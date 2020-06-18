@@ -1,0 +1,44 @@
+{
+	"sendWelcomeMessage" : true,
+	"welcomeMessage" : "Liebe*r ${username},\ndanke für deine Nachricht, dein Vertrauen und dass du den Mut gefunden hast, dich mit uns in Verbindung zu setzen.\nDies ist erst einmal eine automatisch erstellte Nachricht, damit du gleich weißt, wie es jetzt weitergeht. Innerhalb der nächsten 2 Werktage wirst du dann eine persönliche Nachricht von uns erhalten.\nVorab möchten wir dir gerne ein paar Hinweise über unsere Online-Beratung mit auf den Weg geben:\n- Wir beraten ausschließlich per MAIL und sind KEINE Chatberatung – die ungefähr gleichaltrigen Ehrenamtlichen (Peers) antworten dir immer innerhalb von 7 Tagen!  \n- Im Hintergrund wird die Beratung von hauptamtlichen Mitarbeiter*innen begleitet.\n- Alle unterliegen der Schweigepflicht, tauschen sich aber intern im Rahmen der Team-Supervisionen aus.\n- Deine IP-Adresse wird NICHT von uns erfasst. Deine Anonymität bleibt allerdings nur gewahrt, wenn du in der Beratung keine persönlichen Daten (z.B. Adresse, E-Mail, Facebook-Username, Bilder, Dokumente, usw.) preisgibst.\n- Bitte merke dir unbedingt deinen Nutzernamen und dein Passwort, weil du dich nur mit beiden Angaben wieder in deinen Account einloggen und deine Antworten lesen kannst!\n\nWir bitten dich, dich nur über EINEN Account bei uns beraten zu lassen. Solltest du dich parallel über mehrere Accounts beraten lassen (\"Doppelberatung\"), müssen wir die Beratung leider sofort beenden.\nWICHTIG: Wir sind eine ehrenamtliche Online-Beratungsstelle. Das bedeutet, dass der Kontakt mit uns kein Ersatz für eine Therapie oder einen Besuch bei einem Arzt oder einer Ärztin ist. Wir können dir aber anbieten, dass wir ein offenes Ohr für deine Sorgen haben, diese ernst nehmen und dir ehrlich antworten. Falls du schneller Hilfe benötigst, schreibe uns bitte eine zweite Nachricht und wir schicken dir dann weitere Beratungsmöglichkeiten vor Ort oder im Netz.\n\nWir wünschen dir viel Kraft für die kommenden Tage, dein [U25]-/#gemeinsamstatteinsam-Team",
+	"sessionDataInitializing": {
+		"addictiveDrugs": false,
+		"age": true,
+		"gender": true,
+		"relation": false,
+		"state": true
+	},
+	"monitoring": true,
+	"monitoringFile": "/monitoring/u25.json",
+	"feedbackChat": true,
+	"notifications": {
+		"newMessage": {
+			"teamSession": {
+				"toConsultant": {
+					"allTeamConsultants": false
+				}
+			}
+		}
+	},
+	"languageFormal": false,
+	"roles": {
+	   	"consultant": {
+			"main" : [ 
+				"consultant", 
+				"u25-consultant", 
+				"u25-main-consultant"
+			],
+			"peer" : [ 
+				"consultant", 
+				"u25-consultant" 
+			] 
+		}
+	},
+	"registration": {
+		"minPostcodeSize": 3,
+		"mandatoryFields": {
+			"age": true,
+			"state": true
+		}
+	}
+}

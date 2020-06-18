@@ -1,0 +1,29 @@
+package de.caritas.cob.UserService.api.model.rocketChat.group;
+
+import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * Response object for Rocket.Chat API Call for getting the group counters
+ * https://rocket.chat/docs/developer-guides/rest-api/groups/counters/
+ *
+ */
+
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public class GroupCounterResponseDTO {
+
+  private Boolean joined;
+  private int members;
+  private Integer unreads;
+  private Date unreadsFrom;
+  private int msgs;
+  private Date latest;
+  private Integer userMentions;
+  private Boolean success;
+}

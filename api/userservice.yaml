@@ -1,0 +1,852 @@
+swagger: "2.0"
+info:
+  description: "This information will be replaced by the SpringFox config information"
+  version: "0.0.1"
+  title: "will be replaced"
+securityDefinitions:
+  Bearer:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+
+# REST API path definitions #
+paths:
+  /users/askers:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Register a user [Authorization: none]"
+      operationId: "registerUser"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "body"
+        name: "User"
+        required: true
+        schema:
+          $ref: "#/definitions/UserDTO"
+      responses:
+        201:
+          description: "CREATED - user was created successfully"
+          schema:
+            $ref: "#/definitions/CreateUserResponseDTO"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        403:
+          description: "FORBIDDEN - no/invalid CSRF token"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/sessions/askers/new:
+    post:
+      tags:
+       - "user-controller"
+      summary: "Create enquiry message for an user [Authorization: Role: user]"
+      operationId: "createEnquiryMessage"
+      security:
+        - Bearer: []
+      parameters:
+      - in: header
+        name: "RCToken"
+        type: string
+        required: true
+      - in: header
+        name: "RCUserId"
+        type: string
+        required: true
+      - in: "body"
+        name: "EnquiryMessage"
+        required: true
+        schema:
+          $ref: "#/definitions/EnquiryMessageDTO"
+      responses:
+        201:
+          description: "CREATED - enquriy message was successfully created"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        409:
+          description: "CONFLICT - message already saved for enquiry"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/sessions/new/{sessionId}:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Accept an enquiry and assign it to the currently authenticated consultant [Authorization: Role: consultant]"
+      operationId: "acceptEnquiry"
+      security:
+        - Bearer: []
+      parameters:
+        - in: "path"
+          required: true
+          description: "Session Id"
+          name: "sessionId"
+          type: integer
+          format: int64 
+        - in: header
+          name: "RCUserId"
+          type: string
+          required: true
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - agency doesn't match/isn't assigned to this enquiry or no/invalid CSRF token"
+        409:
+          description: "CONFLICT - enquiry already accepted by another consultant or agency of session is not assigned to consultant"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/sessions/askers:
+    get:
+      tags:
+       - "user-controller"
+      summary: "Returns a list of open session(s) for the currently authenticated user. Note: Either a session or a chat object is provided. [Authorization: Role: user]"
+      operationId: "getSessionsForAuthenticatedUser"
+      security:
+        - Bearer: []
+      parameters:
+        - in: header
+          name: "RCToken"
+          type: string
+          required: true
+      responses:
+        200:
+          description: "OK - successfull operation"
+          schema:
+              $ref: "#/definitions/UserSessionListResponseDTO"
+        204:
+          description: "NO CONTENT - no enquiry sent yet"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/consultants/absences:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Update the absence status and message for a consultant [Authorization: Role: consultant]"
+      operationId: "updateAbsence"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "body"
+        name: "Absence"
+        required: true
+        schema:
+          $ref: "#/definitions/AbsenceDTO"
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+          
+  /users/data:
+    get:
+      tags:
+      - "user-controller"
+      summary: "Returns user (meta)data for the currently authenticated user [Authorization: Role: user/consultant]"
+      operationId: "getUserData"
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: "OK - successfull operation"
+          schema:
+            $ref: "#/definitions/UserDataResponseDTO"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+          
+  /users/sessions/consultants:
+    get:
+      tags:
+       - "user-controller"
+      summary: "Returns a list of sessions for the currently authenticated consultant. Status 1 returns all enquiries of an agency. Status 2 returns sessions of the calling consultant which are open/in progress. Note: Either a session or a chat object is provided. [Authorization: Role: consultant]"
+      operationId: "getSessionsForAuthenticatedConsultant"
+      security:
+        - Bearer: []
+      parameters:
+        - in: header
+          name: "RCToken"
+          type: string
+          required: true
+        - in: query
+          name: status
+          type: integer
+          description: Session status type
+        - in: "query"
+          name: "offset"
+          required: true
+          type: integer
+          minimum: 0
+          description: "Number of items where to start in the query (0 = first item)"
+        - in: "query"
+          name: "count"
+          required: true
+          type: integer
+          minimum: 1
+          description: "Number of items which are being returned"
+        - in: "query"
+          name: "filter"
+          required: true
+          type: string
+          description: "Information on how to filter the list"
+      responses:
+          200:
+            description: successful operation
+            schema:
+             $ref: '#/definitions/ConsultantSessionListResponseDTO'
+          204:
+            description: "successful operation, but no content"
+          401:
+            description: "UNAUTHORIZED - no/invalid Keycloak token"
+          403:
+            description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/consultants/import:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Imports a list of consultants from a file [Authorization: Role: technical]"
+      operationId: "importConsultants"
+      security:
+        - Bearer: []
+      responses:
+          200:
+            description: "successful operation"
+          400:
+            description: "BAD REQUEST - invalid/incomplete request or body object"
+          401:
+            description: "UNAUTHORIZED - no/invalid Keycloak token (tech user)"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+            
+  /users/askers/import:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Imports a list of askers from a file [Authorization: Role: technical]"
+      operationId: "importAskers"
+      security:
+        - Bearer: []
+      responses:
+          200:
+            description: "successful operation"
+          400:
+            description: "BAD REQUEST - invalid/incomplete request or body object"
+          401:
+            description: "UNAUTHORIZED - no/invalid Keycloak token (tech user)"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/askersWithoutSession/import:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Imports a list of askers without a session from a file [Authorization: Role: technical]"
+      operationId: "importAskersWithoutSession"
+      security:
+        - Bearer: []
+      responses:
+          200:
+            description: "successful operation"
+          400:
+            description: "BAD REQUEST - invalid/incomplete request or body object"
+          401:
+            description: "UNAUTHORIZED - no/invalid Keycloak token (tech user)"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+
+  /users/sessions/teams:
+    get:
+      tags:
+        - "user-controller"
+      summary: "Returns a list of team consulting sessions, which were accepted by other consultants of the team, for the currently authenticated consultant [Authorization: Role: consultant]"
+      operationId: "getTeamSessionsForAuthenticatedConsultant"
+      security:
+        - Bearer: []
+      parameters:
+        - in: header
+          name: "RCToken"
+          type: string
+          required: true
+        - in: "query"
+          name: "offset"
+          required: true
+          type: integer
+          minimum: 0
+          description: "Number of items where to start in the query (0 = first item)"
+        - in: "query"
+          name: "count"
+          required: true
+          type: integer
+          minimum: 1
+          description: "Number of items which are being returned"
+        - in: "query"
+          name: "filter"
+          required: true
+          type: string
+          description: "Information on how to filter the list"
+      responses:
+        200:
+          description: successful operation
+          schema:
+              $ref: '#/definitions/ConsultantSessionListResponseDTO'
+        204:
+          description: "successful operation, but no content"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/mails/messages/new:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Sends a notification e-mail that a new message/answer has been written [Authorization: Role: user, consultant]"
+      operationId: "sendNewMessageNotification"
+      security:
+        - Bearer: []
+      parameters:
+        - in: "body"
+          name: "NewMessageNotification"
+          required: true
+          schema:
+            $ref: "#/definitions/NewMessageNotificationDTO"
+      responses:
+          200:
+            description: "successful operation"
+          400:
+            description: "BAD REQUEST - invalid/incomplete request or body object"
+          401:
+            description: "UNAUTHORIZED - invalid token"
+          409:
+            description: "CONFLICT - no user e-mail address in db given"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/mails/messages/feedback/new:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Sends a notification e-mail that a new feedback message/answer has been written [Authorization: Role: consultant with authority for feedback chat]"
+      operationId: "sendNewFeedbackMessageNotification"
+      security:
+        - Bearer: []
+      parameters:
+        - in: "body"
+          name: "NewMessageNotification"
+          required: true
+          schema:
+            $ref: "#/definitions/NewMessageNotificationDTO"
+      responses:
+          200:
+            description: "successful operation"
+          400:
+            description: "BAD REQUEST - invalid/incomplete request or body object"
+          401:
+            description: "UNAUTHORIZED - invalid token"
+          409:
+            description: "CONFLICT - no user e-mail address in db given"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/sessions/monitoring/{sessionId}:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Update the monitoring values of a session [Authorization: Role: consultant]"
+      operationId: "updateMonitoring"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "path"
+        required: true
+        description: "Session Id"
+        name: "sessionId"
+        type: integer
+        format: int64
+      - in: "body"
+        name: "Monitoring"
+        required: true
+        schema:
+          $ref: "#/definitions/MonitoringDTO"
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/consultants:
+    get:
+      tags:
+       - "user-controller"
+      summary: "Returns an alphabetically sorted list of consultants depending on the query filter parameters [Authorization: Authority: VIEW_AGENCY_CONSULTANTS]"
+      operationId: "getConsultants"
+      security:
+        - Bearer: []
+      parameters:
+        - in: query
+          name: agencyId
+          type: integer
+          format: int64
+          description: Agency Id
+      responses:
+          200:
+            description: successful operation
+            schema:
+              type: array
+              items: 
+                $ref: '#/definitions/ConsultantResponseDTO'
+          204:
+            description: "successful operation, but no content"
+          400:
+            description: "BAD REQUEST - invalid/incomplete request or body object"
+          401:
+            description: "UNAUTHORIZED - no/invalid Keycloak token"
+          403:
+            description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/sessions/{sessionId}/consultant/{consultantId}:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Assign a session to the specified consultant id [Authorization: Authority: ASSIGN_CONSULTANT_TO_ENQUIRY or ASSIGN_CONSULTANT_TO_SESSION]"
+      operationId: "assignSession"
+      security:
+        - Bearer: []
+      parameters:
+        - in: "path"
+          required: true
+          description: "Session Id"
+          name: "sessionId"
+          type: integer
+          format: int64 
+        - in: "path"
+          required: true
+          description: "Consultant Id"
+          name: "consultantId"
+          type: string
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token or agency of session is not assigned to consultant"
+        409:
+          description: "CONFLICT - session is already assigned to this consultant"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/password/change:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Update the (Keycloak) password of a user [Authorization: Role: consultant, user]"
+      operationId: "updatePassword"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "body"
+        name: "Password"
+        required: true
+        schema:
+          $ref: "#/definitions/PasswordDTO"
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/messages/key:
+    post:
+      tags:
+        - "user-controller"
+      summary: "Update the master key fragment for the session key [Authorization: Role: technical]"
+      operationId: "updateKey"
+      security:
+        - Bearer: []
+      parameters:
+        - in: "body"
+          name: "key"
+          required: true
+          schema:
+            $ref: "#/definitions/MasterKeyDTO"
+      responses:
+        202:
+          description: "ACCEPTED - key was successfully inserted"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization"
+        409:
+          description: "CONFLICT - there was a key in the service"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/sessions/{sessionId}/monitoring:
+    get:
+      tags:
+       - "user-controller"
+      summary: "Returns the monitoring for the given session [Authorization: Role: consultant]"
+      operationId: "getMonitoring"
+      security:
+        - Bearer: []
+      parameters:
+        - in: "path"
+          required: true
+          description: "Session Id"
+          name: "sessionId"
+          type: integer
+          format: int64
+      responses:
+          200:
+            description: successful operation
+            schema:
+              $ref: '#/definitions/MonitoringDTO'
+          204:
+            description: "successful operation, but no content"
+          400:
+            description: "BAD REQUEST - invalid/incomplete request or body object"
+          401:
+            description: "UNAUTHORIZED - no/invalid Keycloak token"
+          403:
+            description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+          500:
+            description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/chat/new:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Create a new group chat [Authorization: Role: consultant with authority CREATE_NEW_CHAT]"
+      operationId: "createChat"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "body"
+        name: "Chat"
+        required: true
+        schema:
+          $ref: "#/definitions/ChatDTO"
+      responses:
+        201:
+          description: "CREATED - group chat was created successfully"
+          schema:
+            $ref: "#/definitions/CreateChatResponseDTO"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        403:
+          description: "FORBIDDEN - no/invalid CSRF token"
+        409:
+          description: "CONFLICT - group chat with same name already existing"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/chat/{chatId}/update:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Update a group chat [Authorization: Role: consultant with authority UPDATE_CHAT]"
+      operationId: "updateChat"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "path"
+        required: true
+        description: "Chat Id"
+        name: "chatId"
+        type: integer
+        format: int64
+      - in: "body"
+        name: "Chat"
+        required: true
+        schema:
+          $ref: "#/definitions/ChatDTO"
+      responses:
+        200:
+          description: "OK - successfull operation"
+          schema:
+            $ref: "#/definitions/UpdateChatResponseDTO"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        403:
+          description: "FORBIDDEN - No permission for chat update / Consultant is not owner"
+        409:
+          description: "CONFLICT - Chat is already startet"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/chat/{chatId}/start:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Start a chat [Authorization: Role: consultant with authority START_CHAT]"
+      operationId: "startChat"
+      security:
+        - Bearer: []
+      parameters:
+       - in: "path"
+         required: true
+         description: "Chat Id"
+         name: "chatId"
+         type: integer
+         format: int64
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - No permission for chat / Consultant is not assigned to chat-agency"
+        409:
+          description: "CONFLICT - Chat is already startet"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"     
+  /users/chat/{chatId}/stop:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Stop a chat and delete all users and messages from the Rocket.Chat room (repetitive chat) or delete room (singular chat) [Authorization: Role: consultant with authority STOP_CHAT]"
+      operationId: "stopChat"
+      security:
+        - Bearer: []
+      parameters:
+       - in: "path"
+         required: true
+         description: "Chat Id"
+         name: "chatId"
+         type: integer
+         format: int64
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - No permission for chat / Consultant is not assigned to chat agency"
+        409:
+          description: "CONFLICT - Chat is not started/active"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition" 
+  /users/chat/{chatId}:
+    get:
+      tags:
+      - "user-controller"
+      summary: "Returns the information of provided chat (Id) [Authorization: Role: consultant or user]"
+      operationId: "getChat"
+      security:
+        - Bearer: []
+      parameters:
+       - in: "path"
+         required: true
+         description: "Chat Id"
+         name: "chatId"
+         type: integer
+         format: int64
+      responses:
+        200:
+          description: "OK - successfull operation"
+          schema:
+            $ref: "#/definitions/ChatInfoResponseDTO"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - No permission for chat"
+        404:
+          description: "NOT FOUND - Chat not found"            
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/chat/{chatId}/join:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Join a chat [Authorization: Role: consultant or user]"
+      operationId: "joinChat"
+      security:
+        - Bearer: []
+      parameters:
+       - in: "path"
+         required: true
+         description: "Chat Id"
+         name: "chatId"
+         type: integer
+         format: int64
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - No permission for chat"
+        404:
+          description: "NOT FOUND - Chat not found" 
+        409:
+          description: "CONFLICT - Chat has not startet yet"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"    
+  /users/chat/{chatId}/members:
+    get:
+      tags:
+      - "user-controller"
+      summary: "Returns the members of provided chat (Id) [Authorization: Role: consultant or user]"
+      operationId: "getChatMembers"
+      security:
+        - Bearer: []
+      parameters:
+       - in: "path"
+         required: true
+         description: "Chat Id"
+         name: "chatId"
+         type: integer
+         format: int64
+      responses:
+        200:
+          description: "OK - successfull operation"
+          schema:
+            $ref: "#/definitions/ChatMembersResponseDTO"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - No permission for chat"
+        404:
+          description: "NOT FOUND - Chat not found"     
+        409:
+          description: "CONFLICT - Chat has not startet yet"       
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"  
+  /users/chat/{chatId}/leave:
+    put:
+      tags:
+      - "user-controller"
+      summary: "Leave a chat [Authorization: Role: consultant or user]"
+      operationId: "leaveChat"
+      security:
+        - Bearer: []
+      parameters:
+       - in: "path"
+         required: true
+         description: "Chat Id"
+         name: "chatId"
+         type: integer
+         format: int64
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - No permission for chat"
+        404:
+          description: "NOT FOUND - Chat not found" 
+        409:
+          description: "CONFLICT - Chat has not startet yet"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/delete:
+   delete:
+      tags:
+      - "user-controller"
+      summary: "Delete an user [Authorization: Role: consultant or user]"
+      operationId: "deleteUser"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "body"
+        name: "DeleteUser"
+        required: true
+        schema:
+          $ref: "#/definitions/DeleteUserDTO"  
+      responses:
+        200:
+          description: "OK - successfull operation"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        401:
+          description: "UNAUTHORIZED - no/invalid Keycloak token"
+        403:
+          description: "FORBIDDEN - no/invalid CSRF token"
+        404:
+          description: "NOT FOUND - User not found" 
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+# Model/object definitions #
+definitions:
+  UserDTO:
+    type: "object"
+  CreateUserResponseDTO:
+    type: "object"
+  ConsultantSessionListResponseDTO:
+    type: "object"
+  UserSessionListResponseDTO:
+    type: "object"
+  EnquiryMessageDTO:
+    type: "object"
+  UserSessionResponseDTO:
+    type: "object"
+  AbsenceDTO:
+    type: "object"
+  UserDataResponseDTO:
+    type: "object"
+  MonitoringDTO:
+    type: "object"
+  ConsultantResponseDTO:
+    type: "object"
+  PasswordDTO:
+    type: "object"
+  MonitoringResponseDTO:
+    type: "object"
+  ChatDTO:
+    type: "object"
+  CreateChatResponseDTO:
+    type: "object"
+  ChatInfoResponseDTO:
+    type: "object"
+  ChatMembersResponseDTO:
+    type: "object"
+  UpdateChatResponseDTO:
+    type: "object"
+  DeleteUserDTO:
+    type: "object"

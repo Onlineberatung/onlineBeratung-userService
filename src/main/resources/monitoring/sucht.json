@@ -1,0 +1,52 @@
+{
+    "addictiveDrugs": 
+    {
+    	"alcohol": false,
+    	"drugs":
+    	{
+    		"amphetamines": false,
+    		"cannabis": false,
+    		"hallucinogens": false,
+    		"cocaineCrack": false,
+    		"opioids": false,
+    		"others": false
+    	},
+    	"legalHighs": false,
+    	"tobacco": false,
+    	"medication": false,
+    	"gambling":
+    	{
+    		"online": false,
+    		"offline": false
+    	},
+    	"internetComputer":
+    	{
+    		"chatting": false,
+    		"gaming": false,
+    		"shopping": false,
+    		"pornography": false,
+    		"surfing": false,
+    		"others": false
+    	},
+    	"eatingDisorder": false,
+    	"others": false
+    },
+    "intervention":
+    {
+    	"information": false,
+    	"consulting": false,
+    	"conveyance":
+    	{
+    		"generalConsulting": false,
+    		"doctorClinic": false,
+    		"childYouthAid": false,
+    		"psychologicalSupport": false,
+    		"debtConsulting": false,
+    		"pregnancyConsulting": false,
+    		"selfHelp": false,
+    		"delinquentHelp": false,
+    		"addictionHelpFacility": false,
+    		"others": false
+    	}
+    }
+}

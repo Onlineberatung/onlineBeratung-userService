@@ -1,0 +1,39 @@
+{
+	"sendWelcomeMessage" : false,
+	"welcomeMessage" : null,
+	"sessionDataInitializing": {
+		"addictiveDrugs": false,
+		"age": false,
+		"gender": false,
+		"relation": false,
+		"state": false
+	},
+	"monitoring": false,
+	"monitoringFile": null,
+	"feedbackChat": false,
+	"notifications": {
+		"newMessage": {
+			"teamSession": {
+				"toConsultant": {
+					"allTeamConsultants": true
+				}
+			}
+		}
+	},
+	"languageFormal": true,
+	"roles": {
+		"consultant": {
+			"default" :	[ 
+				"consultant",
+				"kreuzbund-consultant"
+			]
+		} 
+	},
+	"registration": {
+		"minPostcodeSize": 3,
+		"mandatoryFields": {
+			"age": false,
+			"state": false
+		}
+	}
+}
