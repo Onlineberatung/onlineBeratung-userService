@@ -76,9 +76,22 @@ public class GetUserDataFacade {
    * @return UserDataResponseDTO
    */
   public UserDataResponseDTO getUserData(User user) {
-
+    List<AgencyDTO> agencyDTOs = null;
+    if (!user.getUserAgencies().isEmpty()) {
+      try {
+        agencyDTOs = user.getUserAgencies().stream()
+            .map(agency -> agencyServiceHelper.getAgency(agency.getAgencyId()))
+            .collect(Collectors.toList());
+      } catch (AgencyServiceHelperException agencyServiceHelperException) {
+        logService.logAgencyServiceHelperException(String
+                .format("Error while getting agencies of user with id %s", user.getUserId()),
+            agencyServiceHelperException);
+        return null;
+      }
+    }
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
-        null, null, null, false, user.isLanguageFormal(), null, false, null, null, null, null);
+        null, null, null, false, user.isLanguageFormal(), null, false, agencyDTOs, null, null,
+        null);
     LinkedHashMap<String, Object> sessionData = new LinkedHashMap<String, Object>();
 
     for (ConsultingType type : ConsultingType.values()) {

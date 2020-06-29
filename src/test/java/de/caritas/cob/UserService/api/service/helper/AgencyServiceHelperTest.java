@@ -32,8 +32,10 @@ public class AgencyServiceHelperTest {
   private final Long AGENCY_ID = 1L;
   private final String AGENCY_NAME = "testagency";
   private final String POSTCODE = "12345";
+  private final String CITY = "testcity";
   private final String DESCRIPTION = "testdescription";
-  private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, DESCRIPTION,
+  private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY,
+      DESCRIPTION,
       false, false, ConsultingType.SUCHT);
   ResponseEntity<AgencyDTO> RESPONSE = new ResponseEntity<AgencyDTO>(AGENCY_DTO, HttpStatus.OK);
   private final String GET_AGENCY_METHOD_NAME = "getAgency";

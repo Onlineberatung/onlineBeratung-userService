@@ -40,7 +40,8 @@ public class GetUserDataFacadeTest {
       "consultant", "first name", "last name", "consultant@cob.de", false, true, "", false, null,
       null, CONSULTANT_AGENCIES);
   private final AgencyDTO AGENCY_DTO =
-      new AgencyDTO(AGENCY_ID, "Max", "12345", "description", true, false, ConsultingType.SUCHT);
+      new AgencyDTO(AGENCY_ID, "Max", "12345", "Bonn", "description", true, false,
+          ConsultingType.SUCHT);
   private final String USER_ID = "2485jsfdgnjw4kt";
   private final String USERNAME = "asker";
   private final User USER = new User(USER_ID, USERNAME, null, null);
