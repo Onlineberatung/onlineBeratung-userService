@@ -3,6 +3,7 @@ package de.caritas.cob.UserService.api.facade;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -100,33 +101,33 @@ public class CreateEnquiryMessageFacade {
    * Creation of the private Rocket.Chat group and saving of the enquiry message in the database
    * (session) and the Rocket.Chat group.
    * 
-   * @param user
-   * @param message
-   * @param rcToken
-   * @param rcUserId
+   * @param user {@link User}
+   * @param sessionId {@link Session#getId()}
+   * @param message Enquiry message
+   * @param rcToken Rocket.Chat token
+   * @param rcUserId Rocket.Chat user id
    * @return true, if successful. false, if message already saved.
    */
-  public HttpStatus createEnquiryMessage(User user, String message, String rcToken,
+  public HttpStatus createEnquiryMessage(User user, Long sessionId, String message, String rcToken,
       String rcUserId) {
 
     Optional<GroupResponseDTO> rcGroupDTO;
     Optional<String> rcGroupId = Optional.empty();
-    Session session = null;
+    Optional<Session> session = null;
 
     try {
 
-      List<Session> userSessions = sessionService.getSessionsForUser(user);
+      session = sessionService.getSession(sessionId);
 
-      if (userSessions == null || userSessions.isEmpty()) {
+      if (!session.isPresent()) {
         throw new NoUserSessionException(
-            String.format("No sessions for user %s found.", user.getUserId()));
+            String.format("No session found for user %s", user.getUserId()));
       }
-      // Only 1 user session is currently possible
-      session = userSessions.get(0);
-      ConsultingTypeSettings consultingTypeSettings =
-          consultingTypeManager.getConsultantTypeSettings(session.getConsultingType());
 
-      if (session.getEnquiryMessageDate() != null) {
+      ConsultingTypeSettings consultingTypeSettings =
+          consultingTypeManager.getConsultantTypeSettings(session.get().getConsultingType());
+
+      if (session.get().getEnquiryMessageDate() != null) {
         // Enquiry message must not be updated
         throw new MessageHasAlreadyBeenSavedException();
       }
@@ -137,8 +138,8 @@ public class CreateEnquiryMessageFacade {
         return HttpStatus.BAD_REQUEST;
       }
 
-      rcGroupDTO = rocketChatService.createPrivateGroup(rocketChatHelper.generateGroupName(session),
-          rcToken, rcUserId);
+      rcGroupDTO = rocketChatService
+          .createPrivateGroup(rocketChatHelper.generateGroupName(session.get()), rcToken, rcUserId);
 
       if (rcGroupDTO.isPresent()) {
 
@@ -147,11 +148,13 @@ public class CreateEnquiryMessageFacade {
         }
 
         // Update/set the user's Rocket.Chat id in the database
-        user.setRcUserId(rcGroupDTO.get().getGroup().getUser().getId());
-        userService.saveUser(user);
+        if (user.getRcUserId() == null || user.getRcUserId().equals(StringUtils.EMPTY)) {
+          user.setRcUserId(rcGroupDTO.get().getGroup().getUser().getId());
+          userService.saveUser(user);
+        }
 
         List<ConsultantAgency> agencyList =
-            consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
+            consultantAgencyService.findConsultantsByAgencyId(session.get().getAgencyId());
 
         // Add technical user and all consultants of related agency to Rocket.Chat group
         if (!addCosultantsAndTechUserToGroup(rcGroupId, rcUserId, rcToken, agencyList)) {
@@ -160,16 +163,16 @@ public class CreateEnquiryMessageFacade {
 
         // Create an initial monitoring data set for the session
         if (consultingTypeSettings.isMonitoring()) {
-          monitoringService.createMonitoring(session);
+          monitoringService.createMonitoring(session.get());
         }
 
         // Post enquiry message to Rocket.Chat group
         if (!messageServiceHelper.postMessage(message, rcUserId, rcToken, rcGroupId.get())) {
           rollbackCreateGroup(rcGroupId, rcToken, rcUserId);
-          rollbackInitializeMonitoring(session);
+          rollbackInitializeMonitoring(session.get());
           return HttpStatus.INTERNAL_SERVER_ERROR;
         }
-        sessionService.saveEnquiryMessageDateAndRocketChatGroupId(session, rcGroupId.get());
+        sessionService.saveEnquiryMessageDateAndRocketChatGroupId(session.get(), rcGroupId.get());
 
         // Send welcome message (if given/set)
         if (consultingTypeSettings.isSendWelcomeMessage()) {
@@ -181,7 +184,7 @@ public class CreateEnquiryMessageFacade {
 
         // Create feedback chat group and add (peer) consultants and system user (if given/set)
         if (consultingTypeSettings.isFeedbackChat()) {
-          if (!initializeFeedbackChat(session, rcGroupId, rcUserId, rcToken, agencyList)) {
+          if (!initializeFeedbackChat(session.get(), rcGroupId, rcUserId, rcToken, agencyList)) {
             return HttpStatus.INTERNAL_SERVER_ERROR;
           }
         }
@@ -217,7 +220,7 @@ public class CreateEnquiryMessageFacade {
           "Error while saving enquiry message in database. Rollback needed. User-ID: %s",
           user.getUserId()), enquiryMessageException);
       rollbackCreateGroup(rcGroupId, rcToken, rcUserId);
-      rollbackInitializeMonitoring(session);
+      rollbackInitializeMonitoring(session.get());
       return HttpStatus.INTERNAL_SERVER_ERROR;
     } catch (RocketChatLoginException rocketChatLoginException) {
       logService.logInternalServerError("Could not log in technical user for Rocket.Chat API");
@@ -234,7 +237,7 @@ public class CreateEnquiryMessageFacade {
     }
 
     if (session != null) {
-      emailNotificationFacade.sendNewEnquiryEmailNotification(session);
+      emailNotificationFacade.sendNewEnquiryEmailNotification(session.get());
     }
 
     return HttpStatus.CREATED;

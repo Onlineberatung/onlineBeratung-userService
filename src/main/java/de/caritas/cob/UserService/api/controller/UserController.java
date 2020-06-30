@@ -219,8 +219,10 @@ public class UserController implements UsersApi {
   /**
    * Creating an enquiry message
    */
+
   @Override
-  public ResponseEntity<Void> createEnquiryMessage(@RequestHeader String rcToken,
+  public ResponseEntity<Void> createEnquiryMessage(
+      @Valid @NotNull @PathVariable("sessionId") Long sessionId, @RequestHeader String rcToken,
       @RequestHeader String rcUserId, @Valid @RequestBody EnquiryMessageDTO enquiryMessage) {
 
     Optional<User> user = userService.getUser(authenticatedUser.getUserId());
@@ -232,7 +234,7 @@ public class UserController implements UsersApi {
       return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(),
+    HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(), sessionId,
         enquiryMessage.getMessage(), rcToken, rcUserId);
 
     return new ResponseEntity<Void>(status);
