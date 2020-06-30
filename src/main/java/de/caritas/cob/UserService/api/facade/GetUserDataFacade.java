@@ -42,8 +42,8 @@ public class GetUserDataFacade {
   /**
    * Assign a {@link Consultant} repository information to an {@link UserDataResponseDTO} and get
    * the {@link AgencyDTO} for the consultant's assigned agencies.
-   * 
-   * @param consultant
+   *
+   * @param consultant - Consultant
    * @return
    */
   public UserDataResponseDTO getConsultantData(Consultant consultant) {
@@ -92,17 +92,25 @@ public class GetUserDataFacade {
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
         null, null, null, false, user.isLanguageFormal(), null, false, agencyDTOs, null, null,
         null);
-    LinkedHashMap<String, Object> sessionData = new LinkedHashMap<String, Object>();
+    LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
+    List<Session> sessionList = sessionService.getSessionsForUser(user);
 
     for (ConsultingType type : ConsultingType.values()) {
-      List<Session> sessionList = sessionService.getSessionsForUserByConsultingType(user, type);
-      LinkedHashMap<String, Object> typeSessionData = sessionList.size() > 0
-          ? sessionDataHelper.getSessionDataMapFromSession(sessionList.get(0))
-          : null;
-      sessionData.put(Integer.toString(type.getValue()), typeSessionData);
+      List<Session> typeSessionList = sessionList.stream()
+          .filter(session -> session.getConsultingType().getValue() == type.getValue())
+          .collect(Collectors.toList());
+      LinkedHashMap<String, Object> typeSessionData = typeSessionList.isEmpty()
+          ? null
+          : sessionDataHelper.getSessionDataMapFromSession(typeSessionList.get(0));
+      LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
+      consultingTypeData.put("sessionData",
+          typeSessionData == null || typeSessionData.isEmpty() ? null : typeSessionData);
+      consultingTypeData.put("isRegistered",
+          !typeSessionList.isEmpty() && typeSessionList.get(0).getStatus().getValue() != 0);
+      consultingTypes.put(Integer.toString(type.getValue()), consultingTypeData);
     }
 
-    responseDTO.setSessionData(sessionData);
+    responseDTO.setConsultingTypes(consultingTypes);
 
     return responseDTO;
   }
