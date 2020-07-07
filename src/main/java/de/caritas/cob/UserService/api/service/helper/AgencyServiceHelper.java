@@ -80,7 +80,7 @@ public class AgencyServiceHelper {
   }
 
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
-    ResponseEntity<List<AgencyDTO>> response = null;
+    ResponseEntity<List<AgencyDTO>> response;
     String agencyIdsCommaSeperated = StringUtils.join(agencyIds, ",");
 
     try {
