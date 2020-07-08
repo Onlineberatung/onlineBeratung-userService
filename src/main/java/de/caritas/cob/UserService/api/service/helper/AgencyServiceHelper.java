@@ -38,7 +38,7 @@ public class AgencyServiceHelper {
    * requests.
    *
    * @param agencyId the id of agency
-   * @return
+   * @return AgencyDTO {@link AgencyDTO}
    */
   @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyId")
   public AgencyDTO getAgency(Long agencyId) {
@@ -50,18 +50,18 @@ public class AgencyServiceHelper {
    * requests.
    *
    * @param agencyId the id of agency
-   * @return
+   * @return AgencyDTO {@link AgencyDTO}
    */
   public AgencyDTO getAgencyWithoutCaching(Long agencyId) {
     return getAgenciesFromAgencyService(Collections.singletonList(agencyId)).get(0);
   }
 
   /**
-   * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
+   * Returns List of {@link AgencyDTO} for provided agencyIds. Agencies will be cached for further
    * requests.
    *
    * @param agencyIds the List of agency ids
-   * @return
+   * @return List<AgencyDTO> - List of {@link AgencyDTO}
    */
   @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyIds")
   public List<AgencyDTO> getAgencies(List<Long> agencyIds) {
@@ -69,16 +69,9 @@ public class AgencyServiceHelper {
   }
 
   /**
-   * Returns the {@link AgencyDTO} for the provided agencyId. Agency won't be cached for further
-   * requests.
-   *
-   * @param agencyIds the List of agency ids
-   * @return
+   * @param agencyIds - List of ids
+   * @return List<AgencyDTO> - List of {@link AgencyDTO}
    */
-  public List<AgencyDTO> getAgenciesWithoutCaching(List<Long> agencyIds) {
-    return getAgenciesFromAgencyService(agencyIds);
-  }
-
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
     ResponseEntity<List<AgencyDTO>> response;
     String agencyIdsCommaSeperated = StringUtils.join(agencyIds, ",");
