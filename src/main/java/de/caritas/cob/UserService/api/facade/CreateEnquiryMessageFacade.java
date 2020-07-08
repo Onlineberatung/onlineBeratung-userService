@@ -231,7 +231,7 @@ public class CreateEnquiryMessageFacade {
 
     session = sessionService.getSession(sessionId);
 
-    if (!session.isPresent()) {
+    if (!session.isPresent() || !session.get().getUser().getUserId().equals(user.getUserId())) {
       throw new NoUserSessionException(
           String.format("Session %s not found for user %s", sessionId, user.getUserId()));
     }
