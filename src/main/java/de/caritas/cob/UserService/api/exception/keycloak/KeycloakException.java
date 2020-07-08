@@ -1,4 +1,4 @@
-package de.caritas.cob.UserService.api.exception;
+package de.caritas.cob.UserService.api.exception.keycloak;
 
 public class KeycloakException extends RuntimeException {
 

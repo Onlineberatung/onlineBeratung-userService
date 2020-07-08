@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.authorization.Authority;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.ImportException;
 import de.caritas.cob.UserService.api.exception.SaveUserException;
@@ -536,7 +537,7 @@ public class AskerImportService {
               REPLACE_START_TOKEN, REPLACE_END_TOKEN);
           if (welcomeMessage != null && !welcomeMessage.equals(StringUtils.EMPTY)) {
             messageServiceHelper.postMessage(welcomeMessage, systemUserId, systemUserToken,
-                rcGroupId);
+                rcGroupId, CreateEnquiryExceptionParameter.builder().build());
           } else {
             throw new ImportException(
                 String.format("Could not substitute welcome message for group id %s (user: %s)",

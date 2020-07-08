@@ -1,5 +1,6 @@
 package de.caritas.cob.UserService.api.service;
 
+import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -17,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.DataAccessException;
+import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.helper.MonitoringHelper;
 import de.caritas.cob.UserService.api.model.MonitoringDTO;
@@ -120,14 +122,17 @@ public class MonitoringServiceTest {
   /**
    * 
    * Method: crateMonitoring
+   * 
+   * @throws CreateMonitoringException
    */
 
   @Test
-  public void createMonitoring_Should_UpdateMonitoring_WithInitialMonitoringListOfSessionsConsultingType() {
+  public void createMonitoring_Should_UpdateMonitoring_WithInitialMonitoringListOfSessionsConsultingType()
+      throws CreateMonitoringException {
 
     doReturn(MONITORING_DTO).when(monitoringHelper).getMonitoringInitalList(Mockito.any());
 
-    monitoringService.createMonitoring(SESSION);
+    monitoringService.createMonitoring(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringHelper, times(1)).getMonitoringInitalList(SESSION.getConsultingType());

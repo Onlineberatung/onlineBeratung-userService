@@ -7,14 +7,19 @@ public class RocketChatGetUserInfoException extends RuntimeException {
   /**
    * Exception, when a Rocket.Chat API call to get the user's info fails
    * 
-   * @param ex
+   * @param message Error message
+   * @param exception Exception
    */
-  public RocketChatGetUserInfoException(Exception ex) {
-    super(ex);
+  public RocketChatGetUserInfoException(String message, Exception exception) {
+    super(message, exception);
   }
 
+  /**
+   * Exception, when a Rocket.Chat API call to get the user's info fails
+   * 
+   * @param message Error message
+   */
   public RocketChatGetUserInfoException(String message) {
     super(message);
   }
-
 }
