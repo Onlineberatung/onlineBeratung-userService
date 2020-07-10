@@ -6,6 +6,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_NAME;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CITY;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_ROLES;
+import static de.caritas.cob.UserService.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.UserService.testHelper.TestConstants.DRUGS;
 import static de.caritas.cob.UserService.testHelper.TestConstants.ENQUIRY_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.ENQUIRY_ID_2;
@@ -92,7 +93,8 @@ public class SessionServiceTest {
   private final List<Session> SESSION_LIST_SINGLE = Arrays.asList(SESSION);
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = Arrays.asList(SESSION_WITH_CONSULTANT);
   private final AgencyDTO AGENCY_DTO =
-      new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY, false, false, ConsultingType.SUCHT);
+      new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY, DESCRIPTION, false, false,
+          ConsultingType.SUCHT);
   private final String ERROR_MSG = "error";
   private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<String, Object>();
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -159,18 +160,21 @@ public class TestConstants {
   public static final Long AGENCY_ID = 1L;
   public static final Long AGENCY_ID_2 = 2L;
   public static final Long AGENCY_ID_3 = 3L;
+  public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);
   public static final String AGENCY_NAME = "Test Beratungsstelle";
   public static final AgencyDTO EMPTY_AGENCY_DTO = new AgencyDTO();
   public static final String DESCRIPTION = "description";
   public static final boolean IS_TEAM_AGENCY = true;
   public static final boolean IS_NOT_OFFLINE = false;
   public static final AgencyDTO AGENCY_DTO_SUCHT = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
+      CITY,
       DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_SUCHT);
   public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
+      CITY,
       DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_U25);
   public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO(AGENCY_ID, AGENCY_NAME,
-      POSTCODE, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_KREUZBUND);
-
+      POSTCODE, CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_KREUZBUND);
+  public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
   /*
    * Users / Consultants
    */
@@ -300,6 +304,11 @@ public class TestConstants {
   public static final UserAgency USER_AGENCY = new UserAgency(USER, AGENCY_ID);
   public static final UserAgency USER_AGENCY_2 = new UserAgency(USER, AGENCY_ID_2);
   public static final List<UserAgency> USER_AGENCY_LIST = Arrays.asList(USER_AGENCY, USER_AGENCY_2);
+  public static final Set<UserAgency> USER_AGENCY_SET = new HashSet<>(
+      Arrays.asList(USER_AGENCY, USER_AGENCY_2));
+  public static final User USER_WITH_AGENCIES = new User(USER_ID, null, USERNAME,
+      EMAIL, RC_USER_ID,
+      IS_LANGUAGE_FORMAL, null, USER_AGENCY_SET);
 
   /*
    * Session
@@ -343,6 +352,11 @@ public class TestConstants {
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
+  public static final Set<Session> SESSION_SET = new HashSet<Session>(
+      Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
+  public static final User USER_WITH_SESSIONS = new User(USER_ID, null, USERNAME,
+      EMAIL, RC_USER_ID,
+      IS_LANGUAGE_FORMAL, SESSION_SET, null);
 
   /**
    * GroupMemberDTO
