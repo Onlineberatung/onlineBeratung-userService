@@ -2,6 +2,7 @@ package de.caritas.cob.UserService.api.facade;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -88,8 +89,17 @@ public class GetSessionListFacade {
       return new UserSessionListResponseDTO();
     }
 
-    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rcUserId, rcAuthToken);
-    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rcUserId, rcAuthToken);
+    if (rcUserId != null) {
+
+    }
+    Map<String, Boolean> messagesReadMap = Collections.emptyMap();
+    List<RoomsUpdateDTO> roomsUpdateList = Collections.emptyList();
+
+    if (rcUserId != null) {
+      messagesReadMap = getMessagesReadMap(rcUserId, rcAuthToken);
+      roomsUpdateList = getRcRoomsUpdateList(rcUserId, rcAuthToken);
+    }
+
     List<String> userRoomList =
         roomsUpdateList.stream().map(x -> x.getId()).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
