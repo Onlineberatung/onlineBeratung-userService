@@ -89,9 +89,6 @@ public class GetSessionListFacade {
       return new UserSessionListResponseDTO();
     }
 
-    if (rcUserId != null) {
-
-    }
     Map<String, Boolean> messagesReadMap = Collections.emptyMap();
     List<RoomsUpdateDTO> roomsUpdateList = Collections.emptyList();
 
