@@ -1,5 +1,6 @@
 package de.caritas.cob.UserService.api.service.helper;
 
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +18,14 @@ import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.config.CachingConfig;
 
 /**
- * 
  * Helper class to communicate with the AgencyService
- *
  */
 
 @Component
 public class AgencyServiceHelper {
 
-  @Value("${agency.service.api.get.agency.data}")
-  private String agencyServiceApiGetAgencyDataUrl;
+  @Value("${agency.service.api.url}/")
+  private String agencyServiceApiGetAgenciesUrl;
 
   @Value("${agency.service.api.get.agencies}")
   private String agencyServiceApiGetAgenciesUrl;
@@ -40,35 +39,53 @@ public class AgencyServiceHelper {
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
    * requests.
-   * 
-   * @param agencyId
-   * @return
+   *
+   * @param agencyId the id of agency
+   * @return AgencyDTO {@link AgencyDTO}
    */
   @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyId")
   public AgencyDTO getAgency(Long agencyId) {
-    return getAgencyFromAgencyService(agencyId);
+    return getAgenciesFromAgencyService(Collections.singletonList(agencyId)).get(0);
   }
 
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency won't be cached for further
    * requests.
-   * 
-   * @param agencyId
-   * @return
+   *
+   * @param agencyId the id of agency
+   * @return AgencyDTO {@link AgencyDTO}
    */
   public AgencyDTO getAgencyWithoutCaching(Long agencyId) {
-    return getAgencyFromAgencyService(agencyId);
+    return getAgenciesFromAgencyService(Collections.singletonList(agencyId)).get(0);
   }
 
-  private AgencyDTO getAgencyFromAgencyService(Long agencyId) {
-    ResponseEntity<AgencyDTO> response = null;
+  /**
+   * Returns List of {@link AgencyDTO} for provided agencyIds. Agencies will be cached for further
+   * requests.
+   *
+   * @param agencyIds the List of agency ids
+   * @return List<AgencyDTO> - List of {@link AgencyDTO}
+   */
+  @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyIds")
+  public List<AgencyDTO> getAgencies(List<Long> agencyIds) {
+    return getAgenciesFromAgencyService(agencyIds);
+  }
+
+  /**
+   * @param agencyIds - List of ids
+   * @return List<AgencyDTO> - List of {@link AgencyDTO}
+   */
+  private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
+    ResponseEntity<List<AgencyDTO>> response;
+    String agencyIdsCommaSeperated = StringUtils.join(agencyIds, ",");
 
     try {
       HttpHeaders header = serviceHelper.getCsrfHttpHeaders();
       HttpEntity<?> request = new HttpEntity<>(header);
 
-      response = restTemplate.exchange(agencyServiceApiGetAgencyDataUrl + Long.toString(agencyId),
-          HttpMethod.GET, request, AgencyDTO.class);
+      response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeperated,
+          HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {
+          });
 
     } catch (Exception ex) {
       throw new AgencyServiceHelperException(ex);

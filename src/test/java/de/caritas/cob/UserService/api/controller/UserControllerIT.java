@@ -61,6 +61,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTING_TYP
 import static de.caritas.cob.UserService.testHelper.TestConstants.COUNT_10;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CREATE_CHAT_RESPONSE_DTO;
 import static de.caritas.cob.UserService.testHelper.TestConstants.DECODED_PASSWORD;
+import static de.caritas.cob.UserService.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.UserService.testHelper.TestConstants.INACTIVE_CHAT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_MONITORING;
@@ -215,7 +216,8 @@ public class UserControllerIT {
   private final SessionDTO SESSION_DTO = new SessionDTO(SESSION_ID, AGENCY_ID, 0, 2, POSTCODE,
       RC_GROUP_ID, null, RC_USER_ID, MESSAGE_DATE, IS_NO_TEAM_SESSION, IS_MONITORING);
   private final AgencyDTO AGENCY_DTO =
-      new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, false, false, ConsultingType.SUCHT);
+      new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, DESCRIPTION, false, false,
+          ConsultingType.SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO =
