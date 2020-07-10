@@ -24,9 +24,6 @@ import de.caritas.cob.UserService.config.CachingConfig;
 @Component
 public class AgencyServiceHelper {
 
-  @Value("${agency.service.api.url}/")
-  private String agencyServiceApiGetAgenciesUrl;
-
   @Value("${agency.service.api.get.agencies}")
   private String agencyServiceApiGetAgenciesUrl;
 
@@ -84,8 +81,7 @@ public class AgencyServiceHelper {
       HttpEntity<?> request = new HttpEntity<>(header);
 
       response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeperated,
-          HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {
-          });
+          HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {});
 
     } catch (Exception ex) {
       throw new AgencyServiceHelperException(ex);
@@ -104,23 +100,4 @@ public class AgencyServiceHelper {
   public List<AgencyDTO> getAgenciesWithoutCaching(List<Long> agencyIds) {
     return getAgenciesFromAgencyService(agencyIds);
   }
-
-  /**
-   * @param agencyIds - List of ids
-   * @return List<AgencyDTO> - List of {@link AgencyDTO}
-   */
-  private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
-    ResponseEntity<List<AgencyDTO>> response;
-    String agencyIdsCommaSeperated = StringUtils.join(agencyIds, ",");
-    try {
-      HttpHeaders header = serviceHelper.getCsrfHttpHeaders();
-      HttpEntity<?> request = new HttpEntity<>(header);
-      response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeperated,
-          HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {});
-    } catch (Exception ex) {
-      throw new AgencyServiceHelperException(ex);
-    }
-    return response.getBody();
-  }
-
 }
