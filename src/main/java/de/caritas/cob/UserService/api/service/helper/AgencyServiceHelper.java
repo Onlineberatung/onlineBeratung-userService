@@ -24,7 +24,7 @@ import de.caritas.cob.UserService.config.CachingConfig;
 @Component
 public class AgencyServiceHelper {
 
-  @Value("${agency.service.api.url}/")
+  @Value("${agency.service.api.get.agencies}")
   private String agencyServiceApiGetAgenciesUrl;
 
   @Autowired
@@ -37,7 +37,7 @@ public class AgencyServiceHelper {
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
    * requests.
    *
-   * @param agencyId the id of agency
+   * @param agencyId {@link AgencyDTO#getId()}
    * @return AgencyDTO {@link AgencyDTO}
    */
   @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyId")
@@ -49,7 +49,7 @@ public class AgencyServiceHelper {
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency won't be cached for further
    * requests.
    *
-   * @param agencyId the id of agency
+   * @param agencyId {@link AgencyDTO#getId()}
    * @return AgencyDTO {@link AgencyDTO}
    */
   public AgencyDTO getAgencyWithoutCaching(Long agencyId) {
@@ -60,8 +60,8 @@ public class AgencyServiceHelper {
    * Returns List of {@link AgencyDTO} for provided agencyIds. Agencies will be cached for further
    * requests.
    *
-   * @param agencyIds the List of agency ids
-   * @return List<AgencyDTO> - List of {@link AgencyDTO}
+   * @param agencyIds List of {@link AgencyDTO#getId()}
+   * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
   @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyIds")
   public List<AgencyDTO> getAgencies(List<Long> agencyIds) {
@@ -69,8 +69,10 @@ public class AgencyServiceHelper {
   }
 
   /**
-   * @param agencyIds - List of ids
-   * @return List<AgencyDTO> - List of {@link AgencyDTO}
+   * Returns List of {@link AgencyDTO} for provided agencyIds.
+   *
+   * @param agencyIds List of {@link AgencyDTO#getId()}
+   * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
     ResponseEntity<List<AgencyDTO>> response;
