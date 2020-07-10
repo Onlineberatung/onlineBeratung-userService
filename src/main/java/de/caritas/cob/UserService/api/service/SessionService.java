@@ -189,28 +189,31 @@ public class SessionService {
   }
 
   /**
-   * Returns the list of current sessions for the provided user (Id).
+   * Returns a list of current sessions (no matter if an enquiry message has been written or not)
+   * for the provided user ID.
    * 
-   * @return list of user sessions as {@link UserSessionResponseDTO}
+   * @param userId Keycloak/MariaDB user ID
+   * @return {@link List} of {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getSessionsForUserId(String userId) {
 
     List<Session> sessions = null;
-    List<UserSessionResponseDTO> sessionResponseDTOs = null;
-    AgencyDTO agency = null;
+    List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
 
     try {
-      sessions = sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(userId);
-      if (sessions != null && sessions.size() > 0) {
-        // Only 1 user session is currently possible
-        agency = agencyServiceHelper.getAgency(sessions.get(0).getAgencyId());
-        sessionResponseDTOs = new ArrayList<>();
-        sessionResponseDTOs.add(convertToUserSessionResponseDTO(sessions.get(0), agency));
+      sessions = sessionRepository.findByUser_UserId(userId);
+      if (sessions == null || sessions.size() < 1) {
+        throw new ServiceException(String.format(
+            "Database error while retrieving the sessions for the user with id %s", userId));
       }
+
+      List<AgencyDTO> agencies = agencyServiceHelper.getAgenciesWithoutCaching(
+          sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
+      sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
+
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(String
-          .format("Database error while retrieving the sessions for the user with id %s", userId));
+      throw new ServiceException(String.format(
+          "Database error while retrieving the sessions for the user with id %s", userId), ex);
 
     } catch (AgencyServiceHelperException helperEx) {
       logService.logAgencyServiceHelperException(helperEx);
@@ -349,20 +352,29 @@ public class SessionService {
   }
 
   /**
-   * Converts a {@link Session} in combination with a {@link AgencyDTO} to a
-   * {@link UserSessionResponseDTO}
+   * Converts a {@link List} of {@link Session}s to a {@link List} of {@link UserSessionResponseDTO}
+   * and adds the corresponding agency information to the session from the provided {@link List} of
+   * {@link AgencyDTO}s
    * 
-   * @param session
-   * @return
+   * @param sessions {@link List} of {@link Session}
+   * @param agencies {@link List} of {@link AgencyDTO}
+   * @return {@link List} of {@link UserSessionResponseDTO>}
    */
-  private UserSessionResponseDTO convertToUserSessionResponseDTO(Session session,
-      AgencyDTO agency) {
-    if (session.getConsultant() == null) {
-      return new UserSessionResponseDTO(convertToSessionDTO(session), agency, null);
-    } else {
-      return new UserSessionResponseDTO(convertToSessionDTO(session), agency,
-          convertToSessionConsultantForUserDTO(session.getConsultant()));
+  private List<UserSessionResponseDTO> convertToUserSessionResponseDTO(List<Session> sessions,
+      List<AgencyDTO> agencies) {
+
+    List<UserSessionResponseDTO> userSessionList = new ArrayList<>();
+
+    for (Session session : sessions) {
+      userSessionList.add(new UserSessionResponseDTO(convertToSessionDTO(session),
+          agencies.stream()
+              .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
+              .findAny().get(),
+          session.getConsultant() == null ? null
+              : convertToSessionConsultantForUserDTO(session.getConsultant())));
     }
+
+    return userSessionList;
   }
 
   /**

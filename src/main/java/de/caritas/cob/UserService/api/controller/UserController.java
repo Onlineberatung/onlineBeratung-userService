@@ -51,6 +51,7 @@ import de.caritas.cob.UserService.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
 import de.caritas.cob.UserService.api.model.UserDataResponseDTO;
 import de.caritas.cob.UserService.api.model.UserSessionListResponseDTO;
+import de.caritas.cob.UserService.api.model.UserSessionResponseDTO;
 import de.caritas.cob.UserService.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.UserService.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.UserService.api.repository.chat.Chat;
@@ -241,8 +242,10 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Returns the sessions for the currently authenticated/logged in user
+   * Returns a list of sessions for the currently authenticated/logged in user
    * 
+   * @param rcToken Rocket.Chat token as request header value
+   * @return {@link List} of {@link UserSessionResponseDTO}
    */
   @Override
   public ResponseEntity<UserSessionListResponseDTO> getSessionsForAuthenticatedUser(

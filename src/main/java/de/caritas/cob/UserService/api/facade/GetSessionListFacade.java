@@ -71,11 +71,12 @@ public class GetSessionListFacade {
   }
 
   /**
-   * Returns a list of {@link UserSessionResponseDTO} for the specified user id
+   * Returns a list of {@link UserSessionResponseDTO} for the specified user ID
    * 
-   * @param userId
-   * @param rcUserId
-   * @return
+   * @param userId Keycloak/MariaDB user ID
+   * @param rcUserId Rocket.Chat user ID
+   * @param rcAuthToken Rocket.Chat token
+   * @return {@link UserSessionResponseDTO}
    */
   public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId, String rcUserId,
       String rcAuthToken) {

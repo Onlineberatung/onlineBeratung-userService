@@ -265,7 +265,7 @@ public class SessionServiceTest {
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
 
-    when(sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(USER_ID)).thenThrow(ex);
+    when(sessionRepository.findByUser_UserId(USER_ID)).thenThrow(ex);
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -285,8 +285,7 @@ public class SessionServiceTest {
     List<Session> sessions = new ArrayList<Session>();
     sessions.add(ACCEPTED_SESSION);
 
-    when(sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(USER_ID))
-        .thenReturn(sessions);
+    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
     when(agencyServiceHelper.getAgency(Mockito.anyLong())).thenThrow(ex);
 
     try {
@@ -305,8 +304,7 @@ public class SessionServiceTest {
     List<Session> sessions = new ArrayList<Session>();
     sessions.add(ACCEPTED_SESSION);
 
-    when(sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(USER_ID))
-        .thenReturn(sessions);
+    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
     when(agencyServiceHelper.getAgency(Mockito.anyLong())).thenReturn(AGENCY_DTO);
 
     assertThat(sessionService.getSessionsForUserId(USER_ID),

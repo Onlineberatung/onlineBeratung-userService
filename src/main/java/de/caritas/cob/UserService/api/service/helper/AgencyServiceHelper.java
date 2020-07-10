@@ -1,8 +1,11 @@
 package de.caritas.cob.UserService.api.service.helper;
 
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +27,9 @@ public class AgencyServiceHelper {
 
   @Value("${agency.service.api.get.agency.data}")
   private String agencyServiceApiGetAgencyDataUrl;
+
+  @Value("${agency.service.api.get.agencies}")
+  private String agencyServiceApiGetAgenciesUrl;
 
   @Autowired
   private RestTemplate restTemplate;
@@ -68,6 +74,35 @@ public class AgencyServiceHelper {
       throw new AgencyServiceHelperException(ex);
     }
 
+    return response.getBody();
+  }
+
+  /**
+   * Returns the {@link AgencyDTO} for the provided agencyId. Agency won't be cached for further
+   * requests.
+   *
+   * @param agencyIds the List of agency ids
+   * @return
+   */
+  public List<AgencyDTO> getAgenciesWithoutCaching(List<Long> agencyIds) {
+    return getAgenciesFromAgencyService(agencyIds);
+  }
+
+  /**
+   * @param agencyIds - List of ids
+   * @return List<AgencyDTO> - List of {@link AgencyDTO}
+   */
+  private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
+    ResponseEntity<List<AgencyDTO>> response;
+    String agencyIdsCommaSeperated = StringUtils.join(agencyIds, ",");
+    try {
+      HttpHeaders header = serviceHelper.getCsrfHttpHeaders();
+      HttpEntity<?> request = new HttpEntity<>(header);
+      response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeperated,
+          HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {});
+    } catch (Exception ex) {
+      throw new AgencyServiceHelperException(ex);
+    }
     return response.getBody();
   }
 
