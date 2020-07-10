@@ -789,7 +789,8 @@ public class RocketChatService {
           HttpMethod.GET, request, UserInfoResponseDTO.class);
 
     } catch (Exception ex) {
-      throw new RocketChatGetUserInfoException(ex);
+      throw new RocketChatGetUserInfoException(
+          String.format("Could not get Rocket.Chat user info of user id %s", rcUserId), ex);
     }
 
     if (response == null || response.getBody() == null || response.getStatusCode() != HttpStatus.OK

@@ -23,6 +23,7 @@ import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.ChatDTO;
 import de.caritas.cob.UserService.api.model.CreateChatResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
+import de.caritas.cob.UserService.api.model.rocketChat.RocketChatCredentials;
 import de.caritas.cob.UserService.api.model.rocketChat.RocketChatUserDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.group.GroupMemberDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.login.DataDTO;
@@ -58,6 +59,7 @@ public class TestConstants {
   public static final String ERROR = "error";
   public static final String NULL = null;
   public static final boolean SUCCESS = true;
+  public static final Exception EXCEPTION = new Exception();
 
   /**
    * ConsultingTypes
@@ -152,6 +154,8 @@ public class TestConstants {
       new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO, HttpStatus.OK);
   public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN =
       new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_NO_TOKEN, HttpStatus.OK);
+  public static final RocketChatCredentials RC_CREDENTIALS =
+      new RocketChatCredentials(RC_TOKEN, RC_USER_ID, RC_USERNAME, null);
 
 
   /*
@@ -335,7 +339,7 @@ public class TestConstants {
           SessionStatus.NEW, new Date(), RC_GROUP_ID);
   public static final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.NEW, null, RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING);
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
@@ -432,6 +436,8 @@ public class TestConstants {
   public static final boolean MESSAGES_READ = true;
   public static final boolean MESSAGES_NOT_READ = false;
   public static final String MESSAGE_EMPTY = StringUtils.EMPTY;
+  public static final String MESSAGE_WITH_NON_REPLACED_USERNAME = "Hello ${username}";
+  public static final String MESSAGE_WITH_REPLACED_USERNAME = "Hello " + USER.getUsername();
 
   /*
    * Attachments
@@ -585,4 +591,13 @@ public class TestConstants {
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SOCIAL =
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, null, true, null, false, null,
+          false, null, null);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_WELCOME_MESSAGE =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, MESSAGE_WITH_NON_REPLACED_USERNAME,
+          null, true, null, false, null, false, null, null);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WIT_MONITORING =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, null, true, null, false, null,
+          false, null, null);
 }

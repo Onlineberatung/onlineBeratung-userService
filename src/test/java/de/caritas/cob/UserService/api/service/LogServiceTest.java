@@ -1,5 +1,6 @@
 package de.caritas.cob.UserService.api.service;
 
+import static de.caritas.cob.UserService.testHelper.TestConstants.EXCEPTION;
 import static net.therore.logback.EventMatchers.text;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -242,7 +243,7 @@ public class LogServiceTest {
   @Test
   public void logMessageServiceHelperException_should_LogErrorMessage() {
 
-    logService.logMessageServiceHelperException(ERROR_MESSAGE);
+    logService.logMessageServiceHelperException(ERROR_MESSAGE, EXCEPTION);
     verify(rule.getLog(), times(1))
         .contains(argThat(text(MESSAGESERVICE_HELPER_ERROR_TEXT + ERROR_MESSAGE)));
   }

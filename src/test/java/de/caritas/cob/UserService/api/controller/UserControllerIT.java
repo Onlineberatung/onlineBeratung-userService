@@ -568,8 +568,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(USER, MESSAGE, RC_TOKEN, RC_USER_ID))
-        .thenReturn(HttpStatus.CONFLICT);
+    when(createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_TOKEN,
+        RC_USER_ID)).thenReturn(HttpStatus.CONFLICT);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -584,8 +584,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(USER, MESSAGE, RC_TOKEN, RC_USER_ID))
-        .thenReturn(HttpStatus.CREATED);
+    when(createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_TOKEN,
+        RC_USER_ID)).thenReturn(HttpStatus.CREATED);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
