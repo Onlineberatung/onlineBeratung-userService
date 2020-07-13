@@ -78,6 +78,13 @@ public class GetSessionListFacade {
    * @param rcUserId
    * @return
    */
+  /**
+   * Returns a list of {@link UserSessionResponseDTO} for the specified user id
+   * 
+   * @param userId Keycloak user ID
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return
+   */
   public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId,
       RocketChatCredentials rocketChatCredentials) {
 
