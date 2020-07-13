@@ -55,7 +55,7 @@ import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.UserService.api.exception.UpdateSessionException;
-import de.caritas.cob.UserService.api.exception.responses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.UserService.api.helper.AuthenticatedUser;
 import de.caritas.cob.UserService.api.helper.Now;
 import de.caritas.cob.UserService.api.model.AgencyDTO;
@@ -332,7 +332,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetSessionStatusToNew() {
+  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetSessionStatusToNew()
+      throws EnquiryMessageException {
 
     Session session = Mockito.mock(Session.class);
     sessionService.saveEnquiryMessageDateAndRocketChatGroupId(session, RC_GROUP_ID);
@@ -341,7 +342,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetGroupId() {
+  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetGroupId()
+      throws EnquiryMessageException {
 
     Session session = Mockito.mock(Session.class);
     sessionService.saveEnquiryMessageDateAndRocketChatGroupId(session, RC_GROUP_ID);
@@ -350,7 +352,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetMessageDateToNow() {
+  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetMessageDateToNow()
+      throws EnquiryMessageException {
 
     Session session = Mockito.mock(Session.class);
     Date dateNow = new Date();

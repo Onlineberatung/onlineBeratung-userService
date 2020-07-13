@@ -36,7 +36,7 @@ paths:
           description: "FORBIDDEN - no/invalid CSRF token"
         500:
           description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
-  /users/sessions/askers/new:
+  /users/sessions/{sessionId}/enquiry/new:
     post:
       tags:
        - "user-controller"
@@ -45,6 +45,12 @@ paths:
       security:
         - Bearer: []
       parameters:
+      - in: path
+        description: "Session Id"
+        name: "sessionId"
+        type: integer
+        required: true
+        format: int64
       - in: header
         name: "RCToken"
         type: string

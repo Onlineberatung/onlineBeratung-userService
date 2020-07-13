@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.exception.CustomCryptoException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatGetRoomsException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatGetSubscriptionsException;
@@ -77,8 +78,15 @@ public class GetSessionListFacade {
    * @param rcUserId
    * @return
    */
-  public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId, String rcUserId,
-      String rcAuthToken) {
+  /**
+   * Returns a list of {@link UserSessionResponseDTO} for the specified user id
+   * 
+   * @param userId Keycloak user ID
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return
+   */
+  public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId,
+      RocketChatCredentials rocketChatCredentials) {
 
     List<UserSessionResponseDTO> sessions = sessionService.getSessionsForUserId(userId);
     List<UserSessionResponseDTO> chats = chatService.getChatsForUserId(userId);
@@ -87,20 +95,21 @@ public class GetSessionListFacade {
       return new UserSessionListResponseDTO();
     }
 
-    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rcUserId, rcAuthToken);
-    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rcUserId, rcAuthToken);
+    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rocketChatCredentials);
+    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
     List<String> userRoomList =
         roomsUpdateList.stream().map(x -> x.getId()).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
     List<UserSessionResponseDTO> allSessions = new ArrayList<UserSessionResponseDTO>();
 
     if (sessions != null && sessions.size() > 0) {
-      allSessions.addAll(setUserSessionValues(sessions, messagesReadMap, roomMessageMap, rcUserId));
+      allSessions.addAll(setUserSessionValues(sessions, messagesReadMap, roomMessageMap,
+          rocketChatCredentials.getRocketChatUserId()));
     }
 
     if (chats != null && chats.size() > 0) {
-      allSessions.addAll(
-          setUserChatValues(chats, messagesReadMap, roomMessageMap, userRoomList, rcUserId));
+      allSessions.addAll(setUserChatValues(chats, messagesReadMap, roomMessageMap, userRoomList,
+          rocketChatCredentials.getRocketChatUserId()));
     }
 
     // Sort the session list so the latest answers are on top
@@ -242,10 +251,10 @@ public class GetSessionListFacade {
       return new ConsultantSessionListResponseDTO();
     }
 
-    Map<String, Boolean> messagesReadMap =
-        getMessagesReadMap(consultant.getRocketChatId(), rcAuthToken);
-    List<RoomsUpdateDTO> roomsUpdateList =
-        getRcRoomsUpdateList(consultant.getRocketChatId(), rcAuthToken);
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatUserId(consultant.getRocketChatId()).RocketChatToken(rcAuthToken).build();
+    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rocketChatCredentials);
+    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
     List<String> userRoomList =
         roomsUpdateList.stream().map(x -> x.getId()).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
@@ -308,10 +317,10 @@ public class GetSessionListFacade {
       return null;
     }
 
-    Map<String, Boolean> messagesReadMap =
-        getMessagesReadMap(consultant.getRocketChatId(), rcAuthToken);
-    List<RoomsUpdateDTO> roomsUpdateList =
-        getRcRoomsUpdateList(consultant.getRocketChatId(), rcAuthToken);
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatUserId(consultant.getRocketChatId()).RocketChatToken(rcAuthToken).build();
+    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rocketChatCredentials);
+    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
     sessions = setConsultantSessionValues(sessions, messagesReadMap, roomMessageMap,
         consultant.getRocketChatId());
@@ -521,10 +530,10 @@ public class GetSessionListFacade {
    * @param rcUserId
    * @param rcAuthToken
    */
-  private Map<String, Boolean> getMessagesReadMap(String rcUserId, String rcAuthToken) {
+  private Map<String, Boolean> getMessagesReadMap(RocketChatCredentials rocketChatCredentials) {
     List<SubscriptionsUpdateDTO> subscriptions;
     try {
-      subscriptions = rocketChatService.getSubscriptionsOfUser(rcUserId, rcAuthToken);
+      subscriptions = rocketChatService.getSubscriptionsOfUser(rocketChatCredentials);
     } catch (RocketChatGetSubscriptionsException rocketChatGetSubscriptionsException) {
       throw new ServiceException(rocketChatGetSubscriptionsException.getMessage(),
           rocketChatGetSubscriptionsException);
@@ -544,9 +553,9 @@ public class GetSessionListFacade {
    * @param rcAuthToken
    * @return
    */
-  private List<RoomsUpdateDTO> getRcRoomsUpdateList(String rcUserId, String rcAuthToken) {
+  private List<RoomsUpdateDTO> getRcRoomsUpdateList(RocketChatCredentials rocketChatCredentials) {
     try {
-      return rocketChatService.getRoomsOfUser(rcUserId, rcAuthToken);
+      return rocketChatService.getRoomsOfUser(rocketChatCredentials);
     } catch (RocketChatGetRoomsException rocketChatGetRoomsException) {
       throw new ServiceException(rocketChatGetRoomsException.getMessage(),
           rocketChatGetRoomsException);

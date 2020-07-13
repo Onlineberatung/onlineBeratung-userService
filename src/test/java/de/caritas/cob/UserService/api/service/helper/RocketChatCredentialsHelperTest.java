@@ -1,5 +1,22 @@
 package de.caritas.cob.UserService.api.service.helper;
 
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_B;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_C;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_B;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_C;
+import static de.caritas.cob.UserService.testHelper.TestConstants.SYSTEM_USER_A_ID;
+import static de.caritas.cob.UserService.testHelper.TestConstants.SYSTEM_USER_A_TOKEN;
+import static de.caritas.cob.UserService.testHelper.TestConstants.SYSTEM_USER_A_USERNAME;
+import static de.caritas.cob.UserService.testHelper.TestConstants.SYSTEM_USER_B_ID;
+import static de.caritas.cob.UserService.testHelper.TestConstants.SYSTEM_USER_B_TOKEN;
+import static de.caritas.cob.UserService.testHelper.TestConstants.TECHNICAL_USER_A_ID;
+import static de.caritas.cob.UserService.testHelper.TestConstants.TECHNICAL_USER_A_TOKEN;
+import static de.caritas.cob.UserService.testHelper.TestConstants.TECHNICAL_USER_A_USERNAME;
+import static de.caritas.cob.UserService.testHelper.TestConstants.TECHNICAL_USER_B_ID;
+import static de.caritas.cob.UserService.testHelper.TestConstants.TECHNICAL_USER_B_TOKEN;
+import static de.caritas.cob.UserService.testHelper.TestConstants.TECHNICAL_USER_B_USERNAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,8 +42,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatUserNotInitializedException;
-import de.caritas.cob.UserService.api.model.rocketChat.RocketChatCredentials;
 import de.caritas.cob.UserService.api.model.rocketChat.login.DataDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.login.LoginResponseDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.logout.LogoutResponseDTO;
@@ -40,9 +57,11 @@ public class RocketChatCredentialsHelperTest {
 
   private final static String FIELD_NAME_TECHNICAL_USER_A = "techUser_A";
   private final static String FIELD_NAME_TECHNICAL_USER_B = "techUser_B";
+  private final static String FIELD_NAME_TECHNICAL_USER_C = "techUser_B";
 
   private final static String FIELD_NAME_SYSTEM_USER_A = "systemUser_A";
   private final static String FIELD_NAME_SYSTEM_USER_B = "systemUser_B";
+  private final static String FIELD_NAME_SYSTEM_USER_C = "systemUser_B";
 
   private final static String FIELD_NAME_TECHNICAL_USERNAME = "technicalUsername";
   private final static String FIELD_NAME_TECHNICAL_PASSWORD = "technicalPassword";
@@ -110,22 +129,6 @@ public class RocketChatCredentialsHelperTest {
 
   private final static String SYSTEM_USER_USERNAME = "sysUserName";
   private final static String SYSTEM_USER_PW = "sysUserPW";
-
-  private final static String TECHNICAL_USER_A_USERNAME = "techUserAName";
-  private final static String TECHNICAL_USER_A_TOKEN = "techUserAToken";
-  private final static String TECHNICAL_USER_A_ID = "techUserAID";
-
-  private final static String TECHNICAL_USER_B_USERNAME = "techUserBName";
-  private final static String TECHNICAL_USER_B_TOKEN = "techUserBToken";
-  private final static String TECHNICAL_USER_B_ID = "techUserBID";
-
-  private final static String SYSTEM_USER_A_USERNAME = "sysUserAName";
-  private final static String SYSTEM_USER_A_TOKEN = "sysUserAToken";
-  private final static String SYSTEM_USER_A_ID = "sysUserAID";
-
-  private final static String SYSTEM_USER_B_USERNAME = "sysUserBName";
-  private final static String SYSTEM_USER_B_TOKEN = "sysUserBToken";
-  private final static String SYSTEM_USER_B_ID = "sysUserBID";
 
   @InjectMocks
   private RocketChatCredentialsHelper rcCredentialHelper;
@@ -235,13 +238,17 @@ public class RocketChatCredentialsHelperTest {
             .thenReturn(new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_SYSTEM_USER_B,
                 HttpStatus.OK));
 
-    RocketChatCredentials systemA = new RocketChatCredentials(SYSTEM_USER_A_TOKEN, SYSTEM_USER_A_ID,
-        SYSTEM_USER_A_USERNAME, LocalDateTime.now().minusMinutes(5));
+    RocketChatCredentials systemA =
+        RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_A_TOKEN)
+            .RocketChatUserId(SYSTEM_USER_A_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A), systemA);
 
-    RocketChatCredentials technicalA = new RocketChatCredentials(TECHNICAL_USER_A_TOKEN,
-        TECHNICAL_USER_A_ID, TECHNICAL_USER_A_USERNAME, LocalDateTime.now().minusMinutes(5));
+    RocketChatCredentials technicalA =
+        RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_A_TOKEN)
+            .RocketChatUserId(TECHNICAL_USER_A_ID).RocketChatUsername(TECHNICAL_USER_A_USERNAME)
+            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A), technicalA);
 
@@ -281,26 +288,35 @@ public class RocketChatCredentialsHelperTest {
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
     // create and set technical A user
-    RocketChatCredentials technicalA = new RocketChatCredentials(TECHNICAL_USER_A_TOKEN,
-        TECHNICAL_USER_A_ID, TECHNICAL_USER_A_USERNAME, LocalDateTime.now().minusMinutes(5));
+    RocketChatCredentials technicalA =
+        RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_A_TOKEN)
+            .RocketChatUserId(TECHNICAL_USER_A_ID).RocketChatUsername(TECHNICAL_USER_A_USERNAME)
+            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A), technicalA);
 
     // create and set technical B user
-    RocketChatCredentials technicalB = new RocketChatCredentials(TECHNICAL_USER_B_TOKEN,
-        TECHNICAL_USER_B_ID, TECHNICAL_USER_B_USERNAME, LocalDateTime.now().minusMinutes(1));
+    RocketChatCredentials technicalB =
+        RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_B_TOKEN)
+            .RocketChatUserId(TECHNICAL_USER_B_ID).RocketChatUsername(TECHNICAL_USER_B_USERNAME)
+            .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B), technicalB);
 
     // create and set system A user
-    RocketChatCredentials systemA = new RocketChatCredentials(SYSTEM_USER_A_TOKEN, SYSTEM_USER_A_ID,
-        SYSTEM_USER_A_USERNAME, LocalDateTime.now().minusMinutes(5));
+    RocketChatCredentials systemA =
+        RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_A_TOKEN)
+            .RocketChatUserId(SYSTEM_USER_A_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A), systemA);
 
     // create and set system B user
-    RocketChatCredentials systemB = new RocketChatCredentials(SYSTEM_USER_B_TOKEN, SYSTEM_USER_B_ID,
-        SYSTEM_USER_B_USERNAME, LocalDateTime.now().minusMinutes(1));
+    RocketChatCredentials systemB =
+        RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_B_TOKEN)
+            .RocketChatUserId(SYSTEM_USER_B_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B), systemB);
 
@@ -392,78 +408,60 @@ public class RocketChatCredentialsHelperTest {
   public void getTechnicalUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized()
       throws NoSuchFieldException {
 
-    RocketChatCredentials techUserA = new RocketChatCredentials(TECHNICAL_USER_A_ID,
-        TECHNICAL_USER_A_TOKEN, TECHNICAL_USER_A_USERNAME, LocalDateTime.now());
-
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A), techUserA);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A),
+        RC_CREDENTIALS_TECHNICAL_A);
 
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
 
-    assertEquals(techUserA, technicalUser);
+    assertEquals(RC_CREDENTIALS_TECHNICAL_A, technicalUser);
   }
 
   @Test
   public void getTechnicalUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized()
       throws NoSuchFieldException {
 
-    RocketChatCredentials techUserB = new RocketChatCredentials(TECHNICAL_USER_B_ID,
-        TECHNICAL_USER_B_TOKEN, TECHNICAL_USER_B_USERNAME, LocalDateTime.now());
-
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B), techUserB);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B),
+        RC_CREDENTIALS_TECHNICAL_B);
 
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
 
-    assertEquals(techUserB, technicalUser);
+    assertEquals(RC_CREDENTIALS_TECHNICAL_B, technicalUser);
   }
 
   @Test
   public void getTechnicalUser_Should_ReturnUserA_WhenUserAIsNewer() throws NoSuchFieldException {
-
-    // Prepare User A
-    RocketChatCredentials techUserA = new RocketChatCredentials(TECHNICAL_USER_A_ID,
-        TECHNICAL_USER_A_TOKEN, TECHNICAL_USER_A_USERNAME, LocalDateTime.now());
+    FieldSetter.setField(rcCredentialHelper,
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A),
+        RC_CREDENTIALS_TECHNICAL_A);
 
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A), techUserA);
-
-    // Prepare User B - 5 minutes older than User A
-    RocketChatCredentials techUserB = new RocketChatCredentials(TECHNICAL_USER_B_ID,
-        TECHNICAL_USER_B_TOKEN, TECHNICAL_USER_B_USERNAME, LocalDateTime.now().minusMinutes(5));
-
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B), techUserB);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_C),
+        RC_CREDENTIALS_TECHNICAL_C);
 
     // Get User from Class (actual test)
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
 
     // Verify it is User A since he is newer
-    assertEquals(techUserA, technicalUser);
+    assertEquals(RC_CREDENTIALS_TECHNICAL_A, technicalUser);
   }
 
   @Test
   public void getTechnicalUser_Should_ReturnUserB_WhenUserBIsNewer() throws NoSuchFieldException {
-
-    // Prepare User A
-    RocketChatCredentials techUserA = new RocketChatCredentials(TECHNICAL_USER_A_ID,
-        TECHNICAL_USER_A_TOKEN, TECHNICAL_USER_A_USERNAME, LocalDateTime.now().minusMinutes(5));
+    FieldSetter.setField(rcCredentialHelper,
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A),
+        RC_CREDENTIALS_TECHNICAL_A);
 
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A), techUserA);
-
-    // Prepare User B - 5 minutes older than User A
-    RocketChatCredentials techUserB = new RocketChatCredentials(TECHNICAL_USER_B_ID,
-        TECHNICAL_USER_B_TOKEN, TECHNICAL_USER_B_USERNAME, LocalDateTime.now());
-
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B), techUserB);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B),
+        RC_CREDENTIALS_TECHNICAL_B);
 
     // Get User from Class (actual test)
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
 
     // Verify it is User A since he is newer
-    assertEquals(techUserB, technicalUser);
+    assertEquals(RC_CREDENTIALS_TECHNICAL_B, technicalUser);
   }
 
   /**
@@ -486,78 +484,60 @@ public class RocketChatCredentialsHelperTest {
   public void getSystemUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized()
       throws NoSuchFieldException {
 
-    RocketChatCredentials sysUserA = new RocketChatCredentials(SYSTEM_USER_A_ID,
-        SYSTEM_USER_A_TOKEN, SYSTEM_USER_A_USERNAME, LocalDateTime.now());
-
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A), sysUserA);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A),
+        RC_CREDENTIALS_SYSTEM_A);
 
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
 
-    assertEquals(sysUserA, systemUser);
+    assertEquals(RC_CREDENTIALS_SYSTEM_A, systemUser);
   }
 
   @Test
   public void getSystemUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized()
       throws NoSuchFieldException {
 
-    RocketChatCredentials sysUserB = new RocketChatCredentials(SYSTEM_USER_B_ID,
-        SYSTEM_USER_B_TOKEN, SYSTEM_USER_B_USERNAME, LocalDateTime.now());
-
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B), sysUserB);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B),
+        RC_CREDENTIALS_SYSTEM_B);
 
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
 
-    assertEquals(sysUserB, systemUser);
+    assertEquals(RC_CREDENTIALS_SYSTEM_B, systemUser);
   }
 
   @Test
   public void getSystemUser_Should_ReturnUserA_WhenUserAIsNewer() throws NoSuchFieldException {
-
-    // Prepare User A
-    RocketChatCredentials sysUserA = new RocketChatCredentials(SYSTEM_USER_A_ID,
-        SYSTEM_USER_A_TOKEN, SYSTEM_USER_A_USERNAME, LocalDateTime.now());
+    FieldSetter.setField(rcCredentialHelper,
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A),
+        RC_CREDENTIALS_SYSTEM_A);
 
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A), sysUserA);
-
-    // Prepare User B - 5 minutes older than User A
-    RocketChatCredentials sysUserB = new RocketChatCredentials(SYSTEM_USER_B_ID,
-        SYSTEM_USER_B_TOKEN, SYSTEM_USER_B_USERNAME, LocalDateTime.now().minusMinutes(5));
-
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B), sysUserB);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B),
+        RC_CREDENTIALS_SYSTEM_C);
 
     // Get User from Class (actual test)
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
 
     // Verify it is User A since he is newer
-    assertEquals(sysUserA, systemUser);
+    assertEquals(RC_CREDENTIALS_SYSTEM_A, systemUser);
   }
 
   @Test
   public void getSystemUser_Should_ReturnUserB_WhenUserBIsNewer() throws NoSuchFieldException {
-
-    // Prepare User A - 5 minutes older than User B
-    RocketChatCredentials sysUserA = new RocketChatCredentials(SYSTEM_USER_A_ID,
-        SYSTEM_USER_A_TOKEN, SYSTEM_USER_A_USERNAME, LocalDateTime.now().minusMinutes(5));
+    FieldSetter.setField(rcCredentialHelper,
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A),
+        RC_CREDENTIALS_SYSTEM_A);
 
     FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A), sysUserA);
-
-    // Prepare User B
-    RocketChatCredentials sysUserB = new RocketChatCredentials(SYSTEM_USER_B_ID,
-        SYSTEM_USER_B_TOKEN, SYSTEM_USER_B_USERNAME, LocalDateTime.now());
-
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B), sysUserB);
+        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B),
+        RC_CREDENTIALS_SYSTEM_B);
 
     // Get User from Class (actual test)
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
 
     // Verify it is User A since he is newer
-    assertEquals(sysUserB, systemUser);
+    assertEquals(RC_CREDENTIALS_SYSTEM_B, systemUser);
   }
 
 }

@@ -9,12 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.authorization.UserRole;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.UserService.api.exception.UpdateSessionException;
-import de.caritas.cob.UserService.api.exception.responses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.UserService.api.helper.Helper;
 import de.caritas.cob.UserService.api.helper.Now;
 import de.caritas.cob.UserService.api.helper.SessionDataHelper;
@@ -163,25 +164,28 @@ public class SessionService {
 
   /**
    * Saving the enquiry message and Rocket.Chat group id for a session. The Message will be set to
-   * now and the status to NEW.
+   * now and the status to {@link SessionStatus#NEW}.
    * 
    * @param session
-   * @param groupId
+   * @param rcGroupId
    * @return the {@link Session}
+   * @throws EnquiryMessageException
    */
-  public Session saveEnquiryMessageDateAndRocketChatGroupId(Session session, String groupId) {
+  public Session saveEnquiryMessageDateAndRocketChatGroupId(Session session, String rcGroupId)
+      throws EnquiryMessageException {
 
-    session.setGroupId(groupId);
+    session.setGroupId(rcGroupId);
     session.setEnquiryMessageDate(now.getDate());
     session.setStatus(SessionStatus.NEW);
     try {
       saveSession(session);
     } catch (ServiceException serviceException) {
-      throw new EnquiryMessageException(serviceException);
+      CreateEnquiryExceptionInformation exceptionParameter =
+          CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
+      throw new EnquiryMessageException(serviceException, exceptionParameter);
     }
 
     return session;
-
   }
 
   /**

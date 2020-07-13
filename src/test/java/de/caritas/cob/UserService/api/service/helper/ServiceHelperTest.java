@@ -1,5 +1,8 @@
 package de.caritas.cob.UserService.api.service.helper;
 
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_USER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -22,8 +25,6 @@ public class ServiceHelperTest {
   private final String FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY = "csrfCookieProperty";
   private final String CSRF_TOKEN_HEADER_VALUE = "X-CSRF-TOKEN";
   private final String CSRF_TOKEN_COOKIE_VALUE = "CSRF-TOKEN";
-  private final String RC_USER_ID = "n7NT7EhPGAxLHBMtw";
-  private final String RC_USER_TOKEN = "qseG54mPsvUP5sgcAZdlp7TShQWuyNRNFYg9OcRS3Q5";
   private final String RC_GROUP_ID = "fR2Rz7dmWmHdXE8u2";
   private final String BEARER_TOKEN = "sadifsdfj)(JWifa";
 
@@ -71,10 +72,9 @@ public class ServiceHelperTest {
   public void getRocketChatAndCsrfHttpHeaders_Should_ReturnHeaderWithRocketChatUserProperties() {
     when(authenticatedUser.getAccessToken()).thenReturn(BEARER_TOKEN);
 
-    HttpHeaders result =
-        serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_USER_ID, RC_USER_TOKEN, RC_GROUP_ID);
+    HttpHeaders result = serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
     assertEquals("[" + RC_USER_ID + "]", result.get("rcUserId").toString());
-    assertEquals("[" + RC_USER_TOKEN + "]", result.get("rcToken").toString());
+    assertEquals("[" + RC_TOKEN + "]", result.get("rcToken").toString());
     assertEquals("[" + RC_GROUP_ID + "]", result.get("rcGroupId").toString());
   }
 
@@ -82,8 +82,7 @@ public class ServiceHelperTest {
   public void getRocketChatAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthToken() {
     when(authenticatedUser.getAccessToken()).thenReturn(BEARER_TOKEN);
 
-    HttpHeaders result =
-        serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_USER_ID, RC_USER_TOKEN, RC_GROUP_ID);
+    HttpHeaders result = serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
     assertEquals("[Bearer " + BEARER_TOKEN + "]", result.get("Authorization").toString());
   }
 }

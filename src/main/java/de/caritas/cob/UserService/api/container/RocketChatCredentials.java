@@ -1,9 +1,8 @@
-package de.caritas.cob.UserService.api.model.rocketChat;
+package de.caritas.cob.UserService.api.container;
 
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -13,8 +12,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Builder
 public class RocketChatCredentials {
 
   private String RocketChatToken;

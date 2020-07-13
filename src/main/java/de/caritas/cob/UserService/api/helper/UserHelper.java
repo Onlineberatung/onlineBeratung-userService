@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import de.caritas.cob.UserService.api.exception.HelperException;
 import de.caritas.cob.UserService.api.repository.chat.Chat;
 import de.caritas.cob.UserService.api.repository.session.ConsultingType;
+import de.caritas.cob.UserService.api.repository.user.User;
+import de.caritas.cob.UserService.api.service.UserService;
 import de.caritas.cob.UserService.api.service.helper.KeycloakAdminClientHelper;
 
 @Component
@@ -53,6 +55,8 @@ public class UserHelper {
 
   @Autowired
   private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  @Autowired
+  private UserService userService;
 
   /**
    * Generates a random password which complies with the Keycloak policy
@@ -214,6 +218,19 @@ public class UserHelper {
     return HOST_BASE_URL + "/" + consultingType.getUrlName() + "/"
         + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
             BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
+  }
+
+  /**
+   * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
+   * 
+   * @param user {@link User}
+   * @param rcUserId Rocket.Chat user ID
+   */
+  public void updateRocketChatIdInDatabase(User user, String rcUserId) {
+    if (user != null && StringUtils.isEmpty(user.getRcUserId())) {
+      user.setRcUserId(rcUserId);
+      userService.saveUser(user);
+    }
   }
 
 }

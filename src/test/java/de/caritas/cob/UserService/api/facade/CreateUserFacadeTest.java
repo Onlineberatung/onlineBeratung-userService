@@ -36,9 +36,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.UserService.api.exception.KeycloakException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.exception.responses.BadRequestException;
+import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.UserService.api.helper.UserHelper;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.UserService.api.repository.user.UserRepository;
@@ -476,7 +476,7 @@ public class CreateUserFacadeTest {
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_KREUZBUND);
 
-    verify(rocketChatService, times(1)).logoutUser(Mockito.any(), Mockito.any());
+    verify(rocketChatService, times(1)).logoutUser(Mockito.any());
     verify(sessionDataService, times(0)).saveSessionDataFromRegistration(Mockito.any(),
         Mockito.any());
     verify(keycloakAdminClientHelper, times(0)).rollBackUser(Mockito.anyString());

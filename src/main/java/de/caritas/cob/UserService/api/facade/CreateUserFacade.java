@@ -5,10 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.UserService.api.exception.KeycloakException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.exception.responses.BadRequestException;
+import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.UserService.api.helper.UserHelper;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;
@@ -242,7 +243,9 @@ public class CreateUserFacade {
     }
 
     // Log out user from Rocket.Chat
-    rocketChatService.logoutUser(rcUserId, rcUserToken);
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatUserId(rcUserId).RocketChatToken(rcUserToken).build();
+    rocketChatService.logoutUser(rocketChatCredentials);
 
     // Update rcUserId in user table
     dbUser.setRcUserId(rcUserId);

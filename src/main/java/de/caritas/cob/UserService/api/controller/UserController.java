@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import de.caritas.cob.UserService.api.authorization.Authority;
 import de.caritas.cob.UserService.api.authorization.UserRole;
-import de.caritas.cob.UserService.api.exception.responses.BadRequestException;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
+import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.UserService.api.facade.AssignSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateChatFacade;
 import de.caritas.cob.UserService.api.facade.CreateEnquiryMessageFacade;
@@ -219,8 +220,10 @@ public class UserController implements UsersApi {
   /**
    * Creating an enquiry message
    */
+
   @Override
-  public ResponseEntity<Void> createEnquiryMessage(@RequestHeader String rcToken,
+  public ResponseEntity<Void> createEnquiryMessage(
+      @Valid @NotNull @PathVariable("sessionId") Long sessionId, @RequestHeader String rcToken,
       @RequestHeader String rcUserId, @Valid @RequestBody EnquiryMessageDTO enquiryMessage) {
 
     Optional<User> user = userService.getUser(authenticatedUser.getUserId());
@@ -232,8 +235,10 @@ public class UserController implements UsersApi {
       return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(),
-        enquiryMessage.getMessage(), rcToken, rcUserId);
+    RocketChatCredentials rocketChatCredentials =
+        RocketChatCredentials.builder().RocketChatToken(rcToken).RocketChatUserId(rcUserId).build();
+    HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(), sessionId,
+        enquiryMessage.getMessage(), rocketChatCredentials);
 
     return new ResponseEntity<Void>(status);
   }
@@ -254,8 +259,10 @@ public class UserController implements UsersApi {
       return new ResponseEntity<UserSessionListResponseDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatUserId(user.get().getRcUserId()).RocketChatToken(rcToken).build();
     UserSessionListResponseDTO sessions = getSessionListFacade
-        .getSessionsForAuthenticatedUser(user.get().getUserId(), user.get().getRcUserId(), rcToken);
+        .getSessionsForAuthenticatedUser(user.get().getUserId(), rocketChatCredentials);
 
     return (sessions.getSessions() != null && sessions.getSessions().size() > 0)
         ? new ResponseEntity<UserSessionListResponseDTO>(sessions, HttpStatus.OK)
