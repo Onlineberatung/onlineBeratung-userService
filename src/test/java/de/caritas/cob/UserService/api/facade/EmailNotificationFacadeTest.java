@@ -116,6 +116,7 @@ public class EmailNotificationFacadeTest {
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "12345", AGENCY_ID,
           SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO(1L, "Test Beratungsstelle", "99999",
+      "testcity",
       "Beratungsstellenbeschreibung", false, false, ConsultingType.SUCHT);
   private final String USER_ROLE = UserRole.USER.getValue();
   private final Set<String> USER_ROLES = new HashSet<>(Arrays.asList(USER_ROLE));

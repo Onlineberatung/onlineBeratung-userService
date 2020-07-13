@@ -44,5 +44,5 @@ public class UserDataResponseDTO {
   private Set<String> userRoles;
   @ApiModelProperty(position = 11)
   private Set<String> grantedAuthorities;
-  private LinkedHashMap<String, Object> sessionData;
+  private LinkedHashMap<String, Object> consultingTypes;
 }
