@@ -1,6 +1,6 @@
 package de.caritas.cob.UserService.api.exception;
 
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,41 +9,41 @@ import lombok.Setter;
 public class CreateEnquiryException extends Exception {
 
   private static final long serialVersionUID = -4322443849222920981L;
-  private CreateEnquiryExceptionParameter exceptionParameter;
+  private CreateEnquiryExceptionInformation exceptionParameter;
 
   /**
-   * CreateEnquiryException constructor
+   * Exception when writing an enquiry message fails with errors
    * 
    * @param message Error Message
    * @param exception Exception
-   * @param exceptionParameter {@link CreateEnquiryExceptionParameter}
+   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(String message, Exception exception,
-      CreateEnquiryExceptionParameter exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionParameter) {
     super(message, exception);
     this.exceptionParameter = exceptionParameter;
   }
 
   /**
-   * CreateEnquiryException constructor
+   * Exception when writing an enquiry message fails with errors
    * 
    * @param message Error Message
-   * @param exceptionParameter {@link CreateEnquiryExceptionParameter}
+   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(String message,
-      CreateEnquiryExceptionParameter exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionParameter) {
     super(message);
     this.exceptionParameter = exceptionParameter;
   }
 
   /**
-   * CreateEnquiryException constructor
+   * Exception when writing an enquiry message fails with errors
    * 
    * @param exception Exception
-   * @param exceptionParameter {@link CreateEnquiryExceptionParameter}
+   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(Exception exception,
-      CreateEnquiryExceptionParameter exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionParameter) {
     super(exception);
     this.exceptionParameter = exceptionParameter;
   }

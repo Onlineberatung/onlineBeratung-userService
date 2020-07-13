@@ -4,7 +4,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION;
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatCreateGroupException;
@@ -20,8 +20,8 @@ public class ExceptionConstants {
   /*
    * Enquiry exceptions
    */
-  public static final CreateEnquiryExceptionParameter CREATE_ENQUIRY_EXCEPTION_PARAMETER =
-      CreateEnquiryExceptionParameter.builder().rcGroupId(RC_GROUP_ID)
+  public static final CreateEnquiryExceptionInformation CREATE_ENQUIRY_EXCEPTION_PARAMETER =
+      CreateEnquiryExceptionInformation.builder().rcGroupId(RC_GROUP_ID)
           .rcFeedbackGroupId(RC_FEEDBACK_GROUP_ID).session(SESSION).build();
   public static final EnquiryMessageException ENQUIRY_MESSAGE_EXCEPTION =
       new EnquiryMessageException(EXCEPTION, CREATE_ENQUIRY_EXCEPTION_PARAMETER);

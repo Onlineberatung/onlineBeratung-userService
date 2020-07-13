@@ -11,7 +11,7 @@ import lombok.Getter;
  */
 @Getter
 @Builder
-public class CreateEnquiryExceptionParameter {
+public class CreateEnquiryExceptionInformation {
 
   private Session session;
   private String rcGroupId;

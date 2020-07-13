@@ -1,6 +1,6 @@
 package de.caritas.cob.UserService.api.exception.rocketChat;
 
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.UserService.api.exception.CreateEnquiryException;
 
 public class RocketChatPostWelcomeMessageException extends CreateEnquiryException {
@@ -14,7 +14,7 @@ public class RocketChatPostWelcomeMessageException extends CreateEnquiryExceptio
    * @param exception Exception
    */
   public RocketChatPostWelcomeMessageException(String message, Exception exception,
-      CreateEnquiryExceptionParameter exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionParameter) {
     super(message, exception, exceptionParameter);
   }
 }

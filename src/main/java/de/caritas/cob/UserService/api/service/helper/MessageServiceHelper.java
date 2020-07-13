@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatPostMessageException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatUserNotInitializedException;
@@ -17,7 +18,6 @@ import de.caritas.cob.UserService.api.helper.MessageHelper;
 import de.caritas.cob.UserService.api.helper.UserHelper;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.UserService.api.model.messageService.MessageDTO;
-import de.caritas.cob.UserService.api.model.rocketChat.RocketChatCredentials;
 import de.caritas.cob.UserService.api.repository.user.User;
 
 /**
@@ -52,19 +52,29 @@ public class MessageServiceHelper {
    * 
    * @param message Message
    * @param rcUserId Rocket.Chat user ID
-   * @param rcToken Rocket.Chat token
-   * @param rcGroupId Rocket.Chat group ID
+   * @param rocketChatCredentials {@link RocketChatCredentials}
    * @throws RocketChatPostMessageException
    */
-  public void postMessage(String message, String rcUserId, String rcToken, String rcGroupId,
-      CreateEnquiryExceptionParameter exceptionParameter) throws RocketChatPostMessageException {
+  /**
+   * Calls the MesageService API call for posting a message to a Rocket.Chat group. Throws
+   * {@link RocketChatPostMessageException} when the call fails.
+   * 
+   * @param message Message
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @param rcGroupId Rocket.Chat group ID
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
+   * @throws RocketChatPostMessageException
+   */
+  public void postMessage(String message, RocketChatCredentials rocketChatCredentials,
+      String rcGroupId, CreateEnquiryExceptionInformation exceptionInformation)
+      throws RocketChatPostMessageException {
 
     ResponseEntity<Void> response = null;
     MessageDTO messageDTO = new MessageDTO(message);
 
     try {
       HttpHeaders header =
-          serviceHelper.getRocketChatAndCsrfHttpHeaders(rcUserId, rcToken, rcGroupId);
+          serviceHelper.getRocketChatAndCsrfHttpHeaders(rocketChatCredentials, rcGroupId);
       HttpEntity<MessageDTO> request = new HttpEntity<MessageDTO>(messageDTO, header);
 
       response = restTemplate.exchange(messageServiceApiPostMessageUrl, HttpMethod.POST, request,
@@ -73,15 +83,15 @@ public class MessageServiceHelper {
     } catch (Exception ex) {
       throw new RocketChatPostMessageException(
           String.format("Could not post message to Rocket.Chat group %s with user %s", rcGroupId,
-              rcUserId),
-          ex, exceptionParameter);
+              rocketChatCredentials.getRocketChatUserId()),
+          ex, exceptionInformation);
     }
 
     if (response == null || response.getStatusCode() != HttpStatus.CREATED) {
       throw new RocketChatPostMessageException(
           String.format("Could not post message to Rocket.Chat group %s with user %s", rcGroupId,
-              rcUserId),
-          exceptionParameter);
+              rocketChatCredentials.getRocketChatUserId()),
+          exceptionInformation);
     }
   }
 
@@ -95,7 +105,7 @@ public class MessageServiceHelper {
    */
   public void postWelcomeMessage(String rcGroupId, User user,
       ConsultingTypeSettings consultingTypeSettings,
-      CreateEnquiryExceptionParameter exceptionParameter)
+      CreateEnquiryExceptionInformation exceptionParameter)
       throws RocketChatPostWelcomeMessageException {
 
     if (consultingTypeSettings.isSendWelcomeMessage()) {
@@ -126,8 +136,7 @@ public class MessageServiceHelper {
       throws RocketChatPostMessageException, RocketChatUserNotInitializedException {
 
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
-    this.postMessage(message, systemUser.getRocketChatUserId(), systemUser.getRocketChatToken(),
-        rcGroupId, null);
+    this.postMessage(message, systemUser, rcGroupId, null);
   }
 
 }

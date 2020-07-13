@@ -1,6 +1,6 @@
 package de.caritas.cob.UserService.api.exception;
 
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 
 public class InitializeFeedbackChatException extends CreateEnquiryException {
 
@@ -12,7 +12,7 @@ public class InitializeFeedbackChatException extends CreateEnquiryException {
    * @param message
    */
   public InitializeFeedbackChatException(String message,
-      CreateEnquiryExceptionParameter exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionParameter) {
     super(message, exceptionParameter);
   }
 }

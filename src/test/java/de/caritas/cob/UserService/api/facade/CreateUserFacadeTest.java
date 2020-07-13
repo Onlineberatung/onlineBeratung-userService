@@ -476,7 +476,7 @@ public class CreateUserFacadeTest {
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_KREUZBUND);
 
-    verify(rocketChatService, times(1)).logoutUser(Mockito.any(), Mockito.any());
+    verify(rocketChatService, times(1)).logoutUser(Mockito.any());
     verify(sessionDataService, times(0)).saveSessionDataFromRegistration(Mockito.any(),
         Mockito.any());
     verify(keycloakAdminClientHelper, times(0)).rollBackUser(Mockito.anyString());
