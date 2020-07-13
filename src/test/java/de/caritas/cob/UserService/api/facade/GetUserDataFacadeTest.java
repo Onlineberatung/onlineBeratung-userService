@@ -11,11 +11,11 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import de.caritas.cob.UserService.api.helper.SessionDataHelper;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import org.junit.Test;
@@ -25,6 +25,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.UserService.api.exception.ServiceException;
+import de.caritas.cob.UserService.api.helper.SessionDataHelper;
 import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.UserDataResponseDTO;
 import de.caritas.cob.UserService.api.service.LogService;
@@ -46,7 +48,7 @@ public class GetUserDataFacadeTest {
   SessionDataHelper sessionDataHelper;
 
   @Test
-  public void getConsultantData_Should_ReturnNullAndLogAgencyServiceHelperException_WhenAgencyServiceHelperFails()
+  public void getConsultantData_Should_ReturnNullAndLogAgencyServiceHelperException_When_AgencyServiceHelperFails()
       throws Exception {
 
     AgencyServiceHelperException agencyServiceHelperException =
@@ -60,7 +62,7 @@ public class GetUserDataFacadeTest {
   }
 
   @Test
-  public void getConsultantData_Should_ReturnUserDataResponseDTOWithAgencyDTO_WhenProvidedWithCorrectConsultant() {
+  public void getConsultantData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant() {
 
     when(agencyServiceHelper.getAgency(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
@@ -69,43 +71,43 @@ public class GetUserDataFacadeTest {
   }
 
   @Test
-  public void getUserData_Should_ReturnUserDataResponseDTO_WhenProvidedWithValidUser() {
+  public void getUserData_Should_ReturnUserDataResponseDTO_When_ProvidedWithValidUser() {
     assertThat(getUserDataFacade.getUserData(USER_WITH_SESSIONS),
         instanceOf(UserDataResponseDTO.class));
   }
 
   @Test
-  public void getUserData_Should_ReturnUserDataWithAgency_WhenProvidedWithUserWithAgencyInSession() {
+  public void getUserData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession() {
 
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
 
-    LinkedHashMap<String, Object> consultingTypeData = (LinkedHashMap<String, Object>) getUserDataFacade
-        .getUserData(USER_WITH_SESSIONS)
-        .getConsultingTypes()
-        .get(Integer.toString(AGENCY_DTO_SUCHT.getConsultingType().getValue()));
+    LinkedHashMap<String, Object> consultingTypeData =
+        (LinkedHashMap<String, Object>) getUserDataFacade.getUserData(USER_WITH_SESSIONS)
+            .getConsultingTypes()
+            .get(Integer.toString(AGENCY_DTO_SUCHT.getConsultingType().getValue()));
     AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
 
     assertEquals(AGENCY_DTO_SUCHT, agency);
   }
 
   @Test
-  public void getUserData_Should_ReturnUserDataWithAgency_WhenProvidedWithUserWithAgencies() {
+  public void getUserData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencies() {
 
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
 
-    LinkedHashMap<String, Object> consultingTypeData = (LinkedHashMap<String, Object>) getUserDataFacade
-        .getUserData(USER_WITH_AGENCIES)
-        .getConsultingTypes()
-        .get(Integer.toString(AGENCY_DTO_KREUZBUND.getConsultingType().getValue()));
+    LinkedHashMap<String, Object> consultingTypeData =
+        (LinkedHashMap<String, Object>) getUserDataFacade.getUserData(USER_WITH_AGENCIES)
+            .getConsultingTypes()
+            .get(Integer.toString(AGENCY_DTO_KREUZBUND.getConsultingType().getValue()));
     AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
 
     assertEquals(AGENCY_DTO_KREUZBUND, agency);
   }
 
   @Test
-  public void getUserData_GetConsultingTypes_Should_ReturnNullAndLogAgencyServiceHelperException_WhenAgencyServiceHelperFails()
+  public void getUserData_GetConsultingTypes_Should_ThrowServiceException_When_AgencyServiceHelperFails()
       throws Exception {
 
     AgencyServiceHelperException agencyServiceHelperException =
@@ -113,10 +115,13 @@ public class GetUserDataFacadeTest {
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenThrow(agencyServiceHelperException);
 
-    assertNull(getUserDataFacade.getUserData(USER_WITH_SESSIONS).getConsultingTypes());
-    verify(logService, times(1)).logAgencyServiceHelperException(Mockito.anyString(),
-        Mockito.eq(agencyServiceHelperException));
-
+    try {
+      getUserDataFacade.getUserData(USER_WITH_SESSIONS).getConsultingTypes();
+      fail("Expected exception: ServiceException");
+    } catch (ServiceException serviceException) {
+      assertTrue("Excepted ServiceException thrown", true);
+    }
+    verify(agencyServiceHelper, times(1)).getAgencies(Mockito.anyList());
   }
 
 }

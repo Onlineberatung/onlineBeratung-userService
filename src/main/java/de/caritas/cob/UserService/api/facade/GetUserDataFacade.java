@@ -1,5 +1,6 @@
 package de.caritas.cob.UserService.api.facade;
 
+import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.repository.userAgency.UserAgency;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,8 +46,8 @@ public class GetUserDataFacade {
    * Assign a {@link Consultant} repository information to an {@link UserDataResponseDTO} and get
    * the {@link AgencyDTO} for the consultant's assigned agencies.
    *
-   * @param consultant - {@link Consultant}
-   * @return UserDataResponseDTO - {@link UserDataResponseDTO}
+   * @param consultant {@link Consultant}
+   * @return UserDataResponseDTO {@link UserDataResponseDTO}
    */
   public UserDataResponseDTO getConsultantData(Consultant consultant) {
     List<AgencyDTO> agencyDTOs = null;
@@ -74,8 +75,8 @@ public class GetUserDataFacade {
   /**
    * Returns the session data for every consulting type of the given {@link User}
    *
-   * @param user - {@link User}
-   * @return UserDataResponseDTO - {@link UserDataResponseDTO}
+   * @param user {@link User}
+   * @return UserDataResponseDTO {@link UserDataResponseDTO}
    */
   public UserDataResponseDTO getUserData(User user) {
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
@@ -88,28 +89,24 @@ public class GetUserDataFacade {
   }
 
   /**
-   * @param user - {@link User }
-   * @return LinkedHashMap<String, Object> - HashMap with all consultingtypes and data
+   * Returns information for every consulting type of the given {@link User}
+   *
+   * @param user {@link User }
+   * @return LinkedHashMap<String, Object> HashMap with all consultingtypes and data
    */
   private LinkedHashMap<String, Object> getConsultingTypes(User user) {
 
-    LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
     Set<Session> sessionList =
         user.getSessions() != null ? user.getSessions() : Collections.emptySet();
-    List<Long> agencyIds = new ArrayList<>();
-    agencyIds.addAll(getAgencyIdsInSessions(sessionList));
-    agencyIds.addAll(getAgencyIdsInDatabase(user));
+    List<Long> agencyIds = getAgencyIds(user, sessionList);
     List<AgencyDTO> agencyDTOs;
     try {
       agencyDTOs = agencyServiceHelper.getAgencies(agencyIds);
     } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      logService.logAgencyServiceHelperException(String
-              .format("Error while getting agencies of user with id %s", agencyIds),
-          agencyServiceHelperException);
-
-      return null;
+      throw new ServiceException(
+          String.format("Invalid agencyIds: %s for user with id %s", agencyIds, user.getUserId()));
     }
-
+    LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
     for (ConsultingType type : ConsultingType.values()) {
       consultingTypes.put(Integer.toString(type.getValue()),
           getConsultingTypeData(type, sessionList, agencyDTOs));
@@ -119,10 +116,12 @@ public class GetUserDataFacade {
   }
 
   /**
-   * @param type        - {@link ConsultingType}
-   * @param sessionList - {@link User#getSessions()}
-   * @param agencyDTOs  - List of {@link AgencyDTO}
-   * @return LinkedHashMap<String, Object> - Hashmap containing data (SessionData,isRegistered,agency)
+   * Return Map with information for given consulting type
+   *
+   * @param type        {@link ConsultingType}
+   * @param sessionList List of {@link Session}
+   * @param agencyDTOs  List of {@link AgencyDTO}
+   * @return LinkedHashMap<String, Object> Hashmap containing data (SessionData,isRegistered,agency)
    */
   private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType type,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
@@ -145,10 +144,12 @@ public class GetUserDataFacade {
   }
 
   /**
-   * @param sessionList - {@link User#getSessions()}
-   * @return List<Long> - list of agencyIds
+   * Returns List of agency ids from provided Set of {@link Session}
+   *
+   * @param sessionList {@link User#getSessions()}
+   * @return List<Long> list of agencyIds
    */
-  private List<Long> getAgencyIdsInSessions(Set<Session> sessionList) {
+  private List<Long> getAgencyIdsFromSessions(Set<Session> sessionList) {
     if (sessionList != null) {
       return sessionList.stream().map(Session::getAgencyId).collect(Collectors.toList());
     }
@@ -156,14 +157,30 @@ public class GetUserDataFacade {
   }
 
   /**
+   * Returns List of agency ids from provided {@link User}
+   *
    * @param user - {@link User}
-   * @return - list of agencyIds
+   * @return list of agencyIds
    */
-  private List<Long> getAgencyIdsInDatabase(User user) {
+  private List<Long> getAgencyIdsFromUser(User user) {
     if (user.getUserAgencies() != null) {
       return user.getUserAgencies().stream().map(UserAgency::getAgencyId)
           .collect(Collectors.toList());
     }
     return Collections.emptyList();
+  }
+
+  /**
+   * Returns List of agency ids from provided {@link User} and Set of {@link Session}
+   *
+   * @param user        {@link User}
+   * @param sessionList {@link User#getSessions()}
+   * @return list of agencyIds
+   */
+  private List<Long> getAgencyIds(User user, Set<Session> sessionList) {
+    List<Long> agencyIds = new ArrayList<>();
+    agencyIds.addAll(getAgencyIdsFromSessions(sessionList));
+    agencyIds.addAll(getAgencyIdsFromUser(user));
+    return agencyIds;
   }
 }

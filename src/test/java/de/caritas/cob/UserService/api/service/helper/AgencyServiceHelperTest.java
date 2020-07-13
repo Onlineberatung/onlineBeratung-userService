@@ -77,7 +77,7 @@ public class AgencyServiceHelperTest {
   }
 
   @Test
-  public void getAgencies_Should_ReturnAgencyDTOList_WhenProvidedWithValidAgencyIds()
+  public void getAgencies_Should_ReturnAgencyDTOList_When_ProvidedWithValidAgencyIds()
       throws Exception {
 
     ResponseEntity<List<AgencyDTO>> response = new ResponseEntity<>(AGENCY_DTO_LIST,
@@ -93,7 +93,7 @@ public class AgencyServiceHelperTest {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  public void test_Should_Fail_WhenMethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
+  public void test_Should_Fail_When_MethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
     AgencyServiceHelper agencyServiceHelper = new AgencyServiceHelper();
@@ -110,7 +110,7 @@ public class AgencyServiceHelperTest {
    **/
 
   @Test
-  public void getAgency_Should_ReturnAgencyDTO_WhenProvidedWithValidAgencyId() throws Exception {
+  public void getAgency_Should_ReturnAgencyDTO_When_ProvidedWithValidAgencyId() throws Exception {
 
     ResponseEntity<List<AgencyDTO>> response = new ResponseEntity<>(AGENCY_DTO_LIST,
         HttpStatus.OK);
@@ -125,7 +125,7 @@ public class AgencyServiceHelperTest {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  public void test_Should_Fail_WhenMethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
+  public void test_Should_Fail_When_MethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
     AgencyServiceHelper agencyServiceHelper = new AgencyServiceHelper();

@@ -207,7 +207,7 @@ public class SessionService {
             "Database error while retrieving the sessions for the user with id %s", userId));
       }
 
-      List<AgencyDTO> agencies = agencyServiceHelper.getAgenciesWithoutCaching(
+      List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
           sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
       sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
 
