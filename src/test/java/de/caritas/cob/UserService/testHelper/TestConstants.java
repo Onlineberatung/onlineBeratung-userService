@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.helper.AuthenticatedUser;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.UserService.api.manager.consultingType.SessionDataInitializing;
@@ -23,7 +24,6 @@ import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.ChatDTO;
 import de.caritas.cob.UserService.api.model.CreateChatResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
-import de.caritas.cob.UserService.api.model.rocketChat.RocketChatCredentials;
 import de.caritas.cob.UserService.api.model.rocketChat.RocketChatUserDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.group.GroupMemberDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.login.DataDTO;
@@ -154,8 +154,67 @@ public class TestConstants {
       new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO, HttpStatus.OK);
   public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN =
       new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_NO_TOKEN, HttpStatus.OK);
+
+  /**
+   * Rocket.Chat credentials
+   */
+  public final static String TECHNICAL_USER_A_USERNAME = "techUserAName";
+  public final static String TECHNICAL_USER_A_TOKEN = "techUserAToken";
+  public final static String TECHNICAL_USER_A_ID = "techUserAID";
+
+  public final static String TECHNICAL_USER_B_USERNAME = "techUserBName";
+  public final static String TECHNICAL_USER_B_TOKEN = "techUserBToken";
+  public final static String TECHNICAL_USER_B_ID = "techUserBID";
+
+  public final static String TECHNICAL_USER_C_USERNAME = "techUserCName";
+  public final static String TECHNICAL_USER_C_TOKEN = "techUserCToken";
+  public final static String TECHNICAL_USER_C_ID = "techUserCID";
+
+  public final static String SYSTEM_USER_A_USERNAME = "sysUserAName";
+  public final static String SYSTEM_USER_A_TOKEN = "sysUserAToken";
+  public final static String SYSTEM_USER_A_ID = "sysUserAID";
+
+  public final static String SYSTEM_USER_B_USERNAME = "sysUserBName";
+  public final static String SYSTEM_USER_B_TOKEN = "sysUserBToken";
+  public final static String SYSTEM_USER_B_ID = "sysUserBID";
+
+  public final static String SYSTEM_USER_C_USERNAME = "sysUserBName";
+  public final static String SYSTEM_USER_C_TOKEN = "sysUserBToken";
+  public final static String SYSTEM_USER_C_ID = "sysUserBID";
+
   public static final RocketChatCredentials RC_CREDENTIALS =
-      new RocketChatCredentials(RC_TOKEN, RC_USER_ID, RC_USERNAME, null);
+      RocketChatCredentials.builder().RocketChatToken(RC_TOKEN).RocketChatUserId(RC_USER_ID)
+          .RocketChatUsername(RC_USERNAME).TimeStampCreated(LocalDateTime.now()).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_A =
+      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_A_TOKEN)
+          .RocketChatUserId(TECHNICAL_USER_A_ID).RocketChatUsername(TECHNICAL_USER_A_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_B =
+      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_B_TOKEN)
+          .RocketChatUserId(TECHNICAL_USER_B_ID).RocketChatUsername(TECHNICAL_USER_B_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_C =
+      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_C_TOKEN)
+          .RocketChatUserId(TECHNICAL_USER_C_ID).RocketChatUsername(TECHNICAL_USER_C_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_A =
+      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_A_TOKEN)
+          .RocketChatUserId(SYSTEM_USER_A_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_B =
+      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_B_TOKEN)
+          .RocketChatUserId(SYSTEM_USER_B_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_C =
+      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_C_TOKEN)
+          .RocketChatUserId(SYSTEM_USER_C_ID).RocketChatUsername(SYSTEM_USER_C_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
 
 
   /*

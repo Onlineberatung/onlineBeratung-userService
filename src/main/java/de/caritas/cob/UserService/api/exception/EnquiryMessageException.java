@@ -1,6 +1,6 @@
 package de.caritas.cob.UserService.api.exception;
 
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 
 public class EnquiryMessageException extends CreateEnquiryException {
 
@@ -10,10 +10,10 @@ public class EnquiryMessageException extends CreateEnquiryException {
    * Exception for enquiry message
    * 
    * @param exception Exception
-   * @param exceptionParameter {@link CreateEnquiryExceptionParameter}
+   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
    */
   public EnquiryMessageException(Exception exception,
-      CreateEnquiryExceptionParameter exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionParameter) {
     super(exception, exceptionParameter);
   }
 

@@ -15,8 +15,6 @@ import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_RO
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL;
-import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SERVICE_SYSTEM_USER_ID;
-import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_AUTH_TOKEN;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_USER_ID;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.RC_URL_CHAT_ADD_USER;
@@ -33,6 +31,9 @@ import static de.caritas.cob.UserService.testHelper.FieldConstants.RC_URL_USERS_
 import static de.caritas.cob.UserService.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
 import static de.caritas.cob.UserService.testHelper.TestConstants.GROUP_MEMBER_USER_1;
 import static de.caritas.cob.UserService.testHelper.TestConstants.GROUP_MEMBER_USER_2;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER_INFO_RESPONSE_DTO;
@@ -80,7 +81,6 @@ import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatGroupCounte
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatRemoveUserException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatRemoveUserFromGroupException;
-import de.caritas.cob.UserService.api.model.rocketChat.RocketChatCredentials;
 import de.caritas.cob.UserService.api.model.rocketChat.StandardResponseDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.group.GroupCounterResponseDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.group.GroupDTO;
@@ -105,15 +105,8 @@ public class RocketChatServiceTest {
   private final String RC_USER_ID_HEADER_PARAMETER_NAME = "X-User-Id";
   private final String RC_TECHNICAL_USERNAME = "technical";
   private final String RC_TECHNICAL_PASSWORD = "technical";
-  private RocketChatCredentials RCC_TECHNICAL_USER =
-      new RocketChatCredentials(FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN,
-          FIELD_NAME_ROCKET_CHAT_TECH_USER_ID, RC_TECHNICAL_USERNAME, null);
   private final String RC_SYSTEM_USERNAME = "system";
   private final String RC_SYSTEM_PASSWORD = "system";
-  private RocketChatCredentials RCC_SYSTEM_USER =
-      new RocketChatCredentials(FIELD_NAME_ROCKET_CHAT_SYSTEM_AUTH_TOKEN,
-          FIELD_NAME_ROCKET_CHAT_SERVICE_SYSTEM_USER_ID, RC_SYSTEM_USERNAME, null);
-  private final String RC_TOKEN = "xxx";
   private final String MESSAGE = "Lorem Ipsum";
   private final String GROUP_ID = "xxxYYY";
   private final String GROUP_NAME = "group";
@@ -124,11 +117,11 @@ public class RocketChatServiceTest {
   private final GroupResponseDTO EMPTY_GROUP_RESPONSE_DTO =
       new GroupResponseDTO(null, false, null, null);
   private final GroupMemberDTO GROUP_MEMBER_DTO_1 =
-      new GroupMemberDTO(RCC_SYSTEM_USER.getRocketChatUserId(), null, null, null, null);
+      new GroupMemberDTO(RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId(), null, null, null, null);
   private final GroupMemberDTO GROUP_MEMBER_DTO_2 =
       new GroupMemberDTO(RC_USER_ID, null, null, null, null);
   private final GroupMemberDTO GROUP_MEMBER_DTO_3 =
-      new GroupMemberDTO(RCC_TECHNICAL_USER.getRocketChatUserId(), null, null, null, null);
+      new GroupMemberDTO(RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId(), null, null, null, null);
   private final GroupMemberDTO[] GROUP_MEMBER_DTO =
       new GroupMemberDTO[] {GROUP_MEMBER_DTO_1, GROUP_MEMBER_DTO_2, GROUP_MEMBER_DTO_3};
   private final GroupMemberResponseDTO GROUP_MEMBER_RESPONSE_DTO =
@@ -264,7 +257,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(response);
 
     Optional<GroupResponseDTO> result =
-        rocketChatService.createPrivateGroup(GROUP_NAME, RC_TOKEN, RC_USER_ID);
+        rocketChatService.createPrivateGroup(GROUP_NAME, RC_CREDENTIALS);
 
     assertTrue(result.isPresent());
     assertEquals(GROUP_ID, result.get().getGroup().getId());
@@ -281,7 +274,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(response);
 
     Optional<GroupResponseDTO> result =
-        rocketChatService.createPrivateGroup(GROUP_NAME, RC_TOKEN, RC_USER_ID);
+        rocketChatService.createPrivateGroup(GROUP_NAME, RC_CREDENTIALS);
 
     assertFalse(result.isPresent());
 
@@ -300,7 +293,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenThrow(httpServerErrorException);
 
     try {
-      rocketChatService.createPrivateGroup(GROUP_NAME, RC_TOKEN, RC_USER_ID);
+      rocketChatService.createPrivateGroup(GROUP_NAME, RC_CREDENTIALS);
       fail("Expected exception: RocketChatCreateGroupException");
     } catch (RocketChatCreateGroupException rocketChatCreateGroupException) {
       assertTrue("Excepted RocketChatCreateGroupException thrown", true);
@@ -326,7 +319,7 @@ public class RocketChatServiceTest {
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<Class<GroupDeleteResponseDTO>>any())).thenReturn(response);
 
-    boolean result = rocketChatService.deleteGroup(GROUP_ID, RC_TOKEN, RC_USER_ID);
+    boolean result = rocketChatService.deleteGroup(GROUP_ID, RC_CREDENTIALS);
 
     assertTrue(result);
 
@@ -341,7 +334,7 @@ public class RocketChatServiceTest {
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<Class<GroupDeleteResponseDTO>>any())).thenReturn(response);
 
-    boolean result = rocketChatService.deleteGroup(GROUP_ID, RC_TOKEN, RC_USER_ID);
+    boolean result = rocketChatService.deleteGroup(GROUP_ID, RC_CREDENTIALS);
 
     assertFalse(result);
 
@@ -360,7 +353,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenThrow(httpServerErrorException);
 
     try {
-      rocketChatService.deleteGroup(GROUP_ID, RC_TOKEN, RC_USER_ID);
+      rocketChatService.deleteGroup(GROUP_ID, RC_CREDENTIALS);
       fail("Expected exception: RocketChatDeleteGroupException");
     } catch (RocketChatDeleteGroupException rocketChatDeleteGroupException) {
       assertTrue("Excepted RocketChatDeleteGroupException thrown", true);
@@ -401,7 +394,7 @@ public class RocketChatServiceTest {
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(groupResponseDTO);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     try {
       rocketChatService.addUserToGroup(RC_USER_ID, GROUP_ID);
@@ -429,7 +422,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupCounterResponseDTO>>any()))
             .thenThrow(exception);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     try {
       rocketChatService.getGroupCounters(GROUP_ID, RC_USER_ID);
@@ -449,7 +442,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupCounterResponseDTO>>any()))
             .thenReturn(null);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     try {
       rocketChatService.getGroupCounters(GROUP_ID, RC_USER_ID);
@@ -464,7 +457,7 @@ public class RocketChatServiceTest {
   @Test
   public void getGroupCounters_Should_ReturnGroupCounterResponseDTO_WhenAPICallIsSuccessfull() {
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupCounterResponseDTO>>any()))
@@ -489,7 +482,7 @@ public class RocketChatServiceTest {
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenThrow(exception);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     try {
       rocketChatService.removeUserFromGroup(RC_USER_ID, GROUP_ID);
@@ -508,7 +501,7 @@ public class RocketChatServiceTest {
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(EMPTY_GROUP_RESPONSE_DTO);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     try {
       rocketChatService.removeUserFromGroup(RC_USER_ID, GROUP_ID);
@@ -532,7 +525,7 @@ public class RocketChatServiceTest {
 
     RocketChatGetGroupMembersException exception = new RocketChatGetGroupMembersException(MESSAGE);
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
@@ -552,7 +545,7 @@ public class RocketChatServiceTest {
   public void getMembersOfGroup_Should_ThrowRocketChatGetGroupMembersExceptionAndLogError_WhenAPIResponseIsUnsuccessfull()
       throws RocketChatGetGroupMembersException {
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
@@ -573,7 +566,7 @@ public class RocketChatServiceTest {
   public void getMembersOfGroup_Should_ReturnListOfGroupMemberDTO_WhenAPICallIsSuccessfull()
       throws Exception {
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
@@ -595,7 +588,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<StandardResponseDTO>>any()))
             .thenReturn(STANDARD_RESPONSE_DTO_SUCCESS);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     boolean result = rocketChatService.deleteUser(RC_USER_ID);
 
@@ -610,7 +603,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<StandardResponseDTO>>any()))
             .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     assertFalse(rocketChatService.deleteUser(RC_USER_ID));
 
@@ -642,7 +635,7 @@ public class RocketChatServiceTest {
   public void createPrivateGroupWithSystemUser_Should_ReturnTheGroupId_When_RocketChatApiCallWasSuccessful()
       throws SecurityException {
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(GROUP_RESPONSE_DTO);
@@ -663,7 +656,7 @@ public class RocketChatServiceTest {
   @Test
   public void removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesExceptionAndLogError_WhenApiCallFailsWithAnException() {
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     HttpServerErrorException httpServerErrorException =
         new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
@@ -685,7 +678,7 @@ public class RocketChatServiceTest {
   @Test
   public void removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesExceptionAndLogError_WhenDateFormatIsWrong() {
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     try {
       rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, null);
@@ -705,7 +698,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<StandardResponseDTO>>any()))
             .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     boolean result =
         rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, DATETIME_LATEST);
@@ -721,7 +714,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<StandardResponseDTO>>any()))
             .thenReturn(STANDARD_RESPONSE_DTO_SUCCESS);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     boolean result =
         rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, DATETIME_LATEST);
@@ -800,7 +793,7 @@ public class RocketChatServiceTest {
             .thenThrow(HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION);
 
     try {
-      rocketChatService.getSubscriptionsOfUser(RC_USER_ID, RC_TOKEN);
+      rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
       fail("Expected exception: RocketChatGetSubscriptionsException");
     } catch (RocketChatGetSubscriptionsException ex) {
       assertTrue("Excepted RocketChatGetSubscriptionsException thrown", true);
@@ -818,7 +811,7 @@ public class RocketChatServiceTest {
             .thenReturn(SUBSCRIPTIONS_GET_RESPONSE_ENTITY_NOT_OK);
 
     try {
-      rocketChatService.getSubscriptionsOfUser(RC_USER_ID, RC_TOKEN);
+      rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
       fail("Expected exception: RocketChatGetSubscriptionsException");
     } catch (RocketChatGetSubscriptionsException ex) {
       assertTrue("Excepted RocketChatGetSubscriptionsException thrown", true);
@@ -836,7 +829,7 @@ public class RocketChatServiceTest {
             .thenThrow(HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION);
 
     try {
-      rocketChatService.getSubscriptionsOfUser(RC_USER_ID, RC_TOKEN);
+      rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
       fail("Expected exception: UnauthorizedException");
     } catch (UnauthorizedException ex) {
       assertTrue("Excepted UnauthorizedException thrown", true);
@@ -851,7 +844,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
             .thenReturn(SUBSCRIPTIONS_GET_RESPONSE_ENTITY);
 
-    assertThat(rocketChatService.getSubscriptionsOfUser(RC_USER_ID, RC_TOKEN),
+    assertThat(rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS),
         everyItem(instanceOf(SubscriptionsUpdateDTO.class)));
   }
 
@@ -868,7 +861,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.any(), ArgumentMatchers.<Class<RoomsGetDTO>>any())).thenThrow(exception);
 
     try {
-      rocketChatService.getRoomsOfUser(RC_USER_ID, RC_TOKEN);
+      rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
       fail("Expected exception: RocketChatGetRoomsException");
     } catch (RocketChatGetRoomsException ex) {
       assertTrue("Excepted RocketChatGetRoomsException thrown", true);
@@ -886,7 +879,7 @@ public class RocketChatServiceTest {
             .thenReturn(ROOMS_GET_RESPONSE_ENTITY_NOT_OK);
 
     try {
-      rocketChatService.getRoomsOfUser(RC_USER_ID, RC_TOKEN);
+      rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
       fail("Expected exception: RocketChatGetRoomsException");
     } catch (RocketChatGetRoomsException ex) {
       assertTrue("Excepted RocketChatGetRoomsException thrown", true);
@@ -904,7 +897,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
             .thenReturn(ROOMS_GET_RESPONSE_ENTITY);
 
-    assertThat(rocketChatService.getRoomsOfUser(RC_USER_ID, RC_TOKEN),
+    assertThat(rocketChatService.getRoomsOfUser(RC_CREDENTIALS),
         everyItem(instanceOf(RoomsUpdateDTO.class)));
   }
 
@@ -937,13 +930,15 @@ public class RocketChatServiceTest {
 
     Mockito.doReturn(GROUP_MEMBER_DTO_LIST).when(spy).getMembersOfGroup(Mockito.anyString());
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     spy.removeAllStandardUsersFromGroup(GROUP_ID);
 
-    verify(spy, times(0)).removeUserFromGroup(RCC_SYSTEM_USER.getRocketChatUserId(), GROUP_ID);
-    verify(spy, times(0)).removeUserFromGroup(RCC_TECHNICAL_USER.getRocketChatUserId(), GROUP_ID);
+    verify(spy, times(0)).removeUserFromGroup(RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId(),
+        GROUP_ID);
+    verify(spy, times(0)).removeUserFromGroup(RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId(),
+        GROUP_ID);
     verify(spy, times(1)).removeUserFromGroup(GROUP_MEMBER_USER_1.get_id(), GROUP_ID);
     verify(spy, times(1)).removeUserFromGroup(GROUP_MEMBER_USER_2.get_id(), GROUP_ID);
   }
@@ -961,7 +956,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<StandardResponseDTO>>any()))
             .thenReturn(STANDARD_RESPONSE_DTO_SUCCESS);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     assertTrue(rocketChatService.removeAllMessages(GROUP_ID));
   }
@@ -973,7 +968,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.<Class<StandardResponseDTO>>any()))
             .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     assertFalse(rocketChatService.removeAllMessages(GROUP_ID));
   }
@@ -993,7 +988,7 @@ public class RocketChatServiceTest {
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
             .thenThrow(exception);
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     try {
       rocketChatService.getStandardMembersOfGroup(GROUP_ID);
@@ -1009,7 +1004,7 @@ public class RocketChatServiceTest {
   public void getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersExceptionAndLogError_WhenAPIResponseIsUnsuccessfull()
       throws RocketChatGetGroupMembersException {
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
@@ -1034,14 +1029,14 @@ public class RocketChatServiceTest {
         ArgumentMatchers.any(), ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
             .thenReturn(GROUP_MEMBER_RESPONSE_ENTITY);
 
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RCC_SYSTEM_USER);
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     List<GroupMemberDTO> result = rocketChatService.getStandardMembersOfGroup(GROUP_ID);
 
     assertTrue(result.size() == 1);
-    assertTrue(result.get(0).get_id() != RCC_TECHNICAL_USER.getRocketChatUserId());
-    assertTrue(result.get(0).get_id() != RCC_SYSTEM_USER.getRocketChatUserId());
+    assertTrue(result.get(0).get_id() != RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId());
+    assertTrue(result.get(0).get_id() != RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId());
   }
 
   /**
@@ -1055,7 +1050,7 @@ public class RocketChatServiceTest {
 
     RocketChatGetUserInfoException exception = new RocketChatGetUserInfoException(MESSAGE);
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<UserInfoResponseDTO>>any()))
             .thenThrow(exception);
@@ -1073,7 +1068,7 @@ public class RocketChatServiceTest {
   public void getUserInfo_Should_ThrowRocketChatGetUserInfoException_WhenAPICallIsNotSuccessfull()
       throws RocketChatGetGroupMembersException {
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     try {
       rocketChatService.getUserInfo(RC_USER_ID);
@@ -1087,7 +1082,7 @@ public class RocketChatServiceTest {
   public void getUserInfo_Should_ReturnUserInfoResponseDTOWithSameUserId_WhenAPICallIsSuccessfull()
       throws RocketChatGetGroupMembersException {
 
-    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RCC_TECHNICAL_USER);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<UserInfoResponseDTO>>any())).thenReturn(
             new ResponseEntity<UserInfoResponseDTO>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));

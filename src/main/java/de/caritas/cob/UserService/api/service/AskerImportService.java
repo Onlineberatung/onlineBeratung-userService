@@ -29,7 +29,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.authorization.Authority;
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.ImportException;
 import de.caritas.cob.UserService.api.exception.SaveUserException;
@@ -243,7 +244,9 @@ public class AskerImportService {
         }
 
         // Log out user from Rocket.Chat
-        rocketChatService.logoutUser(rcUserId, rcUserToken);
+        RocketChatCredentials rocketChatUserCredentials = RocketChatCredentials.builder()
+            .RocketChatToken(rcUserToken).RocketChatUserId(rcUserId).build();
+        rocketChatService.logoutUser(rocketChatUserCredentials);
 
         // Update rcUserId in user table
         dbUser.setRcUserId(rcUserId);
@@ -435,16 +438,18 @@ public class AskerImportService {
         }
 
         // Create Rocket.Chat group
-        String rcGroupId = rocketChatService
-            .createPrivateGroup(rocketChatHelper.generateGroupName(session), rcUserToken, rcUserId)
-            .get().getGroup().getId();
+        RocketChatCredentials rocketChatUserCredentials = RocketChatCredentials.builder()
+            .RocketChatToken(rcUserToken).RocketChatUserId(rcUserId).build();
+        String rcGroupId =
+            rocketChatService.createPrivateGroup(rocketChatHelper.generateGroupName(session),
+                rocketChatUserCredentials).get().getGroup().getId();
         if (rcGroupId == null || rcGroupId.equals(StringUtils.EMPTY)) {
           throw new ImportException(String.format("Could not create Rocket.Chat group for user %s",
               record.getUsername()));
         }
 
         // Log out user from Rocket.Chat
-        rocketChatService.logoutUser(rcUserId, rcUserToken);
+        rocketChatService.logoutUser(rocketChatUserCredentials);
 
         // Update rcUserId in user table
         dbUser.setRcUserId(rcUserId);
@@ -536,8 +541,10 @@ public class AskerImportService {
           welcomeMessage = StringSubstitutor.replace(welcomeMessage, replaceValues,
               REPLACE_START_TOKEN, REPLACE_END_TOKEN);
           if (welcomeMessage != null && !welcomeMessage.equals(StringUtils.EMPTY)) {
-            messageServiceHelper.postMessage(welcomeMessage, systemUserId, systemUserToken,
-                rcGroupId, CreateEnquiryExceptionParameter.builder().build());
+            RocketChatCredentials rocketChatSystemCredentials = RocketChatCredentials.builder()
+                .RocketChatToken(systemUserToken).RocketChatUserId(systemUserId).build();
+            messageServiceHelper.postMessage(welcomeMessage, rocketChatSystemCredentials, rcGroupId,
+                CreateEnquiryExceptionInformation.builder().build());
           } else {
             throw new ImportException(
                 String.format("Could not substitute welcome message for group id %s (user: %s)",

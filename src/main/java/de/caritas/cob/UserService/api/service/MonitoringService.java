@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.helper.MonitoringHelper;
@@ -52,7 +52,7 @@ public class MonitoringService {
         updateMonitoring(session.getId(),
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
       } catch (Exception exception) {
-        CreateEnquiryExceptionParameter exceptionParameter = CreateEnquiryExceptionParameter
+        CreateEnquiryExceptionInformation exceptionParameter = CreateEnquiryExceptionInformation
             .builder().session(session).rcGroupId(session.getGroupId()).build();
         throw new CreateMonitoringException(
             String.format("Could not create monitoring for session %s with consultingType %s",

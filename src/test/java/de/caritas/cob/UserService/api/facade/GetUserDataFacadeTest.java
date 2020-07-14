@@ -82,6 +82,7 @@ public class GetUserDataFacadeTest {
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
 
+    @SuppressWarnings("unchecked")
     LinkedHashMap<String, Object> consultingTypeData =
         (LinkedHashMap<String, Object>) getUserDataFacade.getUserData(USER_WITH_SESSIONS)
             .getConsultingTypes()
@@ -97,6 +98,7 @@ public class GetUserDataFacadeTest {
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
 
+    @SuppressWarnings("unchecked")
     LinkedHashMap<String, Object> consultingTypeData =
         (LinkedHashMap<String, Object>) getUserDataFacade.getUserData(USER_WITH_AGENCIES)
             .getConsultingTypes()

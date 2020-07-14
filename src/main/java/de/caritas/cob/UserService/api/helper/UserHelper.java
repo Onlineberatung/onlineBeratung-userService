@@ -227,7 +227,7 @@ public class UserHelper {
    * @param rcUserId Rocket.Chat user ID
    */
   public void updateRocketChatIdInDatabase(User user, String rcUserId) {
-    if (user.getRcUserId() == null || user.getRcUserId().equals(StringUtils.EMPTY)) {
+    if (user != null && StringUtils.isEmpty(user.getRcUserId())) {
       user.setRcUserId(rcUserId);
       userService.saveUser(user);
     }

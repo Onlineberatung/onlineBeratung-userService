@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.authorization.UserRole;
-import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionParameter;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
@@ -180,8 +180,8 @@ public class SessionService {
     try {
       saveSession(session);
     } catch (ServiceException serviceException) {
-      CreateEnquiryExceptionParameter exceptionParameter =
-          CreateEnquiryExceptionParameter.builder().session(session).rcGroupId(rcGroupId).build();
+      CreateEnquiryExceptionInformation exceptionParameter =
+          CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
       throw new EnquiryMessageException(serviceException, exceptionParameter);
     }
 

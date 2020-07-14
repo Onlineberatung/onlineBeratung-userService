@@ -6,8 +6,6 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE_WITH_REPLACED_USERNAME;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.UserService.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.UserService.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -80,7 +78,7 @@ public class MessageServiceHelperTest {
             .thenThrow(new RestClientException(MESSAGE));
 
     try {
-      messageServiceHelper.postMessage(MESSAGE, RC_USER_ID, RC_TOKEN, RC_GROUP_ID, null);
+      messageServiceHelper.postMessage(MESSAGE, RC_CREDENTIALS, RC_GROUP_ID, null);
       fail("Expected exception: RocketChatPostMessageException");
     } catch (RocketChatPostMessageException rocketChatPostMessageException) {
       assertTrue("Excepted RocketChatPostMessageException thrown", true);
@@ -92,13 +90,13 @@ public class MessageServiceHelperTest {
 
     ResponseEntity<Void> response = new ResponseEntity<Void>(HttpStatus.CREATED);
 
-    when(serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_USER_ID, RC_TOKEN, RC_GROUP_ID))
+    when(serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID))
         .thenReturn(new HttpHeaders());
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<HttpEntity<?>>any(), ArgumentMatchers.<Class<Void>>any()))
             .thenReturn(response);
 
-    messageServiceHelper.postMessage(MESSAGE, RC_USER_ID, RC_TOKEN, RC_GROUP_ID, null);
+    messageServiceHelper.postMessage(MESSAGE, RC_CREDENTIALS, RC_GROUP_ID, null);
   }
 
   @Test
@@ -112,7 +110,7 @@ public class MessageServiceHelperTest {
             .thenReturn(response);
 
     try {
-      messageServiceHelper.postMessage(MESSAGE, RC_USER_ID, RC_TOKEN, RC_GROUP_ID, null);
+      messageServiceHelper.postMessage(MESSAGE, RC_CREDENTIALS, RC_GROUP_ID, null);
       fail("Expected exception: RocketChatPostMessageException");
     } catch (RocketChatPostMessageException rocketChatPostMessageException) {
       assertTrue("Excepted RocketChatPostMessageException thrown", true);
