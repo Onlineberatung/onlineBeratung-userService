@@ -1,6 +1,7 @@
 package de.caritas.cob.UserService.api.service;
 
 import static de.caritas.cob.UserService.testHelper.TestConstants.ACLOHOL;
+import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_DTO_LIST;
 import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_NAME;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CITY;
@@ -92,9 +93,8 @@ public class SessionServiceTest {
   private final List<Session> SESSION_LIST = Arrays.asList(SESSION, SESSION_2);
   private final List<Session> SESSION_LIST_SINGLE = Arrays.asList(SESSION);
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = Arrays.asList(SESSION_WITH_CONSULTANT);
-  private final AgencyDTO AGENCY_DTO =
-      new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY, DESCRIPTION, false, false,
-          ConsultingType.SUCHT);
+  private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY,
+      DESCRIPTION, false, false, ConsultingType.SUCHT);
   private final String ERROR_MSG = "error";
   private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<String, Object>();
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
@@ -261,13 +261,12 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowServiceExceptionAndLogExceptionOnDatabaseError()
-      throws Exception {
+  public void getSessionsForUserId_Should_ThrowServiceException_OnDatabaseError() throws Exception {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
 
-    when(sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(USER_ID)).thenThrow(ex);
+    when(sessionRepository.findByUser_UserId(USER_ID)).thenThrow(ex);
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -275,11 +274,10 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowServiceExceptionAndLogExceptionOnAgencyServiceError()
+  public void getSessionsForUserId_Should_ThrowServiceExceptionAndLogException_OnAgencyServiceHelperError()
       throws Exception {
 
     AgencyServiceHelperException ex =
@@ -287,9 +285,8 @@ public class SessionServiceTest {
     List<Session> sessions = new ArrayList<Session>();
     sessions.add(ACCEPTED_SESSION);
 
-    when(sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(USER_ID))
-        .thenReturn(sessions);
-    when(agencyServiceHelper.getAgency(Mockito.anyLong())).thenThrow(ex);
+    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
+    when(agencyServiceHelper.getAgencies(Mockito.any())).thenThrow(ex);
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -301,18 +298,30 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_WhenProvidedWithValidUserId()
+  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId()
       throws Exception {
 
     List<Session> sessions = new ArrayList<Session>();
     sessions.add(ACCEPTED_SESSION);
 
-    when(sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(USER_ID))
-        .thenReturn(sessions);
-    when(agencyServiceHelper.getAgency(Mockito.anyLong())).thenReturn(AGENCY_DTO);
+    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
+    when(agencyServiceHelper.getAgencies(Mockito.any())).thenReturn(AGENCY_DTO_LIST);
 
     assertThat(sessionService.getSessionsForUserId(USER_ID),
         everyItem(instanceOf(UserSessionResponseDTO.class)));
+  }
+
+  @Test
+  public void getSessionsForUserId_Should_ThrowServiceException_When_AgencyServiceHelperReturnsNothing() {
+
+    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(null);
+
+    try {
+      sessionService.getSessionsForUserId(USER_ID);
+      fail("Expected exception: ServiceException");
+    } catch (ServiceException serviceException) {
+      assertTrue("Excepted ServiceException thrown", true);
+    }
   }
 
   @Test

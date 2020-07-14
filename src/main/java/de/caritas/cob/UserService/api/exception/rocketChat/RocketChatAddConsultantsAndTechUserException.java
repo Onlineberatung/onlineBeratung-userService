@@ -12,10 +12,10 @@ public class RocketChatAddConsultantsAndTechUserException extends CreateEnquiryE
    * 
    * @param message Error Message
    * @param exception Exception
-   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public RocketChatAddConsultantsAndTechUserException(String message, Exception exception,
-      CreateEnquiryExceptionInformation exceptionParameter) {
-    super(message, exception, exceptionParameter);
+      CreateEnquiryExceptionInformation exceptionInformation) {
+    super(message, exception, exceptionInformation);
   }
 }

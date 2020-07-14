@@ -3,7 +3,6 @@ package de.caritas.cob.UserService.api.facade;
 import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_DTO_KREUZBUND;
 import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_DTO_SUCHT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.UserService.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER_WITH_AGENCIES;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER_WITH_SESSIONS;
@@ -17,10 +16,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.exception.responses.ConflictException;
-import de.caritas.cob.UserService.api.helper.SessionDataHelper;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import org.junit.Test;
@@ -30,6 +25,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.UserService.api.exception.ServiceException;
+import de.caritas.cob.UserService.api.helper.SessionDataHelper;
 import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.UserDataResponseDTO;
 import de.caritas.cob.UserService.api.service.LogService;
@@ -85,10 +82,11 @@ public class GetUserDataFacadeTest {
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
 
-    LinkedHashMap<String, Object> consultingTypeData = (LinkedHashMap<String, Object>) getUserDataFacade
-        .getUserData(USER_WITH_SESSIONS)
-        .getConsultingTypes()
-        .get(Integer.toString(AGENCY_DTO_SUCHT.getConsultingType().getValue()));
+    @SuppressWarnings("unchecked")
+    LinkedHashMap<String, Object> consultingTypeData =
+        (LinkedHashMap<String, Object>) getUserDataFacade.getUserData(USER_WITH_SESSIONS)
+            .getConsultingTypes()
+            .get(Integer.toString(AGENCY_DTO_SUCHT.getConsultingType().getValue()));
     AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
 
     assertEquals(AGENCY_DTO_SUCHT, agency);
@@ -100,10 +98,11 @@ public class GetUserDataFacadeTest {
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
 
-    LinkedHashMap<String, Object> consultingTypeData = (LinkedHashMap<String, Object>) getUserDataFacade
-        .getUserData(USER_WITH_AGENCIES)
-        .getConsultingTypes()
-        .get(Integer.toString(AGENCY_DTO_KREUZBUND.getConsultingType().getValue()));
+    @SuppressWarnings("unchecked")
+    LinkedHashMap<String, Object> consultingTypeData =
+        (LinkedHashMap<String, Object>) getUserDataFacade.getUserData(USER_WITH_AGENCIES)
+            .getConsultingTypes()
+            .get(Integer.toString(AGENCY_DTO_KREUZBUND.getConsultingType().getValue()));
     AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
 
     assertEquals(AGENCY_DTO_KREUZBUND, agency);

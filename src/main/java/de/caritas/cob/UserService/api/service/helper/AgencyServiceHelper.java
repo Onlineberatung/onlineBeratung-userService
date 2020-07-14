@@ -76,15 +76,14 @@ public class AgencyServiceHelper {
    */
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
     ResponseEntity<List<AgencyDTO>> response;
-    String agencyIdsCommaSeperated = StringUtils.join(agencyIds, ",");
+    String agencyIdsCommaSeparated = StringUtils.join(agencyIds, ",");
 
     try {
       HttpHeaders header = serviceHelper.getCsrfHttpHeaders();
       HttpEntity<?> request = new HttpEntity<>(header);
 
-      response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeperated,
-          HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {
-          });
+      response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeparated,
+          HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {});
 
     } catch (Exception ex) {
       throw new AgencyServiceHelperException(ex);
@@ -93,4 +92,14 @@ public class AgencyServiceHelper {
     return response.getBody();
   }
 
+  /**
+   * Returns the {@link AgencyDTO} for the provided agencyId. Agency won't be cached for further
+   * requests.
+   *
+   * @param agencyIds the List of agency ids
+   * @return
+   */
+  public List<AgencyDTO> getAgenciesWithoutCaching(List<Long> agencyIds) {
+    return getAgenciesFromAgencyService(agencyIds);
+  }
 }

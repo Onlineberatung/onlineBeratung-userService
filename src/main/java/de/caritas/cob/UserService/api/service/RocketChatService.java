@@ -18,8 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import de.caritas.cob.UserService.api.container.RocketChatCredentials;
+import de.caritas.cob.UserService.api.exception.httpresponses.UnauthorizedException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatAddUserToGroupException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatCreateGroupException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatDeleteGroupException;
@@ -707,7 +709,12 @@ public class RocketChatService {
       response = restTemplate.exchange(rocketChatApiSubscriptionsGet, HttpMethod.GET, request,
           SubscriptionsGetDTO.class);
 
-    } catch (Exception ex) {
+    } catch (HttpStatusCodeException ex) {
+      if (ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+        throw new UnauthorizedException(String.format(
+            "Could not get Rocket.Chat subscriptions for user ID %s: Token is not active (401 Unauthorized)",
+            rocketChatCredentials.getRocketChatUserId()));
+      }
       logService.logRocketChatError(
           String.format("Could not get Rocket.Chat subscriptions for user id %s",
               rocketChatCredentials.getRocketChatUserId()),

@@ -52,12 +52,12 @@ public class MonitoringService {
         updateMonitoring(session.getId(),
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
       } catch (Exception exception) {
-        CreateEnquiryExceptionInformation exceptionParameter = CreateEnquiryExceptionInformation
+        CreateEnquiryExceptionInformation exceptionInformation = CreateEnquiryExceptionInformation
             .builder().session(session).rcGroupId(session.getGroupId()).build();
         throw new CreateMonitoringException(
             String.format("Could not create monitoring for session %s with consultingType %s",
                 session.getId(), consultingTypeSettings.getConsultingType()),
-            exception, exceptionParameter);
+            exception, exceptionInformation);
       }
     }
   }

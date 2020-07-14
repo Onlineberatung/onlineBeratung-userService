@@ -12,7 +12,7 @@ public class InitializeFeedbackChatException extends CreateEnquiryException {
    * @param message
    */
   public InitializeFeedbackChatException(String message,
-      CreateEnquiryExceptionInformation exceptionParameter) {
-    super(message, exceptionParameter);
+      CreateEnquiryExceptionInformation exceptionInformation) {
+    super(message, exceptionInformation);
   }
 }

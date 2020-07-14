@@ -47,12 +47,12 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   List<Session> findByUserAndConsultingType(User user, ConsultingType consultingType);
 
   /**
-   * Find the {@link Session}s by a user id and session status
+   * Find all {@link Session}s by a user ID
    * 
-   * @param userId
-   * @return A list of {@link Session}s for the specified user id
+   * @param userId Keycloak/MariaDB user ID
+   * @return A list of {@link Session}s for the specified user ID
    */
-  List<Session> findByUser_UserIdAndEnquiryMessageDateIsNotNull(String userId);
+  List<Session> findByUser_UserId(String userId);
 
   /**
    * Find the {@link Session}s by Rocket.Chat group id and asker id

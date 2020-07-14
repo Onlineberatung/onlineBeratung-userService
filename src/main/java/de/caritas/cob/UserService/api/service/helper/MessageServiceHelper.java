@@ -105,7 +105,7 @@ public class MessageServiceHelper {
    */
   public void postWelcomeMessage(String rcGroupId, User user,
       ConsultingTypeSettings consultingTypeSettings,
-      CreateEnquiryExceptionInformation exceptionParameter)
+      CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostWelcomeMessageException {
 
     if (consultingTypeSettings.isSendWelcomeMessage()) {
@@ -119,7 +119,7 @@ public class MessageServiceHelper {
       } catch (RocketChatPostMessageException | RocketChatUserNotInitializedException exception) {
         throw new RocketChatPostWelcomeMessageException(
             String.format("Could not post welcome message in Rocket.Chat group %s", rcGroupId),
-            exception, exceptionParameter);
+            exception, exceptionInformation);
       }
     }
   }

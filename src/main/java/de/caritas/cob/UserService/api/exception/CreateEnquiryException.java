@@ -9,42 +9,42 @@ import lombok.Setter;
 public class CreateEnquiryException extends Exception {
 
   private static final long serialVersionUID = -4322443849222920981L;
-  private CreateEnquiryExceptionInformation exceptionParameter;
+  private CreateEnquiryExceptionInformation exceptionInformation;
 
   /**
    * Exception when writing an enquiry message fails with errors
    * 
    * @param message Error Message
    * @param exception Exception
-   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(String message, Exception exception,
-      CreateEnquiryExceptionInformation exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionInformation) {
     super(message, exception);
-    this.exceptionParameter = exceptionParameter;
+    this.exceptionInformation = exceptionInformation;
   }
 
   /**
    * Exception when writing an enquiry message fails with errors
    * 
    * @param message Error Message
-   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(String message,
-      CreateEnquiryExceptionInformation exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionInformation) {
     super(message);
-    this.exceptionParameter = exceptionParameter;
+    this.exceptionInformation = exceptionInformation;
   }
 
   /**
    * Exception when writing an enquiry message fails with errors
    * 
    * @param exception Exception
-   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(Exception exception,
-      CreateEnquiryExceptionInformation exceptionParameter) {
+      CreateEnquiryExceptionInformation exceptionInformation) {
     super(exception);
-    this.exceptionParameter = exceptionParameter;
+    this.exceptionInformation = exceptionInformation;
   }
 }

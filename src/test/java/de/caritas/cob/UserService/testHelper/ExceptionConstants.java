@@ -4,6 +4,8 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpStatusCodeException;
 import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
@@ -40,4 +42,14 @@ public class ExceptionConstants {
       new RocketChatCreateGroupException(new Exception());
   public static final RocketChatPostMessageException RC_POST_MESSAGE_EXCEPTION =
       new RocketChatPostMessageException(MESSAGE, CREATE_ENQUIRY_EXCEPTION_PARAMETER);
+
+  /**
+   * HttpStatusCode exception
+   */
+  @SuppressWarnings("serial")
+  public static final HttpStatusCodeException HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION =
+      new HttpStatusCodeException(HttpStatus.INTERNAL_SERVER_ERROR) {};
+  @SuppressWarnings("serial")
+  public static final HttpStatusCodeException HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION =
+      new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
 }

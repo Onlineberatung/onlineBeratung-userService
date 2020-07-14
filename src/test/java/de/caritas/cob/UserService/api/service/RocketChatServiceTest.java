@@ -1,5 +1,7 @@
 package de.caritas.cob.UserService.api.service;
 
+import static de.caritas.cob.UserService.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
+import static de.caritas.cob.UserService.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL;
 import static de.caritas.cob.UserService.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL;
@@ -67,6 +69,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import de.caritas.cob.UserService.api.exception.httpresponses.UnauthorizedException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatAddUserToGroupException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatCreateGroupException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatDeleteGroupException;
@@ -785,12 +788,9 @@ public class RocketChatServiceTest {
   @Test
   public void getSubscriptionsOfUser_Should_ThrowRocketChatGetSubscriptionsExceptionAndLogError_WhenAPICallIsNotSuccessfull() {
 
-    RocketChatGetSubscriptionsException exception =
-        new RocketChatGetSubscriptionsException(MESSAGE);
-
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
-            .thenThrow(exception);
+            .thenThrow(HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION);
 
     try {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
@@ -799,12 +799,12 @@ public class RocketChatServiceTest {
       assertTrue("Excepted RocketChatGetSubscriptionsException thrown", true);
     }
 
-    verify(logService, times(1)).logRocketChatError(Mockito.anyString(), Mockito.eq(exception));
-
+    verify(logService, times(1)).logRocketChatError(Mockito.anyString(),
+        Mockito.eq(HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION));
   }
 
   @Test
-  public void getSubscriptionsOfUser_Should_ThrowRocketChatGetSubscriptionsExceptionAndLogError_WhenAPIResponseIsUnsuccessfull() {
+  public void getSubscriptionsOfUser_Should_ThrowRocketChatGetSubscriptionsExceptionAndLogError_When_APIResponseIsUnsuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
@@ -822,7 +822,22 @@ public class RocketChatServiceTest {
   }
 
   @Test
-  public void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_WhenAPICallIsSuccessfull()
+  public void getSubscriptionsOfUser_Should_ThrowUnauthorizedException_When_RocketChatReturnsUnauthorized() {
+
+    when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
+        ArgumentMatchers.any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
+            .thenThrow(HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION);
+
+    try {
+      rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
+      fail("Expected exception: UnauthorizedException");
+    } catch (UnauthorizedException ex) {
+      assertTrue("Excepted UnauthorizedException thrown", true);
+    }
+  }
+
+  @Test
+  public void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessfull()
       throws Exception {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),

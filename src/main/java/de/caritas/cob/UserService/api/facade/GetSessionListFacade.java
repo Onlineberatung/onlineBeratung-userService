@@ -2,6 +2,7 @@ package de.caritas.cob.UserService.api.facade;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,11 +73,12 @@ public class GetSessionListFacade {
   }
 
   /**
-   * Returns a list of {@link UserSessionResponseDTO} for the specified user id
+   * Returns a list of {@link UserSessionResponseDTO} for the specified user ID
    * 
-   * @param userId
-   * @param rcUserId
-   * @return
+   * @param userId Keycloak/MariaDB user ID
+   * @param rcUserId Rocket.Chat user ID
+   * @param rcAuthToken Rocket.Chat token
+   * @return {@link UserSessionResponseDTO}
    */
   /**
    * Returns a list of {@link UserSessionResponseDTO} for the specified user id
@@ -95,8 +97,14 @@ public class GetSessionListFacade {
       return new UserSessionListResponseDTO();
     }
 
-    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rocketChatCredentials);
-    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
+    Map<String, Boolean> messagesReadMap = Collections.emptyMap();
+    List<RoomsUpdateDTO> roomsUpdateList = Collections.emptyList();
+
+    if (rocketChatCredentials.getRocketChatUserId() != null) {
+      messagesReadMap = getMessagesReadMap(rocketChatCredentials);
+      roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
+    }
+
     List<String> userRoomList =
         roomsUpdateList.stream().map(x -> x.getId()).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
@@ -471,12 +479,12 @@ public class GetSessionListFacade {
    * Sets the values for messagesRead, latestMessage and monitoring for the specified list of
    * {@link ConsultantSessionResponseDTO} and decrypts and truncates the room's last message.
    * 
-   * @param sessions {@link List} of {@link ConsultantSessionResponseDTO}
+   * @param chats {@link List} of {@link ConsultantSessionResponseDTO}
    * @param messagesReadMap Map<String, Boolean>
    * @param roomMessageMap Map<String, Boolean>
-   * @param rcUserId Rocket.Chat Id
-   * @param rcAuthToken Rocket.Chat Token
-   * @return
+   * @param userRoomsList {@link List} of String
+   * @param rcUserId Rocket.Chat user ID
+   * @return {@link List} of {@link ConsultantSessionResponseDTO}
    */
   private List<ConsultantSessionResponseDTO> setConsultantChatValues(
       List<ConsultantSessionResponseDTO> chats, Map<String, Boolean> messagesReadMap,
@@ -527,8 +535,8 @@ public class GetSessionListFacade {
   /**
    * Get a map with the read-status for each room id
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return
    */
   private Map<String, Boolean> getMessagesReadMap(RocketChatCredentials rocketChatCredentials) {
     List<SubscriptionsUpdateDTO> subscriptions;
@@ -549,8 +557,7 @@ public class GetSessionListFacade {
   /**
    * Get the rooms update list for a user from RocketChat
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return
    */
   private List<RoomsUpdateDTO> getRcRoomsUpdateList(RocketChatCredentials rocketChatCredentials) {
@@ -563,11 +570,10 @@ public class GetSessionListFacade {
   }
 
   /**
-   * 
    * Get a map with the last Rocket.Chat message and its date for each room id
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param roomsUpdateList {@link List} of {@link RoomsUpdateDTO}
+   * @return
    */
   private Map<String, RoomsLastMessageDTO> getRcRoomMessageMap(
       List<RoomsUpdateDTO> roomsUpdateList) {
