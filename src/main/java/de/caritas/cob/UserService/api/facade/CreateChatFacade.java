@@ -56,7 +56,6 @@ public class CreateChatFacade {
   public CreateChatResponseDTO createChat(ChatDTO chatDTO, Consultant consultant) {
 
     Chat chat = null;
-    ChatAgency chatAgency = null;
     String rcGroupId = null;
 
     try {
@@ -74,7 +73,7 @@ public class CreateChatFacade {
       }
 
       chat = chatService.saveChat(chatHelper.convertChatDTOtoChat(chatDTO, consultant));
-      chatAgency = chatService.saveChatAgencyRelation(new ChatAgency(chat, agencyId));
+      chatService.saveChatAgencyRelation(new ChatAgency(chat, agencyId));
 
       Optional<GroupResponseDTO> rcGroupDTO = rocketChatService
           .createPrivateGroupWithSystemUser(rocketChatHelper.generateGroupChatName(chat));

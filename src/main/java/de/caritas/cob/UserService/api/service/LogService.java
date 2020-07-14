@@ -3,7 +3,7 @@ package de.caritas.cob.UserService.api.service;
 import java.util.NoSuchElementException;
 import javax.ws.rs.BadRequestException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.UserService.api.exception.responses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,6 +37,7 @@ public class LogService {
   private final String DECRYPTION_ERROR = "Decryption of message error: ";
   private final String TRUNCATION_ERROR = "Truncation of message error: ";
   private final String VALIDATION_ERROR = "Validation error: ";
+  private final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
 
   /**
    * Logs a database error
@@ -279,15 +280,6 @@ public class LogService {
   }
 
   /**
-   * MessageService (helper) error
-   *
-   * @param message
-   */
-  public void logMessageServiceHelperException(String message) {
-    log.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, message);
-  }
-
-  /**
    * MessageService (helper) exception
    *
    * @param message
@@ -380,5 +372,16 @@ public class LogService {
    */
   public void logValidationError(String message) {
     log.error("{}{}", VALIDATION_ERROR, message);
+  }
+
+
+  /**
+   * Logs the exception message from creating the enquiry message
+   * 
+   * @param exception
+   */
+  public void logCreateEnquiryMessageException(Exception exception) {
+    log.error("{}{}", CREATE_ENQUIRY_MESSAGE_ERROR,
+        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
   }
 }

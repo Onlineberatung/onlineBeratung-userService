@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.helper.AuthenticatedUser;
 
 @Component
@@ -34,17 +35,16 @@ public class ServiceHelper {
   /**
    * Adds the Rocket.Chat user id, token and group id to the given {@link HttpHeaders} object
    * 
-   * @param rcUserId
-   * @param rcToken
-   * @param rcGroupId
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @param rcGroupId Rocket.Chat group ID
    * @return
    */
-  public HttpHeaders getRocketChatAndCsrfHttpHeaders(String rcUserId, String rcToken,
+  public HttpHeaders getRocketChatAndCsrfHttpHeaders(RocketChatCredentials rocketChatCredentials,
       String rcGroupId) {
     HttpHeaders header = new HttpHeaders();
     header = this.addCsrfValues(header);
-    header.add("rcUserId", rcUserId);
-    header.add("rcToken", rcToken);
+    header.add("rcUserId", rocketChatCredentials.getRocketChatUserId());
+    header.add("rcToken", rocketChatCredentials.getRocketChatToken());
     header.add("rcGroupId", rcGroupId);
 
     header.add("Authorization", "Bearer " + authenticatedUser.getAccessToken());

@@ -22,7 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import de.caritas.cob.UserService.api.exception.KeycloakException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.UserService.api.helper.AuthenticatedUser;
 
 @SpringBootApplication

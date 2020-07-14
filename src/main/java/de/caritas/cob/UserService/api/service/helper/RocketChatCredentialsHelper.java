@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatLoginException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatUserNotInitializedException;
-import de.caritas.cob.UserService.api.model.rocketChat.RocketChatCredentials;
 import de.caritas.cob.UserService.api.model.rocketChat.login.LoginResponseDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.logout.LogoutResponseDTO;
 import de.caritas.cob.UserService.api.service.LogService;
@@ -169,9 +169,8 @@ public class RocketChatCredentialsHelper {
    */
   public RocketChatCredentials loginUserServiceUser(String username, String password) {
 
-    RocketChatCredentials rcc = new RocketChatCredentials();
-    rcc.setTimeStampCreated(LocalDateTime.now());
-    rcc.setRocketChatUsername(username);
+    RocketChatCredentials rcc = RocketChatCredentials.builder()
+        .TimeStampCreated(LocalDateTime.now()).RocketChatUsername(username).build();
 
     try {
 

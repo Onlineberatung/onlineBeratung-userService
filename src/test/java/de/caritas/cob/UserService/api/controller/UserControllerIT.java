@@ -61,6 +61,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTING_TYP
 import static de.caritas.cob.UserService.testHelper.TestConstants.COUNT_10;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CREATE_CHAT_RESPONSE_DTO;
 import static de.caritas.cob.UserService.testHelper.TestConstants.DECODED_PASSWORD;
+import static de.caritas.cob.UserService.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.UserService.testHelper.TestConstants.INACTIVE_CHAT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_MONITORING;
@@ -215,7 +216,8 @@ public class UserControllerIT {
   private final SessionDTO SESSION_DTO = new SessionDTO(SESSION_ID, AGENCY_ID, 0, 2, POSTCODE,
       RC_GROUP_ID, null, RC_USER_ID, MESSAGE_DATE, IS_NO_TEAM_SESSION, IS_MONITORING);
   private final AgencyDTO AGENCY_DTO =
-      new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, false, false, ConsultingType.SUCHT);
+      new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, DESCRIPTION, false, false,
+          ConsultingType.SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO =
@@ -566,8 +568,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(USER, MESSAGE, RC_TOKEN, RC_USER_ID))
-        .thenReturn(HttpStatus.CONFLICT);
+    when(createEnquiryMessageFacade.createEnquiryMessage(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(HttpStatus.CONFLICT);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -582,8 +584,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(USER, MESSAGE, RC_TOKEN, RC_USER_ID))
-        .thenReturn(HttpStatus.CREATED);
+    when(createEnquiryMessageFacade.createEnquiryMessage(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(HttpStatus.CREATED);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -624,8 +626,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(USER.getUserId(), USER.getRcUserId(),
-        RC_TOKEN)).thenReturn(response);
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -649,7 +651,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isInternalServerError());
 
     verify(getSessionListFacade, times(0)).getSessionsForAuthenticatedUser(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
 
   }
 
@@ -662,8 +664,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(USER.getUserId(), USER.getRcUserId(),
-        RC_TOKEN)).thenReturn(response);
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -681,8 +683,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(USER.getUserId(), USER.getRcUserId(),
-        RC_TOKEN)).thenReturn(response);
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)

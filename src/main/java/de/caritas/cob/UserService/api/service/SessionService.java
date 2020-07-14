@@ -9,12 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.authorization.UserRole;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.UserService.api.exception.UpdateSessionException;
-import de.caritas.cob.UserService.api.exception.responses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.UserService.api.helper.Helper;
 import de.caritas.cob.UserService.api.helper.Now;
 import de.caritas.cob.UserService.api.helper.SessionDataHelper;
@@ -163,50 +164,56 @@ public class SessionService {
 
   /**
    * Saving the enquiry message and Rocket.Chat group id for a session. The Message will be set to
-   * now and the status to NEW.
+   * now and the status to {@link SessionStatus#NEW}.
    * 
    * @param session
-   * @param groupId
+   * @param rcGroupId
    * @return the {@link Session}
+   * @throws EnquiryMessageException
    */
-  public Session saveEnquiryMessageDateAndRocketChatGroupId(Session session, String groupId) {
+  public Session saveEnquiryMessageDateAndRocketChatGroupId(Session session, String rcGroupId)
+      throws EnquiryMessageException {
 
-    session.setGroupId(groupId);
+    session.setGroupId(rcGroupId);
     session.setEnquiryMessageDate(now.getDate());
     session.setStatus(SessionStatus.NEW);
     try {
       saveSession(session);
     } catch (ServiceException serviceException) {
-      throw new EnquiryMessageException(serviceException);
+      CreateEnquiryExceptionInformation exceptionInformation =
+          CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
+      throw new EnquiryMessageException(serviceException, exceptionInformation);
     }
 
     return session;
-
   }
 
   /**
-   * Returns the list of current sessions for the provided user (Id).
+   * Returns a list of current sessions (no matter if an enquiry message has been written or not)
+   * for the provided user ID.
    * 
-   * @return list of user sessions as {@link UserSessionResponseDTO}
+   * @param userId Keycloak/MariaDB user ID
+   * @return {@link List} of {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getSessionsForUserId(String userId) {
 
     List<Session> sessions = null;
-    List<UserSessionResponseDTO> sessionResponseDTOs = null;
-    AgencyDTO agency = null;
+    List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
 
     try {
-      sessions = sessionRepository.findByUser_UserIdAndEnquiryMessageDateIsNotNull(userId);
-      if (sessions != null && sessions.size() > 0) {
-        // Only 1 user session is currently possible
-        agency = agencyServiceHelper.getAgency(sessions.get(0).getAgencyId());
-        sessionResponseDTOs = new ArrayList<>();
-        sessionResponseDTOs.add(convertToUserSessionResponseDTO(sessions.get(0), agency));
+      sessions = sessionRepository.findByUser_UserId(userId);
+      if (sessions == null || sessions.size() < 1) {
+        throw new ServiceException(String.format(
+            "Database error while retrieving the sessions for the user with id %s", userId));
       }
+
+      List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
+          sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
+      sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
+
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(String
-          .format("Database error while retrieving the sessions for the user with id %s", userId));
+      throw new ServiceException(String.format(
+          "Database error while retrieving the sessions for the user with id %s", userId), ex);
 
     } catch (AgencyServiceHelperException helperEx) {
       logService.logAgencyServiceHelperException(helperEx);
@@ -345,20 +352,29 @@ public class SessionService {
   }
 
   /**
-   * Converts a {@link Session} in combination with a {@link AgencyDTO} to a
-   * {@link UserSessionResponseDTO}
+   * Converts a {@link List} of {@link Session}s to a {@link List} of {@link UserSessionResponseDTO}
+   * and adds the corresponding agency information to the session from the provided {@link List} of
+   * {@link AgencyDTO}s
    * 
-   * @param session
-   * @return
+   * @param sessions {@link List} of {@link Session}
+   * @param agencies {@link List} of {@link AgencyDTO}
+   * @return {@link List} of {@link UserSessionResponseDTO>}
    */
-  private UserSessionResponseDTO convertToUserSessionResponseDTO(Session session,
-      AgencyDTO agency) {
-    if (session.getConsultant() == null) {
-      return new UserSessionResponseDTO(convertToSessionDTO(session), agency, null);
-    } else {
-      return new UserSessionResponseDTO(convertToSessionDTO(session), agency,
-          convertToSessionConsultantForUserDTO(session.getConsultant()));
+  private List<UserSessionResponseDTO> convertToUserSessionResponseDTO(List<Session> sessions,
+      List<AgencyDTO> agencies) {
+
+    List<UserSessionResponseDTO> userSessionList = new ArrayList<>();
+
+    for (Session session : sessions) {
+      userSessionList.add(new UserSessionResponseDTO(convertToSessionDTO(session),
+          agencies.stream()
+              .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
+              .findAny().get(),
+          session.getConsultant() == null ? null
+              : convertToSessionConsultantForUserDTO(session.getConsultant())));
     }
+
+    return userSessionList;
   }
 
   /**

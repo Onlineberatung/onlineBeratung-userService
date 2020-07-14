@@ -1,4 +1,4 @@
-package de.caritas.cob.UserService.api.exception.responses;
+package de.caritas.cob.UserService.api.exception.httpresponses;
 
 public class ConflictException extends RuntimeException {
 

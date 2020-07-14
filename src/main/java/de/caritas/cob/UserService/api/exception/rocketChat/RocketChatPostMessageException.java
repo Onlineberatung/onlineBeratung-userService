@@ -1,16 +1,30 @@
 package de.caritas.cob.UserService.api.exception.rocketChat;
 
-public class RocketChatPostMessageException extends RuntimeException {
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
+import de.caritas.cob.UserService.api.exception.CreateEnquiryException;
+
+public class RocketChatPostMessageException extends CreateEnquiryException {
 
   private static final long serialVersionUID = -2247287831013110339L;
 
   /**
-   * Exception, when a Rocket.Chat API call for message posting fails
+   * Exception when posting a message to a Rocket.Chat group fails
    * 
-   * @param ex
+   * @param message Message
+   * @param exception Exception
    */
-  public RocketChatPostMessageException(Exception ex) {
-    super(ex);
+  public RocketChatPostMessageException(String message, Exception exception,
+      CreateEnquiryExceptionInformation exceptionInformation) {
+    super(message, exception, exceptionInformation);
   }
 
+  /**
+   * Exception when posting a message to a Rocket.Chat group fails
+   * 
+   * @param message Message
+   */
+  public RocketChatPostMessageException(String message,
+      CreateEnquiryExceptionInformation exceptionInformation) {
+    super(message, exceptionInformation);
+  }
 }

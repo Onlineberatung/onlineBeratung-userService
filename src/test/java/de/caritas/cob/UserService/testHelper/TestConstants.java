@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.helper.AuthenticatedUser;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.UserService.api.manager.consultingType.SessionDataInitializing;
@@ -57,6 +59,7 @@ public class TestConstants {
   public static final String ERROR = "error";
   public static final String NULL = null;
   public static final boolean SUCCESS = true;
+  public static final Exception EXCEPTION = new Exception();
 
   /**
    * ConsultingTypes
@@ -152,6 +155,67 @@ public class TestConstants {
   public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN =
       new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_NO_TOKEN, HttpStatus.OK);
 
+  /**
+   * Rocket.Chat credentials
+   */
+  public final static String TECHNICAL_USER_A_USERNAME = "techUserAName";
+  public final static String TECHNICAL_USER_A_TOKEN = "techUserAToken";
+  public final static String TECHNICAL_USER_A_ID = "techUserAID";
+
+  public final static String TECHNICAL_USER_B_USERNAME = "techUserBName";
+  public final static String TECHNICAL_USER_B_TOKEN = "techUserBToken";
+  public final static String TECHNICAL_USER_B_ID = "techUserBID";
+
+  public final static String TECHNICAL_USER_C_USERNAME = "techUserCName";
+  public final static String TECHNICAL_USER_C_TOKEN = "techUserCToken";
+  public final static String TECHNICAL_USER_C_ID = "techUserCID";
+
+  public final static String SYSTEM_USER_A_USERNAME = "sysUserAName";
+  public final static String SYSTEM_USER_A_TOKEN = "sysUserAToken";
+  public final static String SYSTEM_USER_A_ID = "sysUserAID";
+
+  public final static String SYSTEM_USER_B_USERNAME = "sysUserBName";
+  public final static String SYSTEM_USER_B_TOKEN = "sysUserBToken";
+  public final static String SYSTEM_USER_B_ID = "sysUserBID";
+
+  public final static String SYSTEM_USER_C_USERNAME = "sysUserBName";
+  public final static String SYSTEM_USER_C_TOKEN = "sysUserBToken";
+  public final static String SYSTEM_USER_C_ID = "sysUserBID";
+
+  public static final RocketChatCredentials RC_CREDENTIALS =
+      RocketChatCredentials.builder().RocketChatToken(RC_TOKEN).RocketChatUserId(RC_USER_ID)
+          .RocketChatUsername(RC_USERNAME).TimeStampCreated(LocalDateTime.now()).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_A =
+      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_A_TOKEN)
+          .RocketChatUserId(TECHNICAL_USER_A_ID).RocketChatUsername(TECHNICAL_USER_A_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_B =
+      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_B_TOKEN)
+          .RocketChatUserId(TECHNICAL_USER_B_ID).RocketChatUsername(TECHNICAL_USER_B_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_C =
+      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_C_TOKEN)
+          .RocketChatUserId(TECHNICAL_USER_C_ID).RocketChatUsername(TECHNICAL_USER_C_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_A =
+      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_A_TOKEN)
+          .RocketChatUserId(SYSTEM_USER_A_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_B =
+      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_B_TOKEN)
+          .RocketChatUserId(SYSTEM_USER_B_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_C =
+      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_C_TOKEN)
+          .RocketChatUserId(SYSTEM_USER_C_ID).RocketChatUsername(SYSTEM_USER_C_USERNAME)
+          .TimeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
+
 
   /*
    * Agencies
@@ -159,18 +223,21 @@ public class TestConstants {
   public static final Long AGENCY_ID = 1L;
   public static final Long AGENCY_ID_2 = 2L;
   public static final Long AGENCY_ID_3 = 3L;
+  public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);
   public static final String AGENCY_NAME = "Test Beratungsstelle";
   public static final AgencyDTO EMPTY_AGENCY_DTO = new AgencyDTO();
   public static final String DESCRIPTION = "description";
   public static final boolean IS_TEAM_AGENCY = true;
   public static final boolean IS_NOT_OFFLINE = false;
   public static final AgencyDTO AGENCY_DTO_SUCHT = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
+      CITY,
       DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_SUCHT);
   public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
+      CITY,
       DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_U25);
   public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO(AGENCY_ID, AGENCY_NAME,
-      POSTCODE, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_KREUZBUND);
-
+      POSTCODE, CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_KREUZBUND);
+  public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
   /*
    * Users / Consultants
    */
@@ -300,6 +367,11 @@ public class TestConstants {
   public static final UserAgency USER_AGENCY = new UserAgency(USER, AGENCY_ID);
   public static final UserAgency USER_AGENCY_2 = new UserAgency(USER, AGENCY_ID_2);
   public static final List<UserAgency> USER_AGENCY_LIST = Arrays.asList(USER_AGENCY, USER_AGENCY_2);
+  public static final Set<UserAgency> USER_AGENCY_SET = new HashSet<>(
+      Arrays.asList(USER_AGENCY, USER_AGENCY_2));
+  public static final User USER_WITH_AGENCIES = new User(USER_ID, null, USERNAME,
+      EMAIL, RC_USER_ID,
+      IS_LANGUAGE_FORMAL, null, USER_AGENCY_SET);
 
   /*
    * Session
@@ -326,7 +398,7 @@ public class TestConstants {
           SessionStatus.NEW, new Date(), RC_GROUP_ID);
   public static final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.NEW, null, RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING);
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
@@ -343,6 +415,11 @@ public class TestConstants {
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
+  public static final Set<Session> SESSION_SET = new HashSet<Session>(
+      Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
+  public static final User USER_WITH_SESSIONS = new User(USER_ID, null, USERNAME,
+      EMAIL, RC_USER_ID,
+      IS_LANGUAGE_FORMAL, SESSION_SET, null);
 
   /**
    * GroupMemberDTO
@@ -418,6 +495,8 @@ public class TestConstants {
   public static final boolean MESSAGES_READ = true;
   public static final boolean MESSAGES_NOT_READ = false;
   public static final String MESSAGE_EMPTY = StringUtils.EMPTY;
+  public static final String MESSAGE_WITH_NON_REPLACED_USERNAME = "Hello ${username}";
+  public static final String MESSAGE_WITH_REPLACED_USERNAME = "Hello " + USER.getUsername();
 
   /*
    * Attachments
@@ -571,4 +650,13 @@ public class TestConstants {
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SOCIAL =
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, null, true, null, false, null,
+          false, null, null);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_WELCOME_MESSAGE =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, MESSAGE_WITH_NON_REPLACED_USERNAME,
+          null, true, null, false, null, false, null, null);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WIT_MONITORING =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, null, true, null, false, null,
+          false, null, null);
 }

@@ -24,16 +24,19 @@ public class AgencyDTO {
   @ApiModelProperty(example = "53113", position = 2)
   private String postcode;
 
+  @ApiModelProperty(example = "Bonn", position = 3)
+  private String city;
+
   @ApiModelProperty(example = "Our agency provides help for the following topics: Lorem ipsum..",
-      position = 3)
+      position = 4)
   private String description;
 
-  @ApiModelProperty(example = "false", position = 4)
+  @ApiModelProperty(example = "false", position = 5)
   private boolean teamAgency;
 
-  @ApiModelProperty(example = "false", position = 5)
+  @ApiModelProperty(example = "false", position = 6)
   private boolean offline;
 
-  @ApiModelProperty(example = "0", position = 6)
+  @ApiModelProperty(example = "0", position = 7)
   private ConsultingType consultingType;
 }

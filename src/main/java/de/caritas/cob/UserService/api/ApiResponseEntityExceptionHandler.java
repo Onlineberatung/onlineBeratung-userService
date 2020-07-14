@@ -2,6 +2,7 @@ package de.caritas.cob.UserService.api;
 
 import java.net.UnknownHostException;
 import javax.validation.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -16,14 +17,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import de.caritas.cob.UserService.api.exception.CustomCryptoException;
-import de.caritas.cob.UserService.api.exception.KeycloakException;
 import de.caritas.cob.UserService.api.exception.NoMasterKeyException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.exception.responses.BadRequestException;
-import de.caritas.cob.UserService.api.exception.responses.ConflictException;
-import de.caritas.cob.UserService.api.exception.responses.ForbiddenException;
-import de.caritas.cob.UserService.api.exception.responses.NotFoundException;
-import de.caritas.cob.UserService.api.exception.responses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.UserService.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.UserService.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.UserService.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.UserService.api.exception.httpresponses.UnauthorizedException;
+import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
+import de.caritas.cob.UserService.api.service.LogService;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+  @Autowired
+  private LogService logService;
 
   /**
    * 
@@ -92,6 +98,21 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
     logWarning(status, ex);
 
     return handleExceptionInternal(null, null, headers, status, request);
+  }
+
+  /**
+   * 401 - Unauthorized
+   * 
+   * @param ex {@link UnauthorizedException}
+   * @param request {@link WebRequest}
+   * @return {@link HttpStatus#UNAUTHORIZED} without body or detailed information
+   */
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<Object> handleUnauthorized(final UnauthorizedException ex,
+      final WebRequest request) {
+    logService.logUnauthorized(ex.getMessage());
+
+    return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
   }
 
   /**
