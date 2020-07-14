@@ -10,11 +10,11 @@ public class EnquiryMessageException extends CreateEnquiryException {
    * Exception for enquiry message
    * 
    * @param exception Exception
-   * @param exceptionParameter {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public EnquiryMessageException(Exception exception,
-      CreateEnquiryExceptionInformation exceptionParameter) {
-    super(exception, exceptionParameter);
+      CreateEnquiryExceptionInformation exceptionInformation) {
+    super(exception, exceptionInformation);
   }
 
 }

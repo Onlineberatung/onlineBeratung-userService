@@ -180,9 +180,9 @@ public class SessionService {
     try {
       saveSession(session);
     } catch (ServiceException serviceException) {
-      CreateEnquiryExceptionInformation exceptionParameter =
+      CreateEnquiryExceptionInformation exceptionInformation =
           CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
-      throw new EnquiryMessageException(serviceException, exceptionParameter);
+      throw new EnquiryMessageException(serviceException, exceptionInformation);
     }
 
     return session;

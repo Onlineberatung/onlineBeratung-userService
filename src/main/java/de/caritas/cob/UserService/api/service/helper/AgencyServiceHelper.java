@@ -76,13 +76,13 @@ public class AgencyServiceHelper {
    */
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
     ResponseEntity<List<AgencyDTO>> response;
-    String agencyIdsCommaSeperated = StringUtils.join(agencyIds, ",");
+    String agencyIdsCommaSeparated = StringUtils.join(agencyIds, ",");
 
     try {
       HttpHeaders header = serviceHelper.getCsrfHttpHeaders();
       HttpEntity<?> request = new HttpEntity<>(header);
 
-      response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeperated,
+      response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeparated,
           HttpMethod.GET, request, new ParameterizedTypeReference<List<AgencyDTO>>() {});
 
     } catch (Exception ex) {

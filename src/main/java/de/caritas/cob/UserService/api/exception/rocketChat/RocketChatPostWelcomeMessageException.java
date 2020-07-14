@@ -14,7 +14,7 @@ public class RocketChatPostWelcomeMessageException extends CreateEnquiryExceptio
    * @param exception Exception
    */
   public RocketChatPostWelcomeMessageException(String message, Exception exception,
-      CreateEnquiryExceptionInformation exceptionParameter) {
-    super(message, exception, exceptionParameter);
+      CreateEnquiryExceptionInformation exceptionInformation) {
+    super(message, exception, exceptionInformation);
   }
 }

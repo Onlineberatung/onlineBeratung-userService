@@ -479,12 +479,12 @@ public class GetSessionListFacade {
    * Sets the values for messagesRead, latestMessage and monitoring for the specified list of
    * {@link ConsultantSessionResponseDTO} and decrypts and truncates the room's last message.
    * 
-   * @param sessions {@link List} of {@link ConsultantSessionResponseDTO}
+   * @param chats {@link List} of {@link ConsultantSessionResponseDTO}
    * @param messagesReadMap Map<String, Boolean>
    * @param roomMessageMap Map<String, Boolean>
-   * @param rcUserId Rocket.Chat Id
-   * @param rcAuthToken Rocket.Chat Token
-   * @return
+   * @param userRoomsList {@link List} of String
+   * @param rcUserId Rocket.Chat user ID
+   * @return {@link List} of {@link ConsultantSessionResponseDTO}
    */
   private List<ConsultantSessionResponseDTO> setConsultantChatValues(
       List<ConsultantSessionResponseDTO> chats, Map<String, Boolean> messagesReadMap,
@@ -535,8 +535,8 @@ public class GetSessionListFacade {
   /**
    * Get a map with the read-status for each room id
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return
    */
   private Map<String, Boolean> getMessagesReadMap(RocketChatCredentials rocketChatCredentials) {
     List<SubscriptionsUpdateDTO> subscriptions;
@@ -557,8 +557,7 @@ public class GetSessionListFacade {
   /**
    * Get the rooms update list for a user from RocketChat
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return
    */
   private List<RoomsUpdateDTO> getRcRoomsUpdateList(RocketChatCredentials rocketChatCredentials) {
@@ -571,11 +570,10 @@ public class GetSessionListFacade {
   }
 
   /**
-   * 
    * Get a map with the last Rocket.Chat message and its date for each room id
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param roomsUpdateList {@link List} of {@link RoomsUpdateDTO}
+   * @return
    */
   private Map<String, RoomsLastMessageDTO> getRcRoomMessageMap(
       List<RoomsUpdateDTO> roomsUpdateList) {

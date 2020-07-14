@@ -130,16 +130,16 @@ public class CreateEnquiryMessageFacade {
         | RocketChatPostMessageException | RocketChatPostWelcomeMessageException
         | EnquiryMessageException | InitializeFeedbackChatException exception) {
       logService.logCreateEnquiryMessageException(exception);
-      doRollback(exception.getExceptionParameter(), rocketChatCredentials);
+      doRollback(exception.getExceptionInformation(), rocketChatCredentials);
 
       return HttpStatus.INTERNAL_SERVER_ERROR;
     } catch (RocketChatLoginException | ServiceException | SaveUserException exception) {
       // Presumably only the Rocket.Chat group was created yet
       logService.logCreateEnquiryMessageException(exception);
       Optional<Session> session = sessionService.getSession(sessionId);
-      CreateEnquiryExceptionInformation exceptionParameter =
+      CreateEnquiryExceptionInformation exceptionInformation =
           CreateEnquiryExceptionInformation.builder().rcGroupId(session.get().getGroupId()).build();
-      doRollback(exceptionParameter, rocketChatCredentials);
+      doRollback(exceptionInformation, rocketChatCredentials);
 
       return HttpStatus.INTERNAL_SERVER_ERROR;
     }
