@@ -45,7 +45,7 @@ import lombok.Setter;
 @ValidAge
 @ValidState
 @ValidPostcode
-public class UserDTO {
+public class UserDTO implements IRegistrationDto {
 
   @NotBlank(message = "{user.username.notBlank}")
   @ApiModelProperty(required = true, example = "max94", position = 0)

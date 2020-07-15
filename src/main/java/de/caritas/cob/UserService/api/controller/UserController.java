@@ -22,6 +22,7 @@ import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.UserService.api.facade.AssignSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateChatFacade;
 import de.caritas.cob.UserService.api.facade.CreateEnquiryMessageFacade;
+import de.caritas.cob.UserService.api.facade.CreateSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateUserFacade;
 import de.caritas.cob.UserService.api.facade.DeleteUserFacade;
 import de.caritas.cob.UserService.api.facade.EmailNotificationFacade;
@@ -47,6 +48,7 @@ import de.caritas.cob.UserService.api.model.EnquiryMessageDTO;
 import de.caritas.cob.UserService.api.model.MasterKeyDTO;
 import de.caritas.cob.UserService.api.model.MonitoringDTO;
 import de.caritas.cob.UserService.api.model.NewMessageNotificationDTO;
+import de.caritas.cob.UserService.api.model.NewRegistrationDto;
 import de.caritas.cob.UserService.api.model.PasswordDTO;
 import de.caritas.cob.UserService.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
@@ -122,6 +124,7 @@ public class UserController implements UsersApi {
   private final GetChatMembersFacade getChatMembersFacade;
   private final CreateUserFacade createUserFacade;
   private final DeleteUserFacade deleteUserFacade;
+  private final CreateSessionFacade createSessionFacade;
 
   @Autowired
   public UserController(UserService userService, ConsultantService consultantService,
@@ -136,7 +139,8 @@ public class UserController implements UsersApi {
       StartChatFacade startChatFacade, GetChatFacade getChatFacade,
       JoinAndLeaveChatFacade joinAndLeaveChatFacade, CreateChatFacade createChatFacade,
       StopChatFacade stopChatFacade, GetChatMembersFacade getChatMembersFacade,
-      CreateUserFacade createUserFacade, DeleteUserFacade deleteUserFacade) {
+      CreateUserFacade createUserFacade, DeleteUserFacade deleteUserFacade,
+      CreateSessionFacade createSessionFacade) {
 
     this.userService = userService;
     this.consultantService = consultantService;
@@ -164,6 +168,7 @@ public class UserController implements UsersApi {
     this.getChatMembersFacade = getChatMembersFacade;
     this.createUserFacade = createUserFacade;
     this.deleteUserFacade = deleteUserFacade;
+    this.createSessionFacade = createSessionFacade;
   }
 
   /**
@@ -183,6 +188,20 @@ public class UserController implements UsersApi {
       return new ResponseEntity<CreateUserResponseDTO>(response.getResponseDTO(),
           response.getStatus());
     }
+  }
+
+  /**
+   * Creates a new session if there is not already an existing session for the provided consulting
+   * type.
+   * 
+   * @param newRegistrationDto {@link NewRegistrationDto}
+   * @return {@link ResponseEntity} with {@link HttpStatus} code
+   */
+  @Override
+  public ResponseEntity<Void> registerNewConsultingType(
+      @Valid @RequestBody NewRegistrationDto newRegistrationDto) {
+
+    return new ResponseEntity<Void>(createSessionFacade.createSession(newRegistrationDto));
   }
 
   /**
