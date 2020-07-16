@@ -202,14 +202,11 @@ public class SessionService {
 
     try {
       sessions = sessionRepository.findByUser_UserId(userId);
-      if (sessions == null || sessions.size() < 1) {
-        throw new ServiceException(String.format(
-            "Database error while retrieving the sessions for the user with id %s", userId));
+      if (sessions != null && sessions.size() > 0) {
+        List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
+            sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
+        sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
       }
-
-      List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
-          sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
-      sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
 
     } catch (DataAccessException ex) {
       throw new ServiceException(String.format(

@@ -131,6 +131,7 @@ import de.caritas.cob.UserService.api.authorization.UserRole;
 import de.caritas.cob.UserService.api.facade.AssignSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateChatFacade;
 import de.caritas.cob.UserService.api.facade.CreateEnquiryMessageFacade;
+import de.caritas.cob.UserService.api.facade.CreateSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateUserFacade;
 import de.caritas.cob.UserService.api.facade.DeleteUserFacade;
 import de.caritas.cob.UserService.api.facade.EmailNotificationFacade;
@@ -215,9 +216,8 @@ public class UserControllerIT {
           + "\" ], \"inTeamAgency\":true}";
   private final SessionDTO SESSION_DTO = new SessionDTO(SESSION_ID, AGENCY_ID, 0, 2, POSTCODE,
       RC_GROUP_ID, null, RC_USER_ID, MESSAGE_DATE, IS_NO_TEAM_SESSION, IS_MONITORING);
-  private final AgencyDTO AGENCY_DTO =
-      new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, DESCRIPTION, false, false,
-          ConsultingType.SUCHT);
+  private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, DESCRIPTION,
+      false, false, ConsultingType.SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO =
@@ -357,6 +357,8 @@ public class UserControllerIT {
   private CreateUserFacade createUserFacade;
   @MockBean
   private DeleteUserFacade deleteUserFacade;
+  @MockBean
+  private CreateSessionFacade createSessionFacade;
 
   @Mock
   private Chat chat;

@@ -44,8 +44,6 @@ public class CreateSessionFacade {
   public HttpStatus createSession(NewRegistrationDto newRegistrationDto) {
     ConsultingType consultingType =
         ConsultingType.values()[Integer.valueOf(newRegistrationDto.getConsultingType())];
-    ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(consultingType);
 
     // Check if already registered to consulting type
     List<UserSessionResponseDTO> sessions =
@@ -79,6 +77,8 @@ public class CreateSessionFacade {
     }
 
     Optional<User> user = userService.getUserViaAuthenticatedUser(authenticatedUser);
+    ConsultingTypeSettings consultingTypeSettings =
+        consultingTypeManager.getConsultantTypeSettings(consultingType);
     Session session = sessionService.saveSession(new Session(user.get(), consultingType,
         newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
         agencyDTO.isTeamAgency(), consultingTypeSettings.isMonitoring()));
