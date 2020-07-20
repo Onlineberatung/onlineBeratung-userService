@@ -5,89 +5,164 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.UserService.api.helper.AgencyHelper;
 import de.caritas.cob.UserService.api.helper.AuthenticatedUser;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.NewRegistrationDto;
+import de.caritas.cob.UserService.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.UserService.api.model.UserSessionResponseDTO;
 import de.caritas.cob.UserService.api.repository.session.ConsultingType;
 import de.caritas.cob.UserService.api.repository.session.Session;
 import de.caritas.cob.UserService.api.repository.session.SessionStatus;
 import de.caritas.cob.UserService.api.repository.user.User;
+import de.caritas.cob.UserService.api.service.LogService;
+import de.caritas.cob.UserService.api.service.MonitoringService;
 import de.caritas.cob.UserService.api.service.SessionService;
 import de.caritas.cob.UserService.api.service.UserService;
-import de.caritas.cob.UserService.api.service.helper.AgencyServiceHelper;
 
 @Service
 public class CreateSessionFacade {
   private final UserService userService;
   private final SessionService sessionService;
   private final ConsultingTypeManager consultingTypeManager;
-  private final AgencyServiceHelper agencyServiceHelper;
   private final AuthenticatedUser authenticatedUser;
+  private final AgencyHelper agencyHelper;
+  private final MonitoringService monitoringService;
+  private final LogService logService;
 
   @Autowired
   public CreateSessionFacade(UserService userService, SessionService sessionService,
-      ConsultingTypeManager consultingTypeManager, AgencyServiceHelper agencyServiceHelper,
-      AuthenticatedUser authenticatedUser) {
+      ConsultingTypeManager consultingTypeManager, AuthenticatedUser authenticatedUser,
+      AgencyHelper agencyHelper, MonitoringService monitoringService, LogService logService) {
     this.userService = userService;
     this.sessionService = sessionService;
     this.consultingTypeManager = consultingTypeManager;
-    this.agencyServiceHelper = agencyServiceHelper;
     this.authenticatedUser = authenticatedUser;
+    this.agencyHelper = agencyHelper;
+    this.monitoringService = monitoringService;
+    this.logService = logService;
   }
 
-  public HttpStatus createSession(NewRegistrationDto newRegistrationDto) {
+  /**
+   * Creates a new {@link Session} for the currently {@link AuthenticatedUser} if this user does not
+   * already have a session for the provided {@link ConsultingType}.
+   * 
+   * @param newRegistrationDto {@link NewRegistrationDto}
+   * @return
+   *         <ul>
+   *         <li>{@link HttpStatus#CREATED}</li> if successfully registered
+   *         <li>{@link HttpStatus#CONFLICT}</li> if already registered to provided
+   *         {@link ConsultingType}
+   *         <li>{@link HttpStatus#INTERNAL_SERVER_ERROR}</li> on unexpected errors
+   *         </ul>
+   */
+  /**
+   * Creates a new {@link Session} for the currently {@link AuthenticatedUser} if this user does not
+   * already have a session for the provided {@link ConsultingType}.
+   * 
+   * @param newRegistrationDto {@link NewRegistrationDto}
+   * @return {@link NewRegistrationResponseDto} with {@link HttpStatus} and ID of the created
+   *         session
+   */
+  public NewRegistrationResponseDto createSession(NewRegistrationDto newRegistrationDto) {
+
     ConsultingType consultingType =
         ConsultingType.values()[Integer.valueOf(newRegistrationDto.getConsultingType())];
 
-    // Check if already registered to consulting type
+    if (isRegisteredToConsultingType(authenticatedUser, consultingType)) {
+      return NewRegistrationResponseDto.builder().status(HttpStatus.CONFLICT).build();
+    }
+
+    // Get agency and check if agency is assigned to given consulting type
+    AgencyDTO agencyDto =
+        agencyHelper.getVerifiedAgency(newRegistrationDto.getAgencyId(), consultingType);
+    Long sessionId;
+
+    try {
+      sessionId = saveNewSession(newRegistrationDto, consultingType, agencyDto.isTeamAgency());
+
+    } catch (ServiceException serviceException) {
+      logService.logCreateSessionFacadeError(
+          String.format("Could not register new consulting type session with %s",
+              newRegistrationDto.toString()),
+          serviceException);
+
+      return NewRegistrationResponseDto.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+    } catch (CreateMonitoringException createMonitoringException) {
+      logService.logCreateSessionFacadeError(String.format(
+          "Could not create monitoring while registering a new consulting type session with %s",
+          newRegistrationDto.toString()), createMonitoringException);
+      monitoringService.rollbackInitializeMonitoring(
+          createMonitoringException.getExceptionInformation().getSession());
+
+      return NewRegistrationResponseDto.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    return NewRegistrationResponseDto.builder().sessionId(sessionId).status(HttpStatus.CREATED)
+        .build();
+  }
+
+  /**
+   * Saves the new {@link Session} and creates the initial monitoring.
+   * 
+   * @param newRegistrationDto {@link NewRegistrationDto}
+   * @param consultingType {@link ConsultingType}
+   * @param isTeamAgency {@link AgencyDTO#isTeamAgency()}
+   * @throws CreateMonitoringException when initialization of monitoring fails
+   * @throws ServiceException when saving the {@link Session} fails
+   */
+  /**
+   * Saves the new {@link Session} and creates the initial monitoring.
+   * 
+   * @param newRegistrationDto {@link NewRegistrationDto}
+   * @param consultingType {@link ConsultingType}
+   * @param isTeamAgency {@link AgencyDTO#isTeamAgency()}
+   * @return {@link Session#getId()} of the new registration
+   * @throws CreateMonitoringException when initialization of monitoring fails
+   * @throws ServiceException when saving the {@link Session} fails
+   */
+  private Long saveNewSession(NewRegistrationDto newRegistrationDto, ConsultingType consultingType,
+      boolean isTeamAgency) throws CreateMonitoringException, ServiceException {
+
+    Optional<User> user = userService.getUserViaAuthenticatedUser(authenticatedUser);
+    ConsultingTypeSettings consultingTypeSettings =
+        consultingTypeManager.getConsultantTypeSettings(consultingType);
+    Session session = null;
+
+    session = sessionService.saveSession(new Session(user.get(), consultingType,
+        newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
+        isTeamAgency, consultingTypeSettings.isMonitoring()));
+
+    monitoringService.createMonitoring(session, consultingTypeSettings);
+
+    return session.getId();
+  }
+
+  /**
+   * Checks if the given {@link AuthenticatedUser} is already registered within the given
+   * {@link ConsultingType}.
+   * 
+   * @param authenticatedUser {@link AuthenticatedUser}
+   * @param consultingType {@link ConsultingType}
+   * @return true if already registered, false if not
+   */
+  private boolean isRegisteredToConsultingType(AuthenticatedUser authenticatedUser,
+      ConsultingType consultingType) {
+
     List<UserSessionResponseDTO> sessions =
         sessionService.getSessionsForUserId(authenticatedUser.getUserId());
 
     if (sessions.stream()
         .filter(session -> session.getSession().getConsultingType() == consultingType.getValue())
         .findFirst().isPresent()) {
-      return HttpStatus.CONFLICT;
+      return true;
     }
 
-    // Check if agency has correct (provided) consulting type
-    AgencyDTO agencyDTO = null;
-    try {
-      agencyDTO = agencyServiceHelper.getAgencyWithoutCaching(newRegistrationDto.getAgencyId());
-    } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      throw new ServiceException(
-          String.format("Could not get agency with id %s for consultingType %s",
-              newRegistrationDto.getAgencyId(), consultingType),
-          agencyServiceHelperException);
-    }
-    if (agencyDTO == null) {
-      throw new ServiceException(
-          String.format("Could not get agency with id %s for consultingType %s",
-              newRegistrationDto.getAgencyId(), consultingType));
-    }
-    if (!agencyDTO.getConsultingType().equals(consultingType)) {
-      throw new BadRequestException(String.format(
-          "The provided agency with id %s is not assigned to the provided consulting type %s",
-          newRegistrationDto.getAgencyId(), consultingType));
-    }
-
-    Optional<User> user = userService.getUserViaAuthenticatedUser(authenticatedUser);
-    ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(consultingType);
-    Session session = sessionService.saveSession(new Session(user.get(), consultingType,
-        newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
-        agencyDTO.isTeamAgency(), consultingTypeSettings.isMonitoring()));
-
-    if (session != null) {
-      return HttpStatus.CREATED;
-
-    }
-
-    return HttpStatus.INTERNAL_SERVER_ERROR;
+    return false;
   }
 }

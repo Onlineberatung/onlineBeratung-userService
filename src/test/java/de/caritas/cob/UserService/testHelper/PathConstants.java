@@ -52,7 +52,9 @@ public class PathConstants {
   public static final String PATH_GET_OPEN_SESSIONS_FOR_AUTHENTICATED_CONSULTANT =
       "/users/sessions/open";
   public static final String PATH_GET_ENQUIRIES_FOR_AGENCY = "/users/sessions/consultants/new";
-  public static final String PATH_POST_REGISTER_USER = "/users/askers";
+  public static final String PATH_POST_REGISTER_USER = "/users/askers/new";
+  public static final String PATH_POST_REGISTER_NEW_CONSULTING_TYPE =
+      "/users/askers/consultingType/new";
   public static final String PATH_POST_NEW_MESSAGE_NOTIFICATION = "/users/mails/messages/new";
   public static final String PATH_POST_IMPORT_CONSULTANTS = "/users/consultants/import";
   public static final String PATH_POST_IMPORT_ASKERS = "/users/askers/import";

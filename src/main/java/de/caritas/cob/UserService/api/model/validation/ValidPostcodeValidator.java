@@ -59,8 +59,12 @@ public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode
    */
   private Optional<ConsultingType> getConsultingType(Object value) {
     if (((IRegistrationDto) value).getConsultingType() != null) {
-      return Optional.ofNullable(
-          ConsultingType.values()[Integer.valueOf(((IRegistrationDto) value).getConsultingType())]);
+      try {
+        return Optional.ofNullable(ConsultingType.values()[Integer
+            .valueOf(((IRegistrationDto) value).getConsultingType())]);
+      } catch (Exception e) {
+        return Optional.empty();
+      }
     }
 
     return Optional.empty();

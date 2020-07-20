@@ -6,14 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.container.RocketChatCredentials;
-import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
+import de.caritas.cob.UserService.api.helper.AgencyHelper;
 import de.caritas.cob.UserService.api.helper.UserHelper;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.CreateUserResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
 import de.caritas.cob.UserService.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -27,7 +24,6 @@ import de.caritas.cob.UserService.api.service.SessionDataService;
 import de.caritas.cob.UserService.api.service.SessionService;
 import de.caritas.cob.UserService.api.service.UserAgencyService;
 import de.caritas.cob.UserService.api.service.UserService;
-import de.caritas.cob.UserService.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.UserService.api.service.helper.KeycloakAdminClientHelper;
 
 /**
@@ -49,14 +45,14 @@ public class CreateUserFacade {
   private final SessionDataService sessionDataService;
   private final ConsultingTypeManager consultingTypeManager;
   private final UserHelper userHelper;
-  private final AgencyServiceHelper agencyServiceHelper;
+  private final AgencyHelper agencyHelper;
 
   @Autowired
   public CreateUserFacade(KeycloakAdminClientHelper keycloakAdminClientHelper,
       UserService userService, RocketChatService rocketChatService,
       UserAgencyService userAgencyService, SessionService sessionService,
       SessionDataService sessionDataService, ConsultingTypeManager consultingTypeManager,
-      UserHelper userHelper, AgencyServiceHelper agencyServiceHelper) {
+      UserHelper userHelper, AgencyHelper agencyHelper) {
     this.keycloakAdminClientHelper = keycloakAdminClientHelper;
     this.userService = userService;
     this.rocketChatService = rocketChatService;
@@ -65,52 +61,33 @@ public class CreateUserFacade {
     this.sessionDataService = sessionDataService;
     this.consultingTypeManager = consultingTypeManager;
     this.userHelper = userHelper;
-    this.agencyServiceHelper = agencyServiceHelper;
+    this.agencyHelper = agencyHelper;
   }
 
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
-   * provided {@link ConsultingType}
+   * provided {@link ConsultingType}.
    * 
    * @param user {@link UserDTO}
-   * @return
+   * @return {@link KeycloakCreateUserResponseDTO}
    * 
    * @throws {@link ServiceException}
    */
   public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO user) {
 
-    ConsultingType consultingType =
-        ConsultingType.values()[Integer.valueOf(user.getConsultingType())];
-    ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(consultingType);
     KeycloakCreateUserResponseDTO response;
     String userId = null;
-    User dbUser = null;
 
-    // Check if non-encrypted username already exists in Keycloak (the encrypted username is being
-    // checked while creating the user in Keycloak)
     if (!userHelper.isUsernameAvailable(user.getUsername())) {
       return new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT,
           new CreateUserResponseDTO(USERNAME_NOT_AVAILABLE, EMAIL_AVAILABLE), null);
     }
 
-    // Check if agency has correct (provided) consulting type
-    AgencyDTO agencyDTO = null;
-    try {
-      agencyDTO = agencyServiceHelper.getAgencyWithoutCaching(user.getAgencyId());
-    } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      throw new ServiceException(String
-          .format("Could not get agency with id %s for Kreuzbund registration", user.getAgencyId()),
-          agencyServiceHelperException);
-    }
-    if (agencyDTO == null) {
-      throw new ServiceException(String.format(
-          "Could not get agency with id %s for Kreuzbund registration", user.getAgencyId()));
-    }
-    if (!agencyDTO.getConsultingType().equals(consultingType)) {
-      throw new BadRequestException(String.format(
-          "The provided agency with id %s is not assigned to the provided consulting type %s",
-          user.getAgencyId(), user.getConsultingType()));
+    ConsultingType consultingType =
+        ConsultingType.values()[Integer.valueOf(user.getConsultingType())];
+
+    if (!agencyHelper.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingType)) {
+      return new KeycloakCreateUserResponseDTO(HttpStatus.BAD_REQUEST);
     }
 
     try {
@@ -118,48 +95,63 @@ public class CreateUserFacade {
       response = keycloakAdminClientHelper.createKeycloakUser(user);
       userId = response.getUserId();
 
-    } catch (KeycloakException keycloakEx) {
-      throw new ServiceException(keycloakEx);
     } catch (Exception ex) {
-      throw new ServiceException(ex);
+      throw new ServiceException(
+          String.format("Could not create Keycloak account for: %s", user.toString()), ex);
     }
 
     if (response.getStatus().equals(HttpStatus.CONFLICT)) {
       return response;
     }
 
-    if (userId != null) {
-      String dummyEmail = null;
-
-      try {
-        // We need to set the user roles after the user was created in Keycloak
-        keycloakAdminClientHelper.updateUserRole(userId);
-
-        // The password also needs to be set after the user was created
-        keycloakAdminClientHelper.updatePassword(userId, user.getPassword());
-
-        // Set a dummy e-mail address if user didn't provide one
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
-          dummyEmail = keycloakAdminClientHelper.updateDummyEmail(userId, user);
-        }
-
-        // Create user in mariaDB
-        String userEmailAddress = (user.getEmail() != null) ? user.getEmail() : dummyEmail;
-        dbUser = userService.createUser(userId, user.getUsername(), userEmailAddress,
-            consultingTypeSettings.isLanguageFormal());
-
-      } catch (Exception ex) {
-        rollBackUserAccount(userId, dbUser, null, null);
-        throw new ServiceException(ex);
-      }
-
-      initializeUserAccount(user, dbUser, consultingTypeSettings);
-
-    } else {
-      throw new ServiceException("Could not create Keycloak user");
-    }
+    // Update Keycloak account data and create user and session in MariaDB
+    updateAccountData(userId, user, consultingType);
 
     return new KeycloakCreateUserResponseDTO(HttpStatus.CREATED);
+  }
+
+  /**
+   * Update the Keycloak account data (roles, password, e-mail address), create the user in MariaDB
+   * and initialize a session or chat relation (depending on {@link ConsultingType}).
+   * 
+   * @param userId Keycloak user ID
+   * @param user {@link UserDTO} from registration form
+   * @param consultingType {@link ConsultingType}
+   */
+  private void updateAccountData(String userId, UserDTO user, ConsultingType consultingType) {
+
+    if (userId == null) {
+      throw new ServiceException(
+          String.format("Could not create Keycloak account for: %s", user.toString()));
+    }
+
+    ConsultingTypeSettings consultingTypeSettings =
+        consultingTypeManager.getConsultantTypeSettings(consultingType);
+    String dummyEmail = null;
+    User dbUser = null;
+
+    try {
+      // We need to set the user roles and password and (dummy) e-mail address after the user was
+      // created in Keycloak
+      keycloakAdminClientHelper.updateUserRole(userId);
+      keycloakAdminClientHelper.updatePassword(userId, user.getPassword());
+
+      if (user.getEmail() == null || user.getEmail().isEmpty()) {
+        dummyEmail = keycloakAdminClientHelper.updateDummyEmail(userId, user);
+      }
+
+      String userEmailAddress = (user.getEmail() != null) ? user.getEmail() : dummyEmail;
+      dbUser = userService.createUser(userId, user.getUsername(), userEmailAddress,
+          consultingTypeSettings.isLanguageFormal());
+
+    } catch (Exception ex) {
+      rollBackUserAccount(userId, dbUser, null, null);
+      throw new ServiceException(
+          String.format("Could not update account data on registration for: %s", user.toString()),
+          ex);
+    }
+
+    initializeUserAccount(user, dbUser, consultingTypeSettings);
   }
 
   /**
@@ -184,7 +176,7 @@ public class CreateUserFacade {
   }
 
   /**
-   * Creates a new session for the provided {@link User}
+   * Creates a new session for the provided {@link User}.
    * 
    * @param user {@link UserDTO}
    * @param dbUser {@link User}
@@ -210,7 +202,7 @@ public class CreateUserFacade {
   }
 
   /**
-   * Creates a new chat/agency relation for the provided {@link User}
+   * Creates a new chat/agency relation for the provided {@link User}.
    * 
    * @param user {@link UserDTO}
    * @param dbUser {@link User}
@@ -268,12 +260,11 @@ public class CreateUserFacade {
     }
   }
 
-
   /**
    * Deletes the provided user in Keycloak and MariaDB and its related session or user <->
    * chat/agency relations.
    * 
-   * @param userId
+   * @param userId Keycloak user ID
    * @param session {@link Session}
    * @param dbUser {@link User}
    */

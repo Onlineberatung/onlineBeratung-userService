@@ -149,7 +149,7 @@ public class MonitoringServiceTest {
 
     doReturn(MONITORING_DTO).when(monitoringHelper).getMonitoringInitalList(Mockito.any());
 
-    monitoringService.deleteInitialMonitoring(SESSION);
+    monitoringService.rollbackInitializeMonitoring(SESSION);
 
     verify(monitoringService, times(1)).deleteMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringHelper, times(1)).getMonitoringInitalList(SESSION.getConsultingType());

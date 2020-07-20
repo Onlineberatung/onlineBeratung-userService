@@ -73,4 +73,13 @@ public class RequestBodyConstants {
   public static final String VALID_UPDATE_CHAT_BODY = "{ \"topic\": \"" + CHAT_TOPIC + "\","
       + "  \"startDate\": \"" + CHAT_START_DATE + "\", \"startTime\": \"" + CHAT_START_TIME + "\","
       + "  \"duration\": " + CHAT_DURATION + ", \"repetitive\": " + CHAT_REPETITIVE + " }";
+  public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE = "{\"agencyId\": \""
+      + AGENCY_ID + "\", \"consultingType\": " + CONSULTING_TYPE_U25.getValue() + "}";
+  public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_AGENCY_ID = "{\"postcode\": \""
+      + POSTCODE + "\", \"consultingType\": " + CONSULTING_TYPE_U25.getValue() + "}";
+  public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_CONSULTING_TYPE =
+      "{\"postcode\": \"" + POSTCODE + "\", \"agencyId\": " + AGENCY_ID + "}";
+  public static final String VALID_NEW_REGISTRATION_BODY =
+      "{\"postcode\": \"" + POSTCODE + "\", \"agencyId\": " + AGENCY_ID + ", \"consultingType\": \""
+          + CONSULTING_TYPE_U25.getValue() + "\"}";
 }

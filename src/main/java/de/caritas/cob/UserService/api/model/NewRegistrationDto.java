@@ -7,6 +7,7 @@ import static de.caritas.cob.UserService.api.helper.UserHelper.POSTCODE_MAX;
 import static de.caritas.cob.UserService.api.helper.UserHelper.POSTCODE_MIN;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Model for new consulting type registrations
@@ -28,24 +30,25 @@ import lombok.Setter;
 @Setter
 @ApiModel(value = "NewRegistration")
 @ValidPostcode
+@ToString
 public class NewRegistrationDto implements IRegistrationDto {
 
-  @NotNull(message = "{user.custom.postcode.notNull}")
+  @NotBlank(message = "{user.custom.postcode.notNull}")
   @Min(value = POSTCODE_MIN, message = "{user.custom.postcode.invalid}")
   @Max(value = POSTCODE_MAX, message = "{user.custom.postcode.invalid}")
-  @ApiModelProperty(required = true, example = "\"79098\"", position = 1)
+  @ApiModelProperty(required = true, example = "\"79098\"", position = 0)
   @JsonProperty("postcode")
   private String postcode;
 
   @NotNull(message = "{user.custom.agency.notNull}")
   @Min(value = AGENCY_ID_MIN, message = "{user.custom.agency.invalid}")
   @Max(value = AGENCY_ID_MAX, message = "{user.custom.agency.invalid}")
-  @ApiModelProperty(required = true, example = "\"15\"", position = 2)
+  @ApiModelProperty(required = true, example = "\"15\"", position = 1)
   @JsonProperty("agencyId")
   private Long agencyId;
 
   @Pattern(regexp = CONSULTING_TYPE_REGEXP, message = "{user.consultingType.invalid}")
-  @ApiModelProperty(required = true, example = "\"0\"", position = 11)
+  @ApiModelProperty(required = true, example = "\"0\"", position = 2)
   @JsonProperty("consultingType")
   private String consultingType;
 }

@@ -23,7 +23,12 @@ import de.caritas.cob.UserService.api.model.AbsenceDTO;
 import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.ChatDTO;
 import de.caritas.cob.UserService.api.model.CreateChatResponseDTO;
+import de.caritas.cob.UserService.api.model.NewRegistrationDto;
+import de.caritas.cob.UserService.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.UserService.api.model.SessionConsultantForUserDTO;
+import de.caritas.cob.UserService.api.model.SessionDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
+import de.caritas.cob.UserService.api.model.UserSessionResponseDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.RocketChatUserDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.group.GroupMemberDTO;
 import de.caritas.cob.UserService.api.model.rocketChat.login.DataDTO;
@@ -60,6 +65,7 @@ public class TestConstants {
   public static final String NULL = null;
   public static final boolean SUCCESS = true;
   public static final Exception EXCEPTION = new Exception();
+  public static final Long MESSAGE_DATE = 123456L;
 
   /**
    * ConsultingTypes
@@ -230,11 +236,9 @@ public class TestConstants {
   public static final boolean IS_TEAM_AGENCY = true;
   public static final boolean IS_NOT_OFFLINE = false;
   public static final AgencyDTO AGENCY_DTO_SUCHT = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
-      CITY,
-      DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_SUCHT);
+      CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_SUCHT);
   public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
-      CITY,
-      DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_U25);
+      CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_U25);
   public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO(AGENCY_ID, AGENCY_NAME,
       POSTCODE, CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_KREUZBUND);
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
@@ -342,6 +346,8 @@ public class TestConstants {
       new RocketChatUserDTO(RC_USER_ID_2, USERNAME);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_2 =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO_2, SUCCESS);
+  public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
+      new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE);
 
   /*
    * ConsultantAgency
@@ -367,10 +373,9 @@ public class TestConstants {
   public static final UserAgency USER_AGENCY = new UserAgency(USER, AGENCY_ID);
   public static final UserAgency USER_AGENCY_2 = new UserAgency(USER, AGENCY_ID_2);
   public static final List<UserAgency> USER_AGENCY_LIST = Arrays.asList(USER_AGENCY, USER_AGENCY_2);
-  public static final Set<UserAgency> USER_AGENCY_SET = new HashSet<>(
-      Arrays.asList(USER_AGENCY, USER_AGENCY_2));
-  public static final User USER_WITH_AGENCIES = new User(USER_ID, null, USERNAME,
-      EMAIL, RC_USER_ID,
+  public static final Set<UserAgency> USER_AGENCY_SET =
+      new HashSet<>(Arrays.asList(USER_AGENCY, USER_AGENCY_2));
+  public static final User USER_WITH_AGENCIES = new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID,
       IS_LANGUAGE_FORMAL, null, USER_AGENCY_SET);
 
   /*
@@ -417,9 +422,29 @@ public class TestConstants {
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
   public static final Set<Session> SESSION_SET = new HashSet<Session>(
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
-  public static final User USER_WITH_SESSIONS = new User(USER_ID, null, USERNAME,
-      EMAIL, RC_USER_ID,
-      IS_LANGUAGE_FORMAL, SESSION_SET, null);
+  public static final User USER_WITH_SESSIONS =
+      new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null);
+  public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO(SESSION_ID, AGENCY_ID,
+      CONSULTING_TYPE_SUCHT.getValue(), SESSION_STATUS_IN_PROGRESS, POSTCODE, RC_GROUP_ID,
+      RC_FEEDBACK_GROUP_ID, RC_USER_ID, MESSAGE_DATE, IS_TEAM_SESSION, IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_U25 = new SessionDTO(SESSION_ID, AGENCY_ID,
+      CONSULTING_TYPE_U25.getValue(), SESSION_STATUS_IN_PROGRESS, POSTCODE, RC_GROUP_ID,
+      RC_FEEDBACK_GROUP_ID, RC_USER_ID, MESSAGE_DATE, IS_TEAM_SESSION, IS_MONITORING);
+  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_SUCHT =
+      new UserSessionResponseDTO(SESSION_DTO_SUCHT, AGENCY_DTO_SUCHT,
+          SESSION_CONSULTANT_FOR_USER_DTO);
+  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_U25 =
+      new UserSessionResponseDTO(SESSION_DTO_U25, AGENCY_DTO_U25, SESSION_CONSULTANT_FOR_USER_DTO);
+  public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_SUCHT =
+      Arrays.asList(USER_SESSION_RESPONSE_DTO_SUCHT);
+  public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_U25 =
+      Arrays.asList(USER_SESSION_RESPONSE_DTO_U25);
+  public static final NewRegistrationDto NEW_REGISTRATION_DTO_SUCHT =
+      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_SUCHT.getValue()));
+  public static final NewRegistrationDto NEW_REGISTRATION_DTO_U25 =
+      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_U25.getValue()));
+  public static final NewRegistrationResponseDto NEW_REGISTRATION_RESPONSE_DTO_CREATED =
+      NewRegistrationResponseDto.builder().status(HttpStatus.CREATED).build();
 
   /**
    * GroupMemberDTO

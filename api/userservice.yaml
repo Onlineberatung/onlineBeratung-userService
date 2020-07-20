@@ -53,6 +53,8 @@ paths:
       responses:
         201:
           description: "CREATED - session was registered successfully"
+          schema:
+            $ref: "#/definitions/NewRegistrationResponseDto"
         400:
           description: "BAD REQUEST - invalid/incomplete request or body object"
         403:
@@ -882,4 +884,6 @@ definitions:
   DeleteUserDTO:
     type: "object"
   NewRegistrationDto:
+    type: "object"
+  NewRegistrationResponseDto:
     type: "object"

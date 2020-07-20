@@ -398,7 +398,8 @@ public class CreateEnquiryMessageFacade {
       rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
     }
     if (createEnquiryExceptionInformation.getSession() != null) {
-      rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
+      monitoringService
+          .rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
       if (createEnquiryExceptionInformation.getRcFeedbackGroupId() != null) {
         rollbackCreateGroup(createEnquiryExceptionInformation.getRcFeedbackGroupId(),
             rocketChatCredentials);
@@ -428,25 +429,6 @@ public class CreateEnquiryMessageFacade {
             rcGroupId), rocketChatDeleteGroupException);
       }
     }
-  }
-
-  /**
-   * Roll back the initialization of the monitoring data for a {@link Session}
-   * 
-   * @param session {@link Session}
-   */
-  private void rollbackInitializeMonitoring(Session session) {
-    if (session != null) {
-      try {
-        monitoringService.deleteInitialMonitoring(session);
-
-      } catch (ServiceException ex) {
-        logService.logInternalServerError(String.format(
-            "Error during rollback while saving enquiry message. Monitoring data for session with id %s could not be deleted.",
-            session.getId()), ex);
-      }
-    }
-
   }
 
   /**

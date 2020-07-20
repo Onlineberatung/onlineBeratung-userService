@@ -4,6 +4,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
@@ -18,6 +19,9 @@ public class ExceptionConstants {
    * Common exceptions
    */
   public static final Exception EXCEPTION = new Exception();
+  @SuppressWarnings("serial")
+  public static final DataAccessException DATA_ACCESS_EXCEPTION =
+      new DataAccessException(MESSAGE) {};
 
   /*
    * Enquiry exceptions

@@ -241,13 +241,13 @@ public class SessionService {
    * @param session
    * @return the {@link Session}
    */
-  public Session saveSession(Session session) {
+  public Session saveSession(Session session) throws ServiceException {
     try {
       return sessionRepository.save(session);
     } catch (DataAccessException ex) {
       logService.logDatabaseError(ex);
       throw new ServiceException(
-          String.format("Database error while saving session with id %s", session.getId()));
+          String.format("Database error while saving session with id %s", session.getId()), ex);
     }
   }
 

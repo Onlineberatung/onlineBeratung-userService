@@ -45,6 +45,7 @@ import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatAddUserToGroupException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatGetUserInfoException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatPostMessageException;
+import de.caritas.cob.UserService.api.helper.MonitoringHelper;
 import de.caritas.cob.UserService.api.helper.RocketChatHelper;
 import de.caritas.cob.UserService.api.helper.UserHelper;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeManager;
@@ -69,33 +70,35 @@ import de.caritas.cob.UserService.api.service.helper.MessageServiceHelper;
 public class CreateEnquiryMessageFacadeTest {
 
   @InjectMocks
-  CreateEnquiryMessageFacade createEnquiryMessageFacade;
+  private CreateEnquiryMessageFacade createEnquiryMessageFacade;
   @Mock
-  EmailNotificationFacade emailNotificationFacade;
+  private EmailNotificationFacade emailNotificationFacade;
   @Mock
-  SessionService sessionService;
+  private SessionService sessionService;
   @Mock
-  RocketChatService rocketChatService;
+  private RocketChatService rocketChatService;
   @Mock
-  MessageServiceHelper messageServiceHelper;
+  private MessageServiceHelper messageServiceHelper;
   @Mock
-  ConsultantAgencyService consultantAgencyService;
+  private ConsultantAgencyService consultantAgencyService;
   @Mock
-  MonitoringService monitoringService;
+  private MonitoringService monitoringService;
   @Mock
-  UserService userService;
+  private UserService userService;
   @Mock
-  LogService logService;
+  private LogService logService;
   @Mock
-  ConsultingTypeManager consultingTypeManager;
+  private ConsultingTypeManager consultingTypeManager;
   @Mock
-  KeycloakAdminClientHelper keycloakHelper;
+  private KeycloakAdminClientHelper keycloakHelper;
   @Mock
-  UserHelper userHelper;
+  private UserHelper userHelper;
   @Mock
-  RocketChatHelper rocketChatHelper;
+  private RocketChatHelper rocketChatHelper;
   @Mock
   private RestTemplate restTemplate;
+  @Mock
+  private MonitoringHelper monitoringHelper;
 
   private final GroupDTO GROUP_DTO = new GroupDTO(RC_GROUP_ID, USERNAME, null, null, 0, 0,
       ROCKET_CHAT_USER_DTO, null, true, false, null);
@@ -335,7 +338,7 @@ public class CreateEnquiryMessageFacadeTest {
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
 
     verify(rocketChatService, times(1)).deleteGroup(RC_GROUP_ID, RC_CREDENTIALS);
-    verify(monitoringService, times(1)).deleteInitialMonitoring(Mockito.any());
+    verify(monitoringService, times(1)).rollbackInitializeMonitoring(Mockito.any());
   }
 
   @Test
@@ -423,7 +426,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
     verify(rocketChatService, times(1)).deleteGroup(RC_GROUP_ID, RC_CREDENTIALS);
-    verify(monitoringService, times(1)).deleteInitialMonitoring(Mockito.any());
+    verify(monitoringService, times(1)).rollbackInitializeMonitoring(Mockito.any());
   }
 
   @Test
@@ -447,32 +450,6 @@ public class CreateEnquiryMessageFacadeTest {
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
 
     verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
-  }
-
-  @Test
-  public void createEnquiryMessage_Should_LogException_When_DeletionOfMonitoringDataFailsWithException()
-      throws EnquiryMessageException {
-
-    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
-    when(consultingTypeManager
-        .getConsultantTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingType()))
-            .thenReturn(CONSULTING_TYPE_SETTINGS_NO_WELCOME_MESSAGE);
-    when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
-    when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-    when(rocketChatService.createPrivateGroup(Mockito.anyString(), Mockito.eq(RC_CREDENTIALS)))
-        .thenReturn(Optional.of(GROUP_RESPONSE_DTO));
-    doThrow(ENQUIRY_MESSAGE_EXCEPTION).when(sessionService)
-        .saveEnquiryMessageDateAndRocketChatGroupId(SESSION_WITHOUT_CONSULTANT, RC_GROUP_ID);
-    when(rocketChatHelper.generateGroupName(Mockito.any(Session.class)))
-        .thenReturn(SESSION_WITHOUT_ENQUIRY_MESSAGE.getId().toString());
-
-    ServiceException serviceException = new ServiceException(MESSAGE);
-    doThrow(serviceException).when(monitoringService).deleteInitialMonitoring(Mockito.any());
-
-    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
-
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.eq(serviceException));
   }
 
   @Test

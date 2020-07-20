@@ -49,6 +49,7 @@ import de.caritas.cob.UserService.api.model.MasterKeyDTO;
 import de.caritas.cob.UserService.api.model.MonitoringDTO;
 import de.caritas.cob.UserService.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.UserService.api.model.NewRegistrationDto;
+import de.caritas.cob.UserService.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.UserService.api.model.PasswordDTO;
 import de.caritas.cob.UserService.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
@@ -195,13 +196,25 @@ public class UserController implements UsersApi {
    * type.
    * 
    * @param newRegistrationDto {@link NewRegistrationDto}
-   * @return {@link ResponseEntity} with {@link HttpStatus} code
+   * @return {@link ResponseEntity} with {@link NewRegistrationResponseDto}
    */
   @Override
-  public ResponseEntity<Void> registerNewConsultingType(
+  public ResponseEntity<NewRegistrationResponseDto> registerNewConsultingType(
       @Valid @RequestBody NewRegistrationDto newRegistrationDto) {
 
-    return new ResponseEntity<Void>(createSessionFacade.createSession(newRegistrationDto));
+    Optional<User> user = userService.getUser(authenticatedUser.getUserId());
+
+    if (!user.isPresent()) {
+      logService.logInternalServerError(
+          String.format("User with id %s not found while registering new consulting type: %s",
+              authenticatedUser.getUserId(), newRegistrationDto.toString()));
+
+      return new ResponseEntity<NewRegistrationResponseDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    NewRegistrationResponseDto response = createSessionFacade.createSession(newRegistrationDto);
+
+    return new ResponseEntity<NewRegistrationResponseDto>(response, response.getStatus());
   }
 
   /**
