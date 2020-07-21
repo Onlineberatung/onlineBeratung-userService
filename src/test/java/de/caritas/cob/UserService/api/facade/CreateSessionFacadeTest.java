@@ -15,6 +15,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_SUCHT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -122,7 +123,25 @@ public class CreateSessionFacadeTest {
   }
 
   @Test
-  public void createSession_Should_ReturnCreated_OnSuccess() {
+  public void createSession_Should_ReturnBadRequest_When_AgencyForConsultingTypeCouldNotBeFound()
+      throws CreateMonitoringException {
+
+    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+    when(sessionService.getSessionsForUserId(USER_ID))
+        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
+    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
+    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
+
+    NewRegistrationResponseDto result =
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+  }
+
+  @Test
+  public void createSession_Should_ReturnCreatedAndSessionId_OnSuccess() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
@@ -138,6 +157,7 @@ public class CreateSessionFacadeTest {
         createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
 
     assertEquals(HttpStatus.CREATED, result.getStatus());
+    assertNotNull(result.getSessionId());
   }
 
   @Test

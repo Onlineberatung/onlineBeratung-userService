@@ -82,6 +82,10 @@ public class CreateSessionFacade {
         agencyHelper.getVerifiedAgency(newRegistrationDto.getAgencyId(), consultingType);
     Long sessionId;
 
+    if (agencyDto == null) {
+      return NewRegistrationResponseDto.builder().status(HttpStatus.BAD_REQUEST).build();
+    }
+
     try {
       sessionId = saveNewSession(newRegistrationDto, consultingType, agencyDto.isTeamAgency());
 

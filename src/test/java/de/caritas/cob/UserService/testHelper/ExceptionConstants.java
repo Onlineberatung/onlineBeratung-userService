@@ -8,6 +8,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
+import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatCreateGroupException;
@@ -56,4 +57,10 @@ public class ExceptionConstants {
   @SuppressWarnings("serial")
   public static final HttpStatusCodeException HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION =
       new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
+
+  /**
+   * AgencyServiceHelperException
+   */
+  public static final AgencyServiceHelperException AGENCY_SERVICE_HELPER_EXCEPTION =
+      new AgencyServiceHelperException(EXCEPTION);
 }

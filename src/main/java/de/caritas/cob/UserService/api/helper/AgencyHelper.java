@@ -30,7 +30,7 @@ public class AgencyHelper {
    * 
    * @param agencyId {@link AgencyDTO#getId()}
    * @param consultingType {@link ConsultingType}
-   * @return {@link AgencyDTO}
+   * @return {@link AgencyDTO} or null if agency is not found
    * @throws ServiceException when getting the agency information fails
    * @throws BadRequestException when the given {@link ConsultingType} is not assigned to the
    *         provided agency
@@ -46,15 +46,12 @@ public class AgencyHelper {
           String.format("Could not get agency with id %s for Kreuzbund registration", agencyId),
           agencyServiceHelperException);
     }
-    if (agencyDTO == null) {
-      throw new ServiceException(
-          String.format("Could not get agency with id %s for Kreuzbund registration", agencyId));
-    }
-    if (!agencyDTO.getConsultingType().equals(consultingType)) {
+    if (agencyDTO != null && !agencyDTO.getConsultingType().equals(consultingType)) {
       throw new BadRequestException(String.format(
           "The provided agency with id %s is not assigned to the provided consulting type %s",
           agencyId, consultingType));
     }
+
     return agencyDTO;
   }
 
