@@ -21,6 +21,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.RC_USER_ID_MAI
 import static de.caritas.cob.UserService.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
+import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION_WITH_CONSULTANT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.U25_SESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.U25_SESSION_WITH_CONSULTANT;
@@ -118,17 +119,15 @@ public class AssignSessionFacadeTest {
     verify(logService, times(1)).logAssignSessionFacadeWarning(Mockito.anyString());
   }
 
-  // @Test
-  // public void
-  // assignSession_Should_ReturnInternalServerErrorAndLogError_WhenUserDoesNotHaveRocketChatIdInDb()
-  // {
-  //
-  // HttpStatus result = assignSessionFacade.assignSession(SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID,
-  // CONSULTANT, true);
-  //
-  // assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
-  // verify(logService, times(1)).logAssignSessionFacadeError(Mockito.anyString());
-  // }
+  @Test
+  public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenUserDoesNotHaveRocketChatIdInDb() {
+
+    HttpStatus result = assignSessionFacade.assignSession(SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID,
+        CONSULTANT, true);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
+    verify(logService, times(1)).logAssignSessionFacadeError(Mockito.anyString());
+  }
 
   @Test
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenConsultantDoesNotHaveRocketChatIdInDb() {
