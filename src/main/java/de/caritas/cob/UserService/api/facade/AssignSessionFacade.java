@@ -372,7 +372,7 @@ public class AssignSessionFacade {
    * @return
    */
   private boolean rocketChatIdMissing(Session session, Consultant consultant) {
-    System.out.println("session: " + session.toString());
+
     if (session != null && session.getUser() != null
         && (session.getUser().getRcUserId() == null || session.getUser().getRcUserId().isEmpty())) {
       logService.logAssignSessionFacadeError(String.format(

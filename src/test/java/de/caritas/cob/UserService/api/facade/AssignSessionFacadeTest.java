@@ -122,8 +122,6 @@ public class AssignSessionFacadeTest {
   @Test
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenUserDoesNotHaveRocketChatIdInDb() {
 
-    // CONSULTANT.setConsultantAgencies(CONSULTANT_AGENCY_SET);
-
     HttpStatus result = assignSessionFacade.assignSession(SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID,
         CONSULTANT, false);
 
