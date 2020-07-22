@@ -123,7 +123,7 @@ public class AssignSessionFacadeTest {
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenUserDoesNotHaveRocketChatIdInDb() {
 
     HttpStatus result = assignSessionFacade.assignSession(SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID,
-        CONSULTANT, false);
+        CONSULTANT_NO_RC_USER_ID, false);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
     verify(logService, times(1)).logAssignSessionFacadeError(Mockito.anyString());
