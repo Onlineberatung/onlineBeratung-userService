@@ -11,6 +11,7 @@ import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformatio
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.EnquiryMessageException;
+import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatCreateGroupException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatPostMessageException;
 
@@ -63,4 +64,9 @@ public class ExceptionConstants {
    */
   public static final AgencyServiceHelperException AGENCY_SERVICE_HELPER_EXCEPTION =
       new AgencyServiceHelperException(EXCEPTION);
+
+  /**
+   * ServiceException
+   */
+  public static final ServiceException SERVICE_EXCEPTION = new ServiceException(EXCEPTION);
 }

@@ -30,23 +30,25 @@ public class SessionDataService {
   }
 
   /**
-   * Save additional registration information in session data
+   * Save additional registration information in session data.
    * 
-   * @param session the {@link Session}
-   * @param user the {@Link UserDTO}
+   * @param session {@link Session}
+   * @param user {@link UserDTO}
+   * @return list of {@link SessionData}
+   * @throws ServiceException when saving session data fails
    */
-  public Iterable<SessionData> saveSessionDataFromRegistration(Session session, UserDTO user) {
+  public Iterable<SessionData> saveSessionDataFromRegistration(Session session, UserDTO user)
+      throws ServiceException {
 
     List<SessionData> sessionDataList =
         sessionDataHelper.createRegistrationSessionDataList(session, user);
     try {
       return sessionDataRepository.saveAll(sessionDataList);
-    } catch (DataAccessException ex) {
+    } catch (DataAccessException | IllegalArgumentException ex) {
       logService.logDatabaseError(ex);
-      throw new ServiceException("Database error while saving session data during registration");
-    } catch (IllegalArgumentException illegalEx) {
-      logService.logDatabaseError(illegalEx);
-      throw new ServiceException("Database error while saving session data during registration");
+      throw new ServiceException(String.format(
+          "Database error while saving session data during registration for session %s and user %s",
+          session.toString(), user.toString()), ex);
     }
 
   }

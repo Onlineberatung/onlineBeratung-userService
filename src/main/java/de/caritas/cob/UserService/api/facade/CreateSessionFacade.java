@@ -14,6 +14,7 @@ import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSetti
 import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.NewRegistrationDto;
 import de.caritas.cob.UserService.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.UserService.api.model.UserDTO;
 import de.caritas.cob.UserService.api.model.UserSessionResponseDTO;
 import de.caritas.cob.UserService.api.repository.session.ConsultingType;
 import de.caritas.cob.UserService.api.repository.session.Session;
@@ -21,6 +22,7 @@ import de.caritas.cob.UserService.api.repository.session.SessionStatus;
 import de.caritas.cob.UserService.api.repository.user.User;
 import de.caritas.cob.UserService.api.service.LogService;
 import de.caritas.cob.UserService.api.service.MonitoringService;
+import de.caritas.cob.UserService.api.service.SessionDataService;
 import de.caritas.cob.UserService.api.service.SessionService;
 import de.caritas.cob.UserService.api.service.UserService;
 
@@ -32,18 +34,21 @@ public class CreateSessionFacade {
   private final AuthenticatedUser authenticatedUser;
   private final AgencyHelper agencyHelper;
   private final MonitoringService monitoringService;
+  private final SessionDataService sessionDataService;
   private final LogService logService;
 
   @Autowired
   public CreateSessionFacade(UserService userService, SessionService sessionService,
       ConsultingTypeManager consultingTypeManager, AuthenticatedUser authenticatedUser,
-      AgencyHelper agencyHelper, MonitoringService monitoringService, LogService logService) {
+      AgencyHelper agencyHelper, MonitoringService monitoringService,
+      SessionDataService sessionDataService, LogService logService) {
     this.userService = userService;
     this.sessionService = sessionService;
     this.consultingTypeManager = consultingTypeManager;
     this.authenticatedUser = authenticatedUser;
     this.agencyHelper = agencyHelper;
     this.monitoringService = monitoringService;
+    this.sessionDataService = sessionDataService;
     this.logService = logService;
   }
 
@@ -80,20 +85,25 @@ public class CreateSessionFacade {
     // Get agency and check if agency is assigned to given consulting type
     AgencyDTO agencyDto =
         agencyHelper.getVerifiedAgency(newRegistrationDto.getAgencyId(), consultingType);
-    Long sessionId;
+    Session session = null;
 
     if (agencyDto == null) {
       return NewRegistrationResponseDto.builder().status(HttpStatus.BAD_REQUEST).build();
     }
 
     try {
-      sessionId = saveNewSession(newRegistrationDto, consultingType, agencyDto.isTeamAgency());
+      session = saveNewSession(newRegistrationDto, consultingType, agencyDto.isTeamAgency());
+      sessionDataService.saveSessionDataFromRegistration(session, new UserDTO());
 
     } catch (ServiceException serviceException) {
       logService.logCreateSessionFacadeError(
           String.format("Could not register new consulting type session with %s",
               newRegistrationDto.toString()),
           serviceException);
+
+      if (session != null) {
+        sessionService.deleteSession(session);
+      }
 
       return NewRegistrationResponseDto.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
@@ -107,8 +117,8 @@ public class CreateSessionFacade {
       return NewRegistrationResponseDto.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    return NewRegistrationResponseDto.builder().sessionId(sessionId).status(HttpStatus.CREATED)
-        .build();
+    return NewRegistrationResponseDto.builder().sessionId(session.getId())
+        .status(HttpStatus.CREATED).build();
   }
 
   /**
@@ -126,12 +136,13 @@ public class CreateSessionFacade {
    * @param newRegistrationDto {@link NewRegistrationDto}
    * @param consultingType {@link ConsultingType}
    * @param isTeamAgency {@link AgencyDTO#isTeamAgency()}
-   * @return {@link Session#getId()} of the new registration
+   * @return the new registered {@link Session}
    * @throws CreateMonitoringException when initialization of monitoring fails
    * @throws ServiceException when saving the {@link Session} fails
    */
-  private Long saveNewSession(NewRegistrationDto newRegistrationDto, ConsultingType consultingType,
-      boolean isTeamAgency) throws CreateMonitoringException, ServiceException {
+  private Session saveNewSession(NewRegistrationDto newRegistrationDto,
+      ConsultingType consultingType, boolean isTeamAgency)
+      throws CreateMonitoringException, ServiceException {
 
     Optional<User> user = userService.getUserViaAuthenticatedUser(authenticatedUser);
     ConsultingTypeSettings consultingTypeSettings =
@@ -144,7 +155,7 @@ public class CreateSessionFacade {
 
     monitoringService.createMonitoring(session, consultingTypeSettings);
 
-    return session.getId();
+    return session;
   }
 
   /**

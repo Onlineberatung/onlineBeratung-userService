@@ -1,6 +1,7 @@
 package de.caritas.cob.UserService.api.facade;
 
 import static de.caritas.cob.UserService.testHelper.ExceptionConstants.CREATE_MONITORING_EXCEPTION;
+import static de.caritas.cob.UserService.testHelper.ExceptionConstants.SERVICE_EXCEPTION;
 import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.UserService.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
@@ -36,6 +37,7 @@ import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeManag
 import de.caritas.cob.UserService.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.UserService.api.service.LogService;
 import de.caritas.cob.UserService.api.service.MonitoringService;
+import de.caritas.cob.UserService.api.service.SessionDataService;
 import de.caritas.cob.UserService.api.service.SessionService;
 import de.caritas.cob.UserService.api.service.UserService;
 
@@ -56,6 +58,8 @@ public class CreateSessionFacadeTest {
   private AgencyHelper agencyHelper;
   @Mock
   private MonitoringService monitoringService;
+  @Mock
+  private SessionDataService sessionDataService;
   @Mock
   private LogService logService;
 
@@ -96,6 +100,29 @@ public class CreateSessionFacadeTest {
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
     verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+  }
+
+  @Test
+  public void createSession_Should_ReturnInternalServerError_When_SessionDataCouldNotBeSaved() {
+
+    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+    when(sessionService.getSessionsForUserId(USER_ID))
+        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
+    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
+    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+        .thenReturn(AGENCY_DTO_U25);
+    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
+    when(sessionDataService.saveSessionDataFromRegistration(Mockito.any(), Mockito.any()))
+        .thenThrow(SERVICE_EXCEPTION);
+
+    NewRegistrationResponseDto result =
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
+    verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+    verify(sessionService, times(1)).deleteSession(Mockito.any());
   }
 
   @Test
@@ -161,6 +188,27 @@ public class CreateSessionFacadeTest {
   }
 
   @Test
+  public void createSession_Should_CreateSessionData() throws CreateMonitoringException {
+
+    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+    when(sessionService.getSessionsForUserId(USER_ID))
+        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
+    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
+    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+        .thenReturn(AGENCY_DTO_U25);
+    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
+
+    NewRegistrationResponseDto result =
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+
+    assertEquals(HttpStatus.CREATED, result.getStatus());
+    verify(sessionDataService, times(1)).saveSessionDataFromRegistration(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
   public void createSession_Should_CreateMonitoring_When_ConsultingTypeContainsMonitoring()
       throws CreateMonitoringException {
 
@@ -182,7 +230,7 @@ public class CreateSessionFacadeTest {
   }
 
   @Test
-  public void createSession_ShouldNot_CreateMonitoring_When_ConsultingTypeContainsMonitoring()
+  public void createSession_ShouldNot_CreateMonitoring_When_ConsultingTypeDoesNotContainsMonitoring()
       throws CreateMonitoringException {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
