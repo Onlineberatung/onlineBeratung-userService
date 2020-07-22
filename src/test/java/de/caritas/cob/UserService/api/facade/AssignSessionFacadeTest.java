@@ -2,7 +2,6 @@ package de.caritas.cob.UserService.api.facade;
 
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_2;
-import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_AGENCY_SET;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_ID_2;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTANT_NO_RC_USER_ID;
@@ -123,10 +122,10 @@ public class AssignSessionFacadeTest {
   @Test
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenUserDoesNotHaveRocketChatIdInDb() {
 
-    CONSULTANT.setConsultantAgencies(CONSULTANT_AGENCY_SET);
+    // CONSULTANT.setConsultantAgencies(CONSULTANT_AGENCY_SET);
 
     HttpStatus result = assignSessionFacade.assignSession(SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID,
-        CONSULTANT_NO_RC_USER_ID, false);
+        CONSULTANT, false);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
     verify(logService, times(1)).logAssignSessionFacadeError(Mockito.anyString());

@@ -305,6 +305,8 @@ public class TestConstants {
       new User(USER_ID_2, null, USERNAME, EMAIL, RC_USER_ID_2, IS_LANGUAGE_FORMAL, null, null);
   public static final User USER_NO_RC_USER_ID =
       new User(USER_ID, null, USERNAME, EMAIL, null, false, null, null);
+  public static final User USER_NO_RC_USER_ID_2 =
+      new User(USER_ID_2, null, USERNAME, EMAIL, null, false, null, null);
   public static final String ACCESS_TOKEN = "DASDLAJS835u83hKSAJDF";
   public static final AuthenticatedUser AUTHENTICATED_USER =
       new AuthenticatedUser(USER_ID, USERNAME, null, ACCESS_TOKEN, null);
@@ -412,7 +414,7 @@ public class TestConstants {
           AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null,
           IS_TEAM_SESSION, IS_MONITORING);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
-      new Session(SESSION_ID, USER_NO_RC_USER_ID, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER_NO_RC_USER_ID_2, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
   public static final Session U25_SESSION_WITH_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
       CONSULTANT_2, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(),
