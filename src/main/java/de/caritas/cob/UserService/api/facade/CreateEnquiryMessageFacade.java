@@ -304,7 +304,7 @@ public class CreateEnquiryMessageFacade {
       rcFeedbackGroupDTO = rocketChatService
           .createPrivateGroupWithSystemUser(rocketChatHelper.generateFeedbackGroupName(session));
 
-      if (rcFeedbackGroupDTO.isPresent() && rcFeedbackGroupDTO.get().getGroup().getId() != null) {
+      if (!rcFeedbackGroupDTO.isPresent() || rcFeedbackGroupDTO.get().getGroup().getId() == null) {
         throw new InitializeFeedbackChatException(
             String.format("Could not create feedback chat group for session %s", session.getId()),
             exceptionWithoutFeedbackId);
