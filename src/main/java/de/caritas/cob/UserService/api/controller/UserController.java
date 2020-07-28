@@ -212,7 +212,8 @@ public class UserController implements UsersApi {
       return new ResponseEntity<NewRegistrationResponseDto>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    NewRegistrationResponseDto response = createSessionFacade.createSession(newRegistrationDto);
+    NewRegistrationResponseDto response =
+        createSessionFacade.createSession(newRegistrationDto, user.get());
 
     return new ResponseEntity<NewRegistrationResponseDto>(response, response.getStatus());
   }

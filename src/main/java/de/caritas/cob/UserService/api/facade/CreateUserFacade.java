@@ -255,7 +255,7 @@ public class CreateUserFacade {
 
     } catch (ServiceException serviceException) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, null, userAgency);
-      throw new ServiceException("Could not create user-agency relationfor Kreuzbund registration",
+      throw new ServiceException("Could not create user-agency relation for Kreuzbund registration",
           serviceException);
     }
   }

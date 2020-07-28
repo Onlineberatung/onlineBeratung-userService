@@ -43,7 +43,8 @@ public class AgencyHelper {
       agencyDTO = agencyServiceHelper.getAgencyWithoutCaching(agencyId);
     } catch (AgencyServiceHelperException agencyServiceHelperException) {
       throw new ServiceException(
-          String.format("Could not get agency with id %s for Kreuzbund registration", agencyId),
+          String.format("Could not get agency with id %s to check with consulting type %s",
+              agencyId, consultingType),
           agencyServiceHelperException);
     }
     if (agencyDTO != null && !agencyDTO.getConsultingType().equals(consultingType)) {

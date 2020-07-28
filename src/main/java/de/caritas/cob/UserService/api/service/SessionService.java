@@ -104,10 +104,10 @@ public class SessionService {
   }
 
   /**
-   * Returns the sessions for the given user and consultingType
+   * Returns the sessions for the given user and consultingType.
    * 
-   * @param user
-   * @return the sessions
+   * @param user {@link User}
+   * @return list of {@link Session}
    */
   public List<Session> getSessionsForUserByConsultingType(User user,
       ConsultingType consultingType) {

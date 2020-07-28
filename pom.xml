@@ -24,6 +24,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<skip.unit-tests>false</skip.unit-tests>
+        <skip.integration-tests>false</skip.integration-tests>
 	</properties>
 
 	<dependencies>
@@ -301,7 +303,7 @@
 							<goal>test</goal>
 						</goals>
 						<configuration>
-							<skipTests>false</skipTests>
+							<skipTests>${skip.unit-tests}</skipTests>
 							<includes>
 								<include>**/*Test.java</include>
 							</includes>
@@ -314,7 +316,7 @@
 							<goal>test</goal>
 						</goals>
 						<configuration>
-							<skipTests>false</skipTests>
+							<skipTests>${skip.integration-tests}</skipTests>
 							<includes>
 								<include>**/*IT.*</include>
 							</includes>

@@ -538,7 +538,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(userService.getUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(createSessionFacade.createSession(Mockito.any()))
+    when(createSessionFacade.createSession(Mockito.any(), Mockito.any()))
         .thenReturn(NEW_REGISTRATION_RESPONSE_DTO_CREATED);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);

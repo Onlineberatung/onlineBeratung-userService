@@ -10,6 +10,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTING_TYP
 import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.UserService.testHelper.TestConstants.NEW_REGISTRATION_DTO_SUCHT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.NEW_REGISTRATION_DTO_U25;
+import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION_LIST;
 import static de.caritas.cob.UserService.testHelper.TestConstants.SESSION_WITH_CONSULTANT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER;
 import static de.caritas.cob.UserService.testHelper.TestConstants.USER_ID;
@@ -72,11 +73,11 @@ public class CreateSessionFacadeTest {
   public void createSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_SUCHT);
+    when(sessionService.getSessionsForUserByConsultingType(Mockito.any(), Mockito.any()))
+        .thenReturn(SESSION_LIST);
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.CONFLICT, result.getStatus());
     verify(sessionService, times(0)).saveSession(Mockito.any());
@@ -96,7 +97,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.saveSession(Mockito.any())).thenThrow(new ServiceException(MESSAGE));
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
     verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
@@ -118,7 +119,7 @@ public class CreateSessionFacadeTest {
         .thenThrow(SERVICE_EXCEPTION);
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
     verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
@@ -142,7 +143,7 @@ public class CreateSessionFacadeTest {
         Mockito.any());
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
     verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
@@ -162,7 +163,7 @@ public class CreateSessionFacadeTest {
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
   }
@@ -181,7 +182,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.CREATED, result.getStatus());
     assertNotNull(result.getSessionId());
@@ -201,7 +202,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.CREATED, result.getStatus());
     verify(sessionDataService, times(1)).saveSessionDataFromRegistration(Mockito.any(),
@@ -223,7 +224,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
     NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT);
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.CREATED, result.getStatus());
     verify(monitoringService, times(1)).createMonitoring(Mockito.any(), Mockito.any());
@@ -242,7 +243,8 @@ public class CreateSessionFacadeTest {
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_U25)).thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    NewRegistrationResponseDto result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_U25);
+    NewRegistrationResponseDto result =
+        createSessionFacade.createSession(NEW_REGISTRATION_DTO_U25, USER);
 
     assertEquals(HttpStatus.CREATED, result.getStatus());
     verify(monitoringService, times(0)).updateMonitoring(Mockito.any(), Mockito.any());

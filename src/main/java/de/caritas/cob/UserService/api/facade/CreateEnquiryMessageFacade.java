@@ -384,7 +384,7 @@ public class CreateEnquiryMessageFacade {
    * Performs a rollback depending on the given parameter values (creation of Rocket.Chat groups and
    * changes/initialization of session).
    * 
-   * @param CreateEnquiryExceptionInformation {@link CreateEnquiryExceptionInformation}
+   * @param createEnquiryExceptionInformation {@link CreateEnquiryExceptionInformation}
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
   private void doRollback(CreateEnquiryExceptionInformation createEnquiryExceptionInformation,

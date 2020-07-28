@@ -1,7 +1,6 @@
 package de.caritas.cob.UserService.api.facade;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,6 @@ import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.NewRegistrationDto;
 import de.caritas.cob.UserService.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.UserService.api.model.UserDTO;
-import de.caritas.cob.UserService.api.model.UserSessionResponseDTO;
 import de.caritas.cob.UserService.api.repository.session.ConsultingType;
 import de.caritas.cob.UserService.api.repository.session.Session;
 import de.caritas.cob.UserService.api.repository.session.SessionStatus;
@@ -24,28 +22,23 @@ import de.caritas.cob.UserService.api.service.LogService;
 import de.caritas.cob.UserService.api.service.MonitoringService;
 import de.caritas.cob.UserService.api.service.SessionDataService;
 import de.caritas.cob.UserService.api.service.SessionService;
-import de.caritas.cob.UserService.api.service.UserService;
 
 @Service
 public class CreateSessionFacade {
-  private final UserService userService;
   private final SessionService sessionService;
   private final ConsultingTypeManager consultingTypeManager;
-  private final AuthenticatedUser authenticatedUser;
   private final AgencyHelper agencyHelper;
   private final MonitoringService monitoringService;
   private final SessionDataService sessionDataService;
   private final LogService logService;
 
   @Autowired
-  public CreateSessionFacade(UserService userService, SessionService sessionService,
-      ConsultingTypeManager consultingTypeManager, AuthenticatedUser authenticatedUser,
-      AgencyHelper agencyHelper, MonitoringService monitoringService,
-      SessionDataService sessionDataService, LogService logService) {
-    this.userService = userService;
+  public CreateSessionFacade(SessionService sessionService,
+      ConsultingTypeManager consultingTypeManager, AgencyHelper agencyHelper,
+      MonitoringService monitoringService, SessionDataService sessionDataService,
+      LogService logService) {
     this.sessionService = sessionService;
     this.consultingTypeManager = consultingTypeManager;
-    this.authenticatedUser = authenticatedUser;
     this.agencyHelper = agencyHelper;
     this.monitoringService = monitoringService;
     this.sessionDataService = sessionDataService;
@@ -73,12 +66,13 @@ public class CreateSessionFacade {
    * @return {@link NewRegistrationResponseDto} with {@link HttpStatus} and ID of the created
    *         session
    */
-  public NewRegistrationResponseDto createSession(NewRegistrationDto newRegistrationDto) {
+  public NewRegistrationResponseDto createSession(NewRegistrationDto newRegistrationDto,
+      User user) {
 
     ConsultingType consultingType =
         ConsultingType.values()[Integer.valueOf(newRegistrationDto.getConsultingType())];
 
-    if (isRegisteredToConsultingType(authenticatedUser, consultingType)) {
+    if (isRegisteredToConsultingType(user, consultingType)) {
       return NewRegistrationResponseDto.builder().status(HttpStatus.CONFLICT).build();
     }
 
@@ -92,7 +86,7 @@ public class CreateSessionFacade {
     }
 
     try {
-      session = saveNewSession(newRegistrationDto, consultingType, agencyDto.isTeamAgency());
+      session = saveNewSession(newRegistrationDto, consultingType, agencyDto.isTeamAgency(), user);
       sessionDataService.saveSessionDataFromRegistration(session, new UserDTO());
 
     } catch (ServiceException serviceException) {
@@ -141,15 +135,14 @@ public class CreateSessionFacade {
    * @throws ServiceException when saving the {@link Session} fails
    */
   private Session saveNewSession(NewRegistrationDto newRegistrationDto,
-      ConsultingType consultingType, boolean isTeamAgency)
+      ConsultingType consultingType, boolean isTeamAgency, User user)
       throws CreateMonitoringException, ServiceException {
 
-    Optional<User> user = userService.getUserViaAuthenticatedUser(authenticatedUser);
     ConsultingTypeSettings consultingTypeSettings =
         consultingTypeManager.getConsultantTypeSettings(consultingType);
     Session session = null;
 
-    session = sessionService.saveSession(new Session(user.get(), consultingType,
+    session = sessionService.saveSession(new Session(user, consultingType,
         newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
         isTeamAgency, consultingTypeSettings.isMonitoring()));
 
@@ -159,22 +152,18 @@ public class CreateSessionFacade {
   }
 
   /**
-   * Checks if the given {@link AuthenticatedUser} is already registered within the given
-   * {@link ConsultingType}.
+   * Checks if the given {@link User} is already registered within the given {@link ConsultingType}.
    * 
-   * @param authenticatedUser {@link AuthenticatedUser}
+   * @param user {@link User}
    * @param consultingType {@link ConsultingType}
    * @return true if already registered, false if not
    */
-  private boolean isRegisteredToConsultingType(AuthenticatedUser authenticatedUser,
-      ConsultingType consultingType) {
+  private boolean isRegisteredToConsultingType(User user, ConsultingType consultingType) {
 
-    List<UserSessionResponseDTO> sessions =
-        sessionService.getSessionsForUserId(authenticatedUser.getUserId());
+    List<Session> sessions =
+        sessionService.getSessionsForUserByConsultingType(user, consultingType);
 
-    if (sessions.stream()
-        .filter(session -> session.getSession().getConsultingType() == consultingType.getValue())
-        .findFirst().isPresent()) {
+    if (sessions.size() > 0) {
       return true;
     }
 
