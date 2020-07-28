@@ -1,7 +1,5 @@
 package de.caritas.cob.UserService.api.facade;
 
-import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.repository.userAgency.UserAgency;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -12,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.helper.SessionDataHelper;
 import de.caritas.cob.UserService.api.model.AgencyDTO;
 import de.caritas.cob.UserService.api.model.UserDataResponseDTO;
@@ -19,6 +18,7 @@ import de.caritas.cob.UserService.api.repository.consultant.Consultant;
 import de.caritas.cob.UserService.api.repository.session.ConsultingType;
 import de.caritas.cob.UserService.api.repository.session.Session;
 import de.caritas.cob.UserService.api.repository.user.User;
+import de.caritas.cob.UserService.api.repository.userAgency.UserAgency;
 import de.caritas.cob.UserService.api.service.LogService;
 import de.caritas.cob.UserService.api.service.helper.AgencyServiceHelper;
 
@@ -59,7 +59,7 @@ public class GetUserDataFacade {
             .collect(Collectors.toList());
       } catch (AgencyServiceHelperException agencyServiceHelperException) {
         logService.logAgencyServiceHelperException(String
-                .format("Error while getting agencies of consultant with id %s", consultant.getId()),
+            .format("Error while getting agencies of consultant with id %s", consultant.getId()),
             agencyServiceHelperException);
 
         return null;
@@ -80,8 +80,7 @@ public class GetUserDataFacade {
    */
   public UserDataResponseDTO getUserData(User user) {
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
-        null, null, null, false, user.isLanguageFormal(), null, false, null, null, null,
-        null);
+        null, null, null, false, user.isLanguageFormal(), null, false, null, null, null, null);
 
     responseDTO.setConsultingTypes(getConsultingTypes(user));
 
@@ -116,35 +115,34 @@ public class GetUserDataFacade {
   }
 
   /**
-   * Return Map with information for given consulting type
+   * Returns a {@link LinkedHashMap} with user information for the given consulting type.
    *
-   * @param type        {@link ConsultingType}
-   * @param sessionList List of {@link Session}
-   * @param agencyDTOs  List of {@link AgencyDTO}
-   * @return LinkedHashMap<String, Object> Hashmap containing data (SessionData,isRegistered,agency)
+   * @param type {@link ConsultingType}
+   * @param sessionList List of the user's {@link Session}s
+   * @param agencyDTOs List of {@link AgencyDTO} that the user is registered to
+   * @return LinkedHashMap<String, Object> {@link LinkedHashMap} containing user data
+   *         (sessionData,isRegistered,agency)
    */
   private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType type,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
 
     LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
-    Optional<Session> consultingTypeSession = sessionList.stream()
-        .filter(session -> session.getConsultingType() == type)
-        .findFirst();
-    Optional<LinkedHashMap<String, Object>> consultingTypeSessionData = consultingTypeSession
-        .map(sessionDataHelper::getSessionDataMapFromSession);
+    Optional<Session> consultingTypeSession =
+        sessionList.stream().filter(session -> session.getConsultingType() == type).findFirst();
+    Optional<LinkedHashMap<String, Object>> consultingTypeSessionData =
+        consultingTypeSession.map(sessionDataHelper::getSessionDataMapFromSession);
+    Optional<AgencyDTO> agency =
+        agencyDTOs.stream().filter(agencyDTO -> agencyDTO.getConsultingType() == type).findFirst();
 
-    consultingTypeData.put("sessionData",
-        consultingTypeSessionData.orElse(null));
-    consultingTypeData.put("isRegistered", consultingTypeSession.isPresent());
-    consultingTypeData.put("agency",
-        agencyDTOs.stream().filter(agencyDTO -> agencyDTO.getConsultingType() == type).findFirst()
-            .orElse(null));
+    consultingTypeData.put("sessionData", consultingTypeSessionData.orElse(null));
+    consultingTypeData.put("isRegistered", agency.isPresent());
+    consultingTypeData.put("agency", agency.orElse(null));
 
     return consultingTypeData;
   }
 
   /**
-   * Returns List of agency ids from provided Set of {@link Session}
+   * Returns List of agency IDs from provided Set of {@link Session}.
    *
    * @param sessionList {@link User#getSessions()}
    * @return List<Long> list of agencyIds
@@ -157,7 +155,7 @@ public class GetUserDataFacade {
   }
 
   /**
-   * Returns List of agency ids from provided {@link User}
+   * Returns List of agency IDs from provided {@link User}.
    *
    * @param user - {@link User}
    * @return list of agencyIds
@@ -171,9 +169,9 @@ public class GetUserDataFacade {
   }
 
   /**
-   * Returns List of agency ids from provided {@link User} and Set of {@link Session}
+   * Returns List of agency IDs from provided {@link User} and Set of {@link Session}.
    *
-   * @param user        {@link User}
+   * @param user {@link User}
    * @param sessionList {@link User#getSessions()}
    * @return list of agencyIds
    */

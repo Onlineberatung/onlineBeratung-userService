@@ -122,18 +122,6 @@ public class MonitoringService {
   }
 
   /**
-   * Deletes the initial monitoring data of the given {@link Session}
-   * 
-   * @param session
-   */
-  public void deleteInitialMonitoring(Session session) {
-    if (session != null) {
-      deleteMonitoring(session.getId(),
-          monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
-    }
-  }
-
-  /**
    * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
    * {@link MonitoringDTO} on level 0 (addictiveDrugs, intervention, etc.)
    * 
@@ -182,7 +170,7 @@ public class MonitoringService {
 
   /**
    * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
-   * {@link MonitoringDTO} on level 2 (monitoring_option table - {@link MonitoringOption})
+   * {@link MonitoringDTO} on level 2 (monitoring_option table - {@link MonitoringOption}).
    * 
    * @param type
    * @param monitoringKey
@@ -203,5 +191,24 @@ public class MonitoringService {
     }
 
     return map;
+  }
+
+  /**
+   * Roll back the initialization of the monitoring data for a {@link Session}.
+   * 
+   * @param session {@link Session}
+   */
+  public void rollbackInitializeMonitoring(Session session) {
+    if (session != null) {
+      try {
+        deleteMonitoring(session.getId(),
+            monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
+
+      } catch (ServiceException ex) {
+        logService.logInternalServerError(String.format(
+            "Error during monitoring rollback. Monitoring data could not be deleted for session: %s",
+            session.toString()), ex);
+      }
+    }
   }
 }

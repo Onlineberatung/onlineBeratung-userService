@@ -32,6 +32,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * User model
@@ -41,11 +42,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 @ApiModel(value = "User")
 @ValidAge
 @ValidState
 @ValidPostcode
-public class UserDTO {
+public class UserDTO implements IRegistrationDto {
 
   @NotBlank(message = "{user.username.notBlank}")
   @ApiModelProperty(required = true, example = "max94", position = 0)

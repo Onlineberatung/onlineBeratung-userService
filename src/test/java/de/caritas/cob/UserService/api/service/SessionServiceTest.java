@@ -312,19 +312,6 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowServiceException_When_AgencyServiceHelperReturnsNothing() {
-
-    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(null);
-
-    try {
-      sessionService.getSessionsForUserId(USER_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
-    }
-  }
-
-  @Test
   public void saveEnquiryMessageDateAndRocketChatGroupId_Should_ThrowEnquiryMessageException_WhenSaveSessionFails()
       throws Exception {
 

@@ -17,6 +17,7 @@ import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_IMPO
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS_WITHOUT_SESSION;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_IMPORT_CONSULTANTS;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_NEW_MESSAGE_NOTIFICATION;
+import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_REGISTER_USER;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -49,6 +50,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import de.caritas.cob.UserService.api.authorization.Authority;
 import de.caritas.cob.UserService.api.facade.CreateEnquiryMessageFacade;
+import de.caritas.cob.UserService.api.facade.CreateSessionFacade;
 import de.caritas.cob.UserService.api.facade.EmailNotificationFacade;
 import de.caritas.cob.UserService.api.facade.GetChatFacade;
 import de.caritas.cob.UserService.api.facade.GetChatMembersFacade;
@@ -134,6 +136,8 @@ public class UserControllerAuthorizationIT {
   private GetChatMembersFacade getChatMembersFacade;
   @MockBean
   private UserHelper userHelper;
+  @MockBean
+  private CreateSessionFacade createSessionFacade;
 
   private Cookie csrfCookie;
 
@@ -143,7 +147,7 @@ public class UserControllerAuthorizationIT {
   }
 
   /**
-   * POST on /users/askers
+   * POST on /users/askers/new
    *
    */
 
@@ -155,6 +159,49 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(userService);
+  }
+
+  /**
+   * POST on /users/askers/consultingType/new (role: asker)
+   *
+   */
+
+  @Test
+  public void registerNewConsultingType_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
+      throws Exception {
+
+    mvc.perform(get(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE).contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
+          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
+          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT})
+  public void registerNewConsultingType_Should_ReturnForbiddenAndCallNoMethods_WhenNoAskerDefaultAuthority()
+      throws Exception {
+
+    mvc.perform(get(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE).contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(authenticatedUser, userService, createSessionFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  public void registerNewConsultingType_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
+      throws Exception {
+
+    mvc.perform(get(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
   }
 
   /**

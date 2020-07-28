@@ -304,7 +304,7 @@ public class CreateEnquiryMessageFacade {
       rcFeedbackGroupDTO = rocketChatService
           .createPrivateGroupWithSystemUser(rocketChatHelper.generateFeedbackGroupName(session));
 
-      if (rcFeedbackGroupDTO.isPresent() && rcFeedbackGroupDTO.get().getGroup().getId() != null) {
+      if (!rcFeedbackGroupDTO.isPresent() || rcFeedbackGroupDTO.get().getGroup().getId() == null) {
         throw new InitializeFeedbackChatException(
             String.format("Could not create feedback chat group for session %s", session.getId()),
             exceptionWithoutFeedbackId);
@@ -384,7 +384,7 @@ public class CreateEnquiryMessageFacade {
    * Performs a rollback depending on the given parameter values (creation of Rocket.Chat groups and
    * changes/initialization of session).
    * 
-   * @param CreateEnquiryExceptionInformation {@link CreateEnquiryExceptionInformation}
+   * @param createEnquiryExceptionInformation {@link CreateEnquiryExceptionInformation}
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
   private void doRollback(CreateEnquiryExceptionInformation createEnquiryExceptionInformation,
@@ -398,7 +398,8 @@ public class CreateEnquiryMessageFacade {
       rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
     }
     if (createEnquiryExceptionInformation.getSession() != null) {
-      rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
+      monitoringService
+          .rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
       if (createEnquiryExceptionInformation.getRcFeedbackGroupId() != null) {
         rollbackCreateGroup(createEnquiryExceptionInformation.getRcFeedbackGroupId(),
             rocketChatCredentials);
@@ -428,25 +429,6 @@ public class CreateEnquiryMessageFacade {
             rcGroupId), rocketChatDeleteGroupException);
       }
     }
-  }
-
-  /**
-   * Roll back the initialization of the monitoring data for a {@link Session}
-   * 
-   * @param session {@link Session}
-   */
-  private void rollbackInitializeMonitoring(Session session) {
-    if (session != null) {
-      try {
-        monitoringService.deleteInitialMonitoring(session);
-
-      } catch (ServiceException ex) {
-        logService.logInternalServerError(String.format(
-            "Error during rollback while saving enquiry message. Monitoring data for session with id %s could not be deleted.",
-            session.getId()), ex);
-      }
-    }
-
   }
 
   /**

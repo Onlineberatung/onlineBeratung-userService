@@ -1,6 +1,7 @@
 package de.caritas.cob.UserService.api.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -104,10 +105,10 @@ public class SessionService {
   }
 
   /**
-   * Returns the sessions for the given user and consultingType
+   * Returns the sessions for the given user and consultingType.
    * 
-   * @param user
-   * @return the sessions
+   * @param user {@link User}
+   * @return list of {@link Session}
    */
   public List<Session> getSessionsForUserByConsultingType(User user,
       ConsultingType consultingType) {
@@ -121,7 +122,7 @@ public class SessionService {
       throw new ServiceException("Database error while retrieving user sessions");
     }
 
-    return userSessions;
+    return userSessions != null ? userSessions : Collections.emptyList();
   }
 
   /**
@@ -202,14 +203,11 @@ public class SessionService {
 
     try {
       sessions = sessionRepository.findByUser_UserId(userId);
-      if (sessions == null || sessions.size() < 1) {
-        throw new ServiceException(String.format(
-            "Database error while retrieving the sessions for the user with id %s", userId));
+      if (sessions != null && sessions.size() > 0) {
+        List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
+            sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
+        sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
       }
-
-      List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
-          sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
-      sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
 
     } catch (DataAccessException ex) {
       throw new ServiceException(String.format(
@@ -244,13 +242,13 @@ public class SessionService {
    * @param session
    * @return the {@link Session}
    */
-  public Session saveSession(Session session) {
+  public Session saveSession(Session session) throws ServiceException {
     try {
       return sessionRepository.save(session);
     } catch (DataAccessException ex) {
       logService.logDatabaseError(ex);
       throw new ServiceException(
-          String.format("Database error while saving session with id %s", session.getId()));
+          String.format("Database error while saving session with id %s", session.getId()), ex);
     }
   }
 
