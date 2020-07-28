@@ -1,6 +1,7 @@
 package de.caritas.cob.UserService.api.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -121,7 +122,7 @@ public class SessionService {
       throw new ServiceException("Database error while retrieving user sessions");
     }
 
-    return userSessions;
+    return userSessions != null ? userSessions : Collections.emptyList();
   }
 
   /**
