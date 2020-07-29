@@ -23,6 +23,7 @@ import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_GET_TEAM_
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_CHAT_NEW;
+import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -39,12 +40,16 @@ import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_REGISTER_
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_UPDATE_KEY;
 import static de.caritas.cob.UserService.testHelper.PathConstants.PATH_USER_DATA;
+import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_AGENCY_ID;
+import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_CONSULTING_TYPE;
+import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.INVALID_U25_USER_REQUEST_BODY_AGE;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.INVALID_U25_USER_REQUEST_BODY_STATE;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.INVALID_USER_REQUEST_BODY;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.USER_REQUEST_BODY_WITH_USERNAME_TOO_LONG;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.USER_REQUEST_BODY_WITH_USERNAME_TOO_SHORT;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_BODY;
+import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.VALID_NEW_REGISTRATION_BODY;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.VALID_U25_USER_REQUEST_BODY;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
 import static de.caritas.cob.UserService.testHelper.RequestBodyConstants.VALID_USER_REQUEST_BODY;
@@ -61,15 +66,21 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.CONSULTING_TYP
 import static de.caritas.cob.UserService.testHelper.TestConstants.COUNT_10;
 import static de.caritas.cob.UserService.testHelper.TestConstants.CREATE_CHAT_RESPONSE_DTO;
 import static de.caritas.cob.UserService.testHelper.TestConstants.DECODED_PASSWORD;
+import static de.caritas.cob.UserService.testHelper.TestConstants.DESCRIPTION;
+import static de.caritas.cob.UserService.testHelper.TestConstants.FIRST_NAME;
 import static de.caritas.cob.UserService.testHelper.TestConstants.INACTIVE_CHAT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_NO_TEAM_SESSION;
 import static de.caritas.cob.UserService.testHelper.TestConstants.IS_TEAM_SESSION;
+import static de.caritas.cob.UserService.testHelper.TestConstants.LAST_NAME;
 import static de.caritas.cob.UserService.testHelper.TestConstants.MASTER_KEY_1;
 import static de.caritas.cob.UserService.testHelper.TestConstants.MASTER_KEY_DTO_KEY_1;
 import static de.caritas.cob.UserService.testHelper.TestConstants.MASTER_KEY_DTO_KEY_2;
+import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE;
+import static de.caritas.cob.UserService.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.UserService.testHelper.TestConstants.NAME;
+import static de.caritas.cob.UserService.testHelper.TestConstants.NEW_REGISTRATION_RESPONSE_DTO_CREATED;
 import static de.caritas.cob.UserService.testHelper.TestConstants.OFFSET_0;
 import static de.caritas.cob.UserService.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_GROUP_ID;
@@ -130,6 +141,7 @@ import de.caritas.cob.UserService.api.authorization.UserRole;
 import de.caritas.cob.UserService.api.facade.AssignSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateChatFacade;
 import de.caritas.cob.UserService.api.facade.CreateEnquiryMessageFacade;
+import de.caritas.cob.UserService.api.facade.CreateSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateUserFacade;
 import de.caritas.cob.UserService.api.facade.DeleteUserFacade;
 import de.caritas.cob.UserService.api.facade.EmailNotificationFacade;
@@ -185,8 +197,6 @@ import de.caritas.cob.UserService.api.service.UserService;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 public class UserControllerIT {
 
-  private final String MESSAGE = "Lorem Ipsum";
-  private final Long MESSAGE_DATE = 123456L;
   private final String VALID_ENQUIRY_MESSAGE_BODY = "{\"message\": \"" + MESSAGE + "\"}";
   private final String VALID_ABSENT_MESSAGE_BODY =
       "{\"absent\": true, \"message\": \"" + MESSAGE + "\"}";
@@ -214,8 +224,8 @@ public class UserControllerIT {
           + "\" ], \"inTeamAgency\":true}";
   private final SessionDTO SESSION_DTO = new SessionDTO(SESSION_ID, AGENCY_ID, 0, 2, POSTCODE,
       RC_GROUP_ID, null, RC_USER_ID, MESSAGE_DATE, IS_NO_TEAM_SESSION, IS_MONITORING);
-  private final AgencyDTO AGENCY_DTO =
-      new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, false, false, ConsultingType.SUCHT);
+  private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, DESCRIPTION,
+      false, false, ConsultingType.SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO =
@@ -257,8 +267,6 @@ public class UserControllerIT {
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
   private final Optional<Session> OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID =
       Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID);
-  private final String FIRST_NAME = "Max";
-  private final String LAST_NAME = "Mustermann";
   private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO =
       new ConsultantResponseDTO(CONSULTANT_ID, FIRST_NAME, LAST_NAME);
   private final List<ConsultantResponseDTO> CONSULTANT_RESPONSE_DTO_LIST =
@@ -355,6 +363,8 @@ public class UserControllerIT {
   private CreateUserFacade createUserFacade;
   @MockBean
   private DeleteUserFacade deleteUserFacade;
+  @MockBean
+  private CreateSessionFacade createSessionFacade;
 
   @Mock
   private Chat chat;
@@ -367,6 +377,10 @@ public class UserControllerIT {
     addictiveDrugsMap.put("drugs", drugsMap);
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
   }
+
+  /**
+   * Method: registerUser
+   */
 
   @Test
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithInvalidRequestBody()
@@ -467,6 +481,77 @@ public class UserControllerIT {
         .andExpect(status().isConflict());
   }
 
+  /**
+   * Method: registerNewConsultingType
+   */
+
+  @Test
+  public void registerNewConsultingType_Should_ReturnBadRequest_When_ProvidedWithInvalidRequestBody()
+      throws Exception {
+
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).content(INVALID_USER_REQUEST_BODY)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerNewConsultingType_Should_ReturnBadRequest_When_PostcodeMissing()
+      throws Exception {
+
+    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .content(INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerNewConsultingType_Should_ReturnBadRequest_When_AgencyIdMissing()
+      throws Exception {
+
+    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .content(INVALID_NEW_REGISTRATION_BODY_WITHOUT_AGENCY_ID)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerNewConsultingType_Should_ReturnBadRequest_When_ConsultingTypeMissing()
+      throws Exception {
+
+    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .content(INVALID_NEW_REGISTRATION_BODY_WITHOUT_CONSULTING_TYPE)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerNewConsultingTyp_Should_ReturnCreated_When_ProvidedWithValidRequestBody()
+      throws Exception {
+
+    when(userService.getUser(Mockito.any())).thenReturn(Optional.of(USER));
+    when(createSessionFacade.createSession(Mockito.any(), Mockito.any()))
+        .thenReturn(NEW_REGISTRATION_RESPONSE_DTO_CREATED);
+    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).content(VALID_NEW_REGISTRATION_BODY)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated());
+  }
+
+  /**
+   * Method: acceptEnquiry
+   */
+
   @Test
   public void acceptEnquiry_Should_ReturnInternalServerError_WhenNoConsultantInDbFound()
       throws Exception {
@@ -566,8 +651,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(USER, MESSAGE, RC_TOKEN, RC_USER_ID))
-        .thenReturn(HttpStatus.CONFLICT);
+    when(createEnquiryMessageFacade.createEnquiryMessage(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(HttpStatus.CONFLICT);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -582,8 +667,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(USER, MESSAGE, RC_TOKEN, RC_USER_ID))
-        .thenReturn(HttpStatus.CREATED);
+    when(createEnquiryMessageFacade.createEnquiryMessage(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(HttpStatus.CREATED);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -624,8 +709,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(USER.getUserId(), USER.getRcUserId(),
-        RC_TOKEN)).thenReturn(response);
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -649,7 +734,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isInternalServerError());
 
     verify(getSessionListFacade, times(0)).getSessionsForAuthenticatedUser(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
 
   }
 
@@ -662,8 +747,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(USER.getUserId(), USER.getRcUserId(),
-        RC_TOKEN)).thenReturn(response);
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -681,8 +766,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(USER.getUserId(), USER.getRcUserId(),
-        RC_TOKEN)).thenReturn(response);
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)

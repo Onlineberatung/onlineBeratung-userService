@@ -2,6 +2,7 @@ package de.caritas.cob.UserService.api.facade;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
 import de.caritas.cob.UserService.api.exception.CustomCryptoException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatGetRoomsException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatGetSubscriptionsException;
@@ -71,14 +73,22 @@ public class GetSessionListFacade {
   }
 
   /**
+   * Returns a list of {@link UserSessionResponseDTO} for the specified user ID
+   * 
+   * @param userId Keycloak/MariaDB user ID
+   * @param rcUserId Rocket.Chat user ID
+   * @param rcAuthToken Rocket.Chat token
+   * @return {@link UserSessionResponseDTO}
+   */
+  /**
    * Returns a list of {@link UserSessionResponseDTO} for the specified user id
    * 
-   * @param userId
-   * @param rcUserId
+   * @param userId Keycloak user ID
+   * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return
    */
-  public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId, String rcUserId,
-      String rcAuthToken) {
+  public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId,
+      RocketChatCredentials rocketChatCredentials) {
 
     List<UserSessionResponseDTO> sessions = sessionService.getSessionsForUserId(userId);
     List<UserSessionResponseDTO> chats = chatService.getChatsForUserId(userId);
@@ -87,20 +97,27 @@ public class GetSessionListFacade {
       return new UserSessionListResponseDTO();
     }
 
-    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rcUserId, rcAuthToken);
-    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rcUserId, rcAuthToken);
+    Map<String, Boolean> messagesReadMap = Collections.emptyMap();
+    List<RoomsUpdateDTO> roomsUpdateList = Collections.emptyList();
+
+    if (rocketChatCredentials.getRocketChatUserId() != null) {
+      messagesReadMap = getMessagesReadMap(rocketChatCredentials);
+      roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
+    }
+
     List<String> userRoomList =
         roomsUpdateList.stream().map(x -> x.getId()).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
     List<UserSessionResponseDTO> allSessions = new ArrayList<UserSessionResponseDTO>();
 
     if (sessions != null && sessions.size() > 0) {
-      allSessions.addAll(setUserSessionValues(sessions, messagesReadMap, roomMessageMap, rcUserId));
+      allSessions.addAll(setUserSessionValues(sessions, messagesReadMap, roomMessageMap,
+          rocketChatCredentials.getRocketChatUserId()));
     }
 
     if (chats != null && chats.size() > 0) {
-      allSessions.addAll(
-          setUserChatValues(chats, messagesReadMap, roomMessageMap, userRoomList, rcUserId));
+      allSessions.addAll(setUserChatValues(chats, messagesReadMap, roomMessageMap, userRoomList,
+          rocketChatCredentials.getRocketChatUserId()));
     }
 
     // Sort the session list so the latest answers are on top
@@ -242,10 +259,10 @@ public class GetSessionListFacade {
       return new ConsultantSessionListResponseDTO();
     }
 
-    Map<String, Boolean> messagesReadMap =
-        getMessagesReadMap(consultant.getRocketChatId(), rcAuthToken);
-    List<RoomsUpdateDTO> roomsUpdateList =
-        getRcRoomsUpdateList(consultant.getRocketChatId(), rcAuthToken);
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatUserId(consultant.getRocketChatId()).RocketChatToken(rcAuthToken).build();
+    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rocketChatCredentials);
+    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
     List<String> userRoomList =
         roomsUpdateList.stream().map(x -> x.getId()).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
@@ -308,10 +325,10 @@ public class GetSessionListFacade {
       return null;
     }
 
-    Map<String, Boolean> messagesReadMap =
-        getMessagesReadMap(consultant.getRocketChatId(), rcAuthToken);
-    List<RoomsUpdateDTO> roomsUpdateList =
-        getRcRoomsUpdateList(consultant.getRocketChatId(), rcAuthToken);
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatUserId(consultant.getRocketChatId()).RocketChatToken(rcAuthToken).build();
+    Map<String, Boolean> messagesReadMap = getMessagesReadMap(rocketChatCredentials);
+    List<RoomsUpdateDTO> roomsUpdateList = getRcRoomsUpdateList(rocketChatCredentials);
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
     sessions = setConsultantSessionValues(sessions, messagesReadMap, roomMessageMap,
         consultant.getRocketChatId());
@@ -462,12 +479,12 @@ public class GetSessionListFacade {
    * Sets the values for messagesRead, latestMessage and monitoring for the specified list of
    * {@link ConsultantSessionResponseDTO} and decrypts and truncates the room's last message.
    * 
-   * @param sessions {@link List} of {@link ConsultantSessionResponseDTO}
+   * @param chats {@link List} of {@link ConsultantSessionResponseDTO}
    * @param messagesReadMap Map<String, Boolean>
    * @param roomMessageMap Map<String, Boolean>
-   * @param rcUserId Rocket.Chat Id
-   * @param rcAuthToken Rocket.Chat Token
-   * @return
+   * @param userRoomsList {@link List} of String
+   * @param rcUserId Rocket.Chat user ID
+   * @return {@link List} of {@link ConsultantSessionResponseDTO}
    */
   private List<ConsultantSessionResponseDTO> setConsultantChatValues(
       List<ConsultantSessionResponseDTO> chats, Map<String, Boolean> messagesReadMap,
@@ -518,13 +535,13 @@ public class GetSessionListFacade {
   /**
    * Get a map with the read-status for each room id
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return
    */
-  private Map<String, Boolean> getMessagesReadMap(String rcUserId, String rcAuthToken) {
+  private Map<String, Boolean> getMessagesReadMap(RocketChatCredentials rocketChatCredentials) {
     List<SubscriptionsUpdateDTO> subscriptions;
     try {
-      subscriptions = rocketChatService.getSubscriptionsOfUser(rcUserId, rcAuthToken);
+      subscriptions = rocketChatService.getSubscriptionsOfUser(rocketChatCredentials);
     } catch (RocketChatGetSubscriptionsException rocketChatGetSubscriptionsException) {
       throw new ServiceException(rocketChatGetSubscriptionsException.getMessage(),
           rocketChatGetSubscriptionsException);
@@ -540,13 +557,12 @@ public class GetSessionListFacade {
   /**
    * Get the rooms update list for a user from RocketChat
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return
    */
-  private List<RoomsUpdateDTO> getRcRoomsUpdateList(String rcUserId, String rcAuthToken) {
+  private List<RoomsUpdateDTO> getRcRoomsUpdateList(RocketChatCredentials rocketChatCredentials) {
     try {
-      return rocketChatService.getRoomsOfUser(rcUserId, rcAuthToken);
+      return rocketChatService.getRoomsOfUser(rocketChatCredentials);
     } catch (RocketChatGetRoomsException rocketChatGetRoomsException) {
       throw new ServiceException(rocketChatGetRoomsException.getMessage(),
           rocketChatGetRoomsException);
@@ -554,11 +570,10 @@ public class GetSessionListFacade {
   }
 
   /**
-   * 
    * Get a map with the last Rocket.Chat message and its date for each room id
    * 
-   * @param rcUserId
-   * @param rcAuthToken
+   * @param roomsUpdateList {@link List} of {@link RoomsUpdateDTO}
+   * @return
    */
   private Map<String, RoomsLastMessageDTO> getRcRoomMessageMap(
       List<RoomsUpdateDTO> roomsUpdateList) {

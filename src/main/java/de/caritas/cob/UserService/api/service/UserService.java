@@ -99,7 +99,8 @@ public class UserService {
    * @return Optional of user
    * @throws {@link InternalServerErrorException}
    */
-  public Optional<User> getUserViaAuthenticatedUser(AuthenticatedUser authenticatedUser) {
+  public Optional<User> getUserViaAuthenticatedUser(AuthenticatedUser authenticatedUser)
+      throws InternalServerErrorException {
 
     Optional<User> userOptional = getUser(authenticatedUser.getUserId());
 

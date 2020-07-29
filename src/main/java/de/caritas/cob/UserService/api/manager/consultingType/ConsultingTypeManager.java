@@ -52,7 +52,16 @@ public class ConsultingTypeManager {
 
   }
 
-  public ConsultingTypeSettings getConsultantTypeSettings(ConsultingType consultingType) {
+  /**
+   * Returns the {@link ConsultingTypeSettings} for the provided {@link ConsultingType}.
+   * 
+   * @param consultingType {@link ConsultingType}
+   * @return {@link ConsultingTypeSettings} for the provided {@link ConsultingType}
+   * @throws MissingConsultingTypeException when no settings for provided consulting type where
+   *         found
+   */
+  public ConsultingTypeSettings getConsultantTypeSettings(ConsultingType consultingType)
+      throws MissingConsultingTypeException {
 
     if (consultingTypeSettingsMap.containsKey(consultingType.getValue())
         && consultingTypeSettingsMap.get(consultingType.getValue()) != null) {

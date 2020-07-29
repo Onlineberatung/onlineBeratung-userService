@@ -1,5 +1,24 @@
 package de.caritas.cob.UserService.api.service;
 
+import static de.caritas.cob.UserService.api.service.LogService.ACCEPT_ENQUIRY_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.AGENCY_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.ASSIGN_SESSION_FACADE_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.ASSIGN_SESSION_FACADE_WARNING_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.BAD_REQUEST_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.CREATE_SESSION_FACADE_ERROR;
+import static de.caritas.cob.UserService.api.service.LogService.DB_INCONSITENCY_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.DECRYPTION_ERROR;
+import static de.caritas.cob.UserService.api.service.LogService.EMAIL_NOTIFICATION_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.FORBIDDEN_WARNING_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.INTERNAL_SERVER_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.KEYCLOAK_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.MAIL_SERVICE_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.MESSAGESERVICE_HELPER_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.ROCKET_CHAT_ERROR_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.TRUNCATION_ERROR;
+import static de.caritas.cob.UserService.api.service.LogService.UNAUTHORIZED_WARNING_TEXT;
+import static de.caritas.cob.UserService.api.service.LogService.VALIDATION_ERROR;
+import static de.caritas.cob.UserService.testHelper.TestConstants.EXCEPTION;
 import static net.therore.logback.EventMatchers.text;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -23,23 +42,6 @@ import net.therore.logback.LogbackRule;
 public class LogServiceTest {
 
   private final String ERROR_MESSAGE = "Error message";
-  private final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error: ";
-  private final String ROCKET_CHAT_ERROR_TEXT = "Rocket.Chat Error: ";
-  private final String AGENCY_ERROR_TEXT = "AgencyServiceHelper error: ";
-  private final String MAIL_SERVICE_ERROR_TEXT = "MailServiceHelper error: ";
-  private final String KEYCLOAK_ERROR_TEXT = "Keycloak error: ";
-  private final String BAD_REQUEST_ERROR_TEXT = "Bad Request: ";
-  private final String DB_INCONSITENCY_ERROR_TEXT = "Database inconsistency: ";
-  private final String UNAUTHORIZED_ERROR_TEXT = "Unauthorized: ";
-  private final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
-  private final String EMAIL_NOTIFICATION_ERROR_TEXT = "EmailNotificationFacade error: ";
-  private final String ACCEPT_ENQUIRY_ERROR_TEXT = "AcceptEnquiryFacade error: ";
-  private final String MESSAGESERVICE_HELPER_ERROR_TEXT = "MessageServiceHelper error: ";
-  private final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
-  private final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
-  private final String DECRYPTION_ERROR = "Decryption of message error: ";
-  private final String TRUNCATION_ERROR = "Truncation of message error: ";
-  private final String VALIDATION_ERROR = "Validation error: ";
 
   @InjectMocks
   private LogService logService;
@@ -124,7 +126,7 @@ public class LogServiceTest {
 
     logService.logUnauthorized(ERROR_MESSAGE);
     verify(rule.getLog(), times(1))
-        .contains(argThat(text(UNAUTHORIZED_ERROR_TEXT + ERROR_MESSAGE)));
+        .contains(argThat(text(UNAUTHORIZED_WARNING_TEXT + ERROR_MESSAGE)));
   }
 
   @Test
@@ -242,7 +244,7 @@ public class LogServiceTest {
   @Test
   public void logMessageServiceHelperException_should_LogErrorMessage() {
 
-    logService.logMessageServiceHelperException(ERROR_MESSAGE);
+    logService.logMessageServiceHelperException(ERROR_MESSAGE, EXCEPTION);
     verify(rule.getLog(), times(1))
         .contains(argThat(text(MESSAGESERVICE_HELPER_ERROR_TEXT + ERROR_MESSAGE)));
   }
@@ -323,4 +325,19 @@ public class LogServiceTest {
     verify(rule.getLog(), times(1)).contains(argThat(text(VALIDATION_ERROR + ERROR_MESSAGE)));
   }
 
+  @Test
+  public void logCreateEnquiryMessageException_Should_LogExceptionStackTrace() {
+
+    logService.logCreateEnquiryMessageException(exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+  }
+
+  @Test
+  public void logCreateSessionFacadeError_Should_LogExceptionStackTraceAndErrorMessage() {
+
+    logService.logCreateSessionFacadeError(ERROR_MESSAGE, exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+    verify(rule.getLog(), times(1))
+        .contains(argThat(text(CREATE_SESSION_FACADE_ERROR + ERROR_MESSAGE)));
+  }
 }

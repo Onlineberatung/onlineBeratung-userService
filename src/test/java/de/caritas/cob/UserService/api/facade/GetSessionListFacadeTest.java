@@ -34,6 +34,7 @@ import static de.caritas.cob.UserService.testHelper.TestConstants.NOW_MINUS_1_DA
 import static de.caritas.cob.UserService.testHelper.TestConstants.NOW_MINUS_2_DAYS;
 import static de.caritas.cob.UserService.testHelper.TestConstants.NOW_MINUS_3_DAYS;
 import static de.caritas.cob.UserService.testHelper.TestConstants.OFFSET_0;
+import static de.caritas.cob.UserService.testHelper.TestConstants.RC_CREDENTIALS;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID_2;
 import static de.caritas.cob.UserService.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID_3;
@@ -359,12 +360,11 @@ public class GetSessionListFacadeTest {
       throws Exception {
 
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.anyString(), Mockito.anyString()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
 
-    assertEquals(true,
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN)
-            .getSessions().get(0).getSession().isMessagesRead());
+    assertEquals(true, getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS)
+        .getSessions().get(0).getSession().isMessagesRead());
   }
 
   @Test
@@ -372,12 +372,11 @@ public class GetSessionListFacadeTest {
       throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.anyString(), Mockito.anyString()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
 
-    assertEquals(true,
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN)
-            .getSessions().get(0).getChat().isMessagesRead());
+    assertEquals(true, getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS)
+        .getSessions().get(0).getChat().isMessagesRead());
   }
 
   @Test
@@ -386,12 +385,12 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(null);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.anyString(), Mockito.anyString()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
 
     assertEquals(false,
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN)
-            .getSessions().get(0).getSession().isMessagesRead());
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS).getSessions()
+            .get(0).getSession().isMessagesRead());
   }
 
   @Test
@@ -400,12 +399,12 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.anyString(), Mockito.anyString()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
 
     assertEquals(false,
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN)
-            .getSessions().get(0).getChat().isMessagesRead());
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS).getSessions()
+            .get(0).getChat().isMessagesRead());
   }
 
   @Test
@@ -416,7 +415,7 @@ public class GetSessionListFacadeTest {
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     for (UserSessionResponseDTO dto : responseList.getSessions()) {
       Long previousDate = (dto.getSession() != null) ? dto.getSession().getMessageDate()
@@ -434,13 +433,12 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(null);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(
         Helper
@@ -453,13 +451,12 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(
         Helper
@@ -472,13 +469,13 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(null);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(FILE_DTO.getType(),
         responseList.getSessions().get(0).getSession().getAttachment().getFileType());
@@ -492,13 +489,13 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Arrays.asList(USER_CHAT_RESPONSE_DTO));
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(FILE_DTO.getType(),
         responseList.getSessions().get(0).getChat().getAttachment().getFileType());
@@ -514,12 +511,12 @@ public class GetSessionListFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertNull(responseList.getSessions());
 
-    verify(rocketChatService, times(0)).getSubscriptionsOfUser(Mockito.any(), Mockito.any());
-    verify(rocketChatService, times(0)).getRoomsOfUser(Mockito.any(), Mockito.any());
+    verify(rocketChatService, times(0)).getSubscriptionsOfUser(Mockito.any());
+    verify(rocketChatService, times(0)).getRoomsOfUser(Mockito.any());
 
   }
 
@@ -530,7 +527,7 @@ public class GetSessionListFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertNotNull(responseList.getSessions());
     assertEquals(responseList.getSessions().size(),
@@ -569,13 +566,12 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     for (UserSessionResponseDTO userSessionResponseDTO : responseList.getSessions()) {
       assertTrue(userSessionResponseDTO.getChat().isSubscribed());
@@ -588,11 +584,10 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(EMPTY_ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(EMPTY_ROOMS_UPDATE_DTO_LIST);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_USER_ID, RC_TOKEN);
+        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     for (UserSessionResponseDTO userSessionResponseDTO : responseList.getSessions()) {
       assertFalse(userSessionResponseDTO.getChat().isSubscribed());
@@ -611,10 +606,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -635,10 +629,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -659,8 +652,7 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -680,10 +672,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -703,8 +693,7 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -722,8 +711,7 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -743,8 +731,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS))
         .thenReturn(null);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
 
@@ -765,8 +752,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS))
         .thenReturn(null);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(EMPTY_ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(EMPTY_ROOMS_UPDATE_DTO_LIST);
 
     ConsultantSessionListResponseDTO responseList =
         getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
@@ -789,9 +775,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -813,9 +798,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -837,9 +821,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -861,9 +844,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -883,9 +865,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -921,8 +902,7 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -1035,9 +1015,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1073,9 +1052,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ONE_SESSION_WITH_FEEDBACK);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITHOUT_FEEDBACK);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1096,10 +1075,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -1119,10 +1097,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -1140,10 +1117,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1162,9 +1138,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getTeamSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1193,9 +1169,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1215,9 +1190,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1236,9 +1210,8 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
 
@@ -1255,9 +1228,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1277,9 +1249,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1298,9 +1269,8 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
 
@@ -1317,9 +1287,8 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1450,9 +1419,8 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1488,9 +1456,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ONE_SESSION_WITH_FEEDBACK);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITHOUT_FEEDBACK);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1511,10 +1479,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -1534,10 +1501,9 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
 
     ConsultantSessionListResponseDTO response =
@@ -1555,10 +1521,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -1578,10 +1543,9 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
 
     ConsultantSessionListResponseDTO response =
@@ -1599,10 +1563,9 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE);
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1621,10 +1584,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1642,10 +1604,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1664,10 +1625,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_INVALID_CONSULTING_TYPE);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
 
     try {
       getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
@@ -1684,9 +1644,9 @@ public class GetSessionListFacadeTest {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1709,9 +1669,9 @@ public class GetSessionListFacadeTest {
 
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
 
@@ -1738,8 +1698,8 @@ public class GetSessionListFacadeTest {
 
     assertNull(responseList.getSessions());
 
-    verify(rocketChatService, times(0)).getSubscriptionsOfUser(Mockito.any(), Mockito.any());
-    verify(rocketChatService, times(0)).getRoomsOfUser(Mockito.any(), Mockito.any());
+    verify(rocketChatService, times(0)).getSubscriptionsOfUser(Mockito.any());
+    verify(rocketChatService, times(0)).getRoomsOfUser(Mockito.any());
   }
 
   @Test
@@ -1748,10 +1708,9 @@ public class GetSessionListFacadeTest {
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE);
 
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1774,10 +1733,9 @@ public class GetSessionListFacadeTest {
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE);
 
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any(), Mockito.any()))
+    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any(), Mockito.any()))
-        .thenReturn(ROOMS_UPDATE_DTO_LIST);
+    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))

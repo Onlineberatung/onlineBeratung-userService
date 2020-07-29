@@ -3,7 +3,7 @@ package de.caritas.cob.UserService.api.service;
 import java.util.NoSuchElementException;
 import javax.ws.rs.BadRequestException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.UserService.api.exception.responses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -13,30 +13,32 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LogService {
 
-  private final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error: ";
-  private final String ROCKET_CHAT_ERROR_TEXT = "Rocket.Chat Error: ";
-  private final String AGENCY_ERROR_TEXT = "AgencyServiceHelper error: ";
-  private final String MAIL_SERVICE_ERROR_TEXT = "MailServiceHelper error: ";
-  private final String DB_ERROR_TEXT = "Database error: ";
-  private final String KEYCLOAK_ERROR_TEXT = "Keycloak error: ";
-  private final String KEYCLOAK_EXCEPTION_TEXT = "Keycloak exception: ";
-  private final String BAD_REQUEST_ERROR_TEXT = "Bad Request: ";
-  private final String DB_INCONSITENCY_ERROR_TEXT = "Database inconsistency: ";
-  private final String UNAUTHORIZED_WARNING_TEXT = "Unauthorized: ";
-  private final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
-  private final String ILLEGAL_ARGUMENT_ERROR_TEXT = "Illegal Argument: ";
-  private final String EMAIL_NOTIFICATION_ERROR_TEXT = "EmailNotificationFacade error: ";
-  private final String ACCEPT_ENQUIRY_ERROR_TEXT = "AcceptEnquiryFacade error: ";
-  private final String MESSAGESERVICE_HELPER_ERROR_TEXT = "MessageServiceHelper error: ";
-  private final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
-  private final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
-  private final String MONITORING_HELPER_ERROR_TEXT = "MonitoringHelper error: ";
-  private final String RC_ENCRYPTION_SERVICE_ERROR = "Encryption service error: ";
-  private final String RC_ENCRYPTION_BAD_KEY_SERVICE_ERROR =
+  public static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error: ";
+  public static final String ROCKET_CHAT_ERROR_TEXT = "Rocket.Chat Error: ";
+  public static final String AGENCY_ERROR_TEXT = "AgencyServiceHelper error: ";
+  public static final String MAIL_SERVICE_ERROR_TEXT = "MailServiceHelper error: ";
+  public static final String DB_ERROR_TEXT = "Database error: ";
+  public static final String KEYCLOAK_ERROR_TEXT = "Keycloak error: ";
+  public static final String KEYCLOAK_EXCEPTION_TEXT = "Keycloak exception: ";
+  public static final String BAD_REQUEST_ERROR_TEXT = "Bad Request: ";
+  public static final String DB_INCONSITENCY_ERROR_TEXT = "Database inconsistency: ";
+  public static final String UNAUTHORIZED_WARNING_TEXT = "Unauthorized: ";
+  public static final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
+  public static final String ILLEGAL_ARGUMENT_ERROR_TEXT = "Illegal Argument: ";
+  public static final String EMAIL_NOTIFICATION_ERROR_TEXT = "EmailNotificationFacade error: ";
+  public static final String ACCEPT_ENQUIRY_ERROR_TEXT = "AcceptEnquiryFacade error: ";
+  public static final String MESSAGESERVICE_HELPER_ERROR_TEXT = "MessageServiceHelper error: ";
+  public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
+  public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
+  public static final String MONITORING_HELPER_ERROR_TEXT = "MonitoringHelper error: ";
+  public static final String RC_ENCRYPTION_SERVICE_ERROR = "Encryption service error: ";
+  public static final String RC_ENCRYPTION_BAD_KEY_SERVICE_ERROR =
       "Encryption service error - possible bad key error: ";
-  private final String DECRYPTION_ERROR = "Decryption of message error: ";
-  private final String TRUNCATION_ERROR = "Truncation of message error: ";
-  private final String VALIDATION_ERROR = "Validation error: ";
+  public static final String DECRYPTION_ERROR = "Decryption of message error: ";
+  public static final String TRUNCATION_ERROR = "Truncation of message error: ";
+  public static final String VALIDATION_ERROR = "Validation error: ";
+  public static final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
+  public static final String CREATE_SESSION_FACADE_ERROR = "CreateSessionFacade error: ";
 
   /**
    * Logs a database error
@@ -279,15 +281,6 @@ public class LogService {
   }
 
   /**
-   * MessageService (helper) error
-   *
-   * @param message
-   */
-  public void logMessageServiceHelperException(String message) {
-    log.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, message);
-  }
-
-  /**
    * MessageService (helper) exception
    *
    * @param message
@@ -380,5 +373,28 @@ public class LogService {
    */
   public void logValidationError(String message) {
     log.error("{}{}", VALIDATION_ERROR, message);
+  }
+
+
+  /**
+   * Logs the exception message from creating the enquiry message
+   * 
+   * @param exception
+   */
+  public void logCreateEnquiryMessageException(Exception exception) {
+    log.error("{}{}", CREATE_ENQUIRY_MESSAGE_ERROR,
+        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+  }
+
+  /**
+   * Error while registering a new consulting type session.
+   * 
+   * @param message Error message
+   * @param exception Exception
+   */
+  public void logCreateSessionFacadeError(String message, Exception exception) {
+    log.error("{}{}", CREATE_SESSION_FACADE_ERROR, message);
+    log.error("{}{}", CREATE_SESSION_FACADE_ERROR,
+        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
   }
 }

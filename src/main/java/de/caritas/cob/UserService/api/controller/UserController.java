@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import de.caritas.cob.UserService.api.authorization.Authority;
 import de.caritas.cob.UserService.api.authorization.UserRole;
-import de.caritas.cob.UserService.api.exception.responses.BadRequestException;
+import de.caritas.cob.UserService.api.container.RocketChatCredentials;
+import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.UserService.api.facade.AssignSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateChatFacade;
 import de.caritas.cob.UserService.api.facade.CreateEnquiryMessageFacade;
+import de.caritas.cob.UserService.api.facade.CreateSessionFacade;
 import de.caritas.cob.UserService.api.facade.CreateUserFacade;
 import de.caritas.cob.UserService.api.facade.DeleteUserFacade;
 import de.caritas.cob.UserService.api.facade.EmailNotificationFacade;
@@ -46,11 +48,14 @@ import de.caritas.cob.UserService.api.model.EnquiryMessageDTO;
 import de.caritas.cob.UserService.api.model.MasterKeyDTO;
 import de.caritas.cob.UserService.api.model.MonitoringDTO;
 import de.caritas.cob.UserService.api.model.NewMessageNotificationDTO;
+import de.caritas.cob.UserService.api.model.NewRegistrationDto;
+import de.caritas.cob.UserService.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.UserService.api.model.PasswordDTO;
 import de.caritas.cob.UserService.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;
 import de.caritas.cob.UserService.api.model.UserDataResponseDTO;
 import de.caritas.cob.UserService.api.model.UserSessionListResponseDTO;
+import de.caritas.cob.UserService.api.model.UserSessionResponseDTO;
 import de.caritas.cob.UserService.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.UserService.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.UserService.api.repository.chat.Chat;
@@ -120,6 +125,7 @@ public class UserController implements UsersApi {
   private final GetChatMembersFacade getChatMembersFacade;
   private final CreateUserFacade createUserFacade;
   private final DeleteUserFacade deleteUserFacade;
+  private final CreateSessionFacade createSessionFacade;
 
   @Autowired
   public UserController(UserService userService, ConsultantService consultantService,
@@ -134,7 +140,8 @@ public class UserController implements UsersApi {
       StartChatFacade startChatFacade, GetChatFacade getChatFacade,
       JoinAndLeaveChatFacade joinAndLeaveChatFacade, CreateChatFacade createChatFacade,
       StopChatFacade stopChatFacade, GetChatMembersFacade getChatMembersFacade,
-      CreateUserFacade createUserFacade, DeleteUserFacade deleteUserFacade) {
+      CreateUserFacade createUserFacade, DeleteUserFacade deleteUserFacade,
+      CreateSessionFacade createSessionFacade) {
 
     this.userService = userService;
     this.consultantService = consultantService;
@@ -162,6 +169,7 @@ public class UserController implements UsersApi {
     this.getChatMembersFacade = getChatMembersFacade;
     this.createUserFacade = createUserFacade;
     this.deleteUserFacade = deleteUserFacade;
+    this.createSessionFacade = createSessionFacade;
   }
 
   /**
@@ -181,6 +189,33 @@ public class UserController implements UsersApi {
       return new ResponseEntity<CreateUserResponseDTO>(response.getResponseDTO(),
           response.getStatus());
     }
+  }
+
+  /**
+   * Creates a new session if there is not already an existing session for the provided consulting
+   * type.
+   * 
+   * @param newRegistrationDto {@link NewRegistrationDto}
+   * @return {@link ResponseEntity} with {@link NewRegistrationResponseDto}
+   */
+  @Override
+  public ResponseEntity<NewRegistrationResponseDto> registerNewConsultingType(
+      @Valid @RequestBody NewRegistrationDto newRegistrationDto) {
+
+    Optional<User> user = userService.getUser(authenticatedUser.getUserId());
+
+    if (!user.isPresent()) {
+      logService.logInternalServerError(
+          String.format("User with id %s not found while registering new consulting type: %s",
+              authenticatedUser.getUserId(), newRegistrationDto.toString()));
+
+      return new ResponseEntity<NewRegistrationResponseDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    NewRegistrationResponseDto response =
+        createSessionFacade.createSession(newRegistrationDto, user.get());
+
+    return new ResponseEntity<NewRegistrationResponseDto>(response, response.getStatus());
   }
 
   /**
@@ -219,8 +254,10 @@ public class UserController implements UsersApi {
   /**
    * Creating an enquiry message
    */
+
   @Override
-  public ResponseEntity<Void> createEnquiryMessage(@RequestHeader String rcToken,
+  public ResponseEntity<Void> createEnquiryMessage(
+      @Valid @NotNull @PathVariable("sessionId") Long sessionId, @RequestHeader String rcToken,
       @RequestHeader String rcUserId, @Valid @RequestBody EnquiryMessageDTO enquiryMessage) {
 
     Optional<User> user = userService.getUser(authenticatedUser.getUserId());
@@ -232,15 +269,19 @@ public class UserController implements UsersApi {
       return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(),
-        enquiryMessage.getMessage(), rcToken, rcUserId);
+    RocketChatCredentials rocketChatCredentials =
+        RocketChatCredentials.builder().RocketChatToken(rcToken).RocketChatUserId(rcUserId).build();
+    HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(), sessionId,
+        enquiryMessage.getMessage(), rocketChatCredentials);
 
     return new ResponseEntity<Void>(status);
   }
 
   /**
-   * Returns the sessions for the currently authenticated/logged in user
+   * Returns a list of sessions for the currently authenticated/logged in user
    * 
+   * @param rcToken Rocket.Chat token as request header value
+   * @return {@link List} of {@link UserSessionResponseDTO}
    */
   @Override
   public ResponseEntity<UserSessionListResponseDTO> getSessionsForAuthenticatedUser(
@@ -254,8 +295,10 @@ public class UserController implements UsersApi {
       return new ResponseEntity<UserSessionListResponseDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatUserId(user.get().getRcUserId()).RocketChatToken(rcToken).build();
     UserSessionListResponseDTO sessions = getSessionListFacade
-        .getSessionsForAuthenticatedUser(user.get().getUserId(), user.get().getRcUserId(), rcToken);
+        .getSessionsForAuthenticatedUser(user.get().getUserId(), rocketChatCredentials);
 
     return (sessions.getSessions() != null && sessions.getSessions().size() > 0)
         ? new ResponseEntity<UserSessionListResponseDTO>(sessions, HttpStatus.OK)

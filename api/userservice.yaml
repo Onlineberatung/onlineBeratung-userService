@@ -11,7 +11,7 @@ securityDefinitions:
 
 # REST API path definitions #
 paths:
-  /users/askers:
+  /users/askers/new:
     post:
       tags:
       - "user-controller"
@@ -36,7 +36,34 @@ paths:
           description: "FORBIDDEN - no/invalid CSRF token"
         500:
           description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
-  /users/sessions/askers/new:
+  /users/askers/consultingType/new:
+    post:
+      tags:
+      - "user-controller"
+      summary: "Register a new consulting type for an existing asker [Authorization: Role: user]"
+      operationId: "registerNewConsultingType"
+      security:
+        - Bearer: []
+      parameters:
+      - in: "body"
+        name: "User"
+        required: true
+        schema:
+          $ref: "#/definitions/NewRegistrationDto"
+      responses:
+        201:
+          description: "CREATED - session was registered successfully"
+          schema:
+            $ref: "#/definitions/NewRegistrationResponseDto"
+        400:
+          description: "BAD REQUEST - invalid/incomplete request or body object"
+        403:
+          description: "FORBIDDEN - no/invalid role/authorization or CSRF token"
+        409:
+          description: "CONFLICT - user is already registered for provided consulting type"
+        500:
+          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
+  /users/sessions/{sessionId}/enquiry/new:
     post:
       tags:
        - "user-controller"
@@ -45,6 +72,12 @@ paths:
       security:
         - Bearer: []
       parameters:
+      - in: path
+        description: "Session Id"
+        name: "sessionId"
+        type: integer
+        required: true
+        format: int64
       - in: header
         name: "RCToken"
         type: string
@@ -849,4 +882,8 @@ definitions:
   UpdateChatResponseDTO:
     type: "object"
   DeleteUserDTO:
+    type: "object"
+  NewRegistrationDto:
+    type: "object"
+  NewRegistrationResponseDto:
     type: "object"

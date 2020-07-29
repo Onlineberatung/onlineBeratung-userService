@@ -45,9 +45,9 @@ import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import de.caritas.cob.UserService.api.authorization.Authority;
-import de.caritas.cob.UserService.api.exception.KeycloakException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.exception.UpdateSessionException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatAddUserToGroupException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatGetGroupMembersException;
 import de.caritas.cob.UserService.api.exception.rocketChat.RocketChatLoginException;
@@ -71,7 +71,7 @@ public class AssignSessionFacadeTest {
       new RocketChatAddUserToGroupException(new Exception());
 
   @InjectMocks
-  private AssignSessionFacade assignSessionFacade;
+  AssignSessionFacade assignSessionFacade;
   @Mock
   SessionService sessionService;
   @Mock
@@ -123,7 +123,7 @@ public class AssignSessionFacadeTest {
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenUserDoesNotHaveRocketChatIdInDb() {
 
     HttpStatus result = assignSessionFacade.assignSession(SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID,
-        CONSULTANT, true);
+        CONSULTANT, false);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
     verify(logService, times(1)).logAssignSessionFacadeError(Mockito.anyString());

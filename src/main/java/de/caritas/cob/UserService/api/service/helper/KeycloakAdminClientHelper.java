@@ -19,7 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.UserService.api.authorization.Authority;
 import de.caritas.cob.UserService.api.authorization.UserRole;
-import de.caritas.cob.UserService.api.exception.KeycloakException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.UserService.api.helper.UserHelper;
 import de.caritas.cob.UserService.api.model.CreateUserResponseDTO;
 import de.caritas.cob.UserService.api.model.UserDTO;

@@ -27,7 +27,7 @@ import de.caritas.cob.UserService.api.authorization.Authority;
 import de.caritas.cob.UserService.api.authorization.UserRole;
 import de.caritas.cob.UserService.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.UserService.api.exception.ImportException;
-import de.caritas.cob.UserService.api.exception.KeycloakException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.UserService.api.helper.UserHelper;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;

@@ -5,8 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import de.caritas.cob.UserService.api.container.CreateEnquiryExceptionInformation;
+import de.caritas.cob.UserService.api.exception.CreateMonitoringException;
 import de.caritas.cob.UserService.api.exception.ServiceException;
 import de.caritas.cob.UserService.api.helper.MonitoringHelper;
+import de.caritas.cob.UserService.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.UserService.api.model.MonitoringDTO;
 import de.caritas.cob.UserService.api.repository.monitoring.Monitoring;
 import de.caritas.cob.UserService.api.repository.monitoring.MonitoringRepository;
@@ -35,13 +38,27 @@ public class MonitoringService {
 
   /**
    * Creates and inserts the initial monitoring data for the given {@link Session} into the database
+   * if monitoring is activated for the given {@link ConsultingTypeSettings}
    * 
-   * @param session
+   * @param session {@link Session}
+   * @param consultingTypeSettings {@link ConsultingTypeSettings}
+   * @throws CreateMonitoringException
    */
-  public void createMonitoring(Session session) {
-    if (session != null) {
-      updateMonitoring(session.getId(),
-          monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
+  public void createMonitoring(Session session, ConsultingTypeSettings consultingTypeSettings)
+      throws CreateMonitoringException {
+
+    if (session != null && consultingTypeSettings.isMonitoring()) {
+      try {
+        updateMonitoring(session.getId(),
+            monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
+      } catch (Exception exception) {
+        CreateEnquiryExceptionInformation exceptionInformation = CreateEnquiryExceptionInformation
+            .builder().session(session).rcGroupId(session.getGroupId()).build();
+        throw new CreateMonitoringException(
+            String.format("Could not create monitoring for session %s with consultingType %s",
+                session.getId(), consultingTypeSettings.getConsultingType()),
+            exception, exceptionInformation);
+      }
     }
   }
 
@@ -105,18 +122,6 @@ public class MonitoringService {
   }
 
   /**
-   * Deletes the initial monitoring data of the given {@link Session}
-   * 
-   * @param session
-   */
-  public void deleteInitialMonitoring(Session session) {
-    if (session != null) {
-      deleteMonitoring(session.getId(),
-          monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
-    }
-  }
-
-  /**
    * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
    * {@link MonitoringDTO} on level 0 (addictiveDrugs, intervention, etc.)
    * 
@@ -165,7 +170,7 @@ public class MonitoringService {
 
   /**
    * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
-   * {@link MonitoringDTO} on level 2 (monitoring_option table - {@link MonitoringOption})
+   * {@link MonitoringDTO} on level 2 (monitoring_option table - {@link MonitoringOption}).
    * 
    * @param type
    * @param monitoringKey
@@ -186,5 +191,24 @@ public class MonitoringService {
     }
 
     return map;
+  }
+
+  /**
+   * Roll back the initialization of the monitoring data for a {@link Session}.
+   * 
+   * @param session {@link Session}
+   */
+  public void rollbackInitializeMonitoring(Session session) {
+    if (session != null) {
+      try {
+        deleteMonitoring(session.getId(),
+            monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
+
+      } catch (ServiceException ex) {
+        logService.logInternalServerError(String.format(
+            "Error during monitoring rollback. Monitoring data could not be deleted for session: %s",
+            session.toString()), ex);
+      }
+    }
   }
 }
