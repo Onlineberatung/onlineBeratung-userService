@@ -1,8 +1,20 @@
 package de.caritas.cob.UserService.api;
 
+import de.caritas.cob.UserService.api.exception.CustomCryptoException;
+import de.caritas.cob.UserService.api.exception.NoMasterKeyException;
+import de.caritas.cob.UserService.api.exception.ServiceException;
+import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.UserService.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.UserService.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.UserService.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.UserService.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.UserService.api.exception.httpresponses.UnauthorizedException;
+import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
+import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
 import java.net.UnknownHostException;
 import javax.validation.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -16,19 +28,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import de.caritas.cob.UserService.api.exception.CustomCryptoException;
-import de.caritas.cob.UserService.api.exception.NoMasterKeyException;
-import de.caritas.cob.UserService.api.exception.ServiceException;
-import de.caritas.cob.UserService.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.UserService.api.exception.httpresponses.ConflictException;
-import de.caritas.cob.UserService.api.exception.httpresponses.ForbiddenException;
-import de.caritas.cob.UserService.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.UserService.api.exception.httpresponses.UnauthorizedException;
-import de.caritas.cob.UserService.api.exception.httpresponses.WrongParameterException;
-import de.caritas.cob.UserService.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.UserService.api.service.LogService;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Customizes API error/exception handling to hide information and/or possible security
@@ -40,9 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
-
-  @Autowired
-  private LogService logService;
 
   /**
    * 
@@ -56,7 +52,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({BadRequestException.class})
   public ResponseEntity<Object> handleCustomBadRequest(final BadRequestException ex,
       final WebRequest request) {
-    logWarning(ex);
+    ex.getLoggingMethod().accept(ex);
 
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
@@ -110,7 +106,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler(UnauthorizedException.class)
   public ResponseEntity<Object> handleUnauthorized(final UnauthorizedException ex,
       final WebRequest request) {
-    logService.logUnauthorized(ex.getMessage());
+    ex.getLoggingMethod().accept(ex);
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
   }
@@ -122,11 +118,25 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * @param request
    * @return
    */
-  @ExceptionHandler({InvalidDataAccessApiUsageException.class, DataAccessException.class,
-      ConflictException.class})
+  @ExceptionHandler({InvalidDataAccessApiUsageException.class, DataAccessException.class})
   protected ResponseEntity<Object> handleConflict(final RuntimeException ex,
       final WebRequest request) {
     logWarning(HttpStatus.CONFLICT, ex);
+
+    return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
+  }
+
+  /**
+   * 409 - Conflict
+   *
+   * @param ex
+   * @param request
+   * @return
+   */
+  @ExceptionHandler({ConflictException.class})
+  protected ResponseEntity<Object> handleCustomConflict(final ConflictException ex,
+      final WebRequest request) {
+    ex.getLoggingMethod().accept(ex);
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
   }
@@ -141,7 +151,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({ForbiddenException.class})
   public ResponseEntity<Object> handleForbidden(final ForbiddenException ex,
       final WebRequest request) {
-    logWarning(HttpStatus.FORBIDDEN, ex);
+    ex.getLoggingMethod().accept(ex);
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
   }
@@ -156,7 +166,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({NotFoundException.class})
   public ResponseEntity<Object> handleForbidden(final NotFoundException ex,
       final WebRequest request) {
-    logWarning(HttpStatus.NOT_FOUND, ex);
+    ex.getLoggingMethod().accept(ex);
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
   }
@@ -174,6 +184,22 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   public ResponseEntity<Object> handleInternal(final RuntimeException ex,
       final WebRequest request) {
     logError(ex);
+
+    return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR,
+        request);
+  }
+
+  /**
+   * 500 - Custom Internal Server Error
+   *
+   * @param ex
+   * @param request
+   * @return
+   */
+  @ExceptionHandler({InternalServerErrorException.class})
+  public ResponseEntity<Object> handleInternal(final InternalServerErrorException ex,
+      final WebRequest request) {
+    ex.getLoggingMethod().accept(ex);
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR,
         request);

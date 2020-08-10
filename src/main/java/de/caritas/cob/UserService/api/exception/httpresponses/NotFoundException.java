@@ -1,16 +1,29 @@
 package de.caritas.cob.UserService.api.exception.httpresponses;
 
-public class NotFoundException extends RuntimeException {
+import de.caritas.cob.UserService.api.service.LogService;
+import java.util.function.Consumer;
+
+public class NotFoundException extends CustomHttpStatusException {
 
   private static final long serialVersionUID = -4160810917274267037L;
 
   /**
    * Not found exception
-   * 
+   *
    * @param message
    */
   public NotFoundException(String message) {
-    super(message);
+    super(message, new LogService()::logInternalServerError);
+  }
+
+  /**
+   * Not found exception
+   *
+   * @param message an additional message
+   * @param loggingMethod the method being used to log this exception
+   */
+  public NotFoundException(String message, Consumer<Exception> loggingMethod) {
+    super(message, loggingMethod);
   }
 
 }

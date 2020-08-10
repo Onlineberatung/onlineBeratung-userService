@@ -106,7 +106,7 @@ public class LogService {
    * 
    * @param exception
    */
-  public void logBadRequestException(BadRequestException exception) {
+  public void logBadRequestException(Exception exception) {
     log.warn("{}{}", BAD_REQUEST_ERROR_TEXT,
         org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
   }
@@ -140,12 +140,30 @@ public class LogService {
   }
 
   /**
+   * Unauthorized warning
+   *
+   * @param message
+   */
+  public void logUnauthorized(Exception exception) {
+    log.warn("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+  }
+
+  /**
    * Forbidden warning
    * 
    * @param message
    */
   public void logForbidden(String message) {
     log.warn("{}{}", FORBIDDEN_WARNING_TEXT, message);
+  }
+
+  /**
+   * Forbidden warning
+   *
+   * @param exception
+   */
+  public void logForbidden(Exception exception) {
+    log.warn("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
   }
 
   /**
@@ -164,6 +182,15 @@ public class LogService {
    */
   public void logInternalServerError(String message, Exception exception) {
     log.error("{}{}", INTERNAL_SERVER_ERROR_TEXT, message);
+    log.error("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+  }
+
+  /**
+   * Log internal server error
+   *
+   * @param exception
+   */
+  public void logInternalServerError(Exception exception) {
     log.error("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
   }
 
