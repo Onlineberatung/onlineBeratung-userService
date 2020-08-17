@@ -223,7 +223,7 @@ public class AssignSessionFacade {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
 
       String message = String.format(
-          "Could not remove techical user from Rocket.Chat group id %s", session.getGroupId());
+          "Could not remove technical user from Rocket.Chat group id %s", session.getGroupId());
       throw new InternalServerErrorException(message, logService::logInternalServerError);
     }
   }
@@ -234,7 +234,7 @@ public class AssignSessionFacade {
 
     AtomicReference<String> rcUserIdToRemove = new AtomicReference<>();
     try {
-      memberList.forEach(removeUnatuthorizedMember(session, consultant, rcUserIdToRemove));
+      memberList.forEach(removeUnauthorizedMember(session, consultant, rcUserIdToRemove));
     } catch (RocketChatRemoveUserFromGroupException removeUserEx) {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
       String message = String.format(
@@ -256,7 +256,7 @@ public class AssignSessionFacade {
     }
   }
 
-  private Consumer<GroupMemberDTO> removeUnatuthorizedMember(Session session, Consultant consultant,
+  private Consumer<GroupMemberDTO> removeUnauthorizedMember(Session session, Consultant consultant,
       AtomicReference<String> rcUserIdToRemove) {
     return member -> {
       if (isUnauthorizedMember(session, consultant, member)) {
@@ -308,7 +308,7 @@ public class AssignSessionFacade {
           memberList);
       String consultantId =
           initialConsultantOptional.isPresent() ? initialConsultantOptional.get().getId() :
-              "unknwon";
+              "unknown";
       String message = String
           .format("Could not get Keycloak roles for user with id %s. Initiate rollback.",
               consultantId);
@@ -321,8 +321,8 @@ public class AssignSessionFacade {
           memberList);
 
       String message = String.format(
-          "Could not add Rocket.Chat technical userto Rocket.Chat group with id %s. Initiate rollback.",
-          session.getFeedbackGroupId());
+          "Could not add Rocket.Chat technical user to Rocket.Chat group with id %s. Initiate "
+              + "rollback.", session.getFeedbackGroupId());
       throw new InternalServerErrorException(message, logService::logInternalServerError);
 
     } catch (RocketChatRemoveUserFromGroupException removeUserEx) {
@@ -365,7 +365,7 @@ public class AssignSessionFacade {
       removeUserFromGroupAndRollbackSession(session, consultant, initialConsultantOptional,
           initialStatus, memberList);
       String message = String.format(
-          "Could not remove techical user from Rocket.Chat feedback group with id %s",
+          "Could not remove technical user from Rocket.Chat feedback group with id %s",
           session.getGroupId());
       throw new InternalServerErrorException(message, logService::logInternalServerError);
     }

@@ -10,11 +10,13 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import lombok.Getter;
 
 /**
  * Provides several conditions used to validate {@link Session} and {@link Consultant} to be
- * updated
+ * updated.
  */
+@Getter
 public class SessionToConsultantConditionProvider {
 
   private final Session session;
@@ -28,31 +30,18 @@ public class SessionToConsultantConditionProvider {
   }
 
   /**
-   * @return the current {@link Session}.
-   */
-  public Session getSession() {
-    return session;
-  }
-
-  /**
-   * @return the current {@link Consultant}.
-   */
-  public Consultant getConsultant() {
-    return consultant;
-  }
-
-  /**
-   * checks if the {@link Session} is in progress
+   * checks if the {@link Session} is in progress.
    *
-   * @return true if the {@link Session} status is IN_PROGRESS.
+   * @return true if the {@link Session} status is IN_PROGRESS
    */
   public boolean isSessionInProgress() {
     return hasSessionStatus(SessionStatus.IN_PROGRESS);
   }
 
   /**
-   * checks if the {@link Session} is new
-   * @return true if the {@link Session} is NEW.
+   * checks if the {@link Session} is new.
+   *
+   * @return true if the {@link Session} is NEW
    */
   public boolean isNewSession() {
     return hasSessionStatus(SessionStatus.NEW);
@@ -63,16 +52,18 @@ public class SessionToConsultantConditionProvider {
   }
 
   /**
-   * checks if the {@link Session} has no {@link Consultant} assigned
-   * @return true if the {@link Session} has no {@link Consultant}.
+   * checks if the {@link Session} has no {@link Consultant} assigned.
+   *
+   * @return true if the {@link Session} has no {@link Consultant}
    */
   public boolean hasSessionNoConsultant() {
     return isNull(this.session.getConsultant()) || isBlank(this.session.getConsultant().getId());
   }
 
   /**
-   * checks if the {@link Session} is already assigned to the {@link Consultant}
-   * @return true if the {@link Session} is already assigned to {@link Consultant}.
+   * checks if the {@link Session} is already assigned to the {@link Consultant}.
+   *
+   * @return true if the {@link Session} is already assigned to {@link Consultant}
    */
   public boolean isSessionAlreadyAssignedToConsultant() {
     return isSessionInProgress() && this.session.getConsultant().getId()
@@ -80,24 +71,27 @@ public class SessionToConsultantConditionProvider {
   }
 
   /**
-   * checks if the {@link Session} has a User without rocked.chat id
-   * @return true if the {@link Session} has a User without rocked.chat id.
+   * checks if the {@link Session} has a User without rocked.chat id.
+   *
+   * @return true if the {@link Session} has a User without rocked.chat id
    */
   public boolean hasSessionUserNoRcId() {
     return nonNull(this.session.getUser()) && isBlank(this.session.getUser().getRcUserId());
   }
 
   /**
-   * checks if the {@link Consultant} has no rocket.chat id
-   * @return true if the {@link Consultant} has no rocket.chat id.
+   * checks if the {@link Consultant} has no rocket.chat id.
+   *
+   * @return true if the {@link Consultant} has no rocket.chat id
    */
   public boolean hasConsultantNoRcId() {
     return isBlank(this.consultant.getRocketChatId());
   }
 
   /**
-   * checks if the agencyId of the {@link Session} is not available in consultants agencies
-   * @return true if agencyId of {@link Session} is not contained in consultants agencies.
+   * checks if the agencyId of the {@link Session} is not available in consultants agencies.
+   *
+   * @return true if agencyId of {@link Session} is not contained in consultants agencies
    */
   public boolean isSessionsAgencyNotAvailableInConsultantAgencies() {
     if (isEmpty(this.consultant.getConsultantAgencies())) {

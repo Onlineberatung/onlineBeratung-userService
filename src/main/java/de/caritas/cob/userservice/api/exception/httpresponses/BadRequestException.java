@@ -8,7 +8,7 @@ public class BadRequestException extends CustomHttpStatusException {
   private static final long serialVersionUID = -3553609955386498237L;
 
   /**
-   * BadRequest exception
+   * BadRequest exception.
    *
    * @param message an additional message
    * @param loggingMethod the method being used to log this exception
@@ -18,12 +18,12 @@ public class BadRequestException extends CustomHttpStatusException {
   }
 
   /**
-   * BadRequest exception
+   * BadRequest exception.
    *
    * @param message an additional message
    */
   public BadRequestException(String message) {
-    super(message, new LogService()::logBadRequestException);
+    super(message, new LogService()::logWarn);
   }
 
 }

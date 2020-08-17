@@ -25,6 +25,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.PrintWriter;
 import java.util.NoSuchElementException;
 import javax.ws.rs.BadRequestException;
@@ -339,5 +341,52 @@ public class LogServiceTest {
     verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
     verify(rule.getLog(), times(1))
         .contains(argThat(text(CREATE_SESSION_FACADE_ERROR + ERROR_MESSAGE)));
+  }
+
+  @Test
+  public void logWarn_Should_LogExceptionStackTrace() {
+
+    logService.logWarn(exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+  }
+
+  @Test
+  public void logAssignSessionFacadeError_Should_LogExceptionStackTraceAndErrorMessage() {
+
+    when(exception.getMessage()).thenReturn(ERROR_MESSAGE);
+    logService.logAssignSessionFacadeError(exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+    verify(rule.getLog(), times(1))
+        .contains(argThat(text(ASSIGN_SESSION_FACADE_ERROR_TEXT + ERROR_MESSAGE)));
+  }
+
+  @Test
+  public void logInternalServerError_Should_LogExceptionStackTrace() {
+
+    logService.logInternalServerError(exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+  }
+
+  @Test
+  public void logForbidden_Should_LogExceptionStackTrace() {
+
+    logService.logForbidden(exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+  }
+
+  @Test
+  public void logUnauthorized_Should_LogExceptionStackTrace() {
+
+    logService.logUnauthorized(exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+  }
+
+  @Test
+  public void logDatabaseError_Should_LogExceptionStackTraceAndErrorMessage() {
+
+    logService.logDatabaseError(ERROR_MESSAGE, exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+    verify(rule.getLog(), times(1))
+        .contains(argThat(text(ERROR_MESSAGE)));
   }
 }

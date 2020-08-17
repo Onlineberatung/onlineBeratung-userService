@@ -8,16 +8,16 @@ public class NotFoundException extends CustomHttpStatusException {
   private static final long serialVersionUID = -4160810917274267037L;
 
   /**
-   * Not found exception
+   * Not found exception.
    *
    * @param message
    */
   public NotFoundException(String message) {
-    super(message, new LogService()::logInternalServerError);
+    super(message, new LogService()::logWarn);
   }
 
   /**
-   * Not found exception
+   * Not found exception.
    *
    * @param message an additional message
    * @param loggingMethod the method being used to log this exception

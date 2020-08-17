@@ -411,7 +411,7 @@ public class AssignSessionFacadeTest {
 
     doReturn(false).when(rocketChatService).addTechnicalUserToGroup(Mockito.anyString());
 
-    assignSessionFacade.assignSession(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignSessionFacade.assignEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verify(logService, times(1)).logInternalServerError(Mockito.anyString());
   }

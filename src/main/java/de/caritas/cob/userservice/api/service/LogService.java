@@ -1,9 +1,10 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
+
 import java.util.NoSuchElementException;
-import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for logging
@@ -40,48 +41,60 @@ public class LogService {
   public static final String CREATE_SESSION_FACADE_ERROR = "CreateSessionFacade error: ";
 
   /**
-   * Logs a database error
+   * Logs a database error.
+   *
+   * @param exception the exception
    */
   public void logDatabaseError(Exception exception) {
     log.error("{}{}", DB_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Logs a database error
+   * Logs a database error.
+   *
+   * @param message the message
+   * @param exception the exception
    */
   public void logDatabaseError(String message, Exception exception) {
     log.error("{}{}", DB_ERROR_TEXT, message);
     log.error("{}{}", DB_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Logs a database error
+   * Logs a database error.
+   *
+   * @param message the message
    */
   public void logDatabaseInconsistency(String message) {
     log.error("{}{}", DB_INCONSITENCY_ERROR_TEXT, message);
   }
 
   /**
-   * Logs a Keycloak error
+   * Logs a Keycloak error.
+   *
+   * @param exception the exception
    */
   public void logKeycloakError(Exception exception) {
     log.error("{}{}", KEYCLOAK_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Logs a Keycloak error
+   * Logs a Keycloak error.
+   *
+   * @param message the message
+   * @param exception the exception
    */
   public void logKeycloakError(String message, Exception exception) {
     log.error("{}{}", KEYCLOAK_ERROR_TEXT, message);
     log.error("{}{}", KEYCLOAK_EXCEPTION_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Logs a Keycloak error
+   * Logs a Keycloak error.
    *
    * @param message error message
    */
@@ -90,87 +103,104 @@ public class LogService {
   }
 
   /**
-   * javax Bad Request Exception
+   * Bad Request Exception.
+   *
+   * @param exception the exception
    */
   public void logBadRequestException(Exception exception) {
     log.warn("{}{}", BAD_REQUEST_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Bad Request/wrong parameter exception
-   */
-  public void logBadRequestException(WrongParameterException exception) {
-    log.error("{}{}", BAD_REQUEST_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
-  }
-
-  /**
-   * Bad Request error
+   * Bad Request error.
+   *
+   * @param message the message
    */
   public void logBadRequest(String message) {
     log.warn("{}{}", BAD_REQUEST_ERROR_TEXT, message);
   }
 
   /**
-   * Unauthorized warning
+   * Unauthorized warning.
+   *
+   * @param message the message
    */
   public void logUnauthorized(String message) {
     log.warn("{}{}", UNAUTHORIZED_WARNING_TEXT, message);
   }
 
   /**
-   * Unauthorized warning
+   * Unauthorized warning.
+   *
+   * @param exception the exception
    */
   public void logUnauthorized(Exception exception) {
-    log.warn("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.warn("{}", getStackTrace(exception));
   }
 
   /**
-   * Forbidden warning
+   * Forbidden warning.
+   *
+   * @param message the message
    */
   public void logForbidden(String message) {
     log.warn("{}{}", FORBIDDEN_WARNING_TEXT, message);
   }
 
   /**
-   * Forbidden warning
+   * Forbidden warning.
+   *
+   * @param exception the exception
    */
   public void logForbidden(Exception exception) {
-    log.warn("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.warn("{}", getStackTrace(exception));
   }
 
   /**
-   * javax Bad Request Exception
+   * Log internal server error.
+   *
+   * @param message the message
    */
   public void logInternalServerError(String message) {
     log.error("{}{}", INTERNAL_SERVER_ERROR_TEXT, message);
   }
 
   /**
-   * javax Bad Request Exception
+   * Log internal server error.
+   *
+   * @param message the message
+   * @param exception the exception
    */
   public void logInternalServerError(String message, Exception exception) {
     log.error("{}{}", INTERNAL_SERVER_ERROR_TEXT, message);
-    log.error("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.error("{}", getStackTrace(exception));
   }
 
   /**
-   * Log internal server error
+   * Log internal server error.
+   *
+   * @param exception the exception
    */
   public void logInternalServerError(Exception exception) {
-    log.error("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.error("{}", getStackTrace(exception));
   }
 
   /**
-   * Rocket.Chat error
+   * Rocket.Chat error.
+   *
+   * @param message the message
    */
   public void logRocketChatError(String message) {
     log.error("{}{})", ROCKET_CHAT_ERROR_TEXT, message);
   }
 
   /**
-   * Rocket.Chat error
+   * Rocket.Chat error.
+   *
+   * @param message the message
+   * @param error the error
+   * @param errorType the errorType
    */
   public void logRocketChatError(String message, String error, String errorType) {
     log.error("{}{} (Error: {} / ErrorType: {})", ROCKET_CHAT_ERROR_TEXT, message, error,
@@ -178,118 +208,150 @@ public class LogService {
   }
 
   /**
-   * Rocket.Chat Error with exception
+   * Rocket.Chat Error with exception.
+   *
+   * @param exception the exception
+   * @param message the message
    */
   public void logRocketChatError(String message, Exception exception) {
     log.error("{}{}", ROCKET_CHAT_ERROR_TEXT, message);
-    log.error("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.error("{}", getStackTrace(exception));
   }
 
   /**
-   * IllegalArgumentException
+   * IllegalArgumentException.
+   *
+   * @param exception the exception
    */
   public void logIllegalArgumentException(IllegalArgumentException exception) {
     log.warn("{}{}", ILLEGAL_ARGUMENT_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * NoSuchElementException
+   * NoSuchElementException.
+   *
+   * @param exception the exception
    */
   public void logNoSuchElementException(NoSuchElementException exception) {
     log.warn("{}{}", ILLEGAL_ARGUMENT_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Exception from AgencyServiceHelper
+   * Exception from AgencyServiceHelper.
+   *
+   * @param exception the exception
    */
   public void logAgencyServiceHelperException(Exception exception) {
     log.error("{}{}", AGENCY_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Exception from AgencyServiceHelper
+   * Exception from AgencyServiceHelper.
+   *
+   * @param exception the exception
+   * @param message the message
    */
   public void logAgencyServiceHelperException(String message, Exception exception) {
     log.error("{}{}", AGENCY_ERROR_TEXT, message);
     log.error("{}{}", AGENCY_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Exception from MailServiceHelperException
+   * Exception from MailServiceHelperException.
+   *
+   * @param message the message
    */
   public void logMailServiceHelperException(String message) {
     log.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
   }
 
   /**
-   * Exception from MailServiceHelperException
+   * Exception from MailServiceHelperException.
+   *
+   * @param message the message
+   * @param exception the exception
    */
   public void logMailServiceHelperException(String message, Exception exception) {
     log.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
     log.error("{}{}", MAIL_SERVICE_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Error from EmailNotificationFacade
+   * Error from EmailNotificationFacade.
+   *
+   * @param message the message
    */
   public void logEmailNotificationFacadeError(String message) {
     log.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, message);
   }
 
   /**
-   * Error from AcceptEnquiryFacade
+   * Error from AcceptEnquiryFacade.
+   *
+   * @param message the message
    */
   public void logAcceptEnquiryFacadeError(String message) {
     log.error("{}{}", ACCEPT_ENQUIRY_ERROR_TEXT, message);
   }
 
   /**
-   * MessageService (helper) exception
+   * MessageService (helper) exception.
+   *
+   * @param message the message
+   * @param exception the exception
    */
   public void logMessageServiceHelperException(String message, Exception exception) {
     log.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, message);
     log.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Warning from AssignSessionFacade
+   * Warning from AssignSessionFacade.
+   *
+   * @param exception the exception
    */
   public void logAssignSessionFacadeWarning(Exception exception) {
     log.warn("{}{}", ASSIGN_SESSION_FACADE_WARNING_TEXT, exception.getMessage());
-    log.warn("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.warn("{}", getStackTrace(exception));
   }
 
   /**
-   * Error from AssignSessionFacade
+   * Error from AssignSessionFacade.
+   *
+   * @param message the message
    */
   public void logAssignSessionFacadeError(String message) {
     log.error("{}{}", ASSIGN_SESSION_FACADE_ERROR_TEXT, message);
   }
 
   /**
-   * Error from AssignSessionFacade
+   * Error from AssignSessionFacade.
+   *
+   * @param exception the exception
    */
   public void logAssignSessionFacadeError(Exception exception) {
     log.error("{}{}", ASSIGN_SESSION_FACADE_ERROR_TEXT, exception.getMessage());
-    log.error("{}", org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.error("{}", getStackTrace(exception));
   }
 
   /**
-   * Logs monitoring exception
+   * Logs monitoring exception.
+   *
+   * @param exception the exception
    */
   public void logMonitoringHelperError(Exception exception) {
     log.error("{}{}", MONITORING_HELPER_ERROR_TEXT,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Logs an info message
+   * Logs an info message.
    *
    * @param msg The message
    */
@@ -298,38 +360,53 @@ public class LogService {
   }
 
   /**
-   * Logs a Encryption service error
+   * Logs a Encryption service error.
+   *
+   * @param exception the exception
    */
   public void logEncryptionServiceError(Exception exception) {
     log.error(RC_ENCRYPTION_SERVICE_ERROR + "{}",
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
-  }
-
-  public void logEncryptionPossibleBadKeyError(Exception exception) {
-    log.error(RC_ENCRYPTION_BAD_KEY_SERVICE_ERROR + "{}",
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Error while decrypting a message
+   * Logs an encryption error.
+   *
+   * @param exception the exception
+   */
+  public void logEncryptionPossibleBadKeyError(Exception exception) {
+    log.error(RC_ENCRYPTION_BAD_KEY_SERVICE_ERROR + "{}",
+        getStackTrace(exception));
+  }
+
+  /**
+   * Error while decrypting a message.
+   *
+   * @param exception the exception
+   * @param message the message
    */
   public void logDecryptionError(String message, Exception exception) {
     log.error("{}{}", DECRYPTION_ERROR, message);
     log.error("{}{}", DECRYPTION_ERROR,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Error while truncating a message
+   * Error while truncating a message.
+   *
+   * @param exception the exception
+   * @param message the message
    */
   public void logTruncationError(String message, Exception exception) {
     log.error("{}{}", TRUNCATION_ERROR, message);
     log.error("{}{}", TRUNCATION_ERROR,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
-   * Error from DTO validation
+   * Error from DTO validation.
+   *
+   * @param message the message
    */
   public void logValidationError(String message) {
     log.error("{}{}", VALIDATION_ERROR, message);
@@ -338,10 +415,12 @@ public class LogService {
 
   /**
    * Logs the exception message from creating the enquiry message
+   *
+   * @param exception the exception
    */
   public void logCreateEnquiryMessageException(Exception exception) {
     log.error("{}{}", CREATE_ENQUIRY_MESSAGE_ERROR,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+        getStackTrace(exception));
   }
 
   /**
@@ -352,7 +431,15 @@ public class LogService {
    */
   public void logCreateSessionFacadeError(String message, Exception exception) {
     log.error("{}{}", CREATE_SESSION_FACADE_ERROR, message);
-    log.error("{}{}", CREATE_SESSION_FACADE_ERROR,
-        org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception));
+    log.error("{}{}", CREATE_SESSION_FACADE_ERROR, getStackTrace(exception));
+  }
+
+  /**
+   * Logs an warning message.
+   *
+   * @param msg The message
+   */
+  public void logWarn(Exception exception) {
+    log.warn(getStackTrace(exception));
   }
 }

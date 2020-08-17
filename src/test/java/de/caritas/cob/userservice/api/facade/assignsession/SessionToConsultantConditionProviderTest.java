@@ -29,7 +29,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionInProgress_Should_return_true_When_Session_is_in_progress() {
+  public void isSessionInProgress_Should_returnTrue_When_SessionIsInProgress() {
     session.setStatus(SessionStatus.IN_PROGRESS);
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).isSessionInProgress();
@@ -38,7 +38,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionInProgress_Should_return_false_When_Session_is_new() {
+  public void isSessionInProgress_Should_returnFalse_When_SessionIsNew() {
     session.setStatus(SessionStatus.NEW);
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).isSessionInProgress();
@@ -47,7 +47,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionInProgress_Should_return_false_When_Session_is_not_set() {
+  public void isSessionInProgress_Should_returnFalse_When_SessionIsNotSet() {
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).isSessionInProgress();
 
@@ -55,7 +55,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isNewSession_Should_return_true_When_Session_is_new() {
+  public void isNewSession_Should_returnTrue_When_SessionIsNew() {
     session.setStatus(SessionStatus.NEW);
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).isNewSession();
@@ -64,7 +64,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isNewSession_Should_return_false_When_Session_is_in_progress() {
+  public void isNewSession_Should_returnFalse_When_SessionIsInProgress() {
     session.setStatus(SessionStatus.IN_PROGRESS);
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).isNewSession();
@@ -73,7 +73,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isNewSession_Should_return_false_When_Session_is_not_set() {
+  public void isNewSession_Should_returnFalse_When_SessionIsNotSet() {
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).isNewSession();
 
@@ -81,7 +81,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasSessionNoConsultant_Should_return_true_When_Session_consultant_is_null() {
+  public void hasSessionNoConsultant_Should_returnTrue_When_SessionConsultantIsNull() {
     this.session.setConsultant(null);
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).hasSessionNoConsultant();
@@ -90,7 +90,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasSessionNoConsultant_Should_return_true_When_Session_consultant_has_no_id() {
+  public void hasSessionNoConsultant_Should_returnTrue_When_SessionConsultantHasNoId() {
     consultant.setId("");
     this.session.setConsultant(consultant);
     boolean result =
@@ -100,7 +100,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasSessionNoConsultant_Should_return_false_When_Session_consultant_has_id() {
+  public void hasSessionNoConsultant_Should_returnFalse_When_SessionConsultantHasId() {
     this.session.setConsultant(this.consultant);
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant).hasSessionNoConsultant();
@@ -109,7 +109,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionAlreadyAssignedToConsultant_Should_return_true_When_Session_is_in_proress_and_has_consultant() {
+  public void isSessionAlreadyAssignedToConsultant_Should_returnTrue_When_SessionIsInProgressAndHasConsultant() {
     this.session.setStatus(SessionStatus.IN_PROGRESS);
     this.session.setConsultant(this.consultant);
     boolean result =
@@ -120,7 +120,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionAlreadyAssignedToConsultant_Should_return_false_When_Session_is_not_in_proress() {
+  public void isSessionAlreadyAssignedToConsultant_Should_returnFalse_When_SessionIsNotInProgress() {
     this.session.setConsultant(this.consultant);
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
@@ -130,7 +130,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionAlreadyAssignedToConsultant_Should_return_false_When_Session_is_in_proress_and_has_other_consultant() {
+  public void isSessionAlreadyAssignedToConsultant_Should_returnFalse_When_SessionIsInProgressAndHasOtherConsultant() {
     this.session.setStatus(SessionStatus.IN_PROGRESS);
     Consultant consultant = new Consultant();
     consultant.setId("other");
@@ -143,7 +143,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasSessionUserNoRcId_Should_return_true_When_Session_has_user_without_rc_id() {
+  public void hasSessionUserNoRcId_Should_returnTrue_When_SessionHasUserWithoutRcId() {
     this.session.setUser(mock(User.class));
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
@@ -153,7 +153,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasSessionUserNoRcId_Should_return_false_When_Session_has_no_user() {
+  public void hasSessionUserNoRcId_Should_returnFalse_When_SessionHasNoUser() {
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
             .hasSessionUserNoRcId();
@@ -162,7 +162,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasSessionUserNoRcId_Should_return_false_When_Session_has_user_with_rc_id() {
+  public void hasSessionUserNoRcId_Should_returnFalse_When_SessionHasUserWithRcId() {
     User userMock = mock(User.class);
     when(userMock.getRcUserId()).thenReturn("user id");
     this.session.setUser(userMock);
@@ -174,7 +174,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasConsultantNoRcId_Should_return_true_When_Consultant_has_no_rc_id() {
+  public void hasConsultantNoRcId_Should_returnTrue_When_ConsultantHasNoRcId() {
     consultant.setRocketChatId("");
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
@@ -184,7 +184,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void hasConsultantNoRcId_Should_return_false_When_Consultant_has_rc_id() {
+  public void hasConsultantNoRcId_Should_returnFalse_When_ConsultantHasRcId() {
     consultant.setRocketChatId("rc id");
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
@@ -194,7 +194,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_return_true_When_Consultant_has_no_agencies() {
+  public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantHasNoAgencies() {
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
             .isSessionsAgencyNotAvailableInConsultantAgencies();
@@ -203,7 +203,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_return_true_When_Consultant_agencies_does_not_contain_session_agency_id() {
+  public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
         new ConsultantAgency(1L, consultant, 1L),
@@ -218,7 +218,7 @@ public class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_return_false_When_Consultant_agencies_contain_session_agency_id() {
+  public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnFalse_When_ConsultantAgenciesContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
         new ConsultantAgency(1L, consultant, 1L),

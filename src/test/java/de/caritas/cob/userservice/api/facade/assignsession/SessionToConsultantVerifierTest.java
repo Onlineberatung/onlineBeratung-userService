@@ -12,7 +12,7 @@ import org.junit.Test;
 public class SessionToConsultantVerifierTest {
 
   @Test(expected = ConflictException.class)
-  public void verifySessionIsNotInProgress_Should_throw_conflict_When_Session_is_in_progress() {
+  public void verifySessionIsNotInProgress_Should_throwConflict_When_SessionIsInProgress() {
     Session session = new Session();
     session.setStatus(SessionStatus.IN_PROGRESS);
     session.setId(1L);
