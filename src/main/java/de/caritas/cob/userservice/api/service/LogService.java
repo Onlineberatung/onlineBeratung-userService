@@ -437,7 +437,7 @@ public class LogService {
   /**
    * Logs an warning message.
    *
-   * @param msg The message
+   * @param exception The exception
    */
   public void logWarn(Exception exception) {
     log.warn(getStackTrace(exception));
