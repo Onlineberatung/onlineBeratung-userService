@@ -5,18 +5,18 @@ public class WrongParameterException extends RuntimeException {
   private static final long serialVersionUID = -8401912145454084348L;
 
   /**
-   * Bad request exception
+   * Bad request exception.
    * 
-   * @param message
+   * @param message an additional message
    */
   public WrongParameterException(String message) {
     super(message);
   }
 
   /**
-   * ClassCastException: Bad request exception
+   * ClassCastException: Bad request exception.
    * 
-   * @param message
+   * @param message an additional message
    */
   public WrongParameterException(String message, ClassCastException exception) {
     super(message, exception);

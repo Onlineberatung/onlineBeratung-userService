@@ -11,23 +11,16 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InOrder;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatLoginException;
@@ -44,6 +37,16 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class CreateChatFacadeTest {
@@ -52,8 +55,6 @@ public class CreateChatFacadeTest {
   private CreateChatFacade createChatFacade;
   @Mock
   private ChatService chatService;
-  @Mock
-  private LogService logService;
   @Mock
   private Consultant consultant;
   @Mock
@@ -72,11 +73,14 @@ public class CreateChatFacadeTest {
   private GroupResponseDTO groupResponseDTO;
   @Mock
   private GroupDTO groupDTO;
+  @Mock
+  private Logger logger;
 
   @Before
   public void setup() {
     when(chat.getId()).thenReturn(CHAT_ID);
     when(chat.getConsultingType()).thenReturn(ConsultingType.KREUZBUND);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   /**
@@ -91,8 +95,7 @@ public class CreateChatFacadeTest {
     assertNull(result);
 
     verify(consultant, atLeastOnce()).getConsultantAgencies();
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(ServiceException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
 
   }
 
@@ -166,8 +169,7 @@ public class CreateChatFacadeTest {
 
     assertNull(result);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(RocketChatCreateGroupException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, never()).deleteGroupAsSystemUser(Mockito.any());
 
@@ -186,8 +188,7 @@ public class CreateChatFacadeTest {
 
     assertNull(result);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(RocketChatCreateGroupException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, never()).deleteGroupAsSystemUser(Mockito.any());
 
@@ -206,8 +207,7 @@ public class CreateChatFacadeTest {
 
     assertNull(result);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(RocketChatLoginException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, never()).deleteGroupAsSystemUser(Mockito.any());
 
@@ -230,8 +230,7 @@ public class CreateChatFacadeTest {
 
     assertNull(result);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(RocketChatAddUserToGroupException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, times(1)).deleteGroupAsSystemUser(RC_GROUP_ID);
 
@@ -251,8 +250,7 @@ public class CreateChatFacadeTest {
 
     assertNull(result);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(SaveChatAgencyException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
   }
 
@@ -272,8 +270,7 @@ public class CreateChatFacadeTest {
 
     assertNull(result);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(SaveChatException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, times(1)).deleteGroupAsSystemUser(RC_GROUP_ID);
   }
@@ -289,8 +286,7 @@ public class CreateChatFacadeTest {
 
     assertNull(result);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.any(SaveChatException.class));
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, never()).deleteChat(chat);
     verify(rocketChatService, never()).deleteGroupAsSystemUser(RC_GROUP_ID);
   }

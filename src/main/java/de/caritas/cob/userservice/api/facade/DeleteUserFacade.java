@@ -13,12 +13,10 @@ import de.caritas.cob.userservice.api.service.LogService;
 @Service
 public class DeleteUserFacade {
   private final KeycloakService keycloakService;
-  private final LogService logService;
 
   @Autowired
-  public DeleteUserFacade(KeycloakService keycloakService, LogService logService) {
+  public DeleteUserFacade(KeycloakService keycloakService) {
     this.keycloakService = keycloakService;
-    this.logService = logService;
   }
 
   /**

@@ -3,15 +3,16 @@ package de.caritas.cob.userservice.api.service;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 import java.util.NoSuchElementException;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 /**
  * Service for logging
  */
-@Service
-@Slf4j
 public class LogService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class);
 
   public static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error: ";
   public static final String ROCKET_CHAT_ERROR_TEXT = "Rocket.Chat Error: ";
@@ -40,14 +41,15 @@ public class LogService {
   public static final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
   public static final String CREATE_SESSION_FACADE_ERROR = "CreateSessionFacade error: ";
 
+  private LogService() {}
+
   /**
    * Logs a database error.
    *
    * @param exception the exception
    */
-  public void logDatabaseError(Exception exception) {
-    log.error("{}{}", DB_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logDatabaseError(Exception exception) {
+    LOGGER.error("{}{}", DB_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -56,10 +58,9 @@ public class LogService {
    * @param message the message
    * @param exception the exception
    */
-  public void logDatabaseError(String message, Exception exception) {
-    log.error("{}{}", DB_ERROR_TEXT, message);
-    log.error("{}{}", DB_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logDatabaseError(String message, Exception exception) {
+    LOGGER.error("{}{}", DB_ERROR_TEXT, message);
+    LOGGER.error("{}{}", DB_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -67,8 +68,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logDatabaseInconsistency(String message) {
-    log.error("{}{}", DB_INCONSITENCY_ERROR_TEXT, message);
+  public static void logDatabaseInconsistency(String message) {
+    LOGGER.error("{}{}", DB_INCONSITENCY_ERROR_TEXT, message);
   }
 
   /**
@@ -76,9 +77,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logKeycloakError(Exception exception) {
-    log.error("{}{}", KEYCLOAK_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logKeycloakError(Exception exception) {
+    LOGGER.error("{}{}", KEYCLOAK_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -87,10 +87,9 @@ public class LogService {
    * @param message the message
    * @param exception the exception
    */
-  public void logKeycloakError(String message, Exception exception) {
-    log.error("{}{}", KEYCLOAK_ERROR_TEXT, message);
-    log.error("{}{}", KEYCLOAK_EXCEPTION_TEXT,
-        getStackTrace(exception));
+  public static void logKeycloakError(String message, Exception exception) {
+    LOGGER.error("{}{}", KEYCLOAK_ERROR_TEXT, message);
+    LOGGER.error("{}{}", KEYCLOAK_EXCEPTION_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -98,8 +97,8 @@ public class LogService {
    *
    * @param message error message
    */
-  public void logKeycloakError(String message) {
-    log.error("{}{}", KEYCLOAK_ERROR_TEXT, message);
+  public static void logKeycloakError(String message) {
+    LOGGER.error("{}{}", KEYCLOAK_ERROR_TEXT, message);
   }
 
   /**
@@ -107,9 +106,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logBadRequestException(Exception exception) {
-    log.warn("{}{}", BAD_REQUEST_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logBadRequestException(Exception exception) {
+    LOGGER.warn("{}{}", BAD_REQUEST_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -117,8 +115,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logBadRequest(String message) {
-    log.warn("{}{}", BAD_REQUEST_ERROR_TEXT, message);
+  public static void logBadRequest(String message) {
+    LOGGER.warn("{}{}", BAD_REQUEST_ERROR_TEXT, message);
   }
 
   /**
@@ -126,8 +124,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logUnauthorized(String message) {
-    log.warn("{}{}", UNAUTHORIZED_WARNING_TEXT, message);
+  public static void logUnauthorized(String message) {
+    LOGGER.warn("{}{}", UNAUTHORIZED_WARNING_TEXT, message);
   }
 
   /**
@@ -135,8 +133,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logUnauthorized(Exception exception) {
-    log.warn("{}", getStackTrace(exception));
+  public static void logUnauthorized(Exception exception) {
+    LOGGER.warn("{}", getStackTrace(exception));
   }
 
   /**
@@ -144,8 +142,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logForbidden(String message) {
-    log.warn("{}{}", FORBIDDEN_WARNING_TEXT, message);
+  public static void logForbidden(String message) {
+    LOGGER.warn("{}{}", FORBIDDEN_WARNING_TEXT, message);
   }
 
   /**
@@ -153,8 +151,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logForbidden(Exception exception) {
-    log.warn("{}", getStackTrace(exception));
+  public static void logForbidden(Exception exception) {
+    LOGGER.warn("{}", getStackTrace(exception));
   }
 
   /**
@@ -162,8 +160,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logInternalServerError(String message) {
-    log.error("{}{}", INTERNAL_SERVER_ERROR_TEXT, message);
+  public static void logInternalServerError(String message) {
+    LOGGER.error("{}{}", INTERNAL_SERVER_ERROR_TEXT, message);
   }
 
   /**
@@ -172,9 +170,9 @@ public class LogService {
    * @param message the message
    * @param exception the exception
    */
-  public void logInternalServerError(String message, Exception exception) {
-    log.error("{}{}", INTERNAL_SERVER_ERROR_TEXT, message);
-    log.error("{}", getStackTrace(exception));
+  public static void logInternalServerError(String message, Exception exception) {
+    LOGGER.error("{}{}", INTERNAL_SERVER_ERROR_TEXT, message);
+    LOGGER.error("{}", getStackTrace(exception));
   }
 
   /**
@@ -182,8 +180,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logInternalServerError(Exception exception) {
-    log.error("{}", getStackTrace(exception));
+  public static void logInternalServerError(Exception exception) {
+    LOGGER.error("{}", getStackTrace(exception));
   }
 
   /**
@@ -191,8 +189,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logRocketChatError(String message) {
-    log.error("{}{})", ROCKET_CHAT_ERROR_TEXT, message);
+  public static void logRocketChatError(String message) {
+    LOGGER.error("{}{})", ROCKET_CHAT_ERROR_TEXT, message);
   }
 
   /**
@@ -202,8 +200,8 @@ public class LogService {
    * @param error the error
    * @param errorType the errorType
    */
-  public void logRocketChatError(String message, String error, String errorType) {
-    log.error("{}{} (Error: {} / ErrorType: {})", ROCKET_CHAT_ERROR_TEXT, message, error,
+  public static void logRocketChatError(String message, String error, String errorType) {
+    LOGGER.error("{}{} (Error: {} / ErrorType: {})", ROCKET_CHAT_ERROR_TEXT, message, error,
         errorType);
   }
 
@@ -213,9 +211,9 @@ public class LogService {
    * @param exception the exception
    * @param message the message
    */
-  public void logRocketChatError(String message, Exception exception) {
-    log.error("{}{}", ROCKET_CHAT_ERROR_TEXT, message);
-    log.error("{}", getStackTrace(exception));
+  public static void logRocketChatError(String message, Exception exception) {
+    LOGGER.error("{}{}", ROCKET_CHAT_ERROR_TEXT, message);
+    LOGGER.error("{}", getStackTrace(exception));
   }
 
   /**
@@ -223,9 +221,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logIllegalArgumentException(IllegalArgumentException exception) {
-    log.warn("{}{}", ILLEGAL_ARGUMENT_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logIllegalArgumentException(IllegalArgumentException exception) {
+    LOGGER.warn("{}{}", ILLEGAL_ARGUMENT_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -233,9 +230,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logNoSuchElementException(NoSuchElementException exception) {
-    log.warn("{}{}", ILLEGAL_ARGUMENT_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logNoSuchElementException(NoSuchElementException exception) {
+    LOGGER.warn("{}{}", ILLEGAL_ARGUMENT_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -243,9 +239,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logAgencyServiceHelperException(Exception exception) {
-    log.error("{}{}", AGENCY_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logAgencyServiceHelperException(Exception exception) {
+    LOGGER.error("{}{}", AGENCY_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -254,10 +249,9 @@ public class LogService {
    * @param exception the exception
    * @param message the message
    */
-  public void logAgencyServiceHelperException(String message, Exception exception) {
-    log.error("{}{}", AGENCY_ERROR_TEXT, message);
-    log.error("{}{}", AGENCY_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logAgencyServiceHelperException(String message, Exception exception) {
+    LOGGER.error("{}{}", AGENCY_ERROR_TEXT, message);
+    LOGGER.error("{}{}", AGENCY_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -265,8 +259,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logMailServiceHelperException(String message) {
-    log.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
+  public static void logMailServiceHelperException(String message) {
+    LOGGER.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
   }
 
   /**
@@ -275,10 +269,9 @@ public class LogService {
    * @param message the message
    * @param exception the exception
    */
-  public void logMailServiceHelperException(String message, Exception exception) {
-    log.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
-    log.error("{}{}", MAIL_SERVICE_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logMailServiceHelperException(String message, Exception exception) {
+    LOGGER.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
+    LOGGER.error("{}{}", MAIL_SERVICE_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -286,8 +279,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logEmailNotificationFacadeError(String message) {
-    log.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, message);
+  public static void logEmailNotificationFacadeError(String message) {
+    LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, message);
   }
 
   /**
@@ -295,8 +288,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logAcceptEnquiryFacadeError(String message) {
-    log.error("{}{}", ACCEPT_ENQUIRY_ERROR_TEXT, message);
+  public static void logAcceptEnquiryFacadeError(String message) {
+    LOGGER.error("{}{}", ACCEPT_ENQUIRY_ERROR_TEXT, message);
   }
 
   /**
@@ -305,10 +298,9 @@ public class LogService {
    * @param message the message
    * @param exception the exception
    */
-  public void logMessageServiceHelperException(String message, Exception exception) {
-    log.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, message);
-    log.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logMessageServiceHelperException(String message, Exception exception) {
+    LOGGER.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, message);
+    LOGGER.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -316,9 +308,9 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logAssignSessionFacadeWarning(Exception exception) {
-    log.warn("{}{}", ASSIGN_SESSION_FACADE_WARNING_TEXT, exception.getMessage());
-    log.warn("{}", getStackTrace(exception));
+  public static void logAssignSessionFacadeWarning(Exception exception) {
+    LOGGER.warn("{}{}", ASSIGN_SESSION_FACADE_WARNING_TEXT, exception.getMessage());
+    LOGGER.warn("{}", getStackTrace(exception));
   }
 
   /**
@@ -326,8 +318,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logAssignSessionFacadeError(String message) {
-    log.error("{}{}", ASSIGN_SESSION_FACADE_ERROR_TEXT, message);
+  public static void logAssignSessionFacadeError(String message) {
+    LOGGER.error("{}{}", ASSIGN_SESSION_FACADE_ERROR_TEXT, message);
   }
 
   /**
@@ -335,9 +327,9 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logAssignSessionFacadeError(Exception exception) {
-    log.error("{}{}", ASSIGN_SESSION_FACADE_ERROR_TEXT, exception.getMessage());
-    log.error("{}", getStackTrace(exception));
+  public static void logAssignSessionFacadeError(Exception exception) {
+    LOGGER.error("{}{}", ASSIGN_SESSION_FACADE_ERROR_TEXT, exception.getMessage());
+    LOGGER.error("{}", getStackTrace(exception));
   }
 
   /**
@@ -345,9 +337,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logMonitoringHelperError(Exception exception) {
-    log.error("{}{}", MONITORING_HELPER_ERROR_TEXT,
-        getStackTrace(exception));
+  public static void logMonitoringHelperError(Exception exception) {
+    LOGGER.error("{}{}", MONITORING_HELPER_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -355,8 +346,8 @@ public class LogService {
    *
    * @param msg The message
    */
-  public void logInfo(String msg) {
-    log.info(msg);
+  public static void logInfo(String msg) {
+    LOGGER.info(msg);
   }
 
   /**
@@ -364,9 +355,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logEncryptionServiceError(Exception exception) {
-    log.error(RC_ENCRYPTION_SERVICE_ERROR + "{}",
-        getStackTrace(exception));
+  public static void logEncryptionServiceError(Exception exception) {
+    LOGGER.error(RC_ENCRYPTION_SERVICE_ERROR + "{}", getStackTrace(exception));
   }
 
   /**
@@ -374,9 +364,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logEncryptionPossibleBadKeyError(Exception exception) {
-    log.error(RC_ENCRYPTION_BAD_KEY_SERVICE_ERROR + "{}",
-        getStackTrace(exception));
+  public static void logEncryptionPossibleBadKeyError(Exception exception) {
+    LOGGER.error(RC_ENCRYPTION_BAD_KEY_SERVICE_ERROR + "{}", getStackTrace(exception));
   }
 
   /**
@@ -385,10 +374,9 @@ public class LogService {
    * @param exception the exception
    * @param message the message
    */
-  public void logDecryptionError(String message, Exception exception) {
-    log.error("{}{}", DECRYPTION_ERROR, message);
-    log.error("{}{}", DECRYPTION_ERROR,
-        getStackTrace(exception));
+  public static void logDecryptionError(String message, Exception exception) {
+    LOGGER.error("{}{}", DECRYPTION_ERROR, message);
+    LOGGER.error("{}{}", DECRYPTION_ERROR, getStackTrace(exception));
   }
 
   /**
@@ -397,10 +385,9 @@ public class LogService {
    * @param exception the exception
    * @param message the message
    */
-  public void logTruncationError(String message, Exception exception) {
-    log.error("{}{}", TRUNCATION_ERROR, message);
-    log.error("{}{}", TRUNCATION_ERROR,
-        getStackTrace(exception));
+  public static void logTruncationError(String message, Exception exception) {
+    LOGGER.error("{}{}", TRUNCATION_ERROR, message);
+    LOGGER.error("{}{}", TRUNCATION_ERROR, getStackTrace(exception));
   }
 
   /**
@@ -408,8 +395,8 @@ public class LogService {
    *
    * @param message the message
    */
-  public void logValidationError(String message) {
-    log.error("{}{}", VALIDATION_ERROR, message);
+  public static void logValidationError(String message) {
+    LOGGER.error("{}{}", VALIDATION_ERROR, message);
   }
 
 
@@ -418,9 +405,8 @@ public class LogService {
    *
    * @param exception the exception
    */
-  public void logCreateEnquiryMessageException(Exception exception) {
-    log.error("{}{}", CREATE_ENQUIRY_MESSAGE_ERROR,
-        getStackTrace(exception));
+  public static void logCreateEnquiryMessageException(Exception exception) {
+    LOGGER.error("{}{}", CREATE_ENQUIRY_MESSAGE_ERROR, getStackTrace(exception));
   }
 
   /**
@@ -429,9 +415,9 @@ public class LogService {
    * @param message Error message
    * @param exception Exception
    */
-  public void logCreateSessionFacadeError(String message, Exception exception) {
-    log.error("{}{}", CREATE_SESSION_FACADE_ERROR, message);
-    log.error("{}{}", CREATE_SESSION_FACADE_ERROR, getStackTrace(exception));
+  public static void logCreateSessionFacadeError(String message, Exception exception) {
+    LOGGER.error("{}{}", CREATE_SESSION_FACADE_ERROR, message);
+    LOGGER.error("{}{}", CREATE_SESSION_FACADE_ERROR, getStackTrace(exception));
   }
 
   /**
@@ -439,7 +425,17 @@ public class LogService {
    *
    * @param exception The exception
    */
-  public void logWarn(Exception exception) {
-    log.warn(getStackTrace(exception));
+  public static void logWarn(Exception exception) {
+    LOGGER.warn(getStackTrace(exception));
+  }
+
+  /**
+   * Logs an warning message.
+   *
+   * @param httpStatus http status
+   * @param exception The exception
+   */
+  public static void logWarn(HttpStatus httpStatus, Exception exception) {
+    LOGGER.warn("UserService API: {}: {}", httpStatus.getReasonPhrase(), getStackTrace(exception));
   }
 }

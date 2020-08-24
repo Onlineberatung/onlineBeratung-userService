@@ -30,27 +30,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.dao.DataAccessException;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.ServiceException;
@@ -73,6 +59,25 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionServiceTest {
@@ -107,7 +112,7 @@ public class SessionServiceTest {
   @Mock
   private AgencyServiceHelper agencyServiceHelper;
   @Mock
-  private LogService logService;
+  private Logger logger;
   @Mock
   private Now now;
   @Mock
@@ -123,6 +128,7 @@ public class SessionServiceTest {
     addictiveDrugsMap.put(ACLOHOL, true);
     addictiveDrugsMap.put(DRUGS, drugsMap);
     SUCHT_MAP.put(MonitoringType.ADDICTIVE_DRUGS.getKey(), addictiveDrugsMap);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @Test
@@ -157,7 +163,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
 
   }
 
@@ -294,7 +300,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logAgencyServiceHelperException(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -393,7 +399,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -431,7 +437,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -457,7 +463,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -518,7 +524,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -578,7 +584,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -640,7 +646,7 @@ public class SessionServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -691,7 +697,7 @@ public class SessionServiceTest {
       fail("Expected exception: UpdateFeedbackGroupIdException");
     } catch (UpdateFeedbackGroupIdException updateFeedbackGroupIdException) {
       assertTrue("Excepted UpdateFeedbackGroupIdException thrown", true);
-      verify(logService, times(1)).logDatabaseError(Mockito.anyString(), Mockito.eq(ex));
+      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     }
 
   }

@@ -60,22 +60,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import org.hibernate.service.spi.ServiceException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -99,6 +90,20 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import org.hibernate.service.spi.ServiceException;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GetSessionListFacadeTest {
@@ -346,9 +351,14 @@ public class GetSessionListFacadeTest {
   @Mock
   private DecryptionService decryptionService;
   @Mock
-  private LogService logService;
+  private Logger logger;
   @Mock
   private ConsultingTypeManager consultingTypeManager;
+
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   /**
    * Method: getSessionsForAuthenticatedUser
@@ -1087,7 +1097,7 @@ public class GetSessionListFacadeTest {
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
-    verify(logService, atLeast(1)).logDecryptionError(Mockito.anyString(), Mockito.eq(exception));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1109,7 +1119,7 @@ public class GetSessionListFacadeTest {
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
-    verify(logService, atLeast(1)).logTruncationError(Mockito.anyString(), Mockito.eq(exception));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1491,7 +1501,7 @@ public class GetSessionListFacadeTest {
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
-    verify(logService, atLeast(1)).logDecryptionError(Mockito.anyString(), Mockito.eq(exception));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1511,7 +1521,7 @@ public class GetSessionListFacadeTest {
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getChat().getLastMessage());
-    verify(logService, atLeast(1)).logDecryptionError(Mockito.anyString(), Mockito.eq(exception));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1533,7 +1543,7 @@ public class GetSessionListFacadeTest {
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
-    verify(logService, atLeast(1)).logTruncationError(Mockito.anyString(), Mockito.eq(exception));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1553,7 +1563,7 @@ public class GetSessionListFacadeTest {
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getChat().getLastMessage());
-    verify(logService, atLeast(1)).logTruncationError(Mockito.anyString(), Mockito.eq(exception));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test

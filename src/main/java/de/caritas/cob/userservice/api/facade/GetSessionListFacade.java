@@ -44,7 +44,6 @@ import de.caritas.cob.userservice.api.service.SessionService;
 /**
  * Facade to encapsulate the steps to get the session list for a user or consultant (read sessions
  * from database and get unread messages status from Rocket.Chat)
- *
  */
 
 @Service
@@ -56,36 +55,27 @@ public class GetSessionListFacade {
   private final SessionService sessionService;
   private final RocketChatService rocketChatService;
   private final DecryptionService decryptionService;
-  private final LogService logService;
   private final ConsultingTypeManager consultingTypeManager;
   private final ChatService chatService;
 
   @Autowired
   public GetSessionListFacade(SessionService sessionService, RocketChatService rocketChatService,
-      DecryptionService decryptionService, LogService logService,
-      ConsultingTypeManager consultingTypeManager, ChatService chatService) {
+      DecryptionService decryptionService, ConsultingTypeManager consultingTypeManager,
+      ChatService chatService) {
     this.sessionService = sessionService;
     this.rocketChatService = rocketChatService;
     this.decryptionService = decryptionService;
-    this.logService = logService;
     this.consultingTypeManager = consultingTypeManager;
     this.chatService = chatService;
   }
 
   /**
    * Returns a list of {@link UserSessionResponseDTO} for the specified user ID
-   * 
+   *
    * @param userId Keycloak/MariaDB user ID
    * @param rcUserId Rocket.Chat user ID
    * @param rcAuthToken Rocket.Chat token
    * @return {@link UserSessionResponseDTO}
-   */
-  /**
-   * Returns a list of {@link UserSessionResponseDTO} for the specified user id
-   * 
-   * @param userId Keycloak user ID
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @return
    */
   public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId,
       RocketChatCredentials rocketChatCredentials) {
@@ -130,7 +120,7 @@ public class GetSessionListFacade {
   /**
    * Sets the messagesRead and latestMessage value for the specified list of
    * {@link UserSessionResponseDTO} with {@link UserChatDTO}
-   * 
+   *
    * @param sessions
    * @param messagesReadMap
    * @param roomMessageMap
@@ -183,7 +173,7 @@ public class GetSessionListFacade {
   /**
    * Sets the messagesRead and latestMessage value for the specified list of
    * {@link UserSessionResponseDTO} with {@link SessionDTO}
-   * 
+   *
    * @param sessions
    * @param messagesReadMap
    * @param roomMessageMap
@@ -235,7 +225,7 @@ public class GetSessionListFacade {
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id and
    * status
-   * 
+   *
    * @param consultant {@link Consultant}
    * @param status integer (1=enquiries, 2=sessions)
    * @param rcAuthToken Rocket.Chat Token
@@ -283,7 +273,7 @@ public class GetSessionListFacade {
     /**
      * Sort the session list by latest Rocket.Chat message if session is in progress (no enquiry).
      * The latest answer is on top.
-     * 
+     *
      * Please note: Enquiry message sessions are being sorted by the repository (via
      * SessionService). Here the latest enquiry message is on the bottom.
      */
@@ -306,7 +296,7 @@ public class GetSessionListFacade {
 
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id
-   * 
+   *
    * @param consultant
    * @param rcAuthToken
    * @param offset
@@ -351,7 +341,7 @@ public class GetSessionListFacade {
 
   /**
    * Get a sublist of a session list with offset and count
-   * 
+   *
    * @param sessions
    * @param offset
    * @param count
@@ -374,7 +364,7 @@ public class GetSessionListFacade {
   /**
    * Remove chats and all sessions which don't have unread feedback chat messages from the given
    * session list
-   * 
+   *
    * @param sessions
    * @return
    */
@@ -399,9 +389,9 @@ public class GetSessionListFacade {
   }
 
   /**
-   * Sets the values for messagesRead, latestMessage and monitoring for the specified list of
-   * {@link ConsultantSessionResponseDTO} and decrypts and truncates the room's last message.
-   * 
+   * Sets the values for messagesRead, latestMessage and monitoring for the specified list of {@link
+   * ConsultantSessionResponseDTO} and decrypts and truncates the room's last message.
+   *
    * @param sessions {@link List} of {@link ConsultantSessionResponseDTO}
    * @param messagesReadMap Map<String, Boolean>
    * @param roomMessageMap Map<String, Boolean>
@@ -476,9 +466,9 @@ public class GetSessionListFacade {
   }
 
   /**
-   * Sets the values for messagesRead, latestMessage and monitoring for the specified list of
-   * {@link ConsultantSessionResponseDTO} and decrypts and truncates the room's last message.
-   * 
+   * Sets the values for messagesRead, latestMessage and monitoring for the specified list of {@link
+   * ConsultantSessionResponseDTO} and decrypts and truncates the room's last message.
+   *
    * @param chats {@link List} of {@link ConsultantSessionResponseDTO}
    * @param messagesReadMap Map<String, Boolean>
    * @param roomMessageMap Map<String, Boolean>
@@ -534,7 +524,7 @@ public class GetSessionListFacade {
 
   /**
    * Get a map with the read-status for each room id
-   * 
+   *
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return
    */
@@ -556,7 +546,7 @@ public class GetSessionListFacade {
 
   /**
    * Get the rooms update list for a user from RocketChat
-   * 
+   *
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return
    */
@@ -571,7 +561,7 @@ public class GetSessionListFacade {
 
   /**
    * Get a map with the last Rocket.Chat message and its date for each room id
-   * 
+   *
    * @param roomsUpdateList {@link List} of {@link RoomsUpdateDTO}
    * @return
    */
@@ -593,7 +583,7 @@ public class GetSessionListFacade {
 
   /**
    * Decrypts and returns a Rocket.Chat message and truncates it to a maximum length
-   * 
+   *
    * @param message Encrypted message
    * @param groupId Rocket.Chat group id of the message
    * @return Decrypted message
@@ -611,10 +601,10 @@ public class GetSessionListFacade {
           decryptedMessage.length() < truncateEnd ? decryptedMessage.length() : truncateEnd);
 
     } catch (CustomCryptoException cryptoEx) {
-      logService.logDecryptionError(
+      LogService.logDecryptionError(
           String.format("Could not decrypt message for group id %s", groupId), cryptoEx);
     } catch (IndexOutOfBoundsException substringEx) {
-      logService.logTruncationError(
+      LogService.logTruncationError(
           String.format("Could not truncate message for group id %s", groupId), substringEx);
     }
 
@@ -625,7 +615,7 @@ public class GetSessionListFacade {
   /**
    * Returns the monitoring property (which is set in the {@link ConsultingTypeSettings}) for the
    * given session.
-   * 
+   *
    * @param session
    * @return true if monitoring is active, else false
    */

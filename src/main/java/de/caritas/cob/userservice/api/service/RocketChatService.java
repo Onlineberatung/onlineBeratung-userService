@@ -1,25 +1,5 @@
 package de.caritas.cob.userservice.api.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatAddUserToGroupException;
@@ -55,7 +35,27 @@ import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.Subscriptio
 import de.caritas.cob.userservice.api.model.rocketChat.user.UserDeleteBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketChat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * 
@@ -119,9 +119,6 @@ public class RocketChatService {
   private RestTemplate restTemplate;
 
   @Autowired
-  private LogService logService;
-
-  @Autowired
   private RocketChatCredentialsHelper rcCredentialHelper;
 
   /**
@@ -146,7 +143,7 @@ public class RocketChatService {
           restTemplate.postForObject(rocketChatApiGroupCreateUrl, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Rocket.Chat group with name %s could not be created", name), ex);
       throw new RocketChatCreateGroupException(ex);
     }
@@ -154,7 +151,7 @@ public class RocketChatService {
     if (response != null && response.isSuccess() && isGroupIdAvailable(response)) {
       return Optional.of(response);
     } else {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Rocket.Chat group with name %s could not be created", name),
           response.getError(), response.getErrorType());
       return Optional.empty();
@@ -207,7 +204,7 @@ public class RocketChatService {
           GroupDeleteResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Rocket.Chat group with id %s could not be deleted", groupId), ex);
       throw new RocketChatDeleteGroupException(ex);
     }
@@ -215,7 +212,7 @@ public class RocketChatService {
     if (response != null && response.isSuccess()) {
       return true;
     } else {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Rocket.Chat group with id %s could not be deleted", groupId), "unknown",
           "unknown");
       return false;
@@ -298,7 +295,7 @@ public class RocketChatService {
     } catch (
 
     Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not login user (%s) in Rocket.Chat for the first time", username),
           ex);
       throw new RocketChatLoginException(ex);
@@ -331,7 +328,7 @@ public class RocketChatService {
       return response;
 
     } catch (Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not login user (%s) in Rocket.Chat", username), ex);
       throw new RocketChatLoginException(ex);
     }
@@ -356,7 +353,7 @@ public class RocketChatService {
       return response != null && response.getStatusCode() == HttpStatus.OK ? true : false;
 
     } catch (Exception ex) {
-      logService.logRocketChatError(String.format("Could not log out user id (%s) from Rocket.Chat",
+      LogService.logRocketChatError(String.format("Could not log out user id (%s) from Rocket.Chat",
           rocketChatCredentials.getRocketChatUserId()), ex);
 
       return false;
@@ -384,14 +381,14 @@ public class RocketChatService {
           restTemplate.postForObject(rocketChatApiGroupAddUserUrl, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(String.format(
+      LogService.logRocketChatError(String.format(
           "Could not add user %s to Rocket.Chat group with id %s", rcUserId, rcGroupId), ex);
       throw new RocketChatAddUserToGroupException(ex);
     }
 
     if (response != null && !response.isSuccess()) {
       String error = "Could not add user %s to Rocket.Chat group with id %s";
-      logService.logRocketChatError(String.format(error, rcUserId, rcGroupId), response.getError(),
+      LogService.logRocketChatError(String.format(error, rcUserId, rcGroupId), response.getError(),
           response.getErrorType());
       throw new RocketChatAddUserToGroupException(String.format(error, rcUserId, rcGroupId));
     }
@@ -431,14 +428,14 @@ public class RocketChatService {
           GroupResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(String.format(
+      LogService.logRocketChatError(String.format(
           "Could not remove user %s from Rocket.Chat group with id %s", rcUserId, rcGroupId), ex);
       throw new RocketChatRemoveUserFromGroupException(ex);
     }
 
     if (response != null && !response.isSuccess()) {
       String error = "Could not remove user %s from Rocket.Chat group with id %s";
-      logService.logRocketChatError(String.format(error, rcUserId, rcGroupId), response.getError(),
+      LogService.logRocketChatError(String.format(error, rcUserId, rcGroupId), response.getError(),
           response.getErrorType());
       throw new RocketChatRemoveUserFromGroupException(String.format(error, rcUserId, rcGroupId));
     }
@@ -528,7 +525,7 @@ public class RocketChatService {
           HttpMethod.GET, request, GroupMemberResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not get Rocket.Chat group members for room id %s", rcGroupId), ex);
       throw new RocketChatGetGroupMembersException(ex);
     }
@@ -537,7 +534,7 @@ public class RocketChatService {
       return Arrays.asList(response.getBody().getMembers());
     } else {
       String error = "Could not get Rocket.Chat group members for room id %s";
-      logService.logRocketChatError(String.format(error, rcGroupId), response.getBody().getError(),
+      LogService.logRocketChatError(String.format(error, rcGroupId), response.getBody().getError(),
           response.getBody().getErrorType());
       throw new RocketChatGetGroupMembersException(String.format(error, rcGroupId));
     }
@@ -565,7 +562,7 @@ public class RocketChatService {
           HttpMethod.GET, request, GroupCounterResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not get Rocket.Chat group counters for room id %s and user id %s",
               rcGroupId, rcUserId),
           ex);
@@ -578,7 +575,7 @@ public class RocketChatService {
     } else {
       String error =
           "Could not get Rocket.Chat group counters for room id %s and user id %s. Rocket.Chat response: %s";
-      logService.logRocketChatError(String.format(error, rcGroupId, rcUserId,
+      LogService.logRocketChatError(String.format(error, rcGroupId, rcUserId,
           response != null ? response.getStatusCode().toString() : "empty"));
       throw new RocketChatGroupCountersException(String.format(error, rcGroupId, rcUserId,
           response != null ? response.getStatusCode().toString() : "empty"));
@@ -607,13 +604,13 @@ public class RocketChatService {
           restTemplate.postForObject(rocketChatApiUserDelete, request, StandardResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not remove user %s from Rocket.Chat", rcUserId), ex);
       throw new RocketChatRemoveUserException(ex);
     }
 
     if (response != null && !response.isSuccess()) {
-      logService.logRocketChatError(String.format("Could not remove user %s from Rocket.Chat: %s",
+      LogService.logRocketChatError(String.format("Could not remove user %s from Rocket.Chat: %s",
           rcUserId, response.getError()));
 
       return false;
@@ -675,13 +672,13 @@ public class RocketChatService {
           StandardResponseDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not clean history of Rocket.Chat group id %s", rcGroupId), ex);
       throw new RocketChatRemoveSystemMessagesException(ex);
     }
 
     if (response != null && !response.isSuccess()) {
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not clean history of Rocket.Chat group id %s: %s", rcGroupId,
               response.getError()));
 
@@ -715,7 +712,7 @@ public class RocketChatService {
             "Could not get Rocket.Chat subscriptions for user ID %s: Token is not active (401 Unauthorized)",
             rocketChatCredentials.getRocketChatUserId()));
       }
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format("Could not get Rocket.Chat subscriptions for user id %s",
               rocketChatCredentials.getRocketChatUserId()),
           ex);
@@ -726,7 +723,7 @@ public class RocketChatService {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat subscriptions for user id %s";
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format(error, rocketChatCredentials.getRocketChatUserId()),
           response.getBody().getMessage(), response.getBody().getStatus());
       throw new RocketChatGetSubscriptionsException(
@@ -752,7 +749,7 @@ public class RocketChatService {
           restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
-      logService.logRocketChatError(String.format("Could not get Rocket.Chat rooms for user id %s",
+      LogService.logRocketChatError(String.format("Could not get Rocket.Chat rooms for user id %s",
           rocketChatCredentials.getRocketChatUserId()), ex);
       throw new RocketChatGetRoomsException(ex);
     }
@@ -761,7 +758,7 @@ public class RocketChatService {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat rooms for user id %s";
-      logService.logRocketChatError(
+      LogService.logRocketChatError(
           String.format(error, rocketChatCredentials.getRocketChatUserId()),
           response.getBody().getMessage(), response.getBody().getStatus());
       throw new RocketChatGetRoomsException(

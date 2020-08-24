@@ -14,12 +14,10 @@ import de.caritas.cob.userservice.api.repository.user.UserRepository;
 @Service
 public class UserService {
 
-  private final LogService logService;
   private final UserRepository userRepository;
 
   @Autowired
-  public UserService(LogService logService, UserRepository userRepository) {
-    this.logService = logService;
+  public UserService(UserRepository userRepository) {
     this.userRepository = userRepository;
   }
 
@@ -27,7 +25,7 @@ public class UserService {
     try {
       userRepository.delete(user);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Deletion of user failed");
     }
   }

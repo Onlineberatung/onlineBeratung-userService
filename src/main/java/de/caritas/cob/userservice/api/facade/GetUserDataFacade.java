@@ -24,20 +24,17 @@ import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 
 /**
  * Facade to encapsulate getting the agency data for the corresponding user
- *
  */
 
 @Service
 public class GetUserDataFacade {
 
-  private final LogService logService;
   private final AgencyServiceHelper agencyServiceHelper;
   private final SessionDataHelper sessionDataHelper;
 
   @Autowired
-  public GetUserDataFacade(LogService logService, AgencyServiceHelper agencyServiceHelper,
+  public GetUserDataFacade(AgencyServiceHelper agencyServiceHelper,
       SessionDataHelper sessionDataHelper) {
-    this.logService = logService;
     this.agencyServiceHelper = agencyServiceHelper;
     this.sessionDataHelper = sessionDataHelper;
   }
@@ -58,8 +55,8 @@ public class GetUserDataFacade {
             .map(agency -> agencyServiceHelper.getAgency(agency.getAgencyId()))
             .collect(Collectors.toList());
       } catch (AgencyServiceHelperException agencyServiceHelperException) {
-        logService.logAgencyServiceHelperException(String
-            .format("Error while getting agencies of consultant with id %s", consultant.getId()),
+        LogService.logAgencyServiceHelperException(String
+                .format("Error while getting agencies of consultant with id %s", consultant.getId()),
             agencyServiceHelperException);
 
         return null;
@@ -121,7 +118,7 @@ public class GetUserDataFacade {
    * @param sessionList List of the user's {@link Session}s
    * @param agencyDTOs List of {@link AgencyDTO} that the user is registered to
    * @return LinkedHashMap<String, Object> {@link LinkedHashMap} containing user data
-   *         (sessionData,isRegistered,agency)
+   * (sessionData,isRegistered,agency)
    */
   private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType type,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {

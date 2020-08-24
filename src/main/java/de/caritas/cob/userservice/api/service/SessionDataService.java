@@ -18,14 +18,12 @@ import de.caritas.cob.userservice.api.repository.sessionData.SessionDataReposito
 public class SessionDataService {
 
   private final SessionDataRepository sessionDataRepository;
-  private final LogService logService;
   private final SessionDataHelper sessionDataHelper;
 
   @Autowired
-  public SessionDataService(SessionDataRepository sessionDataRepository, LogService logService,
+  public SessionDataService(SessionDataRepository sessionDataRepository,
       SessionDataHelper sessionDataHelper) {
     this.sessionDataRepository = sessionDataRepository;
-    this.logService = logService;
     this.sessionDataHelper = sessionDataHelper;
   }
 
@@ -45,7 +43,7 @@ public class SessionDataService {
     try {
       return sessionDataRepository.saveAll(sessionDataList);
     } catch (DataAccessException | IllegalArgumentException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String.format(
           "Database error while saving session data during registration for session %s and user %s",
           session.toString(), user.toString()), ex);
@@ -65,7 +63,7 @@ public class SessionDataService {
     try {
       sessionDataList = sessionDataRepository.findBySessionId(sessionId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String
           .format("Database error while retrieving session data for session id %s", sessionId));
     }

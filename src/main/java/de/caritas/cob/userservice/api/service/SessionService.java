@@ -46,18 +46,16 @@ public class SessionService {
 
   private SessionRepository sessionRepository;
   private AgencyServiceHelper agencyServiceHelper;
-  private LogService logService;
   private Now now;
   private SessionDataHelper sessionDataHelper;
   private final UserHelper userHelper;
 
   @Autowired
   public SessionService(SessionRepository sessionRepository,
-      AgencyServiceHelper agencyServiceHelper, LogService logService, Now now,
-      SessionDataHelper sessionDataHelper, UserHelper userHelper) {
+      AgencyServiceHelper agencyServiceHelper, Now now, SessionDataHelper sessionDataHelper,
+      UserHelper userHelper) {
     this.sessionRepository = sessionRepository;
     this.agencyServiceHelper = agencyServiceHelper;
-    this.logService = logService;
     this.now = now;
     this.sessionDataHelper = sessionDataHelper;
     this.userHelper = userHelper;
@@ -65,7 +63,7 @@ public class SessionService {
 
   /**
    * Returns the sessions for a user
-   * 
+   *
    * @param user
    * @return the sessions
    */
@@ -76,7 +74,7 @@ public class SessionService {
     try {
       userSessions = sessionRepository.findByUser(user);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String.format(
           "Database error while retrieving sessions for user with id %s", user.getUserId()));
     }
@@ -86,7 +84,7 @@ public class SessionService {
 
   /**
    * Returns the session for the provided sessionId
-   * 
+   *
    * @param sessionId
    * @return {@link Session}
    */
@@ -96,7 +94,7 @@ public class SessionService {
     try {
       session = sessionRepository.findById(sessionId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Database error while retrieving session with id %s", sessionId));
     }
@@ -106,7 +104,7 @@ public class SessionService {
 
   /**
    * Returns the sessions for the given user and consultingType.
-   * 
+   *
    * @param user {@link User}
    * @return list of {@link Session}
    */
@@ -118,7 +116,7 @@ public class SessionService {
     try {
       userSessions = sessionRepository.findByUserAndConsultingType(user, consultingType);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while retrieving user sessions");
     }
 
@@ -127,7 +125,7 @@ public class SessionService {
 
   /**
    * Updates the given session by assigning the provided consultant and {@link SessionStatus}
-   * 
+   *
    * @param session
    * @param consultant
    * @param status
@@ -146,7 +144,7 @@ public class SessionService {
 
   /**
    * Updates the feedback group id of the given {@link Session}
-   * 
+   *
    * @param session
    * @param feedbackGroupId
    */
@@ -156,7 +154,7 @@ public class SessionService {
       saveSession(session.get());
 
     } catch (ServiceException serviceException) {
-      logService
+      LogService
           .logDatabaseError(String.format("Could not update feedback group id %s for session %s",
               feedbackGroupId, session.get().getId()), serviceException);
       throw new UpdateFeedbackGroupIdException(serviceException);
@@ -166,7 +164,7 @@ public class SessionService {
   /**
    * Saving the enquiry message and Rocket.Chat group id for a session. The Message will be set to
    * now and the status to {@link SessionStatus#NEW}.
-   * 
+   *
    * @param session
    * @param rcGroupId
    * @return the {@link Session}
@@ -192,7 +190,7 @@ public class SessionService {
   /**
    * Returns a list of current sessions (no matter if an enquiry message has been written or not)
    * for the provided user ID.
-   * 
+   *
    * @param userId Keycloak/MariaDB user ID
    * @return {@link List} of {@link UserSessionResponseDTO}
    */
@@ -214,7 +212,7 @@ public class SessionService {
           "Database error while retrieving the sessions for the user with id %s", userId), ex);
 
     } catch (AgencyServiceHelperException helperEx) {
-      logService.logAgencyServiceHelperException(helperEx);
+      LogService.logAgencyServiceHelperException(helperEx);
       throw new ServiceException(String.format(
           "AgencyService error while retrieving the agency for the session for user %s", userId));
     }
@@ -224,7 +222,7 @@ public class SessionService {
 
   /**
    * Initialize a {@link Session}
-   * 
+   *
    * @param user
    * @param userDto
    */
@@ -238,7 +236,7 @@ public class SessionService {
 
   /**
    * Save a {@link Session} to the database
-   * 
+   *
    * @param session
    * @return the {@link Session}
    */
@@ -246,7 +244,7 @@ public class SessionService {
     try {
       return sessionRepository.save(session);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Database error while saving session with id %s", session.getId()), ex);
     }
@@ -275,7 +273,7 @@ public class SessionService {
       }
 
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String.format(
           "Database error while getting the team sessions for consultant %s", consultant.getId()));
 
@@ -294,7 +292,7 @@ public class SessionService {
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the given consultant and session
    * status.
-   * 
+   *
    * @param consultant
    * @param status The submitted {@link SessionStatus}
    * @return A list of {@link ConsultantSessionResponseDTO}
@@ -337,7 +335,7 @@ public class SessionService {
             "Invalid session status %s submitted for consultant %s", status, consultant.getId()));
       }
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error");
     }
 
@@ -353,7 +351,7 @@ public class SessionService {
    * Converts a {@link List} of {@link Session}s to a {@link List} of {@link UserSessionResponseDTO}
    * and adds the corresponding agency information to the session from the provided {@link List} of
    * {@link AgencyDTO}s
-   * 
+   *
    * @param sessions {@link List} of {@link Session}
    * @param agencies {@link List} of {@link AgencyDTO}
    * @return {@link List} of {@link UserSessionResponseDTO>}
@@ -377,7 +375,7 @@ public class SessionService {
 
   /**
    * Converts a {@link Session} to a {@link ConsultantSessionResponseDTO}
-   * 
+   *
    * @param session
    * @return
    */
@@ -389,7 +387,7 @@ public class SessionService {
 
   /**
    * Converts a {@link Session} to a {@link SessionDTO}
-   * 
+   *
    * @param session
    * @return
    */
@@ -407,7 +405,7 @@ public class SessionService {
 
   /**
    * Converts a {@link Consultant} to a {@link SessionConsultantForUserDTO}
-   * 
+   *
    * @param consultant
    * @return
    */
@@ -420,7 +418,7 @@ public class SessionService {
    * Converts a {@link Consultant} to a {@link SessionConsultantForConsultantDTO}. Only returns the
    * object if the currently authenticated user has the authority to view all peer session (is main
    * consultant).
-   * 
+   *
    * @param consultant
    * @return
    */
@@ -429,13 +427,13 @@ public class SessionService {
 
     return consultant != null
         ? new SessionConsultantForConsultantDTO(consultant.getId(), consultant.getFirstName(),
-            consultant.getLastName())
+        consultant.getLastName())
         : null;
   }
 
   /**
    * Converts a {@link Session} to a {@link SessionUserDTO}
-   * 
+   *
    * @param session
    * @return
    */
@@ -453,14 +451,14 @@ public class SessionService {
 
   /**
    * Delete a {@link Session}
-   * 
+   *
    * @param session the {@link Session}
    */
   public void deleteSession(Session session) {
     try {
       sessionRepository.delete(session);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Deletion of session with id %s failed", session.getId()));
     }
@@ -469,7 +467,7 @@ public class SessionService {
   /**
    * Returns the session for the specified user id and Rocket.Chat group id depending on the user's
    * role.
-   * 
+   *
    * @param rcGroupId Rocket.Chat group id
    * @param userId Rocket.Chat user id
    * @param roles user roles
@@ -487,7 +485,7 @@ public class SessionService {
         userSessions = sessionRepository.findByGroupIdAndConsultantId(rcGroupId, userId);
       }
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Database error while retrieving user sessions by groupId %s and userId %s",
               rcGroupId, userId));
@@ -510,7 +508,7 @@ public class SessionService {
 
   /**
    * Returns the session for the Rocket.Chat feedback group id
-   * 
+   *
    * @param feedbackGroupId
    * @return
    */
@@ -521,7 +519,7 @@ public class SessionService {
     try {
       sessions = sessionRepository.findByFeedbackGroupId(feedbackGroupId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String.format(
           "Database error while retrieving session by feedbackGroupId %s", feedbackGroupId));
     }

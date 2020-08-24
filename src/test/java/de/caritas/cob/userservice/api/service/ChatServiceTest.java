@@ -19,23 +19,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.dao.DataAccessException;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
 import de.caritas.cob.userservice.api.exception.ServiceException;
@@ -50,6 +41,21 @@ import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChatServiceTest {
@@ -61,12 +67,16 @@ public class ChatServiceTest {
   @Mock
   private ChatAgencyRepository chatAgencyRepository;
   @Mock
-  private LogService logService;
+  private Logger logger;
   @Mock
   private UserHelper userHelper;
   @Mock
   private ConsultantService consultantService;
 
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   /**
    * Method getChatsForUserId
@@ -85,7 +95,7 @@ public class ChatServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
 
   }
 
@@ -159,7 +169,7 @@ public class ChatServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
 
   }
 

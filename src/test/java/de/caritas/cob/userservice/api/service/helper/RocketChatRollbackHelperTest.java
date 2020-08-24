@@ -1,22 +1,27 @@
 package de.caritas.cob.userservice.api.service.helper;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
+import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.RocketChatService;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatRollbackHelperTest {
@@ -43,9 +48,14 @@ public class RocketChatRollbackHelperTest {
   @Mock
   private RocketChatService rocketChatService;
   @Mock
-  LogService logService;
+  Logger logger;
   @Mock
   private RocketChatCredentialsHelper rcCredentialHelper;
+
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   /**
    * Method: rollbackRemoveUsersFromRocketChatGroup
@@ -64,7 +74,7 @@ public class RocketChatRollbackHelperTest {
     rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -80,7 +90,7 @@ public class RocketChatRollbackHelperTest {
     rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -95,7 +105,7 @@ public class RocketChatRollbackHelperTest {
     rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -112,7 +122,6 @@ public class RocketChatRollbackHelperTest {
     rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logService, times(1)).logInternalServerError(Mockito.anyString(),
-        Mockito.eq(RC_EXCEPTION));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 }

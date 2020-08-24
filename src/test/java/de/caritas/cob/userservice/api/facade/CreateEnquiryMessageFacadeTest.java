@@ -19,26 +19,15 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_2;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.FieldSetter;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.RestTemplate;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.ServiceException;
@@ -65,6 +54,21 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateEnquiryMessageFacadeTest {
@@ -86,7 +90,7 @@ public class CreateEnquiryMessageFacadeTest {
   @Mock
   private UserService userService;
   @Mock
-  private LogService logService;
+  private Logger logger;
   @Mock
   private ConsultingTypeManager consultingTypeManager;
   @Mock
@@ -131,6 +135,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     FieldSetter.setField(createEnquiryMessageFacade, createEnquiryMessageFacade.getClass()
         .getDeclaredField(FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID), ROCKET_CHAT_SYSTEM_USER_ID);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @Test
@@ -449,7 +454,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
 
-    verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test

@@ -30,19 +30,16 @@ public class CreateSessionFacade {
   private final AgencyHelper agencyHelper;
   private final MonitoringService monitoringService;
   private final SessionDataService sessionDataService;
-  private final LogService logService;
 
   @Autowired
   public CreateSessionFacade(SessionService sessionService,
       ConsultingTypeManager consultingTypeManager, AgencyHelper agencyHelper,
-      MonitoringService monitoringService, SessionDataService sessionDataService,
-      LogService logService) {
+      MonitoringService monitoringService, SessionDataService sessionDataService) {
     this.sessionService = sessionService;
     this.consultingTypeManager = consultingTypeManager;
     this.agencyHelper = agencyHelper;
     this.monitoringService = monitoringService;
     this.sessionDataService = sessionDataService;
-    this.logService = logService;
   }
 
   /**
@@ -90,7 +87,7 @@ public class CreateSessionFacade {
       sessionDataService.saveSessionDataFromRegistration(session, new UserDTO());
 
     } catch (ServiceException serviceException) {
-      logService.logCreateSessionFacadeError(
+      LogService.logCreateSessionFacadeError(
           String.format("Could not register new consulting type session with %s",
               newRegistrationDto.toString()),
           serviceException);
@@ -102,7 +99,7 @@ public class CreateSessionFacade {
       return NewRegistrationResponseDto.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
     } catch (CreateMonitoringException createMonitoringException) {
-      logService.logCreateSessionFacadeError(String.format(
+      LogService.logCreateSessionFacadeError(String.format(
           "Could not create monitoring while registering a new consulting type session with %s",
           newRegistrationDto.toString()), createMonitoringException);
       monitoringService.rollbackInitializeMonitoring(

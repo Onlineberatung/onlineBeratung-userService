@@ -28,12 +28,10 @@ import lombok.Setter;
 public class MonitoringHelper {
 
   private ConsultingTypeManager consultingTypeManager;
-  private LogService logService;
 
   @Autowired
-  public MonitoringHelper(ConsultingTypeManager consultingTypeManager, LogService logService) {
+  public MonitoringHelper(ConsultingTypeManager consultingTypeManager) {
     this.consultingTypeManager = consultingTypeManager;
-    this.logService = logService;
   }
 
   /**
@@ -245,7 +243,7 @@ public class MonitoringHelper {
         }
       }
     } catch (Exception exception) {
-      logService.logMonitoringHelperError(exception);
+      LogService.logMonitoringHelperError(exception);
       return new LinkedHashMap<String, Object>();
     }
 

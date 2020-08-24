@@ -53,7 +53,6 @@ public class AssignSessionFacade {
   private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatRollbackHelper rocketChatRollbackHelper;
-  private final @NonNull LogService logService;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
 
@@ -63,8 +62,7 @@ public class AssignSessionFacade {
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
    */
   public void assignEnquiry(Session session, Consultant consultant) {
-    new SessionToConsultantVerifier(session, consultant, this.logService)
-        .verifySessionIsNotInProgress();
+    new SessionToConsultantVerifier(session, consultant).verifySessionIsNotInProgress();
     assignSession(session, consultant);
   }
 
@@ -76,7 +74,7 @@ public class AssignSessionFacade {
   public void assignSession(Session session, Consultant consultant) {
 
     SessionToConsultantVerifier sessionToConsultantVerifier =
-        new SessionToConsultantVerifier(session, consultant, this.logService);
+        new SessionToConsultantVerifier(session, consultant);
     sessionToConsultantVerifier.verifyPreconditionsForAssignment();
 
     Optional<Consultant> initialConsultant = Optional.ofNullable(session.getConsultant());
@@ -95,18 +93,18 @@ public class AssignSessionFacade {
       }
     } catch (RocketChatLoginException rcLoginEx) {
       throw new InternalServerErrorException("Could not login Rocket.Chat technical user",
-          logService::logInternalServerError);
+          LogService::logInternalServerError);
     } catch (UpdateSessionException updateEx) {
       String message = String.format("Could not update session %s with consultantId %s",
           session.getId(), consultant.getId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     } catch (RocketChatGetGroupMembersException getGroupMembersEx) {
       rollbackSessionUpdate(session, initialConsultant, initialStatus);
 
       String message = String.format(
           "Could not get Rocket.Chat group members of group id %s. Initiate rollback.",
           session.getGroupId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
     sendEmailForConsultantChange(session, consultant);
   }
@@ -157,7 +155,7 @@ public class AssignSessionFacade {
             session.getStatus());
 
       } catch (UpdateSessionException updateSessionEx) {
-        logService.logInternalServerError(String.format(
+        LogService.logInternalServerError(String.format(
             "Error during rollback while setting the session with id %s back to previous state.",
             session.getId()));
       }
@@ -191,7 +189,7 @@ public class AssignSessionFacade {
       String message = String.format(
           "Could not add user with id %s to Rocket.Chat group with id %s. Initiate rollback.",
           rcUserId, groupId);
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
@@ -206,13 +204,13 @@ public class AssignSessionFacade {
       if (!rocketChatService.addTechnicalUserToGroup(groupId)) {
         rollbackSessionUpdate(session, initialConsultant, initialStatus);
         throw new InternalServerErrorException(possibleErrorMessage,
-            logService::logInternalServerError);
+            LogService::logInternalServerError);
       }
 
     } catch (RocketChatAddUserToGroupException addUserEx) {
       rollbackSessionUpdate(session, initialConsultant, initialStatus);
       throw new InternalServerErrorException(possibleErrorMessage,
-          logService::logInternalServerError);
+          LogService::logInternalServerError);
     }
   }
 
@@ -224,7 +222,7 @@ public class AssignSessionFacade {
 
       String message = String.format(
           "Could not remove technical user from Rocket.Chat group id %s", session.getGroupId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
@@ -240,19 +238,19 @@ public class AssignSessionFacade {
       String message = String.format(
           "Could not remove Rocket.Chat user %s from Rocket.Chat group with id %s. Initiate rollback.",
           rcUserIdToRemove, session.getGroupId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     } catch (KeycloakException keycloakEx) {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
       String message = String
           .format("Could not get Keycloak roles for user with id %s. Initiate rollback.",
               rcUserIdToRemove);
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     } catch (ServiceException serviceEx) {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
       String message = String.format(
           "Could not get consultant with id %s information from database for role check. Initiate "
               + "rollback.", consultant.getId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
@@ -313,7 +311,7 @@ public class AssignSessionFacade {
           .format("Could not get Keycloak roles for user with id %s. Initiate rollback.",
               consultantId);
 
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
 
     } catch (RocketChatAddUserToGroupException addUserEx) {
       rollbackSessionUpdate(session, initialConsultantOptional, initialStatus);
@@ -323,7 +321,7 @@ public class AssignSessionFacade {
       String message = String.format(
           "Could not add Rocket.Chat technical user to Rocket.Chat group with id %s. Initiate "
               + "rollback.", session.getFeedbackGroupId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
 
     } catch (RocketChatRemoveUserFromGroupException removeUserEx) {
       rollbackSessionAndRocketChatGroup(session, initialConsultantOptional, initialStatus,
@@ -332,7 +330,7 @@ public class AssignSessionFacade {
       String message = String.format(
           "Could not remove Rocket.Chat user %s from Rocket.Chat group with id %s. Initiate rollback.",
           consultant.getRocketChatId(), session.getFeedbackGroupId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
@@ -350,7 +348,7 @@ public class AssignSessionFacade {
           .format("Could not add technical user to Rocket.Chat feedback group with id %s",
               session.getFeedbackGroupId());
 
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
@@ -367,7 +365,7 @@ public class AssignSessionFacade {
       String message = String.format(
           "Could not remove technical user from Rocket.Chat feedback group with id %s",
           session.getGroupId());
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
@@ -393,7 +391,7 @@ public class AssignSessionFacade {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
       String message = String
           .format("Could not remove system messages from Rocket.Chat group id %s", groupId);
-      throw new InternalServerErrorException(message, logService::logInternalServerError);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 

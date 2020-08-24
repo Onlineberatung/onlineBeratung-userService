@@ -95,12 +95,14 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -126,6 +128,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -314,8 +317,6 @@ public class UserControllerIT {
   @MockBean
   private GetUserDataFacade getUserDataFacade;
   @MockBean
-  private LogService logService;
-  @MockBean
   private ConsultantService consultantService;
   @MockBean
   private ConsultantImportService consultantImportService;
@@ -369,6 +370,9 @@ public class UserControllerIT {
   private CreateSessionFacade createSessionFacade;
 
   @Mock
+  private Logger logger;
+
+  @Mock
   private Chat chat;
 
   @Before
@@ -378,6 +382,7 @@ public class UserControllerIT {
     HashMap<String, Object> addictiveDrugsMap = new HashMap<String, Object>();
     addictiveDrugsMap.put("drugs", drugsMap);
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   /**
@@ -568,7 +573,7 @@ public class UserControllerIT {
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
     verify(authenticatedUser, atLeastOnce()).getUserId();
-    verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -584,7 +589,7 @@ public class UserControllerIT {
             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -600,7 +605,7 @@ public class UserControllerIT {
             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -709,7 +714,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -747,7 +752,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -766,7 +771,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(Mockito.anyString(), Mockito.any()))
+    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -1028,7 +1033,7 @@ public class UserControllerIT {
         .thenReturn(CONSULTANT_USER_DATA_RESPONSE_DTO);
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT).stream()
-            .map(authority -> authority.toString()).collect(Collectors.toSet()));
+            .collect(Collectors.toSet()));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
@@ -1097,7 +1102,7 @@ public class UserControllerIT {
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
-    verify(logService, atLeastOnce()).logForbidden(Mockito.anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1228,7 +1233,7 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_MONITORING).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(logService, times(1)).logBadRequest(Mockito.anyString());
+    verify(logger, times(1)).warn(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1251,7 +1256,7 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_MONITORING).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(logService, times(1)).logBadRequest(Mockito.anyString());
+    verify(logger, times(1)).warn(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1344,7 +1349,7 @@ public class UserControllerIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 
-    verify(logService, atLeastOnce()).logUnauthorized(Mockito.anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1359,7 +1364,7 @@ public class UserControllerIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 
-    verify(logService, atLeastOnce()).logUnauthorized(Mockito.anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1371,7 +1376,7 @@ public class UserControllerIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(logService, atLeastOnce()).logBadRequest(Mockito.anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
   }
 
   /**
@@ -1440,7 +1445,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1468,7 +1473,7 @@ public class UserControllerIT {
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-    verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1481,7 +1486,7 @@ public class UserControllerIT {
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-    verify(logService, atLeastOnce()).logInternalServerError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1494,7 +1499,7 @@ public class UserControllerIT {
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(HttpStatus.FORBIDDEN.value()));
-    verify(logService, atLeastOnce()).logForbidden(Mockito.anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1508,7 +1513,7 @@ public class UserControllerIT {
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(HttpStatus.FORBIDDEN.value()));
-    verify(logService, atLeastOnce()).logForbidden(Mockito.anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1549,15 +1554,15 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(authenticatedUser.getUsername()).thenReturn(USERNAME);
-    when(keycloakService.loginUser(Mockito.anyString(), Mockito.anyString()))
+    when(keycloakService.loginUser(anyString(), anyString()))
         .thenReturn(LOGIN_RESPONSE_ENTITY_OK);
-    when(keycloakService.logoutUser(Mockito.anyString())).thenReturn(false);
+    when(keycloakService.logoutUser(anyString())).thenReturn(false);
 
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(VALID_PASSWORT_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(keycloakService, times(0)).changePassword(Mockito.anyString(), Mockito.anyString());
+    verify(keycloakService, times(0)).changePassword(anyString(), anyString());
   }
 
   @Test
@@ -1566,10 +1571,10 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(authenticatedUser.getUsername()).thenReturn(USERNAME);
-    when(keycloakService.loginUser(Mockito.anyString(), Mockito.anyString()))
+    when(keycloakService.loginUser(anyString(), anyString()))
         .thenReturn(LOGIN_RESPONSE_ENTITY_OK);
-    when(keycloakService.logoutUser(Mockito.anyString())).thenReturn(true);
-    when(keycloakService.changePassword(Mockito.anyString(), Mockito.anyString()))
+    when(keycloakService.logoutUser(anyString())).thenReturn(true);
+    when(keycloakService.changePassword(anyString(), anyString()))
         .thenReturn(false);
 
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(VALID_PASSWORT_REQUEST_BODY)
@@ -1582,14 +1587,14 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUsername()).thenReturn(USERNAME);
-    when(keycloakService.loginUser(Mockito.anyString(), Mockito.anyString()))
+    when(keycloakService.loginUser(anyString(), anyString()))
         .thenReturn(LOGIN_RESPONSE_ENTITY_BAD_REQUEST);
 
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(VALID_PASSWORT_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(keycloakService, times(0)).changePassword(Mockito.anyString(), Mockito.anyString());
+    verify(keycloakService, times(0)).changePassword(anyString(), anyString());
   }
 
   @Test
@@ -1598,10 +1603,10 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUsername()).thenReturn(USERNAME);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(keycloakService.loginUser(Mockito.anyString(), Mockito.anyString()))
+    when(keycloakService.loginUser(anyString(), anyString()))
         .thenReturn(LOGIN_RESPONSE_ENTITY_OK);
-    when(keycloakService.logoutUser(Mockito.anyString())).thenReturn(true);
-    when(keycloakService.changePassword(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+    when(keycloakService.logoutUser(anyString())).thenReturn(true);
+    when(keycloakService.changePassword(anyString(), anyString())).thenReturn(true);
 
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(VALID_PASSWORT_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -1648,7 +1653,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(Mockito.anyString())).thenReturn(OPTIONAL_CONSULTANT);
+    when(consultantService.getConsultant(anyString())).thenReturn(OPTIONAL_CONSULTANT);
     when(createChatFacade.createChat(Mockito.any(), Mockito.any())).thenReturn(null);
 
     mvc.perform(post(PATH_POST_CHAT_NEW).content(VALID_CREATE_CHAT_BODY)

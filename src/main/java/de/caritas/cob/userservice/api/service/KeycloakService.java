@@ -18,9 +18,7 @@ import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 
 /**
- * 
  * Service for Keycloak REST API calls
- * 
  */
 @Service
 public class KeycloakService {
@@ -44,25 +42,23 @@ public class KeycloakService {
   private final String HEADER_BEARER_KEY = "Bearer ";
 
   private RestTemplate restTemplate;
-  private LogService logService;
   private AuthenticatedUser authenticatedUser;
   private KeycloakAdminClientHelper keycloakAdminClientHelper;
 
   @Autowired
-  public KeycloakService(RestTemplate restTemplate, LogService logService,
-      AuthenticatedUser authenticatedUser, KeycloakAdminClientHelper keycloakAdminClientHelper) {
+  public KeycloakService(RestTemplate restTemplate, AuthenticatedUser authenticatedUser,
+      KeycloakAdminClientHelper keycloakAdminClientHelper) {
     this.restTemplate = restTemplate;
-    this.logService = logService;
     this.authenticatedUser = authenticatedUser;
     this.keycloakAdminClientHelper = keycloakAdminClientHelper;
   }
 
   /**
    * Changes the (Keycloak) password of a user and returns true on success.
-   * 
+   *
    * @param userId
    * @param password
-   * 
+   *
    * @return
    */
   public boolean changePassword(final String userId, final String password) {
@@ -71,7 +67,7 @@ public class KeycloakService {
       keycloakAdminClientHelper.updatePassword(userId, password);
 
     } catch (Exception ex) {
-      logService.logKeycloakError(
+      LogService.logKeycloakError(
           String.format("Could not change password for user with id %s", userId), ex);
       return false;
     }
@@ -81,10 +77,10 @@ public class KeycloakService {
 
   /**
    * Performs a Keycloak login and returns the Keycloak {@link LoginResponseDTO} on success
-   * 
+   *
    * @param userName
    * @param password
-   * 
+   *
    * @return
    */
   public Optional<ResponseEntity<LoginResponseDTO>> loginUser(final String userName,
@@ -104,7 +100,7 @@ public class KeycloakService {
       response = restTemplate.postForEntity(KEYCLOAK_LOGIN_URL, request, LoginResponseDTO.class);
 
     } catch (HttpClientErrorException http4xxEx) {
-      logService.logKeycloakError(String.format(
+      LogService.logKeycloakError(String.format(
           "Could not log in user %s because of Keycloak API response 4xx (wrong credentials)",
           userName), http4xxEx);
       return Optional.of(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
@@ -121,7 +117,7 @@ public class KeycloakService {
   /**
    * Performs a Keycloak logout. This only destroys the Keycloak session, the (offline) access token
    * will still be valid until expiration date/time ends.
-   * 
+   *
    * @param refreshToken
    */
   public boolean logoutUser(final String refreshToken) {
@@ -139,13 +135,13 @@ public class KeycloakService {
       response = restTemplate.postForEntity(KEYCLOAK_LOGOUT_URL, request, Void.class);
 
     } catch (Exception ex) {
-      logService.logKeycloakError(
+      LogService.logKeycloakError(
           String.format("Could not log out user with refresh token %s", refreshToken), ex);
       return false;
     }
 
     if (response == null || !response.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
-      logService.logKeycloakError(
+      LogService.logKeycloakError(
           String.format("Could not log out user with refresh token %s", refreshToken));
       return false;
     }
@@ -156,7 +152,7 @@ public class KeycloakService {
   /**
    * Creates and returns {@link HttpHeaders} containing the x-www-form-urlencoded {@link MediaType}
    * and the Bearer Authorization token
-   * 
+   *
    * @return
    */
   private HttpHeaders getFormHttpHeaders() {

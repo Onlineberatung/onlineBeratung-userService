@@ -23,26 +23,14 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCOD
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.FieldSetter;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
@@ -73,6 +61,23 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmailNotificationFacadeTest {
@@ -161,7 +166,7 @@ public class EmailNotificationFacadeTest {
   @Mock
   ConsultantAgencyService consultantAgencyService;
   @Mock
-  LogService logService;
+  Logger logger;
   @Mock
   ConsultantService consultantService;
   @Mock
@@ -184,6 +189,7 @@ public class EmailNotificationFacadeTest {
     FieldSetter.setField(emailNotificationFacade,
         emailNotificationFacade.getClass().getDeclaredField(APPLICATION_BASE_URL_FIELD_NAME),
         APPLICATION_BASE_URL);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   /**
@@ -371,7 +377,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailDtoBuilder);
   }
 
@@ -384,7 +390,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailDtoBuilder);
   }
 
@@ -421,7 +427,7 @@ public class EmailNotificationFacadeTest {
         CONSULTANT_ID);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailDtoBuilder);
   }
 
@@ -601,7 +607,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         U25_PEER_ROLES_DEFAULT, CONSULTANT_ID);
 
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
 
   }
@@ -615,7 +621,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         U25_PEER_ROLES_DEFAULT, CONSULTANT_ID);
 
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
 
   }
@@ -630,7 +636,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         U25_PEER_ROLES_DEFAULT, CONSULTANT_ID);
 
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
 
   }
@@ -667,7 +673,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(null, CONSULTANT_ID_2, USERNAME);
 
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
   }
 
@@ -677,7 +683,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT_WITHOUT_MAIL,
         CONSULTANT_ID_2, USERNAME);
 
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
   }
 
@@ -689,7 +695,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME);
 
-    verify(logService, times(1)).logEmailNotificationFacadeError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
   }
 

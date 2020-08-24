@@ -2,17 +2,13 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.dao.DataAccessException;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.model.UserDTO;
@@ -23,6 +19,16 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
 import de.caritas.cob.userservice.api.repository.sessionData.SessionDataRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
+import java.util.ArrayList;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionDataServiceTest {
@@ -46,9 +52,14 @@ public class SessionDataServiceTest {
   @Mock
   private SessionDataRepository sessionDataRepository;
   @Mock
-  private LogService logService;
+  private Logger logger;
   @Mock
   private SessionDataHelper sessionDataHelper;
+
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   @Test
   public void createSessionDataList_Should_SaveSessionData() {
@@ -74,7 +85,7 @@ public class SessionDataServiceTest {
       assertTrue("Excepted ServiceException thrown", true);
     }
 
-    verify(logService, times(1)).logDatabaseError(dataAccessException);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -94,7 +105,7 @@ public class SessionDataServiceTest {
       assertTrue("Excepted ServiceException thrown", true);
     }
 
-    verify(logService, times(1)).logDatabaseError(illegalArgumentException);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
 }

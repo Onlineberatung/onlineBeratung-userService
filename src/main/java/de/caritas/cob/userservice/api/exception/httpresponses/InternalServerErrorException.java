@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 public class InternalServerErrorException extends CustomHttpStatusException {
 
   /**
-   * InternalServerError exception
+   * InternalServerError exception.
    *
    * @param message an additional message
    * @param loggingMethod the method being used to log this exception
@@ -16,12 +16,12 @@ public class InternalServerErrorException extends CustomHttpStatusException {
   }
 
   /**
-   * InternalServerError exception
+   * InternalServerError exception.
    *
    * @param message an additional message
    */
   public InternalServerErrorException(String message) {
-    super(message, new LogService()::logInternalServerError);
+    super(message, LogService::logInternalServerError);
   }
 
 }

@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.controller;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -99,7 +101,6 @@ public class UserController implements UsersApi {
   private final int MIN_OFFSET = 0;
   private final int MIN_COUNT = 1;
 
-  private final LogService logService;
   private final UserService userService;
   private final ConsultantService consultantService;
   private final SessionService sessionService;
@@ -129,7 +130,7 @@ public class UserController implements UsersApi {
 
   @Autowired
   public UserController(UserService userService, ConsultantService consultantService,
-      SessionService sessionService, AuthenticatedUser authenticatedUser, LogService logService,
+      SessionService sessionService, AuthenticatedUser authenticatedUser,
       CreateEnquiryMessageFacade createEnquiryMessageFacade, GetUserDataFacade getUserDataFacade,
       ConsultantImportService consultantImportService,
       EmailNotificationFacade emailNotificationFacade, MonitoringService monitoringService,
@@ -147,7 +148,6 @@ public class UserController implements UsersApi {
     this.consultantService = consultantService;
     this.sessionService = sessionService;
     this.authenticatedUser = authenticatedUser;
-    this.logService = logService;
     this.createEnquiryMessageFacade = createEnquiryMessageFacade;
     this.getUserDataFacade = getUserDataFacade;
     this.consultantImportService = consultantImportService;
@@ -184,9 +184,9 @@ public class UserController implements UsersApi {
     KeycloakCreateUserResponseDTO response = createUserFacade.createUserAndInitializeAccount(user);
 
     if (!response.getStatus().equals(HttpStatus.CONFLICT)) {
-      return new ResponseEntity<CreateUserResponseDTO>(response.getStatus());
+      return new ResponseEntity<>(response.getStatus());
     } else {
-      return new ResponseEntity<CreateUserResponseDTO>(response.getResponseDTO(),
+      return new ResponseEntity<>(response.getResponseDTO(),
           response.getStatus());
     }
   }
@@ -205,17 +205,17 @@ public class UserController implements UsersApi {
     Optional<User> user = userService.getUser(authenticatedUser.getUserId());
 
     if (!user.isPresent()) {
-      logService.logInternalServerError(
+      LogService.logInternalServerError(
           String.format("User with id %s not found while registering new consulting type: %s",
               authenticatedUser.getUserId(), newRegistrationDto.toString()));
 
-      return new ResponseEntity<NewRegistrationResponseDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     NewRegistrationResponseDto response =
         createSessionFacade.createSession(newRegistrationDto, user.get());
 
-    return new ResponseEntity<NewRegistrationResponseDto>(response, response.getStatus());
+    return new ResponseEntity<>(response, response.getStatus());
   }
 
   /**
@@ -228,7 +228,7 @@ public class UserController implements UsersApi {
     Optional<Session> session = sessionService.getSession(sessionId);
 
     if (!session.isPresent() || session.get().getGroupId() == null) {
-      logService.logInternalServerError(String.format(
+      LogService.logInternalServerError(String.format(
           "Session id %s is invalid, session not found or has no Rocket.Chat groupId assigned.",
           sessionId));
 
@@ -239,7 +239,7 @@ public class UserController implements UsersApi {
         consultantService.getConsultant(authenticatedUser.getUserId());
 
     if (!consultant.isPresent()) {
-      logService.logInternalServerError(
+      LogService.logInternalServerError(
           String.format("Consultant with id %s not found for accepting the enquiry.",
               authenticatedUser.getUserId()));
 
@@ -263,10 +263,10 @@ public class UserController implements UsersApi {
     Optional<User> user = userService.getUser(authenticatedUser.getUserId());
 
     if (!user.isPresent()) {
-      logService.logInternalServerError(
+      LogService.logInternalServerError(
           String.format("User with id %s not found while creating enquiry message.",
               authenticatedUser.getUserId()));
-      return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     RocketChatCredentials rocketChatCredentials =
@@ -274,7 +274,7 @@ public class UserController implements UsersApi {
     HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(), sessionId,
         enquiryMessage.getMessage(), rocketChatCredentials);
 
-    return new ResponseEntity<Void>(status);
+    return new ResponseEntity<>(status);
   }
 
   /**
@@ -290,9 +290,9 @@ public class UserController implements UsersApi {
     Optional<User> user = userService.getUser(authenticatedUser.getUserId());
 
     if (!user.isPresent()) {
-      logService.logInternalServerError(String.format(
+      LogService.logInternalServerError(String.format(
           "User with id %s not found for getting user sessions.", authenticatedUser.getUserId()));
-      return new ResponseEntity<UserSessionListResponseDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
@@ -300,9 +300,9 @@ public class UserController implements UsersApi {
     UserSessionListResponseDTO sessions = getSessionListFacade
         .getSessionsForAuthenticatedUser(user.get().getUserId(), rocketChatCredentials);
 
-    return (sessions.getSessions() != null && sessions.getSessions().size() > 0)
-        ? new ResponseEntity<UserSessionListResponseDTO>(sessions, HttpStatus.OK)
-        : new ResponseEntity<UserSessionListResponseDTO>(HttpStatus.NO_CONTENT);
+    return isNotEmpty(sessions.getSessions())
+        ? new ResponseEntity<>(sessions, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   @Override
@@ -311,15 +311,15 @@ public class UserController implements UsersApi {
         consultantService.getConsultant(authenticatedUser.getUserId());
 
     if (!consultant.isPresent()) {
-      logService.logInternalServerError(
+      LogService.logInternalServerError(
           String.format("Consultant with id %s not found while updating absent state.",
               authenticatedUser.getUserId()));
-      return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     consultantService.updateConsultantAbsent(consultant.get(), absence);
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -339,7 +339,7 @@ public class UserController implements UsersApi {
           consultantService.getConsultant(authenticatedUser.getUserId());
 
       if (!consultant.isPresent()) {
-        logService.logInternalServerError(
+        LogService.logInternalServerError(
             String.format("Consultant with id %s not found while getting UserData.",
                 authenticatedUser.getUserId()));
       } else {
@@ -351,14 +351,14 @@ public class UserController implements UsersApi {
       Optional<User> user = userService.getUser(authenticatedUser.getUserId());
 
       if (!user.isPresent()) {
-        logService.logInternalServerError(String.format(
+        LogService.logInternalServerError(String.format(
             "User with id %s not found while getting UserData.", authenticatedUser.getUserId()));
       } else {
         responseDTO = getUserDataFacade.getUserData(user.get());
       }
 
     } else {
-      logService.logInternalServerError(
+      LogService.logInternalServerError(
           String.format("User with id %s has neither Consultant-Role, nor User-Role .",
               authenticatedUser.getUserId()));
     }
@@ -367,8 +367,8 @@ public class UserController implements UsersApi {
     responseDTO.setGrantedAuthorities(authenticatedUser.getGrantedAuthorities());
 
     return (responseDTO != null)
-        ? new ResponseEntity<UserDataResponseDTO>(responseDTO, HttpStatus.OK)
-        : new ResponseEntity<UserDataResponseDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
+        ? new ResponseEntity<>(responseDTO, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   /**
@@ -381,10 +381,10 @@ public class UserController implements UsersApi {
       @NotNull @Valid @RequestParam Integer count, @Valid @NotEmpty @RequestParam String filter,
       @Valid @NotEmpty @RequestParam Integer status) {
 
-    if (offset == null || offset < MIN_OFFSET) {
+    if (offset < MIN_OFFSET) {
       throw new BadRequestException("offset must be a positive number");
     }
-    if (count == null || count < MIN_COUNT) {
+    if (count < MIN_COUNT) {
       throw new BadRequestException("count must be a positive number");
     }
 
@@ -398,10 +398,9 @@ public class UserController implements UsersApi {
           status, rcToken, offset, count, optionalSessionFilter.get());
     }
 
-    return (sessionList != null && sessionList.getSessions() != null
-        && sessionList.getSessions().size() > 0)
-            ? new ResponseEntity<ConsultantSessionListResponseDTO>(sessionList, HttpStatus.OK)
-            : new ResponseEntity<ConsultantSessionListResponseDTO>(HttpStatus.NO_CONTENT);
+    return sessionList != null && isNotEmpty(sessionList.getSessions())
+            ? new ResponseEntity<>(sessionList, HttpStatus.OK)
+            : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -412,10 +411,10 @@ public class UserController implements UsersApi {
       @RequestHeader String rcToken, @NotNull @Valid @RequestParam Integer offset,
       @NotNull @Valid @RequestParam Integer count, @Valid @NotEmpty @RequestParam String filter) {
 
-    if (offset == null || offset < MIN_OFFSET) {
+    if (offset < MIN_OFFSET) {
       throw new BadRequestException("offset must be a positive number");
     }
-    if (count == null || count < MIN_COUNT) {
+    if (count < MIN_COUNT) {
       throw new BadRequestException("count must be a positive number");
     }
 
@@ -423,10 +422,10 @@ public class UserController implements UsersApi {
         consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
 
     if (!consultant.get().isTeamConsultant()) {
-      logService.logForbidden(String.format(
+      LogService.logForbidden(String.format(
           "Consultant with id %s is no team consultant and therefor not allowed to get team sessions.",
           authenticatedUser.getUserId()));
-      return new ResponseEntity<ConsultantSessionListResponseDTO>(HttpStatus.FORBIDDEN);
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     ConsultantSessionListResponseDTO sessionList = null;
@@ -436,10 +435,9 @@ public class UserController implements UsersApi {
           rcToken, offset, count, optionalSessionFilter.get());
     }
 
-    return (sessionList != null && sessionList.getSessions() != null
-        && sessionList.getSessions().size() > 0)
-            ? new ResponseEntity<ConsultantSessionListResponseDTO>(sessionList, HttpStatus.OK)
-            : new ResponseEntity<ConsultantSessionListResponseDTO>(HttpStatus.NO_CONTENT);
+    return sessionList != null && isNotEmpty(sessionList.getSessions())
+            ? new ResponseEntity<>(sessionList, HttpStatus.OK)
+            : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -451,7 +449,7 @@ public class UserController implements UsersApi {
 
     consultantImportService.startImport();
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -463,7 +461,7 @@ public class UserController implements UsersApi {
 
     askerImportService.startImport();
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -475,7 +473,7 @@ public class UserController implements UsersApi {
 
     askerImportService.startImportForAskersWithoutSession();
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -491,7 +489,7 @@ public class UserController implements UsersApi {
     emailNotificationFacade.sendNewMessageNotification(newMessageNotificationDTO.getRcGroupId(),
         authenticatedUser.getRoles(), authenticatedUser.getUserId());
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -508,7 +506,7 @@ public class UserController implements UsersApi {
         newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getRoles(),
         authenticatedUser.getUserId());
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -522,25 +520,25 @@ public class UserController implements UsersApi {
     // Check if session exists
     Optional<Session> session = sessionService.getSession(sessionId);
     if (!session.isPresent()) {
-      logService.logBadRequest(String.format("Session with id %s not found", sessionId));
-      return new ResponseEntity<MonitoringDTO>(HttpStatus.BAD_REQUEST);
+      LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     // Check if consultant has the right to access the session
     if (!authenticatedUserHelper.hasPermissionForSession(session.get())) {
-      logService.logBadRequest(
+      LogService.logBadRequest(
           String.format("Consultant with id %s has no permission to access session with id %s",
               authenticatedUser.getUserId(), sessionId));
-      return new ResponseEntity<MonitoringDTO>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     MonitoringDTO responseDTO = monitoringService.getMonitoring(session.get());
 
     if (responseDTO != null && responseDTO.getProperties().size() > 0) {
-      return new ResponseEntity<MonitoringDTO>(responseDTO, HttpStatus.OK);
+      return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 
     } else {
-      return new ResponseEntity<MonitoringDTO>(HttpStatus.NO_CONTENT);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
   }
@@ -560,18 +558,18 @@ public class UserController implements UsersApi {
       // Check if calling consultant has the permission to update the monitoring values
       if (authenticatedUserHelper.hasPermissionForSession(session.get())) {
         monitoringService.updateMonitoring(session.get().getId(), monitoring);
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
 
       } else {
-        logService.logUnauthorized(String.format(
+        LogService.logUnauthorized(String.format(
             "Consultant with id %s is not authorized to update monitoring of session %s",
             authenticatedUser.getUserId(), sessionId));
-        return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
 
     } else {
-      logService.logBadRequest(String.format("Session with id %s not found", sessionId));
-      return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+      LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -585,9 +583,9 @@ public class UserController implements UsersApi {
     List<ConsultantResponseDTO> consultants =
         consultantAgencyService.getConsultantsOfAgency(agencyId);
 
-    return (consultants != null && consultants.size() > 0)
-        ? new ResponseEntity<List<ConsultantResponseDTO>>(consultants, HttpStatus.OK)
-        : new ResponseEntity<List<ConsultantResponseDTO>>(HttpStatus.NO_CONTENT);
+    return isNotEmpty(consultants)
+        ? new ResponseEntity<>(consultants, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -604,7 +602,7 @@ public class UserController implements UsersApi {
     Optional<Consultant> consultant = consultantService.getConsultant(consultantId);
 
     if (!consultant.isPresent()) {
-      logService.logInternalServerError(
+      LogService.logInternalServerError(
           String.format("Consultant (to be assigned) with id %s not found.", consultantId));
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -612,7 +610,7 @@ public class UserController implements UsersApi {
     Optional<Session> session = sessionService.getSession(sessionId);
 
     if (!session.isPresent()) {
-      logService.logInternalServerError(String.format("Session with id %s not found.", sessionId));
+      LogService.logInternalServerError(String.format("Session with id %s not found.", sessionId));
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -620,7 +618,7 @@ public class UserController implements UsersApi {
     // consultant
     if (session.get().getStatus().equals(SessionStatus.IN_PROGRESS) && !authenticatedUser
         .getGrantedAuthorities().contains(Authority.ASSIGN_CONSULTANT_TO_SESSION)) {
-      logService.logForbidden(String.format(
+      LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign a session to a another consultant.",
           authenticatedUser.getUserId()));
 
@@ -630,7 +628,7 @@ public class UserController implements UsersApi {
     // Check if the calling consultant has the correct right to assign the enquiry to a consultant
     if (session.get().getStatus().equals(SessionStatus.NEW) && !authenticatedUser
         .getGrantedAuthorities().contains(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY)) {
-      logService.logForbidden(String.format(
+      LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign the enquiry to a consultant.",
           authenticatedUser.getUserId()));
 
@@ -658,11 +656,11 @@ public class UserController implements UsersApi {
       // Change the user's (Keycloak) password
       if (keycloakService.changePassword(authenticatedUser.getUserId(),
           passwordDTO.getNewPassword())) {
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
       }
     }
 
-    return new ResponseEntity<Void>(loginResponse.isPresent()
+    return new ResponseEntity<>(loginResponse.isPresent()
         && loginResponse.get().getStatusCode().equals(HttpStatus.BAD_REQUEST)
             ? HttpStatus.BAD_REQUEST
             : HttpStatus.INTERNAL_SERVER_ERROR);
@@ -678,11 +676,11 @@ public class UserController implements UsersApi {
   public ResponseEntity<Void> updateKey(@Valid @RequestBody MasterKeyDTO masterKey) {
     if (!decryptionService.getMasterKey().equals(masterKey.getMasterKey())) {
       decryptionService.updateMasterKey(masterKey.getMasterKey());
-      logService.logInfo("MasterKey updated");
-      return new ResponseEntity<Void>(HttpStatus.OK);
+      LogService.logInfo("MasterKey updated");
+      return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+    return new ResponseEntity<>(HttpStatus.CONFLICT);
   }
 
   /**
@@ -701,8 +699,8 @@ public class UserController implements UsersApi {
     CreateChatResponseDTO response = createChatFacade.createChat(chatDTO, callingConsultant.get());
 
     return (response != null)
-        ? new ResponseEntity<CreateChatResponseDTO>(response, HttpStatus.CREATED)
-        : new ResponseEntity<CreateChatResponseDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
+        ? new ResponseEntity<>(response, HttpStatus.CREATED)
+        : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   /**
@@ -722,7 +720,7 @@ public class UserController implements UsersApi {
 
     startChatFacade.startChat(chat.get(), callingConsultant.get());
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
 
   }
 
@@ -735,7 +733,7 @@ public class UserController implements UsersApi {
 
     ChatInfoResponseDTO response = getChatFacade.getChat(chatId, authenticatedUser);
 
-    return new ResponseEntity<ChatInfoResponseDTO>(response, HttpStatus.OK);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   /**
@@ -746,7 +744,7 @@ public class UserController implements UsersApi {
 
     joinAndLeaveChatFacade.joinChat(chatId, authenticatedUser);
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
 
   }
 
@@ -768,7 +766,7 @@ public class UserController implements UsersApi {
 
     stopChatFacade.stopChat(chat.get(), callingConsultant.get());
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
@@ -778,7 +776,7 @@ public class UserController implements UsersApi {
     ChatMembersResponseDTO chatMembersResponseDTO =
         getChatMembersFacade.getChatMembers(chatId, authenticatedUser);
 
-    return new ResponseEntity<ChatMembersResponseDTO>(chatMembersResponseDTO, HttpStatus.OK);
+    return new ResponseEntity<>(chatMembersResponseDTO, HttpStatus.OK);
   }
 
   @Override
@@ -786,7 +784,7 @@ public class UserController implements UsersApi {
 
     joinAndLeaveChatFacade.leaveChat(chatId, authenticatedUser);
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
 
   }
 
@@ -801,7 +799,7 @@ public class UserController implements UsersApi {
     UpdateChatResponseDTO updateChatResponseDTO =
         chatService.updateChat(chatId, chatDTO, authenticatedUser);
 
-    return new ResponseEntity<UpdateChatResponseDTO>(updateChatResponseDTO, HttpStatus.OK);
+    return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
   }
 
   @Override
@@ -809,7 +807,7 @@ public class UserController implements UsersApi {
 
     deleteUserFacade.deleteUser(deleteUserDTO);
 
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
 }

@@ -6,24 +6,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Arrays;
-import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.dao.DataAccessException;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.springframework.dao.DataAccessException;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class ConsultantAgencyServiceTest {
@@ -50,7 +55,12 @@ public class ConsultantAgencyServiceTest {
   @Mock
   private ConsultantAgencyRepository consultantAgencyRepository;
   @Mock
-  private LogService logService;
+  private Logger logger;
+
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   @Test
   public void saveConsultantAgency_Should_SaveConsultantAgency() {
@@ -74,7 +84,7 @@ public class ConsultantAgencyServiceTest {
       assertTrue("Excepted ServiceException thrown", true);
     }
 
-    verify(logService, times(1)).logDatabaseError(dataAccessException);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
 
   }
 
@@ -167,7 +177,7 @@ public class ConsultantAgencyServiceTest {
       fail("Expected exception: ServiceException");
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
-      verify(logService, atLeastOnce()).logDatabaseError(Mockito.any());
+      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     }
 
   }
@@ -183,7 +193,7 @@ public class ConsultantAgencyServiceTest {
       fail("Expected exception: ServiceException");
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
-      verify(logService, atLeastOnce()).logDatabaseInconsistency(Mockito.any());
+      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     }
 
   }
@@ -199,7 +209,7 @@ public class ConsultantAgencyServiceTest {
       fail("Expected exception: ServiceException");
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
-      verify(logService, atLeastOnce()).logDatabaseInconsistency(Mockito.any());
+      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     }
 
   }

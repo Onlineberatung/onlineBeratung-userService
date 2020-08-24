@@ -1,15 +1,5 @@
 package de.caritas.cob.userservice.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
 import de.caritas.cob.userservice.api.exception.ServiceException;
@@ -31,6 +21,16 @@ import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
 
 /**
  * Chat service class
@@ -42,16 +42,14 @@ public class ChatService {
 
   private final ChatRepository chatRepository;
   private final ChatAgencyRepository chatAgencyRepository;
-  private final LogService logService;
   private final ConsultantService consultantService;
   private final UserHelper userHelper;
 
   @Autowired
   public ChatService(ChatRepository chatRepository, ChatAgencyRepository chatAgencyRepository,
-      LogService logService, ConsultantService consultantService, UserHelper userHelper) {
+      ConsultantService consultantService, UserHelper userHelper) {
     this.chatRepository = chatRepository;
     this.chatAgencyRepository = chatAgencyRepository;
-    this.logService = logService;
     this.consultantService = consultantService;
     this.userHelper = userHelper;
   }
@@ -71,7 +69,7 @@ public class ChatService {
           .map(ConsultantAgency::getAgencyId).collect(Collectors.toSet()));
 
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Database error while retrieving the chats for the consultant with id %s",
               consultant.getId()));
@@ -133,7 +131,7 @@ public class ChatService {
     try {
       return chatRepository.save(chat);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new SaveChatException(String.format("Creation of chat failed for: %s", chat.toString()),
           ex);
     }
@@ -149,7 +147,7 @@ public class ChatService {
     try {
       return chatAgencyRepository.save(chatAgency);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new SaveChatAgencyException(
           String.format("Creation of chat - user relation failed for: ", chatAgency.toString()),
           ex);
@@ -169,7 +167,7 @@ public class ChatService {
     try {
       chats = chatRepository.findByUserId(userId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String
           .format("Database error while retrieving the chats for the user with id %s", userId));
     }
@@ -205,7 +203,7 @@ public class ChatService {
     try {
       chat = chatRepository.findById(chatId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Database error while retrieving chat with id %s", chatId));
     }
@@ -222,7 +220,7 @@ public class ChatService {
     try {
       chatRepository.delete(chat);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String.format("Deletion of chat with id %s failed", chat.getId()));
     }
   }

@@ -26,14 +26,12 @@ public class MonitoringService {
 
   private MonitoringRepository monitoringRepository;
   private MonitoringHelper monitoringHelper;
-  private LogService logService;
 
   @Autowired
   public MonitoringService(MonitoringRepository monitoringRepository,
-      MonitoringHelper monitoringHelper, LogService logService) {
+      MonitoringHelper monitoringHelper) {
     this.monitoringRepository = monitoringRepository;
     this.monitoringHelper = monitoringHelper;
-    this.logService = logService;
   }
 
   /**
@@ -75,7 +73,7 @@ public class MonitoringService {
       return new MonitoringDTO(convertToMonitoringMap(monitoring, session.getConsultingType()));
 
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while saving monitoring data.");
     }
   }
@@ -95,7 +93,7 @@ public class MonitoringService {
       monitoringRepository.saveAll(monitoringList);
 
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while saving monitoring data.");
     }
   }
@@ -116,7 +114,7 @@ public class MonitoringService {
       monitoringRepository.deleteAll(monitoringList);
 
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while deleting monitoring data.");
     }
   }
@@ -205,7 +203,7 @@ public class MonitoringService {
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
 
       } catch (ServiceException ex) {
-        logService.logInternalServerError(String.format(
+        LogService.logInternalServerError(String.format(
             "Error during monitoring rollback. Monitoring data could not be deleted for session: %s",
             session.toString()), ex);
       }

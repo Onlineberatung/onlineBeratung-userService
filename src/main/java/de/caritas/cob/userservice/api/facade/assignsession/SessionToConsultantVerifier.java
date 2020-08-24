@@ -16,15 +16,11 @@ import de.caritas.cob.userservice.api.service.LogService;
 public class SessionToConsultantVerifier {
 
   private final SessionToConsultantConditionProvider conditionProvider;
-  private final LogService logService;
 
-  public SessionToConsultantVerifier(Session session, Consultant consultant,
-      LogService logService) {
+  public SessionToConsultantVerifier(Session session, Consultant consultant) {
     requireNonNull(session);
     requireNonNull(consultant);
-    requireNonNull(logService);
     this.conditionProvider = new SessionToConsultantConditionProvider(session, consultant);
-    this.logService = logService;
   }
 
   /**
@@ -38,7 +34,7 @@ public class SessionToConsultantVerifier {
           conditionProvider.getSession().getId().toString(),
           conditionProvider.getConsultant().getId());
 
-      throw new ConflictException(message, logService::logAssignSessionFacadeWarning);
+      throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
     }
   }
 
@@ -66,7 +62,7 @@ public class SessionToConsultantVerifier {
           conditionProvider.getSession().getId().toString(),
           conditionProvider.getConsultant().getId());
 
-      throw new ConflictException(message, logService::logAssignSessionFacadeWarning);
+      throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
     }
 
     if (this.conditionProvider.isSessionAlreadyAssignedToConsultant()) {
@@ -75,7 +71,7 @@ public class SessionToConsultantVerifier {
           conditionProvider.getSession().getId().toString(),
           conditionProvider.getConsultant().getId());
 
-      throw new ConflictException(message, logService::logAssignSessionFacadeWarning);
+      throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
     }
   }
 
@@ -86,7 +82,7 @@ public class SessionToConsultantVerifier {
           "The provided user with id %s does not have a Rocket.Chat id assigned in the database.",
           conditionProvider.getSession().getUser().getUserId());
 
-      throw new InternalServerErrorException(message, logService::logAssignSessionFacadeError);
+      throw new InternalServerErrorException(message, LogService::logAssignSessionFacadeError);
     }
 
     if (this.conditionProvider.hasConsultantNoRcId()) {
@@ -94,7 +90,7 @@ public class SessionToConsultantVerifier {
           "The provided consultant with id %s does not have a Rocket.Chat id assigned in the database.",
           conditionProvider.getConsultant().getId());
 
-      throw new InternalServerErrorException(message, logService::logAssignSessionFacadeError);
+      throw new InternalServerErrorException(message, LogService::logAssignSessionFacadeError);
     }
   }
 
@@ -105,7 +101,7 @@ public class SessionToConsultantVerifier {
           conditionProvider.getSession().getId().toString(),
           conditionProvider.getConsultant().getId());
 
-      throw new ForbiddenException(message, logService::logAssignSessionFacadeWarning);
+      throw new ForbiddenException(message, LogService::logAssignSessionFacadeWarning);
     }
   }
 

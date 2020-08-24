@@ -3,11 +3,21 @@ package de.caritas.cob.userservice.api.service;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
+import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
+import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.helper.MonitoringHelper;
+import de.caritas.cob.userservice.api.model.MonitoringDTO;
+import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
+import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,13 +27,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
-import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.helper.MonitoringHelper;
-import de.caritas.cob.userservice.api.model.MonitoringDTO;
-import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MonitoringServiceTest {
@@ -36,7 +41,7 @@ public class MonitoringServiceTest {
   @Mock
   private MonitoringHelper monitoringHelper;
   @Mock
-  private LogService logService;
+  private Logger logger;
 
   private final String ERROR = "error";
   private final Long SESSION_ID = 123L;
@@ -51,6 +56,7 @@ public class MonitoringServiceTest {
     HashMap<String, Object> addictiveDrugsMap = new HashMap<String, Object>();
     addictiveDrugsMap.put("drugs", drugsMap);
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   /**
@@ -74,7 +80,7 @@ public class MonitoringServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -107,7 +113,7 @@ public class MonitoringServiceTest {
     } catch (ServiceException serviceException) {
       assertTrue("Excepted ServiceException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test

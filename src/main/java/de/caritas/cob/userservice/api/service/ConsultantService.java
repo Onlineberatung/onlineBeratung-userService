@@ -21,14 +21,11 @@ import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository
 public class ConsultantService {
 
   private ConsultantRepository consultantRepository;
-  private LogService logService;
   private UserHelper userHelper;
 
   @Autowired
-  public ConsultantService(ConsultantRepository consultantRepository, LogService logService,
-      UserHelper userHelper) {
+  public ConsultantService(ConsultantRepository consultantRepository, UserHelper userHelper) {
     this.consultantRepository = consultantRepository;
-    this.logService = logService;
     this.userHelper = userHelper;
   }
 
@@ -42,7 +39,7 @@ public class ConsultantService {
     try {
       return consultantRepository.save(consultant);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while saving consultant");
     }
   }
@@ -57,7 +54,7 @@ public class ConsultantService {
     try {
       return consultantRepository.findById(consultantId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while loading consultant");
     }
   }
@@ -72,7 +69,7 @@ public class ConsultantService {
     try {
       return consultantRepository.findByRocketChatId(rcUserId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String
           .format("Database error while loading consultant by Rocket.Chat user id %s", rcUserId));
     }
@@ -110,7 +107,7 @@ public class ConsultantService {
     try {
       return consultantRepository.findByEmail(email);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(String.format("Database error while loading consultant by email"));
     }
   }
@@ -125,7 +122,7 @@ public class ConsultantService {
     try {
       return consultantRepository.findByUsername(username);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Database error while loading consultant by username"));
     }
@@ -199,7 +196,7 @@ public class ConsultantService {
     try {
       return consultantRepository.findByConsultantAgenciesAgencyIdIn(agencyIds);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException(
           String.format("Database error while loading consultant by agency ids"));
     }

@@ -22,6 +22,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,19 +41,12 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 
 @RunWith(SpringRunner.class)
 public class ConsultantServiceTest {
 
   @MockBean
   private ConsultantRepository consultantRepository;
-  @MockBean
-  private LogService logService;
   @MockBean
   private UserHelper userHelper;
   @Mock
@@ -57,7 +56,7 @@ public class ConsultantServiceTest {
 
   @Before
   public void setUp() {
-    this.consultantService = new ConsultantService(consultantRepository, logService, userHelper);
+    this.consultantService = new ConsultantService(consultantRepository, userHelper);
   }
 
   @Test

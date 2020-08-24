@@ -18,18 +18,14 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_R
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
@@ -41,6 +37,16 @@ import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.UserService;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class CreateSessionFacadeTest {
@@ -62,8 +68,12 @@ public class CreateSessionFacadeTest {
   @Mock
   private SessionDataService sessionDataService;
   @Mock
-  private LogService logService;
+  private Logger logger;
 
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   /**
    * Method: createSession
@@ -100,7 +110,7 @@ public class CreateSessionFacadeTest {
         createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
-    verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -122,7 +132,7 @@ public class CreateSessionFacadeTest {
         createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
-    verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verify(sessionService, times(1)).deleteSession(Mockito.any());
   }
 
@@ -146,7 +156,7 @@ public class CreateSessionFacadeTest {
         createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
-    verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verify(monitoringService, times(1)).rollbackInitializeMonitoring(Mockito.any());
   }
 

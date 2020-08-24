@@ -14,8 +14,6 @@ public class UserAgencyService {
 
   @Autowired
   UserAgencyRepository userAgencyRepository;
-  @Autowired
-  LogService logService;
 
   /**
    * Save a {@link UserAgency} to the database
@@ -29,7 +27,7 @@ public class UserAgencyService {
     try {
       return userAgencyRepository.save(userAgency);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while saving user agency");
     }
   }
@@ -44,7 +42,7 @@ public class UserAgencyService {
     try {
       return userAgencyRepository.findByUser(user);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while retrieving user agencies");
     }
   }

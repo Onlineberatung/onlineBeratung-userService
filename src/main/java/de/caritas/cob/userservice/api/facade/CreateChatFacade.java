@@ -32,17 +32,14 @@ public class CreateChatFacade {
   private final RocketChatService rocketChatService;
   private final UserHelper userHelper;
   private final RocketChatHelper rocketChatHelper;
-  private final LogService logService;
   private final ChatHelper chatHelper;
 
   public CreateChatFacade(ChatService chatService, UserHelper userHelper,
-      RocketChatService rocketChatService, RocketChatHelper rocketChatHelper, LogService logService,
-      ChatHelper chatHelper) {
+      RocketChatService rocketChatService, RocketChatHelper rocketChatHelper, ChatHelper chatHelper) {
     this.chatService = chatService;
     this.userHelper = userHelper;
     this.rocketChatService = rocketChatService;
     this.rocketChatHelper = rocketChatHelper;
-    this.logService = logService;
     this.chatHelper = chatHelper;
   }
 
@@ -90,32 +87,32 @@ public class CreateChatFacade {
       chatService.saveChat(chat);
 
     } catch (RocketChatCreateGroupException rocketChatCreateGroupException) {
-      logService.logInternalServerError(
+      LogService.logInternalServerError(
           "Error while creating private group in Rocket.Chat for group chat: " + chatDTO.toString(),
           rocketChatCreateGroupException);
       doRollback(chat, rcGroupId);
       return null;
     } catch (RocketChatLoginException rocketChatLoginException) {
-      logService.logInternalServerError("Could not log in technical user for Rocket.Chat API",
+      LogService.logInternalServerError("Could not log in technical user for Rocket.Chat API",
           rocketChatLoginException);
       doRollback(chat, rcGroupId);
       return null;
     } catch (RocketChatAddUserToGroupException rocketChatAddUserToGroupException) {
-      logService.logInternalServerError("Technical user could not be added to group chat room",
+      LogService.logInternalServerError("Technical user could not be added to group chat room",
           rocketChatAddUserToGroupException);
       doRollback(chat, rcGroupId);
       return null;
     } catch (SaveChatAgencyException saveChatAgencyException) {
-      logService.logInternalServerError("Could not save chat agency relation in database",
+      LogService.logInternalServerError("Could not save chat agency relation in database",
           saveChatAgencyException);
       doRollback(chat, rcGroupId);
       return null;
     } catch (SaveChatException saveChatException) {
-      logService.logInternalServerError("Could not save chat in database", saveChatException);
+      LogService.logInternalServerError("Could not save chat in database", saveChatException);
       doRollback(chat, rcGroupId);
       return null;
     } catch (ServiceException serviceException) {
-      logService.logInternalServerError("Could not create chat " + chatDTO.toString(),
+      LogService.logInternalServerError("Could not create chat " + chatDTO.toString(),
           serviceException);
       return null;
     }

@@ -82,8 +82,6 @@ public class KeycloakAdminClientHelper {
 
   @Autowired
   private UserHelper userHelper;
-  @Autowired
-  LogService logService;
 
   /**
    * Instantiate Keycloak Admin Client
@@ -346,7 +344,7 @@ public class KeycloakAdminClientHelper {
 
     } catch (Exception ex) {
       String error = String.format("Could not get roles for user id %s", userId);
-      logService.logKeycloakError(error, ex);
+      LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
 

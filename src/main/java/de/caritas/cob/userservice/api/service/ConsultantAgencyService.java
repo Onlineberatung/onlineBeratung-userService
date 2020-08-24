@@ -15,8 +15,6 @@ public class ConsultantAgencyService {
 
   @Autowired
   ConsultantAgencyRepository consultantAgencyRepository;
-  @Autowired
-  LogService logService;
 
   /**
    * Save a {@link ConsultantAgency} to the database
@@ -28,7 +26,7 @@ public class ConsultantAgencyService {
     try {
       return consultantAgencyRepository.save(consultantAgency);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while saving consultant agency");
     }
   }
@@ -43,7 +41,7 @@ public class ConsultantAgencyService {
     try {
       return consultantAgencyRepository.findByAgencyId(agencyId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while loading consultants by agency");
     }
   }
@@ -56,7 +54,7 @@ public class ConsultantAgencyService {
 
       return agencyList != null && agencyList.size() > 0;
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while getting agency id data set for consultant");
     }
   }
@@ -76,7 +74,7 @@ public class ConsultantAgencyService {
     try {
       agencyList = consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(agencyId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
+      LogService.logDatabaseError(ex);
       throw new ServiceException("Database error while loading consultant list");
     }
 
@@ -100,14 +98,14 @@ public class ConsultantAgencyService {
 
     if (agency == null) {
       error = "Database inconsistency: agency is null";
-      logService.logDatabaseInconsistency(error);
+      LogService.logDatabaseInconsistency(error);
       throw new ServiceException(error);
     }
     if (agency.getConsultant() == null) {
       error = String.format(
           "Database inconsistency: could not get assigned consultant for agency with id %s",
           agency.getAgencyId());
-      logService.logDatabaseInconsistency(error);
+      LogService.logDatabaseInconsistency(error);
       throw new ServiceException(error);
     }
 
