@@ -133,7 +133,7 @@ public class MonitoringHelper {
    * @return
    */
   public MonitoringDTO getMonitoringInitalList(ConsultingType consultingType) {
-    MonitoringDTO monitoring = null;
+    MonitoringDTO monitoring;
     ObjectMapper mapper = new ObjectMapper();
     TypeReference<MonitoringDTO> typeReference = new TypeReference<MonitoringDTO>() {};
     InputStream inputStream = getMonitoringJSONStream(consultingType);

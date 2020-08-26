@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
@@ -33,12 +36,15 @@ public class RocketChatRollbackHelper {
         List<GroupMemberDTO> currentList = rocketChatService.getMembersOfGroup(groupId);
 
         // Add Rocket.Chat technical user, if not in current member list
-        if (!listContainsTechUser(currentList)
-            && !rocketChatService.addTechnicalUserToGroup(groupId)) {
-          LogService.logInternalServerError(String.format(
-              "Could not add techical user from Rocket.Chat group id %s during roll back.",
-              groupId));
-          return;
+        if (!listContainsTechUser(currentList)) {
+          try {
+            rocketChatService.addTechnicalUserToGroup(groupId);
+          } catch (RocketChatAddUserToGroupException e) {
+            LogService.logInternalServerError(String.format(
+                "Could not add techical user from Rocket.Chat group id %s during roll back.",
+                groupId));
+            return;
+          }
         }
 
         if (currentList.size() != memberList.size()) {
@@ -50,11 +56,12 @@ public class RocketChatRollbackHelper {
         }
 
         // Remove technical user from Rocket.Chat group
-        if (!rocketChatService.removeTechnicalUserFromGroup(groupId)) {
+        try {
+          rocketChatService.removeTechnicalUserFromGroup(groupId);
+        } catch (RocketChatRemoveUserFromGroupException e) {
           LogService.logInternalServerError(String.format(
               "Could not remove techical user from Rocket.Chat group id %s during roll back.",
               groupId));
-          return;
         }
 
       } catch (Exception ex) {
@@ -73,8 +80,12 @@ public class RocketChatRollbackHelper {
    */
   private boolean listContainsTechUser(List<GroupMemberDTO> memberList) {
     for (GroupMemberDTO member : memberList) {
-      if (member.get_id().equals(rcCredentialsHelper.getTechnicalUser().getRocketChatUserId())) {
-        return true;
+      try {
+        if (member.get_id().equals(rcCredentialsHelper.getTechnicalUser().getRocketChatUserId())) {
+          return true;
+        }
+      } catch (RocketChatUserNotInitializedException e) {
+        return false;
       }
     }
 

@@ -9,10 +9,9 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_CHAT_NAM
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,9 +20,9 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -87,16 +86,12 @@ public class CreateChatFacadeTest {
    * Method: createChat
    */
 
-  @Test
-  public void createChat_Should_ReturnNull_When_ConsultantHasNoAgency() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createChat_Should_ThrowInternalServerErrorException_When_ConsultantHasNoAgency() {
 
     CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
 
-    assertNull(result);
-
     verify(consultant, atLeastOnce()).getConsultantAgencies();
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
-
   }
 
   @Test
@@ -119,7 +114,8 @@ public class CreateChatFacadeTest {
   }
 
   @Test
-  public void createChat_Should_SaveChatToDatabase() {
+  public void createChat_Should_SaveChatToDatabase()
+      throws RocketChatCreateGroupException, SaveChatException {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(rocketChatHelper.generateGroupChatName(Mockito.any())).thenReturn(GROUP_CHAT_NAME);
@@ -137,7 +133,8 @@ public class CreateChatFacadeTest {
   }
 
   @Test
-  public void createChat_Should_SaveChatGroupId() {
+  public void createChat_Should_SaveChatGroupId()
+      throws RocketChatCreateGroupException, SaveChatException {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(rocketChatHelper.generateGroupChatName(chat)).thenReturn(GROUP_CHAT_NAME);
@@ -156,8 +153,9 @@ public class CreateChatFacadeTest {
 
   }
 
-  @Test
-  public void createChat_Should_ReturnNullAndDoRollback_WhenRocketChatGroupCouldNotBeCreated() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createChat_Should_ThrowInternalServerErrorExceptionAndDoRollback_WhenRocketChatGroupCouldNotBeCreated()
+      throws Exception {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
@@ -165,18 +163,16 @@ public class CreateChatFacadeTest {
     when(chatService.saveChat(Mockito.any())).thenReturn(chat);
     when(chatService.saveChatAgencyRelation(Mockito.any())).thenReturn(chatAgency);
 
-    CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
+    createChatFacade.createChat(CHAT_DTO, consultant);
 
-    assertNull(result);
-
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, never()).deleteGroupAsSystemUser(Mockito.any());
 
   }
 
-  @Test
-  public void createChat_Should_ReturnNullAndRollback_WhenRocketChatGroupIsNotPresent() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createChat_Should_ThrowInternalServerErrorExceptionAndRollback_WhenRocketChatGroupIsNotPresent()
+      throws Exception {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(rocketChatService.createPrivateGroupWithSystemUser(GROUP_CHAT_NAME))
@@ -184,37 +180,16 @@ public class CreateChatFacadeTest {
     when(chatService.saveChat(Mockito.any())).thenReturn(chat);
     when(chatService.saveChatAgencyRelation(Mockito.any())).thenReturn(chatAgency);
 
-    CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
+    createChatFacade.createChat(CHAT_DTO, consultant);
 
-    assertNull(result);
-
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, never()).deleteGroupAsSystemUser(Mockito.any());
 
   }
 
-  @Test
-  public void createChat_Should_ReturnNullAndDoRollback_WhenRocketChatLoginException() {
-
-    when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
-        .thenThrow(new RocketChatLoginException(ERROR));
-    when(chatService.saveChat(Mockito.any())).thenReturn(chat);
-    when(chatService.saveChatAgencyRelation(Mockito.any())).thenReturn(chatAgency);
-
-    CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
-
-    assertNull(result);
-
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
-    verify(chatService, times(1)).deleteChat(chat);
-    verify(rocketChatService, never()).deleteGroupAsSystemUser(Mockito.any());
-
-  }
-
-  @Test
-  public void createChat_Should_ReturnNullAndDoRollback_WhenTechnicalUserCouldNotBeAddedToRocketChatGroup() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createChat_Should_ThrowInternalServerErrorExceptionAndDoRollback_WhenTechnicalUserCouldNotBeAddedToRocketChatGroup()
+      throws Exception {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
@@ -223,21 +198,18 @@ public class CreateChatFacadeTest {
     when(chatService.saveChatAgencyRelation(Mockito.any())).thenReturn(chatAgency);
     when(groupResponseDTO.getGroup()).thenReturn(groupDTO);
     when(groupDTO.getId()).thenReturn(RC_GROUP_ID);
-    when(rocketChatService.addTechnicalUserToGroup(RC_GROUP_ID))
-        .thenThrow(new RocketChatAddUserToGroupException(ERROR));
+    doThrow(new RocketChatAddUserToGroupException(ERROR)).when(rocketChatService)
+        .addTechnicalUserToGroup(RC_GROUP_ID);
 
-    CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
+    createChatFacade.createChat(CHAT_DTO, consultant);
 
-    assertNull(result);
-
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, times(1)).deleteGroupAsSystemUser(RC_GROUP_ID);
-
   }
 
-  @Test
-  public void createChat_Should_ReturnNullAndDoRollback_WhenChatAgencyRelationCouldNotBeSaved() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createChat_Should_ThrowInternalServerErrorExceptionAndDoRollback_WhenChatAgencyRelationCouldNotBeSaved()
+      throws Exception {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
@@ -246,16 +218,14 @@ public class CreateChatFacadeTest {
     when(chatService.saveChatAgencyRelation(Mockito.any()))
         .thenThrow(new SaveChatAgencyException(ERROR, new RuntimeException()));
 
-    CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
+    createChatFacade.createChat(CHAT_DTO, consultant);
 
-    assertNull(result);
-
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
   }
 
-  @Test
-  public void createChat_Should_ReturnNullAndDoRollback_WhenChatCouldNotBeSavedWithGroupId() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createChat_Should_ThrowInternalServerErrorExceptionAndDoRollback_WhenChatCouldNotBeSavedWithGroupId()
+      throws Exception {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(chatService.saveChat(Mockito.any())).thenReturn(chat)
@@ -266,27 +236,21 @@ public class CreateChatFacadeTest {
     when(groupDTO.getId()).thenReturn(RC_GROUP_ID);
     when(chatService.saveChatAgencyRelation(Mockito.any())).thenReturn(chatAgency);
 
-    CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
+    createChatFacade.createChat(CHAT_DTO, consultant);
 
-    assertNull(result);
-
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, times(1)).deleteChat(chat);
     verify(rocketChatService, times(1)).deleteGroupAsSystemUser(RC_GROUP_ID);
   }
 
-  @Test
-  public void createChat_Should_ReturnNull_WhenChatCouldNotBeSaved() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createChat_Should_ThrowInternalServerErrorException_WhenChatCouldNotBeSaved() throws SaveChatException {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(chatService.saveChat(Mockito.any()))
         .thenThrow(new SaveChatException(ERROR, new RuntimeException()));
 
-    CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
+    createChatFacade.createChat(CHAT_DTO, consultant);
 
-    assertNull(result);
-
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
     verify(chatService, never()).deleteChat(chat);
     verify(rocketChatService, never()).deleteGroupAsSystemUser(RC_GROUP_ID);
   }

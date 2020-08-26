@@ -10,12 +10,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
@@ -33,21 +35,23 @@ public class AgencyHelperTest {
    */
 
   @Test
-  public void getVerifiedAgency_Should_ThrowServiceException_When_AgencyServiceHelperFails() {
+  public void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails()
+      throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID))
         .thenThrow(AGENCY_SERVICE_HELPER_EXCEPTION);
 
     try {
       agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  public void getVerifiedAgency_Should_ThrowBadRequestException_When_AgencyIsNotAssignedToGivenConsultingType() {
+  public void getVerifiedAgency_Should_ThrowBadRequestException_When_AgencyIsNotAssignedToGivenConsultingType()
+      throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
@@ -60,7 +64,8 @@ public class AgencyHelperTest {
   }
 
   @Test
-  public void getVerifiedAgency_Should_ReturnCorrectAgency_When_AgencyIsFoundAndValid() {
+  public void getVerifiedAgency_Should_ReturnCorrectAgency_When_AgencyIsFoundAndValid()
+      throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 

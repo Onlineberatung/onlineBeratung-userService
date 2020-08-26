@@ -196,6 +196,15 @@ public class LogService {
   /**
    * Rocket.Chat error.
    *
+   * @param ex the exception
+   */
+  public static void logRocketChatError(Exception ex) {
+    LOGGER.error("{}{})", ROCKET_CHAT_ERROR_TEXT, getStackTrace(ex));
+  }
+
+  /**
+   * Rocket.Chat error.
+   *
    * @param message the message
    * @param error the error
    * @param errorType the errorType
@@ -437,5 +446,14 @@ public class LogService {
    */
   public static void logWarn(HttpStatus httpStatus, Exception exception) {
     LOGGER.warn("UserService API: {}: {}", httpStatus.getReasonPhrase(), getStackTrace(exception));
+  }
+
+  /**
+   * Logs an debug message.
+   *
+   * @param message The message
+   */
+  public static void logDebug(String message) {
+    LOGGER.debug(message);
   }
 }

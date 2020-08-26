@@ -86,7 +86,7 @@ public class DecryptionService {
    * @param secret The secret to be used
    * @return The decrypted message
    */
-  public String decrypt(String messageToDecrypt, String secret) {
+  public String decrypt(String messageToDecrypt, String secret) throws CustomCryptoException {
 
     if (messageToDecrypt == null || !messageToDecrypt.startsWith(ENCRYPTED_MESSAGE_FLAG)) {
       return messageToDecrypt;

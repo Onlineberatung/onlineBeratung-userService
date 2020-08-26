@@ -13,13 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -33,6 +27,13 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.UserService;
+import java.util.Optional;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class GetChatMembersFacadeTest {
@@ -141,7 +142,8 @@ public class GetChatMembersFacadeTest {
   }
 
   @Test
-  public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForUser() {
+  public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForUser()
+      throws Exception {
 
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
@@ -163,7 +165,8 @@ public class GetChatMembersFacadeTest {
   }
 
   @Test
-  public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForConsultant() {
+  public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForConsultant()
+      throws Exception {
 
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);

@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgencyRepository;
@@ -21,14 +21,13 @@ public class UserAgencyService {
    * @param userAgency
    * @return the {@link UserAgency}
    * 
-   * @throws {@link ServiceException}
    */
   public UserAgency saveUserAgency(UserAgency userAgency) {
     try {
       return userAgencyRepository.save(userAgency);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while saving user agency");
+      throw new InternalServerErrorException("Database error while saving user agency",
+          LogService::logDatabaseError);
     }
   }
 
@@ -42,8 +41,8 @@ public class UserAgencyService {
     try {
       return userAgencyRepository.findByUser(user);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while retrieving user agencies");
+      throw new InternalServerErrorException("Database error while retrieving user agencies",
+          LogService::logDatabaseError);
     }
   }
 
@@ -58,11 +57,9 @@ public class UserAgencyService {
     try {
       userAgencyRepository.delete(userAgency);
 
-    } catch (DataAccessException dataAccessException) {
-      throw new ServiceException("Database error while saving user agency", dataAccessException);
-
-    } catch (IllegalArgumentException illArgException) {
-      throw new ServiceException("Database error while saving user agency", illArgException);
+    } catch (DataAccessException | IllegalArgumentException ex) {
+      throw new InternalServerErrorException("Database error while saving user agency",
+          LogService::logDatabaseError);
     }
   }
 

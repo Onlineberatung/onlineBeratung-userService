@@ -2,21 +2,18 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
 import de.caritas.cob.userservice.api.repository.sessionData.SessionDataRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.util.ArrayList;
@@ -69,10 +66,10 @@ public class SessionDataServiceTest {
   }
 
   @Test
-  public void createSessionDataList_Should_LogAndThrowServiceException_WhenSaveSessionDataFails() {
+  public void createSessionDataList_Should_ThrowInternalServerErrorException_WhenSaveSessionDataFails() {
 
     when(sessionDataHelper.createRegistrationSessionDataList(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<SessionData>());
+        .thenReturn(new ArrayList<>());
 
     @SuppressWarnings("serial")
     DataAccessException dataAccessException = new DataAccessException("reson") {};
@@ -80,16 +77,14 @@ public class SessionDataServiceTest {
 
     try {
       sessionDataService.saveSessionDataFromRegistration(INITALIZED_SESSION, USER_DTO);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  public void createSessionDataList_Should_LogAndThrowIllegalArgumentException_WhenProvidedSessionIsNull() {
+  public void createSessionDataList_Should_ThrowInternalServerErrorException_WhenProvidedSessionIsNull() {
 
     when(sessionDataHelper.createRegistrationSessionDataList(Mockito.any(), Mockito.any()))
         .thenReturn(null);
@@ -100,12 +95,10 @@ public class SessionDataServiceTest {
 
     try {
       sessionDataService.saveSessionDataFromRegistration(INITALIZED_SESSION, USER_DTO);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
 }

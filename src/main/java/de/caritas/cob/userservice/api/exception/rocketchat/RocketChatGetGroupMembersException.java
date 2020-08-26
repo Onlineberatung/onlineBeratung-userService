@@ -1,6 +1,6 @@
-package de.caritas.cob.userservice.api.exception.rocketChat;
+package de.caritas.cob.userservice.api.exception.rocketchat;
 
-public class RocketChatGetGroupMembersException extends RuntimeException {
+public class RocketChatGetGroupMembersException extends Exception {
 
   private static final long serialVersionUID = -6467348860210122736L;
 

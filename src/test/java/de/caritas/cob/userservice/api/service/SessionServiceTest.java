@@ -39,9 +39,9 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Now;
@@ -152,16 +152,16 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSession_Should_ThrowServiceExceptionAndLogDatabaseException_WhenRepositoryFails() {
+  public void getSession_Should_ThrowInternalServerErrorExceptionAndLogDatabaseException_WhenRepositoryFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
     when(sessionRepository.findById(ENQUIRY_ID)).thenThrow(ex);
     try {
       sessionService.getSession(ENQUIRY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
 
@@ -184,7 +184,7 @@ public class SessionServiceTest {
   public void updateConsultantAndStatusForSession_Should_ThrowUpdateSessionException_WhenSaveSessionFails() {
 
     @SuppressWarnings("serial")
-    ServiceException ex = new ServiceException("service error") {};
+    InternalServerErrorException ex = new InternalServerErrorException("service error") {};
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {
@@ -197,7 +197,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void updateConsultantAndStatusForSession_Should_SaveSession() {
+  public void updateConsultantAndStatusForSession_Should_SaveSession()
+      throws UpdateSessionException {
 
     sessionService.updateConsultantAndStatusForSession(SESSION, CONSULTANT, SessionStatus.NEW);
     verify(sessionRepository, times(1)).save(SESSION);
@@ -205,7 +206,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void saveSession_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void saveSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("database error") {};
@@ -213,15 +214,15 @@ public class SessionServiceTest {
 
     try {
       sessionService.saveSession(SESSION);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
 
   @Test
-  public void deleteSession_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void deleteSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("database error") {};
@@ -229,9 +230,9 @@ public class SessionServiceTest {
 
     try {
       sessionService.deleteSession(SESSION);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -245,7 +246,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void initializeSession_Should_ReturnSession() {
+  public void initializeSession_Should_ReturnSession() throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgency(USER_DTO.getAgencyId())).thenReturn(AGENCY_DTO);
     when(sessionRepository.save(Mockito.any())).thenReturn(SESSION);
@@ -256,7 +257,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void initializeSession_TeamSession_Should_ReturnSession() {
+  public void initializeSession_TeamSession_Should_ReturnSession()
+      throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgency(USER_DTO.getAgencyId())).thenReturn(AGENCY_DTO);
     when(sessionRepository.save(Mockito.any())).thenReturn(SESSION);
@@ -267,7 +269,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowServiceException_OnDatabaseError() throws Exception {
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnDatabaseError() throws Exception {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
@@ -276,14 +278,14 @@ public class SessionServiceTest {
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowServiceExceptionAndLogException_OnAgencyServiceHelperError()
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorExceptionAndLogException_OnAgencyServiceHelperError()
       throws Exception {
 
     AgencyServiceHelperException ex =
@@ -296,9 +298,9 @@ public class SessionServiceTest {
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
@@ -322,7 +324,7 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    ServiceException ex = new ServiceException("service error") {};
+    InternalServerErrorException ex = new InternalServerErrorException("service error") {};
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {
@@ -387,7 +389,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUser_Should_ThrowServiceExceptionAndLogExceptionOnDatabaseError()
+  public void getSessionsForUser_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -395,9 +397,9 @@ public class SessionServiceTest {
     when(sessionRepository.findByUser(USER)).thenThrow(ex);
     try {
       sessionService.getSessionsForUser(USER);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
@@ -425,7 +427,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserByConsultingType_Should_ThrowServiceExceptionAndLogExceptionOnDatabaseError()
+  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -433,9 +435,9 @@ public class SessionServiceTest {
     when(sessionRepository.findByUserAndConsultingType(USER, ConsultingType.SUCHT)).thenThrow(ex);
     try {
       sessionService.getSessionsForUserByConsultingType(USER, ConsultingType.SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
@@ -446,7 +448,7 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnServiceExceptionOnDatabaseErrorAndLogException()
+  public void getSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -459,11 +461,10 @@ public class SessionServiceTest {
 
     try {
       sessionService.getSessionsForConsultant(consultant, SESSION_STATUS_NEW);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -510,7 +511,7 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowServiceExceptionOnDatabaseErrorAndLogException_AsUserAuthority()
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsUserAuthority()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -520,15 +521,14 @@ public class SessionServiceTest {
 
     try {
       sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowServiceExceptionOnCorruptData_AsUserAuthority()
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsUserAuthority()
       throws Exception {
 
     when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any()))
@@ -536,9 +536,9 @@ public class SessionServiceTest {
 
     try {
       sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -569,7 +569,7 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowServiceExceptionOnDatabaseErrorAndLogException_AsConsultantAuthority()
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsConsultantAuthority()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -580,15 +580,14 @@ public class SessionServiceTest {
 
     try {
       sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowServiceExceptionOnCorruptData_AsConsultantAuthority()
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsConsultantAuthority()
       throws Exception {
 
     when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
@@ -596,9 +595,9 @@ public class SessionServiceTest {
 
     try {
       sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -628,7 +627,7 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getTeamSessionsForConsultant_Should_ReturnServiceExceptionOnDatabaseErrorAndLogException()
+  public void getTeamSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -642,11 +641,10 @@ public class SessionServiceTest {
 
     try {
       sessionService.getTeamSessionsForConsultant(consultant);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -689,7 +687,7 @@ public class SessionServiceTest {
   public void updateFeedbackGroupId_Should_ThrowUpdateFeedbackGroupIdExceptionAndLogError_WhenSaveSessionFails() {
 
     @SuppressWarnings("serial")
-    ServiceException ex = new ServiceException(ERROR_MSG) {};
+    InternalServerErrorException ex = new InternalServerErrorException(ERROR_MSG) {};
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {
@@ -703,7 +701,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void updateFeedbackGroupId_Should_SaveSession() {
+  public void updateFeedbackGroupId_Should_SaveSession() throws UpdateFeedbackGroupIdException {
 
     sessionService.updateFeedbackGroupId(Optional.of(SESSION), RC_GROUP_ID);
     verify(sessionRepository, times(1)).save(SESSION);

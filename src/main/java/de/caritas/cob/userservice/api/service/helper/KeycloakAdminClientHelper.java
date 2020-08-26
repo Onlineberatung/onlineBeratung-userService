@@ -161,7 +161,7 @@ public class KeycloakAdminClientHelper {
    * @return
    */
   @KeycloakAdminClientLogout
-  private boolean isEmailAvailable(String email) throws Exception {
+  private boolean isEmailAvailable(String email) {
     // Get user resource and change e-mail address of technical user
     UserResource techUserResource =
         getInstance().realm(KEYCLOAK_REALM).users().get(KEYCLOAK_TECH_USER_ID);

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.helper.MonitoringHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.MonitoringDTO;
@@ -73,8 +73,8 @@ public class MonitoringService {
       return new MonitoringDTO(convertToMonitoringMap(monitoring, session.getConsultingType()));
 
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while saving monitoring data.");
+      throw new InternalServerErrorException("Database error while saving monitoring data.",
+          LogService::logDatabaseError);
     }
   }
 
@@ -93,8 +93,8 @@ public class MonitoringService {
       monitoringRepository.saveAll(monitoringList);
 
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while saving monitoring data.");
+      throw new InternalServerErrorException("Database error while saving monitoring data.",
+          LogService::logDatabaseError);
     }
   }
 
@@ -114,8 +114,8 @@ public class MonitoringService {
       monitoringRepository.deleteAll(monitoringList);
 
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while deleting monitoring data.");
+      throw new InternalServerErrorException("Database error while deleting monitoring data.",
+          LogService::logDatabaseError);
     }
   }
 
@@ -202,7 +202,7 @@ public class MonitoringService {
         deleteMonitoring(session.getId(),
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
 
-      } catch (ServiceException ex) {
+      } catch (InternalServerErrorException ex) {
         LogService.logInternalServerError(String.format(
             "Error during monitoring rollback. Monitoring data could not be deleted for session: %s",
             session.toString()), ex);

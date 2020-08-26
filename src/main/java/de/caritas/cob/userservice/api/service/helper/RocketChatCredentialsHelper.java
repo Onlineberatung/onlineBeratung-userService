@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service.helper;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -57,10 +57,8 @@ public class RocketChatCredentialsHelper {
 
   /**
    * Get a valid technical Users
-   * 
-   * @return
    */
-  public RocketChatCredentials getTechnicalUser() {
+  public RocketChatCredentials getTechnicalUser() throws RocketChatUserNotInitializedException {
     // If both are uninitialized throw Exception
     if (techUser_A == null && techUser_B == null) {
       throw new RocketChatUserNotInitializedException("No technical user was initialized");
@@ -82,10 +80,8 @@ public class RocketChatCredentialsHelper {
 
   /**
    * Get a valid system user
-   * 
-   * @return
    */
-  public RocketChatCredentials getSystemUser() {
+  public RocketChatCredentials getSystemUser() throws RocketChatUserNotInitializedException {
     // If both are uninitialized throw Exception
     if (systemUser_A == null && systemUser_B == null) {
       throw new RocketChatUserNotInitializedException("No system user was initialized");
@@ -107,9 +103,8 @@ public class RocketChatCredentialsHelper {
 
   /**
    * Update the Credentials
-   *
    */
-  public void updateCredentials() {
+  public void updateCredentials() throws RocketChatLoginException {
     if (techUser_A != null && techUser_B != null) {
       if (techUser_A.getTimeStampCreated().isBefore(techUser_B.getTimeStampCreated())) {
         logoutUser(techUser_A);
@@ -154,17 +149,13 @@ public class RocketChatCredentialsHelper {
       }
     }
 
-
   }
 
   /**
    * Login a system user and receive a RocketChatCredentials-Object
-   * 
-   * @param username
-   * @param password
-   * @return
    */
-  public RocketChatCredentials loginUserServiceUser(String username, String password) {
+  public RocketChatCredentials loginUserServiceUser(String username, String password)
+      throws RocketChatLoginException {
 
     RocketChatCredentials rcc = RocketChatCredentials.builder()
         .TimeStampCreated(LocalDateTime.now()).RocketChatUsername(username).build();
@@ -177,14 +168,12 @@ public class RocketChatCredentialsHelper {
       rcc.setRocketChatUserId(response.getBody().getData().getUserId());
 
     } catch (Exception ex) {
-      LogService.logRocketChatError("Could not login " + username + " user in Rocket.Chat", ex);
-      throw new RocketChatLoginException(ex);
+      throw new RocketChatLoginException("Could not login " + username + " user in Rocket.Chat");
     }
 
     if (rcc.getRocketChatToken() == null || rcc.getRocketChatUserId() == null) {
       String error = "Could not login " + username
           + " user in Rocket.Chat correctly, no authToken or UserId received.";
-      LogService.logInternalServerError(error);
       throw new RocketChatLoginException(error);
     }
 
@@ -193,12 +182,9 @@ public class RocketChatCredentialsHelper {
 
   /**
    * Performs a login with the given credentials and returns the Result
-   *
-   * @param username
-   * @param password
-   * @return
    */
-  public ResponseEntity<LoginResponseDTO> loginUser(String username, String password) {
+  public ResponseEntity<LoginResponseDTO> loginUser(String username, String password)
+      throws RocketChatLoginException {
 
     try {
       HttpHeaders headers = new HttpHeaders();
@@ -217,18 +203,13 @@ public class RocketChatCredentialsHelper {
       return response;
 
     } catch (Exception ex) {
-      LogService.logRocketChatError(
-          String.format("Could not login user (%s) in Rocket.Chat", username), ex);
-      throw new RocketChatLoginException(ex);
+      throw new RocketChatLoginException(
+          String.format("Could not login user (%s) in Rocket.Chat", username));
     }
   }
 
   /**
    * Performs a logout with the given credentials and returns true on success.
-   * 
-   * @param rcUserId
-   * @param rcAuthToken
-   * @return
    */
   public boolean logoutUser(String rcUserId, String rcAuthToken) {
 
@@ -252,8 +233,6 @@ public class RocketChatCredentialsHelper {
 
   /**
    * Logout a RocketChatCredentials-User
-   * 
-   * @param user
    */
   private void logoutUser(RocketChatCredentials user) {
     this.logoutUser(user.getRocketChatUserId(), user.getRocketChatToken());
@@ -263,8 +242,6 @@ public class RocketChatCredentialsHelper {
    * Returns a HttpHeaders instance with standard settings (Rocket.Chat-Token, Rocket.Chat-User-ID,
    * MediaType)
    *
-   * @param rcToken
-   * @param rcUserId
    * @return a HttpHeaders instance with the standard settings
    */
   private HttpHeaders getStandardHttpHeaders(String rcToken, String rcUserId) {

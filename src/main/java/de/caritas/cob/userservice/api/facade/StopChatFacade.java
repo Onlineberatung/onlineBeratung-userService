@@ -1,7 +1,13 @@
 package de.caritas.cob.userservice.api.facade;
 
+import de.caritas.cob.userservice.api.exception.SaveChatException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
-import javax.ws.rs.InternalServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -64,16 +70,27 @@ public class StopChatFacade {
             .format("Repetitive chat with id %s does not have a valid interval.", chat.getId()));
       }
 
-      if (!rocketChatService.removeAllMessages(chat.getGroupId())) {
+      try {
+        rocketChatService.removeAllMessages(chat.getGroupId());
+      } catch (RocketChatRemoveSystemMessagesException e) {
         throw new InternalServerErrorException(
             String.format("Could not delete messages from chat with id %s", chat.getId()));
       }
 
-      rocketChatService.removeAllStandardUsersFromGroup(chat.getGroupId());
+      try {
+        rocketChatService.removeAllStandardUsersFromGroup(chat.getGroupId());
+      } catch (RocketChatGetGroupMembersException | RocketChatRemoveUserFromGroupException
+          | RocketChatUserNotInitializedException e) {
+        throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+      }
 
       chat.setStartDate(getNextStartDate(chat));
       chat.setActive(chatInactive);
-      chatService.saveChat(chat);
+      try {
+        chatService.saveChat(chat);
+      } catch (SaveChatException e) {
+        throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+      }
 
     } else {
       // Single chat -> Delete Rocket.Chat group and chat data in MariaDB

@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
 
 @Service
 public class ConsultantAgencyService {
@@ -26,8 +26,8 @@ public class ConsultantAgencyService {
     try {
       return consultantAgencyRepository.save(consultantAgency);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while saving consultant agency");
+      throw new InternalServerErrorException("Database error while saving consultant agency",
+          LogService::logDatabaseError);
     }
   }
 
@@ -41,8 +41,8 @@ public class ConsultantAgencyService {
     try {
       return consultantAgencyRepository.findByAgencyId(agencyId);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while loading consultants by agency");
+      throw new InternalServerErrorException("Database error while loading consultants by agency",
+          LogService::logDatabaseError);
     }
   }
 
@@ -54,8 +54,8 @@ public class ConsultantAgencyService {
 
       return agencyList != null && agencyList.size() > 0;
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while getting agency id data set for consultant");
+      throw new InternalServerErrorException("Database error while getting agency id data set for"
+          + " consultant", LogService::logDatabaseError);
     }
   }
 
@@ -74,8 +74,8 @@ public class ConsultantAgencyService {
     try {
       agencyList = consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(agencyId);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while loading consultant list");
+      throw new InternalServerErrorException("Database error while loading consultant list",
+          LogService::logDatabaseError);
     }
 
     if (agencyList != null) {
@@ -98,15 +98,13 @@ public class ConsultantAgencyService {
 
     if (agency == null) {
       error = "Database inconsistency: agency is null";
-      LogService.logDatabaseInconsistency(error);
-      throw new ServiceException(error);
+      throw new InternalServerErrorException(error, LogService::logDatabaseError);
     }
     if (agency.getConsultant() == null) {
       error = String.format(
           "Database inconsistency: could not get assigned consultant for agency with id %s",
           agency.getAgencyId());
-      LogService.logDatabaseInconsistency(error);
-      throw new ServiceException(error);
+      throw new InternalServerErrorException(error, LogService::logDatabaseError);
     }
 
     return new ConsultantResponseDTO(agency.getConsultant().getId(),

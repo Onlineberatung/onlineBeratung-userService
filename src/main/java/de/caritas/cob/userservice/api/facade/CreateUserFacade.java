@@ -1,12 +1,16 @@
 package de.caritas.cob.userservice.api.facade;
 
+import de.caritas.cob.userservice.api.exception.SaveUserException;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.service.LogService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -71,12 +75,11 @@ public class CreateUserFacade {
    * @param user {@link UserDTO}
    * @return {@link KeycloakCreateUserResponseDTO}
    * 
-   * @throws {@link ServiceException}
    */
   public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO user) {
 
     KeycloakCreateUserResponseDTO response;
-    String userId = null;
+    String userId;
 
     if (!userHelper.isUsernameAvailable(user.getUsername())) {
       return new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT,
@@ -84,10 +87,11 @@ public class CreateUserFacade {
     }
 
     ConsultingType consultingType =
-        ConsultingType.values()[Integer.valueOf(user.getConsultingType())];
+        ConsultingType.values()[Integer.parseInt(user.getConsultingType())];
 
     if (!agencyHelper.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingType)) {
-      return new KeycloakCreateUserResponseDTO(HttpStatus.BAD_REQUEST);
+      throw new BadRequestException(String.format("Agency with id %s does not match to consulting"
+          + " type %s", user.getAgencyId(), consultingType.getValue()));
     }
 
     try {
@@ -96,8 +100,8 @@ public class CreateUserFacade {
       userId = response.getUserId();
 
     } catch (Exception ex) {
-      throw new ServiceException(
-          String.format("Could not create Keycloak account for: %s", user.toString()), ex);
+      throw new InternalServerErrorException(
+          String.format("Could not create Keycloak account for: %s", user.toString()));
     }
 
     if (response.getStatus().equals(HttpStatus.CONFLICT)) {
@@ -121,7 +125,7 @@ public class CreateUserFacade {
   private void updateAccountData(String userId, UserDTO user, ConsultingType consultingType) {
 
     if (userId == null) {
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Could not create Keycloak account for: %s", user.toString()));
     }
 
@@ -146,9 +150,8 @@ public class CreateUserFacade {
 
     } catch (Exception ex) {
       rollBackUserAccount(userId, dbUser, null, null);
-      throw new ServiceException(
-          String.format("Could not update account data on registration for: %s", user.toString()),
-          ex);
+      throw new InternalServerErrorException(
+          String.format("Could not update account data on registration for: %s", user.toString()));
     }
 
     initializeUserAccount(user, dbUser, consultingTypeSettings);
@@ -166,7 +169,7 @@ public class CreateUserFacade {
       ConsultingTypeSettings consultingTypeSettings) {
 
     if (consultingTypeSettings.getConsultingType().equals(ConsultingType.KREUZBUND)) {
-      createUserChatAgencyRelation(user, dbUser, consultingTypeSettings);
+      createUserChatAgencyRelation(user, dbUser);
 
     } else {
       createUserSession(user, dbUser, consultingTypeSettings);
@@ -181,8 +184,6 @@ public class CreateUserFacade {
    * @param user {@link UserDTO}
    * @param dbUser {@link User}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
-   * 
-   * @throws {@link ServiceException}
    */
   private void createUserSession(UserDTO user, User dbUser,
       ConsultingTypeSettings consultingTypeSettings) {
@@ -197,7 +198,7 @@ public class CreateUserFacade {
 
     } catch (Exception ex) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, session, null);
-      throw new ServiceException(ex);
+      throw new InternalServerErrorException(ex.getMessage());
     }
   }
 
@@ -206,20 +207,23 @@ public class CreateUserFacade {
    * 
    * @param user {@link UserDTO}
    * @param dbUser {@link User}
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
-   * 
+   *
    * @throws {@link ServiceException}
    */
-  private void createUserChatAgencyRelation(UserDTO user, User dbUser,
-      ConsultingTypeSettings consultingTypeSettings) {
+  private void createUserChatAgencyRelation(UserDTO user, User dbUser) {
 
     // Log in user to Rocket.Chat
-    ResponseEntity<LoginResponseDTO> rcUserResponse = rocketChatService
-        .loginUserFirstTime(userHelper.encodeUsername(user.getUsername()), user.getPassword());
+    ResponseEntity<LoginResponseDTO> rcUserResponse;
+    try {
+      rcUserResponse = rocketChatService
+          .loginUserFirstTime(userHelper.encodeUsername(user.getUsername()), user.getPassword());
+    } catch (RocketChatLoginException e) {
+      throw new InternalServerErrorException(e.getMessage(), LogService::logRocketChatError);
+    }
 
     if (!rcUserResponse.getStatusCode().equals(HttpStatus.OK) || rcUserResponse.getBody() == null) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, null, null);
-      throw new ServiceException(String.format(
+      throw new InternalServerErrorException(String.format(
           "Rocket.Chat login for Kreuzbund registration was not successful for user %s.",
           user.getUsername()));
     }
@@ -229,7 +233,7 @@ public class CreateUserFacade {
     if (rcUserToken == null || rcUserToken.equals(StringUtils.EMPTY) || rcUserId == null
         || rcUserId.equals(StringUtils.EMPTY)) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, null, null);
-      throw new ServiceException(String.format(
+      throw new InternalServerErrorException(String.format(
           "Rocket.Chat login for Kreuzbund registration was not successful for user %s.",
           user.getUsername()));
     }
@@ -241,10 +245,15 @@ public class CreateUserFacade {
 
     // Update rcUserId in user table
     dbUser.setRcUserId(rcUserId);
-    User updatedUser = userService.saveUser(dbUser);
+    User updatedUser;
+    try {
+      updatedUser = userService.saveUser(dbUser);
+    } catch (SaveUserException e) {
+      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+    }
     if (updatedUser.getRcUserId() == null || updatedUser.getRcUserId().equals(StringUtils.EMPTY)) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, null, null);
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Could not update Rocket.Chat user id for user %s", user.getUsername()));
     }
 
@@ -253,10 +262,9 @@ public class CreateUserFacade {
     try {
       userAgencyService.saveUserAgency(userAgency);
 
-    } catch (ServiceException serviceException) {
+    } catch (InternalServerErrorException serviceException) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, null, userAgency);
-      throw new ServiceException("Could not create user-agency relation for Kreuzbund registration",
-          serviceException);
+      throw new InternalServerErrorException("Could not create user-agency relation for Kreuzbund registration");
     }
   }
 

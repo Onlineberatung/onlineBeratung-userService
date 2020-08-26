@@ -4,16 +4,17 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpStatusCodeException;
+
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatPostMessageException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpStatusCodeException;
 
 public class ExceptionConstants {
 
@@ -66,7 +67,8 @@ public class ExceptionConstants {
       new AgencyServiceHelperException(EXCEPTION);
 
   /**
-   * ServiceException
+   * InternalServerErrorException
    */
-  public static final ServiceException SERVICE_EXCEPTION = new ServiceException(EXCEPTION);
+  public static final InternalServerErrorException INTERNAL_SERVER_ERROR_EXCEPTION =
+      new InternalServerErrorException(EXCEPTION.getMessage());
 }

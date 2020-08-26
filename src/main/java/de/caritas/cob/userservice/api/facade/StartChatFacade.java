@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api.facade;
 
-import javax.ws.rs.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.SaveChatException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -47,11 +50,13 @@ public class StartChatFacade {
           String.format("Chat with id %s has no Rocket.Chat group id", chat.getId()));
     }
 
-    rocketChatService.addUserToGroup(consultant.getRocketChatId(), chat.getGroupId());
-
-    chat.setActive(true);
-    chatService.saveChat(chat);
-
+    try {
+      rocketChatService.addUserToGroup(consultant.getRocketChatId(), chat.getGroupId());
+      chat.setActive(true);
+      chatService.saveChat(chat);
+    } catch (RocketChatAddUserToGroupException | SaveChatException e) {
+      throw new InternalServerErrorException(e.getMessage(), LogService::logRocketChatError);
+    }
   }
 
 }

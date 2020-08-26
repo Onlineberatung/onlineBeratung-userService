@@ -9,7 +9,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import javax.ws.rs.InternalServerErrorException;
+
+import de.caritas.cob.userservice.api.exception.SaveChatException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -87,7 +90,8 @@ public class StartChatFacadeTest {
   }
 
   @Test
-  public void startChat_Should_AddConsultantToRocketChatGroup() {
+  public void startChat_Should_AddConsultantToRocketChatGroup()
+      throws RocketChatAddUserToGroupException {
 
     when(chatHelper.isChatAgenciesContainConsultantAgency(INACTIVE_CHAT, CONSULTANT))
         .thenReturn(true);
@@ -100,7 +104,7 @@ public class StartChatFacadeTest {
   }
 
   @Test
-  public void startChat_Should_SetChatActiveAndSaveChat() {
+  public void startChat_Should_SetChatActiveAndSaveChat() throws SaveChatException {
 
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
 

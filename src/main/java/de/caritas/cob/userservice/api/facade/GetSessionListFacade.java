@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatGetRoomsException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatGetSubscriptionsException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
@@ -40,6 +43,7 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Facade to encapsulate the steps to get the session list for a user or consultant (read sessions
@@ -73,8 +77,6 @@ public class GetSessionListFacade {
    * Returns a list of {@link UserSessionResponseDTO} for the specified user ID
    *
    * @param userId Keycloak/MariaDB user ID
-   * @param rcUserId Rocket.Chat user ID
-   * @param rcAuthToken Rocket.Chat token
    * @return {@link UserSessionResponseDTO}
    */
   public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId,
@@ -83,7 +85,7 @@ public class GetSessionListFacade {
     List<UserSessionResponseDTO> sessions = sessionService.getSessionsForUserId(userId);
     List<UserSessionResponseDTO> chats = chatService.getChatsForUserId(userId);
 
-    if ((sessions == null || sessions.size() == 0) && (chats == null || chats.size() == 0)) {
+    if (CollectionUtils.isEmpty(sessions) && CollectionUtils.isEmpty(chats)) {
       return new UserSessionListResponseDTO();
     }
 
@@ -96,16 +98,16 @@ public class GetSessionListFacade {
     }
 
     List<String> userRoomList =
-        roomsUpdateList.stream().map(x -> x.getId()).collect(Collectors.toList());
+        roomsUpdateList.stream().map(RoomsUpdateDTO::getId).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> roomMessageMap = getRcRoomMessageMap(roomsUpdateList);
     List<UserSessionResponseDTO> allSessions = new ArrayList<UserSessionResponseDTO>();
 
-    if (sessions != null && sessions.size() > 0) {
+    if (isNotEmpty(sessions)) {
       allSessions.addAll(setUserSessionValues(sessions, messagesReadMap, roomMessageMap,
           rocketChatCredentials.getRocketChatUserId()));
     }
 
-    if (chats != null && chats.size() > 0) {
+    if (isNotEmpty(chats)) {
       allSessions.addAll(setUserChatValues(chats, messagesReadMap, roomMessageMap, userRoomList,
           rocketChatCredentials.getRocketChatUserId()));
     }
@@ -533,8 +535,8 @@ public class GetSessionListFacade {
     try {
       subscriptions = rocketChatService.getSubscriptionsOfUser(rocketChatCredentials);
     } catch (RocketChatGetSubscriptionsException rocketChatGetSubscriptionsException) {
-      throw new ServiceException(rocketChatGetSubscriptionsException.getMessage(),
-          rocketChatGetSubscriptionsException);
+      throw new InternalServerErrorException(rocketChatGetSubscriptionsException.getMessage(),
+          LogService::logRocketChatError);
     }
     Map<String, Boolean> messagesReadMap = new HashMap<String, Boolean>();
     for (SubscriptionsUpdateDTO subscription : subscriptions) {
@@ -554,8 +556,8 @@ public class GetSessionListFacade {
     try {
       return rocketChatService.getRoomsOfUser(rocketChatCredentials);
     } catch (RocketChatGetRoomsException rocketChatGetRoomsException) {
-      throw new ServiceException(rocketChatGetRoomsException.getMessage(),
-          rocketChatGetRoomsException);
+      throw new InternalServerErrorException(rocketChatGetRoomsException.getMessage(),
+          LogService::logRocketChatError);
     }
   }
 

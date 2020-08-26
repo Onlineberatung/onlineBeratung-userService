@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.exception;
 
-public class UpdateFeedbackGroupIdException extends RuntimeException {
+public class UpdateFeedbackGroupIdException extends Exception {
   private static final long serialVersionUID = -6538582440490471213L;
 
   /**

@@ -13,7 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -71,7 +71,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void saveConsultantAgencyt_Should_LogAndThrowServiceException_WhenSaveConsultantAgencyFails() {
+  public void saveConsultantAgencyt_Should_LogAndThrowInternalServerErrorException_WhenSaveConsultantAgencyFails() {
 
     @SuppressWarnings("serial")
     DataAccessException dataAccessException = new DataAccessException(ERROR) {};
@@ -79,13 +79,10 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.saveConsultantAgency(CONSULTANT_AGENCY);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-
   }
 
   /**
@@ -94,7 +91,7 @@ public class ConsultantAgencyServiceTest {
    */
 
   @Test
-  public void isConsultantInAgency_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void isConsultantInAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -103,9 +100,9 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -134,7 +131,7 @@ public class ConsultantAgencyServiceTest {
    */
 
   @Test
-  public void findConsultantsByAgencyId_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void findConsultantsByAgencyId_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -142,9 +139,9 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -165,7 +162,7 @@ public class ConsultantAgencyServiceTest {
    */
 
   @Test
-  public void getConsultantsOfAgency_Should_ThrowServiceExceptionAndLogError_WhenDatabaseFails() {
+  public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -174,42 +171,39 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
-      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
 
   @Test
-  public void getConsultantsOfAgency_Should_ThrowServiceExceptionAndLogError_WhenDatabaseAgencyIsNull() {
+  public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyIsNull() {
 
     when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENCY_NULL_LIST);
 
     try {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
-      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
 
   @Test
-  public void getConsultantsOfAgency_Should_ThrowServiceExceptionAndLogError_WhenDatabaseAgencyConsultantIsNull() {
+  public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyConsultantIsNull() {
 
     when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_NULL_AGENCY_LIST);
 
     try {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
-      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }

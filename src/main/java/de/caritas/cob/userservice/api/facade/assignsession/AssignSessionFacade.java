@@ -3,14 +3,14 @@ package de.caritas.cob.userservice.api.facade.assignsession;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.authorization.Authority;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,7 +76,7 @@ public class AssignSessionFacade {
         new SessionToConsultantVerifier(session, consultant);
     sessionToConsultantVerifier.verifyPreconditionsForAssignment();
 
-    Optional<Consultant> initialConsultant = Optional.ofNullable(session.getConsultant());
+    Consultant initialConsultant = session.getConsultant();
     SessionStatus initialStatus = session.getStatus();
 
     try {
@@ -91,9 +90,6 @@ public class AssignSessionFacade {
         updateFeedbackChatRelevantAssignments(session, consultant, initialConsultant, initialStatus,
             memberList);
       }
-    } catch (RocketChatLoginException rcLoginEx) {
-      throw new InternalServerErrorException("Could not login Rocket.Chat technical user",
-          LogService::logInternalServerError);
     } catch (UpdateSessionException updateEx) {
       String message = String.format("Could not update session %s with consultantId %s",
           session.getId(), consultant.getId());
@@ -110,12 +106,12 @@ public class AssignSessionFacade {
   }
 
   private List<GroupMemberDTO> createUpdatedRocketChatMembers(Session session,
-      Consultant consultant,
-      Optional<Consultant> initialConsultant, SessionStatus initialStatus) {
+      Consultant consultant, Consultant initialConsultant, SessionStatus initialStatus)
+      throws RocketChatGetGroupMembersException {
     addTechnicalUserToGroup(session.getGroupId(), session, initialConsultant, initialStatus);
 
     List<GroupMemberDTO> memberList = rocketChatService.getMembersOfGroup(session.getGroupId());
-    if (initialConsultant.isPresent()) {
+    if (nonNull(initialConsultant)) {
       addUserToRocketChatGroup(session.getGroupId(), consultant.getRocketChatId(), session,
           initialConsultant, initialStatus, memberList);
     }
@@ -132,7 +128,7 @@ public class AssignSessionFacade {
   }
 
   private void updateFeedbackChatRelevantAssignments(Session session, Consultant consultant,
-      Optional<Consultant> initialConsultant, SessionStatus initialStatus,
+      Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
     addUserToRocketChatGroup(session.getFeedbackGroupId(), consultant.getRocketChatId(),
         session, initialConsultant, initialStatus, memberList);
@@ -144,12 +140,12 @@ public class AssignSessionFacade {
         consultant.getRocketChatId(), session, initialConsultant, initialStatus, memberList);
   }
 
-  private void rollbackSessionUpdate(Session session, Optional<Consultant> consultant,
+  private void rollbackSessionUpdate(Session session, Consultant consultant,
       SessionStatus status) {
 
     if (nonNull(session)) {
       try {
-        session.setConsultant(consultant.orElse(null));
+        session.setConsultant(consultant);
         session.setStatus(status);
         sessionService.updateConsultantAndStatusForSession(session, session.getConsultant(),
             session.getStatus());
@@ -163,18 +159,24 @@ public class AssignSessionFacade {
   }
 
   private void rollbackSessionAndRocketChatGroup(Session session,
-      Optional<Consultant> initialConsultant, SessionStatus initialStatus,
+      Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
     rollbackSessionUpdate(session, initialConsultant, initialStatus);
     rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(session.getGroupId(),
         memberList);
-    initialConsultant
-        .ifPresent(consultant -> rocketChatService.removeUserFromGroup(consultant.getRocketChatId(),
-            session.getFeedbackGroupId()));
+    if (nonNull(initialConsultant)) {
+      try {
+        rocketChatService.removeUserFromGroup(initialConsultant.getRocketChatId(),
+            session.getFeedbackGroupId());
+      } catch (RocketChatRemoveUserFromGroupException e) {
+        throw new InternalServerErrorException(e.getMessage(),
+            LogService::logInternalServerError);
+      }
+    }
   }
 
   private void addUserToRocketChatGroup(String groupId, String rcUserId, Session session,
-      Optional<Consultant> initialConsultant, SessionStatus initialStatus,
+      Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
 
     try {
@@ -194,30 +196,25 @@ public class AssignSessionFacade {
   }
 
   private void addTechnicalUserToGroup(String groupId, Session session,
-      Optional<Consultant> initialConsultant, SessionStatus initialStatus) {
-
-    String possibleErrorMessage = String.format(
-        "Could not add Rocket.Chat technical user to Rocket.Chat group with id %s. Initiate rollback.",
-        session.getGroupId());
+      Consultant initialConsultant, SessionStatus initialStatus) {
 
     try {
-      if (!rocketChatService.addTechnicalUserToGroup(groupId)) {
-        rollbackSessionUpdate(session, initialConsultant, initialStatus);
-        throw new InternalServerErrorException(possibleErrorMessage,
-            LogService::logInternalServerError);
-      }
-
-    } catch (RocketChatAddUserToGroupException addUserEx) {
+      rocketChatService.addTechnicalUserToGroup(groupId);
+    } catch (RocketChatAddUserToGroupException | RocketChatUserNotInitializedException addUserEx) {
       rollbackSessionUpdate(session, initialConsultant, initialStatus);
-      throw new InternalServerErrorException(possibleErrorMessage,
-          LogService::logInternalServerError);
+      String message = String.format(
+          "Could not add Rocket.Chat technical user to Rocket.Chat group with id %s. Initiate rollback.",
+          session.getGroupId());
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
   private void removeTechnicalUserFromGroup(String groupId, Session session,
-      Optional<Consultant> initialConsultant, SessionStatus initialStatus,
+      Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
-    if (!rocketChatService.removeTechnicalUserFromGroup(groupId)) {
+    try {
+      rocketChatService.removeTechnicalUserFromGroup(groupId);
+    } catch (RocketChatRemoveUserFromGroupException | RocketChatUserNotInitializedException e) {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
 
       String message = String.format(
@@ -227,25 +224,21 @@ public class AssignSessionFacade {
   }
 
   private void removeUnauthorizedUsersFromRocketChatGroup(List<GroupMemberDTO> memberList,
-      Session session, Consultant consultant, Optional<Consultant> initialConsultant,
+      Session session, Consultant consultant, Consultant initialConsultant,
       SessionStatus initialStatus) {
 
     AtomicReference<String> rcUserIdToRemove = new AtomicReference<>();
     try {
-      memberList.forEach(removeUnauthorizedMember(session, consultant, rcUserIdToRemove));
-    } catch (RocketChatRemoveUserFromGroupException removeUserEx) {
-      rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
-      String message = String.format(
-          "Could not remove Rocket.Chat user %s from Rocket.Chat group with id %s. Initiate rollback.",
-          rcUserIdToRemove, session.getGroupId());
-      throw new InternalServerErrorException(message, LogService::logInternalServerError);
+      for (GroupMemberDTO memberDTO : memberList) {
+        removeUnauthorizedMember(memberDTO, session, consultant, rcUserIdToRemove);
+      }
     } catch (KeycloakException keycloakEx) {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
       String message = String
           .format("Could not get Keycloak roles for user with id %s. Initiate rollback.",
               rcUserIdToRemove);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
-    } catch (ServiceException serviceEx) {
+    } catch (InternalServerErrorException serviceEx) {
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
       String message = String.format(
           "Could not get consultant with id %s information from database for role check. Initiate "
@@ -254,19 +247,24 @@ public class AssignSessionFacade {
     }
   }
 
-  private Consumer<GroupMemberDTO> removeUnauthorizedMember(Session session, Consultant consultant,
-      AtomicReference<String> rcUserIdToRemove) {
-    return member -> {
-      if (isUnauthorizedMember(session, consultant, member)) {
-        rcUserIdToRemove.set(member.get_id());
+  private void removeUnauthorizedMember(GroupMemberDTO member, Session session,
+      Consultant consultant, AtomicReference<String> rcUserIdToRemove) {
+    if (isUnauthorizedMember(session, consultant, member)) {
+      rcUserIdToRemove.set(member.get_id());
 
-        if (!session.isTeamSession()) {
+      if (!session.isTeamSession()) {
+        try {
           rocketChatService.removeUserFromGroup(rcUserIdToRemove.get(), session.getGroupId());
-        } else if (session.hasFeedbackChat()) {
-          removeUserIfRightForPeerSessionViewIsNotGiven(session, rcUserIdToRemove, member);
+        } catch (RocketChatRemoveUserFromGroupException removeUserEx) {
+          String message = String.format(
+              "Could not remove Rocket.Chat user %s from Rocket.Chat group with id %s. Initiate rollback.",
+              rcUserIdToRemove, session.getGroupId());
+          throw new InternalServerErrorException(message, LogService::logInternalServerError);
         }
+      } else if (session.hasFeedbackChat()) {
+        removeUserIfRightForPeerSessionViewIsNotGiven(session, rcUserIdToRemove, member);
       }
-    };
+    }
   }
 
   private void removeUserIfRightForPeerSessionViewIsNotGiven(Session session,
@@ -276,7 +274,11 @@ public class AssignSessionFacade {
     if (memberConsultant.isPresent()
         && !keycloakAdminClientHelper.userHasAuthority(memberConsultant.get().getId(),
         Authority.VIEW_ALL_PEER_SESSIONS)) {
-      rocketChatService.removeUserFromGroup(rcUserIdToRemove.get(), session.getGroupId());
+      try {
+        rocketChatService.removeUserFromGroup(rcUserIdToRemove.get(), session.getGroupId());
+      } catch (RocketChatRemoveUserFromGroupException e) {
+        throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+      }
     }
   }
 
@@ -289,61 +291,39 @@ public class AssignSessionFacade {
   }
 
   private void removePreviousConsultantFromRocketChatFeedbackGroup(Session session,
-      Consultant consultant, Optional<Consultant> initialConsultantOptional,
-      SessionStatus initialStatus,
+      Consultant consultant, Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
 
     try {
-      initialConsultantOptional.ifPresent(initialConsultant -> {
-        if (!keycloakAdminClientHelper.userHasAuthority(initialConsultant.getId(),
-            Authority.VIEW_ALL_FEEDBACK_SESSIONS)) {
-          updateRocketChatUsersForFeedbackGroup(session, consultant, initialConsultantOptional,
-              initialStatus, memberList);
-        }
-      });
+      if (nonNull(initialConsultant) && !keycloakAdminClientHelper
+          .userHasAuthority(initialConsultant.getId(),
+              Authority.VIEW_ALL_FEEDBACK_SESSIONS)) {
+        updateRocketChatUsersForFeedbackGroup(session, consultant, initialConsultant,
+            initialStatus, memberList);
+      }
     } catch (KeycloakException keycloakEx) {
-      rollbackSessionAndRocketChatGroup(session, initialConsultantOptional, initialStatus,
+      rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus,
           memberList);
       String consultantId =
-          initialConsultantOptional.isPresent() ? initialConsultantOptional.get().getId() :
-              "unknown";
+          nonNull(initialConsultant) ? initialConsultant.getId() : "unknown";
       String message = String
           .format("Could not get Keycloak roles for user with id %s. Initiate rollback.",
               consultantId);
 
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
-
-    } catch (RocketChatAddUserToGroupException addUserEx) {
-      rollbackSessionUpdate(session, initialConsultantOptional, initialStatus);
-      rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(session.getGroupId(),
-          memberList);
-
-      String message = String.format(
-          "Could not add Rocket.Chat technical user to Rocket.Chat group with id %s. Initiate "
-              + "rollback.", session.getFeedbackGroupId());
-      throw new InternalServerErrorException(message, LogService::logInternalServerError);
-
-    } catch (RocketChatRemoveUserFromGroupException removeUserEx) {
-      rollbackSessionAndRocketChatGroup(session, initialConsultantOptional, initialStatus,
-          memberList);
-
-      String message = String.format(
-          "Could not remove Rocket.Chat user %s from Rocket.Chat group with id %s. Initiate rollback.",
-          consultant.getRocketChatId(), session.getFeedbackGroupId());
-      throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
 
   private void updateRocketChatUsersForFeedbackGroup(Session session, Consultant consultant,
-      Optional<Consultant> initialConsultantOptional, SessionStatus initialStatus,
+      Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
-    if (rocketChatService.addTechnicalUserToGroup(session.getFeedbackGroupId())) {
-      removeConsultantFromFeedbackGroup(session, consultant, initialConsultantOptional,
+    try {
+      rocketChatService.addTechnicalUserToGroup(session.getFeedbackGroupId());
+      removeConsultantFromFeedbackGroup(session, consultant, initialConsultant,
           initialStatus, memberList);
-    } else {
-      removeUserFromGroupAndRollbackSession(session, consultant, initialConsultantOptional,
-          initialStatus,
-          memberList);
+    } catch (RocketChatAddUserToGroupException | RocketChatUserNotInitializedException e) {
+      removeUserFromGroupAndRollbackSession(consultant.getRocketChatId(), session,
+          initialConsultant, initialStatus, memberList, consultant);
       String message = String
           .format("Could not add technical user to Rocket.Chat feedback group with id %s",
               session.getFeedbackGroupId());
@@ -353,44 +333,57 @@ public class AssignSessionFacade {
   }
 
   private void removeConsultantFromFeedbackGroup(Session session, Consultant consultant,
-      Optional<Consultant> initialConsultantOptional, SessionStatus initialStatus,
+      Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
-    initialConsultantOptional.ifPresent(initialConsultant -> rocketChatService
-        .removeUserFromGroup(initialConsultant.getRocketChatId(),
-            session.getFeedbackGroupId()));
-
-    if (!rocketChatService.removeTechnicalUserFromGroup(session.getFeedbackGroupId())) {
-      removeUserFromGroupAndRollbackSession(session, consultant, initialConsultantOptional,
-          initialStatus, memberList);
-      String message = String.format(
-          "Could not remove technical user from Rocket.Chat feedback group with id %s",
-          session.getGroupId());
-      throw new InternalServerErrorException(message, LogService::logInternalServerError);
+    if (nonNull(initialConsultant)) {
+      try {
+        rocketChatService
+            .removeUserFromGroup(initialConsultant.getRocketChatId(),
+                session.getFeedbackGroupId());
+        rocketChatService.removeTechnicalUserFromGroup(session.getFeedbackGroupId());
+      } catch (RocketChatRemoveUserFromGroupException | RocketChatUserNotInitializedException e) {
+        removeUserFromGroupAndRollbackSession(consultant.getRocketChatId(), session,
+            initialConsultant, initialStatus, memberList, consultant);
+        String message = String.format(
+            "Could not remove technical user from Rocket.Chat feedback group with id %s",
+            session.getGroupId());
+        throw new InternalServerErrorException(message, LogService::logInternalServerError);
+      }
     }
   }
 
-  private void removeUserFromGroupAndRollbackSession(Session session, Consultant consultant,
-      Optional<Consultant> initialConsultant, SessionStatus initialStatus,
-      List<GroupMemberDTO> memberList) {
-    rocketChatService.removeUserFromGroup(consultant.getRocketChatId(),
-        session.getFeedbackGroupId());
-    rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
-  }
-
   private void removeSystemMessagesFromRocketChatGroup(String groupId,
-      String rcUserIdToRemoveOnRollback, Session session, Optional<Consultant> initialConsultant,
+      String rcUserIdToRemoveOnRollback, Session session, Consultant initialConsultant,
       SessionStatus initialStatus, List<GroupMemberDTO> memberList) {
 
-    if (!rocketChatService.removeSystemMessages(groupId,
-        LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now())) {
-
+    try {
+      rocketChatService.removeSystemMessages(groupId,
+          LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+    } catch (RocketChatRemoveSystemMessagesException | RocketChatUserNotInitializedException e) {
       if (nonNull(rcUserIdToRemoveOnRollback)) {
-        rocketChatService.removeUserFromGroup(rcUserIdToRemoveOnRollback,
-            session.getFeedbackGroupId());
+        removeUserFromGroupAndRollbackSession(rcUserIdToRemoveOnRollback, session,
+            initialConsultant, initialStatus, memberList, initialConsultant);
       }
       rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus, memberList);
       String message = String
           .format("Could not remove system messages from Rocket.Chat group id %s", groupId);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
+    }
+  }
+
+  private void removeUserFromGroupAndRollbackSession(String rcUserIdToRemoveOnRollback,
+      Session session, Consultant initialConsultant, SessionStatus initialStatus,
+      List<GroupMemberDTO> memberList, Consultant consultant) {
+    try {
+      rocketChatService.removeUserFromGroup(rcUserIdToRemoveOnRollback,
+          session.getFeedbackGroupId());
+    } catch (RocketChatRemoveUserFromGroupException rocketChatRemoveUserFromGroupException) {
+      rollbackSessionAndRocketChatGroup(session, initialConsultant, initialStatus,
+          memberList);
+
+      String message = String.format(
+          "Could not remove Rocket.Chat user %s from Rocket.Chat group with id %s. Initiate rollback.",
+          consultant.getRocketChatId(), session.getFeedbackGroupId());
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }

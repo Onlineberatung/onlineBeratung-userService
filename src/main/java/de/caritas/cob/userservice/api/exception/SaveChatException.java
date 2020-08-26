@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.exception;
 
-public class SaveChatException extends RuntimeException {
+public class SaveChatException extends Exception {
 
   private static final long serialVersionUID = 5563690206628141695L;
 

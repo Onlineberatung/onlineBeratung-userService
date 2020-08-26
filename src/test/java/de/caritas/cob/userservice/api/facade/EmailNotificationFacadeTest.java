@@ -32,9 +32,10 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.EmailNotificationHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -199,7 +200,8 @@ public class EmailNotificationFacadeTest {
    */
   @SuppressWarnings("unchecked")
   @Test
-  public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants() {
+  public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants()
+      throws AgencyServiceHelperException {
 
     when(consultantAgencyRepository.findByAgencyId(Mockito.eq(SESSION.getAgencyId())))
         .thenReturn(CONSULTANT_AGENCY_LIST);
@@ -221,7 +223,8 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser() {
+  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser()
+      throws AgencyServiceHelperException {
 
     when(consultantAgencyRepository.findByAgencyId(Mockito.eq(SESSION.getAgencyId())))
         .thenReturn(CONSULTANT_AGENCY_LIST);
@@ -236,7 +239,8 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper() {
+  public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper()
+      throws AgencyServiceHelperException {
 
     when(consultantAgencyRepository.findByAgencyId(Mockito.eq(SESSION.getAgencyId())))
         .thenReturn(CONSULTANT_AGENCY_LIST);
@@ -355,7 +359,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_Should_ThrowNewMessageNotificationException_WhenSessionServiceFails() {
 
-    ServiceException serviceException = new ServiceException(ERROR_MSG);
+    InternalServerErrorException serviceException = new InternalServerErrorException(ERROR_MSG);
 
     when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenThrow(serviceException);
@@ -364,7 +368,7 @@ public class EmailNotificationFacadeTest {
       emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
       fail("Expected exception: NewMessageNotificationException");
     } catch (NewMessageNotificationException newMessageNotificationException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -530,7 +534,8 @@ public class EmailNotificationFacadeTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void sendNewFeedbackMessageNotification_Should_SendEmailToAllFeedbackChatGroupMembersWithDecodedUsernames_WhenAssigendConsultantWroteAFeedbackMessage() {
+  public void sendNewFeedbackMessageNotification_Should_SendEmailToAllFeedbackChatGroupMembersWithDecodedUsernames_WhenAssigendConsultantWroteAFeedbackMessage()
+      throws Exception {
 
     when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
     when(sessionService.getSessionByFeedbackGroupId(RC_FEEDBACK_GROUP_ID)).thenReturn(SESSION);

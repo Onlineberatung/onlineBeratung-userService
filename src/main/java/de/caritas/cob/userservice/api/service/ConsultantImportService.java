@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -300,9 +301,9 @@ public class ConsultantImportService {
         if (consultantSessionResponseDtoList != null
             && consultantSessionResponseDtoList.size() > 0) {
           for (ConsultantSessionResponseDTO consultantSessionResponseDTO : consultantSessionResponseDtoList) {
-            if (rocketChatService
-                .addTechnicalUserToGroup(consultantSessionResponseDTO.getSession().getGroupId())) {
-
+            try {
+              rocketChatService
+                  .addTechnicalUserToGroup(consultantSessionResponseDTO.getSession().getGroupId());
               // Add user to Rocket.Chat group
               rocketChatService.addUserToGroup(rocketChatUserId,
                   consultantSessionResponseDTO.getSession().getGroupId());
@@ -317,14 +318,16 @@ public class ConsultantImportService {
                     consultantSessionResponseDTO.getSession().getFeedbackGroupId());
               }
               writeToImportLog(logMessage);
-              if (!rocketChatService.removeTechnicalUserFromGroup(
-                  consultantSessionResponseDTO.getSession().getGroupId())) {
+              try {
+                rocketChatService.removeTechnicalUserFromGroup(
+                    consultantSessionResponseDTO.getSession().getGroupId());
+              } catch (RocketChatRemoveUserFromGroupException e) {
                 logMessage = String.format(
                     "ERROR: Technical user could not be removed from rc group %s (enquiry).",
                     consultantSessionResponseDTO.getSession().getGroupId());
                 writeToImportLog(logMessage);
               }
-            } else {
+            } catch (Exception e) {
               throw new ImportException(String.format(
                   "ERROR: Consultant could not be added to rc group %s: Technical user could not be added to group (enquiry).",
                   consultantSessionResponseDTO.getSession().getGroupId()));
@@ -339,9 +342,10 @@ public class ConsultantImportService {
         if (consultantTeamSessionResponseDtoList != null
             && consultantTeamSessionResponseDtoList.size() > 0) {
           for (ConsultantSessionResponseDTO consultantTeamSessionResponseDto : consultantTeamSessionResponseDtoList) {
-            if (rocketChatService.addTechnicalUserToGroup(
-                consultantTeamSessionResponseDto.getSession().getGroupId())) {
 
+            try {
+              rocketChatService.addTechnicalUserToGroup(
+                  consultantTeamSessionResponseDto.getSession().getGroupId());
               ConsultingTypeSettings consultingTypeSettings =
                   consultingTypeManager.getConsultantTypeSettings(ConsultingType
                       .valueOf(consultantTeamSessionResponseDto.getSession().getConsultingType())
@@ -373,14 +377,16 @@ public class ConsultantImportService {
               }
 
               writeToImportLog(logMessage);
-              if (!rocketChatService.removeTechnicalUserFromGroup(
-                  consultantTeamSessionResponseDto.getSession().getGroupId())) {
+              try {
+                rocketChatService.removeTechnicalUserFromGroup(
+                    consultantTeamSessionResponseDto.getSession().getGroupId());
+              } catch (RocketChatRemoveUserFromGroupException e) {
                 logMessage = String.format(
                     "ERROR: Technical user could not be removed from rc group %s (team-session).",
                     consultantTeamSessionResponseDto.getSession().getGroupId());
                 writeToImportLog(logMessage);
               }
-            } else {
+            } catch (Exception e) {
               throw new ImportException(String.format(
                   "ERROR: Consultant could not be added to rc group %s: Technical user could not be added to group (team-session).",
                   consultantTeamSessionResponseDto.getSession().getGroupId()));

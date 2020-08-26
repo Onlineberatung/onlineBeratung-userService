@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api;
 
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
 import de.caritas.cob.userservice.api.exception.NoMasterKeyException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -172,7 +171,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * @return
    */
   @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class,
-      IllegalStateException.class, ServiceException.class, KeycloakException.class,
+      IllegalStateException.class, KeycloakException.class,
       UnknownHostException.class, CustomCryptoException.class, NoMasterKeyException.class})
   public ResponseEntity<Object> handleInternal(final RuntimeException ex,
       final WebRequest request) {

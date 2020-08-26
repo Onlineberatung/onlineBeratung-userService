@@ -27,6 +27,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -34,7 +37,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -88,19 +90,18 @@ public class CreateUserFacadeTest {
         is(HttpStatus.CONFLICT));
   }
 
-  @Test
-  public void createUserAndInitializeAccount_Should_ReturnBadRequest_When_ProvidedConsultingTypeDoesNotMatchAgency() {
+  @Test(expected = BadRequestException.class)
+  public void createUserAndInitializeAccount_Should_ThrowBadRequest_When_ProvidedConsultingTypeDoesNotMatchAgency() {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(false);
 
-    assertThat(createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT).getStatus(),
-        is(HttpStatus.BAD_REQUEST));
+    createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceException_When_KeycloakHelperCreateUserThrowsException()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_KeycloakHelperCreateUserThrowsException()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -111,9 +112,9 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -132,7 +133,7 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceException_When_CreateKeycloakUserReturnsNoUserId()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_CreateKeycloakUserReturnsNoUserId()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -143,14 +144,14 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_KeycloakHelperUpdateUserRoleReturnsException()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_KeycloakHelperUpdateUserRoleReturnsException()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -164,15 +165,15 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(keycloakAdminClientHelper, times(1)).rollBackUser(Mockito.anyString());
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_UpdateKeycloakPasswordFails()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakPasswordFails()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -188,15 +189,15 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(keycloakAdminClientHelper, times(1)).rollBackUser(Mockito.anyString());
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_UpdateKeycloakDummyEmailFails()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakDummyEmailFails()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -214,9 +215,9 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT_WITHOUT_EMAIL);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(keycloakAdminClientHelper, times(1)).rollBackUser(Mockito.anyString());
   }
@@ -244,7 +245,7 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_CreateAccountInMariaDBFails()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_CreateAccountInMariaDBFails()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -258,13 +259,13 @@ public class CreateUserFacadeTest {
     doNothing().when(keycloakAdminClientHelper).updatePassword(Mockito.anyString(),
         Mockito.anyString());
     when(userService.createUser(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-        Mockito.anyBoolean())).thenThrow(new ServiceException(ERROR));
+        Mockito.anyBoolean())).thenThrow(new InternalServerErrorException(ERROR));
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(keycloakAdminClientHelper, times(1)).rollBackUser(Mockito.anyString());
   }
@@ -294,7 +295,7 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_CreateUserSessionFails()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_CreateUserSessionFails()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -310,20 +311,20 @@ public class CreateUserFacadeTest {
     when(userService.createUser(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
         Mockito.anyBoolean())).thenReturn(USER);
     when(sessionDataService.saveSessionDataFromRegistration(Mockito.any(), Mockito.any()))
-        .thenThrow(new ServiceException(ERROR));
+        .thenThrow(new InternalServerErrorException(ERROR));
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
     verify(keycloakAdminClientHelper, times(1)).rollBackUser(Mockito.anyString());
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndRocketChatLoginFails()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndRocketChatLoginFails()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -343,9 +344,9 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_KREUZBUND);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
     verify(sessionDataService, times(0)).saveSessionDataFromRegistration(Mockito.any(),
@@ -354,7 +355,7 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndRocketChatLoginReturnsNoToken()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndRocketChatLoginReturnsNoToken()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -374,9 +375,9 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_KREUZBUND);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
     verify(sessionDataService, times(0)).saveSessionDataFromRegistration(Mockito.any(),
@@ -413,7 +414,7 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndRcUserIdWasNotUpdatedInDb()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndRcUserIdWasNotUpdatedInDb()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -434,9 +435,9 @@ public class CreateUserFacadeTest {
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_KREUZBUND);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
     verify(sessionDataService, times(0)).saveSessionDataFromRegistration(Mockito.any(),
@@ -445,7 +446,7 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ThrowServiceExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndSavingUserAgencyRelationFails()
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_ConsultingTypeIsWithChatAndSavingUserAgencyRelationFails()
       throws Exception {
 
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
@@ -463,13 +464,13 @@ public class CreateUserFacadeTest {
     when(rocketChatService.loginUserFirstTime(Mockito.any(), Mockito.any()))
         .thenReturn(LOGIN_RESPONSE_ENTITY_OK);
     when(userService.saveUser(Mockito.any())).thenReturn(USER);
-    when(userAgencyService.saveUserAgency(Mockito.any())).thenThrow(new ServiceException(ERROR));
+    when(userAgencyService.saveUserAgency(Mockito.any())).thenThrow(new InternalServerErrorException(ERROR));
 
     try {
       createUserFacade.createUserAndInitializeAccount(USER_DTO_KREUZBUND);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
     verify(sessionDataService, times(0)).saveSessionDataFromRegistration(Mockito.any(),

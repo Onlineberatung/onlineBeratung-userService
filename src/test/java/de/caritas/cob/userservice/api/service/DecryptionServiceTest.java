@@ -60,16 +60,13 @@ public class DecryptionServiceTest {
 
   @Test
   public void decrypt_Should_ReturnDecryptedText_WhenProvidedWithValidParameters()
-      throws NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException,
-      BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+      throws Exception {
     String decryptedMessage = encryptionService.decrypt(MESSAGE_ENCRYPTED, KEY_SESSION);
     assertEquals("Did not get the expected decrypted result.", MESSAGE_PLAIN, decryptedMessage);
   }
 
   @Test
-  public void decrypt_Should_ReturnWrongDecryptedText_WhenProvidedWithInvalidParameters()
-      throws NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException,
-      NoSuchAlgorithmException, InvalidKeyException {
+  public void decrypt_Should_ReturnWrongDecryptedText_WhenProvidedWithInvalidParameters() {
     try {
       encryptionService.decrypt(MESSAGE_ENCRYPTED, KEY_SESSION_WRONG);
       fail("The expected BadPaddingException due to wrong password was not thrown.");

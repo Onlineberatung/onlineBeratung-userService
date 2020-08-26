@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.UserDataResponseDTO;
@@ -72,7 +72,8 @@ public class GetUserDataFacadeTest {
   }
 
   @Test
-  public void getConsultantData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant() {
+  public void getConsultantData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant()
+      throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgency(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
@@ -87,7 +88,8 @@ public class GetUserDataFacadeTest {
   }
 
   @Test
-  public void getUserData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession() {
+  public void getUserData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession()
+      throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
@@ -103,7 +105,8 @@ public class GetUserDataFacadeTest {
   }
 
   @Test
-  public void getUserData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencies() {
+  public void getUserData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencies()
+      throws AgencyServiceHelperException {
 
     when(agencyServiceHelper.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
@@ -119,7 +122,7 @@ public class GetUserDataFacadeTest {
   }
 
   @Test
-  public void getUserData_GetConsultingTypes_Should_ThrowServiceException_When_AgencyServiceHelperFails()
+  public void getUserData_GetConsultingTypes_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails()
       throws Exception {
 
     AgencyServiceHelperException agencyServiceHelperException =
@@ -129,9 +132,9 @@ public class GetUserDataFacadeTest {
 
     try {
       getUserDataFacade.getUserData(USER_WITH_SESSIONS).getConsultingTypes();
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(agencyServiceHelper, times(1)).getAgencies(Mockito.anyList());
   }

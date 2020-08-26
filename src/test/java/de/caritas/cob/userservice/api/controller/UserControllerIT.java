@@ -545,8 +545,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(userService.getUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(createSessionFacade.createSession(Mockito.any(), Mockito.any()))
-        .thenReturn(NEW_REGISTRATION_RESPONSE_DTO_CREATED);
+    when(createSessionFacade.createSession(Mockito.any(), Mockito.any())).thenReturn(1L);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
@@ -656,8 +655,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(HttpStatus.CONFLICT);
+    doThrow(new ConflictException(ERROR)).when(createEnquiryMessageFacade).createEnquiryMessage(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -672,8 +671,6 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(createEnquiryMessageFacade.createEnquiryMessage(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(HttpStatus.CREATED);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)

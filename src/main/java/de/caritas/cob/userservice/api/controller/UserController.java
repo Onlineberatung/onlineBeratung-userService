@@ -2,6 +2,8 @@ package de.caritas.cob.userservice.api.controller;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.exception.SaveChatException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -205,17 +207,17 @@ public class UserController implements UsersApi {
     Optional<User> user = userService.getUser(authenticatedUser.getUserId());
 
     if (!user.isPresent()) {
-      LogService.logInternalServerError(
+      throw new InternalServerErrorException(
           String.format("User with id %s not found while registering new consulting type: %s",
-              authenticatedUser.getUserId(), newRegistrationDto.toString()));
-
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+          authenticatedUser.getUserId(), newRegistrationDto.toString()));
     }
 
-    NewRegistrationResponseDto response =
-        createSessionFacade.createSession(newRegistrationDto, user.get());
-
-    return new ResponseEntity<>(response, response.getStatus());
+    Long createdSessionId = createSessionFacade.createSession(newRegistrationDto, user.get());
+    return new ResponseEntity<>(
+        NewRegistrationResponseDto.builder()
+            .sessionId(createdSessionId)
+            .status(HttpStatus.CREATED)
+            .build(), HttpStatus.CREATED);
   }
 
   /**
@@ -271,10 +273,10 @@ public class UserController implements UsersApi {
 
     RocketChatCredentials rocketChatCredentials =
         RocketChatCredentials.builder().RocketChatToken(rcToken).RocketChatUserId(rcUserId).build();
-    HttpStatus status = createEnquiryMessageFacade.createEnquiryMessage(user.get(), sessionId,
+    createEnquiryMessageFacade.createEnquiryMessage(user.get(), sessionId,
         enquiryMessage.getMessage(), rocketChatCredentials);
 
-    return new ResponseEntity<>(status);
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   /**
@@ -694,13 +696,15 @@ public class UserController implements UsersApi {
 
     Optional<Consultant> callingConsultant =
         consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
+    if (!callingConsultant.isPresent()) {
+      throw new InternalServerErrorException(String.format("No consultant for user %s exists",
+          authenticatedUser.getUserId()));
+    }
 
     // Create chat and return chat link
     CreateChatResponseDTO response = createChatFacade.createChat(chatDTO, callingConsultant.get());
 
-    return (response != null)
-        ? new ResponseEntity<>(response, HttpStatus.CREATED)
-        : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
   /**
@@ -796,10 +800,13 @@ public class UserController implements UsersApi {
   public ResponseEntity<UpdateChatResponseDTO> updateChat(
       @NotNull @Valid @PathVariable("chatId") Long chatId, @Valid @RequestBody ChatDTO chatDTO) {
 
-    UpdateChatResponseDTO updateChatResponseDTO =
-        chatService.updateChat(chatId, chatDTO, authenticatedUser);
-
-    return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
+    try {
+      UpdateChatResponseDTO updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
+          authenticatedUser);
+      return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
+    } catch (SaveChatException e) {
+      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+    }
   }
 
   @Override

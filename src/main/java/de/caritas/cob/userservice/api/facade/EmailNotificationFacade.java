@@ -1,19 +1,12 @@
 package de.caritas.cob.userservice.api.facade;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.EmailNotificationHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -35,6 +28,16 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 /**
  * Facade for capsuling the mail notification via the MailService
@@ -210,13 +213,13 @@ public class EmailNotificationFacade {
         }
       }
 
-    } catch (ServiceException ex) {
+    } catch (InternalServerErrorException ex) {
       throw new NewMessageNotificationException("Error while sending new message notification: ",
           ex);
     }
 
     // Send e mail task to MailService
-    if (mailList != null && !mailList.isEmpty()) {
+    if (isNotEmpty(mailList)) {
       MailsDTO mailsDTO = new MailsDTO();
       mailsDTO.setMails(mailList);
       mailServiceHelper.sendEmailNotification(mailsDTO);
@@ -316,13 +319,16 @@ public class EmailNotificationFacade {
             getMailDtoForFeedbackMessageNotification(email, nameSender, nameRecipient, nameUser));
       }
 
-    } catch (ServiceException ex) {
+    } catch (InternalServerErrorException ex) {
       throw new NewMessageNotificationException("Error while sending new message notification: ",
           ex);
+    } catch (RocketChatGetGroupMembersException e) {
+      LogService.logEmailNotificationFacadeError(String.format(
+          "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
     }
 
     // Send e mail task to MailService
-    if (mailList != null && !mailList.isEmpty()) {
+    if (isNotEmpty(mailList)) {
       MailsDTO mailsDTO = new MailsDTO();
       mailsDTO.setMails(mailList);
       mailServiceHelper.sendEmailNotification(mailsDTO);
@@ -369,12 +375,6 @@ public class EmailNotificationFacade {
 
   /**
    * Get MailDTO for new enquiry notification
-   *
-   * @param email
-   * @param nameSender
-   * @param nameRecipient
-   * @param nameUser
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForNewEnquiryNotificationConsultant(String email, String name,
@@ -388,11 +388,6 @@ public class EmailNotificationFacade {
 
   /**
    * Get MailDTO for new message notification (consultant)
-   *
-   * @param email
-   * @param name
-   * @param postCode
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForNewMessageNotificationConsultant(String email, String name,
@@ -407,11 +402,6 @@ public class EmailNotificationFacade {
 
   /**
    * Get MailDTO for new message notification (asker)
-   *
-   * @param email
-   * @param consultantName
-   * @param askerName
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForNewMessageNotificationAsker(String email, String consultantName,
@@ -424,12 +414,6 @@ public class EmailNotificationFacade {
 
   /**
    * Get MailDTO for feedback message notification
-   *
-   * @param email
-   * @param nameSender
-   * @param nameRecipient
-   * @param nameUser
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForFeedbackMessageNotification(String email, String nameSender,
@@ -445,12 +429,6 @@ public class EmailNotificationFacade {
 
   /**
    * Get MailDTO for assign enquiry notification
-   *
-   * @param email
-   * @param nameSender
-   * @param nameRecipient
-   * @param nameUser
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForAssignEnquiryNotification(String email, String nameSender,

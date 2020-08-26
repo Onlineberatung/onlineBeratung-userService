@@ -1,14 +1,13 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.ws.rs.InternalServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -40,7 +39,7 @@ public class ConsultantService {
       return consultantRepository.save(consultant);
     } catch (DataAccessException ex) {
       LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while saving consultant");
+      throw new InternalServerErrorException("Database error while saving consultant");
     }
   }
 
@@ -55,7 +54,7 @@ public class ConsultantService {
       return consultantRepository.findById(consultantId);
     } catch (DataAccessException ex) {
       LogService.logDatabaseError(ex);
-      throw new ServiceException("Database error while loading consultant");
+      throw new InternalServerErrorException("Database error while loading consultant");
     }
   }
 
@@ -70,7 +69,7 @@ public class ConsultantService {
       return consultantRepository.findByRocketChatId(rcUserId);
     } catch (DataAccessException ex) {
       LogService.logDatabaseError(ex);
-      throw new ServiceException(String
+      throw new InternalServerErrorException(String
           .format("Database error while loading consultant by Rocket.Chat user id %s", rcUserId));
     }
   }
@@ -108,7 +107,7 @@ public class ConsultantService {
       return consultantRepository.findByEmail(email);
     } catch (DataAccessException ex) {
       LogService.logDatabaseError(ex);
-      throw new ServiceException(String.format("Database error while loading consultant by email"));
+      throw new InternalServerErrorException(String.format("Database error while loading consultant by email"));
     }
   }
 
@@ -123,7 +122,7 @@ public class ConsultantService {
       return consultantRepository.findByUsername(username);
     } catch (DataAccessException ex) {
       LogService.logDatabaseError(ex);
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Database error while loading consultant by username"));
     }
   }
@@ -186,7 +185,7 @@ public class ConsultantService {
    * 
    * @param chatAgencies
    * @return
-   * @throws {@link ServiceException}
+   * @throws {@link InternalServerErrorException}
    */
   public List<Consultant> findConsultantsByAgencyIds(Set<ChatAgency> chatAgencies) {
 
@@ -197,7 +196,7 @@ public class ConsultantService {
       return consultantRepository.findByConsultantAgenciesAgencyIdIn(agencyIds);
     } catch (DataAccessException ex) {
       LogService.logDatabaseError(ex);
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Database error while loading consultant by agency ids"));
     }
   }

@@ -12,8 +12,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import java.util.Optional;
-import javax.ws.rs.InternalServerErrorException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -191,7 +194,8 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void joinChat_Should_AddConsultantToRocketChatGroup() {
+  public void joinChat_Should_AddConsultantToRocketChatGroup()
+      throws RocketChatAddUserToGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
     when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
@@ -207,7 +211,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void joinChat_Should_AddUserToRocketChatGroup() {
+  public void joinChat_Should_AddUserToRocketChatGroup() throws RocketChatAddUserToGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
     when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(true);
@@ -362,7 +366,8 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_RemoveConsultantFromRocketChatGroup() {
+  public void leaveChat_Should_RemoveConsultantFromRocketChatGroup()
+      throws RocketChatRemoveUserFromGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
     when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
@@ -378,7 +383,8 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_RemoveUserFromRocketChatGroup() {
+  public void leaveChat_Should_RemoveUserFromRocketChatGroup()
+      throws RocketChatRemoveUserFromGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
     when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(true);

@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.MonitoringHelper;
 import de.caritas.cob.userservice.api.model.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
@@ -66,7 +66,7 @@ public class MonitoringServiceTest {
    */
 
   @Test
-  public void updateMonitoring_Should_ThrowServiceExceptionAndLogException_OnDatabaseError()
+  public void updateMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -76,11 +76,10 @@ public class MonitoringServiceTest {
 
     try {
       monitoringService.updateMonitoring(SESSION_ID, MONITORING_DTO);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -99,7 +98,7 @@ public class MonitoringServiceTest {
    */
 
   @Test
-  public void deleteMonitoring_Should_ThrowServiceExceptionAndLogException_OnDatabaseError()
+  public void deleteMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -109,11 +108,10 @@ public class MonitoringServiceTest {
 
     try {
       monitoringService.deleteMonitoring(SESSION_ID, MONITORING_DTO);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
