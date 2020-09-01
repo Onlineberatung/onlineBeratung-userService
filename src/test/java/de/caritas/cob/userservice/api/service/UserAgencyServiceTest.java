@@ -15,6 +15,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgencyRepository;
 
@@ -44,7 +45,7 @@ public class UserAgencyServiceTest {
    */
 
   @Test
-  public void saveUserAgency_Should_ThrowServiceException_When_DatabaseFails() {
+  public void saveUserAgency_Should_ThrowInternalServerErrorException_When_DatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -52,9 +53,9 @@ public class UserAgencyServiceTest {
 
     try {
       userAgencyService.saveUserAgency(USER_AGENCY);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -75,7 +76,7 @@ public class UserAgencyServiceTest {
    */
 
   @Test
-  public void getUserAgenciesByUser_Should_ReturnServiceException_When_RepositoryFails()
+  public void getUserAgenciesByUser_Should_ReturnInternalServerErrorException_When_RepositoryFails()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -84,9 +85,9 @@ public class UserAgencyServiceTest {
 
     try {
       userAgencyService.getUserAgenciesByUser(USER);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceEx) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceEx) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -106,7 +107,7 @@ public class UserAgencyServiceTest {
    */
 
   @Test
-  public void deleteUserAgency_Should_ThrowServiceException_When_DatabaseFails() {
+  public void deleteUserAgency_Should_ThrowInternalServerErrorException_When_DatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -114,9 +115,9 @@ public class UserAgencyServiceTest {
 
     try {
       userAgencyService.deleteUserAgency(USER_AGENCY);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceEx) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceEx) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -128,9 +129,9 @@ public class UserAgencyServiceTest {
 
     try {
       userAgencyService.deleteUserAgency(null);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceEx) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceEx) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 

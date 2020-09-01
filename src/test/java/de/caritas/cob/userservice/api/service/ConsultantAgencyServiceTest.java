@@ -6,24 +6,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
 
 @RunWith(SpringRunner.class)
 public class ConsultantAgencyServiceTest {
@@ -50,7 +55,12 @@ public class ConsultantAgencyServiceTest {
   @Mock
   private ConsultantAgencyRepository consultantAgencyRepository;
   @Mock
-  private LogService logService;
+  private Logger logger;
+
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   @Test
   public void saveConsultantAgency_Should_SaveConsultantAgency() {
@@ -61,7 +71,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void saveConsultantAgencyt_Should_LogAndThrowServiceException_WhenSaveConsultantAgencyFails() {
+  public void saveConsultantAgencyt_Should_LogAndThrowInternalServerErrorException_WhenSaveConsultantAgencyFails() {
 
     @SuppressWarnings("serial")
     DataAccessException dataAccessException = new DataAccessException(ERROR) {};
@@ -69,13 +79,10 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.saveConsultantAgency(CONSULTANT_AGENCY);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-
-    verify(logService, times(1)).logDatabaseError(dataAccessException);
-
   }
 
   /**
@@ -84,7 +91,7 @@ public class ConsultantAgencyServiceTest {
    */
 
   @Test
-  public void isConsultantInAgency_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void isConsultantInAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -93,9 +100,9 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -124,7 +131,7 @@ public class ConsultantAgencyServiceTest {
    */
 
   @Test
-  public void findConsultantsByAgencyId_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void findConsultantsByAgencyId_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -132,9 +139,9 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -155,7 +162,7 @@ public class ConsultantAgencyServiceTest {
    */
 
   @Test
-  public void getConsultantsOfAgency_Should_ThrowServiceExceptionAndLogError_WhenDatabaseFails() {
+  public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -164,42 +171,39 @@ public class ConsultantAgencyServiceTest {
 
     try {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
-      verify(logService, atLeastOnce()).logDatabaseError(Mockito.any());
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
 
   @Test
-  public void getConsultantsOfAgency_Should_ThrowServiceExceptionAndLogError_WhenDatabaseAgencyIsNull() {
+  public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyIsNull() {
 
     when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENCY_NULL_LIST);
 
     try {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
-      verify(logService, atLeastOnce()).logDatabaseInconsistency(Mockito.any());
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
 
   @Test
-  public void getConsultantsOfAgency_Should_ThrowServiceExceptionAndLogError_WhenDatabaseAgencyConsultantIsNull() {
+  public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyConsultantIsNull() {
 
     when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_NULL_AGENCY_LIST);
 
     try {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
-      verify(logService, atLeastOnce()).logDatabaseInconsistency(Mockito.any());
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }

@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.CREATE_MONITORING_EXCEPTION;
-import static de.caritas.cob.userservice.testHelper.ExceptionConstants.SERVICE_EXCEPTION;
+import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
@@ -16,31 +16,37 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.UserService;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class CreateSessionFacadeTest {
@@ -62,28 +68,30 @@ public class CreateSessionFacadeTest {
   @Mock
   private SessionDataService sessionDataService;
   @Mock
-  private LogService logService;
+  private Logger logger;
 
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   /**
    * Method: createSession
    */
 
-  @Test
+  @Test(expected = ConflictException.class)
   public void createSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserByConsultingType(Mockito.any(), Mockito.any()))
         .thenReturn(SESSION_LIST);
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
-    assertEquals(HttpStatus.CONFLICT, result.getStatus());
     verify(sessionService, times(0)).saveSession(Mockito.any());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void createSession_Should_ReturnInternalServerError_When_SessionCouldNotBeSaved() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
@@ -94,16 +102,14 @@ public class CreateSessionFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenThrow(new ServiceException(MESSAGE));
+    when(sessionService.saveSession(Mockito.any())).thenThrow(new InternalServerErrorException(MESSAGE));
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
-    verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void createSession_Should_ReturnInternalServerError_When_SessionDataCouldNotBeSaved() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
@@ -116,17 +122,15 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
     when(sessionDataService.saveSessionDataFromRegistration(Mockito.any(), Mockito.any()))
-        .thenThrow(SERVICE_EXCEPTION);
+        .thenThrow(INTERNAL_SERVER_ERROR_EXCEPTION);
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
-    verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verify(sessionService, times(1)).deleteSession(Mockito.any());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void createSession_Should_ReturnInternalServerError_When_MonitoringCouldNotBeSaved()
       throws CreateMonitoringException {
 
@@ -142,17 +146,14 @@ public class CreateSessionFacadeTest {
     doThrow(CREATE_MONITORING_EXCEPTION).when(monitoringService).createMonitoring(Mockito.any(),
         Mockito.any());
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
-    verify(logService, times(1)).logCreateSessionFacadeError(Mockito.anyString(), Mockito.any());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verify(monitoringService, times(1)).rollbackInitializeMonitoring(Mockito.any());
   }
 
-  @Test
-  public void createSession_Should_ReturnBadRequest_When_AgencyForConsultingTypeCouldNotBeFound()
-      throws CreateMonitoringException {
+  @Test(expected = BadRequestException.class)
+  public void createSession_Should_ReturnBadRequest_When_AgencyForConsultingTypeCouldNotBeFound() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
@@ -162,14 +163,11 @@ public class CreateSessionFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
-
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
   }
 
   @Test
-  public void createSession_Should_ReturnCreatedAndSessionId_OnSuccess() {
+  public void createSession_Should_ReturnSessionId_OnSuccess() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
@@ -181,15 +179,13 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
-    assertEquals(HttpStatus.CREATED, result.getStatus());
-    assertNotNull(result.getSessionId());
+    assertThat(result, is(1L));
   }
 
   @Test
-  public void createSession_Should_CreateSessionData() throws CreateMonitoringException {
+  public void createSession_Should_CreateSessionData() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
@@ -201,10 +197,9 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
-    assertEquals(HttpStatus.CREATED, result.getStatus());
+    assertThat(result, is(1L));
     verify(sessionDataService, times(1)).saveSessionDataFromRegistration(Mockito.any(),
         Mockito.any());
   }
@@ -223,16 +218,14 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
-    assertEquals(HttpStatus.CREATED, result.getStatus());
+    assertThat(result, is(1L));
     verify(monitoringService, times(1)).createMonitoring(Mockito.any(), Mockito.any());
   }
 
   @Test
-  public void createSession_ShouldNot_CreateMonitoring_When_ConsultingTypeDoesNotContainsMonitoring()
-      throws CreateMonitoringException {
+  public void createSession_ShouldNot_CreateMonitoring_When_ConsultingTypeDoesNotContainsMonitoring() {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
@@ -243,10 +236,9 @@ public class CreateSessionFacadeTest {
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_U25)).thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    NewRegistrationResponseDto result =
-        createSessionFacade.createSession(NEW_REGISTRATION_DTO_U25, USER);
+    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_U25, USER);
 
-    assertEquals(HttpStatus.CREATED, result.getStatus());
+    assertThat(result, is(1L));
     verify(monitoringService, times(0)).updateMonitoring(Mockito.any(), Mockito.any());
   }
 }

@@ -82,8 +82,6 @@ public class KeycloakAdminClientHelper {
 
   @Autowired
   private UserHelper userHelper;
-  @Autowired
-  LogService logService;
 
   /**
    * Instantiate Keycloak Admin Client
@@ -163,7 +161,7 @@ public class KeycloakAdminClientHelper {
    * @return
    */
   @KeycloakAdminClientLogout
-  private boolean isEmailAvailable(String email) throws Exception {
+  private boolean isEmailAvailable(String email) {
     // Get user resource and change e-mail address of technical user
     UserResource techUserResource =
         getInstance().realm(KEYCLOAK_REALM).users().get(KEYCLOAK_TECH_USER_ID);
@@ -346,7 +344,7 @@ public class KeycloakAdminClientHelper {
 
     } catch (Exception ex) {
       String error = String.format("Could not get roles for user id %s", userId);
-      logService.logKeycloakError(error, ex);
+      LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
 

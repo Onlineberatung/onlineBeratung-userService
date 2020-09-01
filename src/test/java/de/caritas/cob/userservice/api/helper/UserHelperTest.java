@@ -25,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -164,7 +166,8 @@ public class UserHelperTest {
   }
 
   @Test
-  public void updateRocketChatIdInDatabase_Should_UpdateUserObjectAndSaveToDb() {
+  public void updateRocketChatIdInDatabase_Should_UpdateUserObjectAndSaveToDb()
+      throws SaveUserException {
 
     ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
 

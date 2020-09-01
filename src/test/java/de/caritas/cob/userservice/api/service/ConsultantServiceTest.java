@@ -22,10 +22,15 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.InternalServerErrorException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,19 +40,12 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 
 @RunWith(SpringRunner.class)
 public class ConsultantServiceTest {
 
   @MockBean
   private ConsultantRepository consultantRepository;
-  @MockBean
-  private LogService logService;
   @MockBean
   private UserHelper userHelper;
   @Mock
@@ -57,7 +55,7 @@ public class ConsultantServiceTest {
 
   @Before
   public void setUp() {
-    this.consultantService = new ConsultantService(consultantRepository, logService, userHelper);
+    this.consultantService = new ConsultantService(consultantRepository, userHelper);
   }
 
   @Test
@@ -102,7 +100,7 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void saveConsultant_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void saveConsultant_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -110,15 +108,15 @@ public class ConsultantServiceTest {
 
     try {
       consultantService.saveConsultant(CONSULTANT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
 
   @Test
-  public void getConsultant_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void getConsultant_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -126,9 +124,9 @@ public class ConsultantServiceTest {
 
     try {
       consultantService.getConsultant(CONSULTANT_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -146,7 +144,7 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantByRcUserId_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void getConsultantByRcUserId_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -154,9 +152,9 @@ public class ConsultantServiceTest {
 
     try {
       consultantService.getConsultantByRcUserId(RC_USER_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -174,7 +172,7 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantByEmail_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void getConsultantByEmail_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -182,9 +180,9 @@ public class ConsultantServiceTest {
 
     try {
       consultantService.getConsultantByEmail(EMAIL);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -202,7 +200,7 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantByUsername_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void getConsultantByUsername_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -210,9 +208,9 @@ public class ConsultantServiceTest {
 
     try {
       consultantService.getConsultantByUsername(USERNAME);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -328,7 +326,7 @@ public class ConsultantServiceTest {
    * 
    */
   @Test
-  public void findConsultantsByAgencyIds_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void findConsultantsByAgencyIds_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -336,9 +334,9 @@ public class ConsultantServiceTest {
 
     try {
       consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }

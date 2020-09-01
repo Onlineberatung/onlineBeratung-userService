@@ -12,11 +12,20 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.helper.ChatHelper;
+import de.caritas.cob.userservice.api.repository.chat.Chat;
+import de.caritas.cob.userservice.api.service.ChatService;
+import de.caritas.cob.userservice.api.service.RocketChatService;
 import java.time.LocalDateTime;
-import javax.ws.rs.InternalServerErrorException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,12 +34,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
-import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
-import de.caritas.cob.userservice.api.helper.ChatHelper;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StopChatFacadeTest {
@@ -103,11 +106,13 @@ public class StopChatFacadeTest {
   }
 
   @Test
-  public void stopChat_Should_ThrowInternalServerError_When_RemoveAllMessagesFails() {
+  public void stopChat_Should_ThrowInternalServerError_When_RemoveAllMessagesFails()
+      throws RocketChatRemoveSystemMessagesException {
 
     when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
         .thenReturn(true);
-    when(rocketChatService.removeAllMessages(ACTIVE_CHAT.getGroupId())).thenReturn(false);
+    doThrow(new RocketChatRemoveSystemMessagesException("error")).when(rocketChatService)
+        .removeAllMessages(Mockito.any());
 
     try {
       stopChatFacade.stopChat(ACTIVE_CHAT, CONSULTANT);
@@ -120,7 +125,8 @@ public class StopChatFacadeTest {
   }
 
   @Test
-  public void stopChat_Should_ThrowInternalServerError_When_DeleteRcGroupFails() {
+  public void stopChat_Should_ThrowInternalServerError_When_DeleteRcGroupFails()
+      throws RocketChatRemoveSystemMessagesException {
 
     when(chatHelper.isChatAgenciesContainConsultantAgency(chat, CONSULTANT)).thenReturn(true);
     when(chat.isActive()).thenReturn(true);
@@ -159,7 +165,8 @@ public class StopChatFacadeTest {
   }
 
   @Test
-  public void stopChat_Should_RemoveAllMessagesAndUsersAndSetStatusAndStartDateOfChat_When_ChatIsRepetitive() {
+  public void stopChat_Should_RemoveAllMessagesAndUsersAndSetStatusAndStartDateOfChat_When_ChatIsRepetitive()
+      throws Exception {
 
     when(chatHelper.isChatAgenciesContainConsultantAgency(chat, CONSULTANT)).thenReturn(true);
     when(chat.isActive()).thenReturn(true);
@@ -167,7 +174,6 @@ public class StopChatFacadeTest {
     when(chat.getChatInterval()).thenReturn(CHAT_INTERVAL_WEEKLY);
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
     when(chat.getStartDate()).thenReturn(LocalDateTime.now());
-    when(rocketChatService.removeAllMessages(RC_GROUP_ID)).thenReturn(true);
 
     stopChatFacade.stopChat(chat, CONSULTANT);
 
@@ -179,14 +185,14 @@ public class StopChatFacadeTest {
   }
 
   @Test
-  public void stopChat_Should_ReturnCorrectNextStartDate_When_ChatIsRepetitive() {
+  public void stopChat_Should_ReturnCorrectNextStartDate_When_ChatIsRepetitive()
+      throws RocketChatRemoveSystemMessagesException {
 
     Chat chatWithDate =
         new Chat(CHAT_START_DATETIME, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, IS_ACTIVE, RC_GROUP_ID);
 
     when(chatHelper.isChatAgenciesContainConsultantAgency(chatWithDate, CONSULTANT))
         .thenReturn(true);
-    when(rocketChatService.removeAllMessages(chatWithDate.getGroupId())).thenReturn(true);
 
     stopChatFacade.stopChat(chatWithDate, CONSULTANT);
 

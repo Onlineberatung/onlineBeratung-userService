@@ -25,6 +25,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.model.rocketChat.login.DataDTO;
+import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
 import java.time.LocalDateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,11 +48,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketChat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatCredentialsHelperTest {
@@ -169,7 +170,8 @@ public class RocketChatCredentialsHelperTest {
    **/
 
   @Test
-  public void updateCredentials_Should_LoginAUsers_WhenNoUsersAreLoggedIn() {
+  public void updateCredentials_Should_LoginAUsers_WhenNoUsersAreLoggedIn()
+      throws Exception {
     // Prepare Header for Requests
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -212,7 +214,7 @@ public class RocketChatCredentialsHelperTest {
 
   @Test
   public void updateCredentials_Should_LoginBUsers_WhenAUsersAreLoggedIn()
-      throws NoSuchFieldException {
+      throws Exception {
     // Prepare Header for Requests
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -281,7 +283,7 @@ public class RocketChatCredentialsHelperTest {
 
   @Test
   public void updateCredentials_Should_LogoutAndReLoginBUsers_WhenAllUsersArePresent()
-      throws NoSuchFieldException {
+      throws Exception {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -405,7 +407,7 @@ public class RocketChatCredentialsHelperTest {
 
   @Test
   public void getTechnicalUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized()
-      throws NoSuchFieldException {
+      throws Exception {
 
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A),
@@ -418,7 +420,7 @@ public class RocketChatCredentialsHelperTest {
 
   @Test
   public void getTechnicalUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized()
-      throws NoSuchFieldException {
+      throws Exception {
 
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B),
@@ -430,7 +432,7 @@ public class RocketChatCredentialsHelperTest {
   }
 
   @Test
-  public void getTechnicalUser_Should_ReturnUserA_WhenUserAIsNewer() throws NoSuchFieldException {
+  public void getTechnicalUser_Should_ReturnUserA_WhenUserAIsNewer() throws Exception {
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A),
         RC_CREDENTIALS_TECHNICAL_A);
@@ -447,7 +449,7 @@ public class RocketChatCredentialsHelperTest {
   }
 
   @Test
-  public void getTechnicalUser_Should_ReturnUserB_WhenUserBIsNewer() throws NoSuchFieldException {
+  public void getTechnicalUser_Should_ReturnUserB_WhenUserBIsNewer() throws Exception {
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A),
         RC_CREDENTIALS_TECHNICAL_A);
@@ -481,7 +483,7 @@ public class RocketChatCredentialsHelperTest {
 
   @Test
   public void getSystemUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized()
-      throws NoSuchFieldException {
+      throws Exception {
 
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A),
@@ -494,7 +496,7 @@ public class RocketChatCredentialsHelperTest {
 
   @Test
   public void getSystemUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized()
-      throws NoSuchFieldException {
+      throws Exception {
 
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B),
@@ -506,7 +508,7 @@ public class RocketChatCredentialsHelperTest {
   }
 
   @Test
-  public void getSystemUser_Should_ReturnUserA_WhenUserAIsNewer() throws NoSuchFieldException {
+  public void getSystemUser_Should_ReturnUserA_WhenUserAIsNewer() throws Exception {
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A),
         RC_CREDENTIALS_SYSTEM_A);
@@ -523,7 +525,7 @@ public class RocketChatCredentialsHelperTest {
   }
 
   @Test
-  public void getSystemUser_Should_ReturnUserB_WhenUserBIsNewer() throws NoSuchFieldException {
+  public void getSystemUser_Should_ReturnUserB_WhenUserBIsNewer() throws Exception {
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A),
         RC_CREDENTIALS_SYSTEM_A);

@@ -3,28 +3,31 @@ package de.caritas.cob.userservice.api.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.model.rocketChat.login.DataDTO;
+import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.rocketChat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KeycloakServiceTest {
@@ -53,7 +56,7 @@ public class KeycloakServiceTest {
   @Mock
   private RestTemplate restTemplate;
   @Mock
-  private LogService logService;
+  private Logger logger;
   @Mock
   private AuthenticatedUser authenticatedUser;
   @Mock
@@ -71,6 +74,7 @@ public class KeycloakServiceTest {
     FieldSetter.setField(keycloakService,
         keycloakService.getClass().getDeclaredField(FIELD_NAME_KEYCLOAK_CLIENT_ID),
         FIELD_VALUE_KEYCLOAK_CLIENT_ID);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   /**
@@ -91,8 +95,7 @@ public class KeycloakServiceTest {
     doThrow(exception).when(keycloakAdminClientHelper).updatePassword(USER_ID, NEW_PW);
 
     assertFalse(keycloakService.changePassword(USER_ID, NEW_PW));
-    verify(logService, times(1)).logKeycloakError(Mockito.anyString(),
-        Mockito.any(Exception.class));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -122,8 +125,7 @@ public class KeycloakServiceTest {
     HttpStatus status = keycloakService.loginUser(USER_ID, OLD_PW).get().getStatusCode();
 
     assertEquals(status, HttpStatus.BAD_REQUEST);
-    verify(logService, times(1)).logKeycloakError(Mockito.anyString(),
-        Mockito.any(HttpClientErrorException.class));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -151,8 +153,7 @@ public class KeycloakServiceTest {
     boolean response = keycloakService.logoutUser(REFRESH_TOKEN);
 
     assertFalse(response);
-    verify(logService, times(1)).logKeycloakError(Mockito.anyString(),
-        Mockito.any(RestClientException.class));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -165,6 +166,6 @@ public class KeycloakServiceTest {
     boolean response = keycloakService.logoutUser(REFRESH_TOKEN);
 
     assertFalse(response);
-    verify(logService, times(1)).logKeycloakError(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 }

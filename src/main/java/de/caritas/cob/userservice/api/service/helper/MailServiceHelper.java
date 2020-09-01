@@ -24,9 +24,6 @@ public class MailServiceHelper {
   private String mailServiceApiSendMailUrl;
 
   @Autowired
-  private LogService logService;
-
-  @Autowired
   private ServiceHelper serviceHelper;
 
   @Autowired
@@ -49,11 +46,11 @@ public class MailServiceHelper {
           restTemplate.exchange(mailServiceApiSendMailUrl, HttpMethod.POST, request, Void.class);
 
     } catch (Exception ex) {
-      logService.logMailServiceHelperException("Error while calling the MailService", ex);
+      LogService.logMailServiceHelperException("Error while calling the MailService", ex);
     }
 
     if (response != null && response.getStatusCode() != HttpStatus.OK) {
-      logService.logMailServiceHelperException(
+      LogService.logMailServiceHelperException(
           "Response status from MailService is not OK (200). Response-Status:"
               + response.getStatusCodeValue());
     }

@@ -8,16 +8,16 @@ public class ConflictException extends CustomHttpStatusException {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Conflict exception
+   * Conflict exception.
    * 
-   * @param message
+   * @param message the message
    */
   public ConflictException(String message) {
-    super(message, new LogService()::logInternalServerError);
+    super(message, LogService::logInternalServerError);
   }
 
   /**
-   * Conflict exception
+   * Conflict exception.
    *
    * @param message an additional message
    * @param loggingMethod the method being used to log this exception

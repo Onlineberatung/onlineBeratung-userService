@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.exception.httpresponses;
 
+import static java.util.Objects.nonNull;
+
 import java.util.function.Consumer;
 
 public abstract class CustomHttpStatusException extends RuntimeException {
@@ -12,9 +14,11 @@ public abstract class CustomHttpStatusException extends RuntimeException {
   }
 
   /**
-   * @return the method consumer to log the Exception
+   * Executes the non null logging method.
    */
-  public Consumer<Exception> getLoggingMethod() {
-    return loggingMethod;
+  public void executeLogging() {
+    if (nonNull(this.loggingMethod)) {
+      this.loggingMethod.accept(this);
+    }
   }
 }

@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +16,6 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
@@ -46,18 +48,16 @@ public class SessionService {
 
   private SessionRepository sessionRepository;
   private AgencyServiceHelper agencyServiceHelper;
-  private LogService logService;
   private Now now;
   private SessionDataHelper sessionDataHelper;
   private final UserHelper userHelper;
 
   @Autowired
   public SessionService(SessionRepository sessionRepository,
-      AgencyServiceHelper agencyServiceHelper, LogService logService, Now now,
-      SessionDataHelper sessionDataHelper, UserHelper userHelper) {
+      AgencyServiceHelper agencyServiceHelper, Now now, SessionDataHelper sessionDataHelper,
+      UserHelper userHelper) {
     this.sessionRepository = sessionRepository;
     this.agencyServiceHelper = agencyServiceHelper;
-    this.logService = logService;
     this.now = now;
     this.sessionDataHelper = sessionDataHelper;
     this.userHelper = userHelper;
@@ -65,8 +65,7 @@ public class SessionService {
 
   /**
    * Returns the sessions for a user
-   * 
-   * @param user
+   *
    * @return the sessions
    */
   public List<Session> getSessionsForUser(User user) {
@@ -76,8 +75,8 @@ public class SessionService {
     try {
       userSessions = sessionRepository.findByUser(user);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(String.format(
+      LogService.logDatabaseError(ex);
+      throw new InternalServerErrorException(String.format(
           "Database error while retrieving sessions for user with id %s", user.getUserId()));
     }
 
@@ -85,9 +84,9 @@ public class SessionService {
   }
 
   /**
-   * Returns the session for the provided sessionId
-   * 
-   * @param sessionId
+   * Returns the session for the provided sessionId.
+   *
+   * @param sessionId the session id
    * @return {@link Session}
    */
   public Optional<Session> getSession(Long sessionId) {
@@ -96,9 +95,9 @@ public class SessionService {
     try {
       session = sessionRepository.findById(sessionId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(
-          String.format("Database error while retrieving session with id %s", sessionId));
+      throw new InternalServerErrorException(
+          String.format("Database error while retrieving session with id %s", sessionId),
+          LogService::logDatabaseError);
     }
 
     return session;
@@ -106,71 +105,70 @@ public class SessionService {
 
   /**
    * Returns the sessions for the given user and consultingType.
-   * 
+   *
    * @param user {@link User}
    * @return list of {@link Session}
    */
   public List<Session> getSessionsForUserByConsultingType(User user,
       ConsultingType consultingType) {
 
-    List<Session> userSessions = null;
+    List<Session> userSessions;
 
     try {
       userSessions = sessionRepository.findByUserAndConsultingType(user, consultingType);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException("Database error while retrieving user sessions");
+      throw new InternalServerErrorException("Database error while retrieving user sessions",
+          LogService::logDatabaseError);
     }
 
     return userSessions != null ? userSessions : Collections.emptyList();
   }
 
   /**
-   * Updates the given session by assigning the provided consultant and {@link SessionStatus}
-   * 
-   * @param session
-   * @param consultant
-   * @param status
+   * Updates the given session by assigning the provided consultant and {@link SessionStatus}.
+   *
+   * @param session the session
+   * @param consultant the consultant
+   * @param status s´the status of the session
    */
   public void updateConsultantAndStatusForSession(Session session, Consultant consultant,
-      SessionStatus status) {
+      SessionStatus status) throws UpdateSessionException {
 
     try {
       session.setConsultant(consultant);
       session.setStatus(status);
       saveSession(session);
-    } catch (ServiceException serviceException) {
+    } catch (InternalServerErrorException serviceException) {
       throw new UpdateSessionException(serviceException);
     }
   }
 
   /**
-   * Updates the feedback group id of the given {@link Session}
-   * 
-   * @param session
-   * @param feedbackGroupId
+   * Updates the feedback group id of the given {@link Session}.
+   *
+   * @param session an optional session
+   * @param feedbackGroupId the id of the feedback group
    */
-  public void updateFeedbackGroupId(Optional<Session> session, String feedbackGroupId) {
+  public void updateFeedbackGroupId(Optional<Session> session, String feedbackGroupId)
+      throws UpdateFeedbackGroupIdException {
     try {
       session.get().setFeedbackGroupId(feedbackGroupId);
       saveSession(session.get());
 
-    } catch (ServiceException serviceException) {
-      logService
-          .logDatabaseError(String.format("Could not update feedback group id %s for session %s",
-              feedbackGroupId, session.get().getId()), serviceException);
-      throw new UpdateFeedbackGroupIdException(serviceException);
+    } catch (InternalServerErrorException serviceException) {
+      throw new UpdateFeedbackGroupIdException(
+          String.format("Could not update feedback group id %s for session %s", feedbackGroupId,
+              session.get().getId()), serviceException);
     }
   }
 
   /**
    * Saving the enquiry message and Rocket.Chat group id for a session. The Message will be set to
    * now and the status to {@link SessionStatus#NEW}.
-   * 
-   * @param session
-   * @param rcGroupId
+   *
+   * @param session the {@link Session}
+   * @param rcGroupId the rocket chat group id
    * @return the {@link Session}
-   * @throws EnquiryMessageException
    */
   public Session saveEnquiryMessageDateAndRocketChatGroupId(Session session, String rcGroupId)
       throws EnquiryMessageException {
@@ -180,7 +178,7 @@ public class SessionService {
     session.setStatus(SessionStatus.NEW);
     try {
       saveSession(session);
-    } catch (ServiceException serviceException) {
+    } catch (InternalServerErrorException serviceException) {
       CreateEnquiryExceptionInformation exceptionInformation =
           CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
       throw new EnquiryMessageException(serviceException, exceptionInformation);
@@ -192,71 +190,71 @@ public class SessionService {
   /**
    * Returns a list of current sessions (no matter if an enquiry message has been written or not)
    * for the provided user ID.
-   * 
+   *
    * @param userId Keycloak/MariaDB user ID
    * @return {@link List} of {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getSessionsForUserId(String userId) {
 
-    List<Session> sessions = null;
-    List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
-
     try {
-      sessions = sessionRepository.findByUser_UserId(userId);
-      if (sessions != null && sessions.size() > 0) {
+      List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
+      List<Session> sessions = sessionRepository.findByUser_UserId(userId);
+      if (isNotEmpty(sessions)) {
         List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
-            sessions.stream().map(session -> session.getAgencyId()).collect(Collectors.toList()));
+            sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));
         sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
       }
-
+      return sessionResponseDTOs;
     } catch (DataAccessException ex) {
-      throw new ServiceException(String.format(
-          "Database error while retrieving the sessions for the user with id %s", userId), ex);
+      throw new InternalServerErrorException(String.format(
+          "Database error while retrieving the sessions for the user with id %s", userId),
+          LogService::logInternalServerError);
 
     } catch (AgencyServiceHelperException helperEx) {
-      logService.logAgencyServiceHelperException(helperEx);
-      throw new ServiceException(String.format(
-          "AgencyService error while retrieving the agency for the session for user %s", userId));
+      throw new InternalServerErrorException(String.format(
+          "AgencyService error while retrieving the agency for the session for user %s", userId),
+          LogService::logAgencyServiceHelperException);
     }
-
-    return sessionResponseDTOs;
   }
 
   /**
-   * Initialize a {@link Session}
-   * 
-   * @param user
-   * @param userDto
+   * Initialize a {@link Session}.
+   *
+   * @param user the user
+   * @param userDto the dto of the user
+   * @param monitoring flag to initialize monitoring
+   * @return the initialized session
    */
-  public Session initializeSession(User user, UserDTO userDto, boolean monitoring) {
+  public Session initializeSession(User user, UserDTO userDto, boolean monitoring)
+      throws AgencyServiceHelperException {
     AgencyDTO agencyDTO = agencyServiceHelper.getAgency(userDto.getAgencyId());
     return saveSession(
-        new Session(user, ConsultingType.values()[Integer.valueOf(userDto.getConsultingType())],
+        new Session(user, ConsultingType.values()[Integer.parseInt(userDto.getConsultingType())],
             userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
             agencyDTO.isTeamAgency(), monitoring));
   }
 
   /**
-   * Save a {@link Session} to the database
-   * 
-   * @param session
+   * Save a {@link Session} to the database.
+   *
+   * @param session the session
    * @return the {@link Session}
    */
-  public Session saveSession(Session session) throws ServiceException {
+  public Session saveSession(Session session) {
     try {
       return sessionRepository.save(session);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(
-          String.format("Database error while saving session with id %s", session.getId()), ex);
+      throw new InternalServerErrorException(
+          String.format("Database error while saving session with id %s", session.getId()),
+          LogService::logDatabaseError);
     }
   }
 
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} containing team sessions excluding
-   * sessions which are taken by the consultant
+   * sessions which are taken by the consultant.
    *
-   * @param consultant
+   * @param consultant the consultant
    * @return A list of {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getTeamSessionsForConsultant(Consultant consultant) {
@@ -275,9 +273,9 @@ public class SessionService {
       }
 
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(String.format(
-          "Database error while getting the team sessions for consultant %s", consultant.getId()));
+      throw new InternalServerErrorException(String.format(
+          "Database error while getting the team sessions for consultant %s", consultant.getId()),
+          LogService::logDatabaseError);
 
     }
 
@@ -294,16 +292,15 @@ public class SessionService {
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the given consultant and session
    * status.
-   * 
-   * @param consultant
+   *
    * @param status The submitted {@link SessionStatus}
    * @return A list of {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getSessionsForConsultant(Consultant consultant,
-      Integer status) {
+      Integer status) throws WrongParameterException {
 
     List<Session> sessions = null;
-    Optional<SessionStatus> sessionStatus = null;
+    Optional<SessionStatus> sessionStatus;
     List<ConsultantSessionResponseDTO> sessionDTOs = null;
 
     try {
@@ -337,12 +334,11 @@ public class SessionService {
             "Invalid session status %s submitted for consultant %s", status, consultant.getId()));
       }
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException("Database error");
+      throw new InternalServerErrorException("Database error", LogService::logDatabaseError);
     }
 
     if (sessions != null) {
-      sessionDTOs = sessions.stream().map(session -> convertToConsultantSessionReponseDTO(session))
+      sessionDTOs = sessions.stream().map(this::convertToConsultantSessionReponseDTO)
           .collect(Collectors.toList());
     }
 
@@ -353,7 +349,7 @@ public class SessionService {
    * Converts a {@link List} of {@link Session}s to a {@link List} of {@link UserSessionResponseDTO}
    * and adds the corresponding agency information to the session from the provided {@link List} of
    * {@link AgencyDTO}s
-   * 
+   *
    * @param sessions {@link List} of {@link Session}
    * @param agencies {@link List} of {@link AgencyDTO}
    * @return {@link List} of {@link UserSessionResponseDTO>}
@@ -377,9 +373,6 @@ public class SessionService {
 
   /**
    * Converts a {@link Session} to a {@link ConsultantSessionResponseDTO}
-   * 
-   * @param session
-   * @return
    */
   private ConsultantSessionResponseDTO convertToConsultantSessionReponseDTO(Session session) {
     return new ConsultantSessionResponseDTO(convertToSessionDTO(session),
@@ -389,9 +382,6 @@ public class SessionService {
 
   /**
    * Converts a {@link Session} to a {@link SessionDTO}
-   * 
-   * @param session
-   * @return
    */
   private SessionDTO convertToSessionDTO(Session session) {
     return new SessionDTO(session.getId(), session.getAgencyId(),
@@ -407,9 +397,6 @@ public class SessionService {
 
   /**
    * Converts a {@link Consultant} to a {@link SessionConsultantForUserDTO}
-   * 
-   * @param consultant
-   * @return
    */
   private SessionConsultantForUserDTO convertToSessionConsultantForUserDTO(Consultant consultant) {
     return new SessionConsultantForUserDTO(consultant.getUsername(), consultant.isAbsent(),
@@ -420,24 +407,18 @@ public class SessionService {
    * Converts a {@link Consultant} to a {@link SessionConsultantForConsultantDTO}. Only returns the
    * object if the currently authenticated user has the authority to view all peer session (is main
    * consultant).
-   * 
-   * @param consultant
-   * @return
    */
   private SessionConsultantForConsultantDTO convertToSessionConsultantForConsultantDTO(
       Consultant consultant) {
 
     return consultant != null
         ? new SessionConsultantForConsultantDTO(consultant.getId(), consultant.getFirstName(),
-            consultant.getLastName())
+        consultant.getLastName())
         : null;
   }
 
   /**
    * Converts a {@link Session} to a {@link SessionUserDTO}
-   * 
-   * @param session
-   * @return
    */
   private SessionUserDTO convertToSessionUserDTO(Session session) {
 
@@ -453,23 +434,23 @@ public class SessionService {
 
   /**
    * Delete a {@link Session}
-   * 
+   *
    * @param session the {@link Session}
    */
   public void deleteSession(Session session) {
     try {
       sessionRepository.delete(session);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(
-          String.format("Deletion of session with id %s failed", session.getId()));
+      throw new InternalServerErrorException(
+          String.format("Deletion of session with id %s failed", session.getId()),
+          LogService::logDatabaseError);
     }
   }
 
   /**
    * Returns the session for the specified user id and Rocket.Chat group id depending on the user's
    * role.
-   * 
+   *
    * @param rcGroupId Rocket.Chat group id
    * @param userId Rocket.Chat user id
    * @param roles user roles
@@ -487,10 +468,9 @@ public class SessionService {
         userSessions = sessionRepository.findByGroupIdAndConsultantId(rcGroupId, userId);
       }
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Database error while retrieving user sessions by groupId %s and userId %s",
-              rcGroupId, userId));
+              rcGroupId, userId), LogService::logDatabaseError);
     }
 
     if (userSessions != null && !userSessions.isEmpty()) {
@@ -498,32 +478,30 @@ public class SessionService {
         // There should be only one session with this Rocket.Chat group id and user id combination
         return userSessions.get(0);
       }
-      if (userSessions.size() > 1) {
-        throw new ServiceException(String.format(
-            "More than one matching session found by groupId %s and userId %s in database. Aborting due to corrupt data.",
-            rcGroupId, userId));
-      }
+      throw new InternalServerErrorException(String.format(
+          "More than one matching session found by groupId %s and userId %s in database. Aborting due to corrupt data.",
+          rcGroupId, userId));
     }
 
     return null;
   }
 
   /**
-   * Returns the session for the Rocket.Chat feedback group id
-   * 
-   * @param feedbackGroupId
-   * @return
+   * Returns the session for the Rocket.Chat feedback group id.
+   *
+   * @param feedbackGroupId the id of the feedbackgroup
+   * @return the session
    */
   public Session getSessionByFeedbackGroupId(String feedbackGroupId) {
 
-    List<Session> sessions = null;
+    List<Session> sessions;
 
     try {
       sessions = sessionRepository.findByFeedbackGroupId(feedbackGroupId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(String.format(
-          "Database error while retrieving session by feedbackGroupId %s", feedbackGroupId));
+      throw new InternalServerErrorException(String.format(
+          "Database error while retrieving session by feedbackGroupId %s", feedbackGroupId),
+          LogService::logDatabaseError);
     }
 
     if (sessions != null && !sessions.isEmpty()) {
@@ -532,11 +510,9 @@ public class SessionService {
         // combination
         return sessions.get(0);
       }
-      if (sessions.size() > 1) {
-        throw new ServiceException(String.format(
-            "More than one matching session found by feedbackGroupId %s in database. Aborting due to corrupt data.",
-            feedbackGroupId));
-      }
+      throw new InternalServerErrorException(String.format(
+          "More than one matching session found by feedbackGroupId %s in database. Aborting due to corrupt data.",
+          feedbackGroupId));
     }
 
     return null;

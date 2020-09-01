@@ -1,9 +1,14 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
+import de.caritas.cob.userservice.api.model.mailService.MailsDTO;
+import de.caritas.cob.userservice.api.service.LogService;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,9 +16,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -21,8 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import de.caritas.cob.userservice.api.model.mailService.MailsDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MailServiceHelperTest {
@@ -31,7 +34,7 @@ public class MailServiceHelperTest {
   private final String MAIL_SERVICE_URL = "http://caritas.local/service/mails/send";
 
   @Mock
-  private LogService logService;
+  private Logger logger;
 
   @Mock
   private ServiceHelper serviceHelper;
@@ -42,12 +45,12 @@ public class MailServiceHelperTest {
   @InjectMocks
   private MailServiceHelper mailServiceHelper;
 
-
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
     FieldSetter.setField(mailServiceHelper,
         mailServiceHelper.getClass().getDeclaredField(FIELD_NAME_MAIL_SERVICE_API_URL),
         MAIL_SERVICE_URL);
+    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @Test
@@ -78,7 +81,7 @@ public class MailServiceHelperTest {
 
     mailServiceHelper.sendEmailNotification(new MailsDTO());
 
-    verify(logService, atLeastOnce()).logMailServiceHelperException(Mockito.anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
 
   }
 
@@ -95,8 +98,7 @@ public class MailServiceHelperTest {
 
     mailServiceHelper.sendEmailNotification(new MailsDTO());
 
-    verify(logService, atLeastOnce()).logMailServiceHelperException(Mockito.anyString(),
-        Mockito.eq(httpServerErrorException));
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
 
   }
 

@@ -15,8 +15,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.Optional;
-import javax.ws.rs.InternalServerErrorException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,6 @@ import org.mockito.Mockito;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 
@@ -45,7 +45,7 @@ public class UserServiceTest {
    */
 
   @Test
-  public void createUser_Should_ReturnServiceException_When_RepositoryFails() throws Exception {
+  public void createUser_Should_ReturnInternalServerErrorException_When_RepositoryFails() throws Exception {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -53,9 +53,9 @@ public class UserServiceTest {
 
     try {
       userService.createUser(USER_ID, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceEx) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceEx) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -76,7 +76,7 @@ public class UserServiceTest {
    */
 
   @Test
-  public void getUser_Should_ReturnServiceException_When_RepositoryFails() throws Exception {
+  public void getUser_Should_ReturnInternalServerErrorException_When_RepositoryFails() throws Exception {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
@@ -84,9 +84,9 @@ public class UserServiceTest {
 
     try {
       userService.getUser(USER_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceEx) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceEx) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -151,7 +151,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void saveUser_Should_UserObject() {
+  public void saveUser_Should_UserObject() throws SaveUserException {
 
     when(userRepository.save(Mockito.any())).thenReturn(USER);
 
@@ -175,9 +175,9 @@ public class UserServiceTest {
 
     try {
       userService.deleteUser(USER);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }

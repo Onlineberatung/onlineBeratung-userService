@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.exception.rocketChat;
+package de.caritas.cob.userservice.api.exception.rocketchat;
 
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;

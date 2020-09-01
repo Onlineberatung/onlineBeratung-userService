@@ -1,6 +1,6 @@
-package de.caritas.cob.userservice.api.exception.rocketChat;
+package de.caritas.cob.userservice.api.exception.rocketchat;
 
-public class RocketChatRemoveSystemMessagesException extends RuntimeException {
+public class RocketChatRemoveSystemMessagesException extends Exception {
 
   private static final long serialVersionUID = 7966120004575237483L;
 

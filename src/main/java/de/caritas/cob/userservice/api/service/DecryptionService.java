@@ -30,9 +30,6 @@ public class DecryptionService {
 
   private String fragment_masterKey = INITIAL_MASTER_KEY;
 
-  @Autowired
-  private LogService logService;
-
   /**
    * Updates the master key fragment
    * 
@@ -89,7 +86,7 @@ public class DecryptionService {
    * @param secret The secret to be used
    * @return The decrypted message
    */
-  public String decrypt(String messageToDecrypt, String secret) {
+  public String decrypt(String messageToDecrypt, String secret) throws CustomCryptoException {
 
     if (messageToDecrypt == null || !messageToDecrypt.startsWith(ENCRYPTED_MESSAGE_FLAG)) {
       return messageToDecrypt;
@@ -103,10 +100,10 @@ public class DecryptionService {
       cipher.init(Cipher.DECRYPT_MODE, keySpec);
       return new String(cipher.doFinal(Base64.getDecoder().decode(messageToDecrypt)));
     } catch (BadPaddingException e) {
-      logService.logEncryptionPossibleBadKeyError(e);
+      LogService.logEncryptionPossibleBadKeyError(e);
       throw new CustomCryptoException(e);
     } catch (Exception e) {
-      logService.logEncryptionServiceError(e);
+      LogService.logEncryptionServiceError(e);
       throw new CustomCryptoException(e);
     }
   }

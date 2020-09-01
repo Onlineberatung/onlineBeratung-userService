@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.helper;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -31,21 +31,19 @@ public class AgencyHelper {
    * @param agencyId {@link AgencyDTO#getId()}
    * @param consultingType {@link ConsultingType}
    * @return {@link AgencyDTO} or null if agency is not found
-   * @throws ServiceException when getting the agency information fails
    * @throws BadRequestException when the given {@link ConsultingType} is not assigned to the
    *         provided agency
    */
   public AgencyDTO getVerifiedAgency(Long agencyId, ConsultingType consultingType)
-      throws ServiceException, BadRequestException {
+      throws BadRequestException {
 
     AgencyDTO agencyDTO = null;
     try {
       agencyDTO = agencyServiceHelper.getAgencyWithoutCaching(agencyId);
     } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Could not get agency with id %s to check with consulting type %s",
-              agencyId, consultingType),
-          agencyServiceHelperException);
+              agencyId, consultingType));
     }
     if (agencyDTO != null && !agencyDTO.getConsultingType().equals(consultingType)) {
       throw new BadRequestException(String.format(
@@ -67,12 +65,11 @@ public class AgencyHelper {
    *         <li>true if agency is assigned to the provided {@link ConsultingType}</li>
    *         <li>false if agency is not assigned to the provided {@link ConsultingType}</li>
    *         </ul>
-   * @throws ServiceException when getting the agency information fails
    * @throws BadRequestException when the given {@link ConsultingType} is not assigned to the
    *         provided agency
    */
   public boolean doesConsultingTypeMatchToAgency(Long agencyId, ConsultingType consultingType)
-      throws ServiceException, BadRequestException {
+      throws BadRequestException {
 
     AgencyDTO agencyDTO = getVerifiedAgency(agencyId, consultingType);
 

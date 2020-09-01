@@ -58,9 +58,9 @@ public class AgencyServiceHelperTest {
    **/
 
   @Test
-  public void getAgencies_Should_ReturnAgencyServiceHelperException_OnError() throws Exception {
+  public void getAgencies_Should_ReturnAgencyServiceHelperException_OnError() {
 
-    AgencyServiceHelperException exception = new AgencyServiceHelperException(new Exception());
+    Exception exception = new RuntimeException(new Exception());
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.any(),
@@ -143,10 +143,9 @@ public class AgencyServiceHelperTest {
    **/
 
   @Test
-  public void getAgencyWithoutCaching_Should_ReturnAgencyServiceHelperException_OnError()
-      throws Exception {
+  public void getAgencyWithoutCaching_Should_ReturnAgencyServiceHelperException_OnError() {
 
-    AgencyServiceHelperException exception = new AgencyServiceHelperException(new Exception());
+    Exception exception = new RuntimeException(new Exception());
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<HttpEntity<?>>any(),

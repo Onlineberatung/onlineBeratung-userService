@@ -1,16 +1,19 @@
 package de.caritas.cob.userservice.api.facade;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.UserDataResponseDTO;
@@ -24,20 +27,17 @@ import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 
 /**
  * Facade to encapsulate getting the agency data for the corresponding user
- *
  */
 
 @Service
 public class GetUserDataFacade {
 
-  private final LogService logService;
   private final AgencyServiceHelper agencyServiceHelper;
   private final SessionDataHelper sessionDataHelper;
 
   @Autowired
-  public GetUserDataFacade(LogService logService, AgencyServiceHelper agencyServiceHelper,
+  public GetUserDataFacade(AgencyServiceHelper agencyServiceHelper,
       SessionDataHelper sessionDataHelper) {
-    this.logService = logService;
     this.agencyServiceHelper = agencyServiceHelper;
     this.sessionDataHelper = sessionDataHelper;
   }
@@ -53,23 +53,31 @@ public class GetUserDataFacade {
     List<AgencyDTO> agencyDTOs = null;
 
     if (!consultant.getConsultantAgencies().isEmpty()) {
-      try {
-        agencyDTOs = consultant.getConsultantAgencies().stream()
-            .map(agency -> agencyServiceHelper.getAgency(agency.getAgencyId()))
-            .collect(Collectors.toList());
-      } catch (AgencyServiceHelperException agencyServiceHelperException) {
-        logService.logAgencyServiceHelperException(String
-            .format("Error while getting agencies of consultant with id %s", consultant.getId()),
-            agencyServiceHelperException);
+      agencyDTOs = consultant.getConsultantAgencies().stream()
+          .map(this::fromConsultantAgency)
+          .filter(Objects::nonNull)
+          .collect(Collectors.toList());
+    }
 
-        return null;
-      }
+    if (CollectionUtils.isEmpty(agencyDTOs)) {
+      return null;
     }
 
     return new UserDataResponseDTO(consultant.getId(), consultant.getUsername(),
         consultant.getFirstName(), consultant.getLastName(), consultant.getEmail(),
         consultant.isAbsent(), consultant.isLanguageFormal(), consultant.getAbsenceMessage(),
         consultant.isTeamConsultant(), agencyDTOs, null, null, null);
+  }
+
+  private AgencyDTO fromConsultantAgency(ConsultantAgency consultantAgency) {
+    try {
+      return this.agencyServiceHelper.getAgency(consultantAgency.getAgencyId());
+    } catch (AgencyServiceHelperException e) {
+      LogService.logAgencyServiceHelperException(String
+              .format("Error while getting agencies of consultant with id %s",
+                  consultantAgency.getId()), e);
+    }
+    return null;
   }
 
   /**
@@ -102,7 +110,7 @@ public class GetUserDataFacade {
     try {
       agencyDTOs = agencyServiceHelper.getAgencies(agencyIds);
     } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Invalid agencyIds: %s for user with id %s", agencyIds, user.getUserId()));
     }
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
@@ -121,7 +129,7 @@ public class GetUserDataFacade {
    * @param sessionList List of the user's {@link Session}s
    * @param agencyDTOs List of {@link AgencyDTO} that the user is registered to
    * @return LinkedHashMap<String, Object> {@link LinkedHashMap} containing user data
-   *         (sessionData,isRegistered,agency)
+   * (sessionData,isRegistered,agency)
    */
   private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType type,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.exception;
 
-public class SaveUserException extends RuntimeException {
+public class SaveUserException extends Exception {
 
   private static final long serialVersionUID = 1069524178563839717L;
 

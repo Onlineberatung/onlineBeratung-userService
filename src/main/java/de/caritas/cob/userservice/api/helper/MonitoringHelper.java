@@ -28,12 +28,10 @@ import lombok.Setter;
 public class MonitoringHelper {
 
   private ConsultingTypeManager consultingTypeManager;
-  private LogService logService;
 
   @Autowired
-  public MonitoringHelper(ConsultingTypeManager consultingTypeManager, LogService logService) {
+  public MonitoringHelper(ConsultingTypeManager consultingTypeManager) {
     this.consultingTypeManager = consultingTypeManager;
-    this.logService = logService;
   }
 
   /**
@@ -135,7 +133,7 @@ public class MonitoringHelper {
    * @return
    */
   public MonitoringDTO getMonitoringInitalList(ConsultingType consultingType) {
-    MonitoringDTO monitoring = null;
+    MonitoringDTO monitoring;
     ObjectMapper mapper = new ObjectMapper();
     TypeReference<MonitoringDTO> typeReference = new TypeReference<MonitoringDTO>() {};
     InputStream inputStream = getMonitoringJSONStream(consultingType);
@@ -245,7 +243,7 @@ public class MonitoringHelper {
         }
       }
     } catch (Exception exception) {
-      logService.logMonitoringHelperError(exception);
+      LogService.logMonitoringHelperError(exception);
       return new LinkedHashMap<String, Object>();
     }
 

@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -34,9 +36,8 @@ import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.MonitoringHelper;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
@@ -63,7 +64,6 @@ import lombok.Setter;
 
 /**
  * Imports the askers from the created CSV file of the old Caritas system.
- *
  */
 @Service
 public class AskerImportService {
@@ -133,11 +133,11 @@ public class AskerImportService {
     this.rocketChatHelper = rocketChatHelper;
   }
 
-  public AskerImportService() {}
+  public AskerImportService() {
+  }
 
   /**
    * Imports askers without session by a predefined import list (for the format see readme.md)
-   * 
    */
   public void startImportForAskersWithoutSession() {
 
@@ -184,7 +184,6 @@ public class AskerImportService {
           throw new ImportException(String
               .format("Could not get consulting type (agency) for user %s", record.getUsername()));
         }
-
 
         // Check if decoded username is already taken
         if (!userHelper.isUsernameAvailable(record.getUsername())) {
@@ -266,7 +265,7 @@ public class AskerImportService {
       } catch (ImportException importException) {
         writeToImportLog(importException.getMessage(), protocolFile);
         break;
-      } catch (ServiceException serviceException) {
+      } catch (InternalServerErrorException serviceException) {
         writeToImportLog(serviceException.getMessage(), protocolFile);
         break;
       } catch (RocketChatLoginException rcLoginException) {
@@ -287,7 +286,6 @@ public class AskerImportService {
 
   /**
    * Imports askers by a predefined import list (for the format see readme.md)
-   * 
    */
   public void startImport() {
 
@@ -484,8 +482,10 @@ public class AskerImportService {
           }
 
           // Remove all system messages from feedback group
-          if (!rocketChatService.removeSystemMessages(rcFeedbackGroupId,
-              LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now())) {
+          try {
+            rocketChatService.removeSystemMessages(rcFeedbackGroupId,
+                LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+          } catch (RocketChatRemoveSystemMessagesException e) {
             throw new ImportException(String.format(
                 "Could not remove system messages from feedback group id %s for user %s",
                 rcFeedbackGroupId, record.getUsername()));
@@ -553,8 +553,10 @@ public class AskerImportService {
         }
 
         // Remove all system messages from group
-        if (!rocketChatService.removeSystemMessages(rcGroupId,
-            LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now())) {
+        try {
+          rocketChatService.removeSystemMessages(rcGroupId,
+              LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+        } catch (RocketChatRemoveSystemMessagesException e) {
           throw new ImportException(
               String.format("Could not remove system messages from group id %s for user %s",
                   rcGroupId, record.getUsername()));
@@ -582,7 +584,7 @@ public class AskerImportService {
       } catch (ImportException importException) {
         writeToImportLog(importException.getMessage(), protocolFile);
         break;
-      } catch (ServiceException serviceException) {
+      } catch (InternalServerErrorException serviceException) {
         writeToImportLog(serviceException.getMessage(), protocolFile);
         break;
       } catch (RocketChatLoginException rcLoginException) {
@@ -613,8 +615,6 @@ public class AskerImportService {
     try {
       Files.write(Paths.get(protocolFile), (message + NEWLINE_CHAR).getBytes(IMPORT_LOG_CHARSET),
           StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -636,9 +636,6 @@ public class AskerImportService {
   /**
    * Returns a {@link ImportRecord} object for the given CSV record line. Generates a random
    * password if no password is specified.
-   * 
-   * @param record
-   * @return
    */
   private ImportRecordAsker getImportRecordAsker(CSVRecord record) {
     ImportRecordAsker importRecord = new ImportRecordAsker();
@@ -668,9 +665,6 @@ public class AskerImportService {
   /**
    * Returns a {@link ImportRecord} object for the given CSV record line. Generates a random
    * password if no password is specified.
-   * 
-   * @param record
-   * @return
    */
   private ImportRecordAskerWithoutSession getImportRecordAskerWithoutSession(CSVRecord record) {
     ImportRecordAskerWithoutSession importRecord = new ImportRecordAskerWithoutSession();
@@ -698,8 +692,6 @@ public class AskerImportService {
   /**
    * Reads in all welcome message files (according to consulting type id) and returns the result as
    * a map.
-   * 
-   * @return
    */
   private Map<ConsultingType, String> getWelcomeMessageMap(String protocolFile)
       throws ImportException {
@@ -746,6 +738,7 @@ public class AskerImportService {
   @Getter
   @Setter
   private class ImportRecordAsker {
+
     Long idOld = null;
     String username;
     String usernameEncoded;
@@ -759,6 +752,7 @@ public class AskerImportService {
   @Getter
   @Setter
   private class ImportRecordAskerWithoutSession {
+
     Long idOld = null;
     String username;
     String usernameEncoded;

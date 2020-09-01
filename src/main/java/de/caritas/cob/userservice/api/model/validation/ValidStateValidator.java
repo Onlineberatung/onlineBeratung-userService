@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.model.validation;
 
-import java.util.regex.Pattern;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.LogService;
+import java.util.regex.Pattern;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Checks if the state in a {@link UserDTO} is valid (depending on value in
@@ -19,12 +19,10 @@ import de.caritas.cob.userservice.api.service.LogService;
 public class ValidStateValidator implements ConstraintValidator<ValidState, UserDTO> {
 
   private final ConsultingTypeManager consultingTypeManager;
-  private final LogService logService;
 
   @Autowired
-  public ValidStateValidator(ConsultingTypeManager consultingTypeManager, LogService logService) {
+  public ValidStateValidator(ConsultingTypeManager consultingTypeManager) {
     this.consultingTypeManager = consultingTypeManager;
-    this.logService = logService;
   }
 
   @Override
@@ -39,7 +37,7 @@ public class ValidStateValidator implements ConstraintValidator<ValidState, User
 
     if (consultingTypeSettings.getRegistration() == null
         || consultingTypeSettings.getRegistration().getMandatoryFields() == null) {
-      logService.logValidationError(String.format(
+      LogService.logValidationError(String.format(
           "Could not get mandatory fields for consulting type %s. Please check configuration",
           userDTO.getConsultingType()));
       return false;

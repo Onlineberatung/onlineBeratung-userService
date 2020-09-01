@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.model.validation;
 
-import java.util.Optional;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.IRegistrationDto;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.LogService;
+import java.util.Optional;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Checks if the postcode of a {@link IRegistrationDto} is valid (depending on minimum size value in
@@ -19,13 +19,10 @@ import de.caritas.cob.userservice.api.service.LogService;
 public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode, Object> {
 
   private final ConsultingTypeManager consultingTypeManager;
-  private final LogService logService;
 
   @Autowired
-  public ValidPostcodeValidator(ConsultingTypeManager consultingTypeManager,
-      LogService logService) {
+  public ValidPostcodeValidator(ConsultingTypeManager consultingTypeManager) {
     this.consultingTypeManager = consultingTypeManager;
-    this.logService = logService;
   }
 
   @Override
@@ -40,7 +37,7 @@ public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode
         consultingTypeManager.getConsultantTypeSettings(getConsultingType(value).get());
 
     if (consultingTypeSettings.getRegistration() == null) {
-      logService.logValidationError(String.format(
+      LogService.logValidationError(String.format(
           "Could not get registration settings for consulting type %s. Please check configuration",
           getConsultingType(value).get()));
       return false;
@@ -61,7 +58,7 @@ public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode
     if (((IRegistrationDto) value).getConsultingType() != null) {
       try {
         return Optional.ofNullable(ConsultingType.values()[Integer
-            .valueOf(((IRegistrationDto) value).getConsultingType())]);
+            .parseInt(((IRegistrationDto) value).getConsultingType())]);
       } catch (Exception e) {
         return Optional.empty();
       }

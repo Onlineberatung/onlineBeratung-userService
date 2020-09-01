@@ -23,7 +23,7 @@ public class BadRequestException extends CustomHttpStatusException {
    * @param message an additional message
    */
   public BadRequestException(String message) {
-    super(message, new LogService()::logWarn);
+    super(message, LogService::logWarn);
   }
 
 }

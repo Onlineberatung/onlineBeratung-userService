@@ -1,9 +1,12 @@
 package de.caritas.cob.userservice.api.facade;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.ws.rs.InternalServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.authorization.UserRole;
@@ -104,8 +107,12 @@ public class GetChatMembersFacade {
           String.format("Chat with id %s has no Rocket.Chat group id", chat.get().getId()));
     }
 
-    return convertGroupMemberDTOListToChatMemberResponseDTO(
-        rocketChatService.getStandardMembersOfGroup(chat.get().getGroupId()));
+    try {
+      return convertGroupMemberDTOListToChatMemberResponseDTO(
+          rocketChatService.getStandardMembersOfGroup(chat.get().getGroupId()));
+    } catch (RocketChatGetGroupMembersException | RocketChatUserNotInitializedException e) {
+      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+    }
   }
 
   /**

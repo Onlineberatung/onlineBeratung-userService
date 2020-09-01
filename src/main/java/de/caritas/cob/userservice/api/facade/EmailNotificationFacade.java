@@ -1,19 +1,12 @@
 package de.caritas.cob.userservice.api.facade;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.EmailNotificationHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -35,6 +28,16 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 /**
  * Facade for capsuling the mail notification via the MailService
@@ -57,7 +60,6 @@ public class EmailNotificationFacade {
   private final SessionService sessionService;
   private final ConsultantAgencyService consultantAgencyService;
   private final ConsultantService consultantService;
-  private final LogService logService;
   private final RocketChatService rocketChatService;
   private final MailDtoBuilder mailDtoBuilder;
   private final ConsultingTypeManager consultingTypeManager;
@@ -67,9 +69,9 @@ public class EmailNotificationFacade {
   public EmailNotificationFacade(ConsultantAgencyRepository consultantAgencyRepository,
       MailServiceHelper mailServiceHelper, AgencyServiceHelper agencyServiceHelper,
       SessionService sessionService, ConsultantAgencyService consultantAgencyService,
-      LogService logService, ConsultantService consultantService,
-      RocketChatService rocketChatService, MailDtoBuilder mailDtoBuilder,
-      ConsultingTypeManager consultingTypeManager, UserHelper userHelper) {
+      ConsultantService consultantService, RocketChatService rocketChatService,
+      MailDtoBuilder mailDtoBuilder, ConsultingTypeManager consultingTypeManager,
+      UserHelper userHelper) {
 
     this.consultantAgencyRepository = consultantAgencyRepository;
     this.mailServiceHelper = mailServiceHelper;
@@ -77,7 +79,6 @@ public class EmailNotificationFacade {
     this.sessionService = sessionService;
     this.consultantAgencyService = consultantAgencyService;
     this.consultantService = consultantService;
-    this.logService = logService;
     this.rocketChatService = rocketChatService;
     this.mailDtoBuilder = mailDtoBuilder;
     this.consultingTypeManager = consultingTypeManager;
@@ -86,7 +87,6 @@ public class EmailNotificationFacade {
 
   @Async
   public void sendNewEnquiryEmailNotification(Session session) {
-
 
     try {
 
@@ -133,7 +133,6 @@ public class EmailNotificationFacade {
   /**
    * Sends email notifications according to the corresponding consultant(s) or asker when a new
    * message was written.
-   * 
    */
   @Async
   public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId) {
@@ -184,7 +183,7 @@ public class EmailNotificationFacade {
           }
 
         } else {
-          logService.logEmailNotificationFacadeError(String.format(
+          LogService.logEmailNotificationFacadeError(String.format(
               "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s or the session does not belong to the user.",
               rcGroupId, userId));
         }
@@ -208,20 +207,19 @@ public class EmailNotificationFacade {
               userHelper.decodeUsername(session.getUser().getUsername())));
 
         } else {
-          logService.logEmailNotificationFacadeError(String.format(
+          LogService.logEmailNotificationFacadeError(String.format(
               "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s, the session does not belong to the user or has not provided a e-mail address.",
               rcGroupId, userId));
         }
       }
 
-    } catch (ServiceException ex) {
+    } catch (InternalServerErrorException ex) {
       throw new NewMessageNotificationException("Error while sending new message notification: ",
           ex);
     }
 
-
     // Send e mail task to MailService
-    if (mailList != null && !mailList.isEmpty()) {
+    if (isNotEmpty(mailList)) {
       MailsDTO mailsDTO = new MailsDTO();
       mailsDTO.setMails(mailList);
       mailServiceHelper.sendEmailNotification(mailsDTO);
@@ -232,7 +230,6 @@ public class EmailNotificationFacade {
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new feedback
    * message was written.
-   * 
    */
   @Async
   public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, Set<String> roles,
@@ -244,7 +241,7 @@ public class EmailNotificationFacade {
 
       Optional<Consultant> sendingConsultantOptional = consultantService.getConsultant(userId);
       if (!sendingConsultantOptional.isPresent()) {
-        logService.logEmailNotificationFacadeError(
+        LogService.logEmailNotificationFacadeError(
             String.format("Consultant with id %s not found.", userId));
         return;
       }
@@ -252,13 +249,13 @@ public class EmailNotificationFacade {
       Session session = sessionService.getSessionByFeedbackGroupId(rcFeedbackGroupId);
 
       if (session == null) {
-        logService.logEmailNotificationFacadeError(String.format(
+        LogService.logEmailNotificationFacadeError(String.format(
             "No session found for the rocket chat feedback group id %s.", rcFeedbackGroupId));
         return;
       }
 
       if (session.getConsultant() == null) {
-        logService.logEmailNotificationFacadeError(String.format(
+        LogService.logEmailNotificationFacadeError(String.format(
             "No consultant is assigned to the session found by rocket chat feedback group id %s.",
             rcFeedbackGroupId));
         return;
@@ -270,7 +267,7 @@ public class EmailNotificationFacade {
         List<GroupMemberDTO> groupMembers = rocketChatService.getMembersOfGroup(rcFeedbackGroupId);
 
         if (groupMembers == null || groupMembers.isEmpty()) {
-          logService.logEmailNotificationFacadeError(String.format(
+          LogService.logEmailNotificationFacadeError(String.format(
               "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
           return;
         }
@@ -285,7 +282,7 @@ public class EmailNotificationFacade {
               consultantService.getConsultantByRcUserId(groupMemberDTO.get_id());
 
           if (!consultantOptional.isPresent()) {
-            logService.logEmailNotificationFacadeError(String.format(
+            LogService.logEmailNotificationFacadeError(String.format(
                 "Consultant with rc user id %s not found. Why is this consultant in the rc room with the id %s?",
                 groupMemberDTO.get_id(), rcFeedbackGroupId));
             continue;
@@ -322,13 +319,16 @@ public class EmailNotificationFacade {
             getMailDtoForFeedbackMessageNotification(email, nameSender, nameRecipient, nameUser));
       }
 
-    } catch (ServiceException ex) {
+    } catch (InternalServerErrorException ex) {
       throw new NewMessageNotificationException("Error while sending new message notification: ",
           ex);
+    } catch (RocketChatGetGroupMembersException e) {
+      LogService.logEmailNotificationFacadeError(String.format(
+          "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
     }
 
     // Send e mail task to MailService
-    if (mailList != null && !mailList.isEmpty()) {
+    if (isNotEmpty(mailList)) {
       MailsDTO mailsDTO = new MailsDTO();
       mailsDTO.setMails(mailList);
       mailServiceHelper.sendEmailNotification(mailsDTO);
@@ -339,7 +339,6 @@ public class EmailNotificationFacade {
   /**
    * Sends an email notifications to the consultant when an enquiry has been assigned to him by a
    * different consultant
-   * 
    */
   @Async
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
@@ -347,7 +346,7 @@ public class EmailNotificationFacade {
 
     if (receiverConsultant == null || receiverConsultant.getEmail() == null
         || receiverConsultant.getEmail().isEmpty()) {
-      logService.logEmailNotificationFacadeError(String.format(
+      LogService.logEmailNotificationFacadeError(String.format(
           "Error while sending assign message notification: Receiver consultant with id %s is null or doesn't have an email address.",
           receiverConsultant != null ? receiverConsultant.getId() : "unknown"));
       return;
@@ -356,7 +355,7 @@ public class EmailNotificationFacade {
     Optional<Consultant> senderConsultant = consultantService.getConsultant(senderUserId);
 
     if (!senderConsultant.isPresent()) {
-      logService.logEmailNotificationFacadeError(String.format(
+      LogService.logEmailNotificationFacadeError(String.format(
           "Error while sending assign message notification: Sender consultant with id %s could not be found in database.",
           senderUserId));
       return;
@@ -375,14 +374,7 @@ public class EmailNotificationFacade {
   }
 
   /**
-   * 
    * Get MailDTO for new enquiry notification
-   * 
-   * @param email
-   * @param nameSender
-   * @param nameRecipient
-   * @param nameUser
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForNewEnquiryNotificationConsultant(String email, String name,
@@ -395,13 +387,7 @@ public class EmailNotificationFacade {
   }
 
   /**
-   * 
    * Get MailDTO for new message notification (consultant)
-   * 
-   * @param email
-   * @param name
-   * @param postCode
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForNewMessageNotificationConsultant(String email, String name,
@@ -415,13 +401,7 @@ public class EmailNotificationFacade {
 
 
   /**
-   * 
    * Get MailDTO for new message notification (asker)
-   * 
-   * @param email
-   * @param consultantName
-   * @param askerName
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForNewMessageNotificationAsker(String email, String consultantName,
@@ -433,14 +413,7 @@ public class EmailNotificationFacade {
   }
 
   /**
-   * 
    * Get MailDTO for feedback message notification
-   * 
-   * @param email
-   * @param nameSender
-   * @param nameRecipient
-   * @param nameUser
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForFeedbackMessageNotification(String email, String nameSender,
@@ -455,14 +428,7 @@ public class EmailNotificationFacade {
   }
 
   /**
-   * 
    * Get MailDTO for assign enquiry notification
-   * 
-   * @param email
-   * @param nameSender
-   * @param nameRecipient
-   * @param nameUser
-   * @return
    */
   @SuppressWarnings("unchecked")
   private MailDTO getMailDtoForAssignEnquiryNotification(String email, String nameSender,

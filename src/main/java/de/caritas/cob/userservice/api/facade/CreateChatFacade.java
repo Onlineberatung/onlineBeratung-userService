@@ -1,13 +1,11 @@
 package de.caritas.cob.userservice.api.facade;
 
-import java.util.Optional;
-import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketChat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -18,12 +16,12 @@ import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
+import java.util.Optional;
+import org.springframework.stereotype.Service;
 
 /**
  * Facade to encapsulate the steps for creating a chat.
- *
  */
 @Service
 public class CreateChatFacade {
@@ -32,23 +30,21 @@ public class CreateChatFacade {
   private final RocketChatService rocketChatService;
   private final UserHelper userHelper;
   private final RocketChatHelper rocketChatHelper;
-  private final LogService logService;
   private final ChatHelper chatHelper;
 
   public CreateChatFacade(ChatService chatService, UserHelper userHelper,
-      RocketChatService rocketChatService, RocketChatHelper rocketChatHelper, LogService logService,
+      RocketChatService rocketChatService, RocketChatHelper rocketChatHelper,
       ChatHelper chatHelper) {
     this.chatService = chatService;
     this.userHelper = userHelper;
     this.rocketChatService = rocketChatService;
     this.rocketChatHelper = rocketChatHelper;
-    this.logService = logService;
     this.chatHelper = chatHelper;
   }
 
   /**
    * Creates a chat in MariaDB, it's relation to the agency and Rocket.Chat-room.
-   * 
+   *
    * @param chatDTO {@link ChatDTO}
    * @param consultant {@link Consultant}
    * @return the generated chat link URL (String)
@@ -64,11 +60,11 @@ public class CreateChatFacade {
       // (which is a Kreuzbund agency)
       Long agencyId = consultant.getConsultantAgencies() != null
           && !consultant.getConsultantAgencies().isEmpty()
-              ? consultant.getConsultantAgencies().iterator().next().getAgencyId()
-              : null;
+          ? consultant.getConsultantAgencies().iterator().next().getAgencyId()
+          : null;
 
       if (agencyId == null) {
-        throw new ServiceException(String
+        throw new InternalServerErrorException(String
             .format("Consultant with id %s is not assigned to any agency", consultant.getId()));
       }
 
@@ -90,34 +86,26 @@ public class CreateChatFacade {
       chatService.saveChat(chat);
 
     } catch (RocketChatCreateGroupException rocketChatCreateGroupException) {
-      logService.logInternalServerError(
-          "Error while creating private group in Rocket.Chat for group chat: " + chatDTO.toString(),
-          rocketChatCreateGroupException);
       doRollback(chat, rcGroupId);
-      return null;
-    } catch (RocketChatLoginException rocketChatLoginException) {
-      logService.logInternalServerError("Could not log in technical user for Rocket.Chat API",
-          rocketChatLoginException);
-      doRollback(chat, rcGroupId);
-      return null;
+      throw new InternalServerErrorException(
+          "Error while creating private group in Rocket.Chat for group chat: " + chatDTO
+              .toString());
     } catch (RocketChatAddUserToGroupException rocketChatAddUserToGroupException) {
-      logService.logInternalServerError("Technical user could not be added to group chat room",
-          rocketChatAddUserToGroupException);
       doRollback(chat, rcGroupId);
-      return null;
+      throw new InternalServerErrorException("Technical user could not be added to group chat "
+          + "room");
     } catch (SaveChatAgencyException saveChatAgencyException) {
-      logService.logInternalServerError("Could not save chat agency relation in database",
-          saveChatAgencyException);
       doRollback(chat, rcGroupId);
-      return null;
+      throw new InternalServerErrorException("Could not save chat agency relation in database");
     } catch (SaveChatException saveChatException) {
-      logService.logInternalServerError("Could not save chat in database", saveChatException);
       doRollback(chat, rcGroupId);
-      return null;
-    } catch (ServiceException serviceException) {
-      logService.logInternalServerError("Could not create chat " + chatDTO.toString(),
-          serviceException);
-      return null;
+      throw new InternalServerErrorException("Could not save chat in database");
+    } catch (RocketChatUserNotInitializedException e) {
+      doRollback(chat, rcGroupId);
+      throw new InternalServerErrorException("Rocket chat user is not initialized");
+    } catch (InternalServerErrorException e) {
+      doRollback(chat, rcGroupId);
+      throw e;
     }
 
     return new CreateChatResponseDTO(rcGroupId,

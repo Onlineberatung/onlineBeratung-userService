@@ -19,29 +19,20 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.dao.DataAccessException;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
@@ -50,6 +41,21 @@ import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChatServiceTest {
@@ -61,19 +67,23 @@ public class ChatServiceTest {
   @Mock
   private ChatAgencyRepository chatAgencyRepository;
   @Mock
-  private LogService logService;
+  private Logger logger;
   @Mock
   private UserHelper userHelper;
   @Mock
   private ConsultantService consultantService;
 
+  @Before
+  public void setup() {
+    setInternalState(LogService.class, "LOGGER", logger);
+  }
 
   /**
    * Method getChatsForUserId
    */
 
   @Test
-  public void getChatsForUserId_Should_ThrowServiceExceptionAndLogExceptionOnDatabaseError() {
+  public void getChatsForUserId_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
@@ -81,12 +91,10 @@ public class ChatServiceTest {
 
     try {
       chatService.getChatsForUserId(USER_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
-
   }
 
   @Test
@@ -146,7 +154,7 @@ public class ChatServiceTest {
    */
 
   @Test
-  public void getChatsForConsultant_Should_ThrowServiceExceptionAndLogExceptionOnDatabaseError() {
+  public void getChatsForConsultant_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
 
     Consultant consultant = Mockito.mock(Consultant.class);
     @SuppressWarnings("serial")
@@ -155,12 +163,10 @@ public class ChatServiceTest {
 
     try {
       chatService.getChatsForConsultant(consultant);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logService, times(1)).logDatabaseError(ex);
-
   }
 
   @Test
@@ -267,7 +273,7 @@ public class ChatServiceTest {
    */
 
   @Test
-  public void getChat_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void getChat_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("database error") {};
@@ -275,9 +281,9 @@ public class ChatServiceTest {
 
     try {
       chatService.getChat(CHAT_ID);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -300,7 +306,7 @@ public class ChatServiceTest {
    */
 
   @Test
-  public void deleteChat_Should_ThrowServiceException_WhenDatabaseFails() {
+  public void deleteChat_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("database error") {};
@@ -308,9 +314,9 @@ public class ChatServiceTest {
 
     try {
       chatService.deleteChat(ACTIVE_CHAT);
-      fail("Expected exception: ServiceException");
-    } catch (ServiceException serviceException) {
-      assertTrue("Excepted ServiceException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
 
   }
@@ -320,7 +326,8 @@ public class ChatServiceTest {
    */
 
   @Test
-  public void updateChat_Should_ThrowBadRequestException_WhenChatDoesNotExist() {
+  public void updateChat_Should_ThrowBadRequestException_WhenChatDoesNotExist()
+      throws SaveChatException {
 
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.empty());
 
@@ -333,7 +340,8 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void updateChat_Should_ThrowForbiddenException_WhenCallingConsultantNotOwnerOfChat() {
+  public void updateChat_Should_ThrowForbiddenException_WhenCallingConsultantNotOwnerOfChat()
+      throws SaveChatException {
 
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(INACTIVE_CHAT));
 
@@ -346,7 +354,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void updateChat_Should_ThrowConflictException_WhenChatIsActive() {
+  public void updateChat_Should_ThrowConflictException_WhenChatIsActive() throws SaveChatException {
 
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
 
@@ -359,7 +367,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void updateChat_Should_SaveNewChatSettings() {
+  public void updateChat_Should_SaveNewChatSettings() throws SaveChatException {
 
     Chat inactiveChat = mock(Chat.class);
     when(inactiveChat.isActive()).thenReturn(false);
@@ -373,7 +381,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void updateChat_Should_ReturnCorrectGroupIdAndChatLinkObject() {
+  public void updateChat_Should_ReturnCorrectGroupIdAndChatLinkObject() throws SaveChatException {
 
     Chat inactiveChat = mock(Chat.class);
     when(inactiveChat.isActive()).thenReturn(false);

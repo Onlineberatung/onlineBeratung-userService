@@ -172,6 +172,18 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<artifactId>powermock-module-junit4</artifactId>
+			<groupId>org.powermock</groupId>
+			<scope>test</scope>
+			<version>2.0.2</version>
+		</dependency>
+		<dependency>
+			<artifactId>powermock-api-mockito2</artifactId>
+			<groupId>org.powermock</groupId>
+			<scope>test</scope>
+			<version>2.0.2</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
 		<dependency>

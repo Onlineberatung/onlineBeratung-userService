@@ -41,7 +41,7 @@ public class AgencyServiceHelper {
    * @return AgencyDTO {@link AgencyDTO}
    */
   @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyId")
-  public AgencyDTO getAgency(Long agencyId) {
+  public AgencyDTO getAgency(Long agencyId) throws AgencyServiceHelperException {
     return getAgenciesFromAgencyService(Collections.singletonList(agencyId)).get(0);
   }
 
@@ -52,7 +52,7 @@ public class AgencyServiceHelper {
    * @param agencyId {@link AgencyDTO#getId()}
    * @return AgencyDTO {@link AgencyDTO}
    */
-  public AgencyDTO getAgencyWithoutCaching(Long agencyId) {
+  public AgencyDTO getAgencyWithoutCaching(Long agencyId) throws AgencyServiceHelperException {
     return getAgenciesFromAgencyService(Collections.singletonList(agencyId)).get(0);
   }
 
@@ -64,7 +64,7 @@ public class AgencyServiceHelper {
    * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
   @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyIds")
-  public List<AgencyDTO> getAgencies(List<Long> agencyIds) {
+  public List<AgencyDTO> getAgencies(List<Long> agencyIds) throws AgencyServiceHelperException {
     return getAgenciesFromAgencyService(agencyIds);
   }
 
@@ -74,7 +74,8 @@ public class AgencyServiceHelper {
    * @param agencyIds List of {@link AgencyDTO#getId()}
    * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
-  private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
+  private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds)
+      throws AgencyServiceHelperException {
     ResponseEntity<List<AgencyDTO>> response;
     String agencyIdsCommaSeparated = StringUtils.join(agencyIds, ",");
 
@@ -99,7 +100,8 @@ public class AgencyServiceHelper {
    * @param agencyIds the List of agency ids
    * @return
    */
-  public List<AgencyDTO> getAgenciesWithoutCaching(List<Long> agencyIds) {
+  public List<AgencyDTO> getAgenciesWithoutCaching(List<Long> agencyIds)
+      throws AgencyServiceHelperException {
     return getAgenciesFromAgencyService(agencyIds);
   }
 }

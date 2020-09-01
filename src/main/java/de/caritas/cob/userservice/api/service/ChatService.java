@@ -1,21 +1,11 @@
 package de.caritas.cob.userservice.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
-import de.caritas.cob.userservice.api.exception.ServiceException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.ChatDTO;
@@ -31,10 +21,19 @@ import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
 
 /**
  * Chat service class
- *
  */
 
 @Service
@@ -42,39 +41,36 @@ public class ChatService {
 
   private final ChatRepository chatRepository;
   private final ChatAgencyRepository chatAgencyRepository;
-  private final LogService logService;
   private final ConsultantService consultantService;
   private final UserHelper userHelper;
 
   @Autowired
   public ChatService(ChatRepository chatRepository, ChatAgencyRepository chatAgencyRepository,
-      LogService logService, ConsultantService consultantService, UserHelper userHelper) {
+      ConsultantService consultantService, UserHelper userHelper) {
     this.chatRepository = chatRepository;
     this.chatAgencyRepository = chatAgencyRepository;
-    this.logService = logService;
     this.consultantService = consultantService;
     this.userHelper = userHelper;
   }
 
   /**
    * Returns a list of current chats for the provided {@link Consultant}
-   * 
+   *
    * @return list of chats as {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getChatsForConsultant(Consultant consultant) {
 
     List<ConsultantSessionResponseDTO> sessionResponseDTOs = null;
-    List<Chat> chats = null;
+    List<Chat> chats;
 
     try {
       chats = chatRepository.findByAgencyIds(consultant.getConsultantAgencies().stream()
           .map(ConsultantAgency::getAgencyId).collect(Collectors.toSet()));
 
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(
+      throw new InternalServerErrorException(
           String.format("Database error while retrieving the chats for the consultant with id %s",
-              consultant.getId()));
+              consultant.getId()), LogService::logDatabaseError);
     }
 
     if (chats != null && chats.size() > 0) {
@@ -88,7 +84,7 @@ public class ChatService {
 
   /**
    * Converts a {@link Chat} to a {@link ConsultantSessionResponseDTO}
-   * 
+   *
    * @param {@link Chat}
    * @return {@link ConsultantSessionResponseDTO}
    */
@@ -108,9 +104,6 @@ public class ChatService {
 
   /**
    * Get an array with rc user ids of the moderators of a chat
-   * 
-   * @param chatAgencies
-   * @return
    */
   private String[] getChatModerators(Set<ChatAgency> chatAgencies) {
 
@@ -125,15 +118,14 @@ public class ChatService {
 
   /**
    * Saves a {@link Chat} to MariaDB
-   * 
+   *
    * @param chat {@link Chat}
    * @return {@link Chat} (will never be null)
    */
-  public Chat saveChat(Chat chat) {
+  public Chat saveChat(Chat chat) throws SaveChatException {
     try {
       return chatRepository.save(chat);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
       throw new SaveChatException(String.format("Creation of chat failed for: %s", chat.toString()),
           ex);
     }
@@ -141,15 +133,14 @@ public class ChatService {
 
   /**
    * Saves a {@link ChatAgency} to MariaDB
-   * 
+   *
    * @param chatAgency {@link ChatAgency}
    * @return {@link ChatAgency} (will never be null)
    */
-  public ChatAgency saveChatAgencyRelation(ChatAgency chatAgency) {
+  public ChatAgency saveChatAgencyRelation(ChatAgency chatAgency) throws SaveChatAgencyException {
     try {
       return chatAgencyRepository.save(chatAgency);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
       throw new SaveChatAgencyException(
           String.format("Creation of chat - user relation failed for: ", chatAgency.toString()),
           ex);
@@ -158,7 +149,8 @@ public class ChatService {
 
   /**
    * Returns the list of current chats for the provided user (Id).
-   * 
+   *
+   * @param userId the id of the user
    * @return list of user chats as {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getChatsForUserId(String userId) {
@@ -169,9 +161,9 @@ public class ChatService {
     try {
       chats = chatRepository.findByUserId(userId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(String
-          .format("Database error while retrieving the chats for the user with id %s", userId));
+      throw new InternalServerErrorException(String
+          .format("Database error while retrieving the chats for the user with id %s", userId),
+          LogService::logDatabaseError);
     }
 
     if (chats != null && chats.size() > 0) {
@@ -184,9 +176,6 @@ public class ChatService {
 
   /**
    * Converts a {@link Chat} to a {@link UserSessionResponseDTO}
-   * 
-   * @param session
-   * @return
    */
   private UserSessionResponseDTO convertChatToUserSessionResponseDTO(Chat chat) {
     return new UserSessionResponseDTO(null, new UserChatDTO(chat.getId(), chat.getTopic(),
@@ -205,9 +194,9 @@ public class ChatService {
     try {
       chat = chatRepository.findById(chatId);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(
-          String.format("Database error while retrieving chat with id %s", chatId));
+      throw new InternalServerErrorException(
+          String.format("Database error while retrieving chat with id %s", chatId),
+          LogService::logDatabaseError);
     }
 
     return chat;
@@ -215,26 +204,22 @@ public class ChatService {
 
   /**
    * Delete a {@link Chat}
-   * 
+   *
    * @param chat the {@link Chat}
    */
   public void deleteChat(Chat chat) {
     try {
       chatRepository.delete(chat);
     } catch (DataAccessException ex) {
-      logService.logDatabaseError(ex);
-      throw new ServiceException(String.format("Deletion of chat with id %s failed", chat.getId()));
+      throw new InternalServerErrorException(
+          String.format("Deletion of chat with id %s failed", chat.getId()),
+          LogService::logDatabaseError);
     }
   }
 
   /**
    * Updates topic, duration, repetitive and start date of the provided {@link Chat}
-   * 
-   * @param chatId
-   * @param chatDTO
-   * @param authenticatedUser
-   * @return
-   * 
+   *
    * @throws {@link BadRequestException}, {@link ForbiddenException}, {@link ConflictException}
    */
   public UpdateChatResponseDTO updateChat(Long chatId, ChatDTO chatDTO,
@@ -262,7 +247,11 @@ public class ChatService {
     chat.get().setStartDate(startDate);
     chat.get().setInitialStartDate(startDate);
 
-    this.saveChat(chat.get());
+    try {
+      this.saveChat(chat.get());
+    } catch (SaveChatException e) {
+      throw new InternalServerErrorException(e.getMessage());
+    }
 
     return new UpdateChatResponseDTO(chat.get().getGroupId(),
         userHelper.generateChatUrl(chat.get().getId(), chat.get().getConsultingType()));

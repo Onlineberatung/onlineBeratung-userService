@@ -7,16 +7,16 @@ public class UnauthorizedException extends CustomHttpStatusException {
   private static final long serialVersionUID = -3553609955386498237L;
 
   /**
-   * Unauthorized exception
+   * Unauthorized exception.
    *
-   * @param message
+   * @param message an additional message
    */
   public UnauthorizedException(String message) {
-    super(message, new LogService()::logUnauthorized);
+    super(message, LogService::logUnauthorized);
   }
 
   /**
-   * Unauthorized exception
+   * Unauthorized exception.
    *
    * @param message an additional message
    * @param loggingMethod the method being used to log this exception

@@ -10,10 +10,10 @@ public class NotFoundException extends CustomHttpStatusException {
   /**
    * Not found exception.
    *
-   * @param message
+   * @param message the message
    */
   public NotFoundException(String message) {
-    super(message, new LogService()::logWarn);
+    super(message, LogService::logWarn);
   }
 
   /**

@@ -8,16 +8,16 @@ public class ForbiddenException extends CustomHttpStatusException {
   private static final long serialVersionUID = 7560597708504748234L;
 
   /**
-   * Forbidden exception
+   * Forbidden exception.
    *
-   * @param message
+   * @param message the message
    */
   public ForbiddenException(String message) {
-    super(message, new LogService()::logForbidden);
+    super(message, LogService::logForbidden);
   }
 
   /**
-   * Forbidden exception
+   * Forbidden exception.
    *
    * @param message an additional message
    * @param loggingMethod the method being used to log this exception
