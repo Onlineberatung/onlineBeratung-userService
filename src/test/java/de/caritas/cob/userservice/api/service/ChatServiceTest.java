@@ -83,7 +83,7 @@ public class ChatServiceTest {
    */
 
   @Test
-  public void getChatsForUserId_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError() {
+  public void getChatsForUserId_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
@@ -95,8 +95,6 @@ public class ChatServiceTest {
     } catch (InternalServerErrorException serviceException) {
       assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-
   }
 
   @Test
@@ -156,7 +154,7 @@ public class ChatServiceTest {
    */
 
   @Test
-  public void getChatsForConsultant_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError() {
+  public void getChatsForConsultant_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
 
     Consultant consultant = Mockito.mock(Consultant.class);
     @SuppressWarnings("serial")
@@ -169,8 +167,6 @@ public class ChatServiceTest {
     } catch (InternalServerErrorException serviceException) {
       assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-
   }
 
   @Test

@@ -150,7 +150,7 @@ public class CreateEnquiryMessageFacade {
 
     Session session = getSessionForEnquiryMessage(sessionId, user);
 
-    checkIfKeylocakAndRocketChatUsernamesMatch(rocketChatCredentials.getRocketChatUserId(), user);
+    checkIfKeycloakAndRocketChatUsernamesMatch(rocketChatCredentials.getRocketChatUserId(), user);
 
     GroupResponseDTO rcGroupDTO = createRocketChatGroupForSession(session, rocketChatCredentials);
     userHelper.updateRocketChatIdInDatabase(user, rcGroupDTO.getGroup().getUser().getId());
@@ -183,21 +183,10 @@ public class CreateEnquiryMessageFacade {
     emailNotificationFacade.sendNewEnquiryEmailNotification(session);
   }
 
-  /**
-   * Returns the {@link Session} for the given session ID.
-   *
-   * Throws {@link NoUserSessionException} when no session is found for the given ID. Throws {@link
-   * MessageHasAlreadyBeenSavedException} when an enquiry message has already been written.
-   *
-   * @param sessionId {@link Session#getId()}
-   * @param user {@link User}
-   * @return {@link Session}
-   * @throws {@link NoUserSessionException}
-   */
   private Session getSessionForEnquiryMessage(Long sessionId, User user)
       throws NoUserSessionException, MessageHasAlreadyBeenSavedException {
 
-    Optional<Session> session = null;
+    Optional<Session> session;
 
     session = sessionService.getSession(sessionId);
 
@@ -214,14 +203,8 @@ public class CreateEnquiryMessageFacade {
     return session.get();
   }
 
-  /**
-   * Checks if the given Keycloak and Rocket.Chat user are the same.
-   *
-   * @param rcUserId Rocket.Chat user ID
-   * @param user {@link User}
-   */
-  private void checkIfKeylocakAndRocketChatUsernamesMatch(String rcUserId, User user)
-      throws CheckForCorrectRocketChatUserException, RocketChatGetUserInfoException {
+  private void checkIfKeycloakAndRocketChatUsernamesMatch(String rcUserId, User user)
+      throws RocketChatGetUserInfoException {
 
     UserInfoResponseDTO rcUserInfoDTO = rocketChatService.getUserInfo(rcUserId);
     if (!userHelper.doUsernamesMatch(rcUserInfoDTO.getUser().getUsername(), user.getUsername())) {
@@ -231,14 +214,6 @@ public class CreateEnquiryMessageFacade {
     }
   }
 
-  /**
-   * Creates the private Rocket.Chat room for the given {@link Session}. Throws a {@link
-   * RocketChatCreateGroupException} if no group is being returned by Rocket.Chat.
-   *
-   * @param session {@link Session}
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @return {@link GroupResponseDTO}
-   */
   private GroupResponseDTO createRocketChatGroupForSession(Session session,
       RocketChatCredentials rocketChatCredentials) throws RocketChatCreateGroupException {
 
@@ -254,15 +229,6 @@ public class CreateEnquiryMessageFacade {
     return rcGroupDTO.get();
   }
 
-  /**
-   * Initializes the Rocket.Chat feedback chat group for a session (Create feedback chat group, add
-   * (peer) consultants and system user).
-   *
-   * @param session {@link Session}
-   * @param rcGroupId Rocket.Chat group ID
-   * @param agencyList {@link List} of {@link ConsultantAgency}
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
-   */
   private void initializeFeedbackChat(Session session, String rcGroupId,
       List<ConsultantAgency> agencyList, ConsultingTypeSettings consultingTypeSettings)
       throws InitializeFeedbackChatException {
@@ -323,14 +289,6 @@ public class CreateEnquiryMessageFacade {
     }
   }
 
-  /**
-   * Adds the consultant of the provided list of {@link ConsultantAgency} to the provided
-   * Rocket.Chat group ID.
-   *
-   * @param rcGroupId Rocket.Chat group ID
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @param agencyList {@link List} of {@link ConsultantAgency}
-   */
   private void addConsultantsAndTechUserToGroup(String rcGroupId,
       RocketChatCredentials rocketChatCredentials, List<ConsultantAgency> agencyList)
       throws RocketChatAddConsultantsAndTechUserException {
@@ -355,13 +313,6 @@ public class CreateEnquiryMessageFacade {
     }
   }
 
-  /**
-   * Performs a rollback depending on the given parameter values (creation of Rocket.Chat groups and
-   * changes/initialization of session).
-   *
-   * @param createEnquiryExceptionInformation {@link CreateEnquiryExceptionInformation}
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   */
   private void doRollback(CreateEnquiryExceptionInformation createEnquiryExceptionInformation,
       RocketChatCredentials rocketChatCredentials) {
 
@@ -383,12 +334,6 @@ public class CreateEnquiryMessageFacade {
     }
   }
 
-  /**
-   * Roll back the creation of the Rocket.Chat group
-   *
-   * @param rcGroupId Rocket.Chat group ID
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   */
   private void rollbackCreateGroup(String rcGroupId, RocketChatCredentials rocketChatCredentials) {
     if (rcGroupId != null) {
       if (!rocketChatService.rollbackGroup(rcGroupId, rocketChatCredentials)) {
@@ -399,11 +344,6 @@ public class CreateEnquiryMessageFacade {
     }
   }
 
-  /**
-   * Roll back the session changes
-   *
-   * @param session {@link Session}
-   */
   private void rollbackSession(Session session) {
     if (session != null) {
 

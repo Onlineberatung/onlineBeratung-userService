@@ -413,7 +413,7 @@ public class RocketChatServiceTest {
   }
 
   @Test
-  public void removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupExceptionAndLogError_WhenAPIResponseIsUnsuccessfull()
+  public void removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupException_WhenAPIResponseIsUnsuccessfull()
       throws Exception {
 
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), any(),
@@ -427,8 +427,6 @@ public class RocketChatServiceTest {
     } catch (RocketChatRemoveUserFromGroupException ex) {
       assertTrue("Excepted RocketChatRemoveUserFromGroupException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), any(), any());
   }
 
   /**
@@ -436,7 +434,7 @@ public class RocketChatServiceTest {
    */
 
   @Test
-  public void getMembersOfGroup_Should_ThrowRocketChatGetGroupMembersExceptionAndLogError_WhenAPICallIsNotSuccessfull()
+  public void getMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPICallIsNotSuccessfull()
       throws RocketChatUserNotInitializedException {
 
     Exception exception = new RuntimeException(MESSAGE);
@@ -453,12 +451,10 @@ public class RocketChatServiceTest {
     } catch (RocketChatGetGroupMembersException ex) {
       assertTrue("Excepted RocketChatGetGroupMembersException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  public void getMembersOfGroup_Should_ThrowRocketChatGetGroupMembersExceptionAndLogError_WhenAPIResponseIsUnsuccessfull()
+  public void getMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPIResponseIsUnsuccessfull()
       throws Exception {
 
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
@@ -473,8 +469,6 @@ public class RocketChatServiceTest {
     } catch (RocketChatGetGroupMembersException ex) {
       assertTrue("Excepted RocketChatGetGroupMembersException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), any(), any());
   }
 
   @Test
@@ -818,7 +812,7 @@ public class RocketChatServiceTest {
    * Method: getStandardMembersOfGroup
    */
   @Test
-  public void getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersExceptionAndLogError_WhenAPICallIsNotSuccessfull()
+  public void getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPICallIsNotSuccessfull()
       throws RocketChatUserNotInitializedException {
 
     Exception exception = new RuntimeException(MESSAGE);
@@ -835,12 +829,10 @@ public class RocketChatServiceTest {
     } catch (RocketChatGetGroupMembersException | RocketChatUserNotInitializedException ex) {
       assertTrue("Excepted RocketChatGetGroupMembersException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  public void getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersExceptionAndLogError_WhenAPIResponseIsUnsuccessfull()
+  public void getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPIResponseIsUnsuccessfull()
       throws Exception {
 
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
@@ -855,8 +847,6 @@ public class RocketChatServiceTest {
     } catch (RocketChatGetGroupMembersException ex) {
       assertTrue("Excepted RocketChatGetGroupMembersException thrown", true);
     }
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), any(), any());
   }
 
   @Test

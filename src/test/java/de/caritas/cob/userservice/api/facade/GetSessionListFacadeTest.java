@@ -68,6 +68,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
+import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -769,7 +770,7 @@ public class GetSessionListFacadeTest {
 
   @Test
   public void getSessionsForAuthenticatedConsultant_Should_SetSubscribedFlagToFalse_WhenConsultantIsNotAttendeeOfAChat()
-      throws RocketChatGetRoomsException {
+      throws Exception {
 
     when(chatService.getChatsForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
@@ -1332,7 +1333,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1349,7 +1351,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsGreaterThanTotal() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsGreaterThanTotal()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1364,7 +1367,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsSmallerThanTotal() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsSmallerThanTotal()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1379,7 +1383,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectOffset() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectOffset()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1395,7 +1400,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnNoSessions_WhenOffsetIsGreaterThanTotal() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnNoSessions_WhenOffsetIsGreaterThanTotal()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1410,7 +1416,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsSmallerThanTotal() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsSmallerThanTotal()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1426,7 +1433,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsGreaterThanTotal() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsGreaterThanTotal()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1466,7 +1474,8 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectCount_WhenCountIsGreaterThanAmountOfSessions() {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectCount_WhenCountIsGreaterThanAmountOfSessions()
+      throws WrongParameterException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);

@@ -56,7 +56,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * @param request
    * @return
    */
-  @ExceptionHandler({ConstraintViolationException.class, WrongParameterException.class})
+  @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<Object> handleBadRequest(final RuntimeException ex,
       final WebRequest request) {
     LogService.logWarn(ex);

@@ -152,7 +152,11 @@ public class RocketChatCredentialsHelper {
   }
 
   /**
-   * Login a system user and receive a RocketChatCredentials-Object
+   * Login a system user and receive a RocketChatCredentials-Object.
+   *
+   * @param username the username
+   * @param password the password
+   * @return credentials of rocket chat
    */
   public RocketChatCredentials loginUserServiceUser(String username, String password)
       throws RocketChatLoginException {
@@ -181,7 +185,11 @@ public class RocketChatCredentialsHelper {
   }
 
   /**
-   * Performs a login with the given credentials and returns the Result
+   * Performs a login with the given credentials and returns the Result.
+   *
+   * @param username the username
+   * @param password the password
+   * @return a response entity with the login dto
    */
   public ResponseEntity<LoginResponseDTO> loginUser(String username, String password)
       throws RocketChatLoginException {
@@ -210,6 +218,10 @@ public class RocketChatCredentialsHelper {
 
   /**
    * Performs a logout with the given credentials and returns true on success.
+   *
+   * @param rcUserId the rocket chat user id
+   * @param rcAuthToken the rocket chat auth token
+   * @return true if logout was successful
    */
   public boolean logoutUser(String rcUserId, String rcAuthToken) {
 

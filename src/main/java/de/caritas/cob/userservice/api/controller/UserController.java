@@ -88,6 +88,7 @@ import io.swagger.annotations.Api;
 @RestController
 @Api(tags = "user-controller")
 public class UserController implements UsersApi {
+
   @Value("${api.success.userRegistered}")
   private String USER_REGISTERED;
 
@@ -176,7 +177,7 @@ public class UserController implements UsersApi {
 
   /**
    * Creates a Keycloak user and returns a 201 CREATED on success
-   * 
+   *
    * @param user
    * @return
    */
@@ -196,7 +197,7 @@ public class UserController implements UsersApi {
   /**
    * Creates a new session if there is not already an existing session for the provided consulting
    * type.
-   * 
+   *
    * @param newRegistrationDto {@link NewRegistrationDto}
    * @return {@link ResponseEntity} with {@link NewRegistrationResponseDto}
    */
@@ -209,7 +210,7 @@ public class UserController implements UsersApi {
     if (!user.isPresent()) {
       throw new InternalServerErrorException(
           String.format("User with id %s not found while registering new consulting type: %s",
-          authenticatedUser.getUserId(), newRegistrationDto.toString()));
+              authenticatedUser.getUserId(), newRegistrationDto.toString()));
     }
 
     Long createdSessionId = createSessionFacade.createSession(newRegistrationDto, user.get());
@@ -281,7 +282,7 @@ public class UserController implements UsersApi {
 
   /**
    * Returns a list of sessions for the currently authenticated/logged in user
-   * 
+   *
    * @param rcToken Rocket.Chat token as request header value
    * @return {@link List} of {@link UserSessionResponseDTO}
    */
@@ -326,7 +327,7 @@ public class UserController implements UsersApi {
 
   /**
    * Gets the user data for the current logged in user depending on his user role.
-   * 
+   *
    */
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
@@ -401,8 +402,8 @@ public class UserController implements UsersApi {
     }
 
     return sessionList != null && isNotEmpty(sessionList.getSessions())
-            ? new ResponseEntity<>(sessionList, HttpStatus.OK)
-            : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        ? new ResponseEntity<>(sessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -438,13 +439,13 @@ public class UserController implements UsersApi {
     }
 
     return sessionList != null && isNotEmpty(sessionList.getSessions())
-            ? new ResponseEntity<>(sessionList, HttpStatus.OK)
-            : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        ? new ResponseEntity<>(sessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
    * Imports a file list of consultants. Technical user authorization required
-   * 
+   *
    */
   @Override
   public ResponseEntity<Void> importConsultants() {
@@ -456,7 +457,7 @@ public class UserController implements UsersApi {
 
   /**
    * Imports a file list of askers. Technical user authorization required.
-   * 
+   *
    */
   @Override
   public ResponseEntity<Void> importAskers() {
@@ -468,7 +469,7 @@ public class UserController implements UsersApi {
 
   /**
    * Imports a file list of askers without a session. Technical user authorization required.
-   * 
+   *
    */
   @Override
   public ResponseEntity<Void> importAskersWithoutSession() {
@@ -482,7 +483,7 @@ public class UserController implements UsersApi {
    * Sends email notifications to the user(s) if there has been a new answer. Uses the provided
    * Keycloak authorization token for user verification (user role). This means that the user that
    * wrote the answer should also call this method.
-   * 
+   *
    */
   @Override
   public ResponseEntity<Void> sendNewMessageNotification(
@@ -498,7 +499,7 @@ public class UserController implements UsersApi {
    * Sends email notifications to the user(s) if there has been a new feedback answer. Uses the
    * provided Keycloak authorization token for user verification (user role). This means that the
    * user that wrote the answer should also call this method.
-   * 
+   *
    */
   @Override
   public ResponseEntity<Void> sendNewFeedbackMessageNotification(
@@ -513,7 +514,7 @@ public class UserController implements UsersApi {
 
   /**
    * Returns the monitoring for the given session
-   * 
+   *
    */
   @Override
   public ResponseEntity<MonitoringDTO> getMonitoring(
@@ -664,13 +665,13 @@ public class UserController implements UsersApi {
 
     return new ResponseEntity<>(loginResponse.isPresent()
         && loginResponse.get().getStatusCode().equals(HttpStatus.BAD_REQUEST)
-            ? HttpStatus.BAD_REQUEST
-            : HttpStatus.INTERNAL_SERVER_ERROR);
+        ? HttpStatus.BAD_REQUEST
+        : HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   /**
    * Updates the master key fragment for the en-/decryption of messages
-   * 
+   *
    * @param masterKey
    * @return
    */
@@ -687,7 +688,7 @@ public class UserController implements UsersApi {
 
   /**
    * Creates a new chat with the given details and returns the generated chat link
-   * 
+   *
    * @param chatDTO {@link ChatDTO}
    * @return
    */
@@ -794,19 +795,15 @@ public class UserController implements UsersApi {
 
   /**
    * Updates the settings of the given {@link Chat}.
-   * 
+   *
    */
   @Override
   public ResponseEntity<UpdateChatResponseDTO> updateChat(
       @NotNull @Valid @PathVariable("chatId") Long chatId, @Valid @RequestBody ChatDTO chatDTO) {
 
-    try {
-      UpdateChatResponseDTO updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
-          authenticatedUser);
-      return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
-    } catch (SaveChatException e) {
-      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
-    }
+    UpdateChatResponseDTO updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
+        authenticatedUser);
+    return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
   }
 
   @Override

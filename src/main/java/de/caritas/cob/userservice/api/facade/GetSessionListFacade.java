@@ -2,7 +2,9 @@ package de.caritas.cob.userservice.api.facade;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +79,7 @@ public class GetSessionListFacade {
    * Returns a list of {@link UserSessionResponseDTO} for the specified user ID
    *
    * @param userId Keycloak/MariaDB user ID
+   * @param rocketChatCredentials the rocket chat credentials
    * @return {@link UserSessionResponseDTO}
    */
   public UserSessionListResponseDTO getSessionsForAuthenticatedUser(String userId,
@@ -234,14 +237,18 @@ public class GetSessionListFacade {
    * @param offset Offset
    * @param count Count
    * @param sessionFilter Filter
-   * @return
+   * @return the response dto
    */
   public ConsultantSessionListResponseDTO getSessionsForAuthenticatedConsultant(
       Consultant consultant, int status, String rcAuthToken, int offset, int count,
       SessionFilter sessionFilter) {
 
-    List<ConsultantSessionResponseDTO> sessions =
-        sessionService.getSessionsForConsultant(consultant, status);
+    List<ConsultantSessionResponseDTO> sessions;
+    try {
+      sessions = sessionService.getSessionsForConsultant(consultant, status);
+    } catch (WrongParameterException e) {
+      throw new BadRequestException(e.getMessage());
+    }
     List<ConsultantSessionResponseDTO> chats = null;
     if (status == SessionStatus.IN_PROGRESS.getValue()) {
       chats = chatService.getChatsForConsultant(consultant);

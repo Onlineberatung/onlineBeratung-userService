@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Facade for capsuling to join a chat
+ * Facade for capsuling to join a chat.
  */
 @Service
 public class JoinAndLeaveChatFacade {
@@ -46,7 +46,10 @@ public class JoinAndLeaveChatFacade {
   }
 
   /**
-   * Join a chat
+   * Join a chat.
+   *
+   * @param chatId the chat id
+   * @param authenticatedUser the authenticated user
    */
   public void joinChat(Long chatId, AuthenticatedUser authenticatedUser) {
 
@@ -62,7 +65,10 @@ public class JoinAndLeaveChatFacade {
   }
 
   /**
-   * Leave a chat
+   * Leave a chat.
+   *
+   * @param chatId the id of the chat
+   * @param authenticatedUser the authenticated user
    */
   public void leaveChat(Long chatId, AuthenticatedUser authenticatedUser) {
 
@@ -77,9 +83,6 @@ public class JoinAndLeaveChatFacade {
 
   }
 
-  /**
-   * Get the chat
-   */
   private Chat getChat(Long chatId) {
 
     Optional<Chat> chat = chatService.getChat(chatId);
@@ -98,8 +101,10 @@ public class JoinAndLeaveChatFacade {
   }
 
   /**
-   * Check chat permission for user/consultant and get the rc user id
+   * Check chat permission for user/consultant and get the rc user id.
    *
+   * @param authenticatedUser the authenticated user
+   * @param chat the chat
    * @return the rc user id of the consultant/user
    */
   private String checkPermissionAndGetRcUserId(AuthenticatedUser authenticatedUser, Chat chat) {

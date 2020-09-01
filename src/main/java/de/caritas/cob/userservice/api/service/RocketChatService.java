@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
+
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
@@ -181,6 +183,7 @@ public class RocketChatService {
   /**
    * Deletion of a Rocket.Chat group.
    *
+   * @param groupId the group id
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return true, if successfully
    */
@@ -237,9 +240,13 @@ public class RocketChatService {
   }
 
   /**
-   * Retrieves the userId for the given credentials
+   * Retrieves the userId for the given credentials.
    *
+   * @param username the username
+   * @param password the password
    * @param firstLogin true, if first login in Rocket.Chat. This requires a special API call.
+   * @return the userid
+   * @throws {@link RocketChatLoginException}
    */
   public String getUserID(String username, String password, boolean firstLogin)
       throws RocketChatLoginException {
@@ -283,7 +290,12 @@ public class RocketChatService {
   }
 
   /**
-   * Performs a login with the given credentials and returns the Result
+   * Performs a login with the given credentials and returns the Result.
+   *
+   * @param username the username
+   * @param password the password
+   * @return the response entity of the login dto
+   * @throws {@link RocketChatLoginException}
    */
   public ResponseEntity<LoginResponseDTO> loginUser(String username, String password)
       throws RocketChatLoginException {
@@ -309,6 +321,7 @@ public class RocketChatService {
    * Performs a logout with the given credentials and returns true on success.
    *
    * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return true if logout was successful
    */
   public boolean logoutUser(RocketChatCredentials rocketChatCredentials) {
 
@@ -361,7 +374,9 @@ public class RocketChatService {
   }
 
   /**
-   * Adds the technical user to the given Rocket.Chat group id
+   * Adds the technical user to the given Rocket.Chat group id.
+   *
+   * @param rcGroupId the rocket chat group id
    */
   public void addTechnicalUserToGroup(String rcGroupId)
       throws RocketChatAddUserToGroupException, RocketChatUserNotInitializedException {
@@ -369,10 +384,11 @@ public class RocketChatService {
   }
 
   /**
-   * Removes the provided user from the Rocket.Chat group with given groupId
+   * Removes the provided user from the Rocket.Chat group with given groupId.
    *
    * @param rcUserId Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
+   * @throws {@link RocketChatRemoveUserFromGroupException}
    */
   public void removeUserFromGroup(String rcUserId, String rcGroupId)
       throws RocketChatRemoveUserFromGroupException {
@@ -395,14 +411,14 @@ public class RocketChatService {
 
     if (response != null && !response.isSuccess()) {
       String error = "Could not remove user %s from Rocket.Chat group with id %s";
-      LogService.logRocketChatError(String.format(error, rcUserId, rcGroupId), response.getError(),
-          response.getErrorType());
       throw new RocketChatRemoveUserFromGroupException(String.format(error, rcUserId, rcGroupId));
     }
   }
 
   /**
-   * Removes the technical user from the given Rocket.Chat group id
+   * Removes the technical user from the given Rocket.Chat group id.
+   *
+   * @param rcGroupId the rocket chat group id
    */
   public void removeTechnicalUserFromGroup(String rcGroupId)
       throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException {
@@ -412,7 +428,10 @@ public class RocketChatService {
 
   /**
    * Get all standard members (all users except system user and technical user) of a rocket chat
-   * group
+   * group.
+   *
+   * @param rcGroupId the rocket chat group id
+   * @return all standard members of that group
    */
   public List<GroupMemberDTO> getStandardMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException, RocketChatUserNotInitializedException {
@@ -442,6 +461,8 @@ public class RocketChatService {
 
   /**
    * Removes all users from the given group except system user and technical user.
+   *
+   * @param rcGroupId the rocket chat group id
    */
   public void removeAllStandardUsersFromGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException, RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException {
@@ -461,7 +482,10 @@ public class RocketChatService {
   }
 
   /**
-   * Returns the group/room members of the given Rocket.Chat group id
+   * Returns the group/room members of the given Rocket.Chat group id.
+   *
+   * @param rcGroupId the rocket chat id
+   * @return al members of the group
    */
   public List<GroupMemberDTO> getMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException {
@@ -476,17 +500,14 @@ public class RocketChatService {
           HttpMethod.GET, request, GroupMemberResponseDTO.class);
 
     } catch (Exception ex) {
-      LogService.logRocketChatError(
-          String.format("Could not get Rocket.Chat group members for room id %s", rcGroupId), ex);
-      throw new RocketChatGetGroupMembersException(ex);
+      throw new RocketChatGetGroupMembersException(String.format("Could not get Rocket.Chat group"
+          + " members for room id %s", rcGroupId), ex);
     }
 
     if (response != null && response.getStatusCode() == HttpStatus.OK) {
       return Arrays.asList(response.getBody().getMembers());
     } else {
       String error = "Could not get Rocket.Chat group members for room id %s";
-      LogService.logRocketChatError(String.format(error, rcGroupId), response.getBody().getError(),
-          response.getBody().getErrorType());
       throw new RocketChatGetGroupMembersException(String.format(error, rcGroupId));
     }
   }
@@ -494,6 +515,10 @@ public class RocketChatService {
   /**
    * Removes all messages from the specified Rocket.Chat group written by the technical user from
    * the last 24 hours (avoiding time zone failures).
+   *
+   * @param rcGroupId the rocket chat group id
+   * @param oldest the oldest message time
+   * @param latest the latest message time
    */
   public void removeSystemMessages(String rcGroupId, LocalDateTime oldest, LocalDateTime latest)
       throws RocketChatRemoveSystemMessagesException, RocketChatUserNotInitializedException {
@@ -503,7 +528,9 @@ public class RocketChatService {
   }
 
   /**
-   * Removes all messages (from every user) from a Rocket.Chat group
+   * Removes all messages (from every user) from a Rocket.Chat group.
+   *
+   * @param rcGroupId the rocket chat group id
    */
   public void removeAllMessages(String rcGroupId)
       throws RocketChatRemoveSystemMessagesException {
@@ -529,8 +556,8 @@ public class RocketChatService {
       GroupCleanHistoryDTO body = new GroupCleanHistoryDTO(rcGroupId,
           oldest.format(DateTimeFormatter.ofPattern(rcDateTimePattern)),
           latest.format(DateTimeFormatter.ofPattern(rcDateTimePattern)),
-          (users != null && users.length > 0) ? users : new String[]{});
-      HttpEntity<GroupCleanHistoryDTO> request = new HttpEntity<GroupCleanHistoryDTO>(body, header);
+          (isNotEmpty(users)) ? users : new String[]{});
+      HttpEntity<GroupCleanHistoryDTO> request = new HttpEntity<>(body, header);
 
       response = restTemplate.postForObject(rocketChatApiCleanRoomHistory, request,
           StandardResponseDTO.class);
@@ -547,9 +574,10 @@ public class RocketChatService {
   }
 
   /**
-   * Returns the subscriptions for the given user id
+   * Returns the subscriptions for the given user id.
    *
    * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return the subscriptions of the user
    */
   public List<SubscriptionsUpdateDTO> getSubscriptionsOfUser(
       RocketChatCredentials rocketChatCredentials) throws RocketChatGetSubscriptionsException {
@@ -584,9 +612,10 @@ public class RocketChatService {
   }
 
   /**
-   * Returns the rooms for the given user id
+   * Returns the rooms for the given user id.
    *
    * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return the rooms for the user
    */
   public List<RoomsUpdateDTO> getRoomsOfUser(RocketChatCredentials rocketChatCredentials)
       throws RocketChatGetRoomsException {
@@ -595,7 +624,7 @@ public class RocketChatService {
 
     try {
       HttpHeaders header = getStandardHttpHeaders(rocketChatCredentials);
-      HttpEntity<Void> request = new HttpEntity<Void>(header);
+      HttpEntity<Void> request = new HttpEntity<>(header);
 
       response =
           restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
@@ -616,10 +645,11 @@ public class RocketChatService {
   }
 
   /**
-   * Returns the information of the given Rocket.Chat user
+   * Returns the information of the given Rocket.Chat user.
    *
    * @param rcUserId Rocket.Chat user id
    * @throws {@link RocketChatGetUserInfoException}
+   * @return the dto containing the user infos
    */
   public UserInfoResponseDTO getUserInfo(String rcUserId) throws RocketChatGetUserInfoException {
 

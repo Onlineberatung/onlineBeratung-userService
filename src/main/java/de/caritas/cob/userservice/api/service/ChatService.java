@@ -68,10 +68,9 @@ public class ChatService {
           .map(ConsultantAgency::getAgencyId).collect(Collectors.toSet()));
 
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new InternalServerErrorException(
           String.format("Database error while retrieving the chats for the consultant with id %s",
-              consultant.getId()));
+              consultant.getId()), LogService::logDatabaseError);
     }
 
     if (chats != null && chats.size() > 0) {
@@ -127,7 +126,6 @@ public class ChatService {
     try {
       return chatRepository.save(chat);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new SaveChatException(String.format("Creation of chat failed for: %s", chat.toString()),
           ex);
     }
@@ -143,7 +141,6 @@ public class ChatService {
     try {
       return chatAgencyRepository.save(chatAgency);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new SaveChatAgencyException(
           String.format("Creation of chat - user relation failed for: ", chatAgency.toString()),
           ex);
@@ -153,6 +150,7 @@ public class ChatService {
   /**
    * Returns the list of current chats for the provided user (Id).
    *
+   * @param userId the id of the user
    * @return list of user chats as {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getChatsForUserId(String userId) {
@@ -163,9 +161,9 @@ public class ChatService {
     try {
       chats = chatRepository.findByUserId(userId);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new InternalServerErrorException(String
-          .format("Database error while retrieving the chats for the user with id %s", userId));
+          .format("Database error while retrieving the chats for the user with id %s", userId),
+          LogService::logDatabaseError);
     }
 
     if (chats != null && chats.size() > 0) {
@@ -196,9 +194,9 @@ public class ChatService {
     try {
       chat = chatRepository.findById(chatId);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new InternalServerErrorException(
-          String.format("Database error while retrieving chat with id %s", chatId));
+          String.format("Database error while retrieving chat with id %s", chatId),
+          LogService::logDatabaseError);
     }
 
     return chat;
@@ -213,9 +211,9 @@ public class ChatService {
     try {
       chatRepository.delete(chat);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new InternalServerErrorException(
-          String.format("Deletion of chat with id %s failed", chat.getId()));
+          String.format("Deletion of chat with id %s failed", chat.getId()),
+          LogService::logDatabaseError);
     }
   }
 
@@ -225,7 +223,7 @@ public class ChatService {
    * @throws {@link BadRequestException}, {@link ForbiddenException}, {@link ConflictException}
    */
   public UpdateChatResponseDTO updateChat(Long chatId, ChatDTO chatDTO,
-      AuthenticatedUser authenticatedUser) throws SaveChatException {
+      AuthenticatedUser authenticatedUser) {
 
     Optional<Chat> chat = getChat(chatId);
 
@@ -249,7 +247,11 @@ public class ChatService {
     chat.get().setStartDate(startDate);
     chat.get().setInitialStartDate(startDate);
 
-    this.saveChat(chat.get());
+    try {
+      this.saveChat(chat.get());
+    } catch (SaveChatException e) {
+      throw new InternalServerErrorException(e.getMessage());
+    }
 
     return new UpdateChatResponseDTO(chat.get().getGroupId(),
         userHelper.generateChatUrl(chat.get().getId(), chat.get().getConsultingType()));

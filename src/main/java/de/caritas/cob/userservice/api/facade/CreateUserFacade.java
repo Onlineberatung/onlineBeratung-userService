@@ -202,14 +202,6 @@ public class CreateUserFacade {
     }
   }
 
-  /**
-   * Creates a new chat/agency relation for the provided {@link User}.
-   * 
-   * @param user {@link UserDTO}
-   * @param dbUser {@link User}
-   *
-   * @throws {@link ServiceException}
-   */
   private void createUserChatAgencyRelation(UserDTO user, User dbUser) {
 
     // Log in user to Rocket.Chat

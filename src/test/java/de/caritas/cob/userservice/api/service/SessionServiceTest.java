@@ -152,7 +152,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSession_Should_ThrowInternalServerErrorExceptionAndLogDatabaseException_WhenRepositoryFails() {
+  public void getSession_Should_ThrowInternalServerErrorException_WhenRepositoryFails() {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
@@ -163,8 +163,6 @@ public class SessionServiceTest {
     } catch (InternalServerErrorException serviceException) {
       assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-
   }
 
   @Test
@@ -285,7 +283,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowInternalServerErrorExceptionAndLogException_OnAgencyServiceHelperError()
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError()
       throws Exception {
 
     AgencyServiceHelperException ex =
@@ -302,7 +300,6 @@ public class SessionServiceTest {
     } catch (InternalServerErrorException serviceException) {
       assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -427,7 +424,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError()
+  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError()
       throws Exception {
 
     @SuppressWarnings("serial")
@@ -439,7 +436,6 @@ public class SessionServiceTest {
     } catch (InternalServerErrorException serviceException) {
       assertTrue("Excepted InternalServerErrorException thrown", true);
     }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -684,7 +680,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void updateFeedbackGroupId_Should_ThrowUpdateFeedbackGroupIdExceptionAndLogError_WhenSaveSessionFails() {
+  public void updateFeedbackGroupId_Should_ThrowUpdateFeedbackGroupIdException_WhenSaveSessionFails() {
 
     @SuppressWarnings("serial")
     InternalServerErrorException ex = new InternalServerErrorException(ERROR_MSG) {};
@@ -695,7 +691,6 @@ public class SessionServiceTest {
       fail("Expected exception: UpdateFeedbackGroupIdException");
     } catch (UpdateFeedbackGroupIdException updateFeedbackGroupIdException) {
       assertTrue("Excepted UpdateFeedbackGroupIdException thrown", true);
-      verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     }
 
   }

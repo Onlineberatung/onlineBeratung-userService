@@ -20,21 +20,23 @@ public class UserService {
     this.userRepository = userRepository;
   }
 
+  /**
+   * Deletes a user.
+   *
+   * @param user the user to be deleted
+   */
   public void deleteUser(User user) {
     try {
       userRepository.delete(user);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new InternalServerErrorException("Deletion of user failed");
+      throw new InternalServerErrorException("Deletion of user failed",
+          LogService::logDatabaseError);
     }
   }
 
   /**
    * Create a new {@link User}
-   * 
-   * @param userId
-   * @param username
-   * @param email
+   *
    * @return The created {@link User}
    */
   public User createUser(String userId, String username, String email, boolean languageFormal) {
@@ -43,11 +45,7 @@ public class UserService {
 
   /**
    * Creates a new {@link User}
-   * 
-   * @param userId
-   * @param oldId
-   * @param username
-   * @param email
+   *
    * @return The created {@link User}
    */
   public User createUser(String userId, Long oldId, String username, String email,
@@ -61,8 +59,7 @@ public class UserService {
 
   /**
    * Load a {@link User}
-   * 
-   * @param userId
+   *
    * @return An {@link Optional} with the {@link User}, if found
    */
   public Optional<User> getUser(String userId) {
@@ -75,9 +72,6 @@ public class UserService {
 
   /**
    * Saves an {@link User} to the database
-   * 
-   * @param user
-   * @return
    */
   public User saveUser(User user) throws SaveUserException {
     try {
@@ -89,8 +83,7 @@ public class UserService {
 
   /**
    * Find a consultant via the {@link AuthenticatedUser}
-   * 
-   * @param authenticatedUser
+   *
    * @return Optional of user
    * @throws {@link InternalServerErrorException}
    */

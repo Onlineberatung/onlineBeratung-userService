@@ -84,8 +84,9 @@ public class SessionService {
   }
 
   /**
-   * Returns the session for the provided sessionId
+   * Returns the session for the provided sessionId.
    *
+   * @param sessionId the session id
    * @return {@link Session}
    */
   public Optional<Session> getSession(Long sessionId) {
@@ -94,9 +95,9 @@ public class SessionService {
     try {
       session = sessionRepository.findById(sessionId);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new InternalServerErrorException(
-          String.format("Database error while retrieving session with id %s", sessionId));
+          String.format("Database error while retrieving session with id %s", sessionId),
+          LogService::logDatabaseError);
     }
 
     return session;
@@ -116,15 +117,19 @@ public class SessionService {
     try {
       userSessions = sessionRepository.findByUserAndConsultingType(user, consultingType);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new InternalServerErrorException("Database error while retrieving user sessions");
+      throw new InternalServerErrorException("Database error while retrieving user sessions",
+          LogService::logDatabaseError);
     }
 
     return userSessions != null ? userSessions : Collections.emptyList();
   }
 
   /**
-   * Updates the given session by assigning the provided consultant and {@link SessionStatus}
+   * Updates the given session by assigning the provided consultant and {@link SessionStatus}.
+   *
+   * @param session the session
+   * @param consultant the consultant
+   * @param status s´the status of the session
    */
   public void updateConsultantAndStatusForSession(Session session, Consultant consultant,
       SessionStatus status) throws UpdateSessionException {
@@ -139,7 +144,10 @@ public class SessionService {
   }
 
   /**
-   * Updates the feedback group id of the given {@link Session}
+   * Updates the feedback group id of the given {@link Session}.
+   *
+   * @param session an optional session
+   * @param feedbackGroupId the id of the feedback group
    */
   public void updateFeedbackGroupId(Optional<Session> session, String feedbackGroupId)
       throws UpdateFeedbackGroupIdException {
@@ -148,10 +156,9 @@ public class SessionService {
       saveSession(session.get());
 
     } catch (InternalServerErrorException serviceException) {
-      LogService
-          .logDatabaseError(String.format("Could not update feedback group id %s for session %s",
-              feedbackGroupId, session.get().getId()), serviceException);
-      throw new UpdateFeedbackGroupIdException(serviceException);
+      throw new UpdateFeedbackGroupIdException(
+          String.format("Could not update feedback group id %s for session %s", feedbackGroupId,
+              session.get().getId()), serviceException);
     }
   }
 
@@ -159,6 +166,8 @@ public class SessionService {
    * Saving the enquiry message and Rocket.Chat group id for a session. The Message will be set to
    * now and the status to {@link SessionStatus#NEW}.
    *
+   * @param session the {@link Session}
+   * @param rcGroupId the rocket chat group id
    * @return the {@link Session}
    */
   public Session saveEnquiryMessageDateAndRocketChatGroupId(Session session, String rcGroupId)
@@ -202,14 +211,19 @@ public class SessionService {
           LogService::logInternalServerError);
 
     } catch (AgencyServiceHelperException helperEx) {
-      LogService.logAgencyServiceHelperException(helperEx);
       throw new InternalServerErrorException(String.format(
-          "AgencyService error while retrieving the agency for the session for user %s", userId));
+          "AgencyService error while retrieving the agency for the session for user %s", userId),
+          LogService::logAgencyServiceHelperException);
     }
   }
 
   /**
-   * Initialize a {@link Session}
+   * Initialize a {@link Session}.
+   *
+   * @param user the user
+   * @param userDto the dto of the user
+   * @param monitoring flag to initialize monitoring
+   * @return the initialized session
    */
   public Session initializeSession(User user, UserDTO userDto, boolean monitoring)
       throws AgencyServiceHelperException {
@@ -221,8 +235,9 @@ public class SessionService {
   }
 
   /**
-   * Save a {@link Session} to the database
+   * Save a {@link Session} to the database.
    *
+   * @param session the session
    * @return the {@link Session}
    */
   public Session saveSession(Session session) {
@@ -237,8 +252,9 @@ public class SessionService {
 
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} containing team sessions excluding
-   * sessions which are taken by the consultant
+   * sessions which are taken by the consultant.
    *
+   * @param consultant the consultant
    * @return A list of {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getTeamSessionsForConsultant(Consultant consultant) {
@@ -281,10 +297,10 @@ public class SessionService {
    * @return A list of {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getSessionsForConsultant(Consultant consultant,
-      Integer status) {
+      Integer status) throws WrongParameterException {
 
     List<Session> sessions = null;
-    Optional<SessionStatus> sessionStatus = null;
+    Optional<SessionStatus> sessionStatus;
     List<ConsultantSessionResponseDTO> sessionDTOs = null;
 
     try {
@@ -322,7 +338,7 @@ public class SessionService {
     }
 
     if (sessions != null) {
-      sessionDTOs = sessions.stream().map(session -> convertToConsultantSessionReponseDTO(session))
+      sessionDTOs = sessions.stream().map(this::convertToConsultantSessionReponseDTO)
           .collect(Collectors.toList());
     }
 
@@ -471,7 +487,10 @@ public class SessionService {
   }
 
   /**
-   * Returns the session for the Rocket.Chat feedback group id
+   * Returns the session for the Rocket.Chat feedback group id.
+   *
+   * @param feedbackGroupId the id of the feedbackgroup
+   * @return the session
    */
   public Session getSessionByFeedbackGroupId(String feedbackGroupId) {
 

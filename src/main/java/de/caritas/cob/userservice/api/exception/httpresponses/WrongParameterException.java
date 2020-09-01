@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.exception.httpresponses;
 
-public class WrongParameterException extends RuntimeException {
+public class WrongParameterException extends Exception {
 
   private static final long serialVersionUID = -8401912145454084348L;
 
