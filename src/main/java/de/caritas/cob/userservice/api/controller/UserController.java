@@ -2,33 +2,13 @@ package de.caritas.cob.userservice.api.controller;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.exception.SaveChatException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import de.caritas.cob.userservice.api.authorization.Authority;
-import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
-import de.caritas.cob.userservice.api.facade.DeleteUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
@@ -37,6 +17,7 @@ import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
@@ -47,7 +28,6 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.DeleteUserDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MonitoringDTO;
@@ -72,15 +52,27 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
-import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
+import java.util.List;
+import java.util.Optional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller for user api requests
@@ -89,23 +81,10 @@ import io.swagger.annotations.Api;
 @Api(tags = "user-controller")
 public class UserController implements UsersApi {
 
-  @Value("${api.success.userRegistered}")
-  private String USER_REGISTERED;
+  private static final int MIN_OFFSET = 0;
+  private static final int MIN_COUNT = 1;
 
-  @Value("${api.error.keycloakError}")
-  private String KEYCLOAK_ERROR;
-
-  @Value("${api.error.userRegistered}")
-  private String USER_NOT_CREATED;
-
-  @Value("${keycloakService.user.dummySuffix}")
-  private String EMAIL_DUMMY_SUFFIX;
-
-  private final int MIN_OFFSET = 0;
-  private final int MIN_COUNT = 1;
-
-  private final UserService userService;
-  private final ConsultantService consultantService;
+  private final ValidatedUserAccountProvider userAccountProvider;
   private final SessionService sessionService;
   private final AuthenticatedUser authenticatedUser;
   private final CreateEnquiryMessageFacade createEnquiryMessageFacade;
@@ -128,11 +107,10 @@ public class UserController implements UsersApi {
   private final StopChatFacade stopChatFacade;
   private final GetChatMembersFacade getChatMembersFacade;
   private final CreateUserFacade createUserFacade;
-  private final DeleteUserFacade deleteUserFacade;
   private final CreateSessionFacade createSessionFacade;
 
   @Autowired
-  public UserController(UserService userService, ConsultantService consultantService,
+  public UserController(ValidatedUserAccountProvider userAccountProvider,
       SessionService sessionService, AuthenticatedUser authenticatedUser,
       CreateEnquiryMessageFacade createEnquiryMessageFacade, GetUserDataFacade getUserDataFacade,
       ConsultantImportService consultantImportService,
@@ -144,11 +122,9 @@ public class UserController implements UsersApi {
       StartChatFacade startChatFacade, GetChatFacade getChatFacade,
       JoinAndLeaveChatFacade joinAndLeaveChatFacade, CreateChatFacade createChatFacade,
       StopChatFacade stopChatFacade, GetChatMembersFacade getChatMembersFacade,
-      CreateUserFacade createUserFacade, DeleteUserFacade deleteUserFacade,
-      CreateSessionFacade createSessionFacade) {
+      CreateUserFacade createUserFacade, CreateSessionFacade createSessionFacade) {
 
-    this.userService = userService;
-    this.consultantService = consultantService;
+    this.userAccountProvider = userAccountProvider;
     this.sessionService = sessionService;
     this.authenticatedUser = authenticatedUser;
     this.createEnquiryMessageFacade = createEnquiryMessageFacade;
@@ -171,7 +147,6 @@ public class UserController implements UsersApi {
     this.stopChatFacade = stopChatFacade;
     this.getChatMembersFacade = getChatMembersFacade;
     this.createUserFacade = createUserFacade;
-    this.deleteUserFacade = deleteUserFacade;
     this.createSessionFacade = createSessionFacade;
   }
 
@@ -205,15 +180,9 @@ public class UserController implements UsersApi {
   public ResponseEntity<NewRegistrationResponseDto> registerNewConsultingType(
       @Valid @RequestBody NewRegistrationDto newRegistrationDto) {
 
-    Optional<User> user = userService.getUser(authenticatedUser.getUserId());
+    User user = this.userAccountProvider.retrieveValidatedUser();
+    Long createdSessionId = createSessionFacade.createSession(newRegistrationDto, user);
 
-    if (!user.isPresent()) {
-      throw new InternalServerErrorException(
-          String.format("User with id %s not found while registering new consulting type: %s",
-              authenticatedUser.getUserId(), newRegistrationDto.toString()));
-    }
-
-    Long createdSessionId = createSessionFacade.createSession(newRegistrationDto, user.get());
     return new ResponseEntity<>(
         NewRegistrationResponseDto.builder()
             .sessionId(createdSessionId)
@@ -238,18 +207,8 @@ public class UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Optional<Consultant> consultant =
-        consultantService.getConsultant(authenticatedUser.getUserId());
-
-    if (!consultant.isPresent()) {
-      LogService.logInternalServerError(
-          String.format("Consultant with id %s not found for accepting the enquiry.",
-              authenticatedUser.getUserId()));
-
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    assignSessionFacade.assignEnquiry(session.get(), consultant.get());
+    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    assignSessionFacade.assignEnquiry(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -263,18 +222,13 @@ public class UserController implements UsersApi {
       @Valid @NotNull @PathVariable("sessionId") Long sessionId, @RequestHeader String rcToken,
       @RequestHeader String rcUserId, @Valid @RequestBody EnquiryMessageDTO enquiryMessage) {
 
-    Optional<User> user = userService.getUser(authenticatedUser.getUserId());
+    User user = this.userAccountProvider.retrieveValidatedUser();
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .RocketChatToken(rcToken)
+        .RocketChatUserId(rcUserId)
+        .build();
 
-    if (!user.isPresent()) {
-      LogService.logInternalServerError(
-          String.format("User with id %s not found while creating enquiry message.",
-              authenticatedUser.getUserId()));
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    RocketChatCredentials rocketChatCredentials =
-        RocketChatCredentials.builder().RocketChatToken(rcToken).RocketChatUserId(rcUserId).build();
-    createEnquiryMessageFacade.createEnquiryMessage(user.get(), sessionId,
+    createEnquiryMessageFacade.createEnquiryMessage(user, sessionId,
         enquiryMessage.getMessage(), rocketChatCredentials);
 
     return new ResponseEntity<>(HttpStatus.CREATED);
@@ -290,18 +244,14 @@ public class UserController implements UsersApi {
   public ResponseEntity<UserSessionListResponseDTO> getSessionsForAuthenticatedUser(
       @RequestHeader String rcToken) {
 
-    Optional<User> user = userService.getUser(authenticatedUser.getUserId());
-
-    if (!user.isPresent()) {
-      LogService.logInternalServerError(String.format(
-          "User with id %s not found for getting user sessions.", authenticatedUser.getUserId()));
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
+    User user = this.userAccountProvider.retrieveValidatedUser();
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatUserId(user.get().getRcUserId()).RocketChatToken(rcToken).build();
+        .RocketChatUserId(user.getRcUserId())
+        .RocketChatToken(rcToken)
+        .build();
+
     UserSessionListResponseDTO sessions = getSessionListFacade
-        .getSessionsForAuthenticatedUser(user.get().getUserId(), rocketChatCredentials);
+        .getSessionsForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
 
     return isNotEmpty(sessions.getSessions())
         ? new ResponseEntity<>(sessions, HttpStatus.OK)
@@ -310,17 +260,8 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> updateAbsence(@Valid @RequestBody AbsenceDTO absence) {
-    Optional<Consultant> consultant =
-        consultantService.getConsultant(authenticatedUser.getUserId());
 
-    if (!consultant.isPresent()) {
-      LogService.logInternalServerError(
-          String.format("Consultant with id %s not found while updating absent state.",
-              authenticatedUser.getUserId()));
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    consultantService.updateConsultantAbsent(consultant.get(), absence);
+    this.userAccountProvider.updateConsultantAbsent(absence);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -332,46 +273,10 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
 
-    Set<String> roles = authenticatedUser.getRoles();
+    UserDataResponseDTO responseDTO =
+        this.getUserDataFacade.buildUserDataPreferredByConsultantRole();
 
-    UserDataResponseDTO responseDTO = null;
-
-    if (roles.contains(UserRole.CONSULTANT.getValue())) {
-
-      Optional<Consultant> consultant =
-          consultantService.getConsultant(authenticatedUser.getUserId());
-
-      if (!consultant.isPresent()) {
-        LogService.logInternalServerError(
-            String.format("Consultant with id %s not found while getting UserData.",
-                authenticatedUser.getUserId()));
-      } else {
-        responseDTO = getUserDataFacade.getConsultantData(consultant.get());
-      }
-
-    } else if (roles.contains(UserRole.USER.getValue())) {
-
-      Optional<User> user = userService.getUser(authenticatedUser.getUserId());
-
-      if (!user.isPresent()) {
-        LogService.logInternalServerError(String.format(
-            "User with id %s not found while getting UserData.", authenticatedUser.getUserId()));
-      } else {
-        responseDTO = getUserDataFacade.getUserData(user.get());
-      }
-
-    } else {
-      LogService.logInternalServerError(
-          String.format("User with id %s has neither Consultant-Role, nor User-Role .",
-              authenticatedUser.getUserId()));
-    }
-
-    responseDTO.setUserRoles(authenticatedUser.getRoles());
-    responseDTO.setGrantedAuthorities(authenticatedUser.getGrantedAuthorities());
-
-    return (responseDTO != null)
-        ? new ResponseEntity<>(responseDTO, HttpStatus.OK)
-        : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    return new ResponseEntity<>(responseDTO, HttpStatus.OK);
   }
 
   /**
@@ -391,14 +296,13 @@ public class UserController implements UsersApi {
       throw new BadRequestException("count must be a positive number");
     }
 
-    Optional<Consultant> consultant =
-        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
+    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
     ConsultantSessionListResponseDTO sessionList = null;
     Optional<SessionFilter> optionalSessionFilter = SessionFilter.getByValue(filter);
     if (optionalSessionFilter.isPresent()) {
-      sessionList = getSessionListFacade.getSessionsForAuthenticatedConsultant(consultant.get(),
-          status, rcToken, offset, count, optionalSessionFilter.get());
+      sessionList = getSessionListFacade.getSessionsForAuthenticatedConsultant(consultant, status,
+          rcToken, offset, count, optionalSessionFilter.get());
     }
 
     return sessionList != null && isNotEmpty(sessionList.getSessions())
@@ -421,20 +325,12 @@ public class UserController implements UsersApi {
       throw new BadRequestException("count must be a positive number");
     }
 
-    Optional<Consultant> consultant =
-        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
-
-    if (!consultant.get().isTeamConsultant()) {
-      LogService.logForbidden(String.format(
-          "Consultant with id %s is no team consultant and therefor not allowed to get team sessions.",
-          authenticatedUser.getUserId()));
-      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    }
+    Consultant consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
 
     ConsultantSessionListResponseDTO sessionList = null;
     Optional<SessionFilter> optionalSessionFilter = SessionFilter.getByValue(filter);
     if (optionalSessionFilter.isPresent()) {
-      sessionList = getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(consultant.get(),
+      sessionList = getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(consultant,
           rcToken, offset, count, optionalSessionFilter.get());
     }
 
@@ -600,15 +496,7 @@ public class UserController implements UsersApi {
       @Valid @NotEmpty @PathVariable("consultantId") String consultantId) {
 
     // Check, if calling consultant exists
-    consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
-
-    Optional<Consultant> consultant = consultantService.getConsultant(consultantId);
-
-    if (!consultant.isPresent()) {
-      LogService.logInternalServerError(
-          String.format("Consultant (to be assigned) with id %s not found.", consultantId));
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    this.userAccountProvider.retrieveValidatedConsultant();
 
     Optional<Session> session = sessionService.getSession(sessionId);
 
@@ -638,7 +526,8 @@ public class UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    assignSessionFacade.assignSession(session.get(), consultant.get());
+    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
+    assignSessionFacade.assignSession(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -695,15 +584,9 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<CreateChatResponseDTO> createChat(@Valid @RequestBody ChatDTO chatDTO) {
 
-    Optional<Consultant> callingConsultant =
-        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
-    if (!callingConsultant.isPresent()) {
-      throw new InternalServerErrorException(String.format("No consultant for user %s exists",
-          authenticatedUser.getUserId()));
-    }
-
+    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
     // Create chat and return chat link
-    CreateChatResponseDTO response = createChatFacade.createChat(chatDTO, callingConsultant.get());
+    CreateChatResponseDTO response = createChatFacade.createChat(chatDTO, callingConsultant);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
@@ -714,16 +597,14 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> startChat(@NotNull @Valid @PathVariable("chatId") Long chatId) {
 
-    Optional<Consultant> callingConsultant =
-        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
-
     Optional<Chat> chat = chatService.getChat(chatId);
     if (!chat.isPresent()) {
       throw new BadRequestException(
           String.format("Chat with id %s not found for starting chat.", chatId));
     }
 
-    startChatFacade.startChat(chat.get(), callingConsultant.get());
+    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    startChatFacade.startChat(chat.get(), callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
 
@@ -760,16 +641,14 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> stopChat(@NotNull @Valid @PathVariable("chatId") Long chatId) {
 
-    Optional<Consultant> callingConsultant =
-        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
-
     Optional<Chat> chat = chatService.getChat(chatId);
     if (!chat.isPresent()) {
       throw new BadRequestException(
           String.format("Chat with id %s not found while trying to stop the chat.", chatId));
     }
 
-    stopChatFacade.stopChat(chat.get(), callingConsultant.get());
+    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    stopChatFacade.stopChat(chat.get(), callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -804,14 +683,6 @@ public class UserController implements UsersApi {
     UpdateChatResponseDTO updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
         authenticatedUser);
     return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteUser(@Valid @RequestBody DeleteUserDTO deleteUserDTO) {
-
-    deleteUserFacade.deleteUser(deleteUserDTO);
-
-    return new ResponseEntity<>(HttpStatus.OK);
   }
 
 }

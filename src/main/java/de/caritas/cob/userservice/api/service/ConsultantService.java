@@ -53,8 +53,8 @@ public class ConsultantService {
     try {
       return consultantRepository.findById(consultantId);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new InternalServerErrorException("Database error while loading consultant");
+      throw new InternalServerErrorException("Database error while loading consultant",
+          LogService::logDatabaseError);
     }
   }
 
@@ -68,9 +68,9 @@ public class ConsultantService {
     try {
       return consultantRepository.findByRocketChatId(rcUserId);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new InternalServerErrorException(String
-          .format("Database error while loading consultant by Rocket.Chat user id %s", rcUserId));
+          .format("Database error while loading consultant by Rocket.Chat user id %s", rcUserId),
+          LogService::logDatabaseError);
     }
   }
 
@@ -106,8 +106,8 @@ public class ConsultantService {
     try {
       return consultantRepository.findByEmail(email);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new InternalServerErrorException(String.format("Database error while loading consultant by email"));
+      throw new InternalServerErrorException("Database error while loading consultant by email",
+          LogService::logDatabaseError);
     }
   }
 
@@ -121,9 +121,8 @@ public class ConsultantService {
     try {
       return consultantRepository.findByUsername(username);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new InternalServerErrorException(
-          String.format("Database error while loading consultant by username"));
+      throw new InternalServerErrorException("Database error while loading consultant by username",
+          LogService::logDatabaseError);
     }
   }
 
@@ -195,9 +194,8 @@ public class ConsultantService {
     try {
       return consultantRepository.findByConsultantAgenciesAgencyIdIn(agencyIds);
     } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
       throw new InternalServerErrorException(
-          String.format("Database error while loading consultant by agency ids"));
+          "Database error while loading consultant by agency ids", LogService::logDatabaseError);
     }
   }
 
