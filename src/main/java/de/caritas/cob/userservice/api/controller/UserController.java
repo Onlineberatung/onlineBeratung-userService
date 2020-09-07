@@ -4,6 +4,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
@@ -65,7 +66,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,77 +79,39 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for user api requests
  */
 @RestController
+@RequiredArgsConstructor
 @Api(tags = "user-controller")
 public class UserController implements UsersApi {
 
   private static final int MIN_OFFSET = 0;
   private static final int MIN_COUNT = 1;
+  private static final String OFFSET_INVALID_MESSAGE = "offset must be a positive number";
+  private static final String COUNT_INVALID_MESSAGE = "count must be a positive number";
 
-  private final ValidatedUserAccountProvider userAccountProvider;
-  private final SessionService sessionService;
-  private final AuthenticatedUser authenticatedUser;
-  private final CreateEnquiryMessageFacade createEnquiryMessageFacade;
-  private final GetUserDataFacade getUserDataFacade;
-  private final ConsultantImportService consultantImportService;
-  private final EmailNotificationFacade emailNotificationFacade;
-  private final MonitoringService monitoringService;
-  private final AskerImportService askerImportService;
-  private final GetSessionListFacade getSessionListFacade;
-  private final ConsultantAgencyService consultantAgencyService;
-  private final AssignSessionFacade assignSessionFacade;
-  private final KeycloakService keycloakService;
-  private final DecryptionService decryptionService;
-  private final AuthenticatedUserHelper authenticatedUserHelper;
-  private final ChatService chatService;
-  private final StartChatFacade startChatFacade;
-  private final GetChatFacade getChatFacade;
-  private final JoinAndLeaveChatFacade joinAndLeaveChatFacade;
-  private final CreateChatFacade createChatFacade;
-  private final StopChatFacade stopChatFacade;
-  private final GetChatMembersFacade getChatMembersFacade;
-  private final CreateUserFacade createUserFacade;
-  private final CreateSessionFacade createSessionFacade;
-
-  @Autowired
-  public UserController(ValidatedUserAccountProvider userAccountProvider,
-      SessionService sessionService, AuthenticatedUser authenticatedUser,
-      CreateEnquiryMessageFacade createEnquiryMessageFacade, GetUserDataFacade getUserDataFacade,
-      ConsultantImportService consultantImportService,
-      EmailNotificationFacade emailNotificationFacade, MonitoringService monitoringService,
-      AskerImportService askerImportService, GetSessionListFacade getSessionListFacade,
-      ConsultantAgencyService consultantAgencyService, AssignSessionFacade assignSessionFacade,
-      KeycloakService keycloakService, DecryptionService encryptionService,
-      AuthenticatedUserHelper authenticatedUserHelper, ChatService chatService,
-      StartChatFacade startChatFacade, GetChatFacade getChatFacade,
-      JoinAndLeaveChatFacade joinAndLeaveChatFacade, CreateChatFacade createChatFacade,
-      StopChatFacade stopChatFacade, GetChatMembersFacade getChatMembersFacade,
-      CreateUserFacade createUserFacade, CreateSessionFacade createSessionFacade) {
-
-    this.userAccountProvider = userAccountProvider;
-    this.sessionService = sessionService;
-    this.authenticatedUser = authenticatedUser;
-    this.createEnquiryMessageFacade = createEnquiryMessageFacade;
-    this.getUserDataFacade = getUserDataFacade;
-    this.consultantImportService = consultantImportService;
-    this.emailNotificationFacade = emailNotificationFacade;
-    this.monitoringService = monitoringService;
-    this.askerImportService = askerImportService;
-    this.getSessionListFacade = getSessionListFacade;
-    this.consultantAgencyService = consultantAgencyService;
-    this.assignSessionFacade = assignSessionFacade;
-    this.keycloakService = keycloakService;
-    this.decryptionService = encryptionService;
-    this.authenticatedUserHelper = authenticatedUserHelper;
-    this.chatService = chatService;
-    this.startChatFacade = startChatFacade;
-    this.getChatFacade = getChatFacade;
-    this.joinAndLeaveChatFacade = joinAndLeaveChatFacade;
-    this.createChatFacade = createChatFacade;
-    this.stopChatFacade = stopChatFacade;
-    this.getChatMembersFacade = getChatMembersFacade;
-    this.createUserFacade = createUserFacade;
-    this.createSessionFacade = createSessionFacade;
-  }
+  private final @NotNull ValidatedUserAccountProvider userAccountProvider;
+  private final @NotNull SessionService sessionService;
+  private final @NotNull AuthenticatedUser authenticatedUser;
+  private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
+  private final @NotNull GetUserDataFacade getUserDataFacade;
+  private final @NotNull ConsultantImportService consultantImportService;
+  private final @NotNull EmailNotificationFacade emailNotificationFacade;
+  private final @NotNull MonitoringService monitoringService;
+  private final @NotNull AskerImportService askerImportService;
+  private final @NotNull GetSessionListFacade getSessionListFacade;
+  private final @NotNull ConsultantAgencyService consultantAgencyService;
+  private final @NotNull AssignSessionFacade assignSessionFacade;
+  private final @NotNull KeycloakService keycloakService;
+  private final @NotNull DecryptionService decryptionService;
+  private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
+  private final @NotNull ChatService chatService;
+  private final @NotNull StartChatFacade startChatFacade;
+  private final @NotNull GetChatFacade getChatFacade;
+  private final @NotNull JoinAndLeaveChatFacade joinAndLeaveChatFacade;
+  private final @NotNull CreateChatFacade createChatFacade;
+  private final @NotNull StopChatFacade stopChatFacade;
+  private final @NotNull GetChatMembersFacade getChatMembersFacade;
+  private final @NotNull CreateUserFacade createUserFacade;
+  private final @NotNull CreateSessionFacade createSessionFacade;
 
   /**
    * Creates a Keycloak user and returns a 201 CREATED on success
@@ -285,16 +248,11 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getSessionsForAuthenticatedConsultant(
-      @RequestHeader String rcToken, @NotNull @Valid @RequestParam Integer offset,
-      @NotNull @Valid @RequestParam Integer count, @Valid @NotEmpty @RequestParam String filter,
+      @RequestHeader String rcToken,
+      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
+      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
+      @Valid @NotEmpty @RequestParam String filter,
       @Valid @NotEmpty @RequestParam Integer status) {
-
-    if (offset < MIN_OFFSET) {
-      throw new BadRequestException("offset must be a positive number");
-    }
-    if (count < MIN_COUNT) {
-      throw new BadRequestException("count must be a positive number");
-    }
 
     Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
@@ -315,15 +273,10 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getTeamSessionsForAuthenticatedConsultant(
-      @RequestHeader String rcToken, @NotNull @Valid @RequestParam Integer offset,
-      @NotNull @Valid @RequestParam Integer count, @Valid @NotEmpty @RequestParam String filter) {
-
-    if (offset < MIN_OFFSET) {
-      throw new BadRequestException("offset must be a positive number");
-    }
-    if (count < MIN_COUNT) {
-      throw new BadRequestException("count must be a positive number");
-    }
+      @RequestHeader String rcToken,
+      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
+      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
+      @Valid @NotEmpty @RequestParam String filter) {
 
     Consultant consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
 
