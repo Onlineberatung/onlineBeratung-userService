@@ -80,7 +80,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.MASTER_KEY_DTO
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.NEW_REGISTRATION_RESPONSE_DTO_CREATED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.OFFSET_0;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
@@ -95,9 +94,11 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -109,46 +110,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.ws.rs.InternalServerErrorException;
-import org.hibernate.service.spi.ServiceException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
-import de.caritas.cob.userservice.api.facade.DeleteUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
@@ -157,6 +129,7 @@ import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
@@ -187,14 +160,41 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
-import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.hibernate.service.spi.ServiceException;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)
@@ -305,7 +305,7 @@ public class UserControllerIT {
   private MockMvc mvc;
 
   @MockBean
-  private UserService userService;
+  private ValidatedUserAccountProvider accountProvider;
   @MockBean
   private SessionService sessionService;
   @MockBean
@@ -316,8 +316,6 @@ public class UserControllerIT {
   private CreateEnquiryMessageFacade createEnquiryMessageFacade;
   @MockBean
   private GetUserDataFacade getUserDataFacade;
-  @MockBean
-  private ConsultantService consultantService;
   @MockBean
   private ConsultantImportService consultantImportService;
   @MockBean
@@ -364,8 +362,6 @@ public class UserControllerIT {
   private GetChatMembersFacade getChatMembersFacade;
   @MockBean
   private CreateUserFacade createUserFacade;
-  @MockBean
-  private DeleteUserFacade deleteUserFacade;
   @MockBean
   private CreateSessionFacade createSessionFacade;
 
@@ -544,7 +540,7 @@ public class UserControllerIT {
   public void registerNewConsultingTyp_Should_ReturnCreated_When_ProvidedWithValidRequestBody()
       throws Exception {
 
-    when(userService.getUser(Mockito.any())).thenReturn(Optional.of(USER));
+    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
     when(createSessionFacade.createSession(Mockito.any(), Mockito.any())).thenReturn(1L);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
@@ -564,15 +560,15 @@ public class UserControllerIT {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(OPTIONAL_SESSION);
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID).header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(authenticatedUser, atLeastOnce()).getUserId();
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -581,7 +577,7 @@ public class UserControllerIT {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.empty());
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID).header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -597,7 +593,7 @@ public class UserControllerIT {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID);
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID).header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -612,7 +608,7 @@ public class UserControllerIT {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(OPTIONAL_TEAM_SESSION);
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID).header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -625,7 +621,7 @@ public class UserControllerIT {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(OPTIONAL_TEAM_SESSION);
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
     doThrow(new ConflictException("")).when(assignSessionFacade)
         .assignEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
 
@@ -640,7 +636,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedUser()).thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, "xxx")
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, "xxx").content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -654,7 +650,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
     doThrow(new ConflictException(ERROR)).when(createEnquiryMessageFacade).createEnquiryMessage(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
 
@@ -670,7 +666,7 @@ public class UserControllerIT {
   public void createEnquiryMessage_Should_ReturnCreated_WhenMessageWasCreated() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -679,13 +675,12 @@ public class UserControllerIT {
 
   }
 
-
   @Test
   public void createEnquiryMessage_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedUser()).thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE).header(RC_TOKEN_HEADER_PARAMETER_NAME, "xxx")
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, "xxx").content(VALID_ENQUIRY_MESSAGE_BODY)
@@ -709,7 +704,7 @@ public class UserControllerIT {
     String sessionsJson = convertObjectToJson(response);
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
     when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
@@ -719,8 +714,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
         .andExpect(content().json(sessionsJson));
 
-    verify(authenticatedUser, atLeastOnce()).getUserId();
-    verify(userService, atLeastOnce()).getUser(USER_ID);
+    verify(accountProvider, atLeastOnce()).retrieveValidatedUser();
 
   }
 
@@ -729,7 +723,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedUser()).thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -747,7 +741,7 @@ public class UserControllerIT {
     UserSessionListResponseDTO response = new UserSessionListResponseDTO(session);
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
     when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
@@ -756,7 +750,6 @@ public class UserControllerIT {
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
 
-    verify(authenticatedUser, atLeastOnce()).getUserId();
   }
 
   @Test
@@ -766,7 +759,7 @@ public class UserControllerIT {
     UserSessionListResponseDTO response = new UserSessionListResponseDTO(session);
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
     when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
@@ -774,8 +767,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
-
-    verify(authenticatedUser, atLeastOnce()).getUserId();
   }
 
 
@@ -792,7 +783,7 @@ public class UserControllerIT {
   public void updateAbsence_Should_ReturnOk_WhenSaved() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedTeamConsultant()).thenReturn(TEAM_CONSULTANT);
 
     mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).content(VALID_ABSENT_MESSAGE_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -804,7 +795,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.empty());
+    doThrow(new InternalServerErrorException("")).when(accountProvider)
+        .updateConsultantAbsent(any());
 
     mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).content(VALID_ABSENT_MESSAGE_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -847,8 +839,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedConsultant()).thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -865,8 +856,7 @@ public class UserControllerIT {
         new ConsultantSessionListResponseDTO(session, OFFSET_0, COUNT_10, 1);
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
     when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
         SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
@@ -886,8 +876,7 @@ public class UserControllerIT {
         new ConsultantSessionListResponseDTO(null, OFFSET_0, COUNT_10, 0);
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
     when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
         SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
@@ -907,8 +896,7 @@ public class UserControllerIT {
         new ConsultantSessionListResponseDTO(session, OFFSET_0, COUNT_10, 0);
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
     when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
         SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
@@ -964,7 +952,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -979,13 +967,12 @@ public class UserControllerIT {
   @Test
   public void getUserData_ForUser_Should_ReturnOkAndValidContent() throws Exception {
 
-    when(authenticatedUser.getRoles()).thenReturn(ROLES_WITH_USER);
-    when(authenticatedUser.getGrantedAuthorities())
-        .thenReturn(Authority.getAuthoritiesByUserRole(UserRole.USER).stream()
-            .map(authority -> authority.toString()).collect(Collectors.toSet()));
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(getUserDataFacade.getUserData(Mockito.any())).thenReturn(USER_USER_DATA_RESPONSE_DTO);
+    UserDataResponseDTO responseDto = USER_USER_DATA_RESPONSE_DTO;
+    responseDto.setUserRoles(ROLES_WITH_USER);
+    responseDto.setGrantedAuthorities(
+        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
+    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+        .thenReturn(responseDto);
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
@@ -999,10 +986,11 @@ public class UserControllerIT {
     when(authenticatedUser.getRoles()).thenReturn(ROLES_WITH_USER);
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(Authority.getAuthoritiesByUserRole(UserRole.USER).stream()
-            .map(authority -> authority.toString()).collect(Collectors.toSet()));
+            .collect(Collectors.toSet()));
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    when(getUserDataFacade.getUserData(Mockito.any())).thenReturn(null);
+    when(accountProvider.retrieveValidatedUser()).thenThrow(new InternalServerErrorException(""));
+    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
@@ -1010,10 +998,11 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForUser_Should_ReturnInternalServerError_WhenUserDataFacadeReturnsEmptyDTO()
+  public void getUserData_ForUser_Should_ReturnInternalServerError_When_UserDataFacadeReturnsEmptyDTO()
       throws Exception {
 
-    when(authenticatedUser.getRoles()).thenReturn(ROLES_INVALID);
+    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
@@ -1023,14 +1012,12 @@ public class UserControllerIT {
   @Test
   public void getUserData_ForConsultant_Should_ReturnOkAndValidContent() throws Exception {
 
-    when(authenticatedUser.getRoles()).thenReturn(ROLES_WITH_CONSULTANT);
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(TEAM_CONSULTANT));
-    when(getUserDataFacade.getConsultantData(TEAM_CONSULTANT))
-        .thenReturn(CONSULTANT_USER_DATA_RESPONSE_DTO);
-    when(authenticatedUser.getGrantedAuthorities())
-        .thenReturn(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT).stream()
-            .collect(Collectors.toSet()));
+    UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
+    responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
+    responseDto.setGrantedAuthorities(
+        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
+
+    when(getUserDataFacade.buildUserDataPreferredByConsultantRole()).thenReturn(responseDto);
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
@@ -1041,7 +1028,8 @@ public class UserControllerIT {
   public void getUserData_Should_ReturnInternalServerError_WhenAuthenticatedUserHasNoValidRole()
       throws Exception {
 
-    when(authenticatedUser.getRoles()).thenReturn(ROLES_INVALID);
+    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
@@ -1052,9 +1040,8 @@ public class UserControllerIT {
   public void getUserData_ForConsultant_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
       throws Exception {
 
-    when(authenticatedUser.getRoles()).thenReturn(ROLES_WITH_CONSULTANT);
-    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.empty());
+    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
@@ -1080,7 +1067,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedTeamConsultant())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -1092,14 +1080,13 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.of(CONSULTANT));
+    when(accountProvider.retrieveValidatedTeamConsultant()).thenThrow(new ForbiddenException(""));
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
-    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString());
   }
 
   @Test
@@ -1111,8 +1098,7 @@ public class UserControllerIT {
         new ConsultantSessionListResponseDTO(session, OFFSET_0, COUNT_10, 0);
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
     when(getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
         OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);
 
@@ -1132,8 +1118,7 @@ public class UserControllerIT {
 
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.of(TEAM_CONSULTANT));
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
     when(getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
         OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);
@@ -1189,8 +1174,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -1442,13 +1426,14 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
   public void assignSession_Should_ReturnHttpStatusOfAssignSessionFacade() throws Exception {
 
-    when(consultantService.getConsultant(Mockito.any())).thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultantById(any()))
+        .thenReturn(OPTIONAL_CONSULTANT.get());
     when(sessionService.getSession(Mockito.anyLong())).thenReturn(OPTIONAL_SESSION);
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY);
@@ -1464,20 +1449,20 @@ public class UserControllerIT {
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenConsultantIsNotFoundInDb()
       throws Exception {
 
-    when(consultantService.getConsultant(Mockito.any())).thenReturn(OPTIONAL_CONSULTANT)
-        .thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenSessionIsNotFoundInDb()
       throws Exception {
 
-    when(consultantService.getConsultant(Mockito.any())).thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
     when(sessionService.getSession(Mockito.anyLong())).thenReturn(Optional.empty());
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).contentType(MediaType.APPLICATION_JSON)
@@ -1490,7 +1475,7 @@ public class UserControllerIT {
   public void assignSession_Should_ReturnForbiddenAndLogError_WhenCallerDoesNotHaveTheRightToAssignSessions()
       throws Exception {
 
-    when(consultantService.getConsultant(Mockito.any())).thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
     when(sessionService.getSession(Mockito.anyLong())).thenReturn(OPTIONAL_SESSION);
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(AUTHORITY_ASSIGN_ENQUIRY);
 
@@ -1503,7 +1488,7 @@ public class UserControllerIT {
   public void assignSession_Should_ReturnForbiddenAndLogError_WhenCallerDoesNotHaveTheRightToAssignEnquiries()
       throws Exception {
 
-    when(consultantService.getConsultant(Mockito.any())).thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(OPTIONAL_SESSION_WITHOUT_CONSULTANT);
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(AUTHORITY_ASSIGN_SESSION);
@@ -1642,7 +1627,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(accountProvider);
   }
 
   @Test
@@ -1650,8 +1635,9 @@ public class UserControllerIT {
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultant(anyString())).thenReturn(OPTIONAL_CONSULTANT);
-    when(createChatFacade.createChat(Mockito.any(), Mockito.any())).thenReturn(null);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
+    when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(post(PATH_POST_CHAT_NEW).content(VALID_CREATE_CHAT_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -1662,8 +1648,7 @@ public class UserControllerIT {
   public void createChat_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
     when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
         .thenReturn(CREATE_CHAT_RESPONSE_DTO);
 
@@ -1697,8 +1682,7 @@ public class UserControllerIT {
   public void startChat_Should_ReturnOK_When_ChatWasStarted() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
     when(chatService.getChat(Mockito.any())).thenReturn(Optional.of(INACTIVE_CHAT));
 
     mvc.perform(put(PATH_PUT_CHAT_START).contentType(MediaType.APPLICATION_JSON)
@@ -1709,8 +1693,8 @@ public class UserControllerIT {
   public void startChat_Should_ReturnBadRequest_When_ChatWasNotFound() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any(AuthenticatedUser.class)))
-        .thenReturn(Optional.empty());
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenThrow(new InternalServerErrorException(""));
     when(chatService.getChat(Mockito.any())).thenReturn(Optional.empty());
 
     mvc.perform(put(PATH_PUT_CHAT_START).contentType(MediaType.APPLICATION_JSON)
@@ -1729,8 +1713,7 @@ public class UserControllerIT {
 
     verifyNoMoreInteractions(getChatFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
-    verifyNoMoreInteractions(userService);
+    verifyNoMoreInteractions(accountProvider);
     verifyNoMoreInteractions(chatHelper);
   }
 
@@ -1756,8 +1739,7 @@ public class UserControllerIT {
 
     verifyNoMoreInteractions(joinAndLeaveChatFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
-    verifyNoMoreInteractions(userService);
+    verifyNoMoreInteractions(accountProvider);
     verifyNoMoreInteractions(chatHelper);
   }
 
@@ -1777,7 +1759,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(accountProvider);
     verifyNoMoreInteractions(stopChatFacade);
   }
 
@@ -1785,21 +1767,20 @@ public class UserControllerIT {
   public void stopChat_Should_ReturnInternalServerError_When_CallingConsultantDoesNotExist()
       throws Exception {
 
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any()))
-        .thenThrow(new InternalServerErrorException());
+    when(chatService.getChat(any())).thenReturn(Optional.of(mock(Chat.class)));
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(stopChatFacade);
   }
 
   @Test
   public void stopChat_Should_ReturnBadRequest_When_ChatNotFound() throws Exception {
 
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any()))
-        .thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
     when(chatService.getChat(Mockito.anyLong())).thenReturn(Optional.empty());
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).accept(MediaType.APPLICATION_JSON))
@@ -1809,8 +1790,7 @@ public class UserControllerIT {
   @Test
   public void stopChat_Should_ReturnOk_When_ChatWasStopped() throws Exception {
 
-    when(consultantService.getConsultantViaAuthenticatedUser(Mockito.any()))
-        .thenReturn(OPTIONAL_CONSULTANT);
+    when(accountProvider.retrieveValidatedConsultant()).thenReturn(OPTIONAL_CONSULTANT.get());
     when(chatService.getChat(Mockito.anyLong())).thenReturn(Optional.of(chat));
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).accept(MediaType.APPLICATION_JSON))
@@ -1830,8 +1810,7 @@ public class UserControllerIT {
 
     verifyNoMoreInteractions(getChatMembersFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
-    verifyNoMoreInteractions(userService);
+    verifyNoMoreInteractions(accountProvider);
     verifyNoMoreInteractions(chatHelper);
     verifyNoMoreInteractions(userHelper);
     verifyNoMoreInteractions(rocketChatService);

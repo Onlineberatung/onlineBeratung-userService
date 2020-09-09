@@ -1,7 +1,23 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static java.util.Objects.requireNonNull;
+
+import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.SessionDataHelper;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -11,19 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 
 /**
  * Facade to encapsulate getting the agency data for the corresponding user
@@ -34,22 +38,38 @@ public class GetUserDataFacade {
 
   private final AgencyServiceHelper agencyServiceHelper;
   private final SessionDataHelper sessionDataHelper;
+  private final AuthenticatedUser authenticatedUser;
+  private final ValidatedUserAccountProvider userAccountProvider;
 
-  @Autowired
   public GetUserDataFacade(AgencyServiceHelper agencyServiceHelper,
-      SessionDataHelper sessionDataHelper) {
-    this.agencyServiceHelper = agencyServiceHelper;
-    this.sessionDataHelper = sessionDataHelper;
+      SessionDataHelper sessionDataHelper, AuthenticatedUser authenticatedUser,
+      ValidatedUserAccountProvider userAccountProvider) {
+    this.agencyServiceHelper = requireNonNull(agencyServiceHelper);
+    this.sessionDataHelper = requireNonNull(sessionDataHelper);
+    this.authenticatedUser = requireNonNull(authenticatedUser);
+    this.userAccountProvider = requireNonNull(userAccountProvider);
   }
 
   /**
-   * Assign a {@link Consultant} repository information to an {@link UserDataResponseDTO} and get
-   * the {@link AgencyDTO} for the consultant's assigned agencies.
+   * Returns the user data of the authenticated user preferred by role consultant.
    *
-   * @param consultant {@link Consultant}
    * @return UserDataResponseDTO {@link UserDataResponseDTO}
    */
-  public UserDataResponseDTO getConsultantData(Consultant consultant) {
+  public UserDataResponseDTO buildUserDataPreferredByConsultantRole() {
+    Set<String> roles = authenticatedUser.getRoles();
+
+    if (roles.contains(UserRole.CONSULTANT.getValue())) {
+      return getConsultantData(userAccountProvider.retrieveValidatedConsultant());
+    } else if (roles.contains(UserRole.USER.getValue())) {
+      return getUserData(userAccountProvider.retrieveValidatedUser());
+    } else {
+      throw new InternalServerErrorException(
+          String.format("User with id %s has neither Consultant-Role, nor User-Role .",
+          authenticatedUser.getUserId()));
+    }
+  }
+
+  private UserDataResponseDTO getConsultantData(Consultant consultant) {
     List<AgencyDTO> agencyDTOs = null;
 
     if (!consultant.getConsultantAgencies().isEmpty()) {
@@ -60,13 +80,15 @@ public class GetUserDataFacade {
     }
 
     if (CollectionUtils.isEmpty(agencyDTOs)) {
-      return null;
+      throw new InternalServerErrorException(String.format("No agency available for "
+          + "consultant %s", consultant.getId()));
     }
 
     return new UserDataResponseDTO(consultant.getId(), consultant.getUsername(),
         consultant.getFirstName(), consultant.getLastName(), consultant.getEmail(),
         consultant.isAbsent(), consultant.isLanguageFormal(), consultant.getAbsenceMessage(),
-        consultant.isTeamConsultant(), agencyDTOs, null, null, null);
+        consultant.isTeamConsultant(), agencyDTOs, authenticatedUser.getRoles(),
+        authenticatedUser.getGrantedAuthorities(), null);
   }
 
   private AgencyDTO fromConsultantAgency(ConsultantAgency consultantAgency) {
@@ -80,27 +102,16 @@ public class GetUserDataFacade {
     return null;
   }
 
-  /**
-   * Returns the session data for every consulting type of the given {@link User}
-   *
-   * @param user {@link User}
-   * @return UserDataResponseDTO {@link UserDataResponseDTO}
-   */
-  public UserDataResponseDTO getUserData(User user) {
+  private UserDataResponseDTO getUserData(User user) {
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
-        null, null, null, false, user.isLanguageFormal(), null, false, null, null, null, null);
+        null, null, null, false, user.isLanguageFormal(), null, false, null,
+        authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
 
     responseDTO.setConsultingTypes(getConsultingTypes(user));
 
     return responseDTO;
   }
 
-  /**
-   * Returns information for every consulting type of the given {@link User}
-   *
-   * @param user {@link User }
-   * @return LinkedHashMap<String, Object> HashMap with all consultingtypes and data
-   */
   private LinkedHashMap<String, Object> getConsultingTypes(User user) {
 
     Set<Session> sessionList =
@@ -122,15 +133,6 @@ public class GetUserDataFacade {
     return consultingTypes;
   }
 
-  /**
-   * Returns a {@link LinkedHashMap} with user information for the given consulting type.
-   *
-   * @param type {@link ConsultingType}
-   * @param sessionList List of the user's {@link Session}s
-   * @param agencyDTOs List of {@link AgencyDTO} that the user is registered to
-   * @return LinkedHashMap<String, Object> {@link LinkedHashMap} containing user data
-   * (sessionData,isRegistered,agency)
-   */
   private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType type,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
 
@@ -149,12 +151,6 @@ public class GetUserDataFacade {
     return consultingTypeData;
   }
 
-  /**
-   * Returns List of agency IDs from provided Set of {@link Session}.
-   *
-   * @param sessionList {@link User#getSessions()}
-   * @return List<Long> list of agencyIds
-   */
   private List<Long> getAgencyIdsFromSessions(Set<Session> sessionList) {
     if (sessionList != null) {
       return sessionList.stream().map(Session::getAgencyId).collect(Collectors.toList());
@@ -162,12 +158,6 @@ public class GetUserDataFacade {
     return Collections.emptyList();
   }
 
-  /**
-   * Returns List of agency IDs from provided {@link User}.
-   *
-   * @param user - {@link User}
-   * @return list of agencyIds
-   */
   private List<Long> getAgencyIdsFromUser(User user) {
     if (user.getUserAgencies() != null) {
       return user.getUserAgencies().stream().map(UserAgency::getAgencyId)
@@ -176,13 +166,6 @@ public class GetUserDataFacade {
     return Collections.emptyList();
   }
 
-  /**
-   * Returns List of agency IDs from provided {@link User} and Set of {@link Session}.
-   *
-   * @param user {@link User}
-   * @param sessionList {@link User#getSessions()}
-   * @return list of agencyIds
-   */
   private List<Long> getAgencyIds(User user, Set<Session> sessionList) {
     List<Long> agencyIds = new ArrayList<>();
     agencyIds.addAll(getAgencyIdsFromSessions(sessionList));
