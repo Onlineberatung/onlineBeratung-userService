@@ -91,7 +91,7 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void updateConsultantAbsent_Should_CallupdateConsultantAbsent_When_ConsultantIsPresent() {
+  public void updateConsultantAbsent_Should_CallUpdateConsultantAbsent_When_ConsultantIsPresent() {
     Consultant consultantMock = mock(Consultant.class);
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultantMock));
 

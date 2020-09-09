@@ -448,7 +448,6 @@ public class UserController implements UsersApi {
       @Valid @NotNull @PathVariable("sessionId") Long sessionId,
       @Valid @NotEmpty @PathVariable("consultantId") String consultantId) {
 
-    // Check, if calling consultant exists
     this.userAccountProvider.retrieveValidatedConsultant();
 
     Optional<Session> session = sessionService.getSession(sessionId);

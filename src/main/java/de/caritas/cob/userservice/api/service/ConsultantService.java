@@ -121,7 +121,8 @@ public class ConsultantService {
     try {
       return consultantRepository.findByUsername(username);
     } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while loading consultant by username",
+      throw new InternalServerErrorException(
+          String.format("Database error while loading consultant by username %s", username),
           LogService::logDatabaseError);
     }
   }

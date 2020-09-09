@@ -68,7 +68,8 @@ public class ValidatedUserAccountProvider {
       return consultant;
     }
     throw new ForbiddenException(String.format(
-        "Consultant with id %s is no team consultant and therefor not allowed to get team sessions.",
+        "Consultant with id %s is no team consultant and therefore not allowed to get team "
+            + "sessions.",
         authenticatedUser.getUserId()));
   }
 
