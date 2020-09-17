@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.service;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class MonitoringService {
   /**
    * Creates and inserts the initial monitoring data for the given {@link Session} into the database
    * if monitoring is activated for the given {@link ConsultingTypeSettings}
-   * 
+   *
    * @param session {@link Session}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
    * @throws CreateMonitoringException
@@ -62,7 +63,7 @@ public class MonitoringService {
 
   /**
    * Returns the monitoring for the given session
-   * 
+   *
    * @param session
    * @return
    */
@@ -80,7 +81,7 @@ public class MonitoringService {
 
   /**
    * Updates the monitoring values of a {@link Session}
-   * 
+   *
    * @param sessionId
    * @param monitoringDTO
    */
@@ -100,7 +101,7 @@ public class MonitoringService {
 
   /**
    * Deletes the monitoring values of a {@link Session}
-   * 
+   *
    * @param sessionId
    * @param monitoringDTO
    * @return
@@ -122,7 +123,7 @@ public class MonitoringService {
   /**
    * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
    * {@link MonitoringDTO} on level 0 (addictiveDrugs, intervention, etc.)
-   * 
+   *
    * @param monitoringList
    * @return
    */
@@ -146,7 +147,7 @@ public class MonitoringService {
   /**
    * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
    * {@link MonitoringDTO} on level 1 (monitoring table - {@link Monitoring})
-   * 
+   *
    * @param type
    * @param monitoringList
    * @return
@@ -169,7 +170,7 @@ public class MonitoringService {
   /**
    * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
    * {@link MonitoringDTO} on level 2 (monitoring_option table - {@link MonitoringOption}).
-   * 
+   *
    * @param type
    * @param monitoringKey
    * @param monitoringList
@@ -193,11 +194,11 @@ public class MonitoringService {
 
   /**
    * Roll back the initialization of the monitoring data for a {@link Session}.
-   * 
+   *
    * @param session {@link Session}
    */
   public void rollbackInitializeMonitoring(Session session) {
-    if (session != null) {
+    if (!Objects.isNull(session)) {
       try {
         deleteMonitoring(session.getId(),
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));

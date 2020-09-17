@@ -13,8 +13,10 @@ import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddConsultantsAndTechUserException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddConsultantsException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddSystemUserException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserInfoException;
@@ -42,8 +44,10 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -51,51 +55,39 @@ import org.springframework.stereotype.Service;
  * Facade for capsuling the steps for saving the enquiry message.
  */
 @Service
+@RequiredArgsConstructor
 public class CreateEnquiryMessageFacade {
 
+  private final @NonNull
+  SessionService sessionService;
+  private final @NonNull
+  RocketChatService rocketChatService;
+  private final @NonNull
+  EmailNotificationFacade emailNotificationFacade;
+  private final @NonNull
+  MessageServiceHelper messageServiceHelper;
+  private final @NonNull
+  ConsultantAgencyService consultantAgencyService;
+  private final @NonNull
+  MonitoringService monitoringService;
+  private final @NonNull
+  ConsultingTypeManager consultingTypeManager;
+  private final @NonNull
+  KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull
+  UserHelper userHelper;
+  private final @NonNull
+  RocketChatHelper rocketChatHelper;
   @Value("${rocket.systemuser.id}")
-  private String ROCKET_CHAT_SYSTEM_USER_ID;
-
-  private final SessionService sessionService;
-  private final RocketChatService rocketChatService;
-  private final EmailNotificationFacade emailNotificationFacade;
-  private final MessageServiceHelper messageServiceHelper;
-  private final ConsultantAgencyService consultantAgencyService;
-  private final MonitoringService monitoringService;
-  private final ConsultingTypeManager consultingTypeManager;
-  private final KeycloakAdminClientHelper keycloakAdminClientHelper;
-  private final UserHelper userHelper;
-  private final RocketChatHelper rocketChatHelper;
-
-  /**
-   * Constructor
-   */
-  @Autowired
-  public CreateEnquiryMessageFacade(SessionService sessionService,
-      RocketChatService rocketChatService, EmailNotificationFacade emailNotificationFacade,
-      MessageServiceHelper messageServiceHelper, ConsultantAgencyService consultantAgencyService,
-      MonitoringService monitoringService, ConsultingTypeManager consultingTypeManager,
-      KeycloakAdminClientHelper keycloakHelper, UserHelper userHelper,
-      RocketChatHelper rocketChatHelper) {
-    this.sessionService = sessionService;
-    this.rocketChatService = rocketChatService;
-    this.emailNotificationFacade = emailNotificationFacade;
-    this.messageServiceHelper = messageServiceHelper;
-    this.consultantAgencyService = consultantAgencyService;
-    this.monitoringService = monitoringService;
-    this.consultingTypeManager = consultingTypeManager;
-    this.keycloakAdminClientHelper = keycloakHelper;
-    this.userHelper = userHelper;
-    this.rocketChatHelper = rocketChatHelper;
-  }
+  private String rocketChatSystemUserId;
 
   /**
    * Handles possible exceptions and roll backs during the creation of the enquiry message for a
    * session.
    *
-   * @param user {@link User}
-   * @param sessionId {@link Session#getId()}
-   * @param message enquiry message
+   * @param user                  {@link User}
+   * @param sessionId             {@link Session#getId()}
+   * @param message               enquiry message
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
   public void createEnquiryMessage(User user, Long sessionId, String message,
@@ -114,7 +106,7 @@ public class CreateEnquiryMessageFacade {
     } catch (RocketChatCreateGroupException | RocketChatGetUserInfoException exception) {
       throw new InternalServerErrorException(exception.getMessage(),
           LogService::logCreateEnquiryMessageException);
-    } catch (RocketChatAddConsultantsAndTechUserException | CreateMonitoringException
+    } catch (RocketChatAddConsultantsException | RocketChatAddSystemUserException | CreateMonitoringException
         | RocketChatPostMessageException | RocketChatPostWelcomeMessageException
         | EnquiryMessageException | InitializeFeedbackChatException exception) {
       doRollback(exception.getExceptionInformation(), rocketChatCredentials);
@@ -123,32 +115,41 @@ public class CreateEnquiryMessageFacade {
     } catch (InternalServerErrorException | SaveUserException exception) {
       // Presumably only the Rocket.Chat group was created yet
       Optional<Session> session = sessionService.getSession(sessionId);
-      CreateEnquiryExceptionInformation exceptionInformation =
-          CreateEnquiryExceptionInformation.builder().rcGroupId(session.get().getGroupId()).build();
-      doRollback(exceptionInformation, rocketChatCredentials);
+      if (session.isPresent()) {
+        CreateEnquiryExceptionInformation exceptionInformation =
+            CreateEnquiryExceptionInformation.builder().rcGroupId(session.get().getGroupId())
+                .build();
+        doRollback(exceptionInformation, rocketChatCredentials);
+      }
 
       throw new InternalServerErrorException(exception.getMessage(),
           LogService::logCreateEnquiryMessageException);
     }
+
   }
 
   /**
    * Creates the private Rocket.Chat group, initializes the session monitoring and saves the enquiry
    * message in Rocket.Chat.
    *
-   * @param user {@link User}
-   * @param sessionId {@link Session#getId()}
-   * @param message Message
+   * @param user                  {@link User}
+   * @param sessionId             {@link Session#getId()}
+   * @param message               Message
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
   private void doCreateEnquiryMessageSteps(User user, Long sessionId, String message,
       RocketChatCredentials rocketChatCredentials)
-      throws RocketChatAddConsultantsAndTechUserException, CreateMonitoringException,
+      throws RocketChatAddConsultantsException, CreateMonitoringException,
       RocketChatPostMessageException, RocketChatPostWelcomeMessageException,
       EnquiryMessageException, InitializeFeedbackChatException, RocketChatCreateGroupException,
-      RocketChatGetUserInfoException, SaveUserException {
+      RocketChatGetUserInfoException, SaveUserException, MessageHasAlreadyBeenSavedException, NoUserSessionException, RocketChatAddSystemUserException {
 
     Session session = getSessionForEnquiryMessage(sessionId, user);
+
+    if (!Objects.isNull(session.getEnquiryMessageDate())) {
+      throw new MessageHasAlreadyBeenSavedException(
+          String.format("Enquiry message already written for session %s", sessionId));
+    }
 
     checkIfKeycloakAndRocketChatUsernamesMatch(rocketChatCredentials.getRocketChatUserId(), user);
 
@@ -158,7 +159,8 @@ public class CreateEnquiryMessageFacade {
     List<ConsultantAgency> agencyList =
         consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
-    addConsultantsAndTechUserToGroup(rcGroupDTO.getGroup().getId(), rocketChatCredentials,
+    addSystemUserToGroup(rcGroupDTO.getGroup().getId());
+    addConsultantsToGroup(rcGroupDTO.getGroup().getId(), rocketChatCredentials,
         agencyList);
 
     ConsultingTypeSettings consultingTypeSettings =
@@ -177,27 +179,21 @@ public class CreateEnquiryMessageFacade {
     messageServiceHelper.postWelcomeMessage(rcGroupDTO.getGroup().getId(), user,
         consultingTypeSettings, createEnquiryExceptionInformation);
 
-    initializeFeedbackChat(session, rcGroupDTO.getGroup().getId(), agencyList,
-        consultingTypeSettings);
+    if (consultingTypeSettings.isFeedbackChat()) {
+      initializeFeedbackChat(session, rcGroupDTO.getGroup().getId(), agencyList);
+    }
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(session);
   }
 
   private Session getSessionForEnquiryMessage(Long sessionId, User user)
-      throws NoUserSessionException, MessageHasAlreadyBeenSavedException {
+      throws NoUserSessionException {
 
-    Optional<Session> session;
-
-    session = sessionService.getSession(sessionId);
+    Optional<Session> session = sessionService.getSession(sessionId);
 
     if (!session.isPresent() || !session.get().getUser().getUserId().equals(user.getUserId())) {
       throw new NoUserSessionException(
           String.format("Session %s not found for user %s", sessionId, user.getUserId()));
-    }
-
-    if (session.get().getEnquiryMessageDate() != null) {
-      throw new MessageHasAlreadyBeenSavedException(
-          String.format("Enquiry message already written for session %s", sessionId));
     }
 
     return session.get();
@@ -230,31 +226,19 @@ public class CreateEnquiryMessageFacade {
   }
 
   private void initializeFeedbackChat(Session session, String rcGroupId,
-      List<ConsultantAgency> agencyList, ConsultingTypeSettings consultingTypeSettings)
+      List<ConsultantAgency> agencyList)
       throws InitializeFeedbackChatException {
 
-    if (!consultingTypeSettings.isFeedbackChat()) {
-      return;
-    }
-
     String rcFeedbackGroupId = null;
-    Optional<GroupResponseDTO> rcFeedbackGroupDTO = Optional.empty();
     CreateEnquiryExceptionInformation exceptionWithoutFeedbackId =
         CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
 
     try {
-      rcFeedbackGroupDTO = rocketChatService
-          .createPrivateGroupWithSystemUser(rocketChatHelper.generateFeedbackGroupName(session));
 
-      if (!rcFeedbackGroupDTO.isPresent() || rcFeedbackGroupDTO.get().getGroup().getId() == null) {
-        throw new InitializeFeedbackChatException(
-            String.format("Could not create feedback chat group for session %s", session.getId()),
-            exceptionWithoutFeedbackId);
-      }
-      rcFeedbackGroupId = rcFeedbackGroupDTO.get().getGroup().getId();
+      rcFeedbackGroupId = createFeedbackGroupAsSystemUserAndGetGroupId(session, exceptionWithoutFeedbackId);
 
       // Add RocketChat user for system message to group
-      rocketChatService.addUserToGroup(ROCKET_CHAT_SYSTEM_USER_ID, rcFeedbackGroupId);
+      rocketChatService.addUserToGroup(rocketChatSystemUserId, rcFeedbackGroupId);
 
       // Add all consultants of the session's agency to the feedback group that have the right
       // to view all feedback sessions
@@ -273,40 +257,60 @@ public class CreateEnquiryMessageFacade {
       // Update the session's feedback group id
       sessionService.updateFeedbackGroupId(Optional.of(session), rcFeedbackGroupId);
 
-    } catch (RocketChatCreateGroupException rocketChatCreateGroupException) {
-      throw new InitializeFeedbackChatException(
-          String.format("Could not create feedback chat group for session %s", session.getId()),
-          exceptionWithoutFeedbackId);
-
-    } catch (RocketChatAddUserToGroupException | RocketChatRemoveSystemMessagesException
+    } catch (RocketChatCreateGroupException | RocketChatAddUserToGroupException | RocketChatRemoveSystemMessagesException
         | UpdateFeedbackGroupIdException | RocketChatUserNotInitializedException exception) {
       CreateEnquiryExceptionInformation exceptionWithFeedbackId =
           CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId)
               .rcFeedbackGroupId(rcFeedbackGroupId).build();
       throw new InitializeFeedbackChatException(
-          String.format("Could not create feedback chat group for session %s", session.getId()),
+          session.getId(),
           exceptionWithFeedbackId);
     }
   }
 
-  private void addConsultantsAndTechUserToGroup(String rcGroupId,
-      RocketChatCredentials rocketChatCredentials, List<ConsultantAgency> agencyList)
-      throws RocketChatAddConsultantsAndTechUserException {
+  private String createFeedbackGroupAsSystemUserAndGetGroupId(Session session,
+      CreateEnquiryExceptionInformation createEnquiryExceptionInformation)
+      throws RocketChatCreateGroupException, InitializeFeedbackChatException {
+
+    Optional<GroupResponseDTO> rcFeedbackGroupDTO = rocketChatService
+        .createPrivateGroupWithSystemUser(rocketChatHelper.generateFeedbackGroupName(session));
+
+    if (!rcFeedbackGroupDTO.isPresent() || Objects
+        .isNull(rcFeedbackGroupDTO.get().getGroup().getId())) {
+      throw new InitializeFeedbackChatException(
+          session.getId(),
+          createEnquiryExceptionInformation);
+    }
+    return rcFeedbackGroupDTO.get().getGroup().getId();
+  }
+
+  private void addSystemUserToGroup(String rcGroupId)
+      throws RocketChatAddSystemUserException {
 
     try {
-      // Add RocketChat user for system message to group
-      rocketChatService.addUserToGroup(ROCKET_CHAT_SYSTEM_USER_ID, rcGroupId);
-
-      if (agencyList != null) {
-        for (ConsultantAgency agency : agencyList) {
-          rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(), rcGroupId);
-        }
-      }
-
+      rocketChatService.addUserToGroup(rocketChatSystemUserId, rcGroupId);
     } catch (RocketChatAddUserToGroupException rocketChatAddUserToGroupException) {
-      throw new RocketChatAddConsultantsAndTechUserException(
+      throw new RocketChatAddSystemUserException(
           String.format(
-              "Add consultants and tech user error: Could not add user with ID %s to group %s",
+              "Add system user error: Could not add user with ID %s to Rocket.Chat group %s",
+              rocketChatSystemUserId, rcGroupId),
+          rocketChatAddUserToGroupException,
+          CreateEnquiryExceptionInformation.builder().rcGroupId(rcGroupId).build());
+    }
+  }
+
+  private void addConsultantsToGroup(String rcGroupId,
+      RocketChatCredentials rocketChatCredentials, List<ConsultantAgency> agencyList)
+      throws RocketChatAddConsultantsException {
+
+    try {
+      for (ConsultantAgency agency : agencyList) {
+        rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(), rcGroupId);
+      }
+    } catch (RocketChatAddUserToGroupException rocketChatAddUserToGroupException) {
+      throw new RocketChatAddConsultantsException(
+          String.format(
+              "Add consultants error: Could not add user with ID %s to group %s",
               rocketChatCredentials.getRocketChatUserId(), rcGroupId),
           rocketChatAddUserToGroupException,
           CreateEnquiryExceptionInformation.builder().rcGroupId(rcGroupId).build());
@@ -316,37 +320,32 @@ public class CreateEnquiryMessageFacade {
   private void doRollback(CreateEnquiryExceptionInformation createEnquiryExceptionInformation,
       RocketChatCredentials rocketChatCredentials) {
 
-    if (createEnquiryExceptionInformation == null) {
+    if (Objects.isNull(createEnquiryExceptionInformation)) {
       return;
     }
 
-    if (createEnquiryExceptionInformation.getRcGroupId() != null) {
-      rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
-    }
-    if (createEnquiryExceptionInformation.getSession() != null) {
-      monitoringService
-          .rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
-      if (createEnquiryExceptionInformation.getRcFeedbackGroupId() != null) {
-        rollbackCreateGroup(createEnquiryExceptionInformation.getRcFeedbackGroupId(),
-            rocketChatCredentials);
-        rollbackSession(createEnquiryExceptionInformation.getSession());
-      }
-    }
+    rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
+    rollbackCreateGroup(createEnquiryExceptionInformation.getRcFeedbackGroupId(),
+        rocketChatCredentials);
+    monitoringService.rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
+    rollbackSession(createEnquiryExceptionInformation.getSession());
+
   }
 
-  private void rollbackCreateGroup(String rcGroupId, RocketChatCredentials rocketChatCredentials) {
-    if (rcGroupId != null) {
-      if (!rocketChatService.rollbackGroup(rcGroupId, rocketChatCredentials)) {
-        LogService.logInternalServerError(String.format(
-            "Error during rollback while saving enquiry message. Group with id %s could not be deleted.",
-            rcGroupId));
-      }
+  private void rollbackCreateGroup(String rcGroupId,
+      RocketChatCredentials rocketChatCredentials) {
+    if (Objects.isNull(rcGroupId) || Objects.isNull(rocketChatCredentials)) {
+      return;
+    }
+    if (!rocketChatService.rollbackGroup(rcGroupId, rocketChatCredentials)) {
+      LogService.logInternalServerError(String.format(
+          "Error during rollback while saving enquiry message. Group with id %s could not be deleted.",
+          rcGroupId));
     }
   }
 
   private void rollbackSession(Session session) {
-    if (session != null) {
-
+    if (!Objects.isNull(session)) {
       try {
         session.setEnquiryMessageDate(null);
         session.setStatus(SessionStatus.INITIAL);
@@ -355,7 +354,7 @@ public class CreateEnquiryMessageFacade {
         sessionService.saveSession(session);
       } catch (InternalServerErrorException ex) {
         LogService.logInternalServerError(String.format(
-            "Error during rollback while saving session. Session data could not be set to state before createEnquiryMessageFacade.",
+            "Error during rollback while saving session with id %s. Session data could not be set to state before createEnquiryMessageFacade.",
             session.getId()), ex);
       }
     }

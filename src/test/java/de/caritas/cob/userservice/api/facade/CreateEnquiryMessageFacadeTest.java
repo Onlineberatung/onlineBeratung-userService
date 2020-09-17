@@ -56,6 +56,7 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -116,7 +117,7 @@ public class CreateEnquiryMessageFacadeTest {
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID);
   private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Arrays.asList(CONSULTANT_AGENCY);
-  private final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "ROCKET_CHAT_SYSTEM_USER_ID";
+  private final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "rocketChatSystemUserId";
   private final String ROCKET_CHAT_SYSTEM_USER_ID = "xN3Msb3ksnfxda7gEk";
   private final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   private final SessionDataInitializing SESSION_DATA_INITIALIZING =
@@ -415,7 +416,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(GROUP_RESPONSE_DTO));
     doThrow(ENQUIRY_MESSAGE_EXCEPTION).when(sessionService)
         .saveEnquiryMessageDateAndRocketChatGroupId(SESSION_WITHOUT_CONSULTANT, RC_GROUP_ID);
-    when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(null);
+    when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(new ArrayList<ConsultantAgency>());
     when(rocketChatHelper.generateGroupName(Mockito.any(Session.class)))
         .thenReturn(SESSION_WITHOUT_ENQUIRY_MESSAGE.getId().toString());
 
