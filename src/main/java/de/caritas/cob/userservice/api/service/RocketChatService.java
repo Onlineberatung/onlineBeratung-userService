@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -135,13 +137,13 @@ public class RocketChatService {
       response =
           restTemplate.postForObject(rocketChatApiGroupCreateUrl, request, GroupResponseDTO.class);
 
-    } catch (Exception ex) {
+    } catch (RestClientResponseException ex) {
       LogService.logRocketChatError(
           String.format("Rocket.Chat group with name %s could not be created", name), ex);
       throw new RocketChatCreateGroupException(ex);
     }
 
-    if (response != null && response.isSuccess() && isGroupIdAvailable(response)) {
+    if (isCreateGroupResponseSuccess(response)) {
       return Optional.of(response);
     } else {
       LogService.logRocketChatError(
@@ -150,6 +152,10 @@ public class RocketChatService {
       return Optional.empty();
     }
 
+  }
+
+  private boolean isCreateGroupResponseSuccess(GroupResponseDTO response) {
+    return !Objects.isNull(response) && response.isSuccess() && isGroupIdAvailable(response);
   }
 
   /**
@@ -219,7 +225,7 @@ public class RocketChatService {
    * @return true, if group id is available
    */
   private boolean isGroupIdAvailable(GroupResponseDTO response) {
-    return response.getGroup() != null && response.getGroup().getId() != null;
+    return !Objects.isNull(response.getGroup()) && Objects.isNull(response.getGroup().getId());
   }
 
 
@@ -328,12 +334,12 @@ public class RocketChatService {
     try {
       HttpHeaders headers = getStandardHttpHeaders(rocketChatCredentials);
 
-      HttpEntity<Void> request = new HttpEntity<Void>(headers);
+      HttpEntity<Void> request = new HttpEntity<>(headers);
 
       ResponseEntity<LogoutResponseDTO> response =
           restTemplate.postForEntity(rocketChatApiUserLogout, request, LogoutResponseDTO.class);
 
-      return response != null && response.getStatusCode() == HttpStatus.OK ? true : false;
+      return response.getStatusCode() == HttpStatus.OK;
 
     } catch (Exception ex) {
       LogService.logRocketChatError(String.format("Could not log out user id (%s) from Rocket.Chat",
@@ -494,7 +500,7 @@ public class RocketChatService {
     try {
       RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
       HttpHeaders header = getStandardHttpHeaders(systemUser);
-      HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<GroupAddUserBodyDTO>(header);
+      HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
 
       response = restTemplate.exchange(rocketChatApiGetGroupMembersUrl + "?roomId=" + rcGroupId,
           HttpMethod.GET, request, GroupMemberResponseDTO.class);
@@ -504,7 +510,7 @@ public class RocketChatService {
           + " members for room id %s", rcGroupId), ex);
     }
 
-    if (response != null && response.getStatusCode() == HttpStatus.OK) {
+    if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
       return Arrays.asList(response.getBody().getMembers());
     } else {
       String error = "Could not get Rocket.Chat group members for room id %s";
@@ -602,7 +608,7 @@ public class RocketChatService {
               rocketChatCredentials.getRocketChatUserId()));
     }
 
-    if (response.getStatusCode() == HttpStatus.OK) {
+    if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat subscriptions for user id %s";
@@ -635,7 +641,7 @@ public class RocketChatService {
               rocketChatCredentials.getRocketChatUserId()));
     }
 
-    if (response.getStatusCode() == HttpStatus.OK) {
+    if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat rooms for user id %s";
