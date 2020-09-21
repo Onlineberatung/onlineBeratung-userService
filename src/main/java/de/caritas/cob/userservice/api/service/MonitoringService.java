@@ -46,7 +46,7 @@ public class MonitoringService {
   public void createMonitoring(Session session, ConsultingTypeSettings consultingTypeSettings)
       throws CreateMonitoringException {
 
-    if (session != null && consultingTypeSettings.isMonitoring()) {
+    if (!Objects.isNull(session) && consultingTypeSettings.isMonitoring()) {
       try {
         updateMonitoring(session.getId(),
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
