@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
@@ -160,31 +158,6 @@ public class SessionService {
           String.format("Could not update feedback group id %s for session %s", feedbackGroupId,
               session.get().getId()), serviceException);
     }
-  }
-
-  /**
-   * Saving the enquiry message and Rocket.Chat group id for a session. The Message will be set to
-   * now and the status to {@link SessionStatus#NEW}.
-   *
-   * @param session the {@link Session}
-   * @param rcGroupId the rocket chat group id
-   * @return the {@link Session}
-   */
-  public Session saveEnquiryMessageDateAndRocketChatGroupId(Session session, String rcGroupId)
-      throws EnquiryMessageException {
-
-    session.setGroupId(rcGroupId);
-    session.setEnquiryMessageDate(now.getDate());
-    session.setStatus(SessionStatus.NEW);
-    try {
-      saveSession(session);
-    } catch (InternalServerErrorException serviceException) {
-      CreateEnquiryExceptionInformation exceptionInformation =
-          CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
-      throw new EnquiryMessageException(serviceException, exceptionInformation);
-    }
-
-    return session;
   }
 
   /**

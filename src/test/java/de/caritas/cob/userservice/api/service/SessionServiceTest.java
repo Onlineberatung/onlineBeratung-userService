@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -316,58 +315,9 @@ public class SessionServiceTest {
         everyItem(instanceOf(UserSessionResponseDTO.class)));
   }
 
-  @Test
-  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_ThrowEnquiryMessageException_WhenSaveSessionFails()
-      throws Exception {
-
-    @SuppressWarnings("serial")
-    InternalServerErrorException ex = new InternalServerErrorException("service error") {};
-    when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
-
-    try {
-      sessionService.saveEnquiryMessageDateAndRocketChatGroupId(SESSION, RC_GROUP_ID);
-      fail("Expected exception: EnquiryMessageException");
-    } catch (EnquiryMessageException enquiryMessageException) {
-      assertTrue("Excepted EnquiryMessageException thrown", true);
-    }
-  }
-
-  @Test
-  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetSessionStatusToNew()
-      throws EnquiryMessageException {
-
-    Session session = Mockito.mock(Session.class);
-    sessionService.saveEnquiryMessageDateAndRocketChatGroupId(session, RC_GROUP_ID);
-    verify(session, times(1)).setStatus(SessionStatus.NEW);
-
-  }
-
-  @Test
-  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetGroupId()
-      throws EnquiryMessageException {
-
-    Session session = Mockito.mock(Session.class);
-    sessionService.saveEnquiryMessageDateAndRocketChatGroupId(session, RC_GROUP_ID);
-    verify(session, times(1)).setGroupId(RC_GROUP_ID);
-
-  }
-
-  @Test
-  public void saveEnquiryMessageDateAndRocketChatGroupId_Should_SetMessageDateToNow()
-      throws EnquiryMessageException {
-
-    Session session = Mockito.mock(Session.class);
-    Date dateNow = new Date();
-    when(now.getDate()).thenReturn(dateNow);
-    sessionService.saveEnquiryMessageDateAndRocketChatGroupId(session, RC_GROUP_ID);
-    verify(now, times(1)).getDate();
-    verify(session, times(1)).setEnquiryMessageDate(dateNow);
-
-  }
-
   /**
    * method: getSessionsForUser
-   * 
+   *
    */
 
   @Test
@@ -403,7 +353,7 @@ public class SessionServiceTest {
 
   /**
    * method: getSessionsForUserByConsultingType
-   * 
+   *
    */
 
   @Test
@@ -440,7 +390,7 @@ public class SessionServiceTest {
 
   /**
    * method: getSessionsForConsultant
-   * 
+   *
    */
 
   @Test
@@ -501,9 +451,9 @@ public class SessionServiceTest {
   }
 
   /**
-   * 
+   *
    * Method: getSessionByGroupIdAndUserId Role: user
-   * 
+   *
    */
 
   @Test
@@ -559,9 +509,9 @@ public class SessionServiceTest {
   }
 
   /**
-   * 
+   *
    * Method: getSessionByGroupIdAndUserId Role: consultant
-   * 
+   *
    */
 
   @Test
@@ -619,7 +569,7 @@ public class SessionServiceTest {
 
   /**
    * method: getTeamSessionsForConsultant
-   * 
+   *
    */
 
   @Test

@@ -43,7 +43,7 @@ public class MonitoringService {
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
    * @throws CreateMonitoringException
    */
-  public void createMonitoring(Session session, ConsultingTypeSettings consultingTypeSettings)
+  public void createMonitoringIfConfigured(Session session, ConsultingTypeSettings consultingTypeSettings)
       throws CreateMonitoringException {
 
     if (!Objects.isNull(session) && consultingTypeSettings.isMonitoring()) {

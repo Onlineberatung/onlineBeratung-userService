@@ -21,7 +21,7 @@ import de.caritas.cob.userservice.api.model.messageService.MessageDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 
 /**
- * 
+ *
  * Helper class to communicate with the MessageService
  *
  */
@@ -49,7 +49,7 @@ public class MessageServiceHelper {
   /**
    * Calls the MesageService API call for posting a message to a Rocket.Chat group. Throws
    * {@link RocketChatPostMessageException} when the call fails.
-   * 
+   *
    * @param message Message
    * @param rcUserId Rocket.Chat user ID
    * @param rocketChatCredentials {@link RocketChatCredentials}
@@ -58,7 +58,7 @@ public class MessageServiceHelper {
   /**
    * Calls the MesageService API call for posting a message to a Rocket.Chat group. Throws
    * {@link RocketChatPostMessageException} when the call fails.
-   * 
+   *
    * @param message Message
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @param rcGroupId Rocket.Chat group ID
@@ -97,13 +97,13 @@ public class MessageServiceHelper {
 
   /**
    * Posts a welcome message as system user to the given Rocket.Chat group
-   * 
+   *
    * @param rcGroupId Rocket.Chat group ID
    * @param user {@link User} who receives the message
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
    * @throws RocketChatPostWelcomeMessageException
    */
-  public void postWelcomeMessage(String rcGroupId, User user,
+  public void postWelcomeMessageIfConfigured(String rcGroupId, User user,
       ConsultingTypeSettings consultingTypeSettings,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostWelcomeMessageException {
@@ -126,7 +126,7 @@ public class MessageServiceHelper {
 
   /**
    * Posts a message as system user to the given Rocket.Chat group.
-   * 
+   *
    * @param message Message
    * @param rcGroupId Rocket.Chat group ID
    * @throws RocketChatPostMessageException

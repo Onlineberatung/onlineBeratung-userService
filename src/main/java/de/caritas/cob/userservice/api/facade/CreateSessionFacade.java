@@ -119,7 +119,7 @@ public class CreateSessionFacade {
         newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
         isTeamAgency, consultingTypeSettings.isMonitoring()));
 
-    monitoringService.createMonitoring(session, consultingTypeSettings);
+    monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
 
     return session;
   }

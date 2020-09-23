@@ -61,7 +61,7 @@ public class UserHelper {
 
   /**
    * Generates a random password which complies with the Keycloak policy
-   * 
+   *
    * @return
    */
   public String getRandomPassword() {
@@ -91,7 +91,7 @@ public class UserHelper {
 
   /**
    * Generates the dummy email for a Keycloak user
-   * 
+   *
    * @param userId
    * @return
    */
@@ -101,7 +101,7 @@ public class UserHelper {
 
   /**
    * Checks if the given username is between minimum and maximum char length
-   * 
+   *
    * @param username
    * @return
    */
@@ -113,7 +113,7 @@ public class UserHelper {
   /**
    * Returns the Base32 encoded username. The padding char "=" of the Base32 String will be replaced
    * by a dot "." to support Rocket.Chat special chars.
-   * 
+   *
    * @param username
    * @return encoded username
    */
@@ -125,7 +125,7 @@ public class UserHelper {
   /**
    * Returns the Base32 decoded username. Placeholder dot "." (to support Rocket.Chat special chars)
    * will be replaced by the Base32 padding symbol "=".
-   * 
+   *
    * @param username
    * @return
    */
@@ -142,7 +142,7 @@ public class UserHelper {
 
   /**
    * Encodes the given username if it isn't already encoded
-   * 
+   *
    * @param username
    * @return encoded username
    */
@@ -152,7 +152,7 @@ public class UserHelper {
 
   /**
    * Descodes the given username if it isn't already decoded
-   * 
+   *
    * @param username
    * @return
    */
@@ -163,7 +163,7 @@ public class UserHelper {
   /**
    * Returns true if the decoded username does not exist in Keycloak yet or false if it already
    * exists.
-   * 
+   *
    * @param username (decoded or encoded)
    * @return true if does not exist, else false
    */
@@ -181,7 +181,7 @@ public class UserHelper {
 
   /**
    * Returns true if the given usernames match.
-   * 
+   *
    * @param firstUsername encoded or decoded first username to compare
    * @param secondUsername encoded or decoded second username to compare
    * @return
@@ -193,7 +193,7 @@ public class UserHelper {
 
   /**
    * Base32 encodes a given String
-   * 
+   *
    * @param value String to be encoded
    * @return encoded String
    */
@@ -210,7 +210,7 @@ public class UserHelper {
 
   /**
    * Generates the URL for a chat with the given {@link Chat} id and {@link ConsultingType}
-   * 
+   *
    * @param chatId the {@link Chat}'s id
    * @param consultingType the chat's {@link ConsultingType}
    * @return URL (String)
@@ -223,7 +223,7 @@ public class UserHelper {
 
   /**
    * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
-   * 
+   *
    * @param user {@link User}
    * @param rcUserId Rocket.Chat user ID
    */

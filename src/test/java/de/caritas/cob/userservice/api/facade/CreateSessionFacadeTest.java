@@ -143,7 +143,7 @@ public class CreateSessionFacadeTest {
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
-    doThrow(CREATE_MONITORING_EXCEPTION).when(monitoringService).createMonitoring(Mockito.any(),
+    doThrow(CREATE_MONITORING_EXCEPTION).when(monitoringService).createMonitoringIfConfigured(Mockito.any(),
         Mockito.any());
 
     createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
@@ -221,7 +221,7 @@ public class CreateSessionFacadeTest {
     Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
 
     assertThat(result, is(1L));
-    verify(monitoringService, times(1)).createMonitoring(Mockito.any(), Mockito.any());
+    verify(monitoringService, times(1)).createMonitoringIfConfigured(Mockito.any(), Mockito.any());
   }
 
   @Test
