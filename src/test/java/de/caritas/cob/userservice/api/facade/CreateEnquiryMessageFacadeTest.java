@@ -315,7 +315,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroupAndMonitoringData_When_PostMessageFails()
+  public void createEnquiryMessage_Should_DeleteRcGroupAndMonitoringData_When_PostMessageFails()
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
@@ -342,7 +342,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroup_When_AddConsultantToRocketChatGroupFails()
+  public void createEnquiryMessage_Should_DeleteRcGroup_When_AddConsultantToRocketChatGroupFails()
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
@@ -369,7 +369,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroup_When_PostMessageFails()
+  public void createEnquiryMessage_Should_DeleteRcGroup_When_PostMessageFails()
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
@@ -565,7 +565,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroup_WhenAddSystemUserToGroupFails()
+  public void createEnquiryMessage_Should_DeleteRcGroup_WhenAddSystemUserToGroupFails()
       throws RocketChatCreateGroupException, RocketChatAddUserToGroupException {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
@@ -593,7 +593,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroup_WhenRemoveSystemMessagesFails()
+  public void createEnquiryMessage_Should_DeleteRcGroup_WhenRemoveSystemMessagesFails()
       throws RocketChatCreateGroupException, RocketChatRemoveSystemMessagesException, RocketChatUserNotInitializedException {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
@@ -622,7 +622,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroupAndFeedbackGroup_WhenAddSystemUserToFeedbackGroupFails()
+  public void createEnquiryMessage_Should_DeleteRcGroupAndFeedbackGroup_WhenAddSystemUserToFeedbackGroupFails()
       throws RocketChatCreateGroupException, RocketChatAddUserToGroupException {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
@@ -655,7 +655,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroupAndFeedbackGroup_When_WhenRemoveSystemMessagesFailsForFeedbackGroup()
+  public void createEnquiryMessage_Should_DeleteRcGroupAndFeedbackGroup_When_WhenRemoveSystemMessagesFailsForFeedbackGroup()
       throws Exception {
 
     when(consultingTypeManager
@@ -691,7 +691,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_DeleteRocketChatGroupAndFeedbackGroup_When_AddConsultantToRocketChatFeedbackGroupFails()
+  public void createEnquiryMessage_Should_DeleteRcGroupAndFeedbackGroup_When_AddConsultantToRocketChatFeedbackGroupFails()
       throws RocketChatCreateGroupException, RocketChatAddUserToGroupException {
 
     when(consultingTypeManager
@@ -723,7 +723,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(rocketChatService, times(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
-        .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+        .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
   }
 
   @Test
@@ -756,7 +756,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(rocketChatService, times(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
-        .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+        .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
     verify(monitoringService, times(1)).rollbackInitializeMonitoring(spySession);
   }
 
@@ -796,7 +796,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(rocketChatService, times(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
-        .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+        .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
     verify(monitoringService, times(1)).rollbackInitializeMonitoring(SESSION_WITHOUT_CONSULTANT);
   }
 
@@ -837,7 +837,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(rocketChatService, times(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
-        .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+        .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
     verify(monitoringService, times(1)).rollbackInitializeMonitoring(SESSION_WITHOUT_CONSULTANT);
   }
 
@@ -877,7 +877,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(rocketChatService, times(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
-        .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+        .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
   }
 
   @Test
@@ -908,7 +908,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(rocketChatService, times(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
-        .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+        .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
   }
 
 }

@@ -330,8 +330,7 @@ public class CreateEnquiryMessageFacade {
     }
 
     rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
-    rollbackCreateGroup(createEnquiryExceptionInformation.getRcFeedbackGroupId(),
-        rocketChatCredentials);
+    rollbackCreateGroupAsSystemUser(createEnquiryExceptionInformation.getRcFeedbackGroupId());
     monitoringService
         .rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
 
@@ -344,8 +343,20 @@ public class CreateEnquiryMessageFacade {
     }
     if (!rocketChatService.rollbackGroup(rcGroupId, rocketChatCredentials)) {
       LogService.logInternalServerError(String.format(
-          "Error during rollback while saving enquiry message. Group with id %s could not be deleted.",
+          "Error during rollback of group while saving enquiry message. Group with id %s could not be deleted.",
           rcGroupId));
     }
   }
+
+  private void rollbackCreateGroupAsSystemUser(String rcGroupId) {
+    if (Objects.isNull(rcGroupId)) {
+      return;
+    }
+    if (!rocketChatService.deleteGroupAsSystemUser(rcGroupId)) {
+      LogService.logInternalServerError(String.format(
+          "Error during rollback of feedback group while saving enquiry message. Group with id %s could not be deleted.",
+          rcGroupId));
+    }
+  }
+
 }
