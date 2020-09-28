@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -130,16 +131,20 @@ public class RocketChatService {
           String.format("Rocket.Chat group with name %s could not be created", name));
     }
 
-    return Optional.of(response);
+    return Optional.ofNullable(response);
 
   }
 
   private boolean isCreateGroupResponseSuccess(GroupResponseDTO response) {
-    return !Objects.isNull(response) && response.isSuccess() && isGroupIdAvailable(response);
+    return nonNull(response) && response.isSuccess() && isGroupIdAvailable(response);
   }
 
   /**
-   * Creates a private Rocket.Chat group with the system user (credentials)
+   * Creates a private Rocket.Chat group with the system user (credentials).
+   *
+   * @param groupName the Rocket.Chat group name
+   * @return an {@link Optional} of a {@link GroupResponseDTO}
+   * @throws RocketChatCreateGroupException {@link RocketChatCreateGroupException}
    */
   public Optional<GroupResponseDTO> createPrivateGroupWithSystemUser(String groupName)
       throws RocketChatCreateGroupException {
@@ -153,8 +158,9 @@ public class RocketChatService {
   }
 
   /**
-   * Deletion of a Rocket.Chat group as system user.
+   *  Deletion of a Rocket.Chat group as system user.
    *
+   * @param groupId the Rocket.Chat group id
    * @return true, if successfully
    */
   public boolean deleteGroupAsSystemUser(String groupId) {
@@ -199,23 +205,10 @@ public class RocketChatService {
 
   }
 
-  /**
-   * Returns true if the group id is available in the {@link GroupResponseDTO}
-   *
-   * @return true, if group id is available
-   */
   private boolean isGroupIdAvailable(GroupResponseDTO response) {
-    return !Objects.isNull(response.getGroup()) && !Objects.isNull(response.getGroup().getId());
+    return nonNull(response.getGroup()) && nonNull(response.getGroup().getId());
   }
 
-
-  /**
-   * Returns a HttpHeaders instance with standard settings (Rocket.Chat-Token, Rocket.Chat-User-ID,
-   * MediaType)
-   *
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @return a HttpHeaders instance with the standard settings
-   */
   private HttpHeaders getStandardHttpHeaders(RocketChatCredentials rocketChatCredentials) {
 
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -330,7 +323,7 @@ public class RocketChatService {
   }
 
   /**
-   * Adds the provided user to the Rocket.Chat group with given groupId
+   * Adds the provided user to the Rocket.Chat group with given groupId.
    *
    * @param rcUserId  Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
@@ -353,7 +346,7 @@ public class RocketChatService {
           "Could not add user %s to Rocket.Chat group with id %s", rcUserId, rcGroupId));
     }
 
-    if (response != null && !response.isSuccess()) {
+    if (nonNull(response) && !response.isSuccess()) {
       String error = "Could not add user %s to Rocket.Chat group with id %s";
       throw new RocketChatAddUserToGroupException(String.format(error, rcUserId, rcGroupId));
     }
@@ -523,15 +516,6 @@ public class RocketChatService {
     removeMessages(rcGroupId, null, localDateTime1900, localDateTimeFuture);
   }
 
-  /**
-   * Removes all messages from the specified Rocket.Chat group written by the given user name array
-   * which have been written between oldest and latest ({@link LocalDateTime}.
-   *
-   * @param rcGroupId Rocket.Chat group id
-   * @param users     Array of usernames (String); null for all users
-   * @param oldest    {@link LocalDateTime}
-   * @param latest    {@link LocalDateTime}
-   */
   private void removeMessages(String rcGroupId, String[] users, LocalDateTime oldest,
       LocalDateTime latest) throws RocketChatRemoveSystemMessagesException {
 
@@ -553,7 +537,7 @@ public class RocketChatService {
           String.format("Could not clean history of Rocket.Chat group id %s", rcGroupId));
     }
 
-    if (response != null && !response.isSuccess()) {
+    if (nonNull(response) && !response.isSuccess()) {
       throw new RocketChatRemoveSystemMessagesException(
           String.format("Could not clean history of Rocket.Chat group id %s", rcGroupId));
     }
@@ -588,7 +572,7 @@ public class RocketChatService {
               rocketChatCredentials.getRocketChatUserId()));
     }
 
-    if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
+    if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat subscriptions for user id %s";
@@ -621,7 +605,7 @@ public class RocketChatService {
               rocketChatCredentials.getRocketChatUserId()));
     }
 
-    if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
+    if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat rooms for user id %s";
@@ -657,7 +641,7 @@ public class RocketChatService {
 
     if (!isGetUserInfoIsSuccess(response)) {
       throw new InternalServerErrorException(
-          String.format("Could not get Rocket.Chat user info of user id %s.\nStatus: %s.\nerror: %s.\nerror type: %s",
+          String.format("Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
               rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
               response.getBody().getErrorType()),
           LogService::logRocketChatError);
@@ -667,7 +651,7 @@ public class RocketChatService {
   }
 
   private boolean isGetUserInfoIsSuccess(ResponseEntity<UserInfoResponseDTO> response) {
-    return !Objects.isNull(response.getBody()) && response.getStatusCode() == HttpStatus.OK
+    return nonNull(response.getBody()) && response.getStatusCode() == HttpStatus.OK
         && response
         .getBody().isSuccess();
   }
