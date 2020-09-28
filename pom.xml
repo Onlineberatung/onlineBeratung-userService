@@ -135,7 +135,7 @@
 			<artifactId>commons-validator</artifactId>
 			<version>1.6</version>
 		</dependency>
-		
+
 		<!-- Commons Codec -->
 		<dependency>
 		    <groupId>commons-codec</groupId>
@@ -224,8 +224,7 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>4.1.4.RELEASE</version>
 		</dependency>
-
-	</dependencies>
+  </dependencies>
 
 	<build>
 		<finalName>${project.name}</finalName>

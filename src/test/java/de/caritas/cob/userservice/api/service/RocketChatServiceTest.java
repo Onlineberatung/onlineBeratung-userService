@@ -10,7 +10,6 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_RO
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_INFO;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID;
@@ -18,7 +17,6 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_RO
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_USER_ID;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_ADD_USER;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_DELETE;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGIN;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGOUT;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CLEAN_ROOM_HISTORY;
@@ -28,6 +26,7 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_ROOMS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_SUBSCRIPTIONS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_USERS_INFO_GET;
+import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_USER_1;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_USER_2;
@@ -37,6 +36,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO;
+import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -53,13 +53,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserInfoException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
@@ -103,6 +103,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -161,13 +162,9 @@ public class RocketChatServiceTest {
       new GroupDTO(GROUP_ID, GROUP_NAME, null, null, 0, 0, null, null, false, false, null);
   private final GroupResponseDTO GROUP_RESPONSE_DTO =
       new GroupResponseDTO(GROUP_DTO, true, null, null);
-  private HttpHeaders HTTP_HEADERS = new HttpHeaders() {
-    private static final long serialVersionUID = 1L;
-
-    {
-      setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    }
-  };
+  private final LocalDateTime DATETIME_OLDEST = LocalDateTime.now();
+  private final LocalDateTime DATETIME_LATEST = LocalDateTime.now();
+  private final String PASSWORD = "password";
   MultiValueMap<String, String> MULTI_VALUE_MAP_WITH_TECH_USER_CREDENTIALS =
       new LinkedMultiValueMap<String, String>() {
         private static final long serialVersionUID = 1L;
@@ -186,25 +183,27 @@ public class RocketChatServiceTest {
           add("password", RC_SYSTEM_PASSWORD);
         }
       };
+  @Mock
+  Logger logger;
+  @Mock
+  RocketChatCredentialsHelper rcCredentialsHelper;
+  private HttpHeaders HTTP_HEADERS = new HttpHeaders() {
+    private static final long serialVersionUID = 1L;
+
+    {
+      setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    }
+  };
   HttpEntity<MultiValueMap<String, String>> RC_LOGIN_REQUEST_TECH_USER =
       new HttpEntity<MultiValueMap<String, String>>(MULTI_VALUE_MAP_WITH_TECH_USER_CREDENTIALS,
           HTTP_HEADERS);
   HttpEntity<MultiValueMap<String, String>> RC_LOGIN_REQUEST_SYSTEM_USER =
       new HttpEntity<MultiValueMap<String, String>>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS,
           HTTP_HEADERS);
-  private final LocalDateTime DATETIME_OLDEST = LocalDateTime.now();
-  private final LocalDateTime DATETIME_LATEST = LocalDateTime.now();
-  private final String PASSWORD = "password";
-
   @InjectMocks
   private RocketChatService rocketChatService;
   @Mock
   private RestTemplate restTemplate;
-  @Mock
-  Logger logger;
-
-  @Mock
-  RocketChatCredentialsHelper rcCredentialsHelper;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -252,13 +251,8 @@ public class RocketChatServiceTest {
   public void createPrivateGroup_Should_ReturnTheGroupId_WhenRocketChatApiCallWasSuccessfully()
       throws NoSuchFieldException, SecurityException, RocketChatCreateGroupException {
 
-    GroupDTO groupDTO =
-        new GroupDTO(GROUP_ID, GROUP_NAME, "fname", "P", 0, 1, null, null, false, false, null);
-
-    GroupResponseDTO response = new GroupResponseDTO(groupDTO, true, null, null);
-
     when(restTemplate.postForObject(ArgumentMatchers.anyString(), any(),
-        ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(response);
+        ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(GROUP_RESPONSE_DTO);
 
     Optional<GroupResponseDTO> result =
         rocketChatService.createPrivateGroup(GROUP_NAME, RC_CREDENTIALS);
@@ -269,24 +263,7 @@ public class RocketChatServiceTest {
   }
 
   @Test
-  public void createPrivateGroup_Should_ReturnEmtpyOptionalAndLog_WhenRocketChatApiCallWasNotSuccessfully()
-      throws NoSuchFieldException, SecurityException, RocketChatCreateGroupException {
-
-    GroupResponseDTO response = new GroupResponseDTO(null, false, null, null);
-
-    when(restTemplate.postForObject(ArgumentMatchers.anyString(), any(),
-        ArgumentMatchers.<Class<GroupResponseDTO>>any())).thenReturn(response);
-
-    Optional<GroupResponseDTO> result =
-        rocketChatService.createPrivateGroup(GROUP_NAME, RC_CREDENTIALS);
-
-    assertFalse(result.isPresent());
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), any(), any());
-  }
-
-  @Test
-  public void createPrivateGroup_Should_ThrowRocketChatCreateGroupExceptionAndLog_WhenApiCallFailsWithAnException()
+  public void createPrivateGroup_Should_ThrowRocketChatCreateGroupException_WhenApiCallFailsWithAnException()
       throws NoSuchFieldException, SecurityException {
 
     HttpServerErrorException httpServerErrorException =
@@ -301,7 +278,6 @@ public class RocketChatServiceTest {
       assertTrue("Excepted RocketChatCreateGroupException thrown", true);
     }
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -870,40 +846,32 @@ public class RocketChatServiceTest {
   /**
    * Method: getUserInfo
    */
-  @Test
-  public void getUserInfo_Should_ThrowRocketChatGetUserInfoException_WhenAPICallFails()
+  @Test(expected = InternalServerErrorException.class)
+  public void getUserInfo_Should_ThrowInternalServerExceptionException_WhenAPICallFails()
       throws RocketChatUserNotInitializedException {
 
-    Exception exception = new RuntimeException(MESSAGE);
+    Exception exception = new RestClientResponseException(MESSAGE, HttpStatus.BAD_REQUEST.value(),
+        ERROR, null, null, null);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<UserInfoResponseDTO>>any()))
         .thenThrow(exception);
 
-    try {
-      rocketChatService.getUserInfo(RC_USER_ID);
-      fail("Expected exception: RocketChatGetUserInfoException");
-    } catch (RocketChatGetUserInfoException ex) {
-      assertTrue("Excepted RocketChatGetUserInfoException thrown", true);
-    }
+    rocketChatService.getUserInfo(RC_USER_ID);
+
   }
 
-  @Test
-  public void getUserInfo_Should_ThrowRocketChatGetUserInfoException_WhenAPICallIsNotSuccessfull()
+  @Test(expected = InternalServerErrorException.class)
+  public void getUserInfo_Should_ThrowInternalServerErrorException_WhenAPICallIsNotSuccessfull()
       throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate
         .exchange(anyString(), eq(HttpMethod.GET), any(), eq(UserInfoResponseDTO.class)))
-        .thenReturn(new ResponseEntity(HttpStatus.OK));
+        .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO_FAILED, HttpStatus.OK));
 
-    try {
-      rocketChatService.getUserInfo(RC_USER_ID);
-      fail("Expected exception: RocketChatGetUserInfoException");
-    } catch (RocketChatGetUserInfoException ex) {
-      assertTrue("Excepted RocketChatGetUserInfoException thrown", true);
-    }
+    rocketChatService.getUserInfo(RC_USER_ID);
   }
 
   @Test

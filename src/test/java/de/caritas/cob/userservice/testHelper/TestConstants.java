@@ -64,6 +64,7 @@ public class TestConstants {
   public static final String ERROR = "error";
   public static final String NULL = null;
   public static final boolean SUCCESS = true;
+  public static final boolean FAILED = false;
   public static final Exception EXCEPTION = new Exception();
   public static final Long MESSAGE_DATE = 123456L;
 
@@ -343,11 +344,13 @@ public class TestConstants {
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO =
       new RocketChatUserDTO(RC_USER_ID, USERNAME);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO =
-      new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, SUCCESS);
+      new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, SUCCESS, NULL, NULL);
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO_2 =
       new RocketChatUserDTO(RC_USER_ID_2, USERNAME);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_2 =
-      new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO_2, SUCCESS);
+      new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO_2, SUCCESS, NULL, NULL);
+  public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_FAILED =
+      new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, FAILED, ERROR, ERROR);
   public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
       new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE);
 

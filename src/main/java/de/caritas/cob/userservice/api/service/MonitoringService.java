@@ -1,8 +1,11 @@
 package de.caritas.cob.userservice.api.service;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -24,8 +27,8 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 @Service
 public class MonitoringService {
 
-  private MonitoringRepository monitoringRepository;
-  private MonitoringHelper monitoringHelper;
+  private final MonitoringRepository monitoringRepository;
+  private final MonitoringHelper monitoringHelper;
 
   @Autowired
   public MonitoringService(MonitoringRepository monitoringRepository,
@@ -36,16 +39,16 @@ public class MonitoringService {
 
   /**
    * Creates and inserts the initial monitoring data for the given {@link Session} into the database
-   * if monitoring is activated for the given {@link ConsultingTypeSettings}
-   * 
+   * if monitoring is activated for the given {@link ConsultingTypeSettings}.
+   *
    * @param session {@link Session}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
-   * @throws CreateMonitoringException
+   * @throws CreateMonitoringException @link CreateMonitoringException}
    */
-  public void createMonitoring(Session session, ConsultingTypeSettings consultingTypeSettings)
+  public void createMonitoringIfConfigured(Session session, ConsultingTypeSettings consultingTypeSettings)
       throws CreateMonitoringException {
 
-    if (session != null && consultingTypeSettings.isMonitoring()) {
+    if (nonNull(session) && consultingTypeSettings.isMonitoring()) {
       try {
         updateMonitoring(session.getId(),
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
@@ -61,10 +64,10 @@ public class MonitoringService {
   }
 
   /**
-   * Returns the monitoring for the given session
-   * 
-   * @param session
-   * @return
+   * Returns the monitoring for the given session.
+   *
+   * @param session the {@link Session}
+   * @return the {@link MonitoringDTO} for the {@link Session}
    */
   public MonitoringDTO getMonitoring(Session session) {
 
@@ -79,10 +82,10 @@ public class MonitoringService {
   }
 
   /**
-   * Updates the monitoring values of a {@link Session}
-   * 
-   * @param sessionId
-   * @param monitoringDTO
+   * Updates the monitoring values of a {@link Session}.
+   *
+   * @param sessionId the session id
+   * @param monitoringDTO the {@link MonitoringDTO} of the {@link Session}
    */
   public void updateMonitoring(Long sessionId, MonitoringDTO monitoringDTO) {
 
@@ -99,11 +102,10 @@ public class MonitoringService {
   }
 
   /**
-   * Deletes the monitoring values of a {@link Session}
-   * 
-   * @param sessionId
-   * @param monitoringDTO
-   * @return
+   * Deletes the monitoring values of a {@link Session}.
+   *
+   * @param sessionId the session id
+   * @param monitoringDTO the {@link MonitoringDTO} of the {@link Session}
    */
   public void deleteMonitoring(Long sessionId, MonitoringDTO monitoringDTO) {
 
@@ -119,22 +121,15 @@ public class MonitoringService {
     }
   }
 
-  /**
-   * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
-   * {@link MonitoringDTO} on level 0 (addictiveDrugs, intervention, etc.)
-   * 
-   * @param monitoringList
-   * @return
-   */
   private LinkedHashMap<String, Object> convertToMonitoringMap(List<Monitoring> monitoringList,
       ConsultingType consultingType) {
 
-    LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
-    if (monitoringList != null) {
+    if (nonNull(monitoringList)) {
       for (MonitoringType type : MonitoringType.values()) {
         if (type.getConsultingType().equals(consultingType)) {
-          map.put(type.getKey() != null ? type.getKey() : null,
+          map.put(type.getKey(),
               convertToMonitoring(type, monitoringList));
         }
       }
@@ -143,22 +138,14 @@ public class MonitoringService {
     return monitoringHelper.sortMonitoringMap(map, consultingType);
   }
 
-  /**
-   * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
-   * {@link MonitoringDTO} on level 1 (monitoring table - {@link Monitoring})
-   * 
-   * @param type
-   * @param monitoringList
-   * @return
-   */
   private LinkedHashMap<String, Object> convertToMonitoring(MonitoringType type,
       List<Monitoring> monitoringList) {
 
-    LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
     for (Monitoring monitoring : monitoringList) {
       if (monitoring.getMonitoringType().getKey().equals(type.getKey())) {
-        map.put(monitoring.getKey(), monitoring.getValue() != null ? (Boolean) monitoring.getValue()
+        map.put(monitoring.getKey(), nonNull(monitoring.getValue()) ? monitoring.getValue()
             : convertToMonitoringOption(type, monitoring.getKey(), monitoringList));
       }
     }
@@ -166,24 +153,15 @@ public class MonitoringService {
     return map;
   }
 
-  /**
-   * Converts a list of {@link Monitoring} and returns a {@link LinkedHashMap} of
-   * {@link MonitoringDTO} on level 2 (monitoring_option table - {@link MonitoringOption}).
-   * 
-   * @param type
-   * @param monitoringKey
-   * @param monitoringList
-   * @return
-   */
   private LinkedHashMap<String, Object> convertToMonitoringOption(MonitoringType type,
       String monitoringKey, List<Monitoring> monitoringList) {
-    LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
     for (Monitoring monitoring : monitoringList) {
       if (monitoring.getMonitoringType().getKey().equals(type.getKey())
           && monitoringKey.equals(monitoring.getKey())) {
         for (MonitoringOption option : monitoring.getMonitoringOptionList()) {
-          map.put(option.getKey(), (Boolean) option.getValue());
+          map.put(option.getKey(), option.getValue());
         }
       }
     }
@@ -193,11 +171,11 @@ public class MonitoringService {
 
   /**
    * Roll back the initialization of the monitoring data for a {@link Session}.
-   * 
+   *
    * @param session {@link Session}
    */
   public void rollbackInitializeMonitoring(Session session) {
-    if (session != null) {
+    if (nonNull(session)) {
       try {
         deleteMonitoring(session.getId(),
             monitoringHelper.getMonitoringInitalList(session.getConsultingType()));

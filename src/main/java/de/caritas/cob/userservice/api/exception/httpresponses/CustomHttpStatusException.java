@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.exception.httpresponses;
 import static java.util.Objects.nonNull;
 
 import java.util.function.Consumer;
+import lombok.Setter;
 
 public abstract class CustomHttpStatusException extends RuntimeException {
 
@@ -10,6 +11,11 @@ public abstract class CustomHttpStatusException extends RuntimeException {
 
   CustomHttpStatusException(String message, Consumer<Exception> loggingMethod) {
     super(message);
+    this.loggingMethod = loggingMethod;
+  }
+
+  CustomHttpStatusException(String message, Exception ex, Consumer<Exception> loggingMethod) {
+    super(message, ex);
     this.loggingMethod = loggingMethod;
   }
 

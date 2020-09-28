@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -10,7 +11,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroup
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserInfoException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -65,50 +67,35 @@ public class RocketChatService {
 
   private static final String ERROR_MESSAGE = "Error during rollback: Rocket.Chat group with id "
       + "%s could not be deleted";
-
-  @Value("${rocket.chat.header.auth.token}")
-  private String rocketChatHeaderAuthToken;
-
-  @Value("${rocket.chat.header.user.id}")
-  private String rocketChatHeaderUserId;
-
-  @Value("${rocket.chat.api.group.create.url}")
-  private String rocketChatApiGroupCreateUrl;
-
-  @Value("${rocket.chat.api.group.delete.url}")
-  private String rocketChatApiGroupDeleteUrl;
-
-  @Value("${rocket.chat.api.group.add.user}")
-  private String rocketChatApiGroupAddUserUrl;
-
-  @Value("${rocket.chat.api.group.remove.user}")
-  private String rocketChatApiGroupRemoveUserUrl;
-
-  @Value("${rocket.chat.api.group.get.member}")
-  private String rocketChatApiGetGroupMembersUrl;
-
-  @Value("${rocket.chat.api.subscriptions.get}")
-  private String rocketChatApiSubscriptionsGet;
-
-  @Value("${rocket.chat.api.rooms.get}")
-  private String rocketChatApiRoomsGet;
-
-  @Value("${rocket.chat.api.user.login}")
-  private String rocketChatApiUserLogin;
-
-  @Value("${rocket.chat.api.user.logout}")
-  private String rocketChatApiUserLogout;
-
-  @Value("${rocket.chat.api.user.info}")
-  private String rocketChatApiUserInfo;
-
-  @Value("${rocket.chat.api.rooms.clean.history}")
-  private String rocketChatApiCleanRoomHistory;
-
-  private String rcDateTimePattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+  private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 01, 01, 00, 00);
   private final LocalDateTime localDateTimeFuture = LocalDateTime.now().plusYears(1L);
-
+  @Value("${rocket.chat.header.auth.token}")
+  private String rocketChatHeaderAuthToken;
+  @Value("${rocket.chat.header.user.id}")
+  private String rocketChatHeaderUserId;
+  @Value("${rocket.chat.api.group.create.url}")
+  private String rocketChatApiGroupCreateUrl;
+  @Value("${rocket.chat.api.group.delete.url}")
+  private String rocketChatApiGroupDeleteUrl;
+  @Value("${rocket.chat.api.group.add.user}")
+  private String rocketChatApiGroupAddUserUrl;
+  @Value("${rocket.chat.api.group.remove.user}")
+  private String rocketChatApiGroupRemoveUserUrl;
+  @Value("${rocket.chat.api.group.get.member}")
+  private String rocketChatApiGetGroupMembersUrl;
+  @Value("${rocket.chat.api.subscriptions.get}")
+  private String rocketChatApiSubscriptionsGet;
+  @Value("${rocket.chat.api.rooms.get}")
+  private String rocketChatApiRoomsGet;
+  @Value("${rocket.chat.api.user.login}")
+  private String rocketChatApiUserLogin;
+  @Value("${rocket.chat.api.user.logout}")
+  private String rocketChatApiUserLogout;
+  @Value("${rocket.chat.api.user.info}")
+  private String rocketChatApiUserInfo;
+  @Value("${rocket.chat.api.rooms.clean.history}")
+  private String rocketChatApiCleanRoomHistory;
   @Autowired
   private RestTemplate restTemplate;
 
@@ -135,25 +122,29 @@ public class RocketChatService {
       response =
           restTemplate.postForObject(rocketChatApiGroupCreateUrl, request, GroupResponseDTO.class);
 
-    } catch (Exception ex) {
-      LogService.logRocketChatError(
-          String.format("Rocket.Chat group with name %s could not be created", name), ex);
+    } catch (RestClientResponseException ex) {
       throw new RocketChatCreateGroupException(ex);
     }
 
-    if (response != null && response.isSuccess() && isGroupIdAvailable(response)) {
-      return Optional.of(response);
-    } else {
-      LogService.logRocketChatError(
-          String.format("Rocket.Chat group with name %s could not be created", name),
-          response.getError(), response.getErrorType());
-      return Optional.empty();
+    if (!isCreateGroupResponseSuccess(response)) {
+      throw new RocketChatCreateGroupException(
+          String.format("Rocket.Chat group with name %s could not be created", name));
     }
+
+    return Optional.ofNullable(response);
 
   }
 
+  private boolean isCreateGroupResponseSuccess(GroupResponseDTO response) {
+    return nonNull(response) && response.isSuccess() && isGroupIdAvailable(response);
+  }
+
   /**
-   * Creates a private Rocket.Chat group with the system user (credentials)
+   * Creates a private Rocket.Chat group with the system user (credentials).
+   *
+   * @param groupName the Rocket.Chat group name
+   * @return an {@link Optional} of a {@link GroupResponseDTO}
+   * @throws RocketChatCreateGroupException {@link RocketChatCreateGroupException}
    */
   public Optional<GroupResponseDTO> createPrivateGroupWithSystemUser(String groupName)
       throws RocketChatCreateGroupException {
@@ -167,8 +158,9 @@ public class RocketChatService {
   }
 
   /**
-   * Deletion of a Rocket.Chat group as system user.
+   *  Deletion of a Rocket.Chat group as system user.
    *
+   * @param groupId the Rocket.Chat group id
    * @return true, if successfully
    */
   public boolean deleteGroupAsSystemUser(String groupId) {
@@ -183,7 +175,7 @@ public class RocketChatService {
   /**
    * Deletion of a Rocket.Chat group.
    *
-   * @param groupId the group id
+   * @param groupId               the group id
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return true, if successfully
    */
@@ -213,23 +205,10 @@ public class RocketChatService {
 
   }
 
-  /**
-   * Returns true if the group id is available in the {@link GroupResponseDTO}
-   *
-   * @return true, if group id is available
-   */
   private boolean isGroupIdAvailable(GroupResponseDTO response) {
-    return response.getGroup() != null && response.getGroup().getId() != null;
+    return nonNull(response.getGroup()) && nonNull(response.getGroup().getId());
   }
 
-
-  /**
-   * Returns a HttpHeaders instance with standard settings (Rocket.Chat-Token, Rocket.Chat-User-ID,
-   * MediaType)
-   *
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @return a HttpHeaders instance with the standard settings
-   */
   private HttpHeaders getStandardHttpHeaders(RocketChatCredentials rocketChatCredentials) {
 
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -242,8 +221,8 @@ public class RocketChatService {
   /**
    * Retrieves the userId for the given credentials.
    *
-   * @param username the username
-   * @param password the password
+   * @param username   the username
+   * @param password   the password
    * @param firstLogin true, if first login in Rocket.Chat. This requires a special API call.
    * @return the userid
    * @throws {@link RocketChatLoginException}
@@ -328,12 +307,12 @@ public class RocketChatService {
     try {
       HttpHeaders headers = getStandardHttpHeaders(rocketChatCredentials);
 
-      HttpEntity<Void> request = new HttpEntity<Void>(headers);
+      HttpEntity<Void> request = new HttpEntity<>(headers);
 
       ResponseEntity<LogoutResponseDTO> response =
           restTemplate.postForEntity(rocketChatApiUserLogout, request, LogoutResponseDTO.class);
 
-      return response != null && response.getStatusCode() == HttpStatus.OK ? true : false;
+      return response.getStatusCode() == HttpStatus.OK;
 
     } catch (Exception ex) {
       LogService.logRocketChatError(String.format("Could not log out user id (%s) from Rocket.Chat",
@@ -344,9 +323,9 @@ public class RocketChatService {
   }
 
   /**
-   * Adds the provided user to the Rocket.Chat group with given groupId
+   * Adds the provided user to the Rocket.Chat group with given groupId.
    *
-   * @param rcUserId Rocket.Chat userId
+   * @param rcUserId  Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
    */
   public void addUserToGroup(String rcUserId, String rcGroupId)
@@ -367,7 +346,7 @@ public class RocketChatService {
           "Could not add user %s to Rocket.Chat group with id %s", rcUserId, rcGroupId));
     }
 
-    if (response != null && !response.isSuccess()) {
+    if (nonNull(response) && !response.isSuccess()) {
       String error = "Could not add user %s to Rocket.Chat group with id %s";
       throw new RocketChatAddUserToGroupException(String.format(error, rcUserId, rcGroupId));
     }
@@ -386,7 +365,7 @@ public class RocketChatService {
   /**
    * Removes the provided user from the Rocket.Chat group with given groupId.
    *
-   * @param rcUserId Rocket.Chat userId
+   * @param rcUserId  Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
    * @throws {@link RocketChatRemoveUserFromGroupException}
    */
@@ -494,7 +473,7 @@ public class RocketChatService {
     try {
       RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
       HttpHeaders header = getStandardHttpHeaders(systemUser);
-      HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<GroupAddUserBodyDTO>(header);
+      HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
 
       response = restTemplate.exchange(rocketChatApiGetGroupMembersUrl + "?roomId=" + rcGroupId,
           HttpMethod.GET, request, GroupMemberResponseDTO.class);
@@ -504,7 +483,7 @@ public class RocketChatService {
           + " members for room id %s", rcGroupId), ex);
     }
 
-    if (response != null && response.getStatusCode() == HttpStatus.OK) {
+    if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
       return Arrays.asList(response.getBody().getMembers());
     } else {
       String error = "Could not get Rocket.Chat group members for room id %s";
@@ -517,8 +496,8 @@ public class RocketChatService {
    * the last 24 hours (avoiding time zone failures).
    *
    * @param rcGroupId the rocket chat group id
-   * @param oldest the oldest message time
-   * @param latest the latest message time
+   * @param oldest    the oldest message time
+   * @param latest    the latest message time
    */
   public void removeSystemMessages(String rcGroupId, LocalDateTime oldest, LocalDateTime latest)
       throws RocketChatRemoveSystemMessagesException, RocketChatUserNotInitializedException {
@@ -537,15 +516,6 @@ public class RocketChatService {
     removeMessages(rcGroupId, null, localDateTime1900, localDateTimeFuture);
   }
 
-  /**
-   * Removes all messages from the specified Rocket.Chat group written by the given user name array
-   * which have been written between oldest and latest ({@link LocalDateTime}.
-   *
-   * @param rcGroupId Rocket.Chat group id
-   * @param users Array of usernames (String); null for all users
-   * @param oldest {@link LocalDateTime}
-   * @param latest {@link LocalDateTime}
-   */
   private void removeMessages(String rcGroupId, String[] users, LocalDateTime oldest,
       LocalDateTime latest) throws RocketChatRemoveSystemMessagesException {
 
@@ -554,8 +524,8 @@ public class RocketChatService {
       RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
       HttpHeaders header = getStandardHttpHeaders(technicalUser);
       GroupCleanHistoryDTO body = new GroupCleanHistoryDTO(rcGroupId,
-          oldest.format(DateTimeFormatter.ofPattern(rcDateTimePattern)),
-          latest.format(DateTimeFormatter.ofPattern(rcDateTimePattern)),
+          oldest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
+          latest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
           (isNotEmpty(users)) ? users : new String[]{});
       HttpEntity<GroupCleanHistoryDTO> request = new HttpEntity<>(body, header);
 
@@ -567,7 +537,7 @@ public class RocketChatService {
           String.format("Could not clean history of Rocket.Chat group id %s", rcGroupId));
     }
 
-    if (response != null && !response.isSuccess()) {
+    if (nonNull(response) && !response.isSuccess()) {
       throw new RocketChatRemoveSystemMessagesException(
           String.format("Could not clean history of Rocket.Chat group id %s", rcGroupId));
     }
@@ -602,7 +572,7 @@ public class RocketChatService {
               rocketChatCredentials.getRocketChatUserId()));
     }
 
-    if (response.getStatusCode() == HttpStatus.OK) {
+    if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat subscriptions for user id %s";
@@ -635,7 +605,7 @@ public class RocketChatService {
               rocketChatCredentials.getRocketChatUserId()));
     }
 
-    if (response.getStatusCode() == HttpStatus.OK) {
+    if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat rooms for user id %s";
@@ -648,10 +618,10 @@ public class RocketChatService {
    * Returns the information of the given Rocket.Chat user.
    *
    * @param rcUserId Rocket.Chat user id
-   * @throws {@link RocketChatGetUserInfoException}
    * @return the dto containing the user infos
+   * @throws {@link InternalServerErrorException}
    */
-  public UserInfoResponseDTO getUserInfo(String rcUserId) throws RocketChatGetUserInfoException {
+  public UserInfoResponseDTO getUserInfo(String rcUserId) {
 
     ResponseEntity<UserInfoResponseDTO> response;
     try {
@@ -662,18 +632,28 @@ public class RocketChatService {
       response = restTemplate.exchange(rocketChatApiUserInfo + "?userId=" + rcUserId,
           HttpMethod.GET, request, UserInfoResponseDTO.class);
 
-    } catch (Exception ex) {
-      throw new RocketChatGetUserInfoException(
-          String.format("Could not get Rocket.Chat user info of user id %s", rcUserId), ex);
+    } catch (RestClientResponseException | RocketChatUserNotInitializedException ex) {
+      throw new InternalServerErrorException(
+          String.format("Could not get Rocket.Chat user info of user id %s", rcUserId), ex,
+          LogService::logRocketChatError);
+
     }
 
-    if (response.getBody() == null || response.getStatusCode() != HttpStatus.OK || !response
-        .getBody().isSuccess()) {
-      throw new RocketChatGetUserInfoException(
-          String.format("Could not get Rocket.Chat user info of user id %s", rcUserId));
+    if (!isGetUserInfoIsSuccess(response)) {
+      throw new InternalServerErrorException(
+          String.format("Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
+              rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
+              response.getBody().getErrorType()),
+          LogService::logRocketChatError);
     }
 
     return response.getBody();
+  }
+
+  private boolean isGetUserInfoIsSuccess(ResponseEntity<UserInfoResponseDTO> response) {
+    return nonNull(response.getBody()) && response.getStatusCode() == HttpStatus.OK
+        && response
+        .getBody().isSuccess();
   }
 
 }
