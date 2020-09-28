@@ -67,9 +67,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
-import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
+import de.caritas.cob.userservice.api.facade.getsessionlist.GetSessionListFacade;
+import de.caritas.cob.userservice.api.facade.getsessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
@@ -95,8 +98,12 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.hibernate.service.spi.ServiceException;
 import org.junit.Before;
 import org.junit.Test;
@@ -245,6 +252,11 @@ public class GetSessionListFacadeTest {
               null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_6, "A", "A", "P",
               null, null, null, null));
+  private final Map<String, Boolean> MESSAGE_READ_MAP_WITHOUT_UNREADS =
+      new HashMap<>({
+
+
+      });
   private final List<SubscriptionsUpdateDTO> SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS =
       Arrays.asList(
           new SubscriptionsUpdateDTO("A", true, false, 4, 0, 0, NOW, RC_GROUP_ID, "A", "A", "P",
@@ -356,6 +368,8 @@ public class GetSessionListFacadeTest {
   private Logger logger;
   @Mock
   private ConsultingTypeManager consultingTypeManager;
+  @Mock
+  private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
 
   @Before
   public void setup() {
@@ -364,7 +378,6 @@ public class GetSessionListFacadeTest {
 
   /**
    * Method: getSessionsForAuthenticatedUser
-   * 
    */
 
   @Test
@@ -395,7 +408,7 @@ public class GetSessionListFacadeTest {
   public void getSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadFalse_WhenThereAreUnreadMessages()
       throws Exception {
 
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(null);
+    when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
     when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
@@ -410,7 +423,7 @@ public class GetSessionListFacadeTest {
       throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
+    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
 
@@ -444,7 +457,7 @@ public class GetSessionListFacadeTest {
   public void getSessionsForAuthenticatedUser_Should_SetCorrectSessionMessageDate()
       throws Exception {
 
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(null);
+    when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
     when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
@@ -464,7 +477,7 @@ public class GetSessionListFacadeTest {
       throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
+    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
@@ -482,7 +495,7 @@ public class GetSessionListFacadeTest {
   public void getSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForSession()
       throws Exception {
 
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(null);
+    when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
     when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT);
@@ -504,7 +517,7 @@ public class GetSessionListFacadeTest {
       throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Arrays.asList(USER_CHAT_RESPONSE_DTO));
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
+    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(rocketChatService.getRoomsOfUser(Mockito.any()))
         .thenReturn(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
@@ -524,14 +537,13 @@ public class GetSessionListFacadeTest {
   public void getSessionsForAuthenticatedUser_Should_ReturnNull_WhenSessionAndChatListAreEmpty()
       throws Exception {
 
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(null);
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
+    when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
+    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
 
     UserSessionListResponseDTO responseList =
         getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertNull(responseList.getSessions());
-
     verify(rocketChatService, times(0)).getSubscriptionsOfUser(Mockito.any());
     verify(rocketChatService, times(0)).getRoomsOfUser(Mockito.any());
 
@@ -553,7 +565,7 @@ public class GetSessionListFacadeTest {
     for (UserSessionResponseDTO userSessionResponseDTO : USER_CHAT_RESPONSE_DTO_LIST) {
       boolean containsChat = false;
       for (UserSessionResponseDTO response : responseList.getSessions()) {
-        if (response.getChat() != null
+        if (!Objects.isNull(response.getChat())
             && response.getChat().equals(userSessionResponseDTO.getChat())) {
           containsChat = true;
         }
@@ -566,7 +578,7 @@ public class GetSessionListFacadeTest {
     for (UserSessionResponseDTO userSessionResponseDTO : USER_SESSION_REPONSE_DTO_LIST) {
       boolean containsSession = false;
       for (UserSessionResponseDTO response : responseList.getSessions()) {
-        if (response.getSession() != null
+        if (!Objects.isNull(response.getSession())
             && response.getSession().equals(userSessionResponseDTO.getSession())) {
           containsSession = true;
         }
@@ -583,7 +595,7 @@ public class GetSessionListFacadeTest {
       throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
+    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
@@ -602,7 +614,7 @@ public class GetSessionListFacadeTest {
       throws RocketChatGetRoomsException {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(null);
+    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(EMPTY_ROOMS_UPDATE_DTO_LIST);
 
     UserSessionListResponseDTO responseList =
@@ -616,7 +628,6 @@ public class GetSessionListFacadeTest {
 
   /**
    * Method: getSessionsForAuthenticatedConsultant
-   * 
    */
 
   @Test
@@ -790,7 +801,6 @@ public class GetSessionListFacadeTest {
 
   /**
    * Method: getTeamSessionsForAuthenticatedConsultant
-   * 
    */
 
   @Test
@@ -915,9 +925,8 @@ public class GetSessionListFacadeTest {
     ConsultantSessionListResponseDTO response =
         getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
-
-    assertTrue(response.getSessions().get(0).getSession().getMessageDate()
-        .equals(Helper.UNIXTIME_0.getTime()));
+    assertEquals(Long.valueOf(Helper.UNIXTIME_0.getTime()),
+        response.getSessions().get(0).getSession().getMessageDate());
 
   }
 
@@ -1149,7 +1158,9 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE);
     when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
+
+    when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any())).thenReturn(
+        RocketChatRoomInformation.builder().roomsUpdateList(ROOMS_UPDATE_DTO_LIST).messagesReadMap(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS).build());
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -1159,7 +1170,7 @@ public class GetSessionListFacadeTest {
         getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
-    assertEquals(response.getSessions().get(0).getSession().getLastMessage(), DECRYPTED_MESSAGE);
+    assertEquals(DECRYPTED_MESSAGE, response.getSessions().get(0).getSession().getLastMessage());
   }
 
   @Test
@@ -1190,7 +1201,6 @@ public class GetSessionListFacadeTest {
 
   /**
    * Method: getSessionsForAuthenticatedConsultant
-   * 
    */
 
   @Test
@@ -1333,8 +1343,7 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1345,14 +1354,13 @@ public class GetSessionListFacadeTest {
         getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
-    assertTrue(response.getSessions().get(0).getSession().getMessageDate()
-        .equals(Helper.UNIXTIME_0.getTime()));
+    assertEquals(Long.valueOf(Helper.UNIXTIME_0.getTime()),
+        response.getSessions().get(0).getSession().getMessageDate());
 
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsGreaterThanTotal()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsGreaterThanTotal() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1367,8 +1375,7 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsSmallerThanTotal()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_WhenCountIsSmallerThanTotal() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1383,8 +1390,7 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectOffset()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectOffset() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1400,8 +1406,7 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnNoSessions_WhenOffsetIsGreaterThanTotal()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnNoSessions_WhenOffsetIsGreaterThanTotal() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1416,8 +1421,7 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsSmallerThanTotal()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsSmallerThanTotal() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1433,8 +1437,7 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsGreaterThanTotal()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_WhenCountIsGreaterThanTotal() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1451,7 +1454,7 @@ public class GetSessionListFacadeTest {
 
   @Test
   public void getSessionsForAuthenticatedConsultant_Should_ReturnFilteredSessionList_WhenFeedbackFilterIsSet()
-      throws Exception {
+      throws RocketChatGetRoomsException, RocketChatGetSubscriptionsException, CustomCryptoException {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1474,8 +1477,7 @@ public class GetSessionListFacadeTest {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectCount_WhenCountIsGreaterThanAmountOfSessions()
-      throws WrongParameterException {
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnCorrectCount_WhenCountIsGreaterThanAmountOfSessions() {
 
     when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
@@ -1620,8 +1622,8 @@ public class GetSessionListFacadeTest {
         getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
-    assertEquals(response.getSessions().get(0).getSession().getLastMessage(), DECRYPTED_MESSAGE);
-    assertEquals(response.getSessions().get(1).getChat().getLastMessage(), DECRYPTED_MESSAGE);
+    assertEquals(DECRYPTED_MESSAGE, response.getSessions().get(0).getSession().getLastMessage());
+    assertEquals(DECRYPTED_MESSAGE, response.getSessions().get(1).getChat().getLastMessage());
   }
 
   @Test

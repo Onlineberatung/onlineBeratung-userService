@@ -130,25 +130,6 @@ public class ChatServiceTest {
 
   }
 
-  @Test
-  public void getChatsForUserId_Should_ReturnNullWhenListOfChatsNull() {
-
-    when(chatRepository.findByUserId(USER_ID)).thenReturn(null);
-    List<UserSessionResponseDTO> resultList = chatService.getChatsForUserId(USER_ID);
-    assertNull(resultList);
-
-  }
-
-  @Test
-  public void getChatsForUserId_Should_ReturnNullWhenListOfChatsIsEmpty() {
-
-    when(chatRepository.findByUserId(USER_ID)).thenReturn(new ArrayList<Chat>());
-    List<UserSessionResponseDTO> resultList = chatService.getChatsForUserId(USER_ID);
-    assertNull(resultList);
-
-  }
-
-
   /**
    * Method getChatsForConsultant
    */

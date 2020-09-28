@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
 import de.caritas.cob.userservice.api.exception.SaveChatException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -73,9 +75,9 @@ public class ChatService {
               consultant.getId()), LogService::logDatabaseError);
     }
 
-    if (chats != null && chats.size() > 0) {
+    if (isNotEmpty(chats)) {
       sessionResponseDTOs =
-          chats.stream().map(chat -> convertChatToConsultantSessionResponseDTO(chat))
+          chats.stream().map(this::convertChatToConsultantSessionResponseDTO)
               .collect(Collectors.toList());
     }
 
@@ -109,7 +111,7 @@ public class ChatService {
 
     List<Consultant> consultantList = consultantService.findConsultantsByAgencyIds(chatAgencies);
 
-    if (consultantList != null && consultantList.size() > 0) {
+    if (isNotEmpty(consultantList)) {
       return consultantList.stream().map(Consultant::getRocketChatId).toArray(String[]::new);
     }
 
@@ -142,7 +144,7 @@ public class ChatService {
       return chatAgencyRepository.save(chatAgency);
     } catch (DataAccessException ex) {
       throw new SaveChatAgencyException(
-          String.format("Creation of chat - user relation failed for: ", chatAgency.toString()),
+          String.format("Creation of chat - user relation failed for: %s", chatAgency.toString()),
           ex);
     }
   }
@@ -155,23 +157,16 @@ public class ChatService {
    */
   public List<UserSessionResponseDTO> getChatsForUserId(String userId) {
 
-    List<UserSessionResponseDTO> sessionResponseDTOs = null;
-    List<Chat> chats = null;
-
     try {
-      chats = chatRepository.findByUserId(userId);
+      List<Chat> chats = chatRepository.findByUserId(userId);
+      return chats.stream().map(this::convertChatToUserSessionResponseDTO)
+          .collect(Collectors.toList());
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException(String
           .format("Database error while retrieving the chats for the user with id %s", userId),
           LogService::logDatabaseError);
     }
 
-    if (chats != null && chats.size() > 0) {
-      sessionResponseDTOs = chats.stream().map(chat -> convertChatToUserSessionResponseDTO(chat))
-          .collect(Collectors.toList());
-    }
-
-    return sessionResponseDTOs;
   }
 
   /**

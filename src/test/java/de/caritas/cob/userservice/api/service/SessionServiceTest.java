@@ -41,8 +41,8 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Now;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -101,10 +101,9 @@ public class SessionServiceTest {
   private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY,
       DESCRIPTION, false, false, ConsultingType.SUCHT);
   private final String ERROR_MSG = "error";
-  private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<String, Object>();
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
       null, null, null, null, null, ConsultingType.SUCHT.getValue() + "");
-
+  private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<String, Object>();
   @InjectMocks
   private SessionService sessionService;
   @Mock
@@ -155,7 +154,8 @@ public class SessionServiceTest {
   public void getSession_Should_ThrowInternalServerErrorException_WhenRepositoryFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("Database error") {};
+    DataAccessException ex = new DataAccessException("Database error") {
+    };
     when(sessionRepository.findById(ENQUIRY_ID)).thenThrow(ex);
     try {
       sessionService.getSession(ENQUIRY_ID);
@@ -182,7 +182,8 @@ public class SessionServiceTest {
   public void updateConsultantAndStatusForSession_Should_ThrowUpdateSessionException_WhenSaveSessionFails() {
 
     @SuppressWarnings("serial")
-    InternalServerErrorException ex = new InternalServerErrorException("service error") {};
+    InternalServerErrorException ex = new InternalServerErrorException("service error") {
+    };
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {
@@ -207,7 +208,8 @@ public class SessionServiceTest {
   public void saveSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("database error") {};
+    DataAccessException ex = new DataAccessException("database error") {
+    };
     when(sessionRepository.save(Mockito.any())).thenThrow(ex);
 
     try {
@@ -223,7 +225,8 @@ public class SessionServiceTest {
   public void deleteSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("database error") {};
+    DataAccessException ex = new DataAccessException("database error") {
+    };
     Mockito.doThrow(ex).when(sessionRepository).delete(Mockito.any(Session.class));
 
     try {
@@ -267,10 +270,12 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnDatabaseError() throws Exception {
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnDatabaseError()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("Database error") {};
+    DataAccessException ex = new DataAccessException("Database error") {
+    };
 
     when(sessionRepository.findByUser_UserId(USER_ID)).thenThrow(ex);
 
@@ -321,7 +326,8 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    InternalServerErrorException ex = new InternalServerErrorException("service error") {};
+    InternalServerErrorException ex = new InternalServerErrorException("service error") {
+    };
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {
@@ -367,7 +373,6 @@ public class SessionServiceTest {
 
   /**
    * method: getSessionsForUser
-   * 
    */
 
   @Test
@@ -390,7 +395,8 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("Database error") {};
+    DataAccessException ex = new DataAccessException("Database error") {
+    };
     when(sessionRepository.findByUser(USER)).thenThrow(ex);
     try {
       sessionService.getSessionsForUser(USER);
@@ -403,7 +409,6 @@ public class SessionServiceTest {
 
   /**
    * method: getSessionsForUserByConsultingType
-   * 
    */
 
   @Test
@@ -428,7 +433,8 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("Database error") {};
+    DataAccessException ex = new DataAccessException("Database error") {
+    };
     when(sessionRepository.findByUserAndConsultingType(USER, ConsultingType.SUCHT)).thenThrow(ex);
     try {
       sessionService.getSessionsForUserByConsultingType(USER, ConsultingType.SUCHT);
@@ -440,7 +446,6 @@ public class SessionServiceTest {
 
   /**
    * method: getSessionsForConsultant
-   * 
    */
 
   @Test
@@ -448,7 +453,8 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("reason") {};
+    DataAccessException ex = new DataAccessException("reason") {
+    };
     Consultant consultant = Mockito.mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
@@ -463,16 +469,11 @@ public class SessionServiceTest {
     }
   }
 
-  @Test
-  public void getSessionsForConsultant_Should_ReturnWrongParameterExceptionAndLogException_WhenStatusParameterIsInvalid()
+  @Test(expected = BadRequestException.class)
+  public void getSessionsForConsultant_Should_ThrowBadRequestException_WhenStatusParameterIsInvalid()
       throws Exception {
 
-    try {
-      sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_INVALID);
-      fail("Expected exception: WrongParameterException");
-    } catch (WrongParameterException wrongParameterException) {
-      assertTrue("Excepted WrongParameterException thrown", true);
-    }
+    sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_INVALID);
   }
 
   @Test
@@ -501,9 +502,7 @@ public class SessionServiceTest {
   }
 
   /**
-   * 
    * Method: getSessionByGroupIdAndUserId Role: user
-   * 
    */
 
   @Test
@@ -511,7 +510,8 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("reason") {};
+    DataAccessException ex = new DataAccessException("reason") {
+    };
 
     when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any())).thenThrow(ex);
 
@@ -559,9 +559,7 @@ public class SessionServiceTest {
   }
 
   /**
-   * 
    * Method: getSessionByGroupIdAndUserId Role: consultant
-   * 
    */
 
   @Test
@@ -569,7 +567,8 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("reason") {};
+    DataAccessException ex = new DataAccessException("reason") {
+    };
 
     when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
         .thenThrow(ex);
@@ -619,7 +618,6 @@ public class SessionServiceTest {
 
   /**
    * method: getTeamSessionsForConsultant
-   * 
    */
 
   @Test
@@ -627,7 +625,8 @@ public class SessionServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR_MSG) {};
+    DataAccessException ex = new DataAccessException(ERROR_MSG) {
+    };
     Consultant consultant = Mockito.mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
@@ -653,7 +652,7 @@ public class SessionServiceTest {
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-                .thenReturn(SESSION_LIST_WITH_CONSULTANT);
+        .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     assertThat(sessionService.getTeamSessionsForConsultant(consultant),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
@@ -669,7 +668,7 @@ public class SessionServiceTest {
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-                .thenReturn(SESSION_LIST_WITH_CONSULTANT);
+        .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     SessionConsultantForConsultantDTO sessionDTO =
         (SessionConsultantForConsultantDTO) sessionService.getTeamSessionsForConsultant(consultant)
@@ -683,7 +682,8 @@ public class SessionServiceTest {
   public void updateFeedbackGroupId_Should_ThrowUpdateFeedbackGroupIdException_WhenSaveSessionFails() {
 
     @SuppressWarnings("serial")
-    InternalServerErrorException ex = new InternalServerErrorException(ERROR_MSG) {};
+    InternalServerErrorException ex = new InternalServerErrorException(ERROR_MSG) {
+    };
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {

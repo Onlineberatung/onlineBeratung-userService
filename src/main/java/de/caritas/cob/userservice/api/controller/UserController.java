@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.GetSessionListFacade;
+import de.caritas.cob.userservice.api.facade.getsessionlist.GetSessionListFacade;
 import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;

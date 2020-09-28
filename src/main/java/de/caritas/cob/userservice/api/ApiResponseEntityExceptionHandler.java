@@ -8,7 +8,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
-import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.net.UnknownHostException;
@@ -51,7 +50,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
   /**
    * Constraint violations
-   * 
+   *
    * @param ex
    * @param request
    * @return
@@ -90,7 +89,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
   /**
    * 401 - Unauthorized
-   * 
+   *
    * @param ex {@link UnauthorizedException}
    * @param request {@link WebRequest}
    * @return {@link HttpStatus#UNAUTHORIZED} without body or detailed information
@@ -105,7 +104,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
   /**
    * 409 - Conflict
-   * 
+   *
    * @param ex
    * @param request
    * @return
@@ -135,7 +134,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
   /**
    * 403 - Forbidden
-   * 
+   *
    * @param ex
    * @param request
    * @return
@@ -150,7 +149,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
   /**
    * 404 - Not Found
-   * 
+   *
    * @param ex
    * @param request
    * @return
@@ -165,7 +164,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
   /**
    * 500 - Internal Server Error
-   * 
+   *
    * @param ex
    * @param request
    * @return

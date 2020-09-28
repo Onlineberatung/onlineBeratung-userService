@@ -124,7 +124,7 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.GetSessionListFacade;
+import de.caritas.cob.userservice.api.facade.getsessionlist.GetSessionListFacade;
 import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
@@ -691,7 +691,7 @@ public class UserControllerIT {
 
   /**
    * Method: getSessionsForAuthenticatedUser (role: user)
-   * 
+   *
    */
 
   @Test
@@ -810,7 +810,7 @@ public class UserControllerIT {
 
   /**
    * Method: getSessionsForAuthenticatedConsultant (role: consultant)
-   * 
+   *
    */
 
   @Test
@@ -961,7 +961,7 @@ public class UserControllerIT {
 
   /**
    * Method: getUserData (role: consultant / user)
-   * 
+   *
    */
 
   @Test
@@ -1050,7 +1050,7 @@ public class UserControllerIT {
 
   /**
    * Method: getTeamSessionsForAuthenticatedConsultant (role: consultant)
-   * 
+   *
    */
 
   @Test
@@ -1182,9 +1182,9 @@ public class UserControllerIT {
   }
 
   /**
-   * 
+   *
    * sendNewMessageNotification()
-   * 
+   *
    */
 
 
@@ -1202,7 +1202,7 @@ public class UserControllerIT {
 
   /**
    * getMonitoring()
-   * 
+   *
    */
 
   @Test
@@ -1266,7 +1266,7 @@ public class UserControllerIT {
 
   /**
    * updateMonitoring()
-   * 
+   *
    */
 
   @Test
@@ -1362,7 +1362,7 @@ public class UserControllerIT {
 
   /**
    * Method: getConsultants (authority: VIEW_AGENCY_CONSULTANTS)
-   * 
+   *
    */
 
   @Test
@@ -1406,7 +1406,7 @@ public class UserControllerIT {
 
   /**
    * Method: assignSession (role: consultant)
-   * 
+   *
    */
 
   @Test
@@ -1518,7 +1518,7 @@ public class UserControllerIT {
 
   /**
    * updatePassword()
-   * 
+   *
    */
 
   @Test
@@ -1617,7 +1617,7 @@ public class UserControllerIT {
 
   /**
    * Method: createChat (role: kreuzbund-consultant)
-   * 
+   *
    */
 
   @Test
@@ -1659,13 +1659,13 @@ public class UserControllerIT {
 
   /**
    * Method: startChat
-   * 
+   *
    */
   @Test
   public void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
     /**
      * Method: stopChat (role: kreuzbund-consultant)
-     * 
+     *
      */
 
     mvc.perform(put(PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS)
@@ -1703,7 +1703,7 @@ public class UserControllerIT {
 
   /**
    * Method: getChat
-   * 
+   *
    */
   @Test
   public void getChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -1728,7 +1728,7 @@ public class UserControllerIT {
 
   /**
    * Method: joinChat
-   * 
+   *
    */
   @Test
   public void joinChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -1799,7 +1799,7 @@ public class UserControllerIT {
 
   /**
    * Method: getChat
-   * 
+   *
    */
   @Test
   public void getChatMembers_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -1827,7 +1827,7 @@ public class UserControllerIT {
 
   /**
    * Method: updateChat
-   * 
+   *
    */
   @Test
   public void updateChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
