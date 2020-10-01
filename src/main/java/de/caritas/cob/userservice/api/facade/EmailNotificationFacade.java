@@ -103,9 +103,9 @@ public class EmailNotificationFacade {
   }
 
   private Predicate<ConsultantAgency> onlyValidConsultantAgency() {
-    return consultantAgency -> nonNull(consultantAgency) &&
-        isNotBlank(consultantAgency.getConsultant().getEmail()) &&
-        !consultantAgency.getConsultant().isAbsent();
+    return consultantAgency -> nonNull(consultantAgency)
+        && isNotBlank(consultantAgency.getConsultant().getEmail())
+        && !consultantAgency.getConsultant().isAbsent();
   }
 
   private Function<ConsultantAgency, MailDTO> toEnquiryMailDTO(Session session, AgencyDTO agency) {
