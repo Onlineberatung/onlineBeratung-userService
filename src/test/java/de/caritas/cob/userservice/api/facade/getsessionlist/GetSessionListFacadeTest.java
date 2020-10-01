@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.facade;
+package de.caritas.cob.userservice.api.facade.getsessionlist;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ATTACHMENT_DTO;
@@ -95,6 +95,8 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
+import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -252,11 +254,6 @@ public class GetSessionListFacadeTest {
               null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_6, "A", "A", "P",
               null, null, null, null));
-  private final Map<String, Boolean> MESSAGE_READ_MAP_WITHOUT_UNREADS =
-      new HashMap<>({
-
-
-      });
   private final List<SubscriptionsUpdateDTO> SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS =
       Arrays.asList(
           new SubscriptionsUpdateDTO("A", true, false, 4, 0, 0, NOW, RC_GROUP_ID, "A", "A", "P",
@@ -370,6 +367,10 @@ public class GetSessionListFacadeTest {
   private ConsultingTypeManager consultingTypeManager;
   @Mock
   private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
+  @Mock
+  private UserSessionListService userSessionListService;
+  @Mock
+  private ConsultantSessionListService consultantSessionListService;
 
   @Before
   public void setup() {
@@ -378,59 +379,11 @@ public class GetSessionListFacadeTest {
 
   /**
    * Method: getSessionsForAuthenticatedUser
-   */
+  */
 
-  @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadTrue_WhenThereAreNoUnreadMessages()
-      throws Exception {
 
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
-        .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
 
-    assertEquals(true, getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS)
-        .getSessions().get(0).getSession().isMessagesRead());
-  }
 
-  @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithChatMessagesReadTrue_WhenThereAreNoUnreadMessages()
-      throws Exception {
-
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
-        .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITHOUT_UNREADS);
-
-    assertEquals(true, getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS)
-        .getSessions().get(0).getChat().isMessagesRead());
-  }
-
-  @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadFalse_WhenThereAreUnreadMessages()
-      throws Exception {
-
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
-        .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
-
-    assertEquals(false,
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS).getSessions()
-            .get(0).getSession().isMessagesRead());
-  }
-
-  @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithChatMessagesReadFalse_WhenThereAreUnreadMessages()
-      throws Exception {
-
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
-    when(rocketChatService.getSubscriptionsOfUser(Mockito.any()))
-        .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_UNREADS);
-
-    assertEquals(false,
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS).getSessions()
-            .get(0).getChat().isMessagesRead());
-  }
 
   @Test
   public void getSessionsForAuthenticatedUser_Should_ReturnCorrectlySortedSessionList()
@@ -440,7 +393,7 @@ public class GetSessionListFacadeTest {
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     for (UserSessionResponseDTO dto : responseList.getSessions()) {
       Long previousDate = (dto.getSession() != null) ? dto.getSession().getMessageDate()
@@ -464,7 +417,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(
         Helper
@@ -472,24 +425,7 @@ public class GetSessionListFacadeTest {
         responseList.getSessions().get(0).getSession().getMessageDate());
   }
 
-  @Test
-  public void getSessionsForAuthenticatedUser_Should_SetCorrectChatMessageDate()
-      throws Exception {
 
-    when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
-    when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
-    when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
-    when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
-        .thenReturn(DECRYPTED_MESSAGE);
-
-    UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
-
-    assertEquals(
-        Helper
-            .getUnixTimestampFromDate(ROOMS_UPDATE_DTO_LIST.get(0).getLastMessage().getTimestamp()),
-        responseList.getSessions().get(0).getChat().getMessageDate());
-  }
 
   @Test
   public void getSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForSession()
@@ -503,7 +439,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(FILE_DTO.getType(),
         responseList.getSessions().get(0).getSession().getAttachment().getFileType());
@@ -524,7 +460,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(FILE_DTO.getType(),
         responseList.getSessions().get(0).getChat().getAttachment().getFileType());
@@ -541,7 +477,7 @@ public class GetSessionListFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertNull(responseList.getSessions());
     verify(rocketChatService, times(0)).getSubscriptionsOfUser(Mockito.any());
@@ -556,7 +492,7 @@ public class GetSessionListFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_REPONSE_DTO_LIST);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertNotNull(responseList.getSessions());
     assertEquals(responseList.getSessions().size(),
@@ -601,7 +537,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(DECRYPTED_MESSAGE);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     for (UserSessionResponseDTO userSessionResponseDTO : responseList.getSessions()) {
       assertTrue(userSessionResponseDTO.getChat().isSubscribed());
@@ -618,7 +554,7 @@ public class GetSessionListFacadeTest {
     when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(EMPTY_ROOMS_UPDATE_DTO_LIST);
 
     UserSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
+        getSessionListFacade.getSessionsDtoForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     for (UserSessionResponseDTO userSessionResponseDTO : responseList.getSessions()) {
       assertFalse(userSessionResponseDTO.getChat().isSubscribed());
@@ -626,9 +562,12 @@ public class GetSessionListFacadeTest {
 
   }
 
-  /**
+  /*
+
+*
    * Method: getSessionsForAuthenticatedConsultant
-   */
+
+
 
   @Test
   public void getSessionsForAuthenticatedConsultant_Should_ReturnValidSessionListWithMessagesReadTrue_WhenThereAreNoUnreadMessages()
@@ -643,9 +582,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(true, response.getSessions().get(0).getSession().isMessagesRead());
     assertNotNull(response.getSessions().get(0).getSession().getAskerRcId());
@@ -666,9 +606,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(false, response.getSessions().get(0).getSession().isMessagesRead());
     assertNotNull(response.getSessions().get(0).getSession().getAskerRcId());
@@ -687,9 +628,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     for (ConsultantSessionResponseDTO dto : response.getSessions()) {
       Long previousDate = dto.getSession().getMessageDate();
@@ -709,9 +651,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(
         Helper
@@ -730,9 +673,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertTrue(response.getSessions().get(0).getSession().getAttachment().isFileReceived());
 
@@ -749,9 +693,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT_2, SESSION_STATUS_NEW,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT_2, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertFalse(response.getSessions().get(1).getSession().getAttachment().isFileReceived());
 
@@ -769,9 +714,10 @@ public class GetSessionListFacadeTest {
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString()))
         .thenReturn(DECRYPTED_MESSAGE);
 
-    ConsultantSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+ConsultantSessionListResponseDTO responseList =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     for (ConsultantSessionResponseDTO consultantSessionResponseDTO : responseList.getSessions()) {
       assertTrue(consultantSessionResponseDTO.getChat().isSubscribed());
@@ -789,9 +735,10 @@ public class GetSessionListFacadeTest {
         .thenReturn(null);
     when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(EMPTY_ROOMS_UPDATE_DTO_LIST);
 
-    ConsultantSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+ConsultantSessionListResponseDTO responseList =
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     for (ConsultantSessionResponseDTO consultantSessionResponseDTO : responseList.getSessions()) {
       assertFalse(consultantSessionResponseDTO.getChat().isSubscribed());
@@ -799,9 +746,10 @@ public class GetSessionListFacadeTest {
 
   }
 
-  /**
+*
    * Method: getTeamSessionsForAuthenticatedConsultant
-   */
+
+
 
   @Test
   public void getTeamSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithMessagesReadTrue_WhenThereAreNoUnreadMessages()
@@ -816,9 +764,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(true, response.getSessions().get(0).getSession().isMessagesRead());
     assertNotNull(response.getSessions().get(0).getSession().getAskerRcId());
@@ -839,9 +788,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(false, response.getSessions().get(0).getSession().isMessagesRead());
     assertNotNull(response.getSessions().get(0).getSession().getAskerRcId());
@@ -862,9 +812,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_USER_ID,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_USER_ID,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     for (ConsultantSessionResponseDTO dto : response.getSessions()) {
       Long previousDate = dto.getSession().getMessageDate();
@@ -885,9 +836,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertTrue(response.getSessions().get(0).getSession().isFeedbackRead());
 
@@ -906,9 +858,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertTrue(response.getSessions().get(0).getSession().isFeedbackRead());
 
@@ -922,9 +875,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
     assertEquals(Long.valueOf(Helper.UNIXTIME_0.getTime()),
         response.getSessions().get(0).getSession().getMessageDate());
 
@@ -941,9 +895,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(
         Helper
@@ -959,9 +914,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getTotal());
   }
@@ -974,9 +930,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() - 1, SessionFilter.ALL);
+
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getTotal());
   }
@@ -989,9 +946,10 @@ public class GetSessionListFacadeTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
-    ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+ConsultantSessionListResponseDTO response =
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
+
 
     assertEquals(OFFSET_0, response.getOffset());
 
@@ -1004,7 +962,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0 + CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 1, COUNT_10,
             SessionFilter.ALL);
 
@@ -1021,7 +979,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_1, SessionFilter.ALL);
 
     assertEquals(COUNT_1, response.getSessions().size());
@@ -1037,7 +995,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 5, SessionFilter.ALL);
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getSessions().size());
@@ -1058,7 +1016,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.FEEDBACK);
 
     assertEquals(1, response.getSessions().size());
@@ -1075,7 +1033,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 5, SessionFilter.ALL);
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getCount());
@@ -1097,7 +1055,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertTrue(response.getSessions().get(0).getSession().isFeedbackRead());
@@ -1120,7 +1078,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
@@ -1143,7 +1101,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
@@ -1167,7 +1125,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(DECRYPTED_MESSAGE, response.getSessions().get(0).getSession().getLastMessage());
@@ -1188,7 +1146,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO responseList =
-        getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+        getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(FILE_DTO.getType(),
@@ -1199,9 +1157,10 @@ public class GetSessionListFacadeTest {
   }
 
 
-  /**
+*
    * Method: getSessionsForAuthenticatedConsultant
-   */
+
+
 
   @Test
   public void getSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithFeedbackReadFalse_WhenThereAreUnreadFeedbackMessages()
@@ -1217,7 +1176,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertFalse(response.getSessions().get(0).getSession().isFeedbackRead());
@@ -1238,7 +1197,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertFalse(response.getSessions().get(0).getSession().isMessagesRead());
@@ -1256,7 +1215,7 @@ public class GetSessionListFacadeTest {
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertFalse(response.getSessions().get(0).getChat().isMessagesRead());
@@ -1276,7 +1235,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertTrue(response.getSessions().get(0).getSession().isFeedbackRead());
@@ -1297,7 +1256,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertTrue(response.getSessions().get(0).getSession().isMessagesRead());
@@ -1315,7 +1274,7 @@ public class GetSessionListFacadeTest {
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertTrue(response.getSessions().get(0).getChat().isMessagesRead());
@@ -1335,7 +1294,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertTrue(response.getSessions().get(0).getSession().isFeedbackRead());
@@ -1351,7 +1310,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(Long.valueOf(Helper.UNIXTIME_0.getTime()),
@@ -1368,7 +1327,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getTotal());
@@ -1383,7 +1342,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response = getSessionListFacade
-        .getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
+        .getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
             OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() - 1, SessionFilter.ALL);
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getTotal());
@@ -1398,7 +1357,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(OFFSET_0, response.getOffset());
@@ -1412,7 +1371,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
 
     ConsultantSessionListResponseDTO response = getSessionListFacade
-        .getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
+        .getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
             OFFSET_0 + CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 1, COUNT_10,
             SessionFilter.ALL);
 
@@ -1429,7 +1388,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_1, SessionFilter.ALL);
 
     assertEquals(COUNT_1, response.getSessions().size());
@@ -1445,7 +1404,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response = getSessionListFacade
-        .getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
+        .getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
             OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 5, SessionFilter.ALL);
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getSessions().size());
@@ -1468,7 +1427,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.FEEDBACK);
 
     assertEquals(1, response.getSessions().size());
@@ -1485,7 +1444,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response = getSessionListFacade
-        .getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
+        .getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS, RC_TOKEN,
             OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 5, SessionFilter.ALL);
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), response.getCount());
@@ -1507,7 +1466,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertTrue(response.getSessions().get(0).getSession().isFeedbackRead());
@@ -1530,7 +1489,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
@@ -1551,7 +1510,7 @@ public class GetSessionListFacadeTest {
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getChat().getLastMessage());
@@ -1574,7 +1533,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getSession().getLastMessage());
@@ -1595,7 +1554,7 @@ public class GetSessionListFacadeTest {
     when(decryptionService.decrypt(Mockito.any(), Mockito.anyString())).thenThrow(exception);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getChat().getLastMessage());
@@ -1619,7 +1578,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(DECRYPTED_MESSAGE, response.getSessions().get(0).getSession().getLastMessage());
@@ -1641,7 +1600,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertFalse(response.getSessions().get(0).getSession().isMonitoring());
@@ -1662,7 +1621,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertTrue(response.getSessions().get(0).getSession().isMonitoring());
@@ -1679,7 +1638,7 @@ public class GetSessionListFacadeTest {
     when(rocketChatService.getRoomsOfUser(Mockito.any())).thenReturn(ROOMS_UPDATE_DTO_LIST);
 
     try {
-      getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+      getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
           SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
       fail("The expected ServiceException was not thrown.");
     } catch (ServiceException ex) {
@@ -1702,7 +1661,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(FILE_DTO.getType(),
@@ -1725,7 +1684,7 @@ public class GetSessionListFacadeTest {
     when(decryptionService.decrypt(Mockito.anyString(), Mockito.anyString())).thenReturn(MESSAGE);
 
     ConsultantSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertEquals(FILE_DTO.getType(),
@@ -1743,7 +1702,7 @@ public class GetSessionListFacadeTest {
     when(chatService.getChatsForConsultant(Mockito.any())).thenReturn(null);
 
     ConsultantSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(responseList.getSessions());
@@ -1768,7 +1727,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO response =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT, SESSION_STATUS_NEW,
             RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNull(response.getSessions().get(0).getChat());
@@ -1794,7 +1753,7 @@ public class GetSessionListFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionListResponseDTO responseList =
-        getSessionListFacade.getSessionsForAuthenticatedConsultant(CONSULTANT,
+        getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(CONSULTANT,
             SESSION_STATUS_IN_PROGRESS, RC_TOKEN, OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     assertNotNull(responseList.getSessions());
@@ -1829,5 +1788,5 @@ public class GetSessionListFacadeTest {
     }
 
   }
-
+*/
 }

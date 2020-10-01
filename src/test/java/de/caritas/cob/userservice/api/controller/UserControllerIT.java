@@ -706,7 +706,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
+    when(getSessionListFacade.getSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -729,7 +729,7 @@ public class UserControllerIT {
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isInternalServerError());
 
-    verify(getSessionListFacade, times(0)).getSessionsForAuthenticatedUser(Mockito.any(),
+    verify(getSessionListFacade, times(0)).getSessionsDtoForAuthenticatedUser(Mockito.any(),
         Mockito.any());
 
   }
@@ -743,7 +743,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
+    when(getSessionListFacade.getSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -761,7 +761,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
+    when(getSessionListFacade.getSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -858,9 +858,9 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
+    /*when(getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(TEAM_CONSULTANT,
         SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
-            .thenReturn(consultantSessionListResponseDTO);
+            .thenReturn(consultantSessionListResponseDTO);*/
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -878,9 +878,9 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
+    /*when(getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(TEAM_CONSULTANT,
         SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
-            .thenReturn(consultantSessionListResponseDTO);
+            .thenReturn(consultantSessionListResponseDTO);*/
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -898,9 +898,9 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
+    /*when(getSessionListFacade.getSessionsDtoForAuthenticatedConsultant(TEAM_CONSULTANT,
         SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
-            .thenReturn(consultantSessionListResponseDTO);
+            .thenReturn(consultantSessionListResponseDTO);*/
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -1099,8 +1099,8 @@ public class UserControllerIT {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-    when(getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
-        OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);
+    /*when(getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
+        OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);*/
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -1120,8 +1120,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
-    when(getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
-        OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);
+    /*when(getSessionListFacade.getTeamSessionsDtoForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
+        OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);*/
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)

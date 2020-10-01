@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade.getsessionlist;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -13,7 +15,6 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,7 +67,7 @@ public class RocketChatRoomInformationProvider {
   }
 
   private boolean isMessagesRead(SubscriptionsUpdateDTO subscription) {
-    return !Objects.isNull(subscription.getUnread()) && subscription.getUnread() == 0;
+    return nonNull(subscription.getUnread()) && subscription.getUnread() == 0;
   }
 
   private List<SubscriptionsUpdateDTO> getSubscriptionsOfUser(
@@ -113,8 +114,7 @@ public class RocketChatRoomInformationProvider {
   }
 
   private boolean isLastMessageAndTimestampForRocketChatRoomAvailable(RoomsUpdateDTO room) {
-    return !Objects.isNull(room.getLastMessage()) && !Objects
-        .isNull(room.getLastMessage().getTimestamp());
+    return nonNull(room.getLastMessage()) && nonNull(room.getLastMessage().getTimestamp());
   }
 
 }
