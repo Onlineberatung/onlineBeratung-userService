@@ -23,11 +23,14 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCOD
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
@@ -107,7 +110,7 @@ public class EmailNotificationFacadeTest {
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID);
   private final Session SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.NEW,
+      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.INITIAL,
           new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(1L, USER, null, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.NEW,
@@ -194,9 +197,7 @@ public class EmailNotificationFacadeTest {
   }
 
   /**
-   * 
    * Method: sendNewEnquiryEmailNotification
-   * 
    */
   @SuppressWarnings("unchecked")
   @Test
@@ -295,9 +296,7 @@ public class EmailNotificationFacadeTest {
   }
 
   /**
-   * 
    * Method: sendNewMessageNotification
-   * 
    */
 
   @SuppressWarnings("unchecked")
@@ -527,9 +526,7 @@ public class EmailNotificationFacadeTest {
   }
 
   /**
-   * 
    * Method: sendNewFeedbackMessageNotification
-   * 
    */
 
   @SuppressWarnings("unchecked")
@@ -546,8 +543,7 @@ public class EmailNotificationFacadeTest {
         .thenReturn(Optional.of(CONSULTANT3));
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
 
-    emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
-        U25_PEER_ROLES_DEFAULT, CONSULTANT_ID);
+    emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID, CONSULTANT_ID);
 
     verify(mailDtoBuilder, times(1)).build(
         Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION),
@@ -584,7 +580,7 @@ public class EmailNotificationFacadeTest {
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
-        U25_PEER_ROLES_DEFAULT, CONSULTANT_ID_2);
+        CONSULTANT_ID_2);
 
     // Verify that mail for assigned consultant is prepared...
     verify(mailDtoBuilder, times(1)).build(
@@ -607,10 +603,8 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewFeedbackMessageNotification_Should_LogErrorAndSendNoMails_WhenCallingConsultantIsNotFound() {
 
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.empty());
-
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
-        U25_PEER_ROLES_DEFAULT, CONSULTANT_ID);
+        CONSULTANT_ID);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
@@ -620,11 +614,10 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewFeedbackMessageNotification_Should_LogErrorAndSendNoMails_WhenSessionIsNotFound() {
 
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
     when(sessionService.getSessionByFeedbackGroupId(RC_FEEDBACK_GROUP_ID)).thenReturn(null);
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
-        U25_PEER_ROLES_DEFAULT, CONSULTANT_ID);
+        CONSULTANT_ID);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
@@ -634,12 +627,11 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewFeedbackMessageNotification_Should_LogErrorAndSendNoMails_WhenNoConsultantIsAssignedToSession() {
 
-    when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
     when(sessionService.getSessionByFeedbackGroupId(RC_FEEDBACK_GROUP_ID))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
-        U25_PEER_ROLES_DEFAULT, CONSULTANT_ID);
+        CONSULTANT_ID);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
@@ -702,6 +694,19 @@ public class EmailNotificationFacadeTest {
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
+  }
+
+  @Test
+  public void sendNewMessageNotification_ShouldNot_LogError_When_SessionStatusIsNew() {
+    Session session = mock(Session.class);
+    when(session.getStatus()).thenReturn(SessionStatus.NEW);
+    when(session.getUser()).thenReturn(USER);
+
+    when(sessionService.getSessionByGroupIdAndUserId(any(), any(), any())).thenReturn(session);
+
+    emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
+
+    verifyZeroInteractions(logger);
   }
 
 }

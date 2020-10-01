@@ -1,6 +1,11 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
@@ -29,12 +34,15 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -43,280 +51,199 @@ import org.springframework.stereotype.Service;
  * Facade for capsuling the mail notification via the MailService
  */
 @Service
+@RequiredArgsConstructor
 public class EmailNotificationFacade {
 
   @Value("${app.base.url}")
-  private String APPLICATION_BASE_URL;
+  private String applicationBaseUrl;
 
   @Value("${keycloakService.user.dummySuffix}")
-  private String EMAIL_DUMMY_SUFFIX;
+  private String emailDummySuffix;
 
   @Value("${rocket.systemuser.id}")
-  private String ROCKET_CHAT_SYSTEM_USER_ID;
+  private String rocketChatSystemUserId;
 
-  private ConsultantAgencyRepository consultantAgencyRepository;
-  private MailServiceHelper mailServiceHelper;
-  private AgencyServiceHelper agencyServiceHelper;
-  private final SessionService sessionService;
-  private final ConsultantAgencyService consultantAgencyService;
-  private final ConsultantService consultantService;
-  private final RocketChatService rocketChatService;
-  private final MailDtoBuilder mailDtoBuilder;
-  private final ConsultingTypeManager consultingTypeManager;
-  private final UserHelper userHelper;
+  private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
+  private final @NonNull MailServiceHelper mailServiceHelper;
+  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull SessionService sessionService;
+  private final @NonNull ConsultantAgencyService consultantAgencyService;
+  private final @NonNull ConsultantService consultantService;
+  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull MailDtoBuilder mailDtoBuilder;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull UserHelper userHelper;
 
-  @Autowired
-  public EmailNotificationFacade(ConsultantAgencyRepository consultantAgencyRepository,
-      MailServiceHelper mailServiceHelper, AgencyServiceHelper agencyServiceHelper,
-      SessionService sessionService, ConsultantAgencyService consultantAgencyService,
-      ConsultantService consultantService, RocketChatService rocketChatService,
-      MailDtoBuilder mailDtoBuilder, ConsultingTypeManager consultingTypeManager,
-      UserHelper userHelper) {
-
-    this.consultantAgencyRepository = consultantAgencyRepository;
-    this.mailServiceHelper = mailServiceHelper;
-    this.agencyServiceHelper = agencyServiceHelper;
-    this.sessionService = sessionService;
-    this.consultantAgencyService = consultantAgencyService;
-    this.consultantService = consultantService;
-    this.rocketChatService = rocketChatService;
-    this.mailDtoBuilder = mailDtoBuilder;
-    this.consultingTypeManager = consultingTypeManager;
-    this.userHelper = userHelper;
-  }
-
+  /**
+   * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
+   * written.
+   *
+   * @param session the regarding session
+   */
   @Async
   public void sendNewEnquiryEmailNotification(Session session) {
 
     try {
-
       List<ConsultantAgency> consultantAgencyList =
           consultantAgencyRepository.findByAgencyId(session.getAgencyId());
 
-      if (consultantAgencyList != null && !consultantAgencyList.isEmpty()) {
-
+      if (isNotEmpty(consultantAgencyList)) {
         AgencyDTO agency = agencyServiceHelper.getAgency(session.getAgencyId());
 
-        MailsDTO mailsDTO = new MailsDTO();
-        List<MailDTO> mailList = new ArrayList<MailDTO>();
+        List<MailDTO> mailList = consultantAgencyList.stream()
+            .filter(onlyValidConsultantAgency())
+            .map(toEnquiryMailDTO(session, agency))
+            .collect(Collectors.toList());
 
-        for (ConsultantAgency consultantAgency : consultantAgencyList) {
-
-          if (consultantAgency.getConsultant() != null
-              && consultantAgency.getConsultant().getEmail() != null
-              && !consultantAgency.getConsultant().getEmail().isEmpty()
-              && !consultantAgency.getConsultant().isAbsent()) {
-
-            mailList.add(getMailDtoForNewEnquiryNotificationConsultant(
-                consultantAgency.getConsultant().getEmail(),
-                consultantAgency.getConsultant().getFullName(), session.getPostcode(),
-                agency.getName()));
-
-          }
-
-        }
-
-        if (!mailList.isEmpty()) {
-
-          mailsDTO.setMails(mailList);
-          mailServiceHelper.sendEmailNotification(mailsDTO);
-
-        }
+        sendMailTasksToMailService(mailList);
       }
-
     } catch (Exception ex) {
       throw new EmailNotificationException("Error while sending email notification", ex);
     }
+  }
 
+  private Predicate<ConsultantAgency> onlyValidConsultantAgency() {
+    return consultantAgency -> nonNull(consultantAgency) &&
+        isNotBlank(consultantAgency.getConsultant().getEmail()) &&
+        !consultantAgency.getConsultant().isAbsent();
+  }
+
+  private Function<ConsultantAgency, MailDTO> toEnquiryMailDTO(Session session, AgencyDTO agency) {
+    return consultantAgency -> getMailDtoForNewEnquiryNotificationConsultant(
+        consultantAgency.getConsultant().getEmail(),
+        consultantAgency.getConsultant().getFullName(),
+        session.getPostcode(),
+        agency.getName()
+    );
+  }
+
+  private void sendMailTasksToMailService(List<MailDTO> mailList) {
+    if (isNotEmpty(mailList)) {
+      MailsDTO mailsDTO = new MailsDTO(mailList);
+      mailServiceHelper.sendEmailNotification(mailsDTO);
+    }
   }
 
   /**
    * Sends email notifications according to the corresponding consultant(s) or asker when a new
    * message was written.
+   *
+   * @param rcGroupId the rocket chat group id
+   * @param roles roles to decide the regarding recipients
+   * @param userId the user id of initiated user
    */
   @Async
   public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId) {
-
-    List<MailDTO> mailList = new ArrayList<MailDTO>();
 
     try {
       Session session = sessionService.getSessionByGroupIdAndUserId(rcGroupId, userId, roles);
 
       // Asker wrote the answer -> inform the consultant(s)
       if (roles.contains(UserRole.USER.getValue())) {
-
-        // Only send a notification if the session exists and also belongs to the requesting asker
-        if (session != null && session.getUser().getUserId().equals(userId)
-            && session.getStatus().equals(SessionStatus.IN_PROGRESS)) {
-
-          List<ConsultantAgency> consultantList = null;
-          ConsultingTypeSettings consultingTypeSettings =
-              consultingTypeManager.getConsultantTypeSettings(session.getConsultingType());
-
-          // Currently only all consultants of a team session are being informed if
-          // allTeamConsultants is set to true in the ConsultingTypeSettings
-          if (session.isTeamSession() && consultingTypeSettings.getNotifications().getNewMessage()
-              .getTeamSession().getToConsultant().isAllTeamConsultants()) {
-            // Team session -> inform all consultants of this agency
-            consultantList =
-                consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
-          } else {
-            // Single session -> inform the assigned consultant
-            if (session.getConsultant().getEmail() != null
-                && !session.getConsultant().getEmail().isEmpty()) {
-              ConsultantAgency agency = new ConsultantAgency(null, session.getConsultant(), null);
-              consultantList = Arrays.asList(agency);
-            }
-          }
-
-          // Create a mail template for every consultant on the mail list
-          if (consultantList != null && !consultantList.isEmpty()) {
-            for (ConsultantAgency agency : consultantList) {
-              if (!agency.getConsultant().getEmail().isEmpty()) {
-
-                mailList.add(
-                    getMailDtoForNewMessageNotificationConsultant(agency.getConsultant().getEmail(),
-                        agency.getConsultant().getFullName(), session.getPostcode()));
-
-              }
-            }
-          }
-
-        } else {
-          LogService.logEmailNotificationFacadeError(String.format(
-              "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s or the session does not belong to the user.",
-              rcGroupId, userId));
-        }
+        sendNewMessageNotificationToConsultants(rcGroupId, userId, session);
       }
 
       // Consultant wrote the answer -> inform the asker
       if (roles.contains(UserRole.CONSULTANT.getValue())) {
-
-        // Only send a notification if the session exists and the consultant is also assigned to
-        // this session and if the asker has provided a e-mail address
-        if (session != null && session.getConsultant().getId().equals(userId)
-            && session.getStatus().equals(SessionStatus.IN_PROGRESS)
-            && (session.getUser().getEmail() != null && !session.getUser().getEmail().isEmpty())) {
-
-          if (session.getUser().getEmail().contains(EMAIL_DUMMY_SUFFIX)) {
-            return;
-          }
-
-          mailList.add(getMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
-              userHelper.decodeUsername(session.getConsultant().getUsername()),
-              userHelper.decodeUsername(session.getUser().getUsername())));
-
-        } else {
-          LogService.logEmailNotificationFacadeError(String.format(
-              "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s, the session does not belong to the user or has not provided a e-mail address.",
-              rcGroupId, userId));
-        }
+        sendNewMessageNotificationToAsker(rcGroupId, userId, session);
       }
 
     } catch (InternalServerErrorException ex) {
       throw new NewMessageNotificationException("Error while sending new message notification: ",
           ex);
     }
+  }
 
-    // Send e mail task to MailService
-    if (isNotEmpty(mailList)) {
-      MailsDTO mailsDTO = new MailsDTO();
-      mailsDTO.setMails(mailList);
-      mailServiceHelper.sendEmailNotification(mailsDTO);
+  private void sendNewMessageNotificationToConsultants(String rcGroupId, String userId,
+      Session session) {
+    if (doesSessionExistAndBelongsToAsker(userId, session)) {
+
+      List<ConsultantAgency> consultantList = retrieveDependentConsultantAgencies(session);
+
+      if (isNotEmpty(consultantList)) {
+        List<MailDTO> mailList = consultantList.stream()
+            .filter(agency -> !agency.getConsultant().getEmail().isEmpty())
+            .map(toNewConsultantMessageMailDTO(session))
+            .collect(Collectors.toList());
+        sendMailTasksToMailService(mailList);
+      }
+
+    } else if (!SessionStatus.NEW.equals(isNull(session) ? session : session.getStatus())) {
+      LogService.logEmailNotificationFacadeError(String.format(
+          "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s or the session does not belong to the user.",
+          rcGroupId, userId));
     }
+  }
 
+  private Function<ConsultantAgency, MailDTO> toNewConsultantMessageMailDTO(Session session) {
+    return agency -> getMailDtoForNewMessageNotificationConsultant(
+        agency.getConsultant().getEmail(),
+        agency.getConsultant().getFullName(), session.getPostcode());
+  }
+
+  private List<ConsultantAgency> retrieveDependentConsultantAgencies(Session session) {
+    if (shouldInformAllConsultantsOfTeamSession(session)) {
+      return consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
+    } else {
+      if (isNotBlank(session.getConsultant().getEmail())) {
+        return singletonList(new ConsultantAgency(null, session.getConsultant(), null));
+      }
+    }
+    return emptyList();
+  }
+
+  private boolean doesSessionExistAndBelongsToAsker(String userId, Session session) {
+    return nonNull(session) && session.getUser().getUserId().equals(userId)
+        && session.getStatus().equals(SessionStatus.IN_PROGRESS);
+  }
+
+  private boolean shouldInformAllConsultantsOfTeamSession(Session session) {
+    ConsultingTypeSettings consultingTypeSettings =
+        consultingTypeManager.getConsultantTypeSettings(session.getConsultingType());
+    return session.isTeamSession() && consultingTypeSettings.getNotifications().getNewMessage()
+        .getTeamSession().getToConsultant().isAllTeamConsultants();
+  }
+
+  private void sendNewMessageNotificationToAsker(String rcGroupId, String userId, Session session) {
+
+    if (doesSessionExistAndBelongsToConsultant(userId, session)) {
+      if (!session.getUser().getEmail().contains(emailDummySuffix)) {
+        MailDTO mailDTO = getMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
+            userHelper.decodeUsername(session.getConsultant().getUsername()),
+            userHelper.decodeUsername(session.getUser().getUsername()));
+        sendMailTasksToMailService(singletonList(mailDTO));
+      }
+    } else {
+      LogService.logEmailNotificationFacadeError(String.format(
+          "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s, the session does not belong to the user or has not provided a e-mail address.",
+          rcGroupId, userId));
+    }
+  }
+
+  private boolean doesSessionExistAndBelongsToConsultant(String userId, Session session) {
+    return nonNull(session) && session.getConsultant().getId().equals(userId)
+        && session.getStatus().equals(SessionStatus.IN_PROGRESS)
+        && isNotBlank(session.getUser().getEmail());
   }
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new feedback
    * message was written.
+   *
+   * @param rcFeedbackGroupId group id of feedback chat
+   * @param userId regarding user id
    */
   @Async
-  public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, Set<String> roles,
-      String userId) {
-
-    List<MailDTO> mailList = new ArrayList<MailDTO>();
+  public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, String userId) {
 
     try {
 
-      Optional<Consultant> sendingConsultantOptional = consultantService.getConsultant(userId);
-      if (!sendingConsultantOptional.isPresent()) {
-        LogService.logEmailNotificationFacadeError(
-            String.format("Consultant with id %s not found.", userId));
-        return;
-      }
-
       Session session = sessionService.getSessionByFeedbackGroupId(rcFeedbackGroupId);
-
-      if (session == null) {
+      if (nonNull(session)) {
+        sendFeedbackMessageForExistingSession(rcFeedbackGroupId, userId, session);
+      } else {
         LogService.logEmailNotificationFacadeError(String.format(
             "No session found for the rocket chat feedback group id %s.", rcFeedbackGroupId));
-        return;
-      }
-
-      if (session.getConsultant() == null) {
-        LogService.logEmailNotificationFacadeError(String.format(
-            "No consultant is assigned to the session found by rocket chat feedback group id %s.",
-            rcFeedbackGroupId));
-        return;
-      }
-
-      // Assigned consultant wrote -> inform all other consultants
-      if (userId.equals(session.getConsultant().getId())) {
-
-        List<GroupMemberDTO> groupMembers = rocketChatService.getMembersOfGroup(rcFeedbackGroupId);
-
-        if (groupMembers == null || groupMembers.isEmpty()) {
-          LogService.logEmailNotificationFacadeError(String.format(
-              "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
-          return;
-        }
-
-        for (GroupMemberDTO groupMemberDTO : groupMembers) {
-
-          if (ROCKET_CHAT_SYSTEM_USER_ID.equals(groupMemberDTO.get_id())) {
-            continue;
-          }
-
-          Optional<Consultant> consultantOptional =
-              consultantService.getConsultantByRcUserId(groupMemberDTO.get_id());
-
-          if (!consultantOptional.isPresent()) {
-            LogService.logEmailNotificationFacadeError(String.format(
-                "Consultant with rc user id %s not found. Why is this consultant in the rc room with the id %s?",
-                groupMemberDTO.get_id(), rcFeedbackGroupId));
-            continue;
-          }
-
-          if (consultantOptional.get().getEmail() != null
-              && !userId.equals(consultantOptional.get().getId())
-              && !session.getConsultant().getId().equals(consultantOptional.get().getId())
-              && !consultantOptional.get().isAbsent()) {
-
-            String nameSender = sendingConsultantOptional.get().getFullName();
-            String nameRecipient = consultantOptional.get().getFullName();
-            String nameUser = userHelper.decodeUsername(session.getUser().getUsername());
-            String email = consultantOptional.get().getEmail();
-
-            mailList.add(getMailDtoForFeedbackMessageNotification(email, nameSender, nameRecipient,
-                nameUser));
-          }
-
-        }
-
-      }
-
-      // Other consultant wrote -> inform only the assigned consultant
-      if (!userId.equals(session.getConsultant().getId())
-          && !session.getConsultant().getEmail().isEmpty() && !session.getConsultant().isAbsent()) {
-
-        String nameSender = sendingConsultantOptional.get().getFullName();
-        String nameRecipient = session.getConsultant().getFullName();
-        String nameUser = userHelper.decodeUsername(session.getUser().getUsername());
-        String email = session.getConsultant().getEmail();
-
-        mailList.add(
-            getMailDtoForFeedbackMessageNotification(email, nameSender, nameRecipient, nameUser));
       }
 
     } catch (InternalServerErrorException ex) {
@@ -326,14 +253,103 @@ public class EmailNotificationFacade {
       LogService.logEmailNotificationFacadeError(String.format(
           "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
     }
+  }
 
-    // Send e mail task to MailService
-    if (isNotEmpty(mailList)) {
-      MailsDTO mailsDTO = new MailsDTO();
-      mailsDTO.setMails(mailList);
-      mailServiceHelper.sendEmailNotification(mailsDTO);
+  private void sendFeedbackMessageForExistingSession(String rcFeedbackGroupId, String userId,
+      Session session) throws RocketChatGetGroupMembersException {
+    if (nonNull(session.getConsultant())) {
+      sendFeedbackMessageForExistingConsultant(rcFeedbackGroupId, userId, session);
+    } else {
+      LogService.logEmailNotificationFacadeError(String.format(
+          "No consultant is assigned to the session found by rocket chat feedback group id %s.",
+          rcFeedbackGroupId));
+    }
+  }
+
+  private void sendFeedbackMessageForExistingConsultant(String rcFeedbackGroupId, String userId,
+      Session session) throws RocketChatGetGroupMembersException {
+    Optional<Consultant> sendingConsultantOptional = consultantService.getConsultant(userId);
+    if (sendingConsultantOptional.isPresent()) {
+      Consultant sendingConsultant = sendingConsultantOptional.get();
+      if (areUsersEqual(userId, session.getConsultant())) {
+        sendNotificationMailToAllOtherConsultants(rcFeedbackGroupId, userId, sendingConsultant,
+            session);
+      }
+
+      if (didAnotherConsultantWrote(userId, session)) {
+        sendNotificationMailToAssignedConsultant(sendingConsultant, session);
+      }
+    } else {
+      LogService.logEmailNotificationFacadeError(
+          String.format("Consultant with id %s not found.", userId));
+    }
+  }
+
+  private boolean areUsersEqual(String userId, Consultant consultant) {
+    return userId.equals(consultant.getId());
+  }
+
+  private void sendNotificationMailToAllOtherConsultants(String rcFeedbackGroupId, String userId,
+      Consultant sendingConsultantOptional, Session session)
+      throws RocketChatGetGroupMembersException {
+    List<GroupMemberDTO> groupMembers = rocketChatService.getMembersOfGroup(rcFeedbackGroupId);
+    if (isNotEmpty(groupMembers)) {
+      List<MailDTO> mailList = groupMembers.stream()
+          .filter(groupMemberDTO -> !rocketChatSystemUserId.equals(groupMemberDTO.get_id()))
+          .map(groupMemberDTO -> this.toValidatedConsultant(groupMemberDTO, rcFeedbackGroupId))
+          .filter(Objects::nonNull)
+          .filter(consultant -> sessionBelongsToConsultant(userId, session, consultant))
+          .map(consultant -> buildMailForAssignedConsultant(sendingConsultantOptional, session,
+              consultant))
+          .collect(Collectors.toList());
+      sendMailTasksToMailService(mailList);
     }
 
+    LogService.logEmailNotificationFacadeError(String.format(
+        "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
+  }
+
+  private void sendNotificationMailToAssignedConsultant(
+      Consultant sendingConsultantOptional, Session session) {
+    List<MailDTO> mailList = singletonList(buildMailForAssignedConsultant(sendingConsultantOptional,
+        session, session.getConsultant()));
+    sendMailTasksToMailService(mailList);
+  }
+
+  private Consultant toValidatedConsultant(GroupMemberDTO groupMemberDTO,
+      String rcFeedbackGroupId) {
+    Optional<Consultant> optionalConsultant =
+        this.consultantService.getConsultantByRcUserId(groupMemberDTO.get_id());
+    if (optionalConsultant.isPresent()) {
+      return optionalConsultant.get();
+    }
+    LogService.logEmailNotificationFacadeError(String.format(
+        "Consultant with rc user id %s not found. Why is this consultant in the rc room with the id %s?",
+        groupMemberDTO.get_id(), rcFeedbackGroupId));
+    return null;
+  }
+
+  private boolean sessionBelongsToConsultant(String userId, Session session,
+      Consultant consultant) {
+    return isNotBlank(consultant.getEmail())
+        && !areUsersEqual(userId, consultant)
+        && !areUsersEqual(session.getConsultant().getId(), consultant)
+        && !consultant.isAbsent();
+  }
+
+  private boolean didAnotherConsultantWrote(String userId, Session session) {
+    return !areUsersEqual(userId, session.getConsultant())
+        && !session.getConsultant().getEmail().isEmpty() && !session.getConsultant().isAbsent();
+  }
+
+  private MailDTO buildMailForAssignedConsultant(Consultant sendingConsultant,
+      Session session, Consultant consultant) {
+    String nameSender = sendingConsultant.getFullName();
+    String nameRecipient = consultant.getFullName();
+    String nameUser = userHelper.decodeUsername(session.getUser().getUsername());
+    String email = consultant.getEmail();
+
+    return getMailDtoForFeedbackMessageNotification(email, nameSender, nameRecipient, nameUser);
   }
 
   /**
@@ -344,32 +360,31 @@ public class EmailNotificationFacade {
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
       String askerUserName) {
 
-    if (receiverConsultant == null || receiverConsultant.getEmail() == null
-        || receiverConsultant.getEmail().isEmpty()) {
+    if (nonNull(receiverConsultant) && isNotBlank(receiverConsultant.getEmail())) {
+      sendAssignEnquiryMailWithExistingReceiver(receiverConsultant, senderUserId, askerUserName);
+    } else {
       LogService.logEmailNotificationFacadeError(String.format(
           "Error while sending assign message notification: Receiver consultant with id %s is null or doesn't have an email address.",
           receiverConsultant != null ? receiverConsultant.getId() : "unknown"));
-      return;
     }
+  }
 
+  private void sendAssignEnquiryMailWithExistingReceiver(Consultant receiverConsultant,
+      String senderUserId, String askerUserName) {
     Optional<Consultant> senderConsultant = consultantService.getConsultant(senderUserId);
 
-    if (!senderConsultant.isPresent()) {
+    if (senderConsultant.isPresent()) {
+      List<MailDTO> mailList = singletonList(getMailDtoForAssignEnquiryNotification(
+          receiverConsultant.getEmail(),
+          senderConsultant.get().getFullName(),
+          receiverConsultant.getFullName(),
+          userHelper.decodeUsername(askerUserName)));
+
+      sendMailTasksToMailService(mailList);
+    } else {
       LogService.logEmailNotificationFacadeError(String.format(
           "Error while sending assign message notification: Sender consultant with id %s could not be found in database.",
           senderUserId));
-      return;
-    }
-
-    MailsDTO mailsDTO = new MailsDTO();
-    List<MailDTO> mailList = new ArrayList<MailDTO>();
-    mailList.add(getMailDtoForAssignEnquiryNotification(receiverConsultant.getEmail(),
-        senderConsultant.get().getFullName(), receiverConsultant.getFullName(),
-        userHelper.decodeUsername(askerUserName)));
-
-    if (!mailList.isEmpty()) {
-      mailsDTO.setMails(mailList);
-      mailServiceHelper.sendEmailNotification(mailsDTO);
     }
   }
 
@@ -380,10 +395,10 @@ public class EmailNotificationFacade {
   private MailDTO getMailDtoForNewEnquiryNotificationConsultant(String email, String name,
       String postCode, String agency) {
     return mailDtoBuilder.build(EmailNotificationHelper.TEMPLATE_NEW_ENQUIRY_NOTIFICATION, email,
-        new SimpleImmutableEntry<String, String>("name", name),
-        new SimpleImmutableEntry<String, String>("plz", postCode),
-        new SimpleImmutableEntry<String, String>("beratungsstelle", agency),
-        new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL));
+        new SimpleImmutableEntry<>("name", name),
+        new SimpleImmutableEntry<>("plz", postCode),
+        new SimpleImmutableEntry<>("beratungsstelle", agency),
+        new SimpleImmutableEntry<>("url", applicationBaseUrl));
   }
 
   /**
@@ -394,9 +409,9 @@ public class EmailNotificationFacade {
       String postCode) {
     return mailDtoBuilder.build(
         EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT, email,
-        new SimpleImmutableEntry<String, String>("name", name),
-        new SimpleImmutableEntry<String, String>("plz", postCode),
-        new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL));
+        new SimpleImmutableEntry<>("name", name),
+        new SimpleImmutableEntry<>("plz", postCode),
+        new SimpleImmutableEntry<>("url", applicationBaseUrl));
   }
 
 
@@ -407,9 +422,9 @@ public class EmailNotificationFacade {
   private MailDTO getMailDtoForNewMessageNotificationAsker(String email, String consultantName,
       String askerName) {
     return mailDtoBuilder.build(EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER,
-        email, new SimpleImmutableEntry<String, String>("consultantName", consultantName),
-        new SimpleImmutableEntry<String, String>("askerName", askerName),
-        new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL));
+        email, new SimpleImmutableEntry<>("consultantName", consultantName),
+        new SimpleImmutableEntry<>("askerName", askerName),
+        new SimpleImmutableEntry<>("url", applicationBaseUrl));
   }
 
   /**
@@ -420,11 +435,10 @@ public class EmailNotificationFacade {
       String nameRecipient, String nameUser) {
 
     return mailDtoBuilder.build(EmailNotificationHelper.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION,
-        email, new SimpleImmutableEntry<String, String>("name_sender", nameSender),
-        new SimpleImmutableEntry<String, String>("name_recipient", nameRecipient),
-        new SimpleImmutableEntry<String, String>("name_user", nameUser),
-        new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL));
-
+        email, new SimpleImmutableEntry<>("name_sender", nameSender),
+        new SimpleImmutableEntry<>("name_recipient", nameRecipient),
+        new SimpleImmutableEntry<>("name_user", nameUser),
+        new SimpleImmutableEntry<>("url", applicationBaseUrl));
   }
 
   /**
@@ -435,11 +449,10 @@ public class EmailNotificationFacade {
       String nameRecipient, String nameUser) {
 
     return mailDtoBuilder.build(EmailNotificationHelper.TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION, email,
-        new SimpleImmutableEntry<String, String>("name_sender", nameSender),
-        new SimpleImmutableEntry<String, String>("name_recipient", nameRecipient),
-        new SimpleImmutableEntry<String, String>("name_user", nameUser),
-        new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL));
-
+        new SimpleImmutableEntry<>("name_sender", nameSender),
+        new SimpleImmutableEntry<>("name_recipient", nameRecipient),
+        new SimpleImmutableEntry<>("name_user", nameUser),
+        new SimpleImmutableEntry<>("url", applicationBaseUrl));
   }
 
 }
