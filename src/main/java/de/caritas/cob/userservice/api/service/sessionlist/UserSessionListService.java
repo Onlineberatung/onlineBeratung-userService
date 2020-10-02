@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
@@ -31,10 +32,10 @@ public class UserSessionListService {
       SessionService sessionService, ChatService chatService,
       RocketChatRoomInformationProvider rocketChatRoomInformationProvider,
       SessionListHelper sessionListHelper) {
-    this.sessionService = sessionService;
-    this.chatService = chatService;
-    this.rocketChatRoomInformationProvider = rocketChatRoomInformationProvider;
-    this.sessionListHelper = sessionListHelper;
+    this.sessionService = requireNonNull(sessionService);
+    this.chatService = requireNonNull(chatService);
+    this.rocketChatRoomInformationProvider = requireNonNull(rocketChatRoomInformationProvider);
+    this.sessionListHelper = requireNonNull(sessionListHelper);
   }
 
   /**
@@ -44,7 +45,7 @@ public class UserSessionListService {
    * @param rocketChatCredentials the rocket chat credentials
    * @return {@link UserSessionResponseDTO}
    */
-  public List<UserSessionResponseDTO> getSessionsForAuthenticatedUser(String userId,
+  public List<UserSessionResponseDTO> retrieveSessionsForAuthenticatedUser(String userId,
       RocketChatCredentials rocketChatCredentials) {
 
     List<UserSessionResponseDTO> sessions = sessionService.getSessionsForUserId(userId);
@@ -63,15 +64,15 @@ public class UserSessionListService {
         .retrieveRocketChatInformation(rocketChatCredentials);
 
     List<UserSessionResponseDTO> allSessions = new ArrayList<>();
-    allSessions.addAll(setUserSessionValues(sessions, rocketChatRoomInformation,
+    allSessions.addAll(updateUserSessionValues(sessions, rocketChatRoomInformation,
         rocketChatCredentials.getRocketChatUserId()));
-    allSessions.addAll(setUserChatValues(chats, rocketChatRoomInformation,
+    allSessions.addAll(updateUserChatValues(chats, rocketChatRoomInformation,
         rocketChatCredentials.getRocketChatUserId()));
 
     return allSessions;
   }
 
-  private List<UserSessionResponseDTO> setUserSessionValues(List<UserSessionResponseDTO> sessions,
+  private List<UserSessionResponseDTO> updateUserSessionValues(List<UserSessionResponseDTO> sessions,
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId) {
 
     for (UserSessionResponseDTO session : sessions) {
@@ -108,7 +109,7 @@ public class UserSessionListService {
     return sessions;
   }
 
-  private List<UserSessionResponseDTO> setUserChatValues(List<UserSessionResponseDTO> chats,
+  private List<UserSessionResponseDTO> updateUserChatValues(List<UserSessionResponseDTO> chats,
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId) {
 
     for (UserSessionResponseDTO chat : chats) {

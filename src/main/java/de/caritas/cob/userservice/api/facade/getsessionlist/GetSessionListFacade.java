@@ -50,7 +50,7 @@ public class GetSessionListFacade {
       RocketChatCredentials rocketChatCredentials) {
 
     List<UserSessionResponseDTO> userSessions = userSessionListService
-        .getSessionsForAuthenticatedUser(userId, rocketChatCredentials);
+        .retrieveSessionsForAuthenticatedUser(userId, rocketChatCredentials);
     userSessions.sort(Comparator.comparing(UserSessionResponseDTO::getLatestMessage).reversed());
 
     return new UserSessionListResponseDTO(userSessions);
@@ -71,7 +71,7 @@ public class GetSessionListFacade {
       SessionListQueryParameter sessionListQueryParameter) {
 
     List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService
-        .getSessionsForAuthenticatedConsultant(consultant, rcAuthToken,
+        .retrieveSessionsForAuthenticatedConsultant(consultant, rcAuthToken,
             sessionListQueryParameter);
 
     /* Sort the session list by latest Rocket.Chat message if session is in progress (no enquiry).
@@ -129,7 +129,7 @@ public class GetSessionListFacade {
       SessionListQueryParameter sessionListQueryParameter) {
 
     List<ConsultantSessionResponseDTO> teamSessions = consultantSessionListService
-        .getTeamSessionsForAuthenticatedConsultant(consultant, rcAuthToken,
+        .retrieveTeamSessionsForAuthenticatedConsultant(consultant, rcAuthToken,
             sessionListQueryParameter);
 
     List<ConsultantSessionResponseDTO> teamSessionsSublist = new ArrayList<>();

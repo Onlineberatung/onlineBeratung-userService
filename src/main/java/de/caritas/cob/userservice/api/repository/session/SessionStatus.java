@@ -5,7 +5,6 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.omg.CORBA.INTF_REPOS;
 
 /**
  * Session status
