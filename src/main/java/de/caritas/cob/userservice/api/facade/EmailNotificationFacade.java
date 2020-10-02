@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.facade;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
@@ -74,7 +73,8 @@ public class EmailNotificationFacade {
           consultantAgencyRepository, agencyServiceHelper, applicationBaseUrl);
       sendMailTasksToMailService(newEnquiryMail);
     } catch (Exception ex) {
-      throw new EmailNotificationException("Error while sending email notification", ex);
+      LogService.logEmailNotificationFacadeError(String.format(
+          "Failed to send new enquiry notification for session %s.", session.getId()));
     }
   }
 
@@ -93,7 +93,7 @@ public class EmailNotificationFacade {
    *
    * @param rcGroupId the rocket chat group id
    * @param roles roles to decide the regarding recipients
-   * @param userId the user id of initiated user
+   * @param userId the user id of initiating user
    */
   @Async
   public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId) {
@@ -108,8 +108,9 @@ public class EmailNotificationFacade {
       sendMailTasksToMailService(newMessageMails);
 
     } catch (Exception ex) {
-      throw new NewMessageNotificationException("Error while sending new message notification: ",
-          ex);
+      LogService.logEmailNotificationFacadeError(String.format(
+          "Failed to send new message notification with rocket chat group id %s and user id %s.",
+          rcGroupId, userId));
     }
   }
 
@@ -139,7 +140,7 @@ public class EmailNotificationFacade {
   }
 
   /**
-   * Sends an email notifications to the consultant when an enquiry has been assigned to him by a
+   * Sends an email notification to the consultant when an enquiry has been assigned to him by a
    * different consultant.
    *
    * @param receiverConsultant the target consultant

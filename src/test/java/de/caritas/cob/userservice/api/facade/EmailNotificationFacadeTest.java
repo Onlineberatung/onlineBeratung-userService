@@ -260,7 +260,7 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_Should_ThrowEmailNotificationException_WhenSendEmailFails() {
+  public void sendNewEnquiryEmailNotification_Should_LogError_WhenSendEmailFails() {
 
     EmailNotificationException emailNotificationException =
         new EmailNotificationException(new Exception());
@@ -268,12 +268,9 @@ public class EmailNotificationFacadeTest {
     when(consultantAgencyRepository.findByAgencyId(Mockito.eq(AGENCY_ID)))
         .thenThrow(emailNotificationException);
 
-    try {
-      emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
-      fail("Expected exception: EmailNotificationException");
-    } catch (EmailNotificationException mailNotificationException) {
-      assertTrue("Excepted EmailNotificationException thrown", true);
-    }
+    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
+
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -326,19 +323,15 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewMessageNotification_Should_ThrowNewMessageNotificationException_WhenSessionServiceFails() {
+  public void sendNewMessageNotification_Should_LogError_WhenSessionServiceFails() {
 
     InternalServerErrorException serviceException = new InternalServerErrorException(ERROR_MSG);
 
     when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenThrow(serviceException);
 
-    try {
-      emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
-      fail("Expected exception: NewMessageNotificationException");
-    } catch (NewMessageNotificationException newMessageNotificationException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
+    emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
+    verify(logger, times(1)).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -583,7 +576,8 @@ public class EmailNotificationFacadeTest {
 
   @Test
   public void sendAssignEnquiryEmailNotification_Should_LogError_When_MailServiceHelperThrowsException() {
-    doThrow(new RuntimeException("unexpected")).when(mailServiceHelper).sendEmailNotification(any());
+    doThrow(new RuntimeException("unexpected")).when(mailServiceHelper)
+        .sendEmailNotification(any());
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(CONSULTANT));
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME);

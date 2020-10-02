@@ -53,12 +53,6 @@ public class NewMessageEmailSupplierTest {
   private Session session;
 
   @Mock
-  private ConsultantService consultantService;
-
-  @Mock
-  private RocketChatService rocketChatService;
-
-  @Mock
   private Set<String> roles;
 
   @Mock
@@ -152,7 +146,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_RetunExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
+  public void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
     ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
     ToConsultant toConsultant = new ToConsultant(true);
     TeamSession teamSession = new TeamSession(toConsultant);
@@ -190,7 +184,7 @@ public class NewMessageEmailSupplierTest {
   public void generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsConsultantAndSessionIsNotValid() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     when(session.getConsultant()).thenReturn(CONSULTANT);
-    User user = mock(User.class);
+    when(session.getUser()).thenReturn(USER);
 
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
@@ -199,7 +193,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndLogError_When_UserMailIsDummy() {
+  public void generateEmails_Should_ReturnEmptyList_When_UserMailIsDummy() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     Consultant consultant = mock(Consultant.class);
@@ -212,11 +206,10 @@ public class NewMessageEmailSupplierTest {
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWriteToValidReceiver() {
+  public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     Consultant consultant = mock(Consultant.class);

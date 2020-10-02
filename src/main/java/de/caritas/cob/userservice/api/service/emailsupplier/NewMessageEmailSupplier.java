@@ -63,8 +63,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private List<MailDTO> buildMailsForConsultants() {
 
-    if (doesSessionExistAndBelongsToAsker()) {
-      return buildMailsForValidatedAsker();
+    if (isSessionActiveAndBelongToAsker()) {
+      return buildMailsForSession();
     }
     if (isNotTheFirstMessage()) {
       LogService.logEmailNotificationFacadeError(String.format(
@@ -74,12 +74,12 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     return emptyList();
   }
 
-  private boolean doesSessionExistAndBelongsToAsker() {
+  private boolean isSessionActiveAndBelongToAsker() {
     return nonNull(session) && session.getUser().getUserId().equals(userId)
         && session.getStatus().equals(SessionStatus.IN_PROGRESS);
   }
 
-  private List<MailDTO> buildMailsForValidatedAsker() {
+  private List<MailDTO> buildMailsForSession() {
     List<ConsultantAgency> consultantList = retrieveDependentConsultantAgencies();
     if (isNotEmpty(consultantList)) {
       return consultantList.stream()
@@ -132,20 +132,22 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private List<MailDTO> buildMailForAsker() {
 
-    if (doesSessionExistAndBelongsToConsultant() && isNotADummyMail()) {
+    if (isSessionActiveAndBelongToConsultant() && isNotADummyMail()) {
       return singletonList(
           buildMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
               userHelper.decodeUsername(session.getConsultant().getUsername()),
               userHelper.decodeUsername(session.getUser().getUsername())));
     }
-    LogService.logEmailNotificationFacadeError(String.format(
-        "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s, the session does not belong to the user or has not provided a e-mail address.",
-        rcGroupId, userId));
+    if (isNotADummyMail()) {
+      LogService.logEmailNotificationFacadeError(String.format(
+          "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s, the session does not belong to the user or has not provided a e-mail address.",
+          rcGroupId, userId));
+    }
 
     return emptyList();
   }
 
-  private boolean doesSessionExistAndBelongsToConsultant() {
+  private boolean isSessionActiveAndBelongToConsultant() {
     return nonNull(session) && userId.equals(session.getConsultant().getId())
         && session.getStatus().equals(SessionStatus.IN_PROGRESS)
         && isNotBlank(session.getUser().getEmail());

@@ -40,7 +40,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
   private final String rocketChatSystemUserId;
 
   /**
-   * Generates a feedback message notification mails sent to regarding consultants.
+   * Generates feedback message notification mails sent to regarding consultants.
    *
    * @return a list of the generated {@link MailDTO}
    */
@@ -72,7 +72,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     Optional<Consultant> sendingConsultantOptional = consultantService.getConsultant(userId);
     if (sendingConsultantOptional.isPresent()) {
       Consultant sendingConsultant = sendingConsultantOptional.get();
-      return buildMailsDependingOnAutor(sendingConsultant);
+      return buildMailsDependingOnAuthor(sendingConsultant);
     }
     LogService.logEmailNotificationFacadeError(
         String.format("Consultant with id %s not found.", userId));
@@ -80,13 +80,13 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return emptyList();
   }
 
-  private List<MailDTO> buildMailsDependingOnAutor(Consultant sendingConsultant)
+  private List<MailDTO> buildMailsDependingOnAuthor(Consultant sendingConsultant)
       throws RocketChatGetGroupMembersException {
     if (areUsersEqual(userId, session.getConsultant())) {
       return buildNotificationMailsForAllOtherConsultants(sendingConsultant);
     }
 
-    if (didAnotherConsultantWrote()) {
+    if (didAnotherConsultantWrite()) {
       return singletonList(buildMailForAssignedConsultant(sendingConsultant,
           session.getConsultant()));
     }
@@ -115,7 +115,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
         .filter(groupMemberDTO -> !rocketChatSystemUserId.equals(groupMemberDTO.get_id()))
         .map(this::toValidatedConsultant)
         .filter(Objects::nonNull)
-        .filter(this::notHimself)
+        .filter(this::notHimselfAndNotAbsent)
         .map(consultant -> buildMailForAssignedConsultant(sendingConsultant, consultant))
         .collect(Collectors.toList());
   }
@@ -132,14 +132,14 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return null;
   }
 
-  private boolean notHimself(Consultant consultant) {
+  private boolean notHimselfAndNotAbsent(Consultant consultant) {
     return isNotBlank(consultant.getEmail())
         && !areUsersEqual(userId, consultant)
         && !areUsersEqual(session.getConsultant().getId(), consultant)
         && !consultant.isAbsent();
   }
 
-  private boolean didAnotherConsultantWrote() {
+  private boolean didAnotherConsultantWrite() {
     return !areUsersEqual(userId, session.getConsultant())
         && !session.getConsultant().getEmail().isEmpty() && !session.getConsultant().isAbsent();
   }

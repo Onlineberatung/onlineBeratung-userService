@@ -95,7 +95,7 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyLisAndLogError_When_SessionHasConsultantIsWriterAndNoMembersAreInFeedbackGroup()
+  public void generateEmails_Should_ReturnEmptyListAndLogError_When_SessionHasConsultantIsWriterAndNoMembersAreInFeedbackGroup()
       throws RocketChatGetGroupMembersException {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
@@ -108,7 +108,7 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyLisAndLogError_When_SessionHasConsultantAndNofeedbackGroupMemberExists()
+  public void generateEmails_Should_ReturnEmptyListAndLogError_When_SessionHasConsultantAndNoFeedbackGroupMemberExists()
       throws RocketChatGetGroupMembersException {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
