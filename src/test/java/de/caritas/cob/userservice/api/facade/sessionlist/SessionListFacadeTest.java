@@ -333,25 +333,6 @@ public class SessionListFacadeTest {
     assertEquals(COUNT_1, result.getSessions().size());
   }
 
-  @Test
-  public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnCorrectCount_WhenCountIsGreaterThanAmountOfSessions() {
-
-    SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-        SESSION_STATUS_IN_PROGRESS,
-        OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 5,
-        SessionFilter.ALL);
-
-    when(consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
-        RC_TOKEN, sessionListQueryParameter))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-
-    ConsultantSessionListResponseDTO result =
-        sessionListFacade.retrieveTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
-            sessionListQueryParameter);
-
-    assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getCount());
-  }
-
   private SessionListQueryParameter createStandardSessionListQueryParameterObject(
       int sessionStatus, int offset, int count, SessionFilter sessionFilter) {
     return SessionListQueryParameter.builder()

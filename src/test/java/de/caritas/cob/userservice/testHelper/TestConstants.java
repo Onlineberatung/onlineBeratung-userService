@@ -178,6 +178,20 @@ public class TestConstants {
       new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO, HttpStatus.OK);
   public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN =
       new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_NO_TOKEN, HttpStatus.OK);
+  public static final List<SubscriptionsUpdateDTO> SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD =
+      Arrays.asList(
+          new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID, "A", "A", "P",
+              null, null, null, null),
+          new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_2, "A", "A", "P",
+              null, null, null, null),
+          new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_3, "A", "A", "P",
+              null, null, null, null),
+          new SubscriptionsUpdateDTO("A", true, false, 1, 0, 0, NOW, RC_FEEDBACK_GROUP_ID, "A", "A",
+              "P", null, null, null, null),
+          new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_FEEDBACK_GROUP_ID_2, "A",
+              "A", "P", null, null, null, null),
+          new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_FEEDBACK_GROUP_ID_3, "A",
+              "A", "P", null, null, null, null));
 
 
   /**
@@ -584,9 +598,18 @@ public class TestConstants {
       .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3);
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST = Arrays
       .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3, USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2);
-  public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS = of(RC_GROUP_ID,
-      false, RC_GROUP_ID_2, false, RC_GROUP_ID_3, false, RC_GROUP_ID_4, false,
-      RC_GROUP_ID_5, false);
+  public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS =
+      new HashMap<String, Boolean>() {{
+        put(RC_GROUP_ID, false);
+        put(RC_GROUP_ID_2, false);
+        put(RC_GROUP_ID_3, false);
+        put(RC_GROUP_ID_4, false);
+        put(RC_GROUP_ID_5, false);
+        put(RC_GROUP_ID_6, false);
+        put(RC_FEEDBACK_GROUP_ID, false);
+        put(RC_FEEDBACK_GROUP_ID_2, false);
+        put(RC_FEEDBACK_GROUP_ID_3, false);
+      }};
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITHOUT_UNREADS =
       new HashMap<String, Boolean>() {{
         put(RC_GROUP_ID, true);
@@ -927,14 +950,6 @@ public class TestConstants {
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE =
       new ConsultantSessionResponseDTO(null, USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE, null, null,
           new Date(NOW.getTime() + 8640000));
-  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_MESSAGE =
-      new ArrayList<ConsultantSessionResponseDTO>() {
-        private static final long serialVersionUID = 1L;
-
-        {
-          add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_MESSAGE);
-        }
-      };
   public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE =
       new ArrayList<ConsultantSessionResponseDTO>() {
         private static final long serialVersionUID = 1L;
