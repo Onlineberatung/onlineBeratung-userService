@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.mailService;
+package de.caritas.cob.userservice.api.model.mailservice;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

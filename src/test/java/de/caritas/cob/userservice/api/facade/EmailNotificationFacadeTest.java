@@ -13,6 +13,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID_
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_SESSION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSION;
+import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
@@ -25,11 +26,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -39,7 +41,6 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.helper.EmailNotificationHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
@@ -48,8 +49,7 @@ import de.caritas.cob.userservice.api.manager.consultingType.notifications.Notif
 import de.caritas.cob.userservice.api.manager.consultingType.notifications.TeamSession;
 import de.caritas.cob.userservice.api.manager.consultingType.notifications.ToConsultant;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.mailService.MailDtoBuilder;
-import de.caritas.cob.userservice.api.model.mailService.MailsDTO;
+import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -65,7 +65,6 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -75,7 +74,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -110,7 +108,8 @@ public class EmailNotificationFacadeTest {
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID);
   private final Session SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.INITIAL,
+      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID,
+          SessionStatus.INITIAL,
           new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(1L, USER, null, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.NEW,
@@ -176,8 +175,6 @@ public class EmailNotificationFacadeTest {
   @Mock
   RocketChatService rocketChatService;
   @Mock
-  MailDtoBuilder mailDtoBuilder;
-  @Mock
   ConsultingTypeManager consultingTypeManager;
   @Mock
   UserHelper userHelper;
@@ -210,15 +207,6 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_ENQUIRY_NOTIFICATION),
-        Mockito.eq(CONSULTANT.getEmail()),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name", CONSULTANT.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("plz", SESSION.getPostcode())),
-        Mockito
-            .eq(new SimpleImmutableEntry<String, String>("beratungsstelle", AGENCY_DTO.getName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
 
   }
@@ -232,9 +220,6 @@ public class EmailNotificationFacadeTest {
     when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
-
-    verify(mailDtoBuilder, times(0)).build(Mockito.any(), Mockito.eq(SESSION.getUser().getEmail()),
-        ArgumentMatchers.any());
 
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
@@ -261,8 +246,6 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verifyNoMoreInteractions(mailDtoBuilder);
-
   }
 
   @Test
@@ -274,8 +257,6 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verifyNoMoreInteractions(mailDtoBuilder);
-
   }
 
   @Test
@@ -311,13 +292,6 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT),
-        Mockito.eq(CONSULTANT.getEmail()),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name", CONSULTANT.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("plz", TEAM_SESSION.getPostcode())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
     verify(consultantAgencyService, times(1)).findConsultantsByAgencyId(AGENCY_ID);
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
@@ -332,9 +306,6 @@ public class EmailNotificationFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
-
-    verify(mailDtoBuilder, times(0)).build(Mockito.any(),
-        Mockito.eq(TEAM_SESSION.getUser().getEmail()), ArgumentMatchers.any());
 
     verify(consultantAgencyService, times(1)).findConsultantsByAgencyId(AGENCY_ID);
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
@@ -352,7 +323,6 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verifyNoMoreInteractions(mailDtoBuilder);
   }
 
   @Test
@@ -381,7 +351,6 @@ public class EmailNotificationFacadeTest {
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailDtoBuilder);
   }
 
   @Test
@@ -394,7 +363,6 @@ public class EmailNotificationFacadeTest {
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailDtoBuilder);
   }
 
   @Test
@@ -406,7 +374,6 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verifyNoMoreInteractions(mailDtoBuilder);
   }
 
   @Test
@@ -431,7 +398,6 @@ public class EmailNotificationFacadeTest {
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailDtoBuilder);
   }
 
   @Test
@@ -444,10 +410,8 @@ public class EmailNotificationFacadeTest {
         CONSULTANT_ID);
 
     verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    verifyNoMoreInteractions(mailDtoBuilder);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void sendNewMessageNotification_Should_SendEmailToUserWithEncodedUsernames_WhenCalledAsConsultantAuthorityAndAskerHasEmail() {
 
@@ -460,18 +424,9 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
 
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER),
-        Mockito.eq(SESSION_IN_PROGRESS.getUser().getEmail()),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("consultantName",
-            USERNAME_CONSULTANT_DECODED)),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("askerName", USERNAME_DECODED)),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void sendNewMessageNotification_Should_SendEmailToAllConsultants_WhenIsTeamSessionAndConsultingTypeSettingsToSendToAllTeamConsultantsIsTrue() {
 
@@ -483,26 +438,9 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT),
-        Mockito.eq(CONSULTANT.getEmail()),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name", CONSULTANT.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("plz", TEAM_SESSION.getPostcode())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT),
-        Mockito.eq(CONSULTANT2.getEmail()),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name", CONSULTANT2.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("plz", TEAM_SESSION.getPostcode())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
-    verify(mailDtoBuilder, times(2)).build(Mockito.any(), Mockito.any(), ArgumentMatchers.any());
-
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void sendNewMessageNotification_Should_SendEmailToAssignConsultantOnly_WhenIsTeamSessionAndConsultingTypeSettingsToSendToAllTeamConsultantsIsFalse() {
 
@@ -512,15 +450,6 @@ public class EmailNotificationFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
-
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT),
-        Mockito.eq(CONSULTANT.getEmail()),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name", CONSULTANT.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("plz", TEAM_SESSION.getPostcode())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
-    verify(mailDtoBuilder, times(1)).build(Mockito.any(), Mockito.any(), ArgumentMatchers.any());
 
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
   }
@@ -545,28 +474,6 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID, CONSULTANT_ID);
 
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION),
-        Mockito.eq(CONSULTANT2.getEmail()),
-        Mockito
-            .eq(new SimpleImmutableEntry<String, String>("name_sender", CONSULTANT.getFullName())),
-        Mockito.eq(
-            new SimpleImmutableEntry<String, String>("name_recipient", CONSULTANT2.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name_user", USERNAME_DECODED)),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION),
-        Mockito.eq(CONSULTANT3.getEmail()),
-        Mockito
-            .eq(new SimpleImmutableEntry<String, String>("name_sender", CONSULTANT.getFullName())),
-        Mockito.eq(
-            new SimpleImmutableEntry<String, String>("name_recipient", CONSULTANT3.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name_user", USERNAME_DECODED)),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
-    verify(mailDtoBuilder, times(2)).build(Mockito.any(), Mockito.any(), ArgumentMatchers.any());
-
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
 
   }
@@ -582,20 +489,6 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID_2);
 
-    // Verify that mail for assigned consultant is prepared...
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION),
-        Mockito.eq(CONSULTANT.getEmail()),
-        Mockito
-            .eq(new SimpleImmutableEntry<String, String>("name_sender", CONSULTANT2.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name_recipient",
-            SESSION.getConsultant().getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name_user", USERNAME_DECODED)),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
-    // and verify that only 1 mail is prepared
-    verify(mailDtoBuilder, times(1)).build(Mockito.any(), Mockito.any(), ArgumentMatchers.any());
-
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
 
   }
@@ -607,7 +500,6 @@ public class EmailNotificationFacadeTest {
         CONSULTANT_ID);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
 
   }
 
@@ -620,7 +512,6 @@ public class EmailNotificationFacadeTest {
         CONSULTANT_ID);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
 
   }
 
@@ -634,11 +525,9 @@ public class EmailNotificationFacadeTest {
         CONSULTANT_ID);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
 
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void sendAssignEnquiryEmailNotification_Should_SendEmail_WhenAllParametersAreValid() {
 
@@ -647,20 +536,6 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME);
-
-    // Verify that mail for assigned consultant is prepared...
-    verify(mailDtoBuilder, times(1)).build(
-        Mockito.eq(EmailNotificationHelper.TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION),
-        Mockito.eq(CONSULTANT.getEmail()),
-        Mockito
-            .eq(new SimpleImmutableEntry<String, String>("name_sender", CONSULTANT2.getFullName())),
-        Mockito.eq(
-            new SimpleImmutableEntry<String, String>("name_recipient", CONSULTANT.getFullName())),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("name_user", USERNAME)),
-        Mockito.eq(new SimpleImmutableEntry<String, String>("url", APPLICATION_BASE_URL)));
-
-    // and verify that only 1 mail is prepared
-    verify(mailDtoBuilder, times(1)).build(Mockito.any(), Mockito.any(), ArgumentMatchers.any());
 
     verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
   }
@@ -671,7 +546,6 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(null, CONSULTANT_ID_2, USERNAME);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
   }
 
   @Test
@@ -681,7 +555,6 @@ public class EmailNotificationFacadeTest {
         CONSULTANT_ID_2, USERNAME);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
   }
 
   @Test
@@ -693,7 +566,6 @@ public class EmailNotificationFacadeTest {
         USERNAME);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verifyNoMoreInteractions(mailServiceHelper, mailDtoBuilder);
   }
 
   @Test
@@ -707,6 +579,33 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
     verifyZeroInteractions(logger);
+  }
+
+  @Test
+  public void sendAssignEnquiryEmailNotification_Should_LogError_When_MailServiceHelperThrowsException() {
+    doThrow(new RuntimeException("unexpected")).when(mailServiceHelper).sendEmailNotification(any());
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(CONSULTANT));
+
+    emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME);
+
+    verify(logger, times(1)).error(anyString(), anyString(), eq("unexpected"));
+  }
+
+  @Test(expected = NewMessageNotificationException.class)
+  public void sendNewFeedbackMessageNotification_Should_ThrowNewMessageNotificationException_When_SessionServiceThrownsServerError() {
+    when(sessionService.getSessionByFeedbackGroupId(any()))
+        .thenThrow(new InternalServerErrorException(""));
+
+    emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID);
+  }
+
+  @Test
+  public void sendAssignEnquiryEmailNotification_Should_LogError_When_SessionServiceThrowsRuntmeException() {
+    when(sessionService.getSessionByFeedbackGroupId(any())).thenThrow(new RuntimeException(""));
+
+    emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID);
+
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
 }

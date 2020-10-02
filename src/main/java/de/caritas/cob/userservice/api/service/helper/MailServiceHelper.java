@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
+import de.caritas.cob.userservice.api.service.LogService;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -9,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import de.caritas.cob.userservice.api.model.mailService.MailsDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 
 /**
  * 
@@ -18,21 +19,19 @@ import de.caritas.cob.userservice.api.service.LogService;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class MailServiceHelper {
 
   @Value("${mail.service.api.mails.send}")
   private String mailServiceApiSendMailUrl;
 
-  @Autowired
-  private ServiceHelper serviceHelper;
-
-  @Autowired
-  private RestTemplate restTemplate;
+  private final @NonNull ServiceHelper serviceHelper;
+  private final @NonNull RestTemplate restTemplate;
 
   /**
-   * Send a email notification asynchron via the MailService
+   * Send a email notification asynchron via the MailService.
    * 
-   * @param mailsDTO
+   * @param mailsDTO the transfer object to be handled in MailService
    */
   public void sendEmailNotification(MailsDTO mailsDTO) {
 
@@ -40,7 +39,7 @@ public class MailServiceHelper {
 
     try {
       HttpHeaders header = serviceHelper.getCsrfHttpHeaders();
-      HttpEntity<MailsDTO> request = new HttpEntity<MailsDTO>(mailsDTO, header);
+      HttpEntity<MailsDTO> request = new HttpEntity<>(mailsDTO, header);
 
       response =
           restTemplate.exchange(mailServiceApiSendMailUrl, HttpMethod.POST, request, Void.class);
