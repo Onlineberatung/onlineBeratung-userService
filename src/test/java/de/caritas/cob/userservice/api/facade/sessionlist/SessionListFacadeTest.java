@@ -27,6 +27,7 @@ import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

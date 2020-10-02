@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ATTACHMENT_DTO
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING;
@@ -362,7 +363,7 @@ public class ConsultantSessionListServiceTest {
   public void retrieveSessionsForAuthenticatedConsultant_ShouldNot_SetIsFeedbackReadToFalse_WhenNoMessageWasPostedInTheFeedbackRoom() {
 
     when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_NEW))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
+        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_2);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .messagesReadMap(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)

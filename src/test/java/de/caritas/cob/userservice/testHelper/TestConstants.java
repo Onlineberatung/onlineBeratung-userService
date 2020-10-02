@@ -740,6 +740,16 @@ public class TestConstants {
           add(CONSULTANT_SESSION_RESPONSE_DTO_3);
         }
       };
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_2 =
+      new ArrayList<ConsultantSessionResponseDTO>() {
+        private static final long serialVersionUID = 1L;
+
+        {
+          add(CONSULTANT_SESSION_RESPONSE_DTO);
+          add(CONSULTANT_SESSION_RESPONSE_DTO_2);
+          add(CONSULTANT_SESSION_RESPONSE_DTO_3);
+        }
+      };
   public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ONE_FEEDBACK =
       new ArrayList<ConsultantSessionResponseDTO>() {
         private static final long serialVersionUID = 1L;
