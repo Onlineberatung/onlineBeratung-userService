@@ -5,15 +5,15 @@ public class FieldConstants {
   /**
    * User
    */
-  public static final String FIELD_NAME_EMAIL_DUMMY_SUFFIX = "EMAIL_DUMMY_SUFFIX";
+  public static final String FIELD_NAME_EMAIL_DUMMY_SUFFIX = "emailDummySuffix";
   public static final String FIELD_VALUE_EMAIL_DUMMY_SUFFIX = "@onlineberatung.internet";
-  public static final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "ROCKET_CHAT_SYSTEM_USER_ID";
+  public static final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "rocketChatSystemUserId";
   public static final String FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID = "sdfk323";
 
   /**
    * UserHelper
    */
-  public static final String FIELD_NAME_HOST_BASE_URL = "HOST_BASE_URL";
+  public static final String FIELD_NAME_HOST_BASE_URL = "hostBaseUrl";
 
   /**
    * StopChatFacade

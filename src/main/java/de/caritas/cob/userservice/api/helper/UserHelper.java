@@ -24,10 +24,10 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 public class UserHelper {
 
   @Value("${keycloakService.user.dummySuffix}")
-  private String EMAIL_DUMMY_SUFFIX;
+  private String emailDummySuffix;
 
   @Value("${app.base.url}")
-  private String HOST_BASE_URL;
+  private String hostBaseUrl;
 
   public static final int USERNAME_MIN_LENGTH = 5;
   public static final int USERNAME_MAX_LENGTH = 30;
@@ -48,10 +48,10 @@ public class UserHelper {
   public static final int CHAT_MAX_DURATION = 180;
   public static final int CHAT_TOPIC_MIN_LENGTH = 3;
   public static final int CHAT_TOPIC_MAX_LENGTH = 50;
-  private final String ENCODING_PREFIX = "enc.";
-  private final String BASE32_PLACEHOLDER = "=";
-  private final String BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING = ".";
-  private final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
+  private static final String ENCODING_PREFIX = "enc.";
+  private static final String BASE32_PLACEHOLDER = "=";
+  private static final String BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING = ".";
+  private static final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
   private Base32 base32 = new Base32();
 
   @Autowired
@@ -96,7 +96,7 @@ public class UserHelper {
    * @return
    */
   public String getDummyEmail(String userId) {
-    return userId + EMAIL_DUMMY_SUFFIX;
+    return userId + emailDummySuffix;
   }
 
   /**
@@ -200,7 +200,7 @@ public class UserHelper {
   private String base32EncodeAndReplacePlaceholder(String value, String placeholder,
       String replaceString) {
     try {
-      return base32.encodeAsString(value.getBytes()).toString().replace(placeholder, replaceString);
+      return base32.encodeAsString(value.getBytes()).replace(placeholder, replaceString);
 
     } catch (Exception exception) {
       // Catch generic exception because of lack of base32 documentation
@@ -216,7 +216,7 @@ public class UserHelper {
    * @return URL (String)
    */
   public String generateChatUrl(Long chatId, ConsultingType consultingType) {
-    return HOST_BASE_URL + "/" + consultingType.getUrlName() + "/"
+    return hostBaseUrl + "/" + consultingType.getUrlName() + "/"
         + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
             BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }

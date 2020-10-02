@@ -56,7 +56,7 @@ public class TestConstants {
    */
   public static final String APPLICATION_BASE_URL = "https://beratung.caritas.de";
   public static final String HOST_BASE_URL = "https://beratung.caritas.de";
-  public static final String APPLICATION_BASE_URL_FIELD_NAME = "APPLICATION_BASE_URL";
+  public static final String APPLICATION_BASE_URL_FIELD_NAME = "applicationBaseUrl";
   public static final String POSTCODE = "12345";
   public static final String INVALID_POSTCODE = "12";
   public static final String NAME = "testname";
