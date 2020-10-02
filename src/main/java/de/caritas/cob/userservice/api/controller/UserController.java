@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.controller;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -165,7 +166,7 @@ public class UserController implements UsersApi {
 
     Optional<Session> session = sessionService.getSession(sessionId);
 
-    if (!session.isPresent() || nonNull(session.get().getGroupId())) {
+    if (!session.isPresent() || isNull(session.get().getGroupId())) {
       LogService.logInternalServerError(String.format(
           "Session id %s is invalid, session not found or has no Rocket.Chat groupId assigned.",
           sessionId));
