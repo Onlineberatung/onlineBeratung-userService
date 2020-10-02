@@ -88,9 +88,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADE
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID_HEADER_PARAMETER_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_FILTER_ALL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_NEW;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
@@ -124,7 +122,7 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.getsessionlist.GetSessionListFacade;
+import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
@@ -325,7 +323,7 @@ public class UserControllerIT {
   @MockBean
   private AskerImportService askerImportService;
   @MockBean
-  private GetSessionListFacade getSessionListFacade;
+  private SessionListFacade sessionListFacade;
   @MockBean
   private ConsultantAgencyService consultantAgencyService;
   @MockBean
@@ -706,7 +704,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
+    when(sessionListFacade.retrieveSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -729,7 +727,7 @@ public class UserControllerIT {
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isInternalServerError());
 
-    verify(getSessionListFacade, times(0)).getSessionsDtoForAuthenticatedUser(Mockito.any(),
+    verify(sessionListFacade, times(0)).retrieveSessionsDtoForAuthenticatedUser(Mockito.any(),
         Mockito.any());
 
   }
@@ -743,7 +741,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
+    when(sessionListFacade.retrieveSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -761,7 +759,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
+    when(sessionListFacade.retrieveSessionsDtoForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)

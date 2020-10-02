@@ -22,7 +22,7 @@ import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
-import de.caritas.cob.userservice.api.facade.getsessionlist.GetSessionListFacade;
+import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
@@ -101,7 +101,7 @@ public class UserController implements UsersApi {
   private final @NotNull EmailNotificationFacade emailNotificationFacade;
   private final @NotNull MonitoringService monitoringService;
   private final @NotNull AskerImportService askerImportService;
-  private final @NotNull GetSessionListFacade getSessionListFacade;
+  private final @NotNull SessionListFacade sessionListFacade;
   private final @NotNull ConsultantAgencyService consultantAgencyService;
   private final @NotNull AssignSessionFacade assignSessionFacade;
   private final @NotNull KeycloakService keycloakService;
@@ -217,8 +217,8 @@ public class UserController implements UsersApi {
         .RocketChatToken(rcToken)
         .build();
 
-    UserSessionListResponseDTO userSessionsDTO = getSessionListFacade
-        .getSessionsDtoForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
+    UserSessionListResponseDTO userSessionsDTO = sessionListFacade
+        .retrieveSessionsDtoForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
 
     return isNotEmpty(userSessionsDTO.getSessions())
         ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
@@ -268,8 +268,8 @@ public class UserController implements UsersApi {
           .sessionFilter(optionalSessionFilter.get())
           .build();
 
-      consultantSessionListResponseDTO = getSessionListFacade
-          .getSessionsDtoForAuthenticatedConsultant(consultant,
+      consultantSessionListResponseDTO = sessionListFacade
+          .retrieveSessionsDtoForAuthenticatedConsultant(consultant,
               rcToken, sessionListQueryParameter);
     }
 
@@ -299,8 +299,8 @@ public class UserController implements UsersApi {
           .count(count).offset(offset).sessionFilter(optionalSessionFilter.get())
           .build();
 
-      teamSessionListDTO = getSessionListFacade
-          .getTeamSessionsDtoForAuthenticatedConsultant(consultant,
+      teamSessionListDTO = sessionListFacade
+          .retrieveTeamSessionsDtoForAuthenticatedConsultant(consultant,
               rcToken, sessionListQueryParameter);
     }
 

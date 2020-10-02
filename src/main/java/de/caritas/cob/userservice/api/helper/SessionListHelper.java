@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  */
 public class SessionListHelper {
 
-  private static final int MAX_MESSAGE_LENGTH_FOR_FRONTEND = 100;
+  public static final int MAX_MESSAGE_LENGTH_FOR_FRONTEND = 100;
 
   private final DecryptionService decryptionService;
 

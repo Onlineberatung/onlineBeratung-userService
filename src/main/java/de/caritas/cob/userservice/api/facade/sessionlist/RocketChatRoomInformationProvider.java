@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.facade.getsessionlist;
+package de.caritas.cob.userservice.api.facade.sessionlist;
 
 import static java.util.Objects.nonNull;
 

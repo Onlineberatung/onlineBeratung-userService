@@ -147,6 +147,7 @@ public class TestConstants {
   public static final String RC_GROUP_ID_4 = "ssssuuu";
   public static final String RC_GROUP_ID_5 = "aldoeke";
   public static final String RC_GROUP_ID_6 = "vmndsjk";
+  public static final String RC_GROUP_ID_7 = "juuuzte";
   public static final String RC_STATUS_ONLINE = "online";
   public static final String RC_UTC_OFFSET = "1";
   public static final String RC_FEEDBACK_GROUP_ID = "yyyZZZ";
@@ -374,6 +375,7 @@ public class TestConstants {
       "enc:uWHNUkWrQJikGnVpknvB3SkzT1RWHJuY0igDT9p7fGFHWECLBpV2+0eIZF6Qi7J0";
   public static final String DECRYPTED_MESSAGE = "Das hier ist jetzt mal eine Test-Message";
   public static final String MESSAGE = "Testnachricht";
+  public static final String MESSAGE_TOO_LONG = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magn";
   public static final AbsenceDTO ABSENCE_DTO = new AbsenceDTO(true, TestConstants.MESSAGE);
   public static final String MESSAGE_WITH_HTML_AND_JS =
       "<b>Testnachricht</b><script>alert('1');</script>";
@@ -496,6 +498,14 @@ public class TestConstants {
       new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
           RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
           IS_NO_TEAM_SESSION, IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_WITH_FEEDBACK =
+      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
+          RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
+          IS_NO_TEAM_SESSION, IS_MONITORING, false);
+  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK =
+      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
+          RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
+          IS_NO_TEAM_SESSION, IS_MONITORING, true);
   /**
    * Chat
    */
@@ -572,8 +582,8 @@ public class TestConstants {
       SESSION_DTO_3, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 8640000));
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST = Arrays
       .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3);
-
-  /* Rocket.Chat room information */
+  public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST = Arrays
+      .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3, USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2);
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS = of(RC_GROUP_ID,
       false, RC_GROUP_ID_2, false, RC_GROUP_ID_3, false, RC_GROUP_ID_4, false,
       RC_GROUP_ID_5, false);
@@ -604,6 +614,9 @@ public class TestConstants {
   public static final List<UserSessionResponseDTO> USER_CHAT_RESPONSE_DTO_LIST =
       Arrays.asList(USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2, USER_CHAT_RESPONSE_DTO_3);
 
+  public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITHOUT_ATTACHMENT =
+      new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
+          MESSAGE, null, null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_1 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
           MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
@@ -688,6 +701,12 @@ public class TestConstants {
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_3 =
       new ConsultantSessionResponseDTO(SESSION_DTO_3, null, null, null,
           new Date(NOW.getTime() + 8640000));
+  public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_FEEDBACK =
+      new ConsultantSessionResponseDTO(SESSION_DTO_WITH_FEEDBACK, null, null, null,
+          new Date(NOW.getTime() + 8640000));
+  public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK =
+      new ConsultantSessionResponseDTO(SESSION_DTO_WITHOUT_FEEDBACK, null, null, null,
+          new Date(NOW.getTime() + 8640000));
   public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST =
       new ArrayList<ConsultantSessionResponseDTO>() {
         private static final long serialVersionUID = 1L;
@@ -696,6 +715,26 @@ public class TestConstants {
           add(CONSULTANT_SESSION_RESPONSE_DTO);
           add(CONSULTANT_SESSION_RESPONSE_DTO_2);
           add(CONSULTANT_SESSION_RESPONSE_DTO_3);
+        }
+      };
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ONE_FEEDBACK =
+      new ArrayList<ConsultantSessionResponseDTO>() {
+        private static final long serialVersionUID = 1L;
+
+        {
+          add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_FEEDBACK);
+          add(CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK);
+        }
+      };
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_CHAT_RESPONSE_DTO_LIST =
+      new ArrayList<ConsultantSessionResponseDTO>() {
+        private static final long serialVersionUID = 1L;
+
+        {
+          add(CONSULTANT_SESSION_RESPONSE_DTO);
+          add(CONSULTANT_SESSION_RESPONSE_DTO_2);
+          add(CONSULTANT_SESSION_RESPONSE_DTO_3);
+          add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
         }
       };
   public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK_CHAT =
@@ -873,6 +912,7 @@ public class TestConstants {
   public static int OFFSET_0 = 0;
   public static int COUNT_10 = 10;
   public static int COUNT_1 = 1;
+  public static int COUNT_0 = 0;
   public static final SessionDTO SESSION_DTO_WITH_ENCRYPTED_MESSAGE = new SessionDTO(SESSION_ID,
       AGENCY_ID, 0, 0, null, RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, RC_USER_ID, ENCRYPTED_MESSAGE,
       Helper.getUnixTimestampFromDate(NOW), false, false, IS_NO_TEAM_SESSION, IS_MONITORING, null);

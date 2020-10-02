@@ -60,4 +60,21 @@ public class SessionDTO {
     this.isTeamSession = isTeamSession;
     this.monitoring = isMonitoring;
   }
+
+  public SessionDTO(Long id, Long agencyId, int consultingType, int status, String postcode,
+      String groupId, String feedbackGroupId, String askerRcId, Long messageDate,
+      boolean isTeamSession, boolean isMonitoring, boolean feedbackRead) {
+    this.id = id;
+    this.agencyId = agencyId;
+    this.consultingType = consultingType;
+    this.status = status;
+    this.postcode = postcode;
+    this.groupId = groupId;
+    this.feedbackGroupId = feedbackGroupId;
+    this.askerRcId = askerRcId;
+    this.messageDate = messageDate;
+    this.isTeamSession = isTeamSession;
+    this.monitoring = isMonitoring;
+    this.feedbackRead = feedbackRead;
+  }
 }

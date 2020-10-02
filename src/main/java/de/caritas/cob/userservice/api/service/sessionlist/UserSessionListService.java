@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
-import de.caritas.cob.userservice.api.facade.getsessionlist.RocketChatRoomInformationProvider;
+import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListHelper;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;

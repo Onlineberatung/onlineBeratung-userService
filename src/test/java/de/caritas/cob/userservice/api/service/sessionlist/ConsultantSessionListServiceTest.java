@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
-import de.caritas.cob.userservice.api.facade.getsessionlist.RocketChatRoomInformationProvider;
+import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -175,7 +175,7 @@ public class ConsultantSessionListServiceTest {
 
     assertEquals(
         Helper
-            .getUnixTimestampFromDate(ROOMS_UPDATE_DTO_LIST.get(0).getLastMessage().getTimestamp()),
+            .getUnixTimestampFromDate(ROOMS_LAST_MESSAGE_DTO_MAP.get(result.get(0).getSession().getGroupId()).getTimestamp()),
         result.get(0).getSession().getMessageDate());
   }
 
@@ -699,7 +699,7 @@ public class ConsultantSessionListServiceTest {
   }
 
   @Test
-  public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnMessageDateAsUnixtime0WhenNoMessages() {
+  public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages() {
 
     when(sessionService.getTeamSessionsForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);

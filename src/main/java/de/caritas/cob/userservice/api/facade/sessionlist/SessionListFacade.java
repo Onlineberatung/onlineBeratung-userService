@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.facade.getsessionlist;
+package de.caritas.cob.userservice.api.facade.sessionlist;
 
 import static java.util.Objects.nonNull;
 
@@ -26,13 +26,13 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class GetSessionListFacade {
+public class SessionListFacade {
 
   private final UserSessionListService userSessionListService;
   private final ConsultantSessionListService consultantSessionListService;
 
   @Autowired
-  public GetSessionListFacade(UserSessionListService userSessionListService,
+  public SessionListFacade(UserSessionListService userSessionListService,
       ConsultantSessionListService consultantSessionListService) {
     this.userSessionListService = userSessionListService;
     this.consultantSessionListService = consultantSessionListService;
@@ -46,7 +46,7 @@ public class GetSessionListFacade {
    * @param rocketChatCredentials the rocket chat credentials
    * @return {@link UserSessionListResponseDTO}
    */
-  public UserSessionListResponseDTO getSessionsDtoForAuthenticatedUser(String userId,
+  public UserSessionListResponseDTO retrieveSessionsDtoForAuthenticatedUser(String userId,
       RocketChatCredentials rocketChatCredentials) {
 
     List<UserSessionResponseDTO> userSessions = userSessionListService
@@ -66,7 +66,7 @@ public class GetSessionListFacade {
    * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
    * @return the response dto
    */
-  public ConsultantSessionListResponseDTO getSessionsDtoForAuthenticatedConsultant(
+  public ConsultantSessionListResponseDTO retrieveSessionsDtoForAuthenticatedConsultant(
       Consultant consultant, String rcAuthToken,
       SessionListQueryParameter sessionListQueryParameter) {
 
@@ -91,7 +91,7 @@ public class GetSessionListFacade {
     List<ConsultantSessionResponseDTO> consultantSessionsSublist = new ArrayList<>();
     if (isMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(),
         consultantSessions)) {
-      consultantSessionsSublist = getConsultantSessionsSublist(sessionListQueryParameter,
+      consultantSessionsSublist = retrieveConsultantSessionsSublist(sessionListQueryParameter,
           consultantSessions);
     }
 
@@ -106,7 +106,7 @@ public class GetSessionListFacade {
     return sessionListQueryParameter.getSessionFilter().equals(SessionFilter.FEEDBACK);
   }
 
-  private List<ConsultantSessionResponseDTO> getConsultantSessionsSublist(
+  private List<ConsultantSessionResponseDTO> retrieveConsultantSessionsSublist(
       SessionListQueryParameter sessionListQueryParameter,
       List<ConsultantSessionResponseDTO> consultantSessions) {
     return consultantSessions.subList(sessionListQueryParameter.getOffset(),
@@ -124,7 +124,7 @@ public class GetSessionListFacade {
    * @return a {@link ConsultantSessionListResponseDTO} with a {@link List} of {@link
    * ConsultantSessionResponseDTO}
    */
-  public ConsultantSessionListResponseDTO getTeamSessionsDtoForAuthenticatedConsultant(
+  public ConsultantSessionListResponseDTO retrieveTeamSessionsDtoForAuthenticatedConsultant(
       Consultant consultant, String rcAuthToken,
       SessionListQueryParameter sessionListQueryParameter) {
 
