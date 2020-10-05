@@ -2,21 +2,17 @@ package de.caritas.cob.userservice.api.container;
 
 import java.time.LocalDateTime;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Representation of Rocket.Chat credentials for the technical user.
- *
  */
-
-@Setter
-@Getter
+@Data
 @Builder
 public class RocketChatCredentials {
 
-  private String RocketChatToken;
-  private String RocketChatUserId;
-  private String RocketChatUsername;
-  private LocalDateTime TimeStampCreated;
+  private String rocketChatToken;
+  private String rocketChatUserId;
+  private String rocketChatUsername;
+  private LocalDateTime timeStampCreated;
 }

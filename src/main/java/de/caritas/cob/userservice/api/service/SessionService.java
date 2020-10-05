@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +17,6 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
-import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.Now;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
@@ -270,7 +270,7 @@ public class SessionService {
    * @return A list of {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getSessionsForConsultant(Consultant consultant,
-      Integer status) throws WrongParameterException {
+      Integer status) {
 
     List<Session> sessions = null;
     Optional<SessionStatus> sessionStatus;
@@ -303,8 +303,8 @@ public class SessionService {
             break;
         }
       } else {
-        throw new WrongParameterException(String.format(
-            "Invalid session status %s submitted for consultant %s", status, consultant.getId()));
+        throw new BadRequestException(String.format(
+            "Invalid session status %s submitted for consultant %s", status, consultant.getId()), LogService::logBadRequestException);
       }
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error", LogService::logDatabaseError);

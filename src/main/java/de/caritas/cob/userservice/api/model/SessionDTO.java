@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.model;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @ApiModel(value = "Session")
 public class SessionDTO {
 
@@ -60,4 +62,5 @@ public class SessionDTO {
     this.isTeamSession = isTeamSession;
     this.monitoring = isMonitoring;
   }
+
 }

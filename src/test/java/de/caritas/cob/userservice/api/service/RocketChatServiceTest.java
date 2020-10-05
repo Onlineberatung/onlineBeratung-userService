@@ -58,27 +58,25 @@ import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketChat.StandardResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupCounterResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupDeleteResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.SubscriptionsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCounterResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -609,7 +607,7 @@ public class RocketChatServiceTest {
    */
 
   @Test
-  public void getSubscriptionsOfUser_Should_ThrowRocketChatGetSubscriptionsException_WhenAPICallIsNotSuccessfull() {
+  public void getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
@@ -617,14 +615,14 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetSubscriptionsException");
-    } catch (RocketChatGetSubscriptionsException ex) {
-      assertTrue("Excepted RocketChatGetSubscriptionsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  public void getSubscriptionsOfUser_Should_ThrowRocketChatGetSubscriptionsException_When_APIResponseIsUnsuccessfull() {
+  public void getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnsuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
@@ -632,9 +630,9 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetSubscriptionsException");
-    } catch (RocketChatGetSubscriptionsException ex) {
-      assertTrue("Excepted RocketChatGetSubscriptionsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -648,14 +646,13 @@ public class RocketChatServiceTest {
     try {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
       fail("Expected exception: UnauthorizedException");
-    } catch (UnauthorizedException | RocketChatGetSubscriptionsException ex) {
+    } catch (UnauthorizedException ex) {
       assertTrue("Excepted UnauthorizedException thrown", true);
     }
   }
 
   @Test
-  public void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessfull()
-      throws Exception {
+  public void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
@@ -670,7 +667,7 @@ public class RocketChatServiceTest {
    */
 
   @Test
-  public void getRoomsOfUser_Should_ThrowRocketChatGetRoomsException_WhenAPICallIsNotSuccessfull() {
+  public void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessfull() {
 
     Exception exception = new RuntimeException(MESSAGE);
 
@@ -679,14 +676,14 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetRoomsException");
-    } catch (RocketChatGetRoomsException ex) {
-      assertTrue("Excepted RocketChatGetRoomsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  public void getRoomsOfUser_Should_ThrowRocketChatGetRoomsException_WhenAPIResponseIsUnsuccessfull() {
+  public void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnsuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
@@ -694,9 +691,9 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetRoomsException");
-    } catch (RocketChatGetRoomsException ex) {
-      assertTrue("Excepted RocketChatGetRoomsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 

@@ -10,7 +10,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import java.util.Arrays;

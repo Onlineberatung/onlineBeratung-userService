@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -48,7 +47,7 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -244,7 +243,7 @@ public class AskerImportService {
 
         // Log out user from Rocket.Chat
         RocketChatCredentials rocketChatUserCredentials = RocketChatCredentials.builder()
-            .RocketChatToken(rcUserToken).RocketChatUserId(rcUserId).build();
+            .rocketChatToken(rcUserToken).rocketChatUserId(rcUserId).build();
         rocketChatService.logoutUser(rocketChatUserCredentials);
 
         // Update rcUserId in user table
@@ -437,7 +436,7 @@ public class AskerImportService {
 
         // Create Rocket.Chat group
         RocketChatCredentials rocketChatUserCredentials = RocketChatCredentials.builder()
-            .RocketChatToken(rcUserToken).RocketChatUserId(rcUserId).build();
+            .rocketChatToken(rcUserToken).rocketChatUserId(rcUserId).build();
         String rcGroupId =
             rocketChatService.createPrivateGroup(rocketChatHelper.generateGroupName(session),
                 rocketChatUserCredentials).get().getGroup().getId();
@@ -542,7 +541,7 @@ public class AskerImportService {
               REPLACE_START_TOKEN, REPLACE_END_TOKEN);
           if (welcomeMessage != null && !welcomeMessage.equals(StringUtils.EMPTY)) {
             RocketChatCredentials rocketChatSystemCredentials = RocketChatCredentials.builder()
-                .RocketChatToken(systemUserToken).RocketChatUserId(systemUserId).build();
+                .rocketChatToken(systemUserToken).rocketChatUserId(systemUserId).build();
             messageServiceHelper.postMessage(welcomeMessage, rocketChatSystemCredentials, rcGroupId,
                 CreateEnquiryExceptionInformation.builder().build());
           } else {
@@ -634,7 +633,7 @@ public class AskerImportService {
   }
 
   /**
-   * Returns a {@link ImportRecord} object for the given CSV record line. Generates a random
+   * Returns a {@link ImportRecordAsker} object for the given CSV record line. Generates a random
    * password if no password is specified.
    */
   private ImportRecordAsker getImportRecordAsker(CSVRecord record) {
@@ -663,8 +662,8 @@ public class AskerImportService {
   }
 
   /**
-   * Returns a {@link ImportRecord} object for the given CSV record line. Generates a random
-   * password if no password is specified.
+   * Returns a {@link ImportRecordAskerWithoutSession} object for the given CSV record line.
+   * Generates a random password if no password is specified.
    */
   private ImportRecordAskerWithoutSession getImportRecordAskerWithoutSession(CSVRecord record) {
     ImportRecordAskerWithoutSession importRecord = new ImportRecordAskerWithoutSession();
@@ -693,8 +692,7 @@ public class AskerImportService {
    * Reads in all welcome message files (according to consulting type id) and returns the result as
    * a map.
    */
-  private Map<ConsultingType, String> getWelcomeMessageMap(String protocolFile)
-      throws ImportException {
+  private Map<ConsultingType, String> getWelcomeMessageMap(String protocolFile) {
 
     Map<ConsultingType, String> welcomeMessageMap = new EnumMap<>(ConsultingType.class);
 

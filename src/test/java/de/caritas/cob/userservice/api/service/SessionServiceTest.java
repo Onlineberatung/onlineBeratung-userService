@@ -40,8 +40,8 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.WrongParameterException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Now;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -100,10 +100,9 @@ public class SessionServiceTest {
   private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY,
       DESCRIPTION, false, false, ConsultingType.SUCHT);
   private final String ERROR_MSG = "error";
-  private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<String, Object>();
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
       null, null, null, null, null, ConsultingType.SUCHT.getValue() + "");
-
+  private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<String, Object>();
   @InjectMocks
   private SessionService sessionService;
   @Mock
@@ -266,7 +265,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnDatabaseError() throws Exception {
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnDatabaseError()
+      throws Exception {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException("Database error") {};
@@ -353,7 +353,6 @@ public class SessionServiceTest {
 
   /**
    * method: getSessionsForUserByConsultingType
-   *
    */
 
   @Test
@@ -390,7 +389,6 @@ public class SessionServiceTest {
 
   /**
    * method: getSessionsForConsultant
-   *
    */
 
   @Test
@@ -413,16 +411,11 @@ public class SessionServiceTest {
     }
   }
 
-  @Test
-  public void getSessionsForConsultant_Should_ReturnWrongParameterExceptionAndLogException_WhenStatusParameterIsInvalid()
+  @Test(expected = BadRequestException.class)
+  public void getSessionsForConsultant_Should_ThrowBadRequestException_WhenStatusParameterIsInvalid()
       throws Exception {
 
-    try {
-      sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_INVALID);
-      fail("Expected exception: WrongParameterException");
-    } catch (WrongParameterException wrongParameterException) {
-      assertTrue("Excepted WrongParameterException thrown", true);
-    }
+    sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_INVALID);
   }
 
   @Test
@@ -451,9 +444,7 @@ public class SessionServiceTest {
   }
 
   /**
-   *
    * Method: getSessionByGroupIdAndUserId Role: user
-   *
    */
 
   @Test
@@ -509,9 +500,7 @@ public class SessionServiceTest {
   }
 
   /**
-   *
    * Method: getSessionByGroupIdAndUserId Role: consultant
-   *
    */
 
   @Test
@@ -569,7 +558,6 @@ public class SessionServiceTest {
 
   /**
    * method: getTeamSessionsForConsultant
-   *
    */
 
   @Test
@@ -603,7 +591,7 @@ public class SessionServiceTest {
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-                .thenReturn(SESSION_LIST_WITH_CONSULTANT);
+        .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     assertThat(sessionService.getTeamSessionsForConsultant(consultant),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
@@ -619,7 +607,7 @@ public class SessionServiceTest {
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-                .thenReturn(SESSION_LIST_WITH_CONSULTANT);
+        .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     SessionConsultantForConsultantDTO sessionDTO =
         (SessionConsultantForConsultantDTO) sessionService.getTeamSessionsForConsultant(consultant)

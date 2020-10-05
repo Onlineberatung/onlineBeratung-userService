@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.ChatDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;

@@ -1,9 +1,13 @@
 package de.caritas.cob.userservice.api.controller;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
@@ -13,12 +17,12 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.GetSessionListFacade;
 import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
+import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
@@ -67,6 +71,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -97,7 +102,7 @@ public class UserController implements UsersApi {
   private final @NotNull EmailNotificationFacade emailNotificationFacade;
   private final @NotNull MonitoringService monitoringService;
   private final @NotNull AskerImportService askerImportService;
-  private final @NotNull GetSessionListFacade getSessionListFacade;
+  private final @NotNull SessionListFacade sessionListFacade;
   private final @NotNull ConsultantAgencyService consultantAgencyService;
   private final @NotNull AssignSessionFacade assignSessionFacade;
   private final @NotNull KeycloakService keycloakService;
@@ -114,10 +119,10 @@ public class UserController implements UsersApi {
   private final @NotNull CreateSessionFacade createSessionFacade;
 
   /**
-   * Creates a Keycloak user and returns a 201 CREATED on success
+   * Creates a Keycloak user and returns a 201 CREATED on success.
    *
-   * @param user
-   * @return
+   * @param user the {@link UserDTO}
+   * @return {@link ResponseEntity} with {@link CreateUserResponseDTO}
    */
   @Override
   public ResponseEntity<CreateUserResponseDTO> registerUser(@Valid @RequestBody UserDTO user) {
@@ -162,7 +167,7 @@ public class UserController implements UsersApi {
 
     Optional<Session> session = sessionService.getSession(sessionId);
 
-    if (!session.isPresent() || session.get().getGroupId() == null) {
+    if (!session.isPresent() || isNull(session.get().getGroupId())) {
       LogService.logInternalServerError(String.format(
           "Session id %s is invalid, session not found or has no Rocket.Chat groupId assigned.",
           sessionId));
@@ -187,8 +192,8 @@ public class UserController implements UsersApi {
 
     User user = this.userAccountProvider.retrieveValidatedUser();
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatToken(rcToken)
-        .RocketChatUserId(rcUserId)
+        .rocketChatToken(rcToken)
+        .rocketChatUserId(rcUserId)
         .build();
 
     createEnquiryMessageFacade.createEnquiryMessage(user, sessionId,
@@ -198,10 +203,10 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Returns a list of sessions for the currently authenticated/logged in user
+   * Returns a list of sessions for the currently authenticated/logged in user.
    *
    * @param rcToken Rocket.Chat token as request header value
-   * @return {@link List} of {@link UserSessionResponseDTO}
+   * @return {@link ResponseEntity} of {@link UserSessionResponseDTO}
    */
   @Override
   public ResponseEntity<UserSessionListResponseDTO> getSessionsForAuthenticatedUser(
@@ -209,15 +214,15 @@ public class UserController implements UsersApi {
 
     User user = this.userAccountProvider.retrieveValidatedUser();
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatUserId(user.getRcUserId())
-        .RocketChatToken(rcToken)
+        .rocketChatUserId(user.getRcUserId())
+        .rocketChatToken(rcToken)
         .build();
 
-    UserSessionListResponseDTO sessions = getSessionListFacade
-        .getSessionsForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
+    UserSessionListResponseDTO userSessionsDTO = sessionListFacade
+        .retrieveSortedSessionsForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
 
-    return isNotEmpty(sessions.getSessions())
-        ? new ResponseEntity<>(sessions, HttpStatus.OK)
+    return isNotEmpty(userSessionsDTO.getSessions())
+        ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
@@ -231,7 +236,6 @@ public class UserController implements UsersApi {
 
   /**
    * Gets the user data for the current logged in user depending on his user role.
-   *
    */
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
@@ -244,7 +248,7 @@ public class UserController implements UsersApi {
 
   /**
    * Returns a list of sessions for the currently authenticated consultant depending on the
-   * submitted sessionStatus
+   * submitted sessionStatus.
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getSessionsForAuthenticatedConsultant(
@@ -256,15 +260,23 @@ public class UserController implements UsersApi {
 
     Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
-    ConsultantSessionListResponseDTO sessionList = null;
+    ConsultantSessionListResponseDTO consultantSessionListResponseDTO = null;
     Optional<SessionFilter> optionalSessionFilter = SessionFilter.getByValue(filter);
     if (optionalSessionFilter.isPresent()) {
-      sessionList = getSessionListFacade.getSessionsForAuthenticatedConsultant(consultant, status,
-          rcToken, offset, count, optionalSessionFilter.get());
+
+      SessionListQueryParameter sessionListQueryParameter = SessionListQueryParameter.builder()
+          .sessionStatus(status).count(count).offset(offset)
+          .sessionFilter(optionalSessionFilter.get())
+          .build();
+
+      consultantSessionListResponseDTO = sessionListFacade
+          .retrieveSessionsDtoForAuthenticatedConsultant(consultant,
+              rcToken, sessionListQueryParameter);
     }
 
-    return sessionList != null && isNotEmpty(sessionList.getSessions())
-        ? new ResponseEntity<>(sessionList, HttpStatus.OK)
+    return nonNull(consultantSessionListResponseDTO) && isNotEmpty(
+        consultantSessionListResponseDTO.getSessions())
+        ? new ResponseEntity<>(consultantSessionListResponseDTO, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
@@ -280,21 +292,26 @@ public class UserController implements UsersApi {
 
     Consultant consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
 
-    ConsultantSessionListResponseDTO sessionList = null;
+    ConsultantSessionListResponseDTO teamSessionListDTO = null;
     Optional<SessionFilter> optionalSessionFilter = SessionFilter.getByValue(filter);
     if (optionalSessionFilter.isPresent()) {
-      sessionList = getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(consultant,
-          rcToken, offset, count, optionalSessionFilter.get());
+
+      SessionListQueryParameter sessionListQueryParameter = SessionListQueryParameter.builder()
+          .count(count).offset(offset).sessionFilter(optionalSessionFilter.get())
+          .build();
+
+      teamSessionListDTO = sessionListFacade
+          .retrieveTeamSessionsDtoForAuthenticatedConsultant(consultant,
+              rcToken, sessionListQueryParameter);
     }
 
-    return sessionList != null && isNotEmpty(sessionList.getSessions())
-        ? new ResponseEntity<>(sessionList, HttpStatus.OK)
+    return nonNull(teamSessionListDTO) && isNotEmpty(teamSessionListDTO.getSessions())
+        ? new ResponseEntity<>(teamSessionListDTO, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
    * Imports a file list of consultants. Technical user authorization required
-   *
    */
   @Override
   public ResponseEntity<Void> importConsultants() {
@@ -306,7 +323,6 @@ public class UserController implements UsersApi {
 
   /**
    * Imports a file list of askers. Technical user authorization required.
-   *
    */
   @Override
   public ResponseEntity<Void> importAskers() {
@@ -318,7 +334,6 @@ public class UserController implements UsersApi {
 
   /**
    * Imports a file list of askers without a session. Technical user authorization required.
-   *
    */
   @Override
   public ResponseEntity<Void> importAskersWithoutSession() {
@@ -332,7 +347,6 @@ public class UserController implements UsersApi {
    * Sends email notifications to the user(s) if there has been a new answer. Uses the provided
    * Keycloak authorization token for user verification (user role). This means that the user that
    * wrote the answer should also call this method.
-   *
    */
   @Override
   public ResponseEntity<Void> sendNewMessageNotification(
@@ -348,7 +362,6 @@ public class UserController implements UsersApi {
    * Sends email notifications to the user(s) if there has been a new feedback answer. Uses the
    * provided Keycloak authorization token for user verification (user role). This means that the
    * user that wrote the answer should also call this method.
-   *
    */
   @Override
   public ResponseEntity<Void> sendNewFeedbackMessageNotification(
@@ -362,7 +375,6 @@ public class UserController implements UsersApi {
 
   /**
    * Returns the monitoring for the given session
-   *
    */
   @Override
   public ResponseEntity<MonitoringDTO> getMonitoring(
@@ -385,9 +397,8 @@ public class UserController implements UsersApi {
 
     MonitoringDTO responseDTO = monitoringService.getMonitoring(session.get());
 
-    if (responseDTO != null && responseDTO.getProperties().size() > 0) {
+    if (nonNull(responseDTO) && MapUtils.isNotEmpty(responseDTO.getProperties())) {
       return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-
     } else {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -494,13 +505,11 @@ public class UserController implements UsersApi {
         keycloakService.loginUser(authenticatedUser.getUsername(), passwordDTO.getOldPassword());
 
     if (loginResponse.isPresent() && loginResponse.get().getStatusCode().equals(HttpStatus.OK)
-        && keycloakService.logoutUser(loginResponse.get().getBody().getRefresh_token())) {
-
-      // Change the user's (Keycloak) password
-      if (keycloakService.changePassword(authenticatedUser.getUserId(),
-          passwordDTO.getNewPassword())) {
-        return new ResponseEntity<>(HttpStatus.OK);
-      }
+        && keycloakService
+        .logoutUser(requireNonNull(loginResponse.get().getBody()).getRefresh_token())
+        && keycloakService.changePassword(authenticatedUser.getUserId(),
+        passwordDTO.getNewPassword())) {
+      return new ResponseEntity<>(HttpStatus.OK);
     }
 
     return new ResponseEntity<>(loginResponse.isPresent()
@@ -510,10 +519,10 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Updates the master key fragment for the en-/decryption of messages
+   * Updates the master key fragment for the en-/decryption of messages.
    *
-   * @param masterKey
-   * @return
+   * @param masterKey the {@link MasterKeyDTO}
+   * @return a {@link ResponseEntity}
    */
   @Override
   public ResponseEntity<Void> updateKey(@Valid @RequestBody MasterKeyDTO masterKey) {
@@ -527,10 +536,10 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Creates a new chat with the given details and returns the generated chat link
+   * Creates a new chat with the given details and returns the generated chat link.
    *
    * @param chatDTO {@link ChatDTO}
-   * @return
+   * @return a {@link ResponseEntity} with a {@link CreateChatResponseDTO}
    */
   @Override
   public ResponseEntity<CreateChatResponseDTO> createChat(@Valid @RequestBody ChatDTO chatDTO) {
@@ -543,7 +552,10 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Start a chat
+   * Start a chat.
+   *
+   * @param chatId the chat id
+   * @return a {@link ResponseEntity}
    */
   @Override
   public ResponseEntity<Void> startChat(@NotNull @Valid @PathVariable("chatId") Long chatId) {
@@ -562,7 +574,10 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Get chat info
+   * Get the chat info.
+   *
+   * @param chatId the chat id
+   * @return a {@link ResponseEntity} with a {@link ChatInfoResponseDTO}
    */
   @Override
   public ResponseEntity<ChatInfoResponseDTO> getChat(
@@ -574,7 +589,10 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Join a chat
+   * Join a chat.
+   *
+   * @param chatId the chat id
+   * @return a {@link ResponseEntity}
    */
   @Override
   public ResponseEntity<Void> joinChat(@NotNull @Valid @PathVariable("chatId") Long chatId) {
@@ -588,6 +606,9 @@ public class UserController implements UsersApi {
   /**
    * Stops the given chat (chatId). Deletes all users and messages from the Rocket.Chat room
    * (repetitive chat) or deletes the whole room (singular chat).
+   *
+   * @param chatId the chat id
+   * @return a {@link ResponseEntity}
    */
   @Override
   public ResponseEntity<Void> stopChat(@NotNull @Valid @PathVariable("chatId") Long chatId) {
@@ -604,6 +625,12 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Get the members of a chat.
+   *
+   * @param chatId the chat id
+   * @return a {@link ResponseEntity} with a {@link ChatMembersResponseDTO}
+   */
   @Override
   public ResponseEntity<ChatMembersResponseDTO> getChatMembers(
       @NotNull @Valid @PathVariable("chatId") Long chatId) {
@@ -614,6 +641,12 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(chatMembersResponseDTO, HttpStatus.OK);
   }
 
+  /**
+   * Leave a chat.
+   *
+   * @param chatId the chat id
+   * @return a {@link ResponseEntity}
+   */
   @Override
   public ResponseEntity<Void> leaveChat(@NotNull @Valid @PathVariable("chatId") Long chatId) {
 
@@ -626,6 +659,9 @@ public class UserController implements UsersApi {
   /**
    * Updates the settings of the given {@link Chat}.
    *
+   * @param chatId  the chat id
+   * @param chatDTO the {@link ChatDTO}
+   * @return a {@link ResponseEntity} with a {@link UpdateChatResponseDTO}
    */
   @Override
   public ResponseEntity<UpdateChatResponseDTO> updateChat(

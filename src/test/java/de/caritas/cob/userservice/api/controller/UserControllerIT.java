@@ -88,9 +88,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADE
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID_HEADER_PARAMETER_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_FILTER_ALL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_NEW;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
@@ -124,7 +122,7 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.GetSessionListFacade;
+import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
@@ -209,13 +207,9 @@ public class UserControllerIT {
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null);
-  private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
-      "first name", "last name", "consultant@cob.de", false, false, "", false, null, null, null);
   private final Optional<Consultant> OPTIONAL_CONSULTANT = Optional.of(TEAM_CONSULTANT);
   private final String DUMMY_ROLE_A = "dummyRoleA";
   private final String DUMMY_ROLE_B = "dummyRoleB";
-  private final Set<String> ROLES_INVALID =
-      new HashSet<>(Arrays.asList(DUMMY_ROLE_A, DUMMY_ROLE_B));
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList(DUMMY_ROLE_A, UserRole.USER.getValue(), DUMMY_ROLE_B));
   private final Set<String> ROLES_WITH_CONSULTANT =
@@ -282,13 +276,13 @@ public class UserControllerIT {
   private final String VALID_PASSWORT_REQUEST_BODY =
       "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
   private final Optional<ResponseEntity<LoginResponseDTO>> LOGIN_RESPONSE_ENTITY_BAD_REQUEST =
-      Optional.of(new ResponseEntity<LoginResponseDTO>(HttpStatus.BAD_REQUEST));
+      Optional.of(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
   private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final LoginResponseDTO LOGIN_RESPONSE_DTO =
       new LoginResponseDTO(ACCESS_TOKEN, 0, 0, REFRESH_TOKEN, null, null, null);
   private final Optional<ResponseEntity<LoginResponseDTO>> LOGIN_RESPONSE_ENTITY_OK =
-      Optional.of(new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO, HttpStatus.OK));
+      Optional.of(new ResponseEntity<>(LOGIN_RESPONSE_DTO, HttpStatus.OK));
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
@@ -298,8 +292,6 @@ public class UserControllerIT {
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
   private final String VALID_MONITORING_RESPONSE_JSON =
       "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
-  KeycloakCreateUserResponseDTO KEYCLOAK_CREATE_USER_RESPONSE_DTO =
-      new KeycloakCreateUserResponseDTO(USER_ID);
 
   @Autowired
   private MockMvc mvc;
@@ -325,7 +317,7 @@ public class UserControllerIT {
   @MockBean
   private AskerImportService askerImportService;
   @MockBean
-  private GetSessionListFacade getSessionListFacade;
+  private SessionListFacade sessionListFacade;
   @MockBean
   private ConsultantAgencyService consultantAgencyService;
   @MockBean
@@ -691,7 +683,7 @@ public class UserControllerIT {
 
   /**
    * Method: getSessionsForAuthenticatedUser (role: user)
-   * 
+   *
    */
 
   @Test
@@ -706,7 +698,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
+    when(sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -729,7 +721,7 @@ public class UserControllerIT {
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isInternalServerError());
 
-    verify(getSessionListFacade, times(0)).getSessionsForAuthenticatedUser(Mockito.any(),
+    verify(sessionListFacade, times(0)).retrieveSortedSessionsForAuthenticatedUser(Mockito.any(),
         Mockito.any());
 
   }
@@ -743,7 +735,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
+    when(sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -761,7 +753,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedUser(anyString(), Mockito.any()))
+    when(sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
@@ -810,7 +802,7 @@ public class UserControllerIT {
 
   /**
    * Method: getSessionsForAuthenticatedConsultant (role: consultant)
-   * 
+   *
    */
 
   @Test
@@ -847,40 +839,26 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getSessionsForAuthenticatedConsultant_Should_ReturnSucess_WhenAuthorizedAndSessionAvailable()
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnSuccess_WhenAuthorizedAndSessionAvailable()
       throws Exception {
 
     List<ConsultantSessionResponseDTO> session = new ArrayList<ConsultantSessionResponseDTO>();
     session.add(new ConsultantSessionResponseDTO());
-    ConsultantSessionListResponseDTO consultantSessionListResponseDTO =
-        new ConsultantSessionListResponseDTO(session, OFFSET_0, COUNT_10, 1);
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 
-    when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
-        SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
-            .thenReturn(consultantSessionListResponseDTO);
-
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().is2xxSuccessful());
-
   }
 
   @Test
   public void getSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndNoSessionsAvailable()
       throws Exception {
 
-    ConsultantSessionListResponseDTO consultantSessionListResponseDTO =
-        new ConsultantSessionListResponseDTO(null, OFFSET_0, COUNT_10, 0);
-
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-
-    when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
-        SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
-            .thenReturn(consultantSessionListResponseDTO);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -891,16 +869,10 @@ public class UserControllerIT {
   public void getSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndSessionListIsEmpty()
       throws Exception {
 
-    List<ConsultantSessionResponseDTO> session = new ArrayList<ConsultantSessionResponseDTO>();
-    ConsultantSessionListResponseDTO consultantSessionListResponseDTO =
-        new ConsultantSessionListResponseDTO(session, OFFSET_0, COUNT_10, 0);
+    List<ConsultantSessionResponseDTO> session = new ArrayList<>();
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-
-    when(getSessionListFacade.getSessionsForAuthenticatedConsultant(TEAM_CONSULTANT,
-        SESSION_STATUS_NEW, RC_TOKEN, OFFSET_0, COUNT_10, SESSION_FILTER_ALL))
-            .thenReturn(consultantSessionListResponseDTO);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -914,7 +886,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_OFFSET)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -924,7 +895,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -934,7 +904,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_COUNT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -944,7 +913,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -961,7 +929,7 @@ public class UserControllerIT {
 
   /**
    * Method: getUserData (role: consultant / user)
-   * 
+   *
    */
 
   @Test
@@ -1050,7 +1018,7 @@ public class UserControllerIT {
 
   /**
    * Method: getTeamSessionsForAuthenticatedConsultant (role: consultant)
-   * 
+   *
    */
 
   @Test
@@ -1093,14 +1061,8 @@ public class UserControllerIT {
   public void getTeamSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndNoSessionsAvailable()
       throws Exception {
 
-    List<ConsultantSessionResponseDTO> session = null;
-    ConsultantSessionListResponseDTO consultantSessionListResponseDTO =
-        new ConsultantSessionListResponseDTO(session, OFFSET_0, COUNT_10, 0);
-
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-    when(getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
-        OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
@@ -1111,22 +1073,12 @@ public class UserControllerIT {
   public void getTeamSessionsForAuthenticatedConsultant_Should_ReturnSucess_WhenAuthorizedAndSessionsAvailable()
       throws Exception {
 
-    List<ConsultantSessionResponseDTO> session = new ArrayList<ConsultantSessionResponseDTO>();
-    session.add(new ConsultantSessionResponseDTO());
-    ConsultantSessionListResponseDTO consultantSessionListResponseDTO =
-        new ConsultantSessionListResponseDTO(session, OFFSET_0, COUNT_10, 0);
-
-
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
-
-    when(getSessionListFacade.getTeamSessionsForAuthenticatedConsultant(TEAM_CONSULTANT, RC_TOKEN,
-        OFFSET_0, COUNT_10, SESSION_FILTER_ALL)).thenReturn(consultantSessionListResponseDTO);
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().is2xxSuccessful());
-
   }
 
   @Test
@@ -1136,7 +1088,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_OFFSET)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -1146,7 +1097,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -1156,7 +1106,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_COUNT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -1166,7 +1115,6 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -1182,11 +1130,10 @@ public class UserControllerIT {
   }
 
   /**
-   * 
+   *
    * sendNewMessageNotification()
-   * 
+   *
    */
-
 
   @Test
   public void sendNewMessageNotification_Should_CallEmailNotificationFacadeAndReturn2xxSuccessful_WhenCalled()
@@ -1202,7 +1149,7 @@ public class UserControllerIT {
 
   /**
    * getMonitoring()
-   * 
+   *
    */
 
   @Test
@@ -1266,7 +1213,7 @@ public class UserControllerIT {
 
   /**
    * updateMonitoring()
-   * 
+   *
    */
 
   @Test
@@ -1362,7 +1309,7 @@ public class UserControllerIT {
 
   /**
    * Method: getConsultants (authority: VIEW_AGENCY_CONSULTANTS)
-   * 
+   *
    */
 
   @Test
@@ -1406,7 +1353,7 @@ public class UserControllerIT {
 
   /**
    * Method: assignSession (role: consultant)
-   * 
+   *
    */
 
   @Test
@@ -1518,7 +1465,7 @@ public class UserControllerIT {
 
   /**
    * updatePassword()
-   * 
+   *
    */
 
   @Test
@@ -1617,7 +1564,7 @@ public class UserControllerIT {
 
   /**
    * Method: createChat (role: kreuzbund-consultant)
-   * 
+   *
    */
 
   @Test
@@ -1659,13 +1606,13 @@ public class UserControllerIT {
 
   /**
    * Method: startChat
-   * 
+   *
    */
   @Test
   public void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
     /**
      * Method: stopChat (role: kreuzbund-consultant)
-     * 
+     *
      */
 
     mvc.perform(put(PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS)
@@ -1703,7 +1650,7 @@ public class UserControllerIT {
 
   /**
    * Method: getChat
-   * 
+   *
    */
   @Test
   public void getChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -1728,7 +1675,7 @@ public class UserControllerIT {
 
   /**
    * Method: joinChat
-   * 
+   *
    */
   @Test
   public void joinChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -1799,7 +1746,7 @@ public class UserControllerIT {
 
   /**
    * Method: getChat
-   * 
+   *
    */
   @Test
   public void getChatMembers_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -1827,7 +1774,7 @@ public class UserControllerIT {
 
   /**
    * Method: updateChat
-   * 
+   *
    */
   @Test
   public void updateChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {

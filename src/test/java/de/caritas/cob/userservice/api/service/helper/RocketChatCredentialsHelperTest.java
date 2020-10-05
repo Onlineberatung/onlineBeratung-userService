@@ -28,9 +28,9 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketChat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
 import java.time.LocalDateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -118,10 +118,10 @@ public class RocketChatCredentialsHelperTest {
 
   LogoutResponseDTO LOGOUT_RESPONSE_DTO_SYSTEM_USER_A = new LogoutResponseDTO("status",
       SYSTEM_USER_USERNAME,
-      new de.caritas.cob.userservice.api.model.rocketChat.logout.DataDTO(SYSTEM_USER_A_USERNAME));
+      new de.caritas.cob.userservice.api.model.rocketchat.logout.DataDTO(SYSTEM_USER_A_USERNAME));
 
   LogoutResponseDTO LOGOUT_RESPONSE_DTO_TECHNICAL_USER_A = new LogoutResponseDTO("status",
-      TECHNICAL_USER_USERNAME, new de.caritas.cob.userservice.api.model.rocketChat.logout.DataDTO(
+      TECHNICAL_USER_USERNAME, new de.caritas.cob.userservice.api.model.rocketchat.logout.DataDTO(
           TECHNICAL_USER_A_USERNAME));
 
   private final static String TECHNICAL_USER_USERNAME = "techUserName";
@@ -240,16 +240,16 @@ public class RocketChatCredentialsHelperTest {
                 HttpStatus.OK));
 
     RocketChatCredentials systemA =
-        RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_A_TOKEN)
-            .RocketChatUserId(SYSTEM_USER_A_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+        RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
+            .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A), systemA);
 
     RocketChatCredentials technicalA =
-        RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_A_TOKEN)
-            .RocketChatUserId(TECHNICAL_USER_A_ID).RocketChatUsername(TECHNICAL_USER_A_USERNAME)
-            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+        RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
+            .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
+            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A), technicalA);
 
@@ -290,33 +290,33 @@ public class RocketChatCredentialsHelperTest {
 
     // create and set technical A user
     RocketChatCredentials technicalA =
-        RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_A_TOKEN)
-            .RocketChatUserId(TECHNICAL_USER_A_ID).RocketChatUsername(TECHNICAL_USER_A_USERNAME)
-            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+        RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
+            .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
+            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_A), technicalA);
 
     // create and set technical B user
     RocketChatCredentials technicalB =
-        RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_B_TOKEN)
-            .RocketChatUserId(TECHNICAL_USER_B_ID).RocketChatUsername(TECHNICAL_USER_B_USERNAME)
-            .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+        RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_B_TOKEN)
+            .rocketChatUserId(TECHNICAL_USER_B_ID).rocketChatUsername(TECHNICAL_USER_B_USERNAME)
+            .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USER_B), technicalB);
 
     // create and set system A user
     RocketChatCredentials systemA =
-        RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_A_TOKEN)
-            .RocketChatUserId(SYSTEM_USER_A_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+        RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
+            .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_A), systemA);
 
     // create and set system B user
     RocketChatCredentials systemB =
-        RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_B_TOKEN)
-            .RocketChatUserId(SYSTEM_USER_B_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+        RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_B_TOKEN)
+            .rocketChatUserId(SYSTEM_USER_B_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
 
     FieldSetter.setField(rcCredentialHelper,
         rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USER_B), systemB);

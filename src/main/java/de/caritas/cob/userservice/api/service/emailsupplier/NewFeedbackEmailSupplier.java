@@ -12,7 +12,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMem
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
 import de.caritas.cob.userservice.api.model.mailservice.TemplateDataDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;

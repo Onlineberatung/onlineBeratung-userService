@@ -9,30 +9,28 @@ import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketChat.StandardResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupAddUserBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupCleanHistoryDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupCreateBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupDeleteBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupDeleteResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupRemoveUserBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LdapLoginDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.SubscriptionsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupAddUserBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCleanHistoryDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCreateBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupRemoveUserBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LdapLoginDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,6 +66,7 @@ public class RocketChatService {
   private static final String ERROR_MESSAGE = "Error during rollback: Rocket.Chat group with id "
       + "%s could not be deleted";
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+  private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 01, 01, 00, 00);
   private final LocalDateTime localDateTimeFuture = LocalDateTime.now().plusYears(1L);
   @Value("${rocket.chat.header.auth.token}")
@@ -239,8 +238,8 @@ public class RocketChatService {
     }
 
     RocketChatCredentials rocketChatCredentials =
-        RocketChatCredentials.builder().RocketChatUserId(response.getBody().getData().getUserId())
-            .RocketChatToken(response.getBody().getData().getAuthToken()).build();
+        RocketChatCredentials.builder().rocketChatUserId(response.getBody().getData().getUserId())
+            .rocketChatToken(response.getBody().getData().getAuthToken()).build();
 
     logoutUser(rocketChatCredentials);
 
@@ -550,7 +549,7 @@ public class RocketChatService {
    * @return the subscriptions of the user
    */
   public List<SubscriptionsUpdateDTO> getSubscriptionsOfUser(
-      RocketChatCredentials rocketChatCredentials) throws RocketChatGetSubscriptionsException {
+      RocketChatCredentials rocketChatCredentials) {
 
     ResponseEntity<SubscriptionsGetDTO> response = null;
 
@@ -567,17 +566,14 @@ public class RocketChatService {
             "Could not get Rocket.Chat subscriptions for user ID %s: Token is not active (401 Unauthorized)",
             rocketChatCredentials.getRocketChatUserId()));
       }
-      throw new RocketChatGetSubscriptionsException(
-          String.format("Could not get Rocket.Chat subscriptions for user id %s",
-              rocketChatCredentials.getRocketChatUserId()));
+      throw new InternalServerErrorException(ex.getMessage(), LogService::logRocketChatError);
     }
 
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat subscriptions for user id %s";
-      throw new RocketChatGetSubscriptionsException(
-          String.format(error, rocketChatCredentials.getRocketChatUserId()));
+      throw new InternalServerErrorException(error, LogService::logRocketChatError);
     }
   }
 
@@ -587,8 +583,7 @@ public class RocketChatService {
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return the rooms for the user
    */
-  public List<RoomsUpdateDTO> getRoomsOfUser(RocketChatCredentials rocketChatCredentials)
-      throws RocketChatGetRoomsException {
+  public List<RoomsUpdateDTO> getRoomsOfUser(RocketChatCredentials rocketChatCredentials) {
 
     ResponseEntity<RoomsGetDTO> response;
 
@@ -600,17 +595,17 @@ public class RocketChatService {
           restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
-      throw new RocketChatGetRoomsException(
-          String.format("Could not get Rocket.Chat rooms for user id %s",
-              rocketChatCredentials.getRocketChatUserId()));
+      throw new InternalServerErrorException(String.format(
+          CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()),
+          LogService::logRocketChatError);
     }
 
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
-      String error = "Could not get Rocket.Chat rooms for user id %s";
-      throw new RocketChatGetRoomsException(
-          String.format(error, rocketChatCredentials.getRocketChatUserId()));
+      String error = String.format(CHAT_ROOM_ERROR_MESSAGE,
+          rocketChatCredentials.getRocketChatUserId());
+      throw new InternalServerErrorException(error, LogService::logRocketChatError);
     }
   }
 
