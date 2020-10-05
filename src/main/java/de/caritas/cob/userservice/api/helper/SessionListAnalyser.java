@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Helper methods for the session list.
+ * Analyser methods for the session list.
  */
 @Component
 public class SessionListAnalyser {
@@ -64,7 +64,7 @@ public class SessionListAnalyser {
    * @param groupId         the Rocket.Chat group id of the session or chat
    * @return true, if messages were read for given thread or no messages in chat room available
    */
-  public boolean isMessagesForRocketChatGroupReadByUser(Map<String, Boolean> messagesReadMap,
+  public boolean areMessagesForRocketChatGroupReadByUser(Map<String, Boolean> messagesReadMap,
       String groupId) {
     return messagesReadMap.getOrDefault(groupId, true);
   }

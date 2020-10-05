@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.model;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @ApiModel(value = "Session")
 public class SessionDTO {
 
@@ -61,20 +63,4 @@ public class SessionDTO {
     this.monitoring = isMonitoring;
   }
 
-  public SessionDTO(Long id, Long agencyId, int consultingType, int status, String postcode,
-      String groupId, String feedbackGroupId, String askerRcId, Long messageDate,
-      boolean isTeamSession, boolean isMonitoring, boolean feedbackRead) {
-    this.id = id;
-    this.agencyId = agencyId;
-    this.consultingType = consultingType;
-    this.status = status;
-    this.postcode = postcode;
-    this.groupId = groupId;
-    this.feedbackGroupId = feedbackGroupId;
-    this.askerRcId = askerRcId;
-    this.messageDate = messageDate;
-    this.isTeamSession = isTeamSession;
-    this.monitoring = isMonitoring;
-    this.feedbackRead = feedbackRead;
-  }
 }

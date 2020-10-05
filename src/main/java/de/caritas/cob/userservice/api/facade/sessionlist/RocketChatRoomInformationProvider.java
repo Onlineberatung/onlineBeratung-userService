@@ -5,13 +5,9 @@ import static java.util.Objects.requireNonNull;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +35,7 @@ public class RocketChatRoomInformationProvider {
       RocketChatCredentials rocketChatCredentials) {
 
     Map<String, Boolean> readMessages = buildMessagesWithReadInfo(rocketChatCredentials);
-    List<RoomsUpdateDTO> roomsForUpdate = getRcRoomsForUpdate(rocketChatCredentials);
+    List<RoomsUpdateDTO> roomsForUpdate = rocketChatService.getRoomsOfUser(rocketChatCredentials);
     List<String> userRooms = roomsForUpdate.stream()
         .map(RoomsUpdateDTO::getId)
         .collect(Collectors.toList());
@@ -55,7 +51,8 @@ public class RocketChatRoomInformationProvider {
 
   private Map<String, Boolean> buildMessagesWithReadInfo(
       RocketChatCredentials rocketChatCredentials) {
-    List<SubscriptionsUpdateDTO> subscriptions = getSubscriptionsOfUser(rocketChatCredentials);
+    List<SubscriptionsUpdateDTO> subscriptions = rocketChatService
+        .getSubscriptionsOfUser(rocketChatCredentials);
 
     return subscriptions.stream()
         .collect(Collectors.toMap(SubscriptionsUpdateDTO::getRoomId, this::isMessageRead));
@@ -63,25 +60,6 @@ public class RocketChatRoomInformationProvider {
 
   private boolean isMessageRead(SubscriptionsUpdateDTO subscription) {
     return nonNull(subscription.getUnread()) && subscription.getUnread() == 0;
-  }
-
-  private List<SubscriptionsUpdateDTO> getSubscriptionsOfUser(
-      RocketChatCredentials rocketChatCredentials) {
-    try {
-      return rocketChatService.getSubscriptionsOfUser(rocketChatCredentials);
-    } catch (RocketChatGetSubscriptionsException rocketChatGetSubscriptionsException) {
-      throw new InternalServerErrorException(rocketChatGetSubscriptionsException.getMessage(),
-          LogService::logRocketChatError);
-    }
-  }
-
-  private List<RoomsUpdateDTO> getRcRoomsForUpdate(RocketChatCredentials rocketChatCredentials) {
-    try {
-      return rocketChatService.getRoomsOfUser(rocketChatCredentials);
-    } catch (RocketChatGetRoomsException rocketChatGetRoomsException) {
-      throw new InternalServerErrorException(rocketChatGetRoomsException.getMessage(),
-          LogService::logRocketChatError);
-    }
   }
 
   private Map<String, RoomsLastMessageDTO> getRcRoomLastMessages(

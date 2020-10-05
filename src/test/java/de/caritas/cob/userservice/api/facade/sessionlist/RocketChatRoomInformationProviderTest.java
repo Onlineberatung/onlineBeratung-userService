@@ -17,8 +17,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,12 +29,12 @@ public class RocketChatRoomInformationProviderTest {
 
   @InjectMocks
   private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
+
   @Mock
   private RocketChatService rocketChatService;
 
   @Test
-  public void retrieveRocketChatInformation_Should_Return_CorrectMessagesReadMap()
-      throws RocketChatGetSubscriptionsException {
+  public void retrieveRocketChatInformation_Should_Return_CorrectMessagesReadMap() {
 
     when(rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS)).thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
@@ -51,8 +49,7 @@ public class RocketChatRoomInformationProviderTest {
   }
 
   @Test
-  public void retrieveRocketChatInformation_Should_Return_RocketChatRoomsUpdateList()
-      throws RocketChatGetRoomsException {
+  public void retrieveRocketChatInformation_Should_Return_RocketChatRoomsUpdateList() {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
@@ -61,8 +58,7 @@ public class RocketChatRoomInformationProviderTest {
   }
 
   @Test
-  public void retrieveRocketChatInformation_Should_Return_CorrectRocketChatUserRoomList()
-      throws RocketChatGetRoomsException {
+  public void retrieveRocketChatInformation_Should_Return_CorrectRocketChatUserRoomList() {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
@@ -71,7 +67,7 @@ public class RocketChatRoomInformationProviderTest {
   }
 
   @Test
-  public void retrieveRocketChatInformation_Should_Return_() throws RocketChatGetRoomsException {
+  public void retrieveRocketChatInformation_Should_Return_CorrectRocketChatLastMessageRoom() {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);

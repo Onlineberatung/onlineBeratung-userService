@@ -515,14 +515,19 @@ public class TestConstants {
       new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
           RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
           IS_NO_TEAM_SESSION, IS_MONITORING);
-  public static final SessionDTO SESSION_DTO_WITH_FEEDBACK =
-      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
-          RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
-          IS_NO_TEAM_SESSION, IS_MONITORING, false);
-  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK =
-      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
-          RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
-          IS_NO_TEAM_SESSION, IS_MONITORING, true);
+  public static final SessionDTO SESSION_DTO_WITH_FEEDBACK = SessionDTO.builder()
+      .id(SESSION_ID).agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null)
+      .groupId(RC_GROUP_ID_3).feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
+      .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
+      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(true)
+      .build();
+
+  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK = SessionDTO.builder()
+      .id(SESSION_ID).agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null)
+      .groupId(RC_GROUP_ID_3).feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
+      .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
+      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(false)
+      .build();
   /**
    * Chat
    */
@@ -600,7 +605,8 @@ public class TestConstants {
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST = Arrays
       .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3);
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST = Arrays
-      .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3, USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2);
+      .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3,
+          USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2);
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS =
       new HashMap<String, Boolean>() {{
         put(RC_GROUP_ID, false);

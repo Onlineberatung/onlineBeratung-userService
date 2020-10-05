@@ -71,6 +71,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -218,7 +219,7 @@ public class UserController implements UsersApi {
         .build();
 
     UserSessionListResponseDTO userSessionsDTO = sessionListFacade
-        .retrieveSessionsDtoForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
+        .retrieveSortedSessionsForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
 
     return isNotEmpty(userSessionsDTO.getSessions())
         ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
@@ -396,7 +397,7 @@ public class UserController implements UsersApi {
 
     MonitoringDTO responseDTO = monitoringService.getMonitoring(session.get());
 
-    if (nonNull(responseDTO) && responseDTO.getProperties().size() > 0) {
+    if (nonNull(responseDTO) && MapUtils.isNotEmpty(responseDTO.getProperties())) {
       return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -551,7 +552,7 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * start a chat.
+   * Start a chat.
    *
    * @param chatId the chat id
    * @return a {@link ResponseEntity}

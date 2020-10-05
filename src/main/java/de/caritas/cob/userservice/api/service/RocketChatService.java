@@ -9,8 +9,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
@@ -68,6 +66,7 @@ public class RocketChatService {
   private static final String ERROR_MESSAGE = "Error during rollback: Rocket.Chat group with id "
       + "%s could not be deleted";
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+  private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 01, 01, 00, 00);
   private final LocalDateTime localDateTimeFuture = LocalDateTime.now().plusYears(1L);
   @Value("${rocket.chat.header.auth.token}")
@@ -550,7 +549,7 @@ public class RocketChatService {
    * @return the subscriptions of the user
    */
   public List<SubscriptionsUpdateDTO> getSubscriptionsOfUser(
-      RocketChatCredentials rocketChatCredentials) throws RocketChatGetSubscriptionsException {
+      RocketChatCredentials rocketChatCredentials) {
 
     ResponseEntity<SubscriptionsGetDTO> response = null;
 
@@ -567,17 +566,14 @@ public class RocketChatService {
             "Could not get Rocket.Chat subscriptions for user ID %s: Token is not active (401 Unauthorized)",
             rocketChatCredentials.getRocketChatUserId()));
       }
-      throw new RocketChatGetSubscriptionsException(
-          String.format("Could not get Rocket.Chat subscriptions for user id %s",
-              rocketChatCredentials.getRocketChatUserId()));
+      throw new InternalServerErrorException(ex.getMessage(), LogService::logRocketChatError);
     }
 
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
       String error = "Could not get Rocket.Chat subscriptions for user id %s";
-      throw new RocketChatGetSubscriptionsException(
-          String.format(error, rocketChatCredentials.getRocketChatUserId()));
+      throw new InternalServerErrorException(error, LogService::logRocketChatError);
     }
   }
 
@@ -587,8 +583,7 @@ public class RocketChatService {
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return the rooms for the user
    */
-  public List<RoomsUpdateDTO> getRoomsOfUser(RocketChatCredentials rocketChatCredentials)
-      throws RocketChatGetRoomsException {
+  public List<RoomsUpdateDTO> getRoomsOfUser(RocketChatCredentials rocketChatCredentials) {
 
     ResponseEntity<RoomsGetDTO> response;
 
@@ -600,17 +595,17 @@ public class RocketChatService {
           restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
-      throw new RocketChatGetRoomsException(
-          String.format("Could not get Rocket.Chat rooms for user id %s",
-              rocketChatCredentials.getRocketChatUserId()));
+      throw new InternalServerErrorException(String.format(
+          CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()),
+          LogService::logRocketChatError);
     }
 
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
-      String error = "Could not get Rocket.Chat rooms for user id %s";
-      throw new RocketChatGetRoomsException(
-          String.format(error, rocketChatCredentials.getRocketChatUserId()));
+      String error = String.format(CHAT_ROOM_ERROR_MESSAGE,
+          rocketChatCredentials.getRocketChatUserId());
+      throw new InternalServerErrorException(error, LogService::logRocketChatError);
     }
   }
 

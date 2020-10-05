@@ -23,9 +23,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Facade to encapsulate the steps to get the session list for a user or consultant (read sessions
- * from database and get unread messages status from Rocket.Chat)
+ * from database and get unread messages status from Rocket.Chat).
  */
-
 @Service
 public class SessionListFacade {
 
@@ -47,7 +46,7 @@ public class SessionListFacade {
    * @param rocketChatCredentials the rocket chat credentials
    * @return {@link UserSessionListResponseDTO}
    */
-  public UserSessionListResponseDTO retrieveSessionsDtoForAuthenticatedUser(String userId,
+  public UserSessionListResponseDTO retrieveSortedSessionsForAuthenticatedUser(String userId,
       RocketChatCredentials rocketChatCredentials) {
 
     List<UserSessionResponseDTO> userSessions = userSessionListService

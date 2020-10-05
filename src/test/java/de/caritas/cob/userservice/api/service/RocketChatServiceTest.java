@@ -58,8 +58,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
@@ -609,7 +607,7 @@ public class RocketChatServiceTest {
    */
 
   @Test
-  public void getSubscriptionsOfUser_Should_ThrowRocketChatGetSubscriptionsException_WhenAPICallIsNotSuccessfull() {
+  public void getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
@@ -617,14 +615,14 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetSubscriptionsException");
-    } catch (RocketChatGetSubscriptionsException ex) {
-      assertTrue("Excepted RocketChatGetSubscriptionsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  public void getSubscriptionsOfUser_Should_ThrowRocketChatGetSubscriptionsException_When_APIResponseIsUnsuccessfull() {
+  public void getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnsuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
@@ -632,9 +630,9 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetSubscriptionsException");
-    } catch (RocketChatGetSubscriptionsException ex) {
-      assertTrue("Excepted RocketChatGetSubscriptionsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -648,14 +646,13 @@ public class RocketChatServiceTest {
     try {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
       fail("Expected exception: UnauthorizedException");
-    } catch (UnauthorizedException | RocketChatGetSubscriptionsException ex) {
+    } catch (UnauthorizedException ex) {
       assertTrue("Excepted UnauthorizedException thrown", true);
     }
   }
 
   @Test
-  public void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessfull()
-      throws Exception {
+  public void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
@@ -670,7 +667,7 @@ public class RocketChatServiceTest {
    */
 
   @Test
-  public void getRoomsOfUser_Should_ThrowRocketChatGetRoomsException_WhenAPICallIsNotSuccessfull() {
+  public void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessfull() {
 
     Exception exception = new RuntimeException(MESSAGE);
 
@@ -679,14 +676,14 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetRoomsException");
-    } catch (RocketChatGetRoomsException ex) {
-      assertTrue("Excepted RocketChatGetRoomsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  public void getRoomsOfUser_Should_ThrowRocketChatGetRoomsException_WhenAPIResponseIsUnsuccessfull() {
+  public void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnsuccessfull() {
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
         any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
@@ -694,9 +691,9 @@ public class RocketChatServiceTest {
 
     try {
       rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: RocketChatGetRoomsException");
-    } catch (RocketChatGetRoomsException ex) {
-      assertTrue("Excepted RocketChatGetRoomsException thrown", true);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException ex) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 

@@ -70,13 +70,13 @@ public class UserSessionListServiceTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(true);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_2)).thenReturn(true);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_3)).thenReturn(true);
 
     assertTrue(
@@ -96,10 +96,10 @@ public class UserSessionListServiceTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_4)).thenReturn(true);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_5)).thenReturn(true);
 
     assertTrue(userSessionListService.retrieveSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS)
@@ -118,13 +118,13 @@ public class UserSessionListServiceTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(false);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_2)).thenReturn(false);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_3)).thenReturn(false);
 
     assertFalse(
@@ -145,10 +145,10 @@ public class UserSessionListServiceTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_4)).thenReturn(false);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_5)).thenReturn(false);
 
     assertFalse(

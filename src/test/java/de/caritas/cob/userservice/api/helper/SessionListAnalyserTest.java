@@ -60,19 +60,19 @@ public class SessionListAnalyserTest {
   @Test
   public void isMessagesForRocketChatGroupReadByUser_Should_ReturnTrue_IfMessageWasRead() {
     assertTrue(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(MESSAGES_READ_MAP_WITHOUT_UNREADS, RC_GROUP_ID));
+        .areMessagesForRocketChatGroupReadByUser(MESSAGES_READ_MAP_WITHOUT_UNREADS, RC_GROUP_ID));
   }
 
   @Test
   public void isMessagesForRocketChatGroupReadByUser_Should_ReturnFalse_IfMessageWasNotRead() {
     assertFalse(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(MESSAGES_READ_MAP_WITH_UNREADS, RC_GROUP_ID));
+        .areMessagesForRocketChatGroupReadByUser(MESSAGES_READ_MAP_WITH_UNREADS, RC_GROUP_ID));
   }
 
   @Test
   public void isMessagesForRocketChatGroupReadByUser_Should_ReturnTrue_IfNoMessageReadInfoAvailableInMessageReadMap() {
     assertTrue(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(MESSAGES_READ_MAP_WITHOUT_UNREADS, RC_GROUP_ID_6));
+        .areMessagesForRocketChatGroupReadByUser(MESSAGES_READ_MAP_WITHOUT_UNREADS, RC_GROUP_ID_6));
   }
 
   /*

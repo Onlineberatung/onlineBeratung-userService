@@ -96,7 +96,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -125,13 +125,13 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(false);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_2)).thenReturn(false);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_3)).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -376,7 +376,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(
+        .areMessagesForRocketChatGroupReadByUser(
             Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
@@ -585,7 +585,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -614,7 +614,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(
+        .areMessagesForRocketChatGroupReadByUser(
             Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
@@ -671,7 +671,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(
+        .areMessagesForRocketChatGroupReadByUser(
             Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
@@ -756,7 +756,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListAnalyser.isMessagesForRocketChatGroupReadByUser(
+    when(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         Mockito.any(), Mockito.any())).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -785,7 +785,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListAnalyser.isMessagesForRocketChatGroupReadByUser(
+    when(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -817,7 +817,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -846,7 +846,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -875,7 +875,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(
+        .areMessagesForRocketChatGroupReadByUser(
             Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
@@ -905,7 +905,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(
+        .areMessagesForRocketChatGroupReadByUser(
             Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
@@ -1029,7 +1029,7 @@ public class ConsultantSessionListServiceTest {
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(
+        .areMessagesForRocketChatGroupReadByUser(
             Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 

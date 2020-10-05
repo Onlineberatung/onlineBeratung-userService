@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -19,31 +18,22 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class UserSessionListService {
 
-  private final SessionService sessionService;
-  private final ChatService chatService;
-  private final RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
-  private final SessionListAnalyser sessionListAnalyser;
-
-  @Autowired
-  public UserSessionListService(
-      SessionService sessionService, ChatService chatService,
-      RocketChatRoomInformationProvider rocketChatRoomInformationProvider,
-      SessionListAnalyser sessionListAnalyser) {
-    this.sessionService = requireNonNull(sessionService);
-    this.chatService = requireNonNull(chatService);
-    this.rocketChatRoomInformationProvider = requireNonNull(rocketChatRoomInformationProvider);
-    this.sessionListAnalyser = requireNonNull(sessionListAnalyser);
-  }
+  private final @NonNull SessionService sessionService;
+  private final @NonNull ChatService chatService;
+  private final @NonNull RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
+  private final @NonNull SessionListAnalyser sessionListAnalyser;
 
   /**
-   * Returns a list of {@link UserSessionResponseDTO} for the specified user ID
+   * Returns a list of {@link UserSessionResponseDTO} for the specified user ID.
    *
    * @param userId Keycloak/MariaDB user ID
    * @param rocketChatCredentials the rocket chat credentials
@@ -91,7 +81,7 @@ public class UserSessionListService {
     SessionDTO session = userSessionDTO.getSession();
     String groupId = session.getGroupId();
 
-    session.setMessagesRead(sessionListAnalyser.isMessagesForRocketChatGroupReadByUser(
+    session.setMessagesRead(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         rocketChatRoomInformation.getReadMessages(), groupId));
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
@@ -133,7 +123,7 @@ public class UserSessionListService {
     chat.setSubscribed(
         isRocketChatRoomSubscribedByUser(rocketChatRoomInformation.getUserRooms(), groupId));
     chat.setMessagesRead(sessionListAnalyser
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             groupId));
 
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
