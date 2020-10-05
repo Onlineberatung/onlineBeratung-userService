@@ -50,7 +50,7 @@ import de.caritas.cob.userservice.api.manager.consultingType.notifications.TeamS
 import de.caritas.cob.userservice.api.manager.consultingType.notifications.ToConsultant;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;

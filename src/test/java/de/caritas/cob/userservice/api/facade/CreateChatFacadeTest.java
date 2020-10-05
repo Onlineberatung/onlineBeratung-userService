@@ -27,8 +27,8 @@ import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -109,7 +109,7 @@ public class CreateChatFacadeTest {
     CreateChatResponseDTO result = createChatFacade.createChat(CHAT_DTO, consultant);
 
     assertThat(result, instanceOf(CreateChatResponseDTO.class));
-    assertEquals(result.getGroupId(), RC_GROUP_ID);
+    assertEquals(RC_GROUP_ID, result.getGroupId());
 
   }
 

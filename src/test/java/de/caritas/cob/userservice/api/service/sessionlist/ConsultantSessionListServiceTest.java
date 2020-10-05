@@ -43,7 +43,7 @@ import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.SessionListHelper;
+import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
@@ -72,7 +72,7 @@ public class ConsultantSessionListServiceTest {
   @Mock
   private ConsultingTypeManager consultingTypeManager;
   @Mock
-  private SessionListHelper sessionListHelper;
+  private SessionListAnalyser sessionListAnalyser;
 
   /**
    * Method: retrieveSessionsForAuthenticatedConsultant
@@ -85,18 +85,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getMessagesReadMap(),
+    when(sessionListAnalyser
+        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -114,24 +114,24 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getMessagesReadMap(),
+    when(sessionListAnalyser
+        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(false);
-    when(sessionListHelper
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getMessagesReadMap(),
+    when(sessionListAnalyser
+        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_2)).thenReturn(false);
-    when(sessionListHelper
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getMessagesReadMap(),
+    when(sessionListAnalyser
+        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID_3)).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -149,14 +149,14 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
@@ -180,18 +180,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(CONSULTANT_2.getRocketChatId()),
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);
@@ -211,18 +211,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(CONSULTANT_2.getRocketChatId()),
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_RECEIVED);
@@ -244,14 +244,14 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -275,14 +275,14 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_EMPTY_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_EMPTY_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -304,14 +304,14 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_EMPTY_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_EMPTY_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -340,10 +340,10 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_EMPTY_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_EMPTY_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
@@ -366,18 +366,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_2);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .isMessagesForRocketChatGroupReadByUser(
-            Mockito.eq(rocketChatRoomInformation.getMessagesReadMap()),
+            Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -396,10 +396,10 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
@@ -421,10 +421,10 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
@@ -446,18 +446,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(CONSULTANT_2.getRocketChatId()),
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);
@@ -481,16 +481,16 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(CONSULTANT_2.getRocketChatId()),
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);
@@ -516,14 +516,14 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
@@ -575,17 +575,17 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getMessagesReadMap(),
+    when(sessionListAnalyser
+        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -604,18 +604,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .isMessagesForRocketChatGroupReadByUser(
-            Mockito.eq(rocketChatRoomInformation.getMessagesReadMap()),
+            Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -634,10 +634,10 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
@@ -661,18 +661,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .isMessagesForRocketChatGroupReadByUser(
-            Mockito.eq(rocketChatRoomInformation.getMessagesReadMap()),
+            Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -693,14 +693,14 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -720,14 +720,14 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -747,16 +747,16 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(Collections.emptyList());
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper.isMessagesForRocketChatGroupReadByUser(
+    when(sessionListAnalyser.isMessagesForRocketChatGroupReadByUser(
         Mockito.any(), Mockito.any())).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -776,16 +776,16 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(Collections.emptyList());
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper.isMessagesForRocketChatGroupReadByUser(
+    when(sessionListAnalyser.isMessagesForRocketChatGroupReadByUser(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -807,17 +807,17 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getMessagesReadMap(),
+    when(sessionListAnalyser
+        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -836,17 +836,17 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
-        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getMessagesReadMap(),
+    when(sessionListAnalyser
+        .isMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
             RC_GROUP_ID)).thenReturn(false);
 
     List<ConsultantSessionResponseDTO> result =
@@ -865,18 +865,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .isMessagesForRocketChatGroupReadByUser(
-            Mockito.eq(rocketChatRoomInformation.getMessagesReadMap()),
+            Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -895,18 +895,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .isMessagesForRocketChatGroupReadByUser(
-            Mockito.eq(rocketChatRoomInformation.getMessagesReadMap()),
+            Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -925,10 +925,10 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
@@ -952,16 +952,16 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITHOUT_UNREADS)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .isLastMessageForRocketChatGroupIdAvailable(
             Mockito.any(),
             Mockito.any())).thenReturn(true);
@@ -984,10 +984,10 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
@@ -1019,18 +1019,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .userRoomList(USERS_ROOMS_LIST)
+            .readMessages(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .isMessagesForRocketChatGroupReadByUser(
-            Mockito.eq(rocketChatRoomInformation.getMessagesReadMap()),
+            Mockito.eq(rocketChatRoomInformation.getReadMessages()),
             Mockito.any())).thenReturn(true);
 
     List<ConsultantSessionResponseDTO> result =
@@ -1049,18 +1049,18 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
-            .roomsUpdateList(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
-            .roomLastMessageMap(ROOMS_LAST_MESSAGE_DTO_MAP)
-            .messagesReadMap(MESSAGES_READ_MAP_WITH_UNREADS)
-            .userRoomList(USERS_ROOMS_LIST)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
-    when(sessionListHelper
+    when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(CONSULTANT_2.getRocketChatId()),
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);

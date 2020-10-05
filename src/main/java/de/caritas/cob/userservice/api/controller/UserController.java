@@ -191,8 +191,8 @@ public class UserController implements UsersApi {
 
     User user = this.userAccountProvider.retrieveValidatedUser();
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatToken(rcToken)
-        .RocketChatUserId(rcUserId)
+        .rocketChatToken(rcToken)
+        .rocketChatUserId(rcUserId)
         .build();
 
     createEnquiryMessageFacade.createEnquiryMessage(user, sessionId,
@@ -213,8 +213,8 @@ public class UserController implements UsersApi {
 
     User user = this.userAccountProvider.retrieveValidatedUser();
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatUserId(user.getRcUserId())
-        .RocketChatToken(rcToken)
+        .rocketChatUserId(user.getRcUserId())
+        .rocketChatToken(rcToken)
         .build();
 
     UserSessionListResponseDTO userSessionsDTO = sessionListFacade

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.facade.sessionlist;
 
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -34,8 +35,8 @@ public class SessionListFacade {
   @Autowired
   public SessionListFacade(UserSessionListService userSessionListService,
       ConsultantSessionListService consultantSessionListService) {
-    this.userSessionListService = userSessionListService;
-    this.consultantSessionListService = consultantSessionListService;
+    this.userSessionListService = requireNonNull(userSessionListService);
+    this.consultantSessionListService = requireNonNull(consultantSessionListService);
   }
 
   /**
@@ -89,7 +90,7 @@ public class SessionListFacade {
     }
 
     List<ConsultantSessionResponseDTO> consultantSessionsSublist = new ArrayList<>();
-    if (isMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(),
+    if (areMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(),
         consultantSessions)) {
       consultantSessionsSublist = retrieveConsultantSessionsSublist(sessionListQueryParameter,
           consultantSessions);
@@ -133,7 +134,7 @@ public class SessionListFacade {
             sessionListQueryParameter);
 
     List<ConsultantSessionResponseDTO> teamSessionsSublist = new ArrayList<>();
-    if (isMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(), teamSessions)) {
+    if (areMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(), teamSessions)) {
       teamSessionsSublist = teamSessions
           .subList(sessionListQueryParameter.getOffset(),
               Math.min(sessionListQueryParameter.getOffset() + sessionListQueryParameter.getCount(),
@@ -158,7 +159,7 @@ public class SessionListFacade {
             || consultantSessionResponseDTO.getSession().isFeedbackRead());
   }
 
-  private boolean isMoreConsultantSessionsAvailable(
+  private boolean areMoreConsultantSessionsAvailable(
       int offset, List<ConsultantSessionResponseDTO> consultantSessions) {
     return
         CollectionUtils.isNotEmpty(consultantSessions)

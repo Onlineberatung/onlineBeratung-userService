@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.service.helper;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,7 +162,9 @@ public class RocketChatCredentialsHelper {
       throws RocketChatLoginException {
 
     RocketChatCredentials rcc = RocketChatCredentials.builder()
-        .TimeStampCreated(LocalDateTime.now()).RocketChatUsername(username).build();
+        .timeStampCreated(LocalDateTime.now())
+        .rocketChatUsername(username)
+        .build();
 
     try {
 

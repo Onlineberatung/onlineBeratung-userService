@@ -22,16 +22,16 @@ import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.UserChatDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.message.attachment.AttachmentDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.message.attachment.FileDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsLastMessageDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.message.attachment.AttachmentDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.message.attachment.FileDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatInterval;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
@@ -223,38 +223,38 @@ public class TestConstants {
   public final static String SYSTEM_USER_C_ID = "sysUserBID";
 
   public static final RocketChatCredentials RC_CREDENTIALS =
-      RocketChatCredentials.builder().RocketChatToken(RC_TOKEN).RocketChatUserId(RC_USER_ID)
-          .RocketChatUsername(RC_USERNAME).TimeStampCreated(LocalDateTime.now()).build();
+      RocketChatCredentials.builder().rocketChatToken(RC_TOKEN).rocketChatUserId(RC_USER_ID)
+          .rocketChatUsername(RC_USERNAME).timeStampCreated(LocalDateTime.now()).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_A =
-      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_A_TOKEN)
-          .RocketChatUserId(TECHNICAL_USER_A_ID).RocketChatUsername(TECHNICAL_USER_A_USERNAME)
-          .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+      RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
+          .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
+          .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_B =
-      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_B_TOKEN)
-          .RocketChatUserId(TECHNICAL_USER_B_ID).RocketChatUsername(TECHNICAL_USER_B_USERNAME)
-          .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+      RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_B_TOKEN)
+          .rocketChatUserId(TECHNICAL_USER_B_ID).rocketChatUsername(TECHNICAL_USER_B_USERNAME)
+          .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_C =
-      RocketChatCredentials.builder().RocketChatToken(TECHNICAL_USER_C_TOKEN)
-          .RocketChatUserId(TECHNICAL_USER_C_ID).RocketChatUsername(TECHNICAL_USER_C_USERNAME)
-          .TimeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
+      RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_C_TOKEN)
+          .rocketChatUserId(TECHNICAL_USER_C_ID).rocketChatUsername(TECHNICAL_USER_C_USERNAME)
+          .timeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_A =
-      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_A_TOKEN)
-          .RocketChatUserId(SYSTEM_USER_A_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
-          .TimeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+      RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
+          .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
+          .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_B =
-      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_B_TOKEN)
-          .RocketChatUserId(SYSTEM_USER_B_ID).RocketChatUsername(SYSTEM_USER_A_USERNAME)
-          .TimeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+      RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_B_TOKEN)
+          .rocketChatUserId(SYSTEM_USER_B_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
+          .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_C =
-      RocketChatCredentials.builder().RocketChatToken(SYSTEM_USER_C_TOKEN)
-          .RocketChatUserId(SYSTEM_USER_C_ID).RocketChatUsername(SYSTEM_USER_C_USERNAME)
-          .TimeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
+      RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_C_TOKEN)
+          .rocketChatUserId(SYSTEM_USER_C_ID).rocketChatUsername(SYSTEM_USER_C_USERNAME)
+          .timeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
 
 
   /*

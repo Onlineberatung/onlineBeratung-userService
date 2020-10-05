@@ -1,16 +1,10 @@
 package de.caritas.cob.userservice.api.facade;
 
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.service.LogService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
@@ -18,17 +12,24 @@ import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSetti
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 /**
  * Facade to encapsulate the steps to initialize an user account (create chat/agency relation or a
@@ -36,37 +37,21 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class CreateUserFacade {
 
-  private final int USERNAME_NOT_AVAILABLE = 0;
-  private final int EMAIL_AVAILABLE = 1;
+  private static final int USERNAME_NOT_AVAILABLE = 0;
+  private static final int EMAIL_AVAILABLE = 1;
 
-  private final KeycloakAdminClientHelper keycloakAdminClientHelper;
-  private final UserService userService;
-  private final RocketChatService rocketChatService;
-  private final UserAgencyService userAgencyService;
-  private final SessionService sessionService;
-  private final SessionDataService sessionDataService;
-  private final ConsultingTypeManager consultingTypeManager;
-  private final UserHelper userHelper;
-  private final AgencyHelper agencyHelper;
-
-  @Autowired
-  public CreateUserFacade(KeycloakAdminClientHelper keycloakAdminClientHelper,
-      UserService userService, RocketChatService rocketChatService,
-      UserAgencyService userAgencyService, SessionService sessionService,
-      SessionDataService sessionDataService, ConsultingTypeManager consultingTypeManager,
-      UserHelper userHelper, AgencyHelper agencyHelper) {
-    this.keycloakAdminClientHelper = keycloakAdminClientHelper;
-    this.userService = userService;
-    this.rocketChatService = rocketChatService;
-    this.userAgencyService = userAgencyService;
-    this.sessionService = sessionService;
-    this.sessionDataService = sessionDataService;
-    this.consultingTypeManager = consultingTypeManager;
-    this.userHelper = userHelper;
-    this.agencyHelper = agencyHelper;
-  }
+  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull UserService userService;
+  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull UserAgencyService userAgencyService;
+  private final @NonNull SessionService sessionService;
+  private final @NonNull SessionDataService sessionDataService;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull UserHelper userHelper;
+  private final @NonNull AgencyHelper agencyHelper;
 
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
@@ -232,7 +217,9 @@ public class CreateUserFacade {
 
     // Log out user from Rocket.Chat
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatUserId(rcUserId).RocketChatToken(rcUserToken).build();
+        .rocketChatUserId(rcUserId)
+        .rocketChatToken(rcUserToken)
+        .build();
     rocketChatService.logoutUser(rocketChatCredentials);
 
     // Update rcUserId in user table

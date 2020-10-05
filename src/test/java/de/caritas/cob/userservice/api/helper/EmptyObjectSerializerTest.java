@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LdapLoginDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LdapLoginDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmptyObjectSerializerTest {

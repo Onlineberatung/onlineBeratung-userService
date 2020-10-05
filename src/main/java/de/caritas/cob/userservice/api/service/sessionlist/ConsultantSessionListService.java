@@ -2,20 +2,22 @@ package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.SessionListHelper;
+import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.chat.UserChatDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
@@ -27,8 +29,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import java.util.stream.Collectors;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,28 +41,29 @@ public class ConsultantSessionListService {
   private final ChatService chatService;
   private final RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   private final ConsultingTypeManager consultingTypeManager;
-  private final SessionListHelper sessionListHelper;
+  private final SessionListAnalyser sessionListAnalyser;
 
   @Autowired
   public ConsultantSessionListService(
       SessionService sessionService, ChatService chatService,
       RocketChatRoomInformationProvider rocketChatRoomInformationProvider,
       ConsultingTypeManager consultingTypeManager,
-      SessionListHelper sessionListHelper) {
+      SessionListAnalyser sessionListAnalyser) {
     this.sessionService = requireNonNull(sessionService);
     this.chatService = requireNonNull(chatService);
     this.rocketChatRoomInformationProvider = requireNonNull(rocketChatRoomInformationProvider);
     this.consultingTypeManager = requireNonNull(consultingTypeManager);
-    this.sessionListHelper = requireNonNull(sessionListHelper);
+    this.sessionListAnalyser = requireNonNull(sessionListAnalyser);
   }
 
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id and
    * status.
    *
-   * @param consultant                {@link Consultant}
-   * @param rcAuthToken               Rocket.Chat Token
-   * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
+   * @param consultant {@link Consultant}
+   * @param rcAuthToken Rocket.Chat Token
+   * @param sessionListQueryParameter session list query parameters as {@link
+   * SessionListQueryParameter}
    * @return the response dto
    */
   public List<ConsultantSessionResponseDTO> retrieveSessionsForAuthenticatedConsultant(
@@ -77,29 +79,34 @@ public class ConsultantSessionListService {
     }
 
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatUserId(consultant.getRocketChatId()).RocketChatToken(rcAuthToken).build();
+        .rocketChatUserId(consultant.getRocketChatId())
+        .rocketChatToken(rcAuthToken)
+        .build();
 
-    return retrieveMergedListOfConsultantSessionsAndChats(
-        consultant, sessions, chats, rocketChatCredentials);
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rocketChatCredentials);
   }
 
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id.
    *
-   * @param consultant                the {@link Consultant}
-   * @param rcAuthToken               the Rocket.Chat auth token
-   * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
+   * @param consultant the {@link Consultant}
+   * @param rcAuthToken the Rocket.Chat auth token
+   * @param sessionListQueryParameter session list query parameters as {@link
+   * SessionListQueryParameter}
    * @return a {@link ConsultantSessionListResponseDTO} with a {@link List} of {@link
    * ConsultantSessionResponseDTO}
    */
-  public List<ConsultantSessionResponseDTO> retrieveTeamSessionsForAuthenticatedConsultant(Consultant
-      consultant, String rcAuthToken, SessionListQueryParameter sessionListQueryParameter) {
+  public List<ConsultantSessionResponseDTO> retrieveTeamSessionsForAuthenticatedConsultant(
+      Consultant consultant, String rcAuthToken,
+      SessionListQueryParameter sessionListQueryParameter) {
 
     List<ConsultantSessionResponseDTO> teamSessions =
         sessionService.getTeamSessionsForConsultant(consultant);
 
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
-        .RocketChatUserId(consultant.getRocketChatId()).RocketChatToken(rcAuthToken).build();
+        .rocketChatUserId(consultant.getRocketChatId())
+        .rocketChatToken(rcAuthToken)
+        .build();
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider
         .retrieveRocketChatInformation(rocketChatCredentials);
     updateConsultantSessionValues(teamSessions, rocketChatRoomInformation,
@@ -114,7 +121,7 @@ public class ConsultantSessionListService {
     return teamSessions;
   }
 
-  private List<ConsultantSessionResponseDTO> retrieveMergedListOfConsultantSessionsAndChats(
+  private List<ConsultantSessionResponseDTO> mergeConsultantSessionsAndChats(
       Consultant consultant, List<ConsultantSessionResponseDTO> sessions,
       List<ConsultantSessionResponseDTO> chats, RocketChatCredentials rocketChatCredentials) {
     List<ConsultantSessionResponseDTO> allSessions = new ArrayList<>();
@@ -122,14 +129,15 @@ public class ConsultantSessionListService {
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider
         .retrieveRocketChatInformation(rocketChatCredentials);
 
-    if (CollectionUtils.isNotEmpty(sessions)) {
+    if (isNotEmpty(sessions)) {
       allSessions.addAll(updateConsultantSessionValues(sessions, rocketChatRoomInformation,
           consultant.getRocketChatId()));
     }
 
-    if (CollectionUtils.isNotEmpty(chats)) {
+    if (isNotEmpty(chats)) {
       allSessions.addAll(
-          updateConsultantChatValues(chats, rocketChatRoomInformation, consultant.getRocketChatId()));
+          updateConsultantChatValues(chats, rocketChatRoomInformation,
+              consultant.getRocketChatId()));
     }
     return allSessions;
   }
@@ -150,94 +158,106 @@ public class ConsultantSessionListService {
       List<ConsultantSessionResponseDTO> sessions,
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId) {
 
-    for (ConsultantSessionResponseDTO dto : sessions) {
+    return sessions.stream()
+        .map(dto -> updateRequiredConsultantSessionValues(rocketChatRoomInformation, rcUserId, dto))
+        .collect(Collectors.toList());
+  }
 
-      SessionDTO session = dto.getSession();
-      String groupId = session.getGroupId();
+  private ConsultantSessionResponseDTO updateRequiredConsultantSessionValues(
+      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
+      ConsultantSessionResponseDTO consultantSessionResponseDTO) {
+    SessionDTO session = consultantSessionResponseDTO.getSession();
+    String groupId = session.getGroupId();
 
-      session.setMonitoring(getMonitoringProperty(session));
+    session.setMonitoring(getMonitoringProperty(session));
 
-      session.setMessagesRead(
-          sessionListHelper.isMessagesForRocketChatGroupReadByUser(
-              rocketChatRoomInformation.getMessagesReadMap(),
-              groupId));
+    session.setMessagesRead(sessionListAnalyser.isMessagesForRocketChatGroupReadByUser(
+        rocketChatRoomInformation.getReadMessages(), groupId));
 
-      if (sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
-          rocketChatRoomInformation.getRoomLastMessageMap(),
-          groupId)) {
-        RoomsLastMessageDTO roomsLastMessage =
-            rocketChatRoomInformation.getRoomLastMessageMap()
-                .get(groupId);
-        session.setLastMessage(
-            !StringUtils.isEmpty(roomsLastMessage.getMessage()) ? sessionListHelper
-                .prepareMessageForSessionList(
-                    roomsLastMessage.getMessage(), groupId) : null);
-        session.setMessageDate(Helper.getUnixTimestampFromDate(
-            rocketChatRoomInformation.getRoomLastMessageMap().get(groupId)
-                .getTimestamp()));
-        dto.setLatestMessage(roomsLastMessage.getTimestamp());
-        session
-            .setAttachment(
-                sessionListHelper
-                    .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
-      } else {
-        // Fallback: If map doesn't contain group id messagedate is set to 1970-01-01
-        session.setMessageDate(Helper.UNIXTIME_0.getTime());
-        dto.setLatestMessage(Helper.UNIXTIME_0);
-      }
-
-      // Due to a Rocket.Chat bug the read state is is only set, when a message was posted
-      if (isFeedbackFlagAvailable(rocketChatRoomInformation, dto)) {
-        session
-            .setFeedbackRead(
-                rocketChatRoomInformation.getMessagesReadMap()
-                    .get(session.getFeedbackGroupId()));
-      } else {
-        // Fallback: If map doesn't contain feedback group id set to true -> no feedback label in frontend application
-        session.setFeedbackRead(!rocketChatRoomInformation.getRoomLastMessageMap()
-            .containsKey(session.getFeedbackGroupId()));
-      }
+    if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
+        rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
+      updateSessionWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
+          consultantSessionResponseDTO, session, groupId);
+    } else {
+      setFallbackDate(consultantSessionResponseDTO, session);
     }
 
-    return sessions;
+    // Due to a Rocket.Chat bug the read state is only set, when a message was posted
+    if (isFeedbackFlagAvailable(rocketChatRoomInformation, consultantSessionResponseDTO)) {
+      session.setFeedbackRead(
+          rocketChatRoomInformation.getReadMessages().get(session.getFeedbackGroupId()));
+    } else {
+      // Fallback: If map doesn't contain feedback group id set to true -> no feedback label in frontend application
+      session.setFeedbackRead(!rocketChatRoomInformation.getLastMessagesRoom()
+          .containsKey(session.getFeedbackGroupId()));
+    }
+    return consultantSessionResponseDTO;
+  }
+
+  private void updateSessionWithAvailableLastMessage(
+      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
+      ConsultantSessionResponseDTO consultantSessionResponseDTO, SessionDTO session,
+      String groupId) {
+    RoomsLastMessageDTO roomsLastMessage =
+        rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
+    session.setLastMessage(isNotBlank(roomsLastMessage.getMessage()) ? sessionListAnalyser
+        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
+    session.setMessageDate(Helper.getUnixTimestampFromDate(
+        rocketChatRoomInformation.getLastMessagesRoom().get(groupId).getTimestamp()));
+    consultantSessionResponseDTO.setLatestMessage(roomsLastMessage.getTimestamp());
+    session.setAttachment(sessionListAnalyser
+        .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
+  }
+
+  private void setFallbackDate(ConsultantSessionResponseDTO consultantSessionResponseDTO,
+      SessionDTO session) {
+    session.setMessageDate(Helper.UNIXTIME_0.getTime());
+    consultantSessionResponseDTO.setLatestMessage(Helper.UNIXTIME_0);
   }
 
   private List<ConsultantSessionResponseDTO> updateConsultantChatValues(
       List<ConsultantSessionResponseDTO> chats, RocketChatRoomInformation rocketChatRoomInformation,
       String rcUserId) {
 
-    for (ConsultantSessionResponseDTO dto : chats) {
+    return chats.stream()
+        .map(chat -> updateRequiredChatValues(rocketChatRoomInformation, rcUserId, chat))
+        .collect(Collectors.toList());
+  }
 
-      UserChatDTO chat = dto.getChat();
-      String groupId = dto.getChat().getGroupId();
+  private ConsultantSessionResponseDTO updateRequiredChatValues(
+      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
+      ConsultantSessionResponseDTO consultantSessionResponseDTO) {
+    UserChatDTO chat = consultantSessionResponseDTO.getChat();
+    String groupId = consultantSessionResponseDTO.getChat().getGroupId();
 
-      chat.setSubscribed(
-          isRoomSubscribedByConsultant(rocketChatRoomInformation.getUserRoomList(), dto));
-      chat.setMessagesRead(rocketChatRoomInformation
-          .getMessagesReadMap().getOrDefault(chat.getGroupId(), true));
+    chat.setSubscribed(isRoomSubscribedByConsultant(rocketChatRoomInformation.getUserRooms(),
+        consultantSessionResponseDTO));
+    chat.setMessagesRead(rocketChatRoomInformation
+        .getReadMessages().getOrDefault(chat.getGroupId(), true));
 
-      if (sessionListHelper.isLastMessageForRocketChatGroupIdAvailable(
-          rocketChatRoomInformation.getRoomLastMessageMap(), groupId)) {
-        RoomsLastMessageDTO roomsLastMessage = rocketChatRoomInformation
-            .getRoomLastMessageMap().get(groupId);
-        chat.setLastMessage(!StringUtils.isEmpty(roomsLastMessage.getMessage())
-            ? sessionListHelper
-            .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId)
-            : null);
-        chat.setMessageDate(Helper
-            .getUnixTimestampFromDate(rocketChatRoomInformation.getRoomLastMessageMap().get(groupId)
-                .getTimestamp()));
-        dto.setLatestMessage(roomsLastMessage.getTimestamp());
-        chat
-            .setAttachment(
-                sessionListHelper
-                    .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
-      } else {
-        dto.setLatestMessage(Timestamp.valueOf(chat.getStartDateWithTime()));
-      }
+    if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
+        rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
+      updateChatWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
+          consultantSessionResponseDTO, chat, groupId);
+    } else {
+      consultantSessionResponseDTO.setLatestMessage(Timestamp.valueOf(chat.getStartDateWithTime()));
     }
+    return consultantSessionResponseDTO;
+  }
 
-    return chats;
+  private void updateChatWithAvailableLastMessage(
+      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
+      ConsultantSessionResponseDTO dto, UserChatDTO chat, String groupId) {
+    RoomsLastMessageDTO roomsLastMessage = rocketChatRoomInformation
+        .getLastMessagesRoom().get(groupId);
+    chat.setLastMessage(isNotBlank(roomsLastMessage.getMessage()) ? sessionListAnalyser
+        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
+    chat.setMessageDate(Helper
+        .getUnixTimestampFromDate(rocketChatRoomInformation.getLastMessagesRoom().get(groupId)
+            .getTimestamp()));
+    dto.setLatestMessage(roomsLastMessage.getTimestamp());
+    chat.setAttachment(sessionListAnalyser
+        .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
   }
 
   private boolean getMonitoringProperty(SessionDTO session) {
@@ -257,9 +277,9 @@ public class ConsultantSessionListService {
 
   private boolean isFeedbackFlagAvailable(RocketChatRoomInformation rocketChatRoomInformation,
       ConsultantSessionResponseDTO session) {
-    return rocketChatRoomInformation.getRoomLastMessageMap()
+    return rocketChatRoomInformation.getLastMessagesRoom()
         .containsKey(session.getSession().getFeedbackGroupId())
-        && rocketChatRoomInformation.getMessagesReadMap()
+        && rocketChatRoomInformation.getReadMessages()
         .containsKey(session.getSession().getFeedbackGroupId());
   }
 

@@ -20,7 +20,6 @@ import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetRoomsException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetSubscriptionsException;
 import de.caritas.cob.userservice.api.service.RocketChatService;
-import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -42,12 +41,12 @@ public class RocketChatRoomInformationProviderTest {
     when(rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS)).thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
 
-    assertTrue(rocketChatRoomInformation.getMessagesReadMap().get(RC_GROUP_ID));
-    assertTrue(rocketChatRoomInformation.getMessagesReadMap().get(RC_GROUP_ID_2));
-    assertTrue(rocketChatRoomInformation.getMessagesReadMap().get(RC_GROUP_ID_3));
-    assertFalse(rocketChatRoomInformation.getMessagesReadMap().get(RC_FEEDBACK_GROUP_ID));
-    assertTrue(rocketChatRoomInformation.getMessagesReadMap().get(RC_FEEDBACK_GROUP_ID_2));
-    assertTrue(rocketChatRoomInformation.getMessagesReadMap().get(RC_FEEDBACK_GROUP_ID_3));
+    assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_GROUP_ID));
+    assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_GROUP_ID_2));
+    assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_GROUP_ID_3));
+    assertFalse(rocketChatRoomInformation.getReadMessages().get(RC_FEEDBACK_GROUP_ID));
+    assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_FEEDBACK_GROUP_ID_2));
+    assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_FEEDBACK_GROUP_ID_3));
 
   }
 
@@ -57,7 +56,7 @@ public class RocketChatRoomInformationProviderTest {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
-    assertEquals(ROOMS_UPDATE_DTO_LIST, rocketChatRoomInformation.getRoomsUpdateList());
+    assertEquals(ROOMS_UPDATE_DTO_LIST, rocketChatRoomInformation.getRoomsForUpdate());
 
   }
 
@@ -67,7 +66,7 @@ public class RocketChatRoomInformationProviderTest {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
-    assertEquals(USERS_ROOMS_LIST, rocketChatRoomInformation.getUserRoomList());
+    assertEquals(USERS_ROOMS_LIST, rocketChatRoomInformation.getUserRooms());
 
   }
 
@@ -76,7 +75,7 @@ public class RocketChatRoomInformationProviderTest {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
-    assertEquals(ROOMS_LAST_MESSAGE_DTO_MAP, rocketChatRoomInformation.getRoomLastMessageMap());
+    assertEquals(ROOMS_LAST_MESSAGE_DTO_MAP, rocketChatRoomInformation.getLastMessagesRoom());
 
   }
 

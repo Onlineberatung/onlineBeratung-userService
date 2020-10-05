@@ -15,24 +15,24 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketChat.StandardResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupAddUserBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupCleanHistoryDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupCreateBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupDeleteBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupDeleteResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupMemberResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupRemoveUserBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LdapLoginDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.logout.LogoutResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.SubscriptionsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketChat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupAddUserBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCleanHistoryDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCreateBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupRemoveUserBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LdapLoginDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -239,8 +239,8 @@ public class RocketChatService {
     }
 
     RocketChatCredentials rocketChatCredentials =
-        RocketChatCredentials.builder().RocketChatUserId(response.getBody().getData().getUserId())
-            .RocketChatToken(response.getBody().getData().getAuthToken()).build();
+        RocketChatCredentials.builder().rocketChatUserId(response.getBody().getData().getUserId())
+            .rocketChatToken(response.getBody().getData().getAuthToken()).build();
 
     logoutUser(rocketChatCredentials);
 
