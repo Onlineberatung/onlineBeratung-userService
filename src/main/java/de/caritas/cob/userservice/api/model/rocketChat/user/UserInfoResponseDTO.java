@@ -19,5 +19,7 @@ public class UserInfoResponseDTO {
 
   private RocketChatUserDTO user;
   private boolean success;
+  private String error;
+  private String errorType;
 
 }

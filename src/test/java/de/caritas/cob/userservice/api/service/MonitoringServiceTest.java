@@ -3,8 +3,6 @@ package de.caritas.cob.userservice.api.service;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -60,9 +58,9 @@ public class MonitoringServiceTest {
   }
 
   /**
-   * 
+   *
    * Method: updateMonitoring Role: consultant
-   * 
+   *
    */
 
   @Test
@@ -92,9 +90,9 @@ public class MonitoringServiceTest {
   }
 
   /**
-   * 
+   *
    * Method: deleteMonitoring Role: consultant
-   * 
+   *
    */
 
   @Test
@@ -124,9 +122,9 @@ public class MonitoringServiceTest {
   }
 
   /**
-   * 
+   *
    * Method: crateMonitoring
-   * 
+   *
    * @throws CreateMonitoringException
    */
 
@@ -136,7 +134,7 @@ public class MonitoringServiceTest {
 
     doReturn(MONITORING_DTO).when(monitoringHelper).getMonitoringInitalList(Mockito.any());
 
-    monitoringService.createMonitoring(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
+    monitoringService.createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringHelper, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
@@ -144,7 +142,7 @@ public class MonitoringServiceTest {
   }
 
   /**
-   * 
+   *
    * Method: deleteInitialMonitoring
    */
 

@@ -1,15 +1,15 @@
-package de.caritas.cob.userservice.api.model.mailService;
+package de.caritas.cob.userservice.api.model.mailservice;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@Builder
+@Data
 public class MailDTO {
 
   private String template;

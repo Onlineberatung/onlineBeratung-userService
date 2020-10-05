@@ -66,7 +66,7 @@ public class MessageServiceHelperTest {
 
   /**
    * postMessage()
-   * 
+   *
    */
 
   @Test
@@ -119,17 +119,17 @@ public class MessageServiceHelperTest {
 
   /**
    * postWelcomeMessage()
-   * 
+   *
    * @throws RocketChatPostMessageException
    * @throws RocketChatPostWelcomeMessageException
-   * 
+   *
    */
 
   @Test
   public void postWelcomeMessage_Should_DoNothing_When_WelcomeMessageIsDeactivated()
       throws Exception {
 
-    messageServiceHelper.postWelcomeMessage(RC_GROUP_ID, null,
+    messageServiceHelper.postWelcomeMessageIfConfigured(RC_GROUP_ID, null,
         CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE, null);
 
     verify(restTemplate, never()).exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
@@ -147,7 +147,7 @@ public class MessageServiceHelperTest {
         ArgumentMatchers.<HttpEntity<?>>any(), ArgumentMatchers.<Class<Void>>any()))
             .thenReturn(response);
 
-    messageServiceHelper.postWelcomeMessage(RC_GROUP_ID, USER,
+    messageServiceHelper.postWelcomeMessageIfConfigured(RC_GROUP_ID, USER,
         CONSULTING_TYPE_SETTINGS_WITH_WELCOME_MESSAGE, null);
 
     verify(restTemplate).exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
@@ -169,7 +169,7 @@ public class MessageServiceHelperTest {
             .thenThrow(exception);
 
     try {
-      messageServiceHelper.postWelcomeMessage(RC_GROUP_ID, USER,
+      messageServiceHelper.postWelcomeMessageIfConfigured(RC_GROUP_ID, USER,
           CONSULTING_TYPE_SETTINGS_WITH_WELCOME_MESSAGE, null);
       fail("Expected exception: RocketChatPostWelcomeMessageException");
     } catch (RocketChatPostWelcomeMessageException rocketChatPostWelcomeMessageException) {

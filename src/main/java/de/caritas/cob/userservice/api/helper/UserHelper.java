@@ -24,10 +24,10 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 public class UserHelper {
 
   @Value("${keycloakService.user.dummySuffix}")
-  private String EMAIL_DUMMY_SUFFIX;
+  private String emailDummySuffix;
 
   @Value("${app.base.url}")
-  private String HOST_BASE_URL;
+  private String hostBaseUrl;
 
   public static final int USERNAME_MIN_LENGTH = 5;
   public static final int USERNAME_MAX_LENGTH = 30;
@@ -48,10 +48,10 @@ public class UserHelper {
   public static final int CHAT_MAX_DURATION = 180;
   public static final int CHAT_TOPIC_MIN_LENGTH = 3;
   public static final int CHAT_TOPIC_MAX_LENGTH = 50;
-  private final String ENCODING_PREFIX = "enc.";
-  private final String BASE32_PLACEHOLDER = "=";
-  private final String BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING = ".";
-  private final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
+  private static final String ENCODING_PREFIX = "enc.";
+  private static final String BASE32_PLACEHOLDER = "=";
+  private static final String BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING = ".";
+  private static final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
   private Base32 base32 = new Base32();
 
   @Autowired
@@ -61,7 +61,7 @@ public class UserHelper {
 
   /**
    * Generates a random password which complies with the Keycloak policy
-   * 
+   *
    * @return
    */
   public String getRandomPassword() {
@@ -91,17 +91,17 @@ public class UserHelper {
 
   /**
    * Generates the dummy email for a Keycloak user
-   * 
+   *
    * @param userId
    * @return
    */
   public String getDummyEmail(String userId) {
-    return userId + EMAIL_DUMMY_SUFFIX;
+    return userId + emailDummySuffix;
   }
 
   /**
    * Checks if the given username is between minimum and maximum char length
-   * 
+   *
    * @param username
    * @return
    */
@@ -113,7 +113,7 @@ public class UserHelper {
   /**
    * Returns the Base32 encoded username. The padding char "=" of the Base32 String will be replaced
    * by a dot "." to support Rocket.Chat special chars.
-   * 
+   *
    * @param username
    * @return encoded username
    */
@@ -125,7 +125,7 @@ public class UserHelper {
   /**
    * Returns the Base32 decoded username. Placeholder dot "." (to support Rocket.Chat special chars)
    * will be replaced by the Base32 padding symbol "=".
-   * 
+   *
    * @param username
    * @return
    */
@@ -142,7 +142,7 @@ public class UserHelper {
 
   /**
    * Encodes the given username if it isn't already encoded
-   * 
+   *
    * @param username
    * @return encoded username
    */
@@ -152,7 +152,7 @@ public class UserHelper {
 
   /**
    * Descodes the given username if it isn't already decoded
-   * 
+   *
    * @param username
    * @return
    */
@@ -163,7 +163,7 @@ public class UserHelper {
   /**
    * Returns true if the decoded username does not exist in Keycloak yet or false if it already
    * exists.
-   * 
+   *
    * @param username (decoded or encoded)
    * @return true if does not exist, else false
    */
@@ -181,7 +181,7 @@ public class UserHelper {
 
   /**
    * Returns true if the given usernames match.
-   * 
+   *
    * @param firstUsername encoded or decoded first username to compare
    * @param secondUsername encoded or decoded second username to compare
    * @return
@@ -193,14 +193,14 @@ public class UserHelper {
 
   /**
    * Base32 encodes a given String
-   * 
+   *
    * @param value String to be encoded
    * @return encoded String
    */
   private String base32EncodeAndReplacePlaceholder(String value, String placeholder,
       String replaceString) {
     try {
-      return base32.encodeAsString(value.getBytes()).toString().replace(placeholder, replaceString);
+      return base32.encodeAsString(value.getBytes()).replace(placeholder, replaceString);
 
     } catch (Exception exception) {
       // Catch generic exception because of lack of base32 documentation
@@ -210,20 +210,20 @@ public class UserHelper {
 
   /**
    * Generates the URL for a chat with the given {@link Chat} id and {@link ConsultingType}
-   * 
+   *
    * @param chatId the {@link Chat}'s id
    * @param consultingType the chat's {@link ConsultingType}
    * @return URL (String)
    */
   public String generateChatUrl(Long chatId, ConsultingType consultingType) {
-    return HOST_BASE_URL + "/" + consultingType.getUrlName() + "/"
+    return hostBaseUrl + "/" + consultingType.getUrlName() + "/"
         + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
             BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }
 
   /**
    * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
-   * 
+   *
    * @param user {@link User}
    * @param rcUserId Rocket.Chat user ID
    */

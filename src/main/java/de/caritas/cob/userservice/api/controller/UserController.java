@@ -367,8 +367,7 @@ public class UserController implements UsersApi {
       @Valid @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(
-        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getRoles(),
-        authenticatedUser.getUserId());
+        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
