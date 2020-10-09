@@ -47,16 +47,19 @@ public class RocketChatRoomInformationProvider {
         roomsForUpdate.stream().map(RoomsUpdateDTO::getId).collect(Collectors.toList());
     Map<String, RoomsLastMessageDTO> lastMessagesRoom = getRcRoomLastMessages(roomsForUpdate);
 
-    return RocketChatRoomInformation.builder().readMessages(readMessages)
-        .roomsForUpdate(roomsForUpdate).userRooms(userRooms).lastMessagesRoom(lastMessagesRoom)
+    return RocketChatRoomInformation.builder()
+        .readMessages(readMessages)
+        .roomsForUpdate(roomsForUpdate)
+        .userRooms(userRooms)
+        .lastMessagesRoom(lastMessagesRoom)
         .build();
   }
 
   private Map<String, Boolean> buildMessagesWithReadInfo(
       RocketChatCredentials rocketChatCredentials) {
 
-    List<SubscriptionsUpdateDTO> subscriptions =
-        rocketChatService.getSubscriptionsOfUser(rocketChatCredentials);
+    List<SubscriptionsUpdateDTO> subscriptions = rocketChatService
+        .getSubscriptionsOfUser(rocketChatCredentials);
 
     return subscriptions.stream()
         .collect(Collectors.toMap(SubscriptionsUpdateDTO::getRoomId, this::isMessageRead));

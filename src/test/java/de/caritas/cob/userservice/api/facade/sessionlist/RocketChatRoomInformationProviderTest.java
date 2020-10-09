@@ -40,8 +40,8 @@ public class RocketChatRoomInformationProviderTest {
 
     when(rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS))
         .thenReturn(SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD);
-    RocketChatRoomInformation rocketChatRoomInformation =
-        rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
+    RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider
+        .retrieveRocketChatInformation(RC_CREDENTIALS);
 
     assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_GROUP_ID));
     assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_GROUP_ID_2));
@@ -49,35 +49,32 @@ public class RocketChatRoomInformationProviderTest {
     assertFalse(rocketChatRoomInformation.getReadMessages().get(RC_FEEDBACK_GROUP_ID));
     assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_FEEDBACK_GROUP_ID_2));
     assertTrue(rocketChatRoomInformation.getReadMessages().get(RC_FEEDBACK_GROUP_ID_3));
-
   }
 
   @Test
   public void retrieveRocketChatInformation_Should_Return_RocketChatRoomsUpdateList() {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
-    RocketChatRoomInformation rocketChatRoomInformation =
-        rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
+    RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider
+        .retrieveRocketChatInformation(RC_CREDENTIALS);
     assertEquals(ROOMS_UPDATE_DTO_LIST, rocketChatRoomInformation.getRoomsForUpdate());
-
   }
 
   @Test
   public void retrieveRocketChatInformation_Should_Return_CorrectRocketChatUserRoomList() {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
-    RocketChatRoomInformation rocketChatRoomInformation =
-        rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
+    RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider
+        .retrieveRocketChatInformation(RC_CREDENTIALS);
     assertEquals(USERS_ROOMS_LIST, rocketChatRoomInformation.getUserRooms());
-
   }
 
   @Test
   public void retrieveRocketChatInformation_Should_Return_CorrectRocketChatLastMessageRoom() {
 
     when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(ROOMS_UPDATE_DTO_LIST);
-    RocketChatRoomInformation rocketChatRoomInformation =
-        rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS);
+    RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider
+        .retrieveRocketChatInformation(RC_CREDENTIALS);
     assertEquals(ROOMS_LAST_MESSAGE_DTO_MAP, rocketChatRoomInformation.getLastMessagesRoom());
 
   }

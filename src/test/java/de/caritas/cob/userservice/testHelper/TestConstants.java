@@ -225,7 +225,8 @@ public class TestConstants {
           .rocketChatUsername(RC_USERNAME).timeStampCreated(LocalDateTime.now()).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_WITH_EMPTY_USER_VALUES =
-      RocketChatCredentials.builder().rocketChatToken(RC_TOKEN)
+      RocketChatCredentials.builder()
+          .rocketChatToken(RC_TOKEN)
           .timeStampCreated(LocalDateTime.now()).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_A =
@@ -321,8 +322,7 @@ public class TestConstants {
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
           "last name", EMAIL, false, false, null, false, null, null, null);
-  public static final SessionConsultantForUserDTO CONSULTANT_DTO =
-      new SessionConsultantForUserDTO();
+  public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO(true, null);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
       new GroupMemberDTO(RC_USER_ID, RC_STATUS_ONLINE, USERNAME, USERNAME, RC_UTC_OFFSET);
@@ -395,8 +395,7 @@ public class TestConstants {
       "enc:uWHNUkWrQJikGnVpknvB3SkzT1RWHJuY0igDT9p7fGFHWECLBpV2+0eIZF6Qi7J0";
   public static final String DECRYPTED_MESSAGE = "Das hier ist jetzt mal eine Test-Message";
   public static final String MESSAGE = "Testnachricht";
-  public static final String MESSAGE_TOO_LONG =
-      "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magn";
+  public static final String MESSAGE_TOO_LONG = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magn";
   public static final AbsenceDTO ABSENCE_DTO = new AbsenceDTO(true, TestConstants.MESSAGE);
   public static final String MESSAGE_WITH_HTML_AND_JS =
       "<b>Testnachricht</b><script>alert('1');</script>";
@@ -416,8 +415,8 @@ public class TestConstants {
   /*
    * ConsultantAgency
    */
-  public static final ConsultantAgency[] CONSULTANT_AGENCY =
-      new ConsultantAgency[] {new ConsultantAgency(1L, CONSULTANT, AGENCY_ID)};
+  public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID)};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
       new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
@@ -463,9 +462,10 @@ public class TestConstants {
   public static final Session ENQUIRY_SESSION_WITH_CONSULTANT =
       new Session(SESSION_ID, null, CONSULTANT_2, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, new Date(), RC_GROUP_ID);
-  public static final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, null, RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING);
+  public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
+      null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
+      null, IS_TEAM_SESSION, IS_MONITORING);
+
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
@@ -519,17 +519,19 @@ public class TestConstants {
       new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
           RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
           IS_NO_TEAM_SESSION, IS_MONITORING);
-  public static final SessionDTO SESSION_DTO_WITH_FEEDBACK = SessionDTO.builder().id(SESSION_ID)
-      .agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null).groupId(RC_GROUP_ID_3)
-      .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
+  public static final SessionDTO SESSION_DTO_WITH_FEEDBACK = SessionDTO.builder()
+      .id(SESSION_ID).agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null)
+      .groupId(RC_GROUP_ID_3).feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
       .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
-      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(true).build();
+      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(true)
+      .build();
 
-  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK = SessionDTO.builder().id(SESSION_ID)
-      .agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null).groupId(RC_GROUP_ID_3)
-      .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
+  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK = SessionDTO.builder()
+      .id(SESSION_ID).agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null)
+      .groupId(RC_GROUP_ID_3).feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
       .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
-      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(false).build();
+      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(false)
+      .build();
   /**
    * Chat
    */
