@@ -1,7 +1,21 @@
 package de.caritas.cob.userservice.testHelper;
 
-import static com.google.common.collect.ImmutableMap.of;
-
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
@@ -43,22 +57,6 @@ import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 public class TestConstants {
 
@@ -225,6 +223,11 @@ public class TestConstants {
   public static final RocketChatCredentials RC_CREDENTIALS =
       RocketChatCredentials.builder().rocketChatToken(RC_TOKEN).rocketChatUserId(RC_USER_ID)
           .rocketChatUsername(RC_USERNAME).timeStampCreated(LocalDateTime.now()).build();
+
+  public static final RocketChatCredentials RC_CREDENTIALS_WITH_EMPTY_USER_VALUES =
+      RocketChatCredentials.builder()
+          .rocketChatToken(RC_TOKEN)
+          .timeStampCreated(LocalDateTime.now()).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_A =
       RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
@@ -412,8 +415,8 @@ public class TestConstants {
   /*
    * ConsultantAgency
    */
-  public static final ConsultantAgency[] CONSULTANT_AGENCY =
-      new ConsultantAgency[]{new ConsultantAgency(1L, CONSULTANT, AGENCY_ID)};
+  public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID)};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
       new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
@@ -459,9 +462,10 @@ public class TestConstants {
   public static final Session ENQUIRY_SESSION_WITH_CONSULTANT =
       new Session(SESSION_ID, null, CONSULTANT_2, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, new Date(), RC_GROUP_ID);
-  public static final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, null, RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING);
+  public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
+      null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
+      null, IS_TEAM_SESSION, IS_MONITORING);
+
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
@@ -577,72 +581,76 @@ public class TestConstants {
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86300000)), MESSAGES_NOT_READ,
       RC_GROUP_ID_4, null, false, null, LocalDateTime.now());
   public static final UserChatDTO USER_CHAT_DTO_2 = new UserChatDTO(CHAT_ID_2, CHAT_TOPIC_2, null,
-      null,
-      CHAT_DURATION_60, IS_REPETITIVE, IS_NOT_ACTIVE, ConsultingType.DEBT.getValue(), null,
+      null, CHAT_DURATION_60, IS_REPETITIVE, IS_NOT_ACTIVE, ConsultingType.DEBT.getValue(), null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86200000)), MESSAGES_NOT_READ,
       RC_GROUP_ID_5, null, false, null, LocalDateTime.now());
   public static final UserChatDTO USER_CHAT_DTO_3 = new UserChatDTO(CHAT_ID_3, CHAT_TOPIC_3, null,
-      null,
-      CHAT_DURATION_90, IS_NOT_REPETITIVE, IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(), null,
-      Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
+      null, CHAT_DURATION_90, IS_NOT_REPETITIVE, IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(),
+      null, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
       RC_GROUP_ID_6, null, false, null, LocalDateTime.now());
   public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO =
       new UserSessionResponseDTO(null, USER_CHAT_DTO_1, EMPTY_AGENCY_DTO, CONSULTANT_DTO, NOW);
   public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO_2 = new UserSessionResponseDTO(
-      null,
-      USER_CHAT_DTO_2, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 80000000));
+      null, USER_CHAT_DTO_2, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 80000000));
   public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO_3 = new UserSessionResponseDTO(
-      null,
-      USER_CHAT_DTO_3, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 70000000));
+      null, USER_CHAT_DTO_3, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 70000000));
 
   /* Session list */
   public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO =
       new UserSessionResponseDTO(SESSION_DTO_1, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO, NOW);
-  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_2 = new UserSessionResponseDTO(
-      SESSION_DTO_2, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 86400000));
-  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_3 = new UserSessionResponseDTO(
-      SESSION_DTO_3, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 8640000));
+  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_2 =
+      new UserSessionResponseDTO(SESSION_DTO_2, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO,
+          new Date(NOW.getTime() + 86400000));
+  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_3 =
+      new UserSessionResponseDTO(SESSION_DTO_3, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO,
+          new Date(NOW.getTime() + 8640000));
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST = Arrays
       .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3);
-  public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST = Arrays
-      .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3,
-          USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2);
+  public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST =
+      Arrays.asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2,
+          USER_SESSION_RESPONSE_DTO_3, USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2);
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS =
-      new HashMap<String, Boolean>() {{
-        put(RC_GROUP_ID, false);
-        put(RC_GROUP_ID_2, false);
-        put(RC_GROUP_ID_3, false);
-        put(RC_GROUP_ID_4, false);
-        put(RC_GROUP_ID_5, false);
-        put(RC_GROUP_ID_6, false);
-        put(RC_FEEDBACK_GROUP_ID, false);
-        put(RC_FEEDBACK_GROUP_ID_2, false);
-        put(RC_FEEDBACK_GROUP_ID_3, false);
-      }};
+      new HashMap<String, Boolean>() {
+        {
+          put(RC_GROUP_ID, false);
+          put(RC_GROUP_ID_2, false);
+          put(RC_GROUP_ID_3, false);
+          put(RC_GROUP_ID_4, false);
+          put(RC_GROUP_ID_5, false);
+          put(RC_GROUP_ID_6, false);
+          put(RC_FEEDBACK_GROUP_ID, false);
+          put(RC_FEEDBACK_GROUP_ID_2, false);
+          put(RC_FEEDBACK_GROUP_ID_3, false);
+        }
+      };
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITHOUT_UNREADS =
-      new HashMap<String, Boolean>() {{
-        put(RC_GROUP_ID, true);
-        put(RC_GROUP_ID_2, true);
-        put(RC_GROUP_ID_3, true);
-        put(RC_GROUP_ID_4, true);
-        put(RC_GROUP_ID_5, true);
-        put(RC_GROUP_ID_6, true);
-        put(RC_FEEDBACK_GROUP_ID, true);
-        put(RC_FEEDBACK_GROUP_ID_2, true);
-        put(RC_FEEDBACK_GROUP_ID_3, true);
-      }};
+      new HashMap<String, Boolean>() {
+        {
+          put(RC_GROUP_ID, true);
+          put(RC_GROUP_ID_2, true);
+          put(RC_GROUP_ID_3, true);
+          put(RC_GROUP_ID_4, true);
+          put(RC_GROUP_ID_5, true);
+          put(RC_GROUP_ID_6, true);
+          put(RC_FEEDBACK_GROUP_ID, true);
+          put(RC_FEEDBACK_GROUP_ID_2, true);
+          put(RC_FEEDBACK_GROUP_ID_3, true);
+        }
+      };
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD =
-      new HashMap<String, Boolean>() {{
-        put(RC_GROUP_ID, true);
-        put(RC_GROUP_ID_2, true);
-        put(RC_GROUP_ID_3, true);
-        put(RC_GROUP_ID_4, true);
-        put(RC_GROUP_ID_5, true);
-        put(RC_GROUP_ID_6, true);
-        put(RC_FEEDBACK_GROUP_ID, false);
-        put(RC_FEEDBACK_GROUP_ID_2, true);
-        put(RC_FEEDBACK_GROUP_ID_3, true);
-      }};
+      new HashMap<String, Boolean>() {
+        {
+          put(RC_GROUP_ID, true);
+          put(RC_GROUP_ID_2, true);
+          put(RC_GROUP_ID_3, true);
+          put(RC_GROUP_ID_4, true);
+          put(RC_GROUP_ID_5, true);
+          put(RC_GROUP_ID_6, true);
+          put(RC_FEEDBACK_GROUP_ID, false);
+          put(RC_FEEDBACK_GROUP_ID_2, true);
+          put(RC_FEEDBACK_GROUP_ID_3, true);
+        }
+      };
   public static final List<UserSessionResponseDTO> USER_CHAT_RESPONSE_DTO_LIST =
       Arrays.asList(USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2, USER_CHAT_RESPONSE_DTO_3);
 
@@ -686,17 +694,19 @@ public class TestConstants {
       new RoomsUpdateDTO(RC_GROUP_ID_6, "name6", "fname6", "P", USER_DTO_3, true, false, new Date(),
           ROOMS_LAST_MESSAGE_DTO_6));
   public static final Map<String, RoomsLastMessageDTO> ROOMS_LAST_MESSAGE_DTO_MAP =
-      new HashMap<String, RoomsLastMessageDTO>() {{
-        put(RC_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
-        put(RC_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
-        put(RC_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
-        put(RC_GROUP_ID_4, ROOMS_LAST_MESSAGE_DTO_4);
-        put(RC_GROUP_ID_5, ROOMS_LAST_MESSAGE_DTO_5);
-        put(RC_GROUP_ID_6, ROOMS_LAST_MESSAGE_DTO_6);
-        put(RC_FEEDBACK_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
-        put(RC_FEEDBACK_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
-        put(RC_FEEDBACK_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
-      }};
+      new HashMap<String, RoomsLastMessageDTO>() {
+        {
+          put(RC_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
+          put(RC_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
+          put(RC_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
+          put(RC_GROUP_ID_4, ROOMS_LAST_MESSAGE_DTO_4);
+          put(RC_GROUP_ID_5, ROOMS_LAST_MESSAGE_DTO_5);
+          put(RC_GROUP_ID_6, ROOMS_LAST_MESSAGE_DTO_6);
+          put(RC_FEEDBACK_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
+          put(RC_FEEDBACK_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
+          put(RC_FEEDBACK_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
+        }
+      };
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
           MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
@@ -706,22 +716,18 @@ public class TestConstants {
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT =
       Arrays.asList(new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
           new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT));
-  public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT = Arrays
-      .asList(
+  public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT =
+      Arrays.asList(
           new RoomsUpdateDTO(RC_GROUP_ID_4, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(),
-              ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT),
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT),
           new RoomsUpdateDTO(RC_GROUP_ID_6, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(),
-              ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT));
-  public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_RECEIVED = new SessionAttachmentDTO(
-      ROOMS_LAST_MESSAGE_DTO_1.getFile().getType(),
-      ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview(),
-      true);
-  public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_NOT_RECEIVED = new SessionAttachmentDTO(
-      ROOMS_LAST_MESSAGE_DTO_1.getFile().getType(),
-      ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview(),
-      false);
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT));
+  public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_RECEIVED =
+      new SessionAttachmentDTO(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType(),
+          ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview(), true);
+  public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_NOT_RECEIVED =
+      new SessionAttachmentDTO(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType(),
+          ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview(), false);
   public static final List<String> USERS_ROOMS_LIST =
       ROOMS_UPDATE_DTO_LIST.stream().map(RoomsUpdateDTO::getId).collect(Collectors.toList());
   public static final List<String> USERS_EMPTY_ROOMS_LIST = new ArrayList<>();

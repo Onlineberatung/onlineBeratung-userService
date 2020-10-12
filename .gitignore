@@ -32,3 +32,4 @@
 consultants.csv
 consultants-import.txt*
 *.tar
+/package-lock.json
