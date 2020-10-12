@@ -818,33 +818,6 @@ paths:
           description: "CONFLICT - Chat has not startet yet"
         500:
           description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
-  /users/delete:
-   delete:
-      tags:
-      - "user-controller"
-      summary: "Delete an user [Authorization: Role: consultant or user]"
-      operationId: "deleteUser"
-      security:
-        - Bearer: []
-      parameters:
-      - in: "body"
-        name: "DeleteUser"
-        required: true
-        schema:
-          $ref: "#/definitions/DeleteUserDTO"  
-      responses:
-        200:
-          description: "OK - successfull operation"
-        400:
-          description: "BAD REQUEST - invalid/incomplete request or body object"
-        401:
-          description: "UNAUTHORIZED - no/invalid Keycloak token"
-        403:
-          description: "FORBIDDEN - no/invalid CSRF token"
-        404:
-          description: "NOT FOUND - User not found" 
-        500:
-          description: "INTERNAL SERVER ERROR - server encountered unexpected condition"
 # Model/object definitions #
 definitions:
   UserDTO:
