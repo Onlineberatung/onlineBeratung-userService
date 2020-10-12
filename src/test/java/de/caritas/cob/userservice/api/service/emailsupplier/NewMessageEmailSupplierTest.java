@@ -85,8 +85,8 @@ public class NewMessageEmailSupplierTest {
   @Test
   public void generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsUserAndSessionIsNotValidAndMessageIsNotTheFirst() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
-    User userAnotherId = USER;
-    userAnotherId.setUserId("another");
+    User userAnotherId = mock(User.class);
+    when(userAnotherId.getUserId()).thenReturn("another");
     when(session.getUser()).thenReturn(userAnotherId);
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
 
