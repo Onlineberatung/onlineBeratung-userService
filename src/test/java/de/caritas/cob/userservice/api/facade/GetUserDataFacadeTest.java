@@ -7,6 +7,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WIT
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -151,6 +152,16 @@ public class GetUserDataFacadeTest {
       assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(agencyServiceHelper, times(1)).getAgencies(Mockito.anyList());
+  }
+
+  @Test
+  public void getUserData_Should_ReturnUserDataResponseDTOWithEmail_When_ProvidedWithValidUser() {
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
+    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
+
+    UserDataResponseDTO resultUser = getUserDataFacade.buildUserDataPreferredByConsultantRole();
+
+    assertThat(resultUser.getEmail(), notNullValue());
   }
 
 }

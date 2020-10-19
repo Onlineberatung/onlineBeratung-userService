@@ -104,7 +104,7 @@ public class GetUserDataFacade {
 
   private UserDataResponseDTO getUserData(User user) {
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
-        null, null, null, false, user.isLanguageFormal(), null, false, null,
+        null, null, user.getEmail(), false, user.isLanguageFormal(), null, false, null,
         authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
 
     responseDTO.setConsultingTypes(getConsultingTypes(user));
