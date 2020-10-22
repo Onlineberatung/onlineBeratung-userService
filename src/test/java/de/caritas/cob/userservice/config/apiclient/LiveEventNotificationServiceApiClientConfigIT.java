@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
-public class LiveServiceApiClientConfigIT {
+public class LiveEventNotificationServiceApiClientConfigIT {
 
   @Autowired
   private LiveControllerApi liveControllerApi;
