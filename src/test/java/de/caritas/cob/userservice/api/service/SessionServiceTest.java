@@ -12,8 +12,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.DRUGS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NOT_OFFLINE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.OTHERS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
@@ -46,12 +44,10 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Now;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -64,7 +60,6 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -98,25 +93,16 @@ public class SessionServiceTest {
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
       ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L);
-  private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
+  private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<ConsultantAgency>();
   private final List<Session> SESSION_LIST = Arrays.asList(SESSION, SESSION_2);
-  private final List<Session> SESSION_LIST_SINGLE = Collections.singletonList(SESSION);
-  private final List<Session> SESSION_LIST_WITH_CONSULTANT = Collections
-      .singletonList(SESSION_WITH_CONSULTANT);
-  private final AgencyDTO AGENCY_DTO = new AgencyDTO()
-      .id(AGENCY_ID)
-      .name(AGENCY_NAME)
-      .postcode(POSTCODE)
-      .city(CITY)
-      .description(DESCRIPTION)
-      .teamAgency(IS_NO_TEAM_AGENCY)
-      .offline(IS_NOT_OFFLINE)
-      .consultingType(ConsultingType.SUCHT);
+  private final List<Session> SESSION_LIST_SINGLE = Arrays.asList(SESSION);
+  private final List<Session> SESSION_LIST_WITH_CONSULTANT = Arrays.asList(SESSION_WITH_CONSULTANT);
+  private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE, CITY,
+      DESCRIPTION, false, false, ConsultingType.SUCHT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
       null, null, null, null, null, ConsultingType.SUCHT.getValue() + "");
-  private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<>();
-
+  private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<String, Object>();
   @InjectMocks
   private SessionService sessionService;
   @Mock
@@ -126,16 +112,16 @@ public class SessionServiceTest {
   @Mock
   private Logger logger;
   @Mock
-  private SessionDataHelper sessionDataHelper;
+  private Now now;
   @Mock
-  private UserHelper userHelper;
+  private AuthenticatedUser authenticatedUser;
 
   @Before
   public void setUp() {
     CONSULTANT_AGENCY_SET.add(CONSULTANT_AGENCY_1);
 
-    LinkedHashMap<String, Object> drugsMap = new LinkedHashMap<>();
-    LinkedHashMap<String, Object> addictiveDrugsMap = new LinkedHashMap<>();
+    LinkedHashMap<String, Object> drugsMap = new LinkedHashMap<String, Object>();
+    LinkedHashMap<String, Object> addictiveDrugsMap = new LinkedHashMap<String, Object>();
     drugsMap.put(OTHERS, false);
     addictiveDrugsMap.put(ACLOHOL, true);
     addictiveDrugsMap.put(DRUGS, drugsMap);
@@ -144,15 +130,15 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_SessionsSorted() {
+  public void getSessionsForConsultant_Should_SessionsSorted() throws Exception {
 
     // Sorting for COBH-199 is done directly via the Spring CRUD repository using method notation.
     // The test becomes invalid if the method name has been changed.
     // Then you have to check if the sorting still exists.
     Consultant consultant = Mockito.mock(Consultant.class);
-    Set<ConsultantAgency> agencySet = new HashSet<>();
+    Set<ConsultantAgency> agencySet = new HashSet<ConsultantAgency>();
     agencySet.add(CONSULTANT_AGENCY_1);
-    List<Long> agencyIds = Collections.singletonList(CONSULTANT_AGENCY_1.getAgencyId());
+    List<Long> agencyIds = Arrays.asList(CONSULTANT_AGENCY_1.getAgencyId());
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
@@ -178,7 +164,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSession_Should_ReturnSession_WhenGetSessionIsSuccessfull() {
+  public void getSession_Should_ReturnSession_WhenGetSessionIsSuccessfull() throws Exception {
 
     Optional<Session> session = Optional.of(SESSION);
 
@@ -279,11 +265,11 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnDatabaseError() {
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnDatabaseError()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("Database error") {
-    };
+    DataAccessException ex = new DataAccessException("Database error") {};
 
     when(sessionRepository.findByUser_UserId(USER_ID)).thenThrow(ex);
 
@@ -301,7 +287,7 @@ public class SessionServiceTest {
 
     AgencyServiceHelperException ex =
         new AgencyServiceHelperException(new Exception("AgencyService error"));
-    List<Session> sessions = new ArrayList<>();
+    List<Session> sessions = new ArrayList<Session>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
@@ -319,7 +305,7 @@ public class SessionServiceTest {
   public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId()
       throws Exception {
 
-    List<Session> sessions = new ArrayList<>();
+    List<Session> sessions = new ArrayList<Session>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
@@ -337,7 +323,7 @@ public class SessionServiceTest {
   @Test
   public void getSessionsForUser_Should_ReturnListOfSessionsForUser() {
 
-    List<Session> sessions = new ArrayList<>();
+    List<Session> sessions = new ArrayList<Session>();
     sessions.add(SESSION);
     sessions.add(SESSION_2);
 
@@ -350,11 +336,11 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUser_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError() {
+  public void getSessionsForUser_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("Database error") {
-    };
+    DataAccessException ex = new DataAccessException("Database error") {};
     when(sessionRepository.findByUser(USER)).thenThrow(ex);
     try {
       sessionService.getSessionsForUser(USER);
@@ -372,7 +358,7 @@ public class SessionServiceTest {
   @Test
   public void getSessionsForUserByConsultingType_Should_ReturnListOfSessionsForUser() {
 
-    List<Session> sessions = new ArrayList<>();
+    List<Session> sessions = new ArrayList<Session>();
     sessions.add(SESSION);
     sessions.add(SESSION_2);
 
@@ -387,11 +373,11 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
+  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("Database error") {
-    };
+    DataAccessException ex = new DataAccessException("Database error") {};
     when(sessionRepository.findByUserAndConsultingType(USER, ConsultingType.SUCHT)).thenThrow(ex);
     try {
       sessionService.getSessionsForUserByConsultingType(USER, ConsultingType.SUCHT);
@@ -406,11 +392,11 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError() {
+  public void getSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("reason") {
-    };
+    DataAccessException ex = new DataAccessException("reason") {};
     Consultant consultant = Mockito.mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
@@ -426,13 +412,15 @@ public class SessionServiceTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void getSessionsForConsultant_Should_ThrowBadRequestException_WhenStatusParameterIsInvalid() {
+  public void getSessionsForConsultant_Should_ThrowBadRequestException_WhenStatusParameterIsInvalid()
+      throws Exception {
 
     sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_INVALID);
   }
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusNew() {
+  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusNew()
+      throws Exception {
 
     Consultant consultant = Mockito.mock(Consultant.class);
 
@@ -445,7 +433,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusInProgress() {
+  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusInProgress()
+      throws Exception {
 
     when(sessionRepository.findByConsultantAndStatus(Mockito.any(), Mockito.any()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
@@ -459,11 +448,11 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsUserAuthority() {
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsUserAuthority()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("reason") {
-    };
+    DataAccessException ex = new DataAccessException("reason") {};
 
     when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any())).thenThrow(ex);
 
@@ -476,7 +465,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsUserAuthority() {
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsUserAuthority()
+      throws Exception {
 
     when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any()))
         .thenReturn(SESSION_LIST);
@@ -500,7 +490,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId_Should_ReturnNull_WhenNoSessionFound_AsUserAuthority() {
+  public void getSessionByGroupIdAndUserId_Should_ReturnNull_WhenNoSessionFound_AsUserAuthority()
+      throws Exception {
 
     when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any()))
         .thenReturn(null);
@@ -513,11 +504,11 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsConsultantAuthority() {
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsConsultantAuthority()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException("reason") {
-    };
+    DataAccessException ex = new DataAccessException("reason") {};
 
     when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
         .thenThrow(ex);
@@ -531,7 +522,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsConsultantAuthority() {
+  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsConsultantAuthority()
+      throws Exception {
 
     when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
         .thenReturn(SESSION_LIST);
@@ -555,7 +547,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId_Should_ReturnNull_WhenNoSessionFound_AsConsultantAuthority() {
+  public void getSessionByGroupIdAndUserId_Should_ReturnNull_WhenNoSessionFound_AsConsultantAuthority()
+      throws Exception {
 
     when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
         .thenReturn(null);
@@ -568,11 +561,11 @@ public class SessionServiceTest {
    */
 
   @Test
-  public void getTeamSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError() {
+  public void getTeamSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError()
+      throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR_MSG) {
-    };
+    DataAccessException ex = new DataAccessException(ERROR_MSG) {};
     Consultant consultant = Mockito.mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
@@ -589,7 +582,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getTeamSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultant() {
+  public void getTeamSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultant()
+      throws Exception {
 
     Consultant consultant = Mockito.mock(Consultant.class);
 
@@ -604,7 +598,8 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getTeamSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTOWithConsultant_WhenProvidedWithValidConsultant() {
+  public void getTeamSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTOWithConsultant_WhenProvidedWithValidConsultant()
+      throws Exception {
 
     Consultant consultant = Mockito.mock(Consultant.class);
 
@@ -615,7 +610,7 @@ public class SessionServiceTest {
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     SessionConsultantForConsultantDTO sessionDTO =
-        sessionService.getTeamSessionsForConsultant(consultant)
+        (SessionConsultantForConsultantDTO) sessionService.getTeamSessionsForConsultant(consultant)
             .get(0).getConsultant();
 
     assertTrue(sessionDTO.getId() != null && sessionDTO.getFirstName() != null

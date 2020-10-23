@@ -108,7 +108,7 @@ public class SessionListFacadeTest {
         sessionListFacade.retrieveSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             sessionListQueryParameter);
 
-    assertEquals(Integer.valueOf(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size()), result.getTotal());
+    assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getTotal());
   }
 
   @Test
@@ -126,7 +126,7 @@ public class SessionListFacadeTest {
         sessionListFacade.retrieveSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
             sessionListQueryParameter);
 
-    assertEquals(Integer.valueOf(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size()), result.getTotal());
+    assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getTotal());
   }
 
   @Test
@@ -214,7 +214,7 @@ public class SessionListFacadeTest {
             sessionListQueryParameter);
 
     assertEquals(COUNT_1, result.getSessions().size());
-    assertFalse(result.getSessions().get(0).getSession().getFeedbackRead());
+    assertFalse(result.getSessions().get(0).getSession().isFeedbackRead());
   }
 
   /**
@@ -258,8 +258,7 @@ public class SessionListFacadeTest {
             sessionListQueryParameter);
 
     assertEquals(CONSULTANT_SESSION_CHAT_RESPONSE_DTO_LIST.size(), result.getSessions().size());
-    assertEquals(result.getTotal(),
-        Integer.valueOf(CONSULTANT_SESSION_CHAT_RESPONSE_DTO_LIST.size()));
+    assertEquals(result.getTotal(), CONSULTANT_SESSION_CHAT_RESPONSE_DTO_LIST.size());
   }
 
   @Test
@@ -277,7 +276,7 @@ public class SessionListFacadeTest {
             sessionListQueryParameter);
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getSessions().size());
-    assertEquals(Integer.valueOf(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size()), result.getTotal());
+    assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getTotal());
   }
 
   @Test

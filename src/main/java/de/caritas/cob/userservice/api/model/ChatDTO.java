@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.chat;
+package de.caritas.cob.userservice.api.model;
 
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_MAX_DURATION;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_MIN_DURATION;

@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
-
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -36,7 +34,7 @@ import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -167,7 +165,7 @@ public class ConsultantImportService {
 
           formalLanguageList.add(consultingTypeSettings.isLanguageFormal());
 
-          if (isTrue(agency.getTeamAgency())) {
+          if (agency.isTeamAgency()) {
             importRecord.setTeamConsultant(true);
           }
 

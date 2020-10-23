@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
-
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import java.io.File;
@@ -46,8 +44,8 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -508,7 +506,7 @@ public class AskerImportService {
         }
 
         // Add consultant(s) to Rocket.Chat group
-        if (isTrue(agencyDTO.getTeamAgency())) {
+        if (agencyDTO.isTeamAgency()) {
           if (agencyList != null) {
             for (ConsultantAgency agency : agencyList) {
               // If feedback chat enabled add all main consultants and the assigned consultant. If

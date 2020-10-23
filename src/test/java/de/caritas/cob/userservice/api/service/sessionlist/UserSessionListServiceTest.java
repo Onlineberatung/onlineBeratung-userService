@@ -59,7 +59,8 @@ public class UserSessionListServiceTest {
   private SessionListAnalyser sessionListAnalyser;
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadTrue_WhenThereAreNoUnreadMessages() {
+  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadTrue_WhenThereAreNoUnreadMessages()
+      throws Exception {
 
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
@@ -80,11 +81,12 @@ public class UserSessionListServiceTest {
 
     assertTrue(
         userSessionListService.retrieveSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS).get(0)
-            .getSession().getMessagesRead());
+            .getSession().isMessagesRead());
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithChatMessagesReadTrue_WhenThereAreNoUnreadMessages() {
+  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithChatMessagesReadTrue_WhenThereAreNoUnreadMessages()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
@@ -105,7 +107,8 @@ public class UserSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadFalse_WhenThereAreUnreadMessages() {
+  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadFalse_WhenThereAreUnreadMessages()
+      throws Exception {
 
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
@@ -126,12 +129,13 @@ public class UserSessionListServiceTest {
 
     assertFalse(
         userSessionListService.retrieveSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS).get(0)
-            .getSession().getMessagesRead());
+            .getSession().isMessagesRead());
 
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithChatMessagesReadFalse_WhenThereAreUnreadMessages() {
+  public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithChatMessagesReadFalse_WhenThereAreUnreadMessages()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
@@ -153,7 +157,8 @@ public class UserSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_SetCorrectChatMessageDate() {
+  public void retrieveSessionsForAuthenticatedUser_Should_SetCorrectChatMessageDate()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
@@ -177,7 +182,8 @@ public class UserSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_SetCorrectSessionMessageDate() {
+  public void retrieveSessionsForAuthenticatedUser_Should_SetCorrectSessionMessageDate()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
@@ -201,7 +207,8 @@ public class UserSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForSession() {
+  public void retrieveSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForSession()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
@@ -229,7 +236,8 @@ public class UserSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForChat() {
+  public void retrieveSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForChat()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
@@ -258,7 +266,8 @@ public class UserSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_ReturnEmptyList_WhenSessionAndChatListAreEmpty() {
+  public void retrieveSessionsForAuthenticatedUser_Should_ReturnEmptyList_WhenSessionAndChatListAreEmpty()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
@@ -323,7 +332,8 @@ public class UserSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedUser_Should_SetSubscribedFlagToTrue_WhenUserIsAttendeeOfAChat() {
+  public void retrieveSessionsForAuthenticatedUser_Should_SetSubscribedFlagToTrue_WhenUserIsAttendeeOfAChat()
+      throws Exception {
 
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(USER_CHAT_RESPONSE_DTO_LIST);
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(Collections.emptyList());
