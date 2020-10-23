@@ -63,7 +63,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYP
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
-import static de.caritas.cob.userservice.testHelper.TestConstants.COUNT_10;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CREATE_CHAT_RESPONSE_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DECODED_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
@@ -80,7 +79,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.MASTER_KEY_DTO
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.OFFSET_0;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
@@ -135,13 +133,12 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.MonitoringDTO;
-import de.caritas.cob.userservice.api.model.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.UserDTO;
-import de.caritas.cob.userservice.api.model.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -167,6 +164,7 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -174,7 +172,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hibernate.service.spi.ServiceException;
 import org.junit.Before;
 import org.junit.Test;
@@ -221,14 +218,32 @@ public class UserControllerIT {
       "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\"" + UserRole.CONSULTANT.getValue() + "\",\""
           + DUMMY_ROLE_B + "\"], \"grantedAuthorities\": [ \"" + Authority.CONSULTANT_DEFAULT
           + "\" ], \"inTeamAgency\":true}";
-  private final SessionDTO SESSION_DTO = new SessionDTO(SESSION_ID, AGENCY_ID, 0, 2, POSTCODE,
-      RC_GROUP_ID, null, RC_USER_ID, MESSAGE_DATE, IS_NO_TEAM_SESSION, IS_MONITORING);
-  private final AgencyDTO AGENCY_DTO = new AgencyDTO(AGENCY_ID, NAME, POSTCODE, CITY, DESCRIPTION,
-      false, false, ConsultingType.SUCHT);
+  private final SessionDTO SESSION_DTO = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(0)
+      .status(2)
+      .postcode(POSTCODE)
+      .groupId(RC_GROUP_ID)
+      .askerRcId(RC_USER_ID)
+      .messageDate(MESSAGE_DATE)
+      .isTeamSession(IS_NO_TEAM_SESSION)
+      .monitoring(IS_MONITORING);
+  private final AgencyDTO AGENCY_DTO = new AgencyDTO()
+      .id(AGENCY_ID)
+      .name(NAME)
+      .postcode(POSTCODE)
+      .city(CITY)
+      .description(DESCRIPTION)
+      .teamAgency(false)
+      .offline(false)
+      .consultingType(ConsultingType.SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
-  private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO =
-      new UserSessionResponseDTO(SESSION_DTO, AGENCY_DTO, SESSION_CONSULTANT_DTO);
+  private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
+      .session(SESSION_DTO)
+      .agency(AGENCY_DTO)
+      .consultant(SESSION_CONSULTANT_DTO);
   private final List<AgencyDTO> AGENCY_LIST = new ArrayList<>();
   @SuppressWarnings("serial")
   private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<String, Object>() {
@@ -266,10 +281,12 @@ public class UserControllerIT {
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
   private final Optional<Session> OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID =
       Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID);
-  private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO =
-      new ConsultantResponseDTO(CONSULTANT_ID, FIRST_NAME, LAST_NAME);
+  private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO = new ConsultantResponseDTO()
+      .consultantId(CONSULTANT_ID)
+      .firstName(FIRST_NAME)
+      .lastName(LAST_NAME);
   private final List<ConsultantResponseDTO> CONSULTANT_RESPONSE_DTO_LIST =
-      Arrays.asList(CONSULTANT_RESPONSE_DTO);
+      Collections.singletonList(CONSULTANT_RESPONSE_DTO);
   private final String VALID_CONSULTANT_RESPONSE_DTO_RESULT =
       "[{\"consultantId\": \"" + CONSULTANT_ID + "\", \"firstName\": \"" + FIRST_NAME
           + "\", \"lastName\": \"" + LAST_NAME + "\"}]";
@@ -286,9 +303,9 @@ public class UserControllerIT {
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
-      new HashSet<>(Arrays.asList(Authority.ASSIGN_CONSULTANT_TO_SESSION));
+      new HashSet<>(Collections.singletonList(Authority.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_ENQUIRY =
-      new HashSet<>(Arrays.asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY));
+      new HashSet<>(Collections.singletonList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY));
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
   private final String VALID_MONITORING_RESPONSE_JSON =
       "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
@@ -690,9 +707,10 @@ public class UserControllerIT {
   public void getSessionsForAuthenticatedUser_Should_ReturnUserSessionsAndOk_WhenAuthorized()
       throws Exception {
 
-    List<UserSessionResponseDTO> sessions = new ArrayList<UserSessionResponseDTO>();
+    List<UserSessionResponseDTO> sessions = new ArrayList<>();
     sessions.add(USER_SESSION_RESPONSE_DTO);
-    UserSessionListResponseDTO response = new UserSessionListResponseDTO(sessions);
+    UserSessionListResponseDTO response = new UserSessionListResponseDTO()
+        .sessions(sessions);
     String sessionsJson = convertObjectToJson(response);
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
@@ -729,8 +747,8 @@ public class UserControllerIT {
   @Test
   public void getSessionsForAuthenticatedUser_Should_ReturnNoContent_WhenAuthorizedAndNoOpenSessionsAvailableAndSessionListIsNull()
       throws Exception {
-    List<UserSessionResponseDTO> session = null;
-    UserSessionListResponseDTO response = new UserSessionListResponseDTO(session);
+    UserSessionListResponseDTO response = new UserSessionListResponseDTO()
+        .sessions(null);
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
@@ -747,8 +765,8 @@ public class UserControllerIT {
   @Test
   public void getSessionsForAuthenticatedUser_Should_ReturnNoContent_WhenAuthorizedAndNoOpenSessionsAvailableAndSessionListIsEmpty()
       throws Exception {
-    List<UserSessionResponseDTO> session = new ArrayList<UserSessionResponseDTO>();
-    UserSessionListResponseDTO response = new UserSessionListResponseDTO(session);
+    List<UserSessionResponseDTO> session = new ArrayList<>();
+    UserSessionListResponseDTO response = new UserSessionListResponseDTO().sessions(session);
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
@@ -842,7 +860,7 @@ public class UserControllerIT {
   public void getSessionsForAuthenticatedConsultant_Should_ReturnSuccess_WhenAuthorizedAndSessionAvailable()
       throws Exception {
 
-    List<ConsultantSessionResponseDTO> session = new ArrayList<ConsultantSessionResponseDTO>();
+    List<ConsultantSessionResponseDTO> session = new ArrayList<>();
     session.add(new ConsultantSessionResponseDTO());
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
@@ -868,8 +886,6 @@ public class UserControllerIT {
   @Test
   public void getSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndSessionListIsEmpty()
       throws Exception {
-
-    List<ConsultantSessionResponseDTO> session = new ArrayList<>();
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
@@ -953,8 +969,7 @@ public class UserControllerIT {
 
     when(authenticatedUser.getRoles()).thenReturn(ROLES_WITH_USER);
     when(authenticatedUser.getGrantedAuthorities())
-        .thenReturn(Authority.getAuthoritiesByUserRole(UserRole.USER).stream()
-            .collect(Collectors.toSet()));
+        .thenReturn(new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenThrow(new InternalServerErrorException(""));
     when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
@@ -1610,10 +1625,6 @@ public class UserControllerIT {
    */
   @Test
   public void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
-    /**
-     * Method: stopChat (role: kreuzbund-consultant)
-     *
-     */
 
     mvc.perform(put(PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))

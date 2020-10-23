@@ -104,7 +104,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertTrue(result.get(0).getSession().isMessagesRead());
+    assertTrue(result.get(0).getSession().getMessagesRead());
   }
 
   @Test
@@ -139,7 +139,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertFalse(result.get(0).getSession().isMessagesRead());
+    assertFalse(result.get(0).getSession().getMessagesRead());
   }
 
   @Test
@@ -201,7 +201,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT_2,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertFalse(result.get(1).getSession().getAttachment().isFileReceived());
+    assertFalse(result.get(1).getSession().getAttachment().getFileReceived());
   }
 
   @Test
@@ -232,7 +232,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT_2,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertTrue(result.get(0).getSession().getAttachment().isFileReceived());
+    assertTrue(result.get(0).getSession().getAttachment().getFileReceived());
   }
 
   @Test
@@ -385,7 +385,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertFalse(result.get(0).getSession().isFeedbackRead());
+    assertFalse(result.get(0).getSession().getFeedbackRead());
 
   }
 
@@ -411,7 +411,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertFalse(result.get(0).getSession().isMonitoring());
+    assertFalse(result.get(0).getSession().getMonitoring());
   }
 
   @Test
@@ -436,7 +436,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertTrue(result.get(0).getSession().isMonitoring());
+    assertTrue(result.get(0).getSession().getMonitoring());
   }
 
   @Test
@@ -594,7 +594,7 @@ public class ConsultantSessionListServiceTest {
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
     assertFalse(result.isEmpty());
-    assertFalse(result.get(0).getSession().isMessagesRead());
+    assertFalse(result.get(0).getSession().getMessagesRead());
   }
 
   @Test
@@ -623,7 +623,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertTrue(result.get(0).getSession().isFeedbackRead());
+    assertTrue(result.get(0).getSession().getFeedbackRead());
 
   }
 
@@ -680,7 +680,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertTrue(result.get(0).getSession().isFeedbackRead());
+    assertTrue(result.get(0).getSession().getFeedbackRead());
 
   }
 
@@ -764,7 +764,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_IN_PROGRESS));
 
-    assertFalse(result.get(0).getSession().isMessagesRead());
+    assertFalse(result.get(0).getSession().getMessagesRead());
   }
 
   @Test
@@ -793,7 +793,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_IN_PROGRESS));
 
-    assertTrue(result.get(0).getSession().isMessagesRead());
+    assertTrue(result.get(0).getSession().getMessagesRead());
   }
 
   /**
@@ -826,7 +826,7 @@ public class ConsultantSessionListServiceTest {
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
     assertFalse(result.isEmpty());
-    assertTrue(result.get(0).getSession().isMessagesRead());
+    assertTrue(result.get(0).getSession().getMessagesRead());
   }
 
   @Test
@@ -855,7 +855,7 @@ public class ConsultantSessionListServiceTest {
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
     assertFalse(result.isEmpty());
-    assertFalse(result.get(0).getSession().isMessagesRead());
+    assertFalse(result.get(0).getSession().getMessagesRead());
   }
 
   @Test
@@ -884,7 +884,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertTrue(result.get(0).getSession().isFeedbackRead());
+    assertTrue(result.get(0).getSession().getFeedbackRead());
 
   }
 
@@ -914,7 +914,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertTrue(result.get(0).getSession().isFeedbackRead());
+    assertTrue(result.get(0).getSession().getFeedbackRead());
 
   }
 
@@ -1008,7 +1008,7 @@ public class ConsultantSessionListServiceTest {
                 RC_TOKEN, sessionListQueryParameter);
 
     assertEquals(1, result.size());
-    assertFalse(result.get(0).getSession().isFeedbackRead());
+    assertFalse(result.get(0).getSession().getFeedbackRead());
 
   }
 
@@ -1038,7 +1038,7 @@ public class ConsultantSessionListServiceTest {
             .retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
                 RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
-    assertFalse(result.get(0).getSession().isFeedbackRead());
+    assertFalse(result.get(0).getSession().getFeedbackRead());
 
   }
 

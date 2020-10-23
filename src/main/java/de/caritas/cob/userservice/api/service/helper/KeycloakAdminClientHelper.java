@@ -22,7 +22,7 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.UserDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
@@ -148,7 +148,9 @@ public class KeycloakAdminClientHelper {
     }
 
     if (keycloakResponse.getStatus().equals(HttpStatus.CONFLICT)) {
-      keycloakResponse.setResponseDTO(new CreateUserResponseDTO(usernameAvailable, emailAvailable));
+      keycloakResponse.setResponseDTO(
+          new CreateUserResponseDTO().usernameAvailable(usernameAvailable)
+              .emailAvailable(emailAvailable));
     }
 
     return keycloakResponse;

@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.exception.SaveChatException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
@@ -8,6 +11,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserF
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -53,7 +57,7 @@ public class StopChatFacade {
               consultant.getId(), chat.getId()));
     }
 
-    if (!chat.isActive()) {
+    if (isFalse(chat.isActive())) {
       throw new ConflictException(
           String.format("Chat with id %s is already stopped.", chat.getId()));
     }
@@ -63,7 +67,7 @@ public class StopChatFacade {
           String.format("Chat with id %s has no Rocket.Chat group id", chat.getId()));
     }
 
-    if (chat.isRepetitive()) {
+    if (isTrue(chat.isRepetitive())) {
       // Repeating chat -> Remove Rocket.Chat messages and users and update next chat start date
       if (chat.getChatInterval() == null) {
         throw new InternalServerErrorException(String

@@ -1,9 +1,11 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
-import de.caritas.cob.userservice.api.model.ChatDTO;
+import de.caritas.cob.userservice.api.model.chat.ChatDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatInterval;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
@@ -60,8 +62,8 @@ public class ChatHelper {
     // As of now only Kreuzbund is using the chat. Therefore insert consulting type "kreuzbund".
     // Also the repetition interval can only be weekly atm.
     return new Chat(chatDTO.getTopic(), ConsultingType.KREUZBUND, startDate, startDate,
-        chatDTO.getDuration(), chatDTO.isRepetitive(),
-        chatDTO.isRepetitive() ? ChatInterval.WEEKLY : null, consultant);
+        chatDTO.getDuration(), isTrue(chatDTO.isRepetitive()),
+        isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null, consultant);
   }
 
 }
