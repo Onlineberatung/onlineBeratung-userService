@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -10,7 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.authorization.UserRole;
@@ -18,16 +20,15 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.Now;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
-import de.caritas.cob.userservice.api.model.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.SessionUserDTO;
-import de.caritas.cob.userservice.api.model.UserDTO;
+import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -39,27 +40,16 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 
 /**
- * Service for Sessions
+ * Service for sessions
  */
 @Service
+@RequiredArgsConstructor
 public class SessionService {
 
-  private SessionRepository sessionRepository;
-  private AgencyServiceHelper agencyServiceHelper;
-  private Now now;
-  private SessionDataHelper sessionDataHelper;
-  private final UserHelper userHelper;
-
-  @Autowired
-  public SessionService(SessionRepository sessionRepository,
-      AgencyServiceHelper agencyServiceHelper, Now now, SessionDataHelper sessionDataHelper,
-      UserHelper userHelper) {
-    this.sessionRepository = sessionRepository;
-    this.agencyServiceHelper = agencyServiceHelper;
-    this.now = now;
-    this.sessionDataHelper = sessionDataHelper;
-    this.userHelper = userHelper;
-  }
+  private final @NonNull SessionRepository sessionRepository;
+  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull SessionDataHelper sessionDataHelper;
+  private final @NonNull UserHelper userHelper;
 
   /**
    * Returns the sessions for a user
@@ -68,7 +58,7 @@ public class SessionService {
    */
   public List<Session> getSessionsForUser(User user) {
 
-    List<Session> userSessions = null;
+    List<Session> userSessions;
 
     try {
       userSessions = sessionRepository.findByUser(user);
@@ -204,7 +194,7 @@ public class SessionService {
     return saveSession(
         new Session(user, ConsultingType.values()[Integer.parseInt(userDto.getConsultingType())],
             userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-            agencyDTO.isTeamAgency(), monitoring));
+            agencyDTO.getTeamAgency(), monitoring));
   }
 
   /**
@@ -255,7 +245,7 @@ public class SessionService {
     List<ConsultantSessionResponseDTO> sessionDTOs = null;
 
     if (sessions != null) {
-      sessionDTOs = sessions.stream().map(session -> convertToConsultantSessionReponseDTO(session))
+      sessionDTOs = sessions.stream().map(this::convertToConsultantSessionResponseDTO)
           .collect(Collectors.toList());
     }
 
@@ -311,91 +301,74 @@ public class SessionService {
     }
 
     if (sessions != null) {
-      sessionDTOs = sessions.stream().map(this::convertToConsultantSessionReponseDTO)
+      sessionDTOs = sessions.stream().map(this::convertToConsultantSessionResponseDTO)
           .collect(Collectors.toList());
     }
 
     return sessionDTOs;
   }
 
-  /**
-   * Converts a {@link List} of {@link Session}s to a {@link List} of {@link UserSessionResponseDTO}
-   * and adds the corresponding agency information to the session from the provided {@link List} of
-   * {@link AgencyDTO}s
-   *
-   * @param sessions {@link List} of {@link Session}
-   * @param agencies {@link List} of {@link AgencyDTO}
-   * @return {@link List} of {@link UserSessionResponseDTO>}
-   */
   private List<UserSessionResponseDTO> convertToUserSessionResponseDTO(List<Session> sessions,
       List<AgencyDTO> agencies) {
 
     List<UserSessionResponseDTO> userSessionList = new ArrayList<>();
 
     for (Session session : sessions) {
-      userSessionList.add(new UserSessionResponseDTO(convertToSessionDTO(session),
-          agencies.stream()
+      userSessionList.add(new UserSessionResponseDTO()
+          .session(convertToSessionDTO(session))
+          .agency(agencies.stream()
               .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
-              .findAny().get(),
-          session.getConsultant() == null ? null
+              .findAny().get())
+          .consultant(nonNull(session.getConsultant()) ? null
               : convertToSessionConsultantForUserDTO(session.getConsultant())));
     }
 
     return userSessionList;
   }
 
-  /**
-   * Converts a {@link Session} to a {@link ConsultantSessionResponseDTO}
-   */
-  private ConsultantSessionResponseDTO convertToConsultantSessionReponseDTO(Session session) {
-    return new ConsultantSessionResponseDTO(convertToSessionDTO(session),
-        convertToSessionUserDTO(session),
-        convertToSessionConsultantForConsultantDTO(session.getConsultant()));
+  private ConsultantSessionResponseDTO convertToConsultantSessionResponseDTO(Session session) {
+    return new ConsultantSessionResponseDTO()
+        .session(convertToSessionDTO(session))
+        .user(convertToSessionUserDTO(session))
+        .consultant(convertToSessionConsultantForConsultantDTO(session.getConsultant()));
   }
 
-  /**
-   * Converts a {@link Session} to a {@link SessionDTO}
-   */
   private SessionDTO convertToSessionDTO(Session session) {
-    return new SessionDTO(session.getId(), session.getAgencyId(),
-        session.getConsultingType().getValue(), session.getStatus().getValue(),
-        session.getPostcode(), session.getGroupId(),
-        session.getFeedbackGroupId() != null ? session.getFeedbackGroupId() : null,
-        session.getUser() != null && session.getUser().getRcUserId() != null
+    return new SessionDTO()
+        .id(session.getId())
+        .agencyId(session.getAgencyId())
+        .consultingType(session.getConsultingType().getValue())
+        .status(session.getStatus().getValue())
+        .postcode(session.getPostcode())
+        .groupId(session.getGroupId())
+        .feedbackGroupId(
+            nonNull(session.getFeedbackGroupId()) ? session.getFeedbackGroupId() : null)
+        .askerRcId(nonNull(session.getUser()) && nonNull(session.getUser().getRcUserId())
             ? session.getUser().getRcUserId()
-            : null,
-        Helper.getUnixTimestampFromDate(session.getEnquiryMessageDate()), session.isTeamSession(),
-        session.isMonitoring());
+            : null)
+        .messageDate(Helper.getUnixTimestampFromDate(session.getEnquiryMessageDate()))
+        .isTeamSession(session.isTeamSession())
+        .monitoring(session.isMonitoring());
   }
 
-  /**
-   * Converts a {@link Consultant} to a {@link SessionConsultantForUserDTO}
-   */
   private SessionConsultantForUserDTO convertToSessionConsultantForUserDTO(Consultant consultant) {
+
     return new SessionConsultantForUserDTO(consultant.getUsername(), consultant.isAbsent(),
         consultant.getAbsenceMessage());
   }
 
-  /**
-   * Converts a {@link Consultant} to a {@link SessionConsultantForConsultantDTO}. Only returns the
-   * object if the currently authenticated user has the authority to view all peer session (is main
-   * consultant).
-   */
   private SessionConsultantForConsultantDTO convertToSessionConsultantForConsultantDTO(
       Consultant consultant) {
 
-    return consultant != null
-        ? new SessionConsultantForConsultantDTO(consultant.getId(), consultant.getFirstName(),
-        consultant.getLastName())
-        : null;
+    return nonNull(consultant) ? new SessionConsultantForConsultantDTO()
+        .id(consultant.getId())
+        .firstName(consultant.getFirstName())
+        .lastName(consultant.getLastName()) : null;
   }
 
-  /**
-   * Converts a {@link Session} to a {@link SessionUserDTO}
-   */
   private SessionUserDTO convertToSessionUserDTO(Session session) {
 
-    if (session.getUser() != null && session.getSessionData() != null) {
+    if (nonNull(session.getUser()) && nonNull(session.getSessionData())) {
       SessionUserDTO sessionUserDto = new SessionUserDTO();
       sessionUserDto.setUsername(userHelper.decodeUsername(session.getUser().getUsername()));
       sessionUserDto.setSessionData(sessionDataHelper.getSessionDataMapFromSession(session));
@@ -462,7 +435,7 @@ public class SessionService {
   /**
    * Returns the session for the Rocket.Chat feedback group id.
    *
-   * @param feedbackGroupId the id of the feedbackgroup
+   * @param feedbackGroupId the id of the feedback group
    * @return the session
    */
   public Session getSessionByFeedbackGroupId(String feedbackGroupId) {

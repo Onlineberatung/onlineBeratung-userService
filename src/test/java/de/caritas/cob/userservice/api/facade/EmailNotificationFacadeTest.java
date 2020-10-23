@@ -5,15 +5,21 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_RO
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.APPLICATION_BASE_URL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.APPLICATION_BASE_URL_FIELD_NAME;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID_3;
+import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
+import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NOT_OFFLINE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_SESSION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
+import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
@@ -22,8 +28,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSU
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,6 +70,7 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -123,21 +128,27 @@ public class EmailNotificationFacadeTest {
   private final Session TEAM_SESSION =
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "12345", AGENCY_ID,
           SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
-  private final AgencyDTO AGENCY_DTO = new AgencyDTO(1L, "Test Beratungsstelle", "99999",
-      "testcity",
-      "Beratungsstellenbeschreibung", false, false, ConsultingType.SUCHT);
+  private final AgencyDTO AGENCY_DTO = new AgencyDTO()
+      .id(AGENCY_ID)
+      .name(AGENCY_NAME)
+      .postcode(POSTCODE)
+      .city(CITY)
+      .description(DESCRIPTION)
+      .teamAgency(IS_NO_TEAM_AGENCY)
+      .offline(IS_NOT_OFFLINE)
+      .consultingType(ConsultingType.SUCHT);
   private final String USER_ROLE = UserRole.USER.getValue();
-  private final Set<String> USER_ROLES = new HashSet<>(Arrays.asList(USER_ROLE));
+  private final Set<String> USER_ROLES = new HashSet<>(Collections.singletonList(USER_ROLE));
   private final String CONSULTANT_ROLE = UserRole.CONSULTANT.getValue();
-  private final Set<String> CONSULTANT_ROLES = new HashSet<>(Arrays.asList(CONSULTANT_ROLE));
+  private final Set<String> CONSULTANT_ROLES = new HashSet<>(
+      Collections.singletonList(CONSULTANT_ROLE));
   private final String ERROR_MSG = "error";
   private final List<ConsultantAgency> CONSULTANT_LIST =
       Arrays.asList(CONSULTANT_AGENCY, CONSULTANT_AGENCY_2);
-  private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Arrays.asList(CONSULTANT_AGENCY);
+  private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Collections
+      .singletonList(CONSULTANT_AGENCY);
   private final List<ConsultantAgency> ABSENT_CONSULTANT_AGENCY_LIST =
-      Arrays.asList(ABSENT_CONSULTANT_AGENCY);
-  private final Set<String> U25_PEER_ROLES_DEFAULT =
-      new HashSet<>(Arrays.asList(UserRole.U25_CONSULTANT.getValue()));
+      Collections.singletonList(ABSENT_CONSULTANT_AGENCY);
   private final String GROUP_MEMBER_1_RC_ID = "yzx324sdg";
   private final GroupMemberDTO GROUP_MEMBER_1 =
       new GroupMemberDTO(GROUP_MEMBER_1_RC_ID, "status1", "username1", "name1", "");
@@ -196,7 +207,6 @@ public class EmailNotificationFacadeTest {
   /**
    * Method: sendNewEnquiryEmailNotification
    */
-  @SuppressWarnings("unchecked")
   @Test
   public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants()
       throws AgencyServiceHelperException {
@@ -276,8 +286,6 @@ public class EmailNotificationFacadeTest {
   /**
    * Method: sendNewMessageNotification
    */
-
-  @SuppressWarnings("unchecked")
   @Test
   public void sendNewMessageNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultant_WhenCalledAsUserAuthorityAndIsTeamSession() {
 
@@ -450,8 +458,6 @@ public class EmailNotificationFacadeTest {
   /**
    * Method: sendNewFeedbackMessageNotification
    */
-
-  @SuppressWarnings("unchecked")
   @Test
   public void sendNewFeedbackMessageNotification_Should_SendEmailToAllFeedbackChatGroupMembersWithDecodedUsernames_WhenAssigendConsultantWroteAFeedbackMessage()
       throws Exception {
@@ -471,7 +477,6 @@ public class EmailNotificationFacadeTest {
 
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void sendNewFeedbackMessageNotification_Should_SendEmailToAssignedConsultantWithDecodedUsername_WhenOtherConsultantWrote() {
 

@@ -6,6 +6,7 @@ import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,9 @@ public class ConsultantAgencyService {
   ConsultantAgencyRepository consultantAgencyRepository;
 
   /**
-   * Save a {@link ConsultantAgency} to the database
-   * 
-   * @param consultantAgency
+   * Save a {@link ConsultantAgency} to the database.
+   *
+   * @param consultantAgency {@link ConsultantAgency}
    * @return the {@link ConsultantAgency}
    */
   public ConsultantAgency saveConsultantAgency(ConsultantAgency consultantAgency) {
@@ -32,10 +33,10 @@ public class ConsultantAgencyService {
   }
 
   /**
-   * Returns a List of {@Link ConsultantAgency} Consultants with the given agency id
-   * 
-   * @param agencyId
-   * @return
+   * Returns a List of {@link ConsultantAgency} Consultants with the given agency ID.
+   *
+   * @param agencyId agency ID
+   * @return {@link List} of {@link ConsultantAgency}
    */
   public List<ConsultantAgency> findConsultantsByAgencyId(Long agencyId) {
     try {
@@ -46,13 +47,20 @@ public class ConsultantAgencyService {
     }
   }
 
+  /**
+   * Checks if provided consultant is assigned to provided agency.
+   *
+   * @param consultantId consultant ID
+   * @param agencyId     agency ID
+   * @return true if provided consultant is assigned to provided agency
+   */
   public boolean isConsultantInAgency(String consultantId, Long agencyId) {
     try {
 
       List<ConsultantAgency> agencyList =
           consultantAgencyRepository.findByConsultantIdAndAgencyId(consultantId, agencyId);
 
-      return agencyList != null && agencyList.size() > 0;
+      return !isEmpty(agencyList);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while getting agency id data set for"
           + " consultant", LogService::logDatabaseError);
@@ -61,14 +69,14 @@ public class ConsultantAgencyService {
 
   /**
    * Returns an alphabetically sorted list of {@link ConsultantResponseDTO} depending on the
-   * provided agencyId
+   * provided agencyId.
    *
-   * @param agencyId
-   * @return A list of {@link ConsultantResponseDTO}
+   * @param agencyId agency ID
+   * @return {@link List} of {@link ConsultantResponseDTO}
    */
   public List<ConsultantResponseDTO> getConsultantsOfAgency(Long agencyId) {
 
-    List<ConsultantAgency> agencyList = null;
+    List<ConsultantAgency> agencyList;
     List<ConsultantResponseDTO> responseList = null;
 
     try {
@@ -79,19 +87,13 @@ public class ConsultantAgencyService {
     }
 
     if (agencyList != null) {
-      responseList = agencyList.stream().map(agency -> convertToConsultantResponseDTO(agency))
+      responseList = agencyList.stream().map(this::convertToConsultantResponseDTO)
           .collect(Collectors.toList());
     }
 
     return responseList;
   }
 
-  /**
-   * Converts a {@link ConsultantAgency} to a {@link ConsultantResponseDTO}
-   * 
-   * @param agency
-   * @return
-   */
   private ConsultantResponseDTO convertToConsultantResponseDTO(ConsultantAgency agency) {
 
     String error;
@@ -107,8 +109,10 @@ public class ConsultantAgencyService {
       throw new InternalServerErrorException(error, LogService::logDatabaseError);
     }
 
-    return new ConsultantResponseDTO(agency.getConsultant().getId(),
-        agency.getConsultant().getFirstName(), agency.getConsultant().getLastName());
+    return new ConsultantResponseDTO()
+        .consultantId(agency.getConsultant().getId())
+        .firstName(agency.getConsultant().getFirstName())
+        .lastName(agency.getConsultant().getLastName());
   }
 
 }

@@ -1,5 +1,6 @@
-package de.caritas.cob.userservice.api.model;
+package de.caritas.cob.userservice.api.model.user;
 
+import de.caritas.cob.userservice.api.model.AgencyDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -32,9 +33,9 @@ public class UserDataResponseDTO {
   private String email;
   @ApiModelProperty(example = "true", position = 5)
   private boolean isAbsent;
-  @ApiModelProperty(example = "Bin mal weg...", position = 6)
+  @ApiModelProperty(example = "true", position = 6)
   private boolean isFormalLanguage;
-  @ApiModelProperty(example = "true", position = 7)
+  @ApiModelProperty(example = "Bin mal weg...", position = 7)
   private String absenceMessage;
   @ApiModelProperty(example = "true", position = 8)
   private boolean isInTeamAgency;

@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.exception.SaveChatException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
@@ -40,7 +42,7 @@ public class StartChatFacade {
               consultant.getId(), chat.getId()));
     }
 
-    if (chat.isActive()) {
+    if (isTrue(chat.isActive())) {
       throw new ConflictException(
           String.format("Chat with id %s is already started.", chat.getId()));
     }

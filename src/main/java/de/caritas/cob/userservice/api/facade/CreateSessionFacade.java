@@ -10,8 +10,8 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.NewRegistrationDto;
-import de.caritas.cob.userservice.api.model.UserDTO;
+import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -74,7 +74,7 @@ public class CreateSessionFacade {
 
     Session session = null;
     try {
-      session = saveNewSession(newRegistrationDto, consultingType, agencyDto.isTeamAgency(), user);
+      session = saveNewSession(newRegistrationDto, consultingType, agencyDto.getTeamAgency(), user);
       sessionDataService.saveSessionDataFromRegistration(session, new UserDTO());
 
     } catch (InternalServerErrorException serviceException) {
@@ -100,8 +100,8 @@ public class CreateSessionFacade {
    * Saves the new {@link Session} and creates the initial monitoring.
    *
    * @param newRegistrationDto {@link NewRegistrationDto}
-   * @param consultingType {@link ConsultingType}
-   * @param isTeamAgency {@link AgencyDTO#isTeamAgency()}
+   * @param consultingType     {@link ConsultingType}
+   * @param isTeamAgency       {@link AgencyDTO#getTeamAgency()}
    * @return the new registered {@link Session}
    * @throws CreateMonitoringException when initialization of monitoring fails
    */
