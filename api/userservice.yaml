@@ -894,8 +894,8 @@ paths:
           description: CONFLICT - Chat has not startet yet
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-c      security:
-  - Bearer: [ ]
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     UserDTO:
