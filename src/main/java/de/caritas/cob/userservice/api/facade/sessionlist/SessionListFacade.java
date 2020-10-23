@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade.sessionlist;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -53,7 +54,7 @@ public class SessionListFacade {
         .retrieveSessionsForAuthenticatedUser(userId, rocketChatCredentials);
     userSessions.sort(Comparator.comparing(UserSessionResponseDTO::getLatestMessage).reversed());
 
-    return new UserSessionListResponseDTO(userSessions);
+    return new UserSessionListResponseDTO().sessions(userSessions);
 
   }
 
@@ -95,11 +96,11 @@ public class SessionListFacade {
           consultantSessions);
     }
 
-    return new ConsultantSessionListResponseDTO(
-        consultantSessionsSublist, sessionListQueryParameter.getOffset(),
-        consultantSessionsSublist.size(),
-        consultantSessions.size());
-
+    return new ConsultantSessionListResponseDTO()
+        .sessions(consultantSessionsSublist)
+        .offset(sessionListQueryParameter.getOffset())
+        .count(consultantSessionsSublist.size())
+        .total(consultantSessions.size());
   }
 
   private boolean isFeedbackFilter(SessionListQueryParameter sessionListQueryParameter) {
@@ -140,10 +141,11 @@ public class SessionListFacade {
                   teamSessions.size()));
     }
 
-    return new ConsultantSessionListResponseDTO(
-        teamSessionsSublist, sessionListQueryParameter.getOffset(),
-        teamSessionsSublist.size(),
-        teamSessions.size());
+    return new ConsultantSessionListResponseDTO()
+        .sessions(teamSessionsSublist)
+        .offset(sessionListQueryParameter.getOffset())
+        .count(teamSessionsSublist.size())
+        .total(teamSessions.size());
   }
 
   private void sortSessionsByLastMessageDateDesc(List<ConsultantSessionResponseDTO> sessions) {
@@ -155,7 +157,7 @@ public class SessionListFacade {
 
     sessions.removeIf(
         consultantSessionResponseDTO -> nonNull(consultantSessionResponseDTO.getChat())
-            || consultantSessionResponseDTO.getSession().isFeedbackRead());
+            || isTrue(consultantSessionResponseDTO.getSession().getFeedbackRead()));
   }
 
   private boolean areMoreConsultantSessionsAvailable(

@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.UserDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -68,7 +68,8 @@ public class CreateUserFacade {
 
     if (!userHelper.isUsernameAvailable(user.getUsername())) {
       return new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT,
-          new CreateUserResponseDTO(USERNAME_NOT_AVAILABLE, EMAIL_AVAILABLE), null);
+          new CreateUserResponseDTO().usernameAvailable(USERNAME_NOT_AVAILABLE)
+              .emailAvailable(EMAIL_AVAILABLE), null);
     }
 
     ConsultingType consultingType =

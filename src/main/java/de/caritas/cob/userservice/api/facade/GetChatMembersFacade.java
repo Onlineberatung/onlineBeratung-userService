@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
@@ -7,7 +10,9 @@ import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -29,38 +34,25 @@ import de.caritas.cob.userservice.api.service.UserService;
 
 /**
  * Facade to encapsulate the steps for get the chat members.
- *
  */
 
 @Service
+@RequiredArgsConstructor
 public class GetChatMembersFacade {
 
-  private ChatService chatService;
-  private UserService userService;
-  private ConsultantService consultantService;
-  private RocketChatService rocketChatService;
-  private ChatHelper chatHelper;
-  private UserHelper userHelper;
-
-  @Autowired
-  public GetChatMembersFacade(ChatService chatService, UserService userService,
-      ChatHelper chatHelper, ConsultantService consultantService,
-      RocketChatService rocketChatService, UserHelper userHelper) {
-    this.chatService = chatService;
-    this.userService = userService;
-    this.chatHelper = chatHelper;
-    this.consultantService = consultantService;
-    this.rocketChatService = rocketChatService;
-    this.userHelper = userHelper;
-  }
+  private final @NonNull ChatService chatService;
+  private final @NonNull UserService userService;
+  private final @NonNull ConsultantService consultantService;
+  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull ChatHelper chatHelper;
+  private final @NonNull UserHelper userHelper;
 
   /**
-   * Get a filtered list of the members of a chat (without technical/system user)
-   * 
-   * @param chatId
-   * @param authenticatedUser
-   * @throws NotFoundException, ConflictException, InternalServerErrorException
-   * @return
+   * Get a filtered list of the members of a chat (without technical/system user).
+   *
+   * @param chatId            chat ID
+   * @param authenticatedUser {@link AuthenticatedUser}
+   * @return {@link ChatMembersResponseDTO}
    */
   public ChatMembersResponseDTO getChatMembers(Long chatId, AuthenticatedUser authenticatedUser) {
 
@@ -69,7 +61,7 @@ public class GetChatMembersFacade {
       throw new NotFoundException(String.format("Chat with id %s not found", chatId));
     }
 
-    if (!chat.get().isActive()) {
+    if (isFalse(chat.get().isActive())) {
       throw new ConflictException(
           String.format("Could not get members of chat with id %s, because it's not started.",
               chat.get().getId()));
@@ -115,19 +107,16 @@ public class GetChatMembersFacade {
     }
   }
 
-  /**
-   * Convert a list of GroupMemberDTOs to a ChatMemberResponseDTO
-   * 
-   * @param groupMemberDTOList
-   * @return
-   */
   private ChatMembersResponseDTO convertGroupMemberDTOListToChatMemberResponseDTO(
       List<GroupMemberDTO> groupMemberDTOList) {
-    return new ChatMembersResponseDTO(groupMemberDTOList.stream()
-        .map(member -> new ChatMemberResponseDTO(member.get_id(), member.getStatus(),
-            userHelper.decodeUsername(member.getUsername()), member.getName(),
-            member.getUtcOffset()))
-        .toArray(ChatMemberResponseDTO[]::new));
+    return new ChatMembersResponseDTO().members(groupMemberDTOList.stream()
+        .map(member -> new ChatMemberResponseDTO()
+            .id(member.get_id())
+            .status(member.getStatus())
+            .username(userHelper.decodeUsername(member.getUsername()))
+            .name(member.getName())
+            .utcOffset(member.getUtcOffset()))
+        .collect(Collectors.toList()));
   }
 
 }
