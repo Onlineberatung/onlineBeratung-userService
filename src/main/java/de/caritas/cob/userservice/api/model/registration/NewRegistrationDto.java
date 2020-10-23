@@ -1,10 +1,12 @@
-package de.caritas.cob.userservice.api.model;
+package de.caritas.cob.userservice.api.model.registration;
 
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MAX;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MIN;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MAX;
 import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MIN;
+
+import de.caritas.cob.userservice.api.model.registration.IRegistrationDto;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;

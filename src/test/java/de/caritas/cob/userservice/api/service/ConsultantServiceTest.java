@@ -28,7 +28,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Assert;
@@ -59,12 +59,12 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() throws Exception {
+  public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() {
     when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
     Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO);
 
     Assert.assertEquals(consultant.getAbsenceMessage(), ABSENCE_DTO.getMessage());
-    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO.isAbsent());
+    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO.getAbsent());
   }
 
   @Test
@@ -73,10 +73,10 @@ public class ConsultantServiceTest {
     Consultant consultant =
         consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_HTML_AND_JS);
 
-    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO_WITH_HTML_AND_JS.isAbsent());
+    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO_WITH_HTML_AND_JS.getAbsent());
     Assert.assertNotEquals(consultant.getAbsenceMessage(),
         ABSENCE_DTO_WITH_HTML_AND_JS.getMessage());
-    Assert.assertEquals(consultant.getAbsenceMessage(), MESSAGE);
+    Assert.assertEquals(MESSAGE, consultant.getAbsenceMessage());
   }
 
   @Test
@@ -139,7 +139,7 @@ public class ConsultantServiceTest {
     Optional<Consultant> result = consultantService.getConsultant(CONSULTANT_ID);
 
     assertTrue(result.isPresent());
-    assertEquals(result.get(), CONSULTANT);
+    assertEquals(CONSULTANT, result.get());
 
   }
 
@@ -167,7 +167,7 @@ public class ConsultantServiceTest {
     Optional<Consultant> result = consultantService.getConsultantByRcUserId(RC_USER_ID);
 
     assertTrue(result.isPresent());
-    assertEquals(result.get(), CONSULTANT);
+    assertEquals(CONSULTANT, result.get());
 
   }
 
@@ -195,7 +195,7 @@ public class ConsultantServiceTest {
     Optional<Consultant> result = consultantService.getConsultantByEmail(EMAIL);
 
     assertTrue(result.isPresent());
-    assertEquals(result.get(), CONSULTANT);
+    assertEquals(CONSULTANT, result.get());
 
   }
 
@@ -223,7 +223,7 @@ public class ConsultantServiceTest {
     Optional<Consultant> result = consultantService.getConsultantByUsername(USERNAME);
 
     assertTrue(result.isPresent());
-    assertEquals(result.get(), CONSULTANT);
+    assertEquals(CONSULTANT, result.get());
 
   }
 
@@ -345,12 +345,12 @@ public class ConsultantServiceTest {
   public void findConsultantsByAgencyIds_Should_ReturnListOfConsultants() {
 
     when(consultantRepository.findByConsultantAgenciesAgencyIdIn(Mockito.any()))
-        .thenReturn(Arrays.asList(CONSULTANT));
+        .thenReturn(Collections.singletonList(CONSULTANT));
 
     List<Consultant> result = consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);
 
     assertNotNull(result);
-    assertTrue(result.size() == 1);
+    assertEquals(1, result.size());
     assertEquals(CONSULTANT, result.get(0));
 
   }

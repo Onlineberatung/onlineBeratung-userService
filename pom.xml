@@ -33,6 +33,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -51,14 +57,20 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 
-		<!-- Swagger dependencies -->
+		<!-- Swagger/OpenAPI dependencies -->
 
-		<!-- Swagger annotations: needed for swagger-codegen-maven-plugin -->
 		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.0</version>
+			<groupId>org.openapitools</groupId>
+			<artifactId>openapi-generator-maven-plugin</artifactId>
+			<version>4.3.1</version>
+			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>0.2.1</version>
+		</dependency>
+
 		<!-- SpringFox: generate YAML file from POJOs and generate documentation -->
 		<dependency>
 			<groupId>io.springfox</groupId>
@@ -148,6 +160,12 @@
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 			<version>3.6.3</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
@@ -189,12 +207,6 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>net.therore.logback</groupId>
-			<artifactId>therore-logback</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
@@ -240,11 +252,11 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
-			<!-- Swagger codegen maven plugin: generates api stubs -->
+			<!-- OpenAPI codegen maven plugin: generates api stubs -->
 			<plugin>
-				<groupId>io.swagger</groupId>
-				<artifactId>swagger-codegen-maven-plugin</artifactId>
-				<version>2.3.1</version>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>4.3.1</version>
 				<executions>
 					<execution>
 						<goals>
@@ -252,16 +264,73 @@
 						</goals>
 						<configuration>
 							<inputSpec>${project.basedir}/api/userservice.yaml</inputSpec>
-							<language>spring</language>
-							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.controller</apiPackage>
+							<generatorName>spring</generatorName>
+							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.controller
+							</apiPackage>
 							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
-							<generateModels>false</generateModels>
-							<generateSupportingFiles>false</generateSupportingFiles>
+							<generateSupportingFiles>true</generateSupportingFiles>
 							<configOptions>
 								<interfaceOnly>true</interfaceOnly>
 								<sourceFolder>/</sourceFolder>
 							</configOptions>
 							<output>target/generated-sources</output>
+							<importMappings>
+								<importMapping>
+									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
+								</importMapping>
+								<importMapping>
+									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
+								</importMapping>
+								<importMapping>
+									SessionConsultantForUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionConsultantForUserDTO
+								</importMapping>
+								<importMapping>
+									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
+								</importMapping>
+								<importMapping>
+									UserDataResponseDTO=${project.groupId}.${project.artifactId}.api.model.user.UserDataResponseDTO
+								</importMapping>
+								<importMapping>
+									MonitoringDTO=${project.groupId}.${project.artifactId}.api.model.monitoring.MonitoringDTO
+								</importMapping>
+								<importMapping>
+									ChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.ChatDTO
+								</importMapping>
+								<importMapping>
+									NewRegistrationDto=${project.groupId}.${project.artifactId}.api.model.registration.NewRegistrationDto
+								</importMapping>
+								<importMapping>Date=java.util.Date</importMapping>
+								<importMapping>HttpStatus=org.springframework.http.HttpStatus</importMapping>
+								<importMapping>
+									ConsultingType=de.caritas.cob.userservice.api.repository.session.ConsultingType
+								</importMapping>
+							</importMappings>
+							<typeMappings>
+								<typeMapping>
+									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
+								</typeMapping>
+								<typeMapping>
+									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
+								</typeMapping>
+								<typeMapping>
+									SessionConsultantForUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionConsultantForUserDTO
+								</typeMapping>
+								<typeMapping>
+									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
+								</typeMapping>
+								<typeMapping>
+									UserDataResponseDTO=${project.groupId}.${project.artifactId}.api.model.user.UserDataResponseDTO
+								</typeMapping>
+								<typeMapping>
+									MonitoringDTO=${project.groupId}.${project.artifactId}.api.model.monitoring.MonitoringDTO
+								</typeMapping>
+								<typeMapping>
+									ChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.ChatDTO
+								</typeMapping>
+								<typeMapping>
+									NewRegistrationDto=${project.groupId}.${project.artifactId}.api.model.registration.NewRegistrationDto
+								</typeMapping>
+							</typeMappings>
 						</configuration>
 					</execution>
 				</executions>

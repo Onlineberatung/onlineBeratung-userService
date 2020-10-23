@@ -13,7 +13,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.MonitoringHelper;
-import de.caritas.cob.userservice.api.model.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.HashMap;
