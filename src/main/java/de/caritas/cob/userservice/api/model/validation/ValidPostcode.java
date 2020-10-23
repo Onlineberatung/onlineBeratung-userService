@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.UserDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 
 /**
  * Custom validation annotation for the postcode property of the registration {@link UserDTO}. The

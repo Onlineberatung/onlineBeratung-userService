@@ -56,10 +56,9 @@ public class KeycloakService {
   /**
    * Changes the (Keycloak) password of a user and returns true on success.
    *
-   * @param userId
-   * @param password
-   *
-   * @return
+   * @param userId   Keycloak user ID
+   * @param password Keycloak password
+   * @return true if password change was successful
    */
   public boolean changePassword(final String userId, final String password) {
 
