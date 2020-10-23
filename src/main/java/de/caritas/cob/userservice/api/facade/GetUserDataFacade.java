@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,9 +35,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GetUserDataFacade {
-
-  @Value("${keycloakService.user.dummySuffix}")
-  private String emailDummySuffix;
 
   private final AgencyServiceHelper agencyServiceHelper;
   private final SessionDataHelper sessionDataHelper;
@@ -107,18 +103,13 @@ public class GetUserDataFacade {
   }
 
   private UserDataResponseDTO getUserData(User user) {
-    String email = observeUserEmailAddress(user);
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
-        null, null, email, false, user.isLanguageFormal(), null, false, null,
+        null, null, null, false, user.isLanguageFormal(), null, false, null,
         authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
 
     responseDTO.setConsultingTypes(getConsultingTypes(user));
 
     return responseDTO;
-  }
-
-  private String observeUserEmailAddress(User user) {
-    return user.getEmail().endsWith(this.emailDummySuffix) ? null : user.getEmail();
   }
 
   private LinkedHashMap<String, Object> getConsultingTypes(User user) {
