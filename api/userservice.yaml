@@ -27,13 +27,10 @@ paths:
                 $ref: '#/components/schemas/CreateUserResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         403:
           description: FORBIDDEN - no/invalid CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/askers/consultingType/new:
@@ -57,17 +54,13 @@ paths:
                 $ref: '#/components/schemas/NewRegistrationResponseDto'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         409:
           description: CONFLICT - user is already registered for provided consulting
             type
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/{sessionId}/enquiry/new:
@@ -103,22 +96,16 @@ paths:
       responses:
         201:
           description: CREATED - enquriy message was successfully created
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         409:
           description: CONFLICT - message already saved for enquiry
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/new/{sessionId}:
@@ -144,24 +131,18 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - agency doesn't match/isn't assigned to this enquiry
             or no/invalid CSRF token
-          content: { }
         409:
           description: CONFLICT - enquiry already accepted by another consultant or
             agency of session is not assigned to consultant
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/askers:
@@ -187,19 +168,14 @@ paths:
                 $ref: '#/components/schemas/UserSessionListResponseDTO'
         204:
           description: NO CONTENT - no enquiry sent yet
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/consultants/absences:
@@ -218,19 +194,14 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/data:
@@ -249,16 +220,12 @@ paths:
                 $ref: '#/components/schemas/UserDataResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/consultants:
@@ -310,16 +277,12 @@ paths:
                 $ref: '#/components/schemas/ConsultantSessionListResponseDTO'
         204:
           description: successful operation, but no content
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/consultants/import:
@@ -331,16 +294,12 @@ paths:
       responses:
         200:
           description: successful operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token (tech user)
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/askers/import:
@@ -352,16 +311,12 @@ paths:
       responses:
         200:
           description: successful operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token (tech user)
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/askersWithoutSession/import:
@@ -374,16 +329,12 @@ paths:
       responses:
         200:
           description: successful operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token (tech user)
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/teams:
@@ -429,16 +380,12 @@ paths:
                 $ref: '#/components/schemas/ConsultantSessionListResponseDTO'
         204:
           description: successful operation, but no content
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/mails/messages/new:
@@ -457,19 +404,14 @@ paths:
       responses:
         200:
           description: successful operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - invalid token
-          content: { }
         409:
           description: CONFLICT - no user e-mail address in db given
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/mails/messages/feedback/new:
@@ -489,19 +431,14 @@ paths:
       responses:
         200:
           description: successful operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - invalid token
-          content: { }
         409:
           description: CONFLICT - no user e-mail address in db given
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/monitoring/{sessionId}:
@@ -527,19 +464,14 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/consultants:
@@ -568,19 +500,14 @@ paths:
                   $ref: '#/components/schemas/ConsultantResponseDTO'
         204:
           description: successful operation, but no content
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/{sessionId}/consultant/{consultantId}:
@@ -607,23 +534,17 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token or
             agency of session is not assigned to consultant
-          content: { }
         409:
           description: CONFLICT - session is already assigned to this consultant
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/password/change:
@@ -642,19 +563,14 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/messages/key:
@@ -673,19 +589,14 @@ paths:
       responses:
         202:
           description: ACCEPTED - key was successfully inserted
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization
-          content: { }
         409:
           description: CONFLICT - there was a key in the service
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/sessions/{sessionId}/monitoring:
@@ -712,19 +623,14 @@ paths:
                 $ref: '#/components/schemas/MonitoringDTO'
         204:
           description: successful operation, but no content
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/new:
@@ -749,16 +655,12 @@ paths:
                 $ref: '#/components/schemas/CreateChatResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         403:
           description: FORBIDDEN - no/invalid CSRF token
-          content: { }
         409:
           description: CONFLICT - group chat with same name already existing
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/{chatId}/update:
@@ -791,17 +693,13 @@ paths:
                 $ref: '#/components/schemas/UpdateChatResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         403:
           description: FORBIDDEN - No permission for chat update / Consultant is not
             owner
-          content: { }
         409:
           description: CONFLICT - Chat is already startet
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/{chatId}/start:
@@ -821,23 +719,17 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - No permission for chat / Consultant is not assigned
             to chat-agency
-          content: { }
         409:
           description: CONFLICT - Chat is already startet
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/{chatId}/stop:
@@ -859,23 +751,17 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - No permission for chat / Consultant is not assigned
             to chat agency
-          content: { }
         409:
           description: CONFLICT - Chat is not started/active
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/{chatId}:
@@ -902,19 +788,14 @@ paths:
                 $ref: '#/components/schemas/ChatInfoResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - No permission for chat
-          content: { }
         404:
           description: NOT FOUND - Chat not found
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/{chatId}/join:
@@ -934,25 +815,18 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - No permission for chat
-          content: { }
         404:
           description: NOT FOUND - Chat not found
-          content: { }
         409:
           description: CONFLICT - Chat has not startet yet
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/{chatId}/members:
@@ -979,22 +853,16 @@ paths:
                 $ref: '#/components/schemas/ChatMembersResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - No permission for chat
-          content: { }
         404:
           description: NOT FOUND - Chat not found
-          content: { }
         409:
           description: CONFLICT - Chat has not startet yet
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
       security:
         - Bearer: [ ]
   /users/chat/{chatId}/leave:
@@ -1014,27 +882,20 @@ paths:
       responses:
         200:
           description: OK - successfull operation
-          content: { }
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-          content: { }
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
-          content: { }
         403:
           description: FORBIDDEN - No permission for chat
-          content: { }
         404:
           description: NOT FOUND - Chat not found
-          content: { }
         409:
           description: CONFLICT - Chat has not startet yet
-          content: { }
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-          content: { }
-      security:
-        - Bearer: [ ]
+c      security:
+  - Bearer: [ ]
 components:
   schemas:
     UserDTO:

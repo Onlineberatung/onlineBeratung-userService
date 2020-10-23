@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
@@ -92,7 +93,7 @@ public class JoinAndLeaveChatFacade {
       throw new NotFoundException(String.format("Chat with id %s not found", chatId));
     }
 
-    if (!isTrue(chat.get().isActive())) {
+    if (isFalse(chat.get().isActive())) {
       throw new ConflictException(
           String.format("User could not join/leave Chat with id %s, because it's not started.",
               chat.get().getId()));

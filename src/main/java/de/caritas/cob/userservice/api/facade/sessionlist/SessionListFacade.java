@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade.sessionlist;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -156,7 +157,7 @@ public class SessionListFacade {
 
     sessions.removeIf(
         consultantSessionResponseDTO -> nonNull(consultantSessionResponseDTO.getChat())
-            || consultantSessionResponseDTO.getSession().getFeedbackRead());
+            || isTrue(consultantSessionResponseDTO.getSession().getFeedbackRead()));
   }
 
   private boolean areMoreConsultantSessionsAvailable(

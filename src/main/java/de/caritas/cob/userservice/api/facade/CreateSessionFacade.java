@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -106,7 +108,7 @@ public class CreateSessionFacade {
    * @throws CreateMonitoringException when initialization of monitoring fails
    */
   private Session saveNewSession(NewRegistrationDto newRegistrationDto,
-      ConsultingType consultingType, boolean isTeamAgency, User user)
+      ConsultingType consultingType, Boolean isTeamAgency, User user)
       throws CreateMonitoringException {
 
     ConsultingTypeSettings consultingTypeSettings;
@@ -117,7 +119,7 @@ public class CreateSessionFacade {
     }
     Session session = sessionService.saveSession(new Session(user, consultingType,
         newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
-        isTeamAgency, consultingTypeSettings.isMonitoring()));
+        isTrue(isTeamAgency), consultingTypeSettings.isMonitoring()));
 
     monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
 

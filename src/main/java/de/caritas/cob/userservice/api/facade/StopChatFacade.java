@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.exception.SaveChatException;
@@ -56,7 +57,7 @@ public class StopChatFacade {
               consultant.getId(), chat.getId()));
     }
 
-    if (!isTrue(chat.isActive())) {
+    if (isFalse(chat.isActive())) {
       throw new ConflictException(
           String.format("Chat with id %s is already stopped.", chat.getId()));
     }

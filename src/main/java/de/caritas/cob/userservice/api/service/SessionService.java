@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -194,7 +195,7 @@ public class SessionService {
     return saveSession(
         new Session(user, ConsultingType.values()[Integer.parseInt(userDto.getConsultingType())],
             userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-            agencyDTO.getTeamAgency(), monitoring));
+            isTrue(agencyDTO.getTeamAgency()), monitoring));
   }
 
   /**

@@ -6,7 +6,10 @@ import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -60,7 +63,7 @@ public class ConsultantAgencyService {
       List<ConsultantAgency> agencyList =
           consultantAgencyRepository.findByConsultantIdAndAgencyId(consultantId, agencyId);
 
-      return !isEmpty(agencyList);
+      return isNotEmpty(agencyList);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while getting agency id data set for"
           + " consultant", LogService::logDatabaseError);
