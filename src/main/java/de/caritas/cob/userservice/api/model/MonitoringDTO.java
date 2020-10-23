@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.monitoring;
+package de.caritas.cob.userservice.api.model;
 
 import java.util.LinkedHashMap;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;

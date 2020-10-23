@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.registration;
+package de.caritas.cob.userservice.api.model;
 
 import static de.caritas.cob.userservice.api.helper.UserHelper.ADDICTIVE_DRUGS_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MAX;
@@ -11,8 +11,6 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MIN;
 import static de.caritas.cob.userservice.api.helper.UserHelper.RELATION_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
-
-import de.caritas.cob.userservice.api.model.registration.IRegistrationDto;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -140,7 +139,7 @@ public class ConsultantSessionListService {
 
     sessions.removeIf(
         consultantSessionResponseDTO -> nonNull(consultantSessionResponseDTO.getChat())
-            || isTrue(consultantSessionResponseDTO.getSession().getFeedbackRead()));
+            || consultantSessionResponseDTO.getSession().isFeedbackRead());
   }
 
   private List<ConsultantSessionResponseDTO> updateConsultantSessionValues(

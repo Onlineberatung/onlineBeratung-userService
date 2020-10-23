@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -18,16 +17,21 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 
 @Service
-@RequiredArgsConstructor
 public class ConsultantService {
 
-  private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull UserHelper userHelper;
+  private ConsultantRepository consultantRepository;
+  private UserHelper userHelper;
+
+  @Autowired
+  public ConsultantService(ConsultantRepository consultantRepository, UserHelper userHelper) {
+    this.consultantRepository = consultantRepository;
+    this.userHelper = userHelper;
+  }
 
   /**
-   * Save a {@link Consultant} to the database.
+   * Save a {@link Consultant} to the database
    *
-   * @param consultant {@link Consultant}
+   * @param consultant
    * @return the {@link Consultant}
    */
   public Consultant saveConsultant(Consultant consultant) {
@@ -40,9 +44,9 @@ public class ConsultantService {
   }
 
   /**
-   * Load a {@link Consultant}.
+   * Load a {@link Consultant}
    *
-   * @param consultantId consultant ID
+   * @param consultantId
    * @return An {@link Optional} with the {@link Consultant}, if found
    */
   public Optional<Consultant> getConsultant(String consultantId) {
@@ -55,9 +59,9 @@ public class ConsultantService {
   }
 
   /**
-   * Returns a {@link Consultant} by the provided Rocket.Chat user ID.
+   * Returns a {@link Consultant} by the provided Rocket.Chat user id
    *
-   * @param rcUserId Rocket.Chat user ID
+   * @param rcUserId
    * @return An {@link Optional} with the {@link Consultant}
    */
   public Optional<Consultant> getConsultantByRcUserId(String rcUserId) {
@@ -71,15 +75,15 @@ public class ConsultantService {
   }
 
   /**
-   * Update a {@link Consultant} with the absence data from a (@Link AbsenceDTO).
+   * Update a {@link Consultant} with the absence data from a (@Link AbsenceDTO)
    *
-   * @param consultant {@link Consultant}
-   * @param absence    {@link AbsenceDTO}
+   * @param consultant
+   * @param absence
    * @return The updated {@link Consultant}
    */
   public Consultant updateConsultantAbsent(Consultant consultant, AbsenceDTO absence) {
 
-    consultant.setAbsent(absence.getAbsent());
+    consultant.setAbsent(absence.isAbsent());
 
     if (absence.getMessage() != null && !absence.getMessage().isEmpty()) {
       consultant.setAbsenceMessage(Helper.removeHTMLFromText(absence.getMessage()));
@@ -93,9 +97,9 @@ public class ConsultantService {
   }
 
   /**
-   * Returns a {@link Consultant} by the provided email address.
+   * Returns a {@link Consultant} by the provided email address
    *
-   * @param email email address
+   * @param email
    * @return An {@link Optional} with the {@link Consultant}
    */
   public Optional<Consultant> getConsultantByEmail(String email) {
@@ -108,9 +112,9 @@ public class ConsultantService {
   }
 
   /**
-   * Returns a {@link Consultant} by the provided username.
+   * Returns a {@link Consultant} by the provided username
    *
-   * @param username username
+   * @param username
    * @return An {@link Optional} with the {@link Consultant}
    */
   public Optional<Consultant> getConsultantByUsername(String username) {
@@ -124,10 +128,10 @@ public class ConsultantService {
   }
 
   /**
-   * Find a consultant by these steps: 1. username 2. encoded username 3. email.
-   *
-   * @param username username
-   * @param email    email address
+   * Find a consultant by these steps: 1. username 2. encoded username 3. email
+   * 
+   * @param username
+   * @param email
    * @return an optional with the consultant found or an empty optional
    */
   public Optional<Consultant> findConsultantByUsernameOrEmail(String username, String email) {
@@ -146,14 +150,19 @@ public class ConsultantService {
     }
 
     consultantOptional = getConsultantByEmail(email);
-    return consultantOptional;
+    if (consultantOptional.isPresent()) {
+      return consultantOptional;
+    }
+
+    return Optional.empty();
+
   }
 
   /**
-   * Find a consultant via the {@link AuthenticatedUser}.
-   *
-   * @param authenticatedUser {@link AuthenticatedUser}
-   * @return {@link Optional} of {@link Consultant}
+   * Find a consultant via the {@link AuthenticatedUser}
+   * 
+   * @param authenticatedUser
+   * @return
    * @throws {@link InternalServerErrorException}
    */
   public Optional<Consultant> getConsultantViaAuthenticatedUser(
@@ -167,13 +176,15 @@ public class ConsultantService {
     }
 
     return consultantOptional;
+
   }
 
   /**
-   * Find consultants by agency ID.
-   *
-   * @param chatAgencies {@link Set} of {@link ChatAgency}
-   * @return {@link List} of {@link Consultant}
+   * 
+   * Find consultants by agency id
+   * 
+   * @param chatAgencies
+   * @return
    * @throws {@link InternalServerErrorException}
    */
   public List<Consultant> findConsultantsByAgencyIds(Set<ChatAgency> chatAgencies) {

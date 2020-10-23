@@ -7,19 +7,15 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WIT
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
@@ -27,8 +23,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
@@ -64,7 +59,6 @@ public class GetUserDataFacadeTest {
 
   @Before
   public void setup() {
-    setField(getUserDataFacade, "emailDummySuffix", "@dummysuffix.de");
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -157,28 +151,6 @@ public class GetUserDataFacadeTest {
       assertTrue("Excepted InternalServerErrorException thrown", true);
     }
     verify(agencyServiceHelper, times(1)).getAgencies(Mockito.anyList());
-  }
-
-  @Test
-  public void getUserData_Should_ReturnUserDataResponseDTOWithEmail_When_ProvidedWithValidUser() {
-    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
-    when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
-
-    UserDataResponseDTO resultUser = getUserDataFacade.buildUserDataPreferredByConsultantRole();
-
-    assertThat(resultUser.getEmail(), notNullValue());
-  }
-
-  @Test
-  public void getUserData_Should_ReturnUserDataResponseDTOWithoutEmail_When_UserHasDummyMail() {
-    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
-    User user = mock(User.class);
-    when(user.getEmail()).thenReturn("user@dummysuffix.de");
-    when(accountProvider.retrieveValidatedUser()).thenReturn(user);
-
-    UserDataResponseDTO resultUser = getUserDataFacade.buildUserDataPreferredByConsultantRole();
-
-    assertThat(resultUser.getEmail(), nullValue());
   }
 
 }

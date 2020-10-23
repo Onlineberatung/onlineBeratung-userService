@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.model.validation;
 
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.registration.IRegistrationDto;
+import de.caritas.cob.userservice.api.model.IRegistrationDto;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.Optional;

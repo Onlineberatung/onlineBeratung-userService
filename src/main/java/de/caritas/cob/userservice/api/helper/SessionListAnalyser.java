@@ -70,10 +70,10 @@ public class SessionListAnalyser {
   }
 
   /**
-   * Check if if the last message is available for a Rocket.Chat group.
+   * Check if if the last message is available for a Rocket.Chat group
    *
    * @param roomLastMessageMap the map with the rooms update of Rocket.Chat
-   * @param groupId            the group id
+   * @param groupId the group id
    * @return true, if last message is available
    */
   public boolean isLastMessageForRocketChatGroupIdAvailable(
@@ -82,7 +82,7 @@ public class SessionListAnalyser {
   }
 
   /**
-   * Get a {@link SessionAttachmentDTO} from the Rocket.Chat room info.
+   * Get a {@link SessionAttachmentDTO} from the Rocket.Chat room info
    *
    * @param rcUserId the Rocket.Chat user id
    * @param roomsLastMessageDto the Rocket.Chat room info
@@ -93,10 +93,9 @@ public class SessionListAnalyser {
     if (isNull(roomsLastMessageDto.getFile())) {
       return null;
     }
-    return new SessionAttachmentDTO()
-        .fileType(roomsLastMessageDto.getFile().getType())
-        .imagePreview(roomsLastMessageDto.getAttachements()[0].getImagePreview())
-        .fileReceived(!rcUserId.equals(roomsLastMessageDto.getUser().getId()));
+    return new SessionAttachmentDTO(roomsLastMessageDto.getFile().getType(),
+        roomsLastMessageDto.getAttachements()[0].getImagePreview(),
+        !rcUserId.equals(roomsLastMessageDto.getUser().getId()));
   }
 
 }

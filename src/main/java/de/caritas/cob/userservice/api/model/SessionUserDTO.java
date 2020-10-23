@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.user;
+package de.caritas.cob.userservice.api.model;
 
 import java.util.LinkedHashMap;
 import io.swagger.annotations.ApiModel;

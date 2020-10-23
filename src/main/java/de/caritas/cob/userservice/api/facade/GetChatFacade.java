@@ -1,11 +1,8 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
-
 import java.util.Optional;
 import java.util.Set;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -24,20 +21,28 @@ import de.caritas.cob.userservice.api.service.UserService;
  * Facade for capsuling to get a chat
  */
 @Service
-@RequiredArgsConstructor
 public class GetChatFacade {
 
-  private final @NonNull ChatService chatService;
-  private final @NonNull ChatHelper chatHelper;
-  private final @NonNull ConsultantService consultantService;
-  private final @NonNull UserService userService;
+  private ChatService chatService;
+  private ChatHelper chatHelper;
+  private ConsultantService consultantService;
+  private UserService userService;
+
+  @Autowired
+  public GetChatFacade(ChatService chatService, ChatHelper chatHelper,
+      ConsultantService consultantService, UserService userService) {
+    this.chatService = chatService;
+    this.chatHelper = chatHelper;
+    this.consultantService = consultantService;
+    this.userService = userService;
+  }
 
   /**
-   * Get chat info.
-   *
-   * @param chatId            chat ID
-   * @param authenticatedUser {@link AuthenticatedUser}
-   * @return {@link ChatInfoResponseDTO}
+   * Get chat info
+   * 
+   * @param chatId
+   * @param authenticatedUser
+   * @return
    */
   public ChatInfoResponseDTO getChat(Long chatId, AuthenticatedUser authenticatedUser) {
 
@@ -72,10 +77,8 @@ public class GetChatFacade {
 
     }
 
-    return new ChatInfoResponseDTO()
-        .id(chat.get().getId())
-        .groupId(chat.get().getGroupId())
-        .active(isTrue(chat.get().isActive()));
+    return new ChatInfoResponseDTO(chat.get().getId(), chat.get().getGroupId(),
+        chat.get().isActive());
   }
 
 }

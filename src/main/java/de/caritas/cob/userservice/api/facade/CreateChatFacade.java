@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.chat.ChatDTO;
+import de.caritas.cob.userservice.api.model.ChatDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
@@ -56,7 +56,7 @@ public class CreateChatFacade {
 
     try {
 
-      // Get agency id for chat. Premise/presumption: Kreuzbund consultants are in one agency only
+      // Get agency id for chat. Premise/presumption: Kreuzbund's consultants are in one agency only
       // (which is a Kreuzbund agency)
       Long agencyId = consultant.getConsultantAgencies() != null
           && !consultant.getConsultantAgencies().isEmpty()
@@ -108,9 +108,8 @@ public class CreateChatFacade {
       throw e;
     }
 
-    return new CreateChatResponseDTO()
-        .groupId(rcGroupId)
-        .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingType()));
+    return new CreateChatResponseDTO(rcGroupId,
+        userHelper.generateChatUrl(chat.getId(), chat.getConsultingType()));
 
   }
 

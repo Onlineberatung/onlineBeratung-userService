@@ -102,14 +102,14 @@ public class SessionListAnalyserTest {
   public void getAttachmentFromRocketChatMessageIfAvailable_Should_ReturnSetFileReceivedToFalse_When_CallingUserIsSender() {
     SessionAttachmentDTO result = sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(ROCKETCHAT_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
-    assertFalse(result.getFileReceived());
+    assertFalse(result.isFileReceived());
   }
 
   @Test
   public void getAttachmentFromRocketChatMessageIfAvailable_Should_ReturnSetFileReceivedToTrue_When_CallingUserIsNotSender() {
     SessionAttachmentDTO result = sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(ROCKETCHAT_ID, ROOMS_LAST_MESSAGE_DTO_2);
-    assertTrue(result.getFileReceived());
+    assertTrue(result.isFileReceived());
   }
 
 }
