@@ -76,7 +76,8 @@ public class CreateSessionFacade {
 
     Session session = null;
     try {
-      session = saveNewSession(newRegistrationDto, consultingType, agencyDto.getTeamAgency(), user);
+      session = saveNewSession(newRegistrationDto, consultingType,
+          isTrue(agencyDto.getTeamAgency()), user);
       sessionDataService.saveSessionDataFromRegistration(session, new UserDTO());
 
     } catch (InternalServerErrorException serviceException) {

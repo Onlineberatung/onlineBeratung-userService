@@ -67,8 +67,6 @@ import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.MapUtils;
