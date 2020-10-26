@@ -9,9 +9,10 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.SessionService;
 import java.util.List;
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,7 +29,7 @@ public class RelevantUserAccountIdsBySessionProviderTest {
   private AuthenticatedUser authenticatedUser;
 
   @Mock
-  private SessionService sessionService;
+  private SessionRepository sessionRepository;
 
   @Test
   public void collectUserIds_Should_returnEmptyList_When_sessionDoesNotExist() {
@@ -40,7 +41,39 @@ public class RelevantUserAccountIdsBySessionProviderTest {
   @Test
   public void collectUserIds_Should_returnListWithUserId_When_consultantIsAuthenticatedUser() {
     when(this.authenticatedUser.getUserId()).thenReturn("consultant");
-    when(sessionService.getSessionByGroupIdAndUserId(any(), any(), any()))
+    when(sessionRepository.findByGroupId(any())).thenReturn(buildSessionWithUserAndConsultant());
+
+    List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
+
+    assertThat(userIds, hasSize(1));
+    assertThat(userIds.get(0), is("user"));
+  }
+
+  private Optional<Session> buildSessionWithUserAndConsultant() {
+    Session session = new Session();
+    Consultant consultant = new Consultant();
+    consultant.setId("consultant");
+    session.setConsultant(consultant);
+    User user = new User("user", null, null, null);
+    session.setUser(user);
+    return Optional.of(session);
+  }
+
+  @Test
+  public void collectUserIds_Should_returnListWithConsultantId_When_userIsAuthenticatedUser() {
+    when(this.authenticatedUser.getUserId()).thenReturn("user");
+    when(sessionRepository.findByGroupId(any())).thenReturn(buildSessionWithUserAndConsultant());
+
+    List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
+
+    assertThat(userIds, hasSize(1));
+    assertThat(userIds.get(0), is("consultant"));
+  }
+
+  @Test
+  public void collectUserIds_Should_returnListWithUserId_When_consultantIsAuthenticatedUserAndRcIdIsFeedbackGroupId() {
+    when(this.authenticatedUser.getUserId()).thenReturn("consultant");
+    when(sessionRepository.findByFeedbackGroupId(any()))
         .thenReturn(buildSessionWithUserAndConsultant());
 
     List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
@@ -49,26 +82,40 @@ public class RelevantUserAccountIdsBySessionProviderTest {
     assertThat(userIds.get(0), is("user"));
   }
 
-  private Session buildSessionWithUserAndConsultant() {
-    Session session = new Session();
-    Consultant consultant = new Consultant();
-    consultant.setId("consultant");
-    session.setConsultant(consultant);
-    User user = new User("user", null, null, null);
-    session.setUser(user);
-    return session;
-  }
-
   @Test
-  public void collectUserIds_Should_returnListWithConsultantId_When_userIsAuthenticatedUser() {
+  public void collectUserIds_Should_returnListWithConsultantId_When_userIsAuthenticatedUserAndRcIdIsFeedbackGroupId() {
     when(this.authenticatedUser.getUserId()).thenReturn("user");
-    when(sessionService.getSessionByGroupIdAndUserId(any(), any(), any()))
-        .thenReturn(buildSessionWithUserAndConsultant());
+    when(sessionRepository.findByFeedbackGroupId(any())).thenReturn(buildSessionWithUserAndConsultant());
 
     List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
 
     assertThat(userIds, hasSize(1));
     assertThat(userIds.get(0), is("consultant"));
+  }
+
+  @Test
+  public void collectUserIds_Should_returnListWithConsultantAndUserId_When_authenticatedUserIsOther() {
+    when(this.authenticatedUser.getUserId()).thenReturn("other user");
+    when(sessionRepository.findByGroupId(any())).thenReturn(buildSessionWithUserAndConsultant());
+
+    List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
+
+    assertThat(userIds, hasSize(2));
+    assertThat(userIds.get(0), is("user"));
+    assertThat(userIds.get(1), is("consultant"));
+  }
+
+  @Test
+  public void collectUserIds_Should_returnListWithConsultantAndUserId_When_authenticatedUserIsOtherAndRcIdIsFeedbackGroupId() {
+    when(this.authenticatedUser.getUserId()).thenReturn("other user");
+    when(sessionRepository.findByFeedbackGroupId(any()))
+        .thenReturn(buildSessionWithUserAndConsultant());
+
+    List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
+
+    assertThat(userIds, hasSize(2));
+    assertThat(userIds.get(0), is("user"));
+    assertThat(userIds.get(1), is("consultant"));
   }
 
 }

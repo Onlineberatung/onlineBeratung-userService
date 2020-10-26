@@ -90,6 +90,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/consultants/import", "/users/askers/import",
             "/users/askersWithoutSession/import")
         .hasAuthority(Authority.TECHNICAL_DEFAULT).antMatchers("/users/mails/messages/feedback/new")
+        .hasAuthority(Authority.TECHNICAL_DEFAULT).antMatchers("/liveproxy/send")
         .hasAuthority(Authority.USE_FEEDBACK).antMatchers("/users/messages/key")
         .hasAuthority(Authority.TECHNICAL_DEFAULT).antMatchers("/users/chat/new")
         .hasAuthority(Authority.CREATE_NEW_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/start")

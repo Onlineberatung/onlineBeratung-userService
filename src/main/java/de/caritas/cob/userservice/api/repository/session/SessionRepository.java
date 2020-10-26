@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.repository.session;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -91,11 +92,19 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   List<Session> findByFeedbackGroupIdAndConsultantId(String feedbackGroupId, String userId);
 
   /**
-   * Find the {@link Session}s by Rocket.Chat feedback group id
+   * Find the {@link Session} by Rocket.Chat feedback group id.
    * 
-   * @param feedbackGroupId
-   * @return
+   * @param feedbackGroupId the rocket chat feedback group id
+   * @return an {@link Optional} of the session
    */
-  List<Session> findByFeedbackGroupId(String feedbackGroupId);
+  Optional<Session> findByFeedbackGroupId(String feedbackGroupId);
+
+  /**
+   * Find the {@link Session} by Rocket.Chat group id.
+   *
+   * @param groupId the rocket chat group id
+   * @return an {@link Optional} of the session
+   */
+  Optional<Session> findByGroupId(String groupId);
 
 }

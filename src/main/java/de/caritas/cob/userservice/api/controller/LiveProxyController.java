@@ -24,7 +24,7 @@ public class LiveProxyController implements LiveproxyApi {
    * Sends a live event to all relevant users according to the rocket chat group id.
    *
    * @param rcGroupId Rocket Chat group id (required)
-   * @return {@link ResponseEntity} with status ok if no error occures
+   * @return {@link ResponseEntity} with status ok if no error occurs
    */
   @Override
   public ResponseEntity<Void> sendLiveEvent(@RequestParam String rcGroupId) {

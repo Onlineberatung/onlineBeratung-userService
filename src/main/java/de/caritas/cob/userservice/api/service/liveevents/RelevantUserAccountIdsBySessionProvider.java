@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,27 +19,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class RelevantUserAccountIdsBySessionProvider extends UserIdsProvider {
 
-  private final SessionService sessionService;
+  private final SessionRepository sessionRepository;
 
   @Autowired
   public RelevantUserAccountIdsBySessionProvider(AuthenticatedUser authenticatedUser,
-      SessionService sessionService) {
+      SessionRepository sessionRepository) {
     super(authenticatedUser);
-    this.sessionService = requireNonNull(sessionService);
+    this.sessionRepository = requireNonNull(sessionRepository);
   }
 
   /**
    * Collects the relevant user id of a session, if consultant wrote, id of user will be returned
    * and vice versa.
    *
-   * @param rcGroupId the rocket chat group id used to retrive the {@link Session}
+   * @param rcGroupId the rocket chat group id used to retrieve the {@link Session}
    * @return a {@link List} containing the user id to be notified
    */
   @Override
   List<String> collectUserIds(String rcGroupId) {
-    Session session = this.sessionService
-        .getSessionByGroupIdAndUserId(rcGroupId, this.authenticatedUser.getUserId(),
-            this.authenticatedUser.getRoles());
+    Session session = this.sessionRepository.findByGroupId(rcGroupId)
+            .orElse(this.sessionRepository.findByFeedbackGroupId(rcGroupId)
+                .orElse(null));
 
     return extractDependentUserIds(session);
   }
