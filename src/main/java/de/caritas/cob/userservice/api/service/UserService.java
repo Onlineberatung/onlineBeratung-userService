@@ -35,8 +35,12 @@ public class UserService {
   }
 
   /**
-   * Create a new {@link User}
+   * Creates a new {@link User}.
    *
+   * @param userId the new user id
+   * @param username the name for the user
+   * @param email the email of the user
+   * @param languageFormal flag for language formal
    * @return The created {@link User}
    */
   public User createUser(String userId, String username, String email, boolean languageFormal) {
@@ -44,8 +48,13 @@ public class UserService {
   }
 
   /**
-   * Creates a new {@link User}
+   * Creates a new {@link User}.
    *
+   * @param userId the new user id
+   * @param oldId an optional old user id
+   * @param username the name for the user
+   * @param email the email of the user
+   * @param languageFormal flag for language formal
    * @return The created {@link User}
    */
   public User createUser(String userId, Long oldId, String username, String email,
@@ -58,8 +67,9 @@ public class UserService {
   }
 
   /**
-   * Load a {@link User}
+   * Load a {@link User}.
    *
+   * @param userId the id of the user to search for
    * @return An {@link Optional} with the {@link User}, if found
    */
   public Optional<User> getUser(String userId) {
@@ -71,7 +81,10 @@ public class UserService {
   }
 
   /**
-   * Saves an {@link User} to the database
+   * Saves an {@link User} to the database.
+   *
+   * @param user the {@link User} to save
+   * @return the saved {@link User}
    */
   public User saveUser(User user) throws SaveUserException {
     try {
@@ -82,10 +95,9 @@ public class UserService {
   }
 
   /**
-   * Find a consultant via the {@link AuthenticatedUser}
+   * Find a user via the {@link AuthenticatedUser}.
    *
    * @return Optional of user
-   * @throws {@link InternalServerErrorException}
    */
   public Optional<User> getUserViaAuthenticatedUser(AuthenticatedUser authenticatedUser) {
 
@@ -98,6 +110,22 @@ public class UserService {
 
     return userOptional;
 
+  }
+
+  /**
+   * Find a user by the given rocket chat user id.
+   *
+   * @param rcUserId the rocket chat user id to search for
+   * @return the user as an {@link Optional}
+   */
+  public Optional<User> findUserByRcUserId(String rcUserId) {
+    try {
+      return userRepository.findByRcUserId(rcUserId);
+    } catch (DataAccessException ex) {
+      throw new InternalServerErrorException(String
+          .format("Database error while loading user by Rocket.Chat user id %s", rcUserId),
+          LogService::logDatabaseError);
+    }
   }
 
 }

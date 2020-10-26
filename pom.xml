@@ -335,6 +335,34 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>4.3.1</version>
+				<executions>
+					<!-- Generate client API for live service -->
+					<execution>
+						<id>liveservice-client-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<library>resttemplate</library>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/liveservice.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<generateApis>true</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<apiPackage>${project.groupId}.${project.artifactId}.liveservice.generated.web</apiPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.liveservice.generated.web.model</modelPackage>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Liquibase Maven plugin -->
 			<plugin>
 				<groupId>org.liquibase</groupId>

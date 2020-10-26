@@ -896,6 +896,32 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /liveproxy/send:
+    post:
+      tags:
+        - liveproxy-controller
+      summary: 'Send a live notification event'
+      operationId: sendLiveEvent
+      parameters:
+        - name: rcGroupId
+          in: query
+          description: Rocket Chat group id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or query object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - group chat with same name already existing
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     UserDTO:

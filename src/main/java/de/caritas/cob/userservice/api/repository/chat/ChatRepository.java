@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.repository.chat;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -20,4 +21,6 @@ public interface ChatRepository extends CrudRepository<Chat, Long> {
       + "c.consultant_id_owner, c.rc_group_id FROM chat c JOIN chat_agency ca ON c.id = ca.chat_id AND ca.agency_id IN :agency_ids",
       nativeQuery = true)
   List<Chat> findByAgencyIds(@Param(value = "agency_ids") Set<Long> agencyIds);
+
+  Optional<Chat> findByGroupId(String groupId);
 }

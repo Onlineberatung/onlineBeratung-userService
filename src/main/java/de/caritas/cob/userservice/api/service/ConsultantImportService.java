@@ -190,8 +190,9 @@ public class ConsultantImportService {
 
           if (consultantOptional.isPresent()) {
             writeToImportLog(
-                String.format("Consultant with username %s exists and won't be imported.",
-                    importRecord.getUsername()));
+                String.format(
+                    "Consultant with username %s (%s) exists and won't be "
+                        + "imported.", importRecord.getUsername(), importRecord.getUsernameEncoded()));
             continue;
           }
 
@@ -396,7 +397,7 @@ public class ConsultantImportService {
           }
         }
 
-        logMessage = "=== END === " + importRecord.getUsername() + " ===";
+        logMessage = "=== END === " + importRecord.getUsername() + " ===" + NEWLINE_CHAR;
         writeToImportLog(logMessage);
 
       } catch (ImportException wontImportException) {

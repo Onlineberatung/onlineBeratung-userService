@@ -4,8 +4,31 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
+import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.helper.Helper;
+import de.caritas.cob.userservice.api.helper.SessionDataHelper;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
+import de.caritas.cob.userservice.api.model.SessionDTO;
+import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,29 +39,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
-import de.caritas.cob.userservice.api.exception.UpdateSessionException;
-import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
-import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
-import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 
 /**
  * Service for sessions
@@ -440,29 +440,13 @@ public class SessionService {
    * @return the session
    */
   public Session getSessionByFeedbackGroupId(String feedbackGroupId) {
-
-    List<Session> sessions;
-
     try {
-      sessions = sessionRepository.findByFeedbackGroupId(feedbackGroupId);
+      return sessionRepository.findByFeedbackGroupId(feedbackGroupId).orElse(null);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException(String.format(
           "Database error while retrieving session by feedbackGroupId %s", feedbackGroupId),
           LogService::logDatabaseError);
     }
-
-    if (sessions != null && !sessions.isEmpty()) {
-      if (sessions.size() == 1) {
-        // There should be only one session with this Rocket.Chat feedback group id and user id
-        // combination
-        return sessions.get(0);
-      }
-      throw new InternalServerErrorException(String.format(
-          "More than one matching session found by feedbackGroupId %s in database. Aborting due to corrupt data.",
-          feedbackGroupId));
-    }
-
-    return null;
   }
 
 }
