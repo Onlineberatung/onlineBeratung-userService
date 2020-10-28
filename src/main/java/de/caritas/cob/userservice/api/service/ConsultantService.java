@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +81,7 @@ public class ConsultantService {
    */
   public Consultant updateConsultantAbsent(Consultant consultant, AbsenceDTO absence) {
 
-    consultant.setAbsent(absence.getAbsent());
+    consultant.setAbsent(isTrue(absence.getAbsent()));
 
     if (absence.getMessage() != null && !absence.getMessage().isEmpty()) {
       consultant.setAbsenceMessage(Helper.removeHTMLFromText(absence.getMessage()));

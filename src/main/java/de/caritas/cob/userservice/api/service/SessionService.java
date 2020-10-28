@@ -320,8 +320,8 @@ public class SessionService {
           .agency(agencies.stream()
               .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
               .findAny().get())
-          .consultant(nonNull(session.getConsultant()) ? null
-              : convertToSessionConsultantForUserDTO(session.getConsultant())));
+          .consultant(nonNull(session.getConsultant()) ? convertToSessionConsultantForUserDTO(
+              session.getConsultant()) : null));
     }
 
     return userSessionList;
