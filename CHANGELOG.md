@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.0.1...v2.1.0) (2020-10-28)
+
+
+### Features
+
+* adapt logging for consultant import ([c7608ad](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c7608adb9b2815dc19abd3b6d3dfa2e69b96c92a))
+* add endpoint and controller for triggering live events ([882c195](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/882c19546e526e18a46c774be3d15f1d118cc5f5))
+* added missing removed files ([e02e45d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e02e45dbc50008b1aa9f842f34ecb02e428d44aa))
+* correct role configuration ([b3b58e7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/b3b58e71fe37da65f1182e8874c75fc527acc9e6))
+* correct session finding, adapt security config ([cd4a33f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/cd4a33f5df65784d67fdf8e60e90c8d81c83f743))
+* minor optimizations ([6c7317e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6c7317e7d9dcfc7a2b75ac88fde13546f33951d8))
+* minor optimizations ([50ad06a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/50ad06a691af43afee6310a5714afc4f202689c6))
+* provide logic to collect relevant user ids ([b29ab8f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/b29ab8f924d3417ee737f9fd06ec701af778215f))
+* setup and generate live service api client ([a716999](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a7169995fa6a067990d0113bb9d07d0d17cec3f6))
+* update swagger to openapi ([eed0650](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/eed065019a9f22d33bd9eae1c02fba7c5327c516))
+* update to open api v3 and generate models ([94b9c1d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/94b9c1d959f9e7997740ef1ea8cc575328b61444))
+
+
+### Bug Fixes
+
+* changed swagger package name to match sources ([ac68864](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ac68864d37d3c026afd920ea37fdc972ca01a94d))
+* correct security authorizaton ([91e5224](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/91e52241e9afcecd8bb748c9aeea1db65f1beb4a))
+* mapped email of user to profiles response ([0f2f54f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0f2f54f95b9a621caa3173c423984d5b413b5ef2))
+* removed false character ([4721afd](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4721afd600088398227bb6d38a34233e7f223271))
+* set user mail only if its no dummy address ([772d096](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/772d0962cf31118ff0feb11514859e80fc958a37))
+
 ### [2.0.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.0.0...v2.0.1) (2020-10-12)
 
 
