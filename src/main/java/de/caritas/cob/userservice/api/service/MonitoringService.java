@@ -5,7 +5,6 @@ import static java.util.Objects.nonNull;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformatio
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.helper.MonitoringHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;

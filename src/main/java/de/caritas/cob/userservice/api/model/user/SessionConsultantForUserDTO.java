@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model;
+package de.caritas.cob.userservice.api.model.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import de.caritas.cob.userservice.api.model.jsonSerializer.DecodeUsernameJsonSerializer;

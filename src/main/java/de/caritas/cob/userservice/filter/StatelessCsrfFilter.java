@@ -64,7 +64,7 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
     public boolean matches(HttpServletRequest request) {
 
       // Allow specific whitelist items to disable CSRF protection for Swagger UI documentation
-      if (Arrays.stream(SpringFoxConfig.whiteList).parallel()
+      if (Arrays.stream(SpringFoxConfig.WHITE_LIST).parallel()
           .anyMatch(request.getRequestURI().toLowerCase()::contains)) {
         return false;
       }

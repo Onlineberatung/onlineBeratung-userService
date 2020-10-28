@@ -68,7 +68,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             CsrfFilter.class)
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-        .antMatchers(SpringFoxConfig.whiteList).permitAll().antMatchers("/users/askers/new")
+        .antMatchers(SpringFoxConfig.WHITE_LIST).permitAll().antMatchers("/users/askers/new")
         .permitAll()
         .antMatchers("/users/data", "/users/mails/messages/new", "/users/password/change",
             "/users/chat/{chatId:[0-9]+}", "/users/chat/{chatId:[0-9]+}/join",
@@ -89,7 +89,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/consultants").hasAuthority(Authority.VIEW_AGENCY_CONSULTANTS)
         .antMatchers("/users/consultants/import", "/users/askers/import",
             "/users/askersWithoutSession/import")
-        .hasAuthority(Authority.TECHNICAL_DEFAULT).antMatchers("/users/mails/messages/feedback/new")
+        .hasAuthority(Authority.TECHNICAL_DEFAULT)
+        .antMatchers("/liveproxy/send").hasAnyAuthority(Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT)
+        .antMatchers("/users/mails/messages/feedback/new")
         .hasAuthority(Authority.USE_FEEDBACK).antMatchers("/users/messages/key")
         .hasAuthority(Authority.TECHNICAL_DEFAULT).antMatchers("/users/chat/new")
         .hasAuthority(Authority.CREATE_NEW_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/start")

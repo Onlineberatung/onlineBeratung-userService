@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
@@ -37,6 +38,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class Chat {
 
   @Id
@@ -111,14 +113,5 @@ public class Chat {
     this.chatInterval = chatInterval;
     this.active = active;
     this.groupId = groupId;
-  }
-
-  @Override
-  public String toString() {
-    return "Chat [id=" + id + ", topic=" + topic + ", consultingType=" + consultingType
-        + ", initialStartDate=" + initialStartDate + ", startDate=" + startDate + ", duration="
-        + duration + ", repetitive=" + repetitive + ", chatInterval=" + chatInterval + ", active="
-        + active + ", maxParticipants=" + maxParticipants + ", groupId=" + groupId + ", chatOwner="
-        + chatOwner + "]";
   }
 }

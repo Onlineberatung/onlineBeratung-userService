@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -34,7 +36,7 @@ import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.UserDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -165,7 +167,7 @@ public class ConsultantImportService {
 
           formalLanguageList.add(consultingTypeSettings.isLanguageFormal());
 
-          if (agency.isTeamAgency()) {
+          if (isTrue(agency.getTeamAgency())) {
             importRecord.setTeamConsultant(true);
           }
 
@@ -188,8 +190,9 @@ public class ConsultantImportService {
 
           if (consultantOptional.isPresent()) {
             writeToImportLog(
-                String.format("Consultant with username %s exists and won't be imported.",
-                    importRecord.getUsername()));
+                String.format(
+                    "Consultant with username %s (%s) exists and won't be "
+                        + "imported.", importRecord.getUsername(), importRecord.getUsernameEncoded()));
             continue;
           }
 
@@ -394,7 +397,7 @@ public class ConsultantImportService {
           }
         }
 
-        logMessage = "=== END === " + importRecord.getUsername() + " ===";
+        logMessage = "=== END === " + importRecord.getUsername() + " ===" + NEWLINE_CHAR;
         writeToImportLog(logMessage);
 
       } catch (ImportException wontImportException) {

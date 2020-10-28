@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.InitializeMonitoringException;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
 import de.caritas.cob.userservice.api.repository.monitoringOption.MonitoringOption;

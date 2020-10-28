@@ -25,15 +25,14 @@ import de.caritas.cob.userservice.api.manager.consultingType.registration.Regist
 import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryFields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ChatDTO;
+import de.caritas.cob.userservice.api.model.chat.ChatDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
-import de.caritas.cob.userservice.api.model.NewRegistrationDto;
-import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.SessionAttachmentDTO;
-import de.caritas.cob.userservice.api.model.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.UserDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.UserChatDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
@@ -88,7 +87,6 @@ public class TestConstants {
   /**
    * ConsultingTypes
    */
-  public static final int INVALID_CONSULTING_TYPE = 9999;
   public static final String CONSULTING_TYPE_SUCHT_URL_NAME = ConsultingType.SUCHT.getUrlName();
   public static final ConsultingType CONSULTING_TYPE_SUCHT = ConsultingType.SUCHT;
   public static final ConsultingType CONSULTING_TYPE_U25 = ConsultingType.U25;
@@ -156,8 +154,6 @@ public class TestConstants {
   public static final String RC_ATTACHMENT_FILE_TYPE = "image/jpeg";
   public static final String RC_ATTACHMENT_IMAGE_PREVIEW =
       "/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAVACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAYDBAUH/8QAKBAAAQMDBAAFBQAAAAAAAAAAAQIDBAAFBhESITETIkFRgQcjQmHw/8QAGAEAAwEBAAAAAAAAAAAAAAAAAgMEAQX/xAAdEQADAAICAwAAAAAAAAAAAAAAAQIDEQQSIjEy/9oADAMBAAIRAxEAPwCjapLjU7YhHlA+77I+aY0XNgHxZGo52pI9RSvIx6LerBPbsd0U1JLv56jcNff4rHstquEF+PFuc0uBscacgfNc+uJExpMzrpGxdszGL5avw5BYQ+gHno1LdMzs0yKXX56FSFebeDyKzc6iW+4WZ5TzBelAbG3D6HQ/qlbHcPiSVoTKhLUdnSOdDxyafgfWFsKZO24JFiy8ZZfXFaCndSfL1/a1PZ7ZEl3p1l9lJbSNQANKKKg5NNNJDn7QqJsEef8AUB+1OrWIpOoHe3vqnqxYnGs8mT4D7i1ngKUOhRRV+L4AT8j/2Q==";
-  public static final List<RoomsUpdateDTO> EMPTY_ROOMS_UPDATE_DTO_LIST =
-      new ArrayList<RoomsUpdateDTO>();
   public static final GroupMemberDTO GROUP_MEMBER_SYS_USER =
       new GroupMemberDTO(ROCKET_CHAT_SYSTEM_USER_ID, RC_STATUS_ONLINE, RC_SYSTEM_USERNAME,
           RC_SYSTEM_USERNAME, RC_UTC_OFFSET);
@@ -165,7 +161,7 @@ public class TestConstants {
       new GroupMemberDTO(ROCKET_CHAT_TECHNICAL_USER_ID, RC_STATUS_ONLINE, RC_TECHNICAL_USERNAME,
           RC_SYSTEM_USERNAME, RC_UTC_OFFSET);
   public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_BAD_REQUEST =
-      new ResponseEntity<LoginResponseDTO>(HttpStatus.BAD_REQUEST);
+      new ResponseEntity<>(HttpStatus.BAD_REQUEST);
   public static final DataDTO DATA_DTO_LOGIN = new DataDTO(RC_USER_ID, RC_TOKEN, null);
   public static final DataDTO DATA_DTO_LOGIN_NO_TOKEN = new DataDTO(RC_USER_ID, null, null);
   public static final String STATUS_OK = "OK";
@@ -174,9 +170,9 @@ public class TestConstants {
   public static final LoginResponseDTO LOGIN_RESPONSE_DTO_NO_TOKEN =
       new LoginResponseDTO(STATUS_OK, DATA_DTO_LOGIN_NO_TOKEN);
   public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_OK =
-      new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO, HttpStatus.OK);
+      new ResponseEntity<>(LOGIN_RESPONSE_DTO, HttpStatus.OK);
   public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN =
-      new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_NO_TOKEN, HttpStatus.OK);
+      new ResponseEntity<>(LOGIN_RESPONSE_DTO_NO_TOKEN, HttpStatus.OK);
   public static final List<SubscriptionsUpdateDTO> SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD =
       Arrays.asList(
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID, "A", "A", "P",
@@ -270,13 +266,35 @@ public class TestConstants {
   public static final AgencyDTO EMPTY_AGENCY_DTO = new AgencyDTO();
   public static final String DESCRIPTION = "description";
   public static final boolean IS_TEAM_AGENCY = true;
+  public static final boolean IS_NO_TEAM_AGENCY = false;
   public static final boolean IS_NOT_OFFLINE = false;
-  public static final AgencyDTO AGENCY_DTO_SUCHT = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
-      CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_SUCHT);
-  public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO(AGENCY_ID, AGENCY_NAME, POSTCODE,
-      CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_U25);
-  public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO(AGENCY_ID, AGENCY_NAME,
-      POSTCODE, CITY, DESCRIPTION, IS_TEAM_AGENCY, IS_NOT_OFFLINE, CONSULTING_TYPE_KREUZBUND);
+  public static final AgencyDTO AGENCY_DTO_SUCHT = new AgencyDTO()
+      .id(AGENCY_ID)
+      .name(AGENCY_NAME)
+      .postcode(POSTCODE)
+      .city(CITY)
+      .description(DESCRIPTION)
+      .teamAgency(IS_TEAM_AGENCY)
+      .offline(IS_NOT_OFFLINE)
+      .consultingType(CONSULTING_TYPE_SUCHT);
+  public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO()
+      .id(AGENCY_ID)
+      .name(AGENCY_NAME)
+      .postcode(POSTCODE)
+      .city(CITY)
+      .description(DESCRIPTION)
+      .teamAgency(IS_TEAM_AGENCY)
+      .offline(IS_NOT_OFFLINE)
+      .consultingType(CONSULTING_TYPE_U25);
+  public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO()
+      .id(AGENCY_ID)
+      .name(AGENCY_NAME)
+      .postcode(POSTCODE)
+      .city(CITY)
+      .description(DESCRIPTION)
+      .teamAgency(IS_TEAM_AGENCY)
+      .offline(IS_NOT_OFFLINE)
+      .consultingType(CONSULTING_TYPE_KREUZBUND);
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
   /*
    * Users / Consultants
@@ -323,7 +341,7 @@ public class TestConstants {
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
           "last name", EMAIL, false, false, null, false, null, null, null);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
-  public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO(true, null);
+  public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
       new GroupMemberDTO(RC_USER_ID, RC_STATUS_ONLINE, USERNAME, USERNAME, RC_UTC_OFFSET);
   public static final GroupMemberDTO GROUP_MEMBER_USER_2 = new GroupMemberDTO(RC_USER_ID_2,
@@ -396,14 +414,15 @@ public class TestConstants {
   public static final String DECRYPTED_MESSAGE = "Das hier ist jetzt mal eine Test-Message";
   public static final String MESSAGE = "Testnachricht";
   public static final String MESSAGE_TOO_LONG = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magn";
-  public static final AbsenceDTO ABSENCE_DTO = new AbsenceDTO(true, TestConstants.MESSAGE);
+  public static final AbsenceDTO ABSENCE_DTO = new AbsenceDTO().absent(true)
+      .message(TestConstants.MESSAGE);
   public static final String MESSAGE_WITH_HTML_AND_JS =
       "<b>Testnachricht</b><script>alert('1');</script>";
   public static final boolean MESSAGES_READ = true;
   public static final boolean MESSAGES_NOT_READ = false;
   public static final String MESSAGE_EMPTY = StringUtils.EMPTY;
   public static final AbsenceDTO ABSENCE_DTO_WITH_EMPTY_MESSAGE =
-      new AbsenceDTO(true, TestConstants.MESSAGE_EMPTY);
+      new AbsenceDTO().absent(true).message(TestConstants.MESSAGE_EMPTY);
   public static final String MESSAGE_WITH_NON_REPLACED_USERNAME = "Hello ${username}";
   public static final String MESSAGE_WITH_REPLACED_USERNAME = "Hello " + USER.getUsername();
   /*
@@ -487,17 +506,40 @@ public class TestConstants {
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
   public static final User USER_WITH_SESSIONS =
       new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null);
-  public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO(SESSION_ID, AGENCY_ID,
-      CONSULTING_TYPE_SUCHT.getValue(), SESSION_STATUS_IN_PROGRESS, POSTCODE, RC_GROUP_ID,
-      RC_FEEDBACK_GROUP_ID, RC_USER_ID, MESSAGE_DATE, IS_TEAM_SESSION, IS_MONITORING);
-  public static final SessionDTO SESSION_DTO_U25 = new SessionDTO(SESSION_ID, AGENCY_ID,
-      CONSULTING_TYPE_U25.getValue(), SESSION_STATUS_IN_PROGRESS, POSTCODE, RC_GROUP_ID,
-      RC_FEEDBACK_GROUP_ID, RC_USER_ID, MESSAGE_DATE, IS_TEAM_SESSION, IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(CONSULTING_TYPE_SUCHT.getValue())
+      .status(SESSION_STATUS_IN_PROGRESS)
+      .postcode(POSTCODE)
+      .groupId(RC_GROUP_ID)
+      .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+      .askerRcId(RC_USER_ID)
+      .messageDate(MESSAGE_DATE)
+      .isTeamSession(IS_TEAM_SESSION)
+      .monitoring(IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_U25 = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(CONSULTING_TYPE_U25.getValue())
+      .status(SESSION_STATUS_IN_PROGRESS)
+      .postcode(POSTCODE)
+      .groupId(RC_GROUP_ID)
+      .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+      .askerRcId(RC_USER_ID)
+      .messageDate(MESSAGE_DATE)
+      .isTeamSession(IS_TEAM_SESSION)
+      .monitoring(IS_MONITORING);
   public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_SUCHT =
-      new UserSessionResponseDTO(SESSION_DTO_SUCHT, AGENCY_DTO_SUCHT,
-          SESSION_CONSULTANT_FOR_USER_DTO);
+      new UserSessionResponseDTO()
+          .session(SESSION_DTO_SUCHT)
+          .agency(AGENCY_DTO_SUCHT)
+          .consultant(SESSION_CONSULTANT_FOR_USER_DTO);
   public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_U25 =
-      new UserSessionResponseDTO(SESSION_DTO_U25, AGENCY_DTO_U25, SESSION_CONSULTANT_FOR_USER_DTO);
+      new UserSessionResponseDTO()
+          .session(SESSION_DTO_U25)
+          .agency(AGENCY_DTO_U25)
+          .consultant(SESSION_CONSULTANT_FOR_USER_DTO);
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_SUCHT =
       Arrays.asList(USER_SESSION_RESPONSE_DTO_SUCHT);
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_U25 =
@@ -506,32 +548,64 @@ public class TestConstants {
       new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_SUCHT.getValue()));
   public static final NewRegistrationDto NEW_REGISTRATION_DTO_U25 =
       new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_U25.getValue()));
-  public static final NewRegistrationResponseDto NEW_REGISTRATION_RESPONSE_DTO_CREATED =
-      NewRegistrationResponseDto.builder().status(HttpStatus.CREATED).build();
   public static final SessionDTO SESSION_DTO_1 =
-      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID, RC_FEEDBACK_GROUP_ID,
-          RC_USER_ID, Helper.getUnixTimestampFromDate(NOW), IS_NO_TEAM_SESSION, IS_MONITORING);
-  public static final SessionDTO SESSION_DTO_2 =
-      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_2, RC_FEEDBACK_GROUP_ID_2,
-          RC_USER_ID_2, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86400000)),
-          IS_NO_TEAM_SESSION, IS_MONITORING);
-  public static final SessionDTO SESSION_DTO_3 =
-      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID_3, RC_FEEDBACK_GROUP_ID_3,
-          RC_USER_ID_3, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)),
-          IS_NO_TEAM_SESSION, IS_MONITORING);
-  public static final SessionDTO SESSION_DTO_WITH_FEEDBACK = SessionDTO.builder()
-      .id(SESSION_ID).agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null)
-      .groupId(RC_GROUP_ID_3).feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
+      new SessionDTO()
+          .id(SESSION_ID)
+          .agencyId(AGENCY_ID)
+          .consultingType(0)
+          .status(0)
+          .groupId(RC_GROUP_ID)
+          .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+          .askerRcId(RC_USER_ID)
+          .messageDate(Helper.getUnixTimestampFromDate(NOW))
+          .isTeamSession(IS_NO_TEAM_SESSION)
+          .monitoring(IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_2 = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(0)
+      .status(0)
+      .groupId(RC_GROUP_ID_2)
+      .feedbackGroupId(RC_FEEDBACK_GROUP_ID_2)
+      .askerRcId(RC_USER_ID_2)
+      .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86400000)))
+      .isTeamSession(IS_NO_TEAM_SESSION)
+      .monitoring(IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_3 = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(0)
+      .status(0)
+      .groupId(RC_GROUP_ID_3)
+      .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
+      .askerRcId(RC_USER_ID_3)
       .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
-      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(true)
-      .build();
-
-  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK = SessionDTO.builder()
-      .id(SESSION_ID).agencyId(AGENCY_ID).consultingType(0).status(0).postcode(null)
-      .groupId(RC_GROUP_ID_3).feedbackGroupId(RC_FEEDBACK_GROUP_ID_3).askerRcId(RC_USER_ID_3)
+      .isTeamSession(IS_NO_TEAM_SESSION)
+      .monitoring(IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_WITH_FEEDBACK = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(0)
+      .status(0)
+      .groupId(RC_GROUP_ID_3)
+      .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
+      .askerRcId(RC_USER_ID_3)
       .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
-      .isTeamSession(IS_NO_TEAM_SESSION).monitoring(IS_MONITORING).feedbackRead(false)
-      .build();
+      .isTeamSession(IS_NO_TEAM_SESSION)
+      .monitoring(IS_MONITORING)
+      .feedbackRead(true);
+  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(0)
+      .status(0)
+      .groupId(RC_GROUP_ID_3)
+      .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
+      .askerRcId(RC_USER_ID_3)
+      .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
+      .isTeamSession(IS_NO_TEAM_SESSION)
+      .monitoring(IS_MONITORING)
+      .feedbackRead(false);
   /**
    * Chat
    */
@@ -564,7 +638,7 @@ public class TestConstants {
   public static final ChatDTO CHAT_DTO =
       new ChatDTO(CHAT_TOPIC, CHAT_START_DATE, CHAT_START_TIME, CHAT_DURATION, CHAT_REPETITIVE);
   public static final CreateChatResponseDTO CREATE_CHAT_RESPONSE_DTO =
-      new CreateChatResponseDTO(RC_GROUP_ID, CHAT_LINK_SUCHT);
+      new CreateChatResponseDTO().groupId(RC_GROUP_ID).chatLink(CHAT_LINK_SUCHT);
   public static final Chat ACTIVE_CHAT = new Chat(CHAT_ID, CHAT_TOPIC, CONSULTING_TYPE_SUCHT,
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME),
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME), CHAT_DURATION_30, IS_REPETITIVE,
@@ -588,22 +662,38 @@ public class TestConstants {
       null, CHAT_DURATION_90, IS_NOT_REPETITIVE, IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(),
       null, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
       RC_GROUP_ID_6, null, false, null, LocalDateTime.now());
-  public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO =
-      new UserSessionResponseDTO(null, USER_CHAT_DTO_1, EMPTY_AGENCY_DTO, CONSULTANT_DTO, NOW);
-  public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO_2 = new UserSessionResponseDTO(
-      null, USER_CHAT_DTO_2, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 80000000));
-  public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO_3 = new UserSessionResponseDTO(
-      null, USER_CHAT_DTO_3, EMPTY_AGENCY_DTO, CONSULTANT_DTO, new Date(NOW.getTime() + 70000000));
+  public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO = new UserSessionResponseDTO()
+      .chat(USER_CHAT_DTO_1)
+      .agency(EMPTY_AGENCY_DTO)
+      .consultant(CONSULTANT_DTO)
+      .latestMessage(NOW);
+  public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO_2 = new UserSessionResponseDTO()
+      .chat(USER_CHAT_DTO_2)
+      .agency(EMPTY_AGENCY_DTO)
+      .consultant(CONSULTANT_DTO)
+      .latestMessage(new Date(NOW.getTime() + 80000000));
+  public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO_3 = new UserSessionResponseDTO()
+      .chat(USER_CHAT_DTO_3)
+      .agency(EMPTY_AGENCY_DTO)
+      .consultant(CONSULTANT_DTO)
+      .latestMessage(new Date(NOW.getTime() + 70000000));
 
   /* Session list */
-  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO =
-      new UserSessionResponseDTO(SESSION_DTO_1, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO, NOW);
-  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_2 =
-      new UserSessionResponseDTO(SESSION_DTO_2, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO,
-          new Date(NOW.getTime() + 86400000));
-  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_3 =
-      new UserSessionResponseDTO(SESSION_DTO_3, null, EMPTY_AGENCY_DTO, CONSULTANT_DTO,
-          new Date(NOW.getTime() + 8640000));
+  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
+      .session(SESSION_DTO_1)
+      .agency(EMPTY_AGENCY_DTO)
+      .consultant(CONSULTANT_DTO)
+      .latestMessage(NOW);
+  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_2 = new UserSessionResponseDTO()
+      .session(SESSION_DTO_2)
+      .agency(EMPTY_AGENCY_DTO)
+      .consultant(CONSULTANT_DTO)
+      .latestMessage(new Date(NOW.getTime() + 86400000));
+  public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_3 = new UserSessionResponseDTO()
+      .session(SESSION_DTO_3)
+      .agency(EMPTY_AGENCY_DTO)
+      .consultant(CONSULTANT_DTO)
+      .latestMessage(new Date(NOW.getTime() + 8640000));
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST = Arrays
       .asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2, USER_SESSION_RESPONSE_DTO_3);
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST =
@@ -723,28 +813,38 @@ public class TestConstants {
           new RoomsUpdateDTO(RC_GROUP_ID_6, "name1", "fname1", "P", USER_DTO_1, true, false,
               new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT));
   public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_RECEIVED =
-      new SessionAttachmentDTO(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType(),
-          ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview(), true);
+      new SessionAttachmentDTO()
+          .fileType(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType())
+          .imagePreview(ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview())
+          .fileReceived(true);
   public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_NOT_RECEIVED =
-      new SessionAttachmentDTO(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType(),
-          ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview(), false);
+      new SessionAttachmentDTO()
+          .fileType(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType())
+          .imagePreview(ROOMS_LAST_MESSAGE_DTO_1.getAttachements()[0].getImagePreview())
+          .fileReceived(false);
   public static final List<String> USERS_ROOMS_LIST =
       ROOMS_UPDATE_DTO_LIST.stream().map(RoomsUpdateDTO::getId).collect(Collectors.toList());
   public static final List<String> USERS_EMPTY_ROOMS_LIST = new ArrayList<>();
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO =
-      new ConsultantSessionResponseDTO(SESSION_DTO_1, null, null, null, NOW);
+      new ConsultantSessionResponseDTO()
+          .session(SESSION_DTO_1)
+          .latestMessage(NOW);
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_2 =
-      new ConsultantSessionResponseDTO(SESSION_DTO_2, null, null, null,
-          new Date(NOW.getTime() + 86400000));
+      new ConsultantSessionResponseDTO()
+          .session(SESSION_DTO_2)
+          .latestMessage(new Date(NOW.getTime() + 86400000));
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_3 =
-      new ConsultantSessionResponseDTO(SESSION_DTO_3, null, null, null,
-          new Date(NOW.getTime() + 8640000));
+      new ConsultantSessionResponseDTO()
+          .session(SESSION_DTO_3)
+          .latestMessage(new Date(NOW.getTime() + 8640000));
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_FEEDBACK =
-      new ConsultantSessionResponseDTO(SESSION_DTO_WITH_FEEDBACK, null, null, null,
-          new Date(NOW.getTime() + 8640000));
+      new ConsultantSessionResponseDTO()
+          .session(SESSION_DTO_WITH_FEEDBACK)
+          .latestMessage(new Date(NOW.getTime() + 8640000));
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK =
-      new ConsultantSessionResponseDTO(SESSION_DTO_WITHOUT_FEEDBACK, null, null, null,
-          new Date(NOW.getTime() + 8640000));
+      new ConsultantSessionResponseDTO()
+          .session(SESSION_DTO_WITHOUT_FEEDBACK)
+          .latestMessage(new Date(NOW.getTime() + 8640000));
   public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST =
       new ArrayList<ConsultantSessionResponseDTO>() {
         private static final long serialVersionUID = 1L;
@@ -785,11 +885,20 @@ public class TestConstants {
           add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
         }
       };
-  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK_CHAT =
-      new SessionDTO(SESSION_ID, AGENCY_ID, 0, 0, null, RC_GROUP_ID, null, RC_USER_ID,
-          Helper.getUnixTimestampFromDate(NOW), IS_NO_TEAM_SESSION, IS_MONITORING);
+  public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK_CHAT = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(0)
+      .status(0)
+      .groupId(RC_GROUP_ID)
+      .askerRcId(RC_USER_ID)
+      .messageDate(Helper.getUnixTimestampFromDate(NOW))
+      .isTeamSession(IS_NO_TEAM_SESSION)
+      .monitoring(IS_MONITORING);
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT =
-      new ConsultantSessionResponseDTO(SESSION_DTO_WITHOUT_FEEDBACK_CHAT, null, null, null, NOW);
+      new ConsultantSessionResponseDTO()
+          .session(SESSION_DTO_WITHOUT_FEEDBACK_CHAT)
+          .latestMessage(NOW);
   public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT =
       Arrays.asList(CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT);
 
@@ -952,29 +1061,39 @@ public class TestConstants {
       new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, IS_NOT_MONITORING, null,
           false, null, false, null, null);
   public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);
-  public static AbsenceDTO ABSENCE_DTO_WITH_HTML_AND_JS =
-      new AbsenceDTO(true, TestConstants.MESSAGE_WITH_HTML_AND_JS);
+  public static AbsenceDTO ABSENCE_DTO_WITH_HTML_AND_JS = new AbsenceDTO()
+      .absent(true)
+      .message(TestConstants.MESSAGE_WITH_HTML_AND_JS);
   /*
    * Parameter
    */
-  public static int OFFSET_0 = 0;
+  public static Integer OFFSET_0 = 0;
   public static int COUNT_10 = 10;
   public static int COUNT_1 = 1;
   public static int COUNT_0 = 0;
-  public static final SessionDTO SESSION_DTO_WITH_ENCRYPTED_MESSAGE = new SessionDTO(SESSION_ID,
-      AGENCY_ID, 0, 0, null, RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, RC_USER_ID, ENCRYPTED_MESSAGE,
-      Helper.getUnixTimestampFromDate(NOW), false, false, IS_NO_TEAM_SESSION, IS_MONITORING, null);
-  public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_MESSAGE =
-      new ConsultantSessionResponseDTO(SESSION_DTO_WITH_ENCRYPTED_MESSAGE, null, null, null,
-          new Date(NOW.getTime() + 8640000));
-  public static final UserChatDTO USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE =
-      new UserChatDTO(CHAT_ID_3, CHAT_TOPIC_3, null, null, CHAT_DURATION_90, IS_NOT_REPETITIVE,
-          IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(), ENCRYPTED_MESSAGE,
-          Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
-          RC_GROUP_ID_6, null, false, null, LocalDateTime.now());
+  public static final SessionDTO SESSION_DTO_WITH_ENCRYPTED_MESSAGE = new SessionDTO()
+      .id(SESSION_ID)
+      .agencyId(AGENCY_ID)
+      .consultingType(0)
+      .status(0)
+      .groupId(RC_GROUP_ID)
+      .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+      .askerRcId(RC_USER_ID)
+      .lastMessage(ENCRYPTED_MESSAGE)
+      .messageDate(Helper.getUnixTimestampFromDate(NOW))
+      .messagesRead(false)
+      .feedbackRead(false)
+      .isTeamSession(IS_NO_TEAM_SESSION)
+      .monitoring(IS_MONITORING);
+  public static final UserChatDTO USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE = new UserChatDTO(CHAT_ID_3,
+      CHAT_TOPIC_3, null, null, CHAT_DURATION_90, IS_NOT_REPETITIVE,
+      IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(), ENCRYPTED_MESSAGE,
+      Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
+      RC_GROUP_ID_6, null, false, null, LocalDateTime.now());
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE =
-      new ConsultantSessionResponseDTO(null, USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE, null, null,
-          new Date(NOW.getTime() + 8640000));
+      new ConsultantSessionResponseDTO()
+          .chat(USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE)
+          .latestMessage(new Date(NOW.getTime() + 8640000));
   public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE =
       new ArrayList<ConsultantSessionResponseDTO>() {
         private static final long serialVersionUID = 1L;

@@ -190,4 +190,23 @@ public class UserServiceTest {
     verify(userRepository, times(1)).delete(Mockito.any());
   }
 
+  @Test(expected = InternalServerErrorException.class)
+  public void findUserByRcUserId_Should_ReturnInternalServerErrorException_When_RepositoryFails() throws Exception {
+    DataAccessException ex = new DataAccessException(ERROR) {};
+    when(userRepository.findByRcUserId(Mockito.anyString())).thenThrow(ex);
+
+    userService.findUserByRcUserId(USER_ID);
+  }
+
+  @Test
+  public void findUserByRcUserId_Should_ReturnUser_WhenRepositoryCallIsSuccessfull() {
+
+    when(userRepository.findByRcUserId(Mockito.anyString())).thenReturn(Optional.of(USER));
+
+    Optional<User> result = userService.findUserByRcUserId(USER_ID);
+
+    assertTrue(result.isPresent());
+    assertEquals(USER, result.get());
+  }
+
 }

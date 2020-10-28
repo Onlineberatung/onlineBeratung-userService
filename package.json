@@ -1,6 +1,6 @@
 {
   "name": "caritas-online-beratung-userservice",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "scripts": {
     "release": "standard-version"
   },
@@ -9,11 +9,11 @@
     "url": "git+https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService.git"
   },
   "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "cz-conventional-changelog": "^3.2.0",
     "husky": "^4.2.5",
-    "standard-version": "^8.0.1"
+    "standard-version": "^9.0.0"
   },
   "config": {
     "commitizen": {
