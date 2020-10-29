@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.service.liveevents;
 
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,8 +14,10 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +41,12 @@ public class LiveEventNotificationServiceTest {
 
   @Mock
   private RelevantUserAccountIdsBySessionProvider bySessionProvider;
+
+  @Mock
+  private RelevantUserAccountIdsByChatProvider byChatProvider;
+
+  @Mock
+  private AuthenticatedUser authenticatedUser;
 
   @Mock
   private Logger logger;
@@ -84,6 +93,43 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
     verify(logger, times(1)).error(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  public void sendLiveDirectMessageEventToUsers_Should_sendEventToAllUsersInsteadOfInitiatingUser() {
+    List<String> userIds = asList("id1", "id2", "id3", "id4");
+    when(this.byChatProvider.collectUserIds(any())).thenReturn(userIds);
+    when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(this.byChatProvider);
+    when(this.authenticatedUser.getUserId()).thenReturn("id2");
+
+    this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
+
+    List<String> expectedIds = asList("id1", "id3", "id4");
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(expectedIds),
+        eq(DIRECTMESSAGE.toString()));
+  }
+
+  @Test
+  public void sendLiveDirectMessageEventToUsers_Should_sendEmptyList_When_noIdsAreProvided() {
+    when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(this.byChatProvider);
+
+    this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
+
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(emptyList()),
+        eq(DIRECTMESSAGE.toString()));
+  }
+
+  @Test
+  public void sendLiveDirectMessageEventToUsers_Should_sendEventToAllUsers_When_initiatingUserIsAnother() {
+    List<String> userIds = asList("id1", "id2", "id3", "id4");
+    when(this.byChatProvider.collectUserIds(any())).thenReturn(userIds);
+    when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(this.byChatProvider);
+    when(this.authenticatedUser.getUserId()).thenReturn("another");
+
+    this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
+
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(userIds),
+        eq(DIRECTMESSAGE.toString()));
   }
 
 }
