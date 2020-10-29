@@ -31,9 +31,6 @@ public class RelevantUserAccountIdsByChatProviderTest {
   private RelevantUserAccountIdsByChatProvider byChatProvider;
 
   @Mock
-  private AuthenticatedUser authenticatedUser;
-
-  @Mock
   private RocketChatService rocketChatService;
 
   @Mock
@@ -54,7 +51,7 @@ public class RelevantUserAccountIdsByChatProviderTest {
   }
 
   @Test
-  public void collectUserIds_Should_returnAllMergedDependingIdsInsteadOfAuthenticatedUser_When_rcGroupHasMembers()
+  public void collectUserIds_Should_returnAllMergedDependingIds_When_rcGroupHasMembers()
       throws RocketChatGetGroupMembersException {
     List<GroupMemberDTO> groupMembers = asList(
         memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
@@ -65,13 +62,13 @@ public class RelevantUserAccountIdsByChatProviderTest {
         .thenReturn(Optional.of(userWithId("user1")));
     when(this.userService.findUserByRcUserId(eq("rc3")))
         .thenReturn(Optional.of(userWithId("user2")));
-    when(this.authenticatedUser.getUserId()).thenReturn("user2");
 
     List<String> collectedUserIds = this.byChatProvider.collectUserIds("groupId");
 
-    assertThat(collectedUserIds, hasSize(2));
+    assertThat(collectedUserIds, hasSize(3));
     assertThat(collectedUserIds.get(0), is("consultant1"));
     assertThat(collectedUserIds.get(1), is("user1"));
+    assertThat(collectedUserIds.get(2), is("user2"));
   }
 
   private GroupMemberDTO memberDTOWithRcId(String rcId) {
@@ -91,7 +88,7 @@ public class RelevantUserAccountIdsByChatProviderTest {
   }
 
   @Test
-  public void collectUserIds_Should_returnAllMergedDependingIdsInsteadOfAuthenticatedAndNotAvailableUser_When_rcGroupHasMembers()
+  public void collectUserIds_Should_returnAllMergedDependingIdsInsteadOfNotAvailableUser_When_rcGroupHasMembers()
       throws RocketChatGetGroupMembersException {
     List<GroupMemberDTO> groupMembers = asList(
         memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
@@ -100,12 +97,12 @@ public class RelevantUserAccountIdsByChatProviderTest {
         .thenReturn(Optional.of(consultantWithId("consultant1")));
     when(this.userService.findUserByRcUserId(eq("rc3")))
         .thenReturn(Optional.of(userWithId("user2")));
-    when(this.authenticatedUser.getUserId()).thenReturn("user2");
 
     List<String> collectedUserIds = this.byChatProvider.collectUserIds("groupId");
 
-    assertThat(collectedUserIds, hasSize(1));
+    assertThat(collectedUserIds, hasSize(2));
     assertThat(collectedUserIds.get(0), is("consultant1"));
+    assertThat(collectedUserIds.get(1), is("user2"));
   }
 
 }
