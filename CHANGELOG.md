@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.3](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.2...v2.1.3) (2020-10-29)
+
+### [2.1.2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.1...v2.1.2) (2020-10-29)
+
+
+### Bug Fixes
+
+* correct bean handling of authenticated user ([03b45ea](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/03b45ea70ef1e7c48c9376966c91823165a435f1))
+
 ### [2.1.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.0...v2.1.1) (2020-10-28)
 
 ## [2.1.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.0.1...v2.1.0) (2020-10-28)
