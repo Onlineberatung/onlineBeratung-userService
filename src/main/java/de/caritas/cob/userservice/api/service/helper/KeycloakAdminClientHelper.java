@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
-import lombok.Synchronized;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -84,6 +83,11 @@ public class KeycloakAdminClientHelper {
   @Autowired
   private UserHelper userHelper;
 
+  /**
+   * Instantiate Keycloak Admin Client
+   * 
+   * @return
+   */
   private Keycloak getInstance() {
 
     this.keycloakInstance = Keycloak.getInstance(KEYCLOAK_SERVER_URL, KEYCLOAK_REALM,
@@ -93,22 +97,22 @@ public class KeycloakAdminClientHelper {
   }
 
   /**
-   * Creates a user in Keycloak and returns its Keycloak user ID.
-   *
-   * @param user {@link UserDTO}
-   * @return {@link KeycloakCreateUserResponseDTO}
+   * Creates a user in Keycloak and returns its Keycloak user Id
+   * 
+   * @param user
+   * @return
    */
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user) throws Exception {
     return createKeycloakUser(user, null, null);
   }
 
   /**
-   * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user ID.
-   *
-   * @param user      {@link UserDTO}
-   * @param firstName first name of user
-   * @param lastName  last name of user
-   * @return {@link KeycloakCreateUserResponseDTO}
+   * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user Id
+   * 
+   * @param user
+   * @param firstName
+   * @param lastName
+   * @return
    */
   @KeycloakAdminClientLogout
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
@@ -150,8 +154,13 @@ public class KeycloakAdminClientHelper {
     return keycloakResponse;
   }
 
+  /**
+   * Checks if given email address is already existing in Keycloak user database.
+   * 
+   * @param email
+   * @return
+   */
   @KeycloakAdminClientLogout
-  @Synchronized
   private boolean isEmailAvailable(String email) {
     // Get user resource and change e-mail address of technical user
     UserResource techUserResource =
@@ -174,6 +183,12 @@ public class KeycloakAdminClientHelper {
     return true;
   }
 
+  /**
+   * Creates and returns the Keycloak CredentialRepresentation object
+   * 
+   * @param password
+   * @return
+   */
   private CredentialRepresentation getCredentialRepresentation(final String password) {
     CredentialRepresentation credentials = new CredentialRepresentation();
     credentials.setType(CredentialRepresentation.PASSWORD);
@@ -183,6 +198,13 @@ public class KeycloakAdminClientHelper {
     return credentials;
   }
 
+  /**
+   * Creates and returns the Keycloak UserRepresentation object filled with the data from the
+   * UserDTO
+   * 
+   * @param
+   * @return
+   */
   private UserRepresentation getUserRepresentation(final UserDTO user, final String firstName,
       final String lastName) {
     UserRepresentation kcUser = new UserRepresentation();
@@ -200,6 +222,12 @@ public class KeycloakAdminClientHelper {
     return kcUser;
   }
 
+  /**
+   * Returns the UserId of the recently created Keycloak user.
+   * 
+   * @param location The URI of the Keycloak API response
+   * @return
+   */
   private String getCreatedUserId(final URI location) {
     if (location != null) {
       String path = location.getPath();
@@ -210,10 +238,10 @@ public class KeycloakAdminClientHelper {
   }
 
   /**
-   * Assigns the role "user" to the given user ID.
-   *
-   * @param userId Keycloak user ID
-   * @throws Exception {@link Exception}
+   * Assigns the role "user" to the given user Id.
+   * 
+   * @param userId
+   * @return
    */
   @KeycloakAdminClientLogout
   public void updateUserRole(final String userId) throws Exception {
@@ -221,10 +249,11 @@ public class KeycloakAdminClientHelper {
   }
 
   /**
-   * Assigns the role with the given name to the given user ID.
-   *
-   * @param userId   Keycloak user ID
-   * @param roleName Keycloak role name
+   * 
+   * Assigns the role with the given name to the given user Id.
+   * 
+   * @param userId
+   * @param roleName
    */
   @KeycloakAdminClientLogout
   public void updateRole(final String userId, final String roleName) {
@@ -254,9 +283,9 @@ public class KeycloakAdminClientHelper {
 
   /**
    * Updates the Keycloak password for a user.
-   *
-   * @param userId   Keycloak user ID
-   * @param password user password
+   * 
+   * @param userId
+   * @param password
    */
   @KeycloakAdminClientLogout
   public void updatePassword(final String userId, final String password) throws Exception {
@@ -268,13 +297,10 @@ public class KeycloakAdminClientHelper {
   }
 
   /**
-   * If user didn't provide an email, set to dummy address (userId@caritas-online-beratung.de). No *
-   * success/error status possible, because the Keycloak Client doesn't provide one either. *
-   *
-   * @param userId Keycloak user ID
-   * @param user {@link UserDTO}
-   * @return the (dummy) email address
-   * @throws Exception {@link Exception}
+   * If user didn't provide an email, set to dummy address (userId@caritas-online-beratung.de). No
+   * success/error status possible, because the Keycloak Client doesn't provide one either.
+   * 
+   * @param userId
    */
   @KeycloakAdminClientLogout
   public String updateDummyEmail(final String userId, UserDTO user) throws Exception {
@@ -289,9 +315,7 @@ public class KeycloakAdminClientHelper {
   }
 
   /**
-   * Delete the user if something went wrong during the registration process.
-   *
-   * @param userId Keycloak user ID
+   * Delete the user if something went wrong during the registration process
    */
   @KeycloakAdminClientLogout
   public void rollBackUser(String userId) {
@@ -305,10 +329,10 @@ public class KeycloakAdminClientHelper {
 
   /**
    * Returns true if the given user has the provided authority.
-   *
-   * @param userId Keycloak user ID
-   * @param authority Keycloak authority
-   * @return true if user hast provided authority
+   * 
+   * @param userId
+   * @param authority
+   * @return
    */
   @KeycloakAdminClientLogout
   public boolean userHasAuthority(String userId, String authority) {
@@ -337,6 +361,13 @@ public class KeycloakAdminClientHelper {
     return false;
   }
 
+  /**
+   * Returns a list of {@link RoleRepresentation} containing all the assigned Keycloak roles for the
+   * provided user id.
+   * 
+   * @param userId
+   * @return
+   */
   @KeycloakAdminClientLogout
   private List<RoleRepresentation> getUserRoles(String userId) {
     return getInstance().realm(KEYCLOAK_REALM).users().get(userId).roles().realmLevel().listAll();
@@ -345,33 +376,28 @@ public class KeycloakAdminClientHelper {
   /**
    * Returns a list of {@link UserRepresentation} containing all users that match the given search
    * string.
-   *
-   * @param username Keycloak user name
-   * @return {@link List} of found users
+   * 
+   * @param username
+   * @return
    */
   @KeycloakAdminClientLogout
   public List<UserRepresentation> findByUsername(String username) {
     return getInstance().realm(KEYCLOAK_REALM).users().search(username);
   }
 
-  /**
-   * Closes the provided session.
-   *
-   * @param sessionId Keycloak session ID
-   */
   public void closeSession(String sessionId) {
     getInstance().realm(KEYCLOAK_REALM).deleteSession(sessionId);
   }
 
   /**
-   * Closes the Keycloak Admin CLI instance.
+   * Closes the Keycloak Admin CLI instance
    */
   public void closeInstance() {
     /**
      * The Keycloak.close() method does actually only close the connection and does NOT delete the
      * session at the moment. There is already an issue for this. Will be implemented in a "future"
      * version: https://issues.jboss.org/browse/KEYCLOAK-7895
-     *
+     * 
      * TODO
      * 
      * -> Thus this close() functionality is commented out (to only maintain one open session at
