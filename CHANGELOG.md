@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.0.1...v2.0.2) (2020-11-02)
+
+
+### Bug Fixes
+
+* concurrency safe keycloak mail check ([65242a8](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/65242a81114a0c81e08dc576d3624e4bb0eddf29))
+
 ### [2.0.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.0.0...v2.0.1) (2020-10-12)
 
 
