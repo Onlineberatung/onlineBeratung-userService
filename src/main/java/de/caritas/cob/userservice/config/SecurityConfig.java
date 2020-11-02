@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.config;
 
+import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
+import de.caritas.cob.userservice.filter.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -14,16 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.csrf.CsrfFilter;
-import de.caritas.cob.userservice.api.authorization.Authority;
-import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
-import de.caritas.cob.userservice.filter.StatelessCsrfFilter;
 
 /**
  * Provides the Keycloak/Spring Security configuration.
@@ -40,9 +39,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   @Value("${csrf.header.property}")
   private String csrfHeaderProperty;
-
-  @Autowired
-  private Environment environment;
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the

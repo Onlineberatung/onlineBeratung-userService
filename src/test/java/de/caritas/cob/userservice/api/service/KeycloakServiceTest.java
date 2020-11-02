@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
@@ -105,7 +106,7 @@ public class KeycloakServiceTest {
   @Test
   public void loginUser_Should_ReturnHttpStatusOK_WhenKeycloakLoginWasSuccessful() {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
+    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
         ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
             new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_SYSTEM_USER, HttpStatus.OK));
 
@@ -119,7 +120,7 @@ public class KeycloakServiceTest {
       throws Exception {
 
     HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
-    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
+    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
         ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenThrow(exception);
 
     HttpStatus status = keycloakService.loginUser(USER_ID, OLD_PW).get().getStatusCode();
@@ -135,7 +136,7 @@ public class KeycloakServiceTest {
   @Test
   public void logoutUser_Should_ReturnTrue_WhenKeycloakLoginWasSuccessful() {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
+    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
         ArgumentMatchers.<Class<Void>>any()))
             .thenReturn(new ResponseEntity<Void>(HttpStatus.NO_CONTENT));
 
@@ -143,12 +144,11 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void logoutUser_Should_ReturnFalseAndLogError_WhenKeycloakLogoutFailsWithException()
-      throws Exception {
+  public void logoutUser_Should_ReturnFalseAndLogError_WhenKeycloakLogoutFailsWithException() {
 
     RestClientException exception = new RestClientException(ERROR);
-    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
-        ArgumentMatchers.<Class<Void>>any())).thenThrow(exception);
+    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(), any()))
+        .thenThrow(exception);
 
     boolean response = keycloakService.logoutUser(REFRESH_TOKEN);
 
@@ -159,7 +159,7 @@ public class KeycloakServiceTest {
   @Test
   public void logoutUser_Should_ReturnFalseAndLogError_WhenKeycloakLogoutFails() throws Exception {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
+    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
         ArgumentMatchers.<Class<Void>>any()))
             .thenReturn(new ResponseEntity<Void>(HttpStatus.BAD_REQUEST));
 
