@@ -14,7 +14,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSU
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_INVALID_ENCODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_LONG;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_SHORT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
@@ -22,11 +21,13 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_NO_RC_USE
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.SaveUserException;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -39,10 +40,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.caritas.cob.userservice.api.exception.HelperException;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserHelperTest {
@@ -96,18 +93,6 @@ public class UserHelperTest {
   @Test
   public void decodeUsername_Should_ReturnDecodedUsername_WhenDecodedUsernameIsGiven() {
     assertEquals(USERNAME_DECODED, userHelper.decodeUsername(USERNAME_DECODED));
-  }
-
-  @Test
-  public void decodeUsername_Should_ThrowHelperException_WhenDecodingFails() {
-
-    try {
-      userHelper.decodeUsername(USERNAME_INVALID_ENCODED);
-      fail("Expected exception: HelperException");
-    } catch (HelperException helperException) {
-      assertTrue("Excepted HelperException thrown", true);
-    }
-
   }
 
   @Test
