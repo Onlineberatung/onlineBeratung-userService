@@ -333,13 +333,6 @@
 							</typeMappings>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.openapitools</groupId>
-				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<version>4.3.1</version>
-				<executions>
 					<!-- Generate client API for live service -->
 					<execution>
 						<id>liveservice-client-model</id>
@@ -357,8 +350,11 @@
 							<generatorName>java</generatorName>
 							<generateApis>true</generateApis>
 							<generateApiTests>false</generateApiTests>
-							<apiPackage>${project.groupId}.${project.artifactId}.liveservice.generated.web</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.liveservice.generated.web.model</modelPackage>
+							<apiPackage>${project.groupId}.${project.artifactId}.liveservice.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.liveservice.generated.web.model
+							</modelPackage>
 						</configuration>
 					</execution>
 				</executions>

@@ -44,7 +44,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @ApiModel(value = "User")
 @ValidAge
 @ValidState
@@ -144,4 +143,19 @@ public class UserDTO implements IRegistrationDto {
     this.consultingType = consultingType;
   }
 
+  @Override
+  public String toString() {
+    return "UserDTO{"
+        + "username='" + username + '\''
+        + ", postcode='" + postcode + '\''
+        + ", agencyId=" + agencyId
+        + ", addictiveDrugs='" + addictiveDrugs + '\''
+        + ", relation='" + relation + '\''
+        + ", age='" + age + '\''
+        + ", gender='" + gender + '\''
+        + ", state='" + state + '\''
+        + ", termsAccepted='" + termsAccepted + '\''
+        + ", consultingType='" + consultingType + '\''
+        + '}';
+  }
 }
