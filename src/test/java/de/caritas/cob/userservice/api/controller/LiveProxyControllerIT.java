@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,9 @@ public class LiveProxyControllerIT {
 
   @MockBean
   private LiveEventNotificationService liveEventNotificationService;
+
+  @MockBean
+  private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
 
   @Test
   public void sendLiveEvent_Should_returnBadRequest_When_rcGroupIdIsNotProvided() throws Exception {
