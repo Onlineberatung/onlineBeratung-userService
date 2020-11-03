@@ -38,7 +38,7 @@ public class RelevantUserAccountIdsBySessionProvider implements UserIdsProvider 
   }
 
   private List<String> extractDependentUserIds(Session session) {
-    if (isNull(session)) {
+    if (isNull(session) || isNull(session.getConsultant())) {
       return emptyList();
     }
     return Stream.of(session.getUser().getUserId(), session.getConsultant().getId())
