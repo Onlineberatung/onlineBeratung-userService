@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -22,7 +23,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -96,7 +96,7 @@ public class ConsultantImportService {
       in = new FileReader(importFilename);
       records = CSVFormat.DEFAULT.parse(in);
     } catch (Exception exception) {
-      throw new InternalServerErrorException(exception);
+      throw new InternalServerErrorException(exception.getMessage());
     }
 
     for (CSVRecord record : records) {
