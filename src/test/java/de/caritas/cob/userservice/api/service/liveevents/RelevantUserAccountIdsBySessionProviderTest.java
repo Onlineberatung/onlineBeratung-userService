@@ -113,4 +113,13 @@ public class RelevantUserAccountIdsBySessionProviderTest {
     assertThat(userIds.get(1), is("consultant"));
   }
 
+  @Test
+  public void collectUserIds_Should_returnEmptyList_When_sessionHasNoConsultant() {
+    when(sessionRepository.findByFeedbackGroupId(any())).thenReturn(Optional.of(new Session()));
+
+    List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
+
+    assertThat(userIds, hasSize(0));
+  }
+
 }

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -36,6 +37,12 @@ public class LiveEventNotificationService {
           .collectUserIds(rcGroupId).stream()
           .filter(this::notInitiatingUser)
           .collect(Collectors.toList());
+      triggerLiveEvent(rcGroupId, userIds);
+    }
+  }
+
+  private void triggerLiveEvent(String rcGroupId, List<String> userIds) {
+    if (isNotEmpty(userIds)) {
       try {
         this.liveControllerApi.sendLiveEvent(userIds, DIRECTMESSAGE.toString());
       } catch (RestClientException e) {
