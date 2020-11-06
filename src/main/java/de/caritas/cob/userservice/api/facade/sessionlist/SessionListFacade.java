@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.util.ArrayList;
@@ -110,9 +111,27 @@ public class SessionListFacade {
   private List<ConsultantSessionResponseDTO> retrieveConsultantSessionsSublist(
       SessionListQueryParameter sessionListQueryParameter,
       List<ConsultantSessionResponseDTO> consultantSessions) {
-    return consultantSessions.subList(sessionListQueryParameter.getOffset(),
-        Math.min(sessionListQueryParameter.getOffset() + sessionListQueryParameter.getCount(),
-            consultantSessions.size()));
+    int queryParameterOffset = sessionListQueryParameter.getOffset();
+    int queryParameterCount = sessionListQueryParameter.getCount();
+    int queryParameterSum = queryParameterOffset + queryParameterCount;
+    int consultantSessionSize = consultantSessions.size();
+    int subListMax = Math.min(queryParameterSum, consultantSessionSize);
+
+    List<ConsultantSessionResponseDTO> consultantSessionsSubList;
+
+    try {
+
+      consultantSessionsSubList = consultantSessions
+          .subList(queryParameterOffset, subListMax);
+    } catch (Exception e) {
+      LogService.logInternalServerError(String.format(
+          "Error while processing retrieveConsultantSessionsSublist with Parameters (queryParameterOffset: %s) - (queryParameterCount: %s) - (queryParameterSum: %s) - (consultantSessionSize: %s) - (subListMax: %s)",
+          queryParameterOffset, queryParameterCount, queryParameterSum, consultantSessionSize,
+          subListMax), e);
+      consultantSessionsSubList = new ArrayList<>();
+    }
+
+    return consultantSessionsSubList;
   }
 
   /**
@@ -135,10 +154,8 @@ public class SessionListFacade {
 
     List<ConsultantSessionResponseDTO> teamSessionsSublist = new ArrayList<>();
     if (areMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(), teamSessions)) {
-      teamSessionsSublist = teamSessions
-          .subList(sessionListQueryParameter.getOffset(),
-              Math.min(sessionListQueryParameter.getOffset() + sessionListQueryParameter.getCount(),
-                  teamSessions.size()));
+      teamSessionsSublist =
+          retrieveConsultantSessionsSublist(sessionListQueryParameter, teamSessions);
     }
 
     return new ConsultantSessionListResponseDTO()
