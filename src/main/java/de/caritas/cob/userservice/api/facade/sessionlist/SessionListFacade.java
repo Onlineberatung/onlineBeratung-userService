@@ -17,6 +17,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
@@ -117,21 +118,15 @@ public class SessionListFacade {
     int consultantSessionSize = consultantSessions.size();
     int subListMax = Math.min(queryParameterSum, consultantSessionSize);
 
-    List<ConsultantSessionResponseDTO> consultantSessionsSubList;
-
     try {
-
-      consultantSessionsSubList = consultantSessions
-          .subList(queryParameterOffset, subListMax);
+      return consultantSessions.subList(queryParameterOffset, subListMax);
     } catch (Exception e) {
       LogService.logInternalServerError(String.format(
           "Error while processing retrieveConsultantSessionsSublist with Parameters (queryParameterOffset: %s) - (queryParameterCount: %s) - (queryParameterSum: %s) - (consultantSessionSize: %s) - (subListMax: %s)",
           queryParameterOffset, queryParameterCount, queryParameterSum, consultantSessionSize,
           subListMax), e);
-      consultantSessionsSubList = new ArrayList<>();
+      return Collections.emptyList();
     }
-
-    return consultantSessionsSubList;
   }
 
   /**
