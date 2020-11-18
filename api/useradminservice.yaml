@@ -1,0 +1,170 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+servers:
+  - url: /
+paths:
+  /useradmin:
+    get:
+      tags:
+        - root-controller
+      summary: 'Returns the hal root entry point. [Authorization: Role: user-admin]'
+      operationId: getRoot
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RootDTO'
+      security:
+        - Bearer: [ ]
+  /useradmin/session:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of agencies by search query parameter. [Authorization: Role:
+      user-admin]'
+      operationId: getSessions
+      parameters:
+        - name: filter
+          in: query
+          description: The filter parameters to search for
+          schema:
+            $ref: '#/components/schemas/SessionRequestFilter'
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Number of items which are being returned
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/SessionAdminResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
+components:
+  schemas:
+    RootDTO:
+      type: object
+      required:
+        - _links
+      properties:
+        _links:
+          $ref: '#/components/schemas/RootLinks'
+
+    RootLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        sessions:
+          $ref: '#/components/schemas/HalLink'
+
+    HalLink:
+      type: object
+      required:
+        - href
+      properties:
+        href:
+          type: string
+        method:
+          type: string
+          enum: [ GET, POST, DELETE, PUT ]
+        templated:
+          type: boolean
+
+    SessionRequestFilter:
+      type: object
+      properties:
+        consultant:
+          type: string
+        asker:
+          type: string
+        agency:
+          type: integer
+        consultingType:
+          type: integer
+
+    SessionAdminResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionAdminDTO'
+        _links:
+          $ref: '#/components/schemas/SessionAdminResultLinks'
+
+    SessionAdminDTO:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "1da238c6-cd46-4162-80f1-bff74eafe77f"
+        consultantId:
+          type: string
+          example: "1da238c6-cd46-4162-80f1-bff74eafe77f"
+        username:
+          type: string
+          example: "enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS"
+        name:
+          type: string
+          example: "Suchtberatung Freiburg"
+        email:
+          type: string
+          example: "email@beratungcaritas.de"
+        consultingType:
+          type: integer
+          example: "1"
+        postcode:
+          type: string
+          example: "12345"
+        agencyId:
+          type: integer
+          example: "1"
+        isTeamSession:
+          type: boolean
+        messageDate:
+          type: string
+        createDate:
+          type: string
+        updateDate:
+          type: string
+
+    SessionAdminResultLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        next:
+          $ref: '#/components/schemas/HalLink'
+        previous:
+          $ref: '#/components/schemas/HalLink'
+
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
