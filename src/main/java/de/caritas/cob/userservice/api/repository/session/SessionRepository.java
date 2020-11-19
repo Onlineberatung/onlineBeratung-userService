@@ -58,6 +58,15 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   List<Session> findByUserUserId(String userId);
 
   /**
+   * Find the {@link Session}s by user id and pageable.
+   *
+   * @param userId the id to search for
+   * @param pageable the pagination object
+   * @return the result {@link Page}
+   */
+  Page<Session> findByUserUserId(String userId, Pageable pageable);
+
+  /**
    * Find the {@link Session}s by Rocket.Chat group id and asker id.
    * 
    * @param groupId the rc group id to search for
@@ -128,15 +137,6 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   Page<Session> findByConsultantId(String consultantId, Pageable pageable);
 
   /**
-   * Find the {@link Session}s by user id and pageable.
-   *
-   * @param userId the id to search for
-   * @param pageable the pagination object
-   * @return the result {@link Page}
-   */
-  Page<Session> findByUserUserId(String userId, Pageable pageable);
-
-  /**
    * Find the {@link Session}s by consulting type and pageable.
    *
    * @param consultingType the {@link ConsultingType} to search for
@@ -144,5 +144,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * @return the result {@link Page}
    */
   Page<Session> findByConsultingType(ConsultingType consultingType, Pageable pageable);
+
+  Page<Session> findAll(Pageable pageable);
 
 }

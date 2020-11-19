@@ -124,21 +124,18 @@ components:
         username:
           type: string
           example: "enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS"
-        name:
-          type: string
-          example: "Suchtberatung Freiburg"
         email:
           type: string
           example: "email@beratungcaritas.de"
         consultingType:
           type: integer
-          example: "1"
+          example: 1
         postcode:
           type: string
           example: "12345"
         agencyId:
           type: integer
-          example: "1"
+          example: 1
         isTeamSession:
           type: boolean
         messageDate:
