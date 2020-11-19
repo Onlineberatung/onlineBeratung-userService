@@ -33,7 +33,16 @@ paths:
           in: query
           description: The filter parameters to search for
           schema:
-            $ref: '#/components/schemas/SessionRequestFilter'
+            type: object
+            properties:
+              consultant:
+                type: string
+              asker:
+                type: string
+              agency:
+                type: integer
+              consultingType:
+                type: integer
         - name: page
           in: query
           description: Number of page where to start in the query (1 = first page)
@@ -92,18 +101,6 @@ components:
           enum: [ GET, POST, DELETE, PUT ]
         templated:
           type: boolean
-
-    SessionRequestFilter:
-      type: object
-      properties:
-        consultant:
-          type: string
-        asker:
-          type: string
-        agency:
-          type: integer
-        consultingType:
-          type: integer
 
     SessionAdminResultDTO:
       type: object
