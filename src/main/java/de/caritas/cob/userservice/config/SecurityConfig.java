@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.config;
 
-import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.filter.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
@@ -93,7 +93,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(Authority.CREATE_NEW_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/start")
         .hasAuthority(Authority.START_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/stop")
         .hasAuthority(Authority.STOP_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/update")
-        .hasAuthority(Authority.UPDATE_CHAT).anyRequest().denyAll();
+        .hasAuthority(Authority.UPDATE_CHAT).antMatchers("/useradmin", "/useradmin/**")
+        .hasAuthority(Authority.USER_ADMIN).anyRequest().denyAll();
   }
 
   /**
@@ -103,7 +104,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * @return
    */
   @Bean
-  public KeycloakConfigResolver KeyCloakConfigResolver() {
+  public KeycloakConfigResolver keyCloakConfigResolver() {
     return new KeycloakSpringBootConfigResolver();
   }
 

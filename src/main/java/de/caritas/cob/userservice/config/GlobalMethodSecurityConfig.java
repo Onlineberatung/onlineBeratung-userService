@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.config;
 
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,6 @@ import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
-import de.caritas.cob.userservice.api.authorization.Authority;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true)
@@ -21,8 +21,7 @@ public class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguratio
 
   @Override
   protected AccessDecisionManager accessDecisionManager() {
-    List<AccessDecisionVoter<? extends Object>> decisionVoters =
-        new ArrayList<AccessDecisionVoter<? extends Object>>();
+    List<AccessDecisionVoter<?>> decisionVoters = new ArrayList<>();
     ExpressionBasedPreInvocationAdvice expressionAdvice = new ExpressionBasedPreInvocationAdvice();
     expressionAdvice.setExpressionHandler(getExpressionHandler());
     RoleVoter roleVoter = new RoleVoter();

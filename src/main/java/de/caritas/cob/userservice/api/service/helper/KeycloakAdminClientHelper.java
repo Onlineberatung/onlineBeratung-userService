@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authorities;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -329,7 +329,7 @@ public class KeycloakAdminClientHelper {
     for (RoleRepresentation role : userRoles) {
       Optional<UserRole> userRoleOptional = UserRole.getRoleByValue(role.getName());
       if (userRoleOptional.isPresent()) {
-        List<String> authorities = Authority.getAuthoritiesByUserRole(userRoleOptional.get());
+        List<String> authorities = Authorities.getAuthoritiesByUserRole(userRoleOptional.get());
         if (authorities.contains(authority)) {
           return true;
         }
