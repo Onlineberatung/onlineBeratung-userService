@@ -84,7 +84,7 @@ public class SessionAdminResultDTOBuilderTest {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
-        .withPage(11)
+        .withPage(10)
         .withPerPage(2)
         .withResultPage(this.resultPage)
         .build();

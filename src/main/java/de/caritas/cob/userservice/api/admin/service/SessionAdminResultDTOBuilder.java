@@ -147,7 +147,7 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
   }
 
   private boolean hasNextPage() {
-    return nonNull(this.resultPage) && this.resultPage.getTotalPages() > (this.page - 1);
+    return nonNull(this.resultPage) && this.resultPage.getTotalPages() > this.page;
   }
 
   private HalLink buildPreviousLink() {
