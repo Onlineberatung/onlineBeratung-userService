@@ -38,13 +38,14 @@ public enum Authorities {
         .filter(authority -> authority.userRole.equals(userRole))
         .findFirst();
 
-    return authorityByUserRole.isPresent() ?
-        authorityByUserRole.get().getAuhorities() : emptyList();
+    return authorityByUserRole.isPresent() ? authorityByUserRole.get().getAuhorities()
+        : emptyList();
   }
 
   public static class Authority {
 
-    private Authority() {}
+    private Authority() {
+    }
 
     public static final String PREFIX = "AUTHORIZATION_";
     public static final String CONSULTANT_DEFAULT = PREFIX + "CONSULTANT_DEFAULT";

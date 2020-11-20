@@ -31,7 +31,6 @@ public class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguratio
     return new AffirmativeBased(decisionVoters);
   }
 
-
   @Bean
   public GrantedAuthorityDefaults grantedAuthorityDefaults() {
     return new GrantedAuthorityDefaults(Authority.PREFIX);
