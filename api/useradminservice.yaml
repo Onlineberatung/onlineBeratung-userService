@@ -51,7 +51,7 @@ paths:
             type: integer
         - name: perPage
           in: query
-          description: Number of items which are being returned
+          description: Number of items which are being returned per page
           required: true
           schema:
             type: integer
@@ -64,6 +64,8 @@ paths:
                 $ref: '#/components/schemas/SessionAdminResultDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

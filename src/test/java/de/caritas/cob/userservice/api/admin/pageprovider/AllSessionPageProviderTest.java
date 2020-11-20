@@ -24,7 +24,7 @@ public class AllSessionPageProviderTest {
 
   @Test
   public void supports_Should_returnTrue() {
-    boolean supports = this.allSessionPageProvider.supports();
+    boolean supports = this.allSessionPageProvider.isSupported();
 
     assertThat(supports, is(true));
   }

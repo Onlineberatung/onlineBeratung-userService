@@ -36,7 +36,7 @@ public class AskerSessionPageProvider implements SessionPageProvider {
    * @return true if filter has asker set
    */
   @Override
-  public boolean supports() {
+  public boolean isSupported() {
     return isNotBlank(this.filter.getAsker());
   }
 }

@@ -39,7 +39,7 @@ public class PageProviderFactory {
    */
   public SessionPageProvider retrieveFirstSupportedSessionPageProvider() {
     return this.pageProviderRegistry.stream()
-        .filter(SessionPageProvider::supports)
+        .filter(SessionPageProvider::isSupported)
         .findFirst()
         .orElse(this.allSessionsPageProvider);
   }

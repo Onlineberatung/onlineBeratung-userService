@@ -31,7 +31,7 @@ public class AskerSessionPageProviderTest {
   public void supports_Should_returnTrue_When_askerFilterIsSet() {
     when(this.filter.getAsker()).thenReturn("asker");
 
-    boolean supports = this.askerSessionPageProvider.supports();
+    boolean supports = this.askerSessionPageProvider.isSupported();
 
     assertThat(supports, is(true));
   }
@@ -40,7 +40,7 @@ public class AskerSessionPageProviderTest {
   public void supports_Should_returnFalse_When_askerFilterIsNotSet() {
     when(this.filter.getAsker()).thenReturn(null);
 
-    boolean supports = this.askerSessionPageProvider.supports();
+    boolean supports = this.askerSessionPageProvider.isSupported();
 
     assertThat(supports, is(false));
   }

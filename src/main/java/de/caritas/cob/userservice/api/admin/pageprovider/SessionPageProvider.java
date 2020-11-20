@@ -22,6 +22,8 @@ public interface SessionPageProvider {
    *
    * @return true if query execution is supported
    */
-  boolean supports();
+  default boolean isSupported() {
+    return true;
+  }
 
 }

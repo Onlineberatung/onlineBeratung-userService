@@ -43,7 +43,7 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
    * @return true if filter has consulting type set
    */
   @Override
-  public boolean supports() {
+  public boolean isSupported() {
     return nonNull(this.filter.getConsultingType());
   }
 }

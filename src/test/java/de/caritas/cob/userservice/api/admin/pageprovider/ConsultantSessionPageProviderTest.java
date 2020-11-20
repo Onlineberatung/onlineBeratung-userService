@@ -31,7 +31,7 @@ public class ConsultantSessionPageProviderTest {
   public void supports_Should_returnTrue_When_consultantFilterIsSet() {
     when(this.filter.getConsultant()).thenReturn("consultant");
 
-    boolean supports = this.consultantSessionPageProvider.supports();
+    boolean supports = this.consultantSessionPageProvider.isSupported();
 
     assertThat(supports, is(true));
   }
@@ -40,7 +40,7 @@ public class ConsultantSessionPageProviderTest {
   public void supports_Should_returnFalse_When_consultantFilterIsNotSet() {
     when(this.filter.getConsultant()).thenReturn(null);
 
-    boolean supports = this.consultantSessionPageProvider.supports();
+    boolean supports = this.consultantSessionPageProvider.isSupported();
 
     assertThat(supports, is(false));
   }

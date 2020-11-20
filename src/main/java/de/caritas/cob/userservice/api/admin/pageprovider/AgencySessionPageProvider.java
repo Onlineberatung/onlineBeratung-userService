@@ -36,7 +36,7 @@ public class AgencySessionPageProvider implements SessionPageProvider {
    * @return true if filter has agency set
    */
   @Override
-  public boolean supports() {
+  public boolean isSupported() {
     return nonNull(this.filter.getAgency());
   }
 }

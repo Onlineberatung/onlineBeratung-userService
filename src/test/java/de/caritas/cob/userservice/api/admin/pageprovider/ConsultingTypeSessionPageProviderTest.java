@@ -36,7 +36,7 @@ public class ConsultingTypeSessionPageProviderTest {
   public void supports_Should_returnTrue_When_consultantTypeFilterIsSet() {
     when(this.filter.getConsultingType()).thenReturn(1);
 
-    boolean supports = this.consultingTypeSessionPageProvider.supports();
+    boolean supports = this.consultingTypeSessionPageProvider.isSupported();
 
     assertThat(supports, is(true));
   }
@@ -45,7 +45,7 @@ public class ConsultingTypeSessionPageProviderTest {
   public void supports_Should_returnFalse_When_consultantTypeFilterIsNotSet() {
     when(this.filter.getConsultingType()).thenReturn(null);
 
-    boolean supports = this.consultingTypeSessionPageProvider.supports();
+    boolean supports = this.consultingTypeSessionPageProvider.isSupported();
 
     assertThat(supports, is(false));
   }

@@ -31,7 +31,7 @@ public class AgencySessionPageProviderTest {
   public void supports_Should_returnTrue_When_agencyFilterIsSet() {
     when(this.filter.getAgency()).thenReturn(1);
 
-    boolean supports = this.agencySessionPageProvider.supports();
+    boolean supports = this.agencySessionPageProvider.isSupported();
 
     assertThat(supports, is(true));
   }
@@ -40,7 +40,7 @@ public class AgencySessionPageProviderTest {
   public void supports_Should_returnFalse_When_agencyFilterIsNotSet() {
     when(this.filter.getAgency()).thenReturn(null);
 
-    boolean supports = this.agencySessionPageProvider.supports();
+    boolean supports = this.agencySessionPageProvider.isSupported();
 
     assertThat(supports, is(false));
   }

@@ -26,13 +26,4 @@ public class AllSessionPageProvider implements SessionPageProvider {
     return sessionRepository.findAll(pageable);
   }
 
-  /**
-   * Is always true because full query can always be executed.
-   *
-   * @return true
-   */
-  @Override
-  public boolean supports() {
-    return true;
-  }
 }

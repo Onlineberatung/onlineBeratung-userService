@@ -36,7 +36,7 @@ public class ConsultantSessionPageProvider implements SessionPageProvider {
    * @return true if filter has consultant set
    */
   @Override
-  public boolean supports() {
+  public boolean isSupported() {
     return isNotBlank(this.filter.getConsultant());
   }
 }
