@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller to handle all agency admin requests.
+ * Controller to handle all session admin requests.
  */
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class SessionAdminController implements UseradminApi {
   /**
    * Creates the root hal based navigation entity.
    *
-   * @return a entity containing the available navigation hal links
+   * @return an entity containing the available navigation hal links
    */
   @Override
   public ResponseEntity<RootDTO> getRoot() {
@@ -39,7 +39,7 @@ public class SessionAdminController implements UseradminApi {
    * @param page Number of page where to start in the query (1 = first page) (required)
    * @param perPage Number of items which are being returned (required)
    * @param filter The filters to restrict results (optional)
-   * @return a entity conatining the filtered sessions
+   * @return an entity containing the filtered sessions
    */
   @Override
   public ResponseEntity<SessionAdminResultDTO> getSessions(@NotNull @Valid Integer page,

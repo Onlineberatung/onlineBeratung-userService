@@ -31,16 +31,17 @@ paths:
       parameters:
         - name: filter
           in: query
-          description: The filter parameters to search for
+          description: 'The filter parameters to search for. If no filter is set all sessions are
+          being returned. If more than one filter is set the first given filter is used only.'
           schema:
             type: object
             properties:
-              consultant:
-                type: string
-              asker:
-                type: string
               agency:
                 type: integer
+              asker:
+                type: string
+              consultant:
+                type: string
               consultingType:
                 type: integer
         - name: page

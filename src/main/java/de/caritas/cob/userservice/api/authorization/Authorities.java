@@ -31,14 +31,14 @@ public enum Authorities {
   USER_ADMIN(UserRole.USER_ADMIN, singletonList(Authority.USER_ADMIN));
 
   private final UserRole userRole;
-  private final List<String> auhorities;
+  private final List<String> grantedAuthorities;
 
   public static List<String> getAuthoritiesByUserRole(UserRole userRole) {
     Optional<Authorities> authorityByUserRole = Stream.of(values())
         .filter(authority -> authority.userRole.equals(userRole))
         .findFirst();
 
-    return authorityByUserRole.isPresent() ? authorityByUserRole.get().getAuhorities()
+    return authorityByUserRole.isPresent() ? authorityByUserRole.get().getGrantedAuthorities()
         : emptyList();
   }
 

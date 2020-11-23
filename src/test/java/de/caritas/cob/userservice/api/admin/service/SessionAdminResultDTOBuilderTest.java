@@ -80,7 +80,7 @@ public class SessionAdminResultDTOBuilderTest {
   }
 
   @Test
-  public void build_Should_returnSessionAdminResultDTOWithoutNextLink_When_parametersPageIsTheFirst() {
+  public void build_Should_returnSessionAdminResultDTOWithoutNextLink_When_parametersPageIsTheLast() {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
