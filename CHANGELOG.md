@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [2.1.6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.5...v2.1.6) (2020-11-10)
+## [2.2.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.5...v2.2.0) (2020-11-03)
+
+
+### Features
+
+* restrict release action to branches starting with release ([44449e2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/44449e2c6e7c19b979cb512662edb7f32e155239))
 
 ### [2.1.5](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.4...v2.1.5) (2020-11-02)
 
