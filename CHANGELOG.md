@@ -2,7 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [2.1.6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.5...v2.1.6) (2020-11-10)
+## [2.3.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.6...v2.3.0) (2020-11-23)
+
+
+### Features
+
+* Improved list handling ([2790205](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2790205b6adda9fd41aa3b4caaa48c81af0db87a))
+* Improved logging in SessionListFacade ([c834607](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c8346076875853575d6552623aaa1849ad820cf6))
+* prevent live event trigger for empty lists and for enquiries ([c48edac](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c48edac8228b6f128f8d73cc3ed4b69dc104b3cf))
+* update keycloak to 11.0.2 ([e7ab339](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e7ab339b6d03cee98405777def5bea053f62239d))
+
+
+### Bug Fixes
+
+* add resteasy again due to need for keycloak user registration ([a337b96](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a337b960c92a9ce6e3b06b5d20fda620fde3e98b))
+* decrement resteasy version to match current keycloak integration ([6fafa80](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6fafa8091899bde83b80fb886bf7da1723db1bf5))
+* logging to files ([f94f999](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f94f999f43189dc831abbe2dd44bb2e03a309bcf))
+* update deprecated logging property ([14c758c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/14c758c7f74f04c975d52e1fe2a95346e6585c48))
+
+## [2.2.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.5...v2.2.0) (2020-11-03)
+
+
+### Features
+
+* restrict release action to branches starting with release ([44449e2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/44449e2c6e7c19b979cb512662edb7f32e155239))
+* update basic spring boot parent version to newest 2.3.5 ([bf1300e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/bf1300e1ee4b6fdeb2edeba60711f1e5177434f6))
+* update dependencies ([1e3c4b8](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1e3c4b8e253d9945b87905137863176ac8684d2c))
+
+## [2.2.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.5...v2.2.0) (2020-11-03)
+
+
+### Features
+
+* restrict release action to branches starting with release ([44449e2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/44449e2c6e7c19b979cb512662edb7f32e155239))
 
 ### [2.1.5](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.4...v2.1.5) (2020-11-02)
 

@@ -1,6 +1,12 @@
 package de.caritas.cob.userservice.api.helper;
 
+import de.caritas.cob.userservice.api.exception.HelperException;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
+import de.caritas.cob.userservice.api.repository.chat.Chat;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.binary.Base32;
@@ -13,12 +19,6 @@ import org.passay.PasswordGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import de.caritas.cob.userservice.api.exception.HelperException;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 
 @Component
 public class UserHelper {

@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.service.liveevents;
 
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -87,6 +87,7 @@ public class LiveEventNotificationServiceTest {
   @Test
   public void sendLiveDirectMessageEventToUsers_Should_logError_When_apiCallFailes() {
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
+    when(this.bySessionProvider.collectUserIds(any())).thenReturn(singletonList("test"));
     doThrow(new RestClientException("")).when(this.liveControllerApi)
         .sendLiveEvent(any(), anyString());
 
@@ -110,13 +111,12 @@ public class LiveEventNotificationServiceTest {
   }
 
   @Test
-  public void sendLiveDirectMessageEventToUsers_Should_sendEmptyList_When_noIdsAreProvided() {
+  public void sendLiveDirectMessageEventToUsers_Should_sendNothing_When_noIdsAreProvided() {
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(this.byChatProvider);
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(emptyList()),
-        eq(DIRECTMESSAGE.toString()));
+    verifyZeroInteractions(this.liveControllerApi);
   }
 
   @Test

@@ -7,19 +7,19 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_S
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import javax.ws.rs.BadRequestException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncodeUsernameJsonDeserializerTest {
@@ -34,15 +34,15 @@ public class EncodeUsernameJsonDeserializerTest {
   }
 
   @Test
-  public void deserialize_Schould_EncodeDecodedUsername() throws JsonParseException, IOException {
+  public void deserialize_Should_EncodeDecodedUsername() throws IOException {
     String json = "{\"username:\":\"" + USERNAME_DECODED + "\"}";
     String result = deserializeUsername(json);
     assertEquals(USERNAME_ENCODED, result);
   }
 
   @Test
-  public void deserialize_SchouldNot_ReencodeEncodedUsername()
-      throws JsonParseException, IOException {
+  public void deserialize_ShouldNot_ReencodeEncodedUsername()
+      throws IOException {
     String json = "{\"username:\":\"" + USERNAME_ENCODED + "\"}";
     String result = deserializeUsername(json);
     assertEquals(USERNAME_ENCODED, result);
@@ -50,7 +50,7 @@ public class EncodeUsernameJsonDeserializerTest {
 
   @Test
   public void deserialize_Should_ThrowBadRequestException_WhenUsernameIsTooShort()
-      throws JsonParseException, IOException {
+      throws IOException {
 
     try {
       String json = "{\"username:\":\"" + USERNAME_TOO_SHORT + "\"}";
@@ -64,7 +64,7 @@ public class EncodeUsernameJsonDeserializerTest {
 
   @Test
   public void deserialize_Should_ThrowBadRequestException_WhenUsernameIsTooLong()
-      throws JsonParseException, IOException {
+      throws IOException {
 
     try {
       String json = "{\"username:\":\"" + USERNAME_TOO_LONG + "\"}";
@@ -76,7 +76,7 @@ public class EncodeUsernameJsonDeserializerTest {
     }
   }
 
-  private String deserializeUsername(String json) throws JsonParseException, IOException {
+  private String deserializeUsername(String json) throws IOException {
     InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
     JsonParser jsonParser = objectMapper.getFactory().createParser(stream);
     jsonParser.nextToken();
