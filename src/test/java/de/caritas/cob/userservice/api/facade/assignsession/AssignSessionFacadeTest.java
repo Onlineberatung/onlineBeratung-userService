@@ -35,7 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;

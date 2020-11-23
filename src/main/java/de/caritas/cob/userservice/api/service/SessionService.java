@@ -162,7 +162,7 @@ public class SessionService {
 
     try {
       List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
-      List<Session> sessions = sessionRepository.findByUser_UserId(userId);
+      List<Session> sessions = sessionRepository.findByUserUserId(userId);
       if (isNotEmpty(sessions)) {
         List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
             sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));

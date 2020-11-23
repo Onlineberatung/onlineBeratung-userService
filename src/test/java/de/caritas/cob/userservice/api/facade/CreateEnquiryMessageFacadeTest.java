@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;

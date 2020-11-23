@@ -83,8 +83,6 @@ public class Session {
     this.monitoring = monitoring;
   }
 
-
-
   @Id
   @SequenceGenerator(name = "id_seq", allocationSize = 1, sequenceName = "sequence_session")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_seq")
@@ -139,6 +137,12 @@ public class Session {
   public boolean hasFeedbackChat() {
     return feedbackGroupId != null;
   }
+
+  @Column(name = "create_date")
+  private Date createDate;
+
+  @Column(name = "update_date")
+  private Date updateDate;
 
   @Override
   public boolean equals(Object obj) {

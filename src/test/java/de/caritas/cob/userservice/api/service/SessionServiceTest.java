@@ -44,8 +44,6 @@ import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.Now;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -285,7 +283,7 @@ public class SessionServiceTest {
     DataAccessException ex = new DataAccessException("Database error") {
     };
 
-    when(sessionRepository.findByUser_UserId(USER_ID)).thenThrow(ex);
+    when(sessionRepository.findByUserUserId(USER_ID)).thenThrow(ex);
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -304,7 +302,7 @@ public class SessionServiceTest {
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
-    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
+    when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
     when(agencyServiceHelper.getAgencies(Mockito.any())).thenThrow(ex);
 
     try {
@@ -322,7 +320,7 @@ public class SessionServiceTest {
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
-    when(sessionRepository.findByUser_UserId(USER_ID)).thenReturn(sessions);
+    when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
     when(agencyServiceHelper.getAgencies(Mockito.any())).thenReturn(AGENCY_DTO_LIST);
 
     assertThat(sessionService.getSessionsForUserId(USER_ID),
@@ -345,7 +343,7 @@ public class SessionServiceTest {
 
     List<Session> result = sessionService.getSessionsForUser(USER);
 
-    assertThat(sessions.equals(result)).isTrue();
+    assertEquals(sessions, result);
 
   }
 
@@ -382,7 +380,7 @@ public class SessionServiceTest {
     List<Session> result =
         sessionService.getSessionsForUserByConsultingType(USER, ConsultingType.SUCHT);
 
-    assertThat(sessions.equals(result)).isTrue();
+    assertEquals(sessions, result);
     assertThat(result.get(0), instanceOf(Session.class));
   }
 

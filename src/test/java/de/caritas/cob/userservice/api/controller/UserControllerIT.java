@@ -108,7 +108,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authorities;
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -121,12 +122,12 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
+import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
@@ -135,15 +136,15 @@ import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
-import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -185,6 +186,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -376,6 +378,8 @@ public class UserControllerIT {
   private CreateSessionFacade createSessionFacade;
   @MockBean
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
+  @MockBean
+  private LinkDiscoverers linkDiscoverers;
 
   @Mock
   private Logger logger;
@@ -957,7 +961,7 @@ public class UserControllerIT {
     UserDataResponseDTO responseDto = USER_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_USER);
     responseDto.setGrantedAuthorities(
-        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
+        new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
     when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
         .thenReturn(responseDto);
 
@@ -972,7 +976,7 @@ public class UserControllerIT {
 
     when(authenticatedUser.getRoles()).thenReturn(ROLES_WITH_USER);
     when(authenticatedUser.getGrantedAuthorities())
-        .thenReturn(new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
+        .thenReturn(new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenThrow(new InternalServerErrorException(""));
     when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
@@ -1001,7 +1005,7 @@ public class UserControllerIT {
     UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
     responseDto.setGrantedAuthorities(
-        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
+        new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
 
     when(getUserDataFacade.buildUserDataPreferredByConsultantRole()).thenReturn(responseDto);
 
