@@ -1,5 +1,9 @@
 package de.caritas.cob.userservice.api.repository.session;
 
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
+import de.caritas.cob.userservice.api.repository.user.User;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -15,18 +19,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Type;
-import org.springframework.lang.Nullable;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
-import de.caritas.cob.userservice.api.repository.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a session of a user
@@ -139,10 +140,10 @@ public class Session {
   }
 
   @Column(name = "create_date")
-  private Date createDate;
+  private LocalDateTime createDate;
 
   @Column(name = "update_date")
-  private Date updateDate;
+  private LocalDateTime updateDate;
 
   @Override
   public boolean equals(Object obj) {
