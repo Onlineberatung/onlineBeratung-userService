@@ -501,6 +501,8 @@ public class AskerImportService {
         session.setGroupId(rcGroupId);
         session.setEnquiryMessageDate(new Date());
         session.setStatus(SessionStatus.IN_PROGRESS);
+        session.setCreateDate(LocalDateTime.now());
+        session.setUpdateDate(LocalDateTime.now());
         Session updatedSession = sessionService.saveSession(session);
         if (updatedSession.getId() == null) {
           throw new ImportException(
