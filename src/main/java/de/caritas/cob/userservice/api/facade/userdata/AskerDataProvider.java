@@ -1,112 +1,56 @@
-package de.caritas.cob.userservice.api.facade;
+package de.caritas.cob.userservice.api.facade.userdata;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
- * Facade to encapsulate getting the agency data for the corresponding user
+ * Provider for asker information
  */
-
-@Service
-public class GetUserDataFacade {
-
-  @Value("${keycloakService.user.dummySuffix}")
-  private String emailDummySuffix;
+@Component
+public class AskerDataProvider {
 
   private final AgencyServiceHelper agencyServiceHelper;
   private final SessionDataHelper sessionDataHelper;
   private final AuthenticatedUser authenticatedUser;
-  private final ValidatedUserAccountProvider userAccountProvider;
+  @Value("${keycloakService.user.dummySuffix}")
+  private String emailDummySuffix;
 
-  public GetUserDataFacade(AgencyServiceHelper agencyServiceHelper,
-      SessionDataHelper sessionDataHelper, AuthenticatedUser authenticatedUser,
-      ValidatedUserAccountProvider userAccountProvider) {
+  public AskerDataProvider(AgencyServiceHelper agencyServiceHelper,
+      SessionDataHelper sessionDataHelper, AuthenticatedUser authenticatedUser) {
     this.agencyServiceHelper = requireNonNull(agencyServiceHelper);
     this.sessionDataHelper = requireNonNull(sessionDataHelper);
     this.authenticatedUser = requireNonNull(authenticatedUser);
-    this.userAccountProvider = requireNonNull(userAccountProvider);
   }
 
   /**
-   * Returns the user data of the authenticated user preferred by role consultant.
+   * Retrieve the user data of an asker, e.g. username, email, name, ...
    *
-   * @return UserDataResponseDTO {@link UserDataResponseDTO}
+   * @param user a {@link User} instance
+   * @return the user data
    */
-  public UserDataResponseDTO buildUserDataPreferredByConsultantRole() {
-    Set<String> roles = authenticatedUser.getRoles();
-
-    if (roles.contains(UserRole.CONSULTANT.getValue())) {
-      return getConsultantData(userAccountProvider.retrieveValidatedConsultant());
-    } else if (roles.contains(UserRole.USER.getValue())) {
-      return getUserData(userAccountProvider.retrieveValidatedUser());
-    } else {
-      throw new InternalServerErrorException(
-          String.format("User with id %s has neither Consultant-Role, nor User-Role .",
-          authenticatedUser.getUserId()));
-    }
-  }
-
-  private UserDataResponseDTO getConsultantData(Consultant consultant) {
-    List<AgencyDTO> agencyDTOs = null;
-
-    if (!consultant.getConsultantAgencies().isEmpty()) {
-      agencyDTOs = consultant.getConsultantAgencies().stream()
-          .map(this::fromConsultantAgency)
-          .filter(Objects::nonNull)
-          .collect(Collectors.toList());
-    }
-
-    if (CollectionUtils.isEmpty(agencyDTOs)) {
-      throw new InternalServerErrorException(String.format("No agency available for "
-          + "consultant %s", consultant.getId()));
-    }
-
-    return new UserDataResponseDTO(consultant.getId(), consultant.getUsername(),
-        consultant.getFirstName(), consultant.getLastName(), consultant.getEmail(),
-        consultant.isAbsent(), consultant.isLanguageFormal(), consultant.getAbsenceMessage(),
-        consultant.isTeamConsultant(), agencyDTOs, authenticatedUser.getRoles(),
-        authenticatedUser.getGrantedAuthorities(), null);
-  }
-
-  private AgencyDTO fromConsultantAgency(ConsultantAgency consultantAgency) {
-    try {
-      return this.agencyServiceHelper.getAgency(consultantAgency.getAgencyId());
-    } catch (AgencyServiceHelperException e) {
-      LogService.logAgencyServiceHelperException(String
-              .format("Error while getting agencies of consultant with id %s",
-                  consultantAgency.getId()), e);
-    }
-    return null;
-  }
-
-  private UserDataResponseDTO getUserData(User user) {
+  public UserDataResponseDTO retrieveData(User user) {
     String email = observeUserEmailAddress(user);
     UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
         null, null, email, false, user.isLanguageFormal(), null, false, null,
@@ -123,8 +67,7 @@ public class GetUserDataFacade {
 
   private LinkedHashMap<String, Object> getConsultingTypes(User user) {
 
-    Set<Session> sessionList =
-        user.getSessions() != null ? user.getSessions() : Collections.emptySet();
+    Set<Session> sessionList = SetUtils.emptyIfNull(user.getSessions());
     List<Long> agencyIds = getAgencyIds(user, sessionList);
     List<AgencyDTO> agencyDTOs;
     try {
@@ -160,25 +103,26 @@ public class GetUserDataFacade {
     return consultingTypeData;
   }
 
-  private List<Long> getAgencyIdsFromSessions(Set<Session> sessionList) {
-    if (sessionList != null) {
-      return sessionList.stream().map(Session::getAgencyId).collect(Collectors.toList());
-    }
-    return Collections.emptyList();
-  }
-
-  private List<Long> getAgencyIdsFromUser(User user) {
-    if (user.getUserAgencies() != null) {
-      return user.getUserAgencies().stream().map(UserAgency::getAgencyId)
-          .collect(Collectors.toList());
-    }
-    return Collections.emptyList();
-  }
-
   private List<Long> getAgencyIds(User user, Set<Session> sessionList) {
     List<Long> agencyIds = new ArrayList<>();
     agencyIds.addAll(getAgencyIdsFromSessions(sessionList));
     agencyIds.addAll(getAgencyIdsFromUser(user));
     return agencyIds;
   }
+
+  private List<Long> getAgencyIdsFromSessions(Set<Session> sessionList) {
+    if (nonNull(sessionList)) {
+      return sessionList.stream().map(Session::getAgencyId).collect(Collectors.toList());
+    }
+    return Collections.emptyList();
+  }
+
+  private List<Long> getAgencyIdsFromUser(User user) {
+    if (nonNull(user.getUserAgencies())) {
+      return user.getUserAgencies().stream().map(UserAgency::getAgencyId)
+          .collect(Collectors.toList());
+    }
+    return Collections.emptyList();
+  }
+
 }

@@ -17,7 +17,7 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
+import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
@@ -95,7 +95,7 @@ public class UserController implements UsersApi {
   private final @NotNull SessionService sessionService;
   private final @NotNull AuthenticatedUser authenticatedUser;
   private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
-  private final @NotNull GetUserDataFacade getUserDataFacade;
+  private final @NotNull UserDataFacade userDataFacade;
   private final @NotNull ConsultantImportService consultantImportService;
   private final @NotNull EmailNotificationFacade emailNotificationFacade;
   private final @NotNull MonitoringService monitoringService;
@@ -237,7 +237,7 @@ public class UserController implements UsersApi {
   public ResponseEntity<UserDataResponseDTO> getUserData() {
 
     UserDataResponseDTO responseDTO =
-        this.getUserDataFacade.buildUserDataPreferredByConsultantRole();
+        this.userDataFacade.buildUserDataByRole();
 
     return new ResponseEntity<>(responseDTO, HttpStatus.OK);
   }
