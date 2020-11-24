@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.facade.userdata;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GRANTED_AUTHORIZATION_USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_SESSIONS;
@@ -30,9 +29,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -134,7 +131,7 @@ public class AskerDataProviderTest {
 
     when(agencyServiceHelper.getAgencies(any())).thenReturn(Arrays.asList(AGENCY_DTO_SUCHT));
     LinkedHashMap<String, Object> sessionData = new LinkedHashMap<String, Object>();
-    sessionData.put("addictiveDrugs","3");
+    sessionData.put("addictiveDrugs", "3");
     when(sessionDataHelper.getSessionDataMapFromSession(any())).thenReturn(sessionData);
 
     when(authenticatedUser.getGrantedAuthorities())
@@ -150,16 +147,17 @@ public class AskerDataProviderTest {
     assertFalse(result.isAbsent());
     assertEquals(CONSULTANT_WITH_AGENCY.isTeamConsultant(), result.isInTeamAgency());
     assertEquals(GRANTED_AUTHORIZATION_USER,
-        result.getGrantedAuthorities().stream().findFirst().get());
-    assertEquals(UserRole.USER.toString(), result.getUserRoles().stream().findFirst().get());
+        result.getGrantedAuthorities().stream().findFirst().orElse(null));
+    assertEquals(UserRole.USER.toString(), result.getUserRoles().stream().findFirst().orElse(null));
     for (ConsultingType consultingType : ConsultingType.values()) {
-      LinkedHashMap<String, Object> consultingTypeEntry = (LinkedHashMap<String, Object>)result.getConsultingTypes().get(String.valueOf(consultingType.getValue()));
+      LinkedHashMap<String, Object> consultingTypeEntry = (LinkedHashMap<String, Object>) result
+          .getConsultingTypes().get(String.valueOf(consultingType.getValue()));
       if (consultingType.getValue() == ConsultingType.SUCHT.getValue()) {
-        assertTrue((boolean)consultingTypeEntry.get("isRegistered"));
-        assertEquals(AGENCY_DTO_SUCHT, (AgencyDTO)consultingTypeEntry.get("agency"));
+        assertTrue((boolean) consultingTypeEntry.get("isRegistered"));
+        assertEquals(AGENCY_DTO_SUCHT, (AgencyDTO) consultingTypeEntry.get("agency"));
         assertEquals(sessionData, consultingTypeEntry.get("sessionData"));
       } else {
-        assertFalse((boolean)consultingTypeEntry.get("isRegistered"));
+        assertFalse((boolean) consultingTypeEntry.get("isRegistered"));
       }
     }
   }
