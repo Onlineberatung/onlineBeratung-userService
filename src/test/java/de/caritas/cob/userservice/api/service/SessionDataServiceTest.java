@@ -49,14 +49,7 @@ public class SessionDataServiceTest {
   @Mock
   private SessionDataRepository sessionDataRepository;
   @Mock
-  private Logger logger;
-  @Mock
   private SessionDataHelper sessionDataHelper;
-
-  @Before
-  public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
-  }
 
   @Test
   public void createSessionDataList_Should_SaveSessionData() {
