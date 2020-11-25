@@ -20,29 +20,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Provider for asker information
+ * Provider for asker information.
  */
 @Component
+@RequiredArgsConstructor
 public class AskerDataProvider {
 
-  private final AgencyServiceHelper agencyServiceHelper;
-  private final SessionDataHelper sessionDataHelper;
-  private final AuthenticatedUser authenticatedUser;
+  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull SessionDataHelper sessionDataHelper;
+  private final @NonNull AuthenticatedUser authenticatedUser;
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
-
-  public AskerDataProvider(AgencyServiceHelper agencyServiceHelper,
-      SessionDataHelper sessionDataHelper, AuthenticatedUser authenticatedUser) {
-    this.agencyServiceHelper = requireNonNull(agencyServiceHelper);
-    this.sessionDataHelper = requireNonNull(sessionDataHelper);
-    this.authenticatedUser = requireNonNull(authenticatedUser);
-  }
 
   /**
    * Retrieve the user data of an asker, e.g. username, email, name, ...
@@ -80,14 +76,12 @@ public class AskerDataProvider {
   }
 
   private List<AgencyDTO> fetchAgenciesViaAgencyService(User user, List<Long> agencyIds) {
-    List<AgencyDTO> agencyDTOs;
     try {
-      agencyDTOs = agencyServiceHelper.getAgencies(agencyIds);
+      return agencyServiceHelper.getAgencies(agencyIds);
     } catch (AgencyServiceHelperException agencyServiceHelperException) {
       throw new InternalServerErrorException(
           String.format("Invalid agencyIds: %s for user with id %s", agencyIds, user.getUserId()));
     }
-    return agencyDTOs;
   }
 
   private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType consultingType,
@@ -108,12 +102,16 @@ public class AskerDataProvider {
 
   private Optional<AgencyDTO> findAgencyByConsultingType(ConsultingType consultingType,
       List<AgencyDTO> agencyDTOs) {
-    return agencyDTOs.stream().filter(agencyDTO -> agencyDTO.getConsultingType() == consultingType).findFirst();
+    return agencyDTOs.stream()
+        .filter(agencyDTO -> agencyDTO.getConsultingType() == consultingType)
+        .findFirst();
   }
 
   private Optional<Session> findSessionByConsultingType(ConsultingType consultingType,
       Set<Session> sessionList) {
-    return sessionList.stream().filter(session -> session.getConsultingType() == consultingType).findFirst();
+    return sessionList.stream()
+        .filter(session -> session.getConsultingType() == consultingType)
+        .findFirst();
   }
 
   private List<Long> mergeAgencyIdsFromSessionAndUser(User user, Set<Session> sessionList) {

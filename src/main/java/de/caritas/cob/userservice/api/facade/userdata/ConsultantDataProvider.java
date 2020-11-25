@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static java.util.Objects.requireNonNull;
-
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -14,23 +12,20 @@ import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Provider for consultant information
+ * Provider for consultant information.
  */
 @Component
+@RequiredArgsConstructor
 public class ConsultantDataProvider {
 
-  private final AuthenticatedUser authenticatedUser;
-  private final AgencyServiceHelper agencyServiceHelper;
-
-  public ConsultantDataProvider(AuthenticatedUser authenticatedUser,
-      AgencyServiceHelper agencyServiceHelper) {
-    this.authenticatedUser = requireNonNull(authenticatedUser);
-    this.agencyServiceHelper = requireNonNull(agencyServiceHelper);
-  }
+  private final @NonNull AuthenticatedUser authenticatedUser;
+  private final @NonNull AgencyServiceHelper agencyServiceHelper;
 
   /**
    * Retrieve the user data of a consultant, e.g. agencies, absence-state, username, name, ...
@@ -51,8 +46,7 @@ public class ConsultantDataProvider {
 
   }
 
-  private List<AgencyDTO> obtainAgencies(
-      de.caritas.cob.userservice.api.repository.consultant.Consultant consultant) {
+  private List<AgencyDTO> obtainAgencies(Consultant consultant) {
     return consultant.getConsultantAgencies().isEmpty() ? null
         : consultant.getConsultantAgencies().stream()
             .map(this::fetchAgencyViaAgencyService)
@@ -60,8 +54,7 @@ public class ConsultantDataProvider {
             .collect(Collectors.toList());
   }
 
-  private UserDataResponseDTO createUserDataResponseDTO(
-      de.caritas.cob.userservice.api.repository.consultant.Consultant consultant,
+  private UserDataResponseDTO createUserDataResponseDTO(Consultant consultant,
       List<AgencyDTO> agencyDTOs) {
     return new UserDataResponseDTO(consultant.getId(), consultant.getUsername(),
         consultant.getFirstName(), consultant.getLastName(), consultant.getEmail(),

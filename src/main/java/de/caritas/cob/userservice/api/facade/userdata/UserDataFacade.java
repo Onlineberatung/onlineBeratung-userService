@@ -8,29 +8,22 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
 import java.util.Set;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
  * Facade to encapsulate getting the user data (e.g. agencies, consulting types, ...) for the
- * corresponding user
+ * corresponding user.
  */
 @Service
+@RequiredArgsConstructor
 public class UserDataFacade {
 
-  private final AuthenticatedUser authenticatedUser;
-  private final ValidatedUserAccountProvider userAccountProvider;
-  private final ConsultantDataProvider consultantDataProvider;
-  private final AskerDataProvider askerDataProvider;
-
-  public UserDataFacade(AuthenticatedUser authenticatedUser,
-      ValidatedUserAccountProvider userAccountProvider,
-      ConsultantDataProvider consultantDataProvider,
-      AskerDataProvider askerDataProvider) {
-    this.authenticatedUser = requireNonNull(authenticatedUser);
-    this.userAccountProvider = requireNonNull(userAccountProvider);
-    this.consultantDataProvider = requireNonNull(consultantDataProvider);
-    this.askerDataProvider = requireNonNull(askerDataProvider);
-  }
+  private final @NonNull AuthenticatedUser authenticatedUser;
+  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
+  private final @NonNull ConsultantDataProvider consultantDataProvider;
+  private final @NonNull AskerDataProvider askerDataProvider;
 
   /**
    * Returns the user data of the authenticated user preferred by role consultant.
