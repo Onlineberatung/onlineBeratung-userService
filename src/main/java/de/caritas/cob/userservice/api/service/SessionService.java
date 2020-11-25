@@ -29,6 +29,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -162,7 +163,7 @@ public class SessionService {
 
     try {
       List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
-      List<Session> sessions = sessionRepository.findByUser_UserId(userId);
+      List<Session> sessions = sessionRepository.findByUserUserId(userId);
       if (isNotEmpty(sessions)) {
         List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
             sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));
@@ -192,10 +193,13 @@ public class SessionService {
   public Session initializeSession(User user, UserDTO userDto, boolean monitoring)
       throws AgencyServiceHelperException {
     AgencyDTO agencyDTO = agencyServiceHelper.getAgency(userDto.getAgencyId());
-    return saveSession(
-        new Session(user, ConsultingType.values()[Integer.parseInt(userDto.getConsultingType())],
-            userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-            isTrue(agencyDTO.getTeamAgency()), monitoring));
+    Session session = new Session(user,
+        ConsultingType.values()[Integer.parseInt(userDto.getConsultingType())],
+        userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
+        isTrue(agencyDTO.getTeamAgency()), monitoring);
+    session.setCreateDate(LocalDateTime.now());
+    session.setUpdateDate(LocalDateTime.now());
+    return saveSession(session);
   }
 
   /**
@@ -295,7 +299,8 @@ public class SessionService {
         }
       } else {
         throw new BadRequestException(String.format(
-            "Invalid session status %s submitted for consultant %s", status, consultant.getId()), LogService::logBadRequestException);
+            "Invalid session status %s submitted for consultant %s", status, consultant.getId()),
+            LogService::logBadRequestException);
       }
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error", LogService::logDatabaseError);

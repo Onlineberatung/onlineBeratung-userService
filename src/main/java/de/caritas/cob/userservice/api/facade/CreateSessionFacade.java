@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -118,13 +119,16 @@ public class CreateSessionFacade {
     } catch (MissingConsultingTypeException e) {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }
-    Session session = sessionService.saveSession(new Session(user, consultingType,
+    Session session = new Session(user, consultingType,
         newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
-        isTrue(isTeamAgency), consultingTypeSettings.isMonitoring()));
+        isTrue(isTeamAgency), consultingTypeSettings.isMonitoring());
+    session.setCreateDate(LocalDateTime.now());
+    session.setUpdateDate(LocalDateTime.now());
+    Session persistedSession = sessionService.saveSession(session);
 
-    monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
+    monitoringService.createMonitoringIfConfigured(persistedSession, consultingTypeSettings);
 
-    return session;
+    return persistedSession;
   }
 
   /**

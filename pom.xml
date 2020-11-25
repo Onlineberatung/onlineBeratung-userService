@@ -51,6 +51,10 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-hateoas</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<version>6.1.6.Final</version>
@@ -191,6 +195,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.jeasy</groupId>
+			<artifactId>easy-random-core</artifactId>
+			<version>4.3.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -312,6 +322,24 @@
 									NewRegistrationDto=${project.groupId}.${project.artifactId}.api.model.registration.NewRegistrationDto
 								</typeMapping>
 							</typeMappings>
+						</configuration>
+					</execution>
+					<execution>
+						<id>user-admin-service</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<sourceFolder>/</sourceFolder>
+							</configOptions>
+							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.admin.controller</apiPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<output>target/generated-sources</output>
 						</configuration>
 					</execution>
 					<!-- Generate client API for live service -->
