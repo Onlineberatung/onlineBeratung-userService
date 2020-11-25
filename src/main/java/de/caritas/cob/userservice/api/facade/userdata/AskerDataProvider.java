@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -68,14 +68,8 @@ public class AskerDataProvider {
   private LinkedHashMap<String, Object> getConsultingTypes(User user) {
 
     Set<Session> sessionList = SetUtils.emptyIfNull(user.getSessions());
-    List<Long> agencyIds = getAgencyIds(user, sessionList);
-    List<AgencyDTO> agencyDTOs;
-    try {
-      agencyDTOs = agencyServiceHelper.getAgencies(agencyIds);
-    } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      throw new InternalServerErrorException(
-          String.format("Invalid agencyIds: %s for user with id %s", agencyIds, user.getUserId()));
-    }
+    List<Long> agencyIds = mergeAgencyIdsFromSessionAndUser(user, sessionList);
+    List<AgencyDTO> agencyDTOs = fetchAgenciesViaAgencyService(user, agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
     for (ConsultingType type : ConsultingType.values()) {
       consultingTypes.put(Integer.toString(type.getValue()),
@@ -85,16 +79,25 @@ public class AskerDataProvider {
     return consultingTypes;
   }
 
-  private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType type,
+  private List<AgencyDTO> fetchAgenciesViaAgencyService(User user, List<Long> agencyIds) {
+    List<AgencyDTO> agencyDTOs;
+    try {
+      agencyDTOs = agencyServiceHelper.getAgencies(agencyIds);
+    } catch (AgencyServiceHelperException agencyServiceHelperException) {
+      throw new InternalServerErrorException(
+          String.format("Invalid agencyIds: %s for user with id %s", agencyIds, user.getUserId()));
+    }
+    return agencyDTOs;
+  }
+
+  private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType consultingType,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
 
     LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
-    Optional<Session> consultingTypeSession =
-        sessionList.stream().filter(session -> session.getConsultingType() == type).findFirst();
+    Optional<Session> consultingTypeSession = findSessionByConsultingType(consultingType, sessionList);
     Optional<LinkedHashMap<String, Object>> consultingTypeSessionData =
         consultingTypeSession.map(sessionDataHelper::getSessionDataMapFromSession);
-    Optional<AgencyDTO> agency =
-        agencyDTOs.stream().filter(agencyDTO -> agencyDTO.getConsultingType() == type).findFirst();
+    Optional<AgencyDTO> agency = findAgencyByConsultingType(consultingType, agencyDTOs);
 
     consultingTypeData.put("sessionData", consultingTypeSessionData.orElse(null));
     consultingTypeData.put("isRegistered", agency.isPresent());
@@ -103,26 +106,32 @@ public class AskerDataProvider {
     return consultingTypeData;
   }
 
-  private List<Long> getAgencyIds(User user, Set<Session> sessionList) {
+  private Optional<AgencyDTO> findAgencyByConsultingType(ConsultingType consultingType,
+      List<AgencyDTO> agencyDTOs) {
+    return agencyDTOs.stream().filter(agencyDTO -> agencyDTO.getConsultingType() == consultingType).findFirst();
+  }
+
+  private Optional<Session> findSessionByConsultingType(ConsultingType consultingType,
+      Set<Session> sessionList) {
+    return sessionList.stream().filter(session -> session.getConsultingType() == consultingType).findFirst();
+  }
+
+  private List<Long> mergeAgencyIdsFromSessionAndUser(User user, Set<Session> sessionList) {
     List<Long> agencyIds = new ArrayList<>();
-    agencyIds.addAll(getAgencyIdsFromSessions(sessionList));
-    agencyIds.addAll(getAgencyIdsFromUser(user));
+    agencyIds.addAll(collectAgencyIdsFromSessions(sessionList));
+    agencyIds.addAll(collectAgencyIdsFromUser(user));
     return agencyIds;
   }
 
-  private List<Long> getAgencyIdsFromSessions(Set<Session> sessionList) {
-    if (nonNull(sessionList)) {
-      return sessionList.stream().map(Session::getAgencyId).collect(Collectors.toList());
-    }
-    return Collections.emptyList();
+  private List<Long> collectAgencyIdsFromSessions(Set<Session> sessionList) {
+    return CollectionUtils.isNotEmpty(sessionList) ? sessionList.stream().map(Session::getAgencyId)
+        .collect(Collectors.toList()) : Collections.emptyList();
   }
 
-  private List<Long> getAgencyIdsFromUser(User user) {
-    if (nonNull(user.getUserAgencies())) {
-      return user.getUserAgencies().stream().map(UserAgency::getAgencyId)
-          .collect(Collectors.toList());
-    }
-    return Collections.emptyList();
+  private List<Long> collectAgencyIdsFromUser(User user) {
+    return CollectionUtils.isNotEmpty(user.getUserAgencies()) ? user.getUserAgencies().stream()
+        .map(UserAgency::getAgencyId)
+        .collect(Collectors.toList()) : Collections.emptyList();
   }
 
 }

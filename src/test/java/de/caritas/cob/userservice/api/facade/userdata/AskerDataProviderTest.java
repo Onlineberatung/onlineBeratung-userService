@@ -27,7 +27,6 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import org.junit.Before;
@@ -129,8 +128,9 @@ public class AskerDataProviderTest {
   @Test
   public void retrieveData_Should_ReturnValidData() throws AgencyServiceHelperException {
 
-    when(agencyServiceHelper.getAgencies(any())).thenReturn(Arrays.asList(AGENCY_DTO_SUCHT));
-    LinkedHashMap<String, Object> sessionData = new LinkedHashMap<String, Object>();
+    when(agencyServiceHelper.getAgencies(any())).thenReturn(
+        Collections.singletonList(AGENCY_DTO_SUCHT));
+    LinkedHashMap<String, Object> sessionData = new LinkedHashMap<>();
     sessionData.put("addictiveDrugs", "3");
     when(sessionDataHelper.getSessionDataMapFromSession(any())).thenReturn(sessionData);
 

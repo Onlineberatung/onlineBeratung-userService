@@ -55,7 +55,7 @@ public class ConsultantDataProvider {
       de.caritas.cob.userservice.api.repository.consultant.Consultant consultant) {
     return consultant.getConsultantAgencies().isEmpty() ? null
         : consultant.getConsultantAgencies().stream()
-            .map(this::fromConsultantAgency)
+            .map(this::fetchAgencyViaAgencyService)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
   }
@@ -70,7 +70,7 @@ public class ConsultantDataProvider {
         authenticatedUser.getGrantedAuthorities(), null);
   }
 
-  private AgencyDTO fromConsultantAgency(ConsultantAgency consultantAgency) {
+  private AgencyDTO fetchAgencyViaAgencyService(ConsultantAgency consultantAgency) {
     try {
       return this.agencyServiceHelper.getAgency(consultantAgency.getAgencyId());
     } catch (AgencyServiceHelperException e) {

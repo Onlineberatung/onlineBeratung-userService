@@ -56,8 +56,7 @@ public class ConsultantDataProviderTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void retrieveData_Should_ThrowInternalServerErrorException_When_NoAgenciesFound()
-      throws Exception {
+  public void retrieveData_Should_ThrowInternalServerErrorException_When_NoAgenciesFound() {
     Consultant consultant = Mockito.mock(Consultant.class);
     when(consultant.getConsultantAgencies()).thenReturn(SetUtils.EMPTY_SET);
 
@@ -117,8 +116,8 @@ public class ConsultantDataProviderTest {
     assertEquals(CONSULTANT_WITH_AGENCY.isAbsent(), result.isAbsent());
     assertEquals(CONSULTANT_WITH_AGENCY.isTeamConsultant(), result.isInTeamAgency());
     assertEquals(GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT,
-        result.getGrantedAuthorities().stream().findFirst().get());
-    assertEquals(UserRole.CONSULTANT.toString(), result.getUserRoles().stream().findFirst().get());
+        result.getGrantedAuthorities().stream().findFirst().orElse(null));
+    assertEquals(UserRole.CONSULTANT.toString(), result.getUserRoles().stream().findFirst().orElse(null));
     assertEquals(AGENCY_DTO_SUCHT, result.getAgencies().get(0));
 
   }
