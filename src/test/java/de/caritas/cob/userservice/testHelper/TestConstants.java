@@ -437,12 +437,14 @@ public class TestConstants {
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID)};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
       new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2);
+  public static final ConsultantAgency CONSULTANT_AGENCY_3 =
+      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Set<Long> CONSULTANT_AGENCY_IDS_SET =
       new HashSet<Long>(Arrays.asList(AGENCY_ID));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
-      ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "", false, null,
+      ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false, null,
       null, new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY)));
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false, null,
@@ -1101,4 +1103,8 @@ public class TestConstants {
           add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
         }
       };
+
+  // Authorization
+  public static final String GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT = "AUTHORIZATION_CONSULTANT_DEFAULT";
+  public static final String GRANTED_AUTHORIZATION_USER = "AUTHORIZATION_USER";
 }

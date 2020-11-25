@@ -122,7 +122,8 @@ import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
-import de.caritas.cob.userservice.api.facade.GetUserDataFacade;
+import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
+import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
@@ -136,7 +137,11 @@ import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -327,7 +332,7 @@ public class UserControllerIT {
   @MockBean
   private CreateEnquiryMessageFacade createEnquiryMessageFacade;
   @MockBean
-  private GetUserDataFacade getUserDataFacade;
+  private UserDataFacade userDataFacade;
   @MockBean
   private ConsultantImportService consultantImportService;
   @MockBean
@@ -962,7 +967,7 @@ public class UserControllerIT {
     responseDto.setUserRoles(ROLES_WITH_USER);
     responseDto.setGrantedAuthorities(
         new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
-    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+    when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
@@ -979,7 +984,7 @@ public class UserControllerIT {
         .thenReturn(new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenThrow(new InternalServerErrorException(""));
-    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+    when(userDataFacade.buildUserDataByRole())
         .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
@@ -991,7 +996,7 @@ public class UserControllerIT {
   public void getUserData_ForUser_Should_ReturnInternalServerError_When_UserDataFacadeReturnsEmptyDTO()
       throws Exception {
 
-    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+    when(userDataFacade.buildUserDataByRole())
         .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
@@ -1007,7 +1012,7 @@ public class UserControllerIT {
     responseDto.setGrantedAuthorities(
         new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
 
-    when(getUserDataFacade.buildUserDataPreferredByConsultantRole()).thenReturn(responseDto);
+    when(userDataFacade.buildUserDataByRole()).thenReturn(responseDto);
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
@@ -1018,7 +1023,7 @@ public class UserControllerIT {
   public void getUserData_Should_ReturnInternalServerError_WhenAuthenticatedUserHasNoValidRole()
       throws Exception {
 
-    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+    when(userDataFacade.buildUserDataByRole())
         .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
@@ -1030,7 +1035,7 @@ public class UserControllerIT {
   public void getUserData_ForConsultant_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
       throws Exception {
 
-    when(getUserDataFacade.buildUserDataPreferredByConsultantRole())
+    when(userDataFacade.buildUserDataByRole())
         .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA).contentType(MediaType.APPLICATION_JSON)
