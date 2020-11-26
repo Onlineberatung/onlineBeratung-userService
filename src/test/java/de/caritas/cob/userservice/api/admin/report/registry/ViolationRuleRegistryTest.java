@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
@@ -28,8 +27,8 @@ public class ViolationRuleRegistryTest {
   private ApplicationContext applicationContext;
 
   @Before
-  public void setuo() {
-    Map<String, ViolationReportRule> mockedBeans = mock(HashMap.class);
+  public void setup() {
+    Map<String, ViolationReportRule> mockedBeans = mock(Map.class);
     List<ViolationReportRule> mockedRules = asList(mock(ViolationReportRule.class),
         mock(ViolationReportRule.class));
     when(mockedBeans.values()).thenReturn(mockedRules);
