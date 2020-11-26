@@ -7,7 +7,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import de.caritas.cob.userservice.api.admin.controller.SessionAdminController;
+import de.caritas.cob.userservice.api.admin.controller.UserAdminController;
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.HalLink;
@@ -138,7 +138,7 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildHalLinkForParams(Integer page, Integer perPage, Filter filter) {
-    return buildHalLink(methodOn(SessionAdminController.class).getSessions(page, perPage, filter),
+    return buildHalLink(methodOn(UserAdminController.class).getSessions(page, perPage, filter),
         MethodEnum.GET);
   }
 
