@@ -24,7 +24,7 @@ public class MissingAgencyForConsultantViolationReportRule implements ViolationR
   private final @NonNull ConsultantRepository consultantRepository;
 
   /**
-   * Generates all violations for {@link Consultant} withour agency assignments.
+   * Generates all violations for {@link Consultant} without agency assignments.
    *
    * @return the generated violations
    */

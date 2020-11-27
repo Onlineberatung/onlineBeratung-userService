@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.admin.report.service;
 
+import static de.caritas.cob.userservice.config.CachingConfig.AGENCY_CACHE;
+
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
@@ -7,6 +9,7 @@ import de.caritas.cob.userservice.api.service.helper.ServiceHelper;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +29,7 @@ public class AgencyAdminService {
    *
    * @return all existing agencies
    */
+  @Cacheable(AGENCY_CACHE)
   public List<AgencyAdminResponseDTO> retrieveAllAgencies() {
     addDefaultHeaders(this.adminAgencyControllerApi.getApiClient());
     return this.adminAgencyControllerApi.searchAgencies(0, Integer.MAX_VALUE, null)
