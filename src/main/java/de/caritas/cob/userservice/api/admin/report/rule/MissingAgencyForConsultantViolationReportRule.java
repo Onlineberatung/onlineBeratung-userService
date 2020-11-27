@@ -2,10 +2,9 @@ package de.caritas.cob.userservice.api.admin.report.rule;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
+import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
-import de.caritas.cob.userservice.api.model.AdditionalInformationDTO;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
-import de.caritas.cob.userservice.api.model.ViolationDTO.ViolationTypeEnum;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import java.util.List;
@@ -15,12 +14,20 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/**
+ * Violation rule to find consultants without agency relation.
+ */
 @Component
 @RequiredArgsConstructor
 public class MissingAgencyForConsultantViolationReportRule implements ViolationReportRule {
 
   private final @NonNull ConsultantRepository consultantRepository;
 
+  /**
+   * Generates all violations for {@link Consultant} withour agency assignments.
+   *
+   * @return the generated violations
+   */
   @Override
   public List<ViolationDTO> generateViolations() {
     return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), true)
@@ -30,18 +37,9 @@ public class MissingAgencyForConsultantViolationReportRule implements ViolationR
   }
 
   private ViolationDTO fromConsultant(Consultant consultant) {
-    return new ViolationDTO()
-        .violationType(ViolationTypeEnum.CONSULTANT)
-        .identifier(consultant.getId())
-        .reason("Missing agency assignment for consultant")
-        .addAdditionalInformationItem(additionalInformation("Username", consultant.getUsername()))
-        .addAdditionalInformationItem(additionalInformation("Email", consultant.getEmail()));
-  }
-
-  private AdditionalInformationDTO additionalInformation(String key, String value) {
-    return new AdditionalInformationDTO()
-        .name(key)
-        .value(value);
+    return ViolationByConsultantBuilder.getInstance(consultant)
+        .withReason("Missing agency assignment for consultant")
+        .build();
   }
 
 }

@@ -1,0 +1,256 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+servers:
+  - url: /
+paths:
+  /agencyadmin:
+    get:
+      tags:
+        - root-controller
+      summary: 'Returns the hal root entry point. [Authorization: Role: agency-admin]'
+      operationId: getRoot
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RootDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+      security:
+        - Bearer: [ ]
+  /agencyadmin/agencies:
+    get:
+      tags:
+        - admin-agency-controller
+      summary: 'Returns the list of agencies by search query parameter. [Authorization: Role:
+      agency-admin]'
+      operationId: searchAgencies
+      parameters:
+        - name: q
+          in: query
+          description: The query parameter to search for
+          schema:
+            type: string
+            example: "Freiburg"
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+            example: 20
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/AgencyAdminSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /agencyadmin/dioceses:
+    get:
+      tags:
+        - admin-agency-controller
+      summary: 'Returns the full list of dioceses [Authorization: Role: agency-admin]'
+      operationId: getDioceses
+      parameters:
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+            example: 20
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/DioceseAdminResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
+components:
+  schemas:
+    RootDTO:
+      type: object
+      required:
+        - _links
+      properties:
+        _links:
+          $ref: '#/components/schemas/RootLinks'
+
+    RootLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        agencies:
+          $ref: '#/components/schemas/HalLink'
+
+    HalLink:
+      type: object
+      required:
+        - href
+      properties:
+        href:
+          type: string
+        method:
+          type: string
+          enum: [ GET, POST, DELETE, PUT ]
+        templated:
+          type: boolean
+
+    AgencyAdminSearchResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgencyAdminResponseDTO'
+        _links:
+          $ref: '#/components/schemas/SearchResultLinks'
+
+    AgencyAdminResponseDTO:
+      type: object
+      properties:
+        agencyId:
+          type: integer
+          format: int64
+          example: 684
+        dioceseId:
+          type: integer
+          format: int64
+          example: 684
+        name:
+          type: string
+          example: "Suchtberatung Freiburg"
+        description:
+          type: string
+          example: "Our agency provides help for the following topics: Lorem ipsum.."
+        postcode:
+          type: string
+          example: "79106"
+        city:
+          type: string
+          example: "Bonn"
+        teamAgency:
+          type: boolean
+          example: "false"
+        offline:
+          type: boolean
+          example: "false"
+        consultingType:
+          type: integer
+          example: 1
+        createDate:
+          type: string
+          example: "2019-08-23T08:52:05"
+        updateDate:
+          type: string
+          example: "2019-12-02T13:12:08"
+        deleteDate:
+          type: string
+          example: "2020-09-02T15:53:23"
+        postCodeRanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostCodeRangeDTO'
+
+    PostCodeRangeDTO:
+      type: object
+      properties:
+        postcodeFrom:
+          type: string
+          example: "79106"
+        postcodeTo:
+          type: string
+          example: "79106"
+
+    DioceseAdminResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/DioceseResponseDTO'
+        _links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    DioceseResponseDTO:
+      type: object
+      properties:
+        dioceseId:
+          type: integer
+          format: int64
+          example: 12
+        name:
+          type: string
+          example: "Freiburg"
+        createDate:
+          type: string
+          example: "2019-08-23T08:52:05"
+        updateDate:
+          type: string
+          example: "2019-12-02T13:12:08"
+
+    PaginationLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        next:
+          $ref: '#/components/schemas/HalLink'
+        previous:
+          $ref: '#/components/schemas/HalLink'
+
+    SearchResultLinks:
+      allOf:
+        - $ref: '#/components/schemas/PaginationLinks'
+        - type: object
+          properties:
+            search:
+              $ref: '#/components/schemas/HalLink'
+
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
