@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.report.rule;
 
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
@@ -18,34 +18,35 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * Violation rule to find team consultants with missing flag is_team_consultant.
+ * Violation rule to find consultants with wrong flag is_team_consultant.
  */
 @Component
 @RequiredArgsConstructor
-public class TeamConsultantWithoutRequiredFlagViolationReportRule implements ViolationReportRule {
+public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
+    ViolationReportRule {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull AgencyAdminService agencyAdminService;
 
   /**
-   * Generates all violations for {@link Consultant} containing a team agency and no
-   * is_team_consultant flag.
+   * Generates all violations for {@link Consultant} containing flag is_team_consultant with
+   * assigned agency which is not a team agency.
    *
    * @return the generated violations
    */
   @Override
   public List<ViolationDTO> generateViolations() {
-    return retrieveAllTeamAgencies().stream()
+    return retrieveAllNonTeamAgencies().stream()
         .map(consultantAgencyRepository::findByAgencyId)
         .flatMap(Collection::stream)
-        .filter(consultantAgency -> !consultantAgency.getConsultant().isTeamConsultant())
+        .filter(consultantAgency -> consultantAgency.getConsultant().isTeamConsultant())
         .map(this::fromConsultantAgency)
         .collect(Collectors.toList());
   }
 
-  private List<Long> retrieveAllTeamAgencies() {
+  private List<Long> retrieveAllNonTeamAgencies() {
     return this.agencyAdminService.retrieveAllAgencies().parallelStream()
-        .filter(agencyAdminResponseDTO -> isTrue(agencyAdminResponseDTO.getTeamAgency()))
+        .filter(agencyAdminResponseDTO -> isFalse(agencyAdminResponseDTO.getTeamAgency()))
         .map(AgencyAdminResponseDTO::getAgencyId)
         .collect(Collectors.toList());
   }
@@ -54,8 +55,8 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRule implements Vio
     Consultant consultant = consultantAgency.getConsultant();
     Long agencyId = consultantAgency.getAgencyId();
     return ViolationByConsultantBuilder.getInstance(consultant)
-        .withReason("Consultant is assigned to team agency " + agencyId + " but is not marked as "
-            + "team consultant")
+        .withReason("Consultant has flag is_team_consultant but assigned agency " + agencyId
+            + " is not a team agency")
         .build();
   }
 
