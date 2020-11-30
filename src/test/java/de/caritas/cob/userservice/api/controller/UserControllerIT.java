@@ -128,7 +128,6 @@ import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
-import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
@@ -146,10 +145,6 @@ import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
-import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -419,7 +414,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidAge()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_REGISTER_USER).content(INVALID_U25_USER_REQUEST_BODY_AGE)
@@ -431,7 +426,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidState()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(INVALID_U25_USER_REQUEST_BODY_STATE)
@@ -443,7 +438,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooShort()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(USER_REQUEST_BODY_WITH_USERNAME_TOO_SHORT)
@@ -455,7 +450,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooLong()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(USER_REQUEST_BODY_WITH_USERNAME_TOO_LONG)
@@ -469,7 +464,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_USER_REQUEST_BODY)
@@ -483,7 +478,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_U25_USER_REQUEST_BODY)
@@ -497,7 +492,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_USER_REQUEST_BODY)
@@ -522,7 +517,7 @@ public class UserControllerIT {
   public void registerNewConsultingType_Should_ReturnBadRequest_When_PostcodeMissing()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -535,7 +530,7 @@ public class UserControllerIT {
   public void registerNewConsultingType_Should_ReturnBadRequest_When_AgencyIdMissing()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -548,7 +543,7 @@ public class UserControllerIT {
   public void registerNewConsultingType_Should_ReturnBadRequest_When_ConsultingTypeMissing()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -563,7 +558,7 @@ public class UserControllerIT {
 
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
     when(createSessionFacade.createSession(Mockito.any(), Mockito.any())).thenReturn(1L);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).content(VALID_NEW_REGISTRATION_BODY)
@@ -1477,7 +1472,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)

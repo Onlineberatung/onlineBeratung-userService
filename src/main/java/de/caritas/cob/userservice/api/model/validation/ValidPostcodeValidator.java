@@ -34,7 +34,7 @@ public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode
     }
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(getConsultingType(value).get());
+        consultingTypeManager.getConsultingTypeSettings(getConsultingType(value).get());
 
     if (consultingTypeSettings.getRegistration() == null) {
       LogService.logValidationError(String.format(

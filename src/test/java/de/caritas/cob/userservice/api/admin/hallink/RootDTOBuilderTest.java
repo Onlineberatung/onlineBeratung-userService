@@ -19,7 +19,7 @@ public class RootDTOBuilderTest {
     RootLinks rootLinks = rootDTO.getLinks();
     assertThat(rootLinks, notNullValue());
     assertThat(rootLinks.getSessions(), notNullValue());
-    assertThat(rootLinks.getSessions().getHref(), is("/useradmin/session?page=1&perPage=20"));
+    assertThat(rootLinks.getSessions().getHref(), is("/useradmin/sessions?page=1&perPage=20"));
     assertThat(rootLinks.getSessions().getMethod(), is(MethodEnum.GET));
     assertThat(rootLinks.getSelf().getHref(), is("/useradmin"));
     assertThat(rootLinks.getSelf().getMethod(), is(MethodEnum.GET));

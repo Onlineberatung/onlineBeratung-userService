@@ -116,7 +116,7 @@ public class CreateUserFacade {
     }
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(consultingType);
+        consultingTypeManager.getConsultingTypeSettings(consultingType);
     String dummyEmail = null;
     User dbUser = null;
 

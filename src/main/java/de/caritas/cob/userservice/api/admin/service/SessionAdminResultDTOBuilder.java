@@ -12,9 +12,9 @@ import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.HalLink;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.model.PaginationLinks;
 import de.caritas.cob.userservice.api.model.SessionAdminDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.model.SessionAdminResultLinks;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -126,8 +126,8 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
         .updateDate(String.valueOf(session.getUpdateDate()));
   }
 
-  private SessionAdminResultLinks buildResultLinks() {
-    return new SessionAdminResultLinks()
+  private PaginationLinks buildResultLinks() {
+    return new PaginationLinks()
         .self(buildSelfLink())
         .next(buildNextLink())
         .previous(buildPreviousLink());
