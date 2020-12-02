@@ -568,7 +568,8 @@ public class UserControllerIT {
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).content(VALID_NEW_REGISTRATION_BODY)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID).content(VALID_NEW_REGISTRATION_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
   }
