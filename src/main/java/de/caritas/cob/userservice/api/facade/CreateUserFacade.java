@@ -228,13 +228,6 @@ public class CreateUserFacade {
           user.getUsername()));
     }
 
-    // Log out user from Rocket.Chat
-    RocketChatCredentials rocketChatCredentials_temp = RocketChatCredentials.builder()
-        .rocketChatUserId(rcUserId)
-        .rocketChatToken(rcUserToken)
-        .build();
-    //rocketChatService.logoutUser(rocketChatCredentials_temp);
-
     // Update rcUserId in user table
     dbUser.setRcUserId(rcUserId);
     User updatedUser;
