@@ -26,7 +26,7 @@ public class ViolationRuleRegistry {
 
   /**
    * Initializes the registry with all implemented {@link ViolationReportRule} beans. It´s
-   * neccesarry to perform the registration after application startup is finished because all
+   * necessary to perform the registration after application startup is finished because all
    * depending beans must be initialized first.
    */
   @EventListener(ApplicationReadyEvent.class)

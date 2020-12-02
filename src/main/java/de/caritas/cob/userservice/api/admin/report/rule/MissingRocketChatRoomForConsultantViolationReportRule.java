@@ -23,7 +23,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * Violation rule to find consultants without neccessary rocket chat room.
+ * Violation rule to find consultants without necessary rocket chat room for directly assigned
+ * sessions.
  */
 @Component
 @RequiredArgsConstructor

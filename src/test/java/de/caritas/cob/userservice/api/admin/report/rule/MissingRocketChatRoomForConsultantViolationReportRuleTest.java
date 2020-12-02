@@ -127,7 +127,7 @@ public class MissingRocketChatRoomForConsultantViolationReportRuleTest {
   }
 
   @Test
-  public void generateViolations_Should_returnNoViolation_When_allRoomsExst() {
+  public void generateViolations_Should_returnNoViolation_When_allRoomsExist() {
     Consultant violatedConsultant = new EasyRandom().nextObject(Consultant.class);
     Session violatedSession = new EasyRandom().nextObject(Session.class);
     violatedConsultant.setSessions(singleton(violatedSession));

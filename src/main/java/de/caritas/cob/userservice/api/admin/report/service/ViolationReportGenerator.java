@@ -36,6 +36,9 @@ public class ViolationReportGenerator {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Reevaluates the cache of agencies.
+   */
   @CacheEvict(value = {AGENCY_CACHE}, allEntries = true)
   public void reevaluateAgencyCache() {
     LogService.logInfo("Agency cache has been purged");

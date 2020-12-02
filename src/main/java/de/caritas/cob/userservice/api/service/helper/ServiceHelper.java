@@ -33,7 +33,7 @@ public class ServiceHelper {
   }
 
   /**
-   * Creates the headers containing keylocak token and csrf headers {@link HttpHeaders} object.
+   * Creates the headers containing keycloak token and csrf headers {@link HttpHeaders} object.
    *
    * @return the created {@link HttpHeaders}
    */

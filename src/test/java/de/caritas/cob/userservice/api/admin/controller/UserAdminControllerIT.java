@@ -15,6 +15,8 @@ import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMa
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,13 +27,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserAdminController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class UserAdminControllerIT {
 
-  private static final String ROOT_PATH = "/useradmin";
-  private static final String SESSION_PATH = ROOT_PATH + "/session";
-  private static final String REPORT_PATH = ROOT_PATH + "/report";
-  private static final String PAGE_PARAM = "page";
-  private static final String PER_PAGE_PARAM = "perPage";
+  protected static final String ROOT_PATH = "/useradmin";
+  protected static final String SESSION_PATH = ROOT_PATH + "/session";
+  protected static final String REPORT_PATH = ROOT_PATH + "/report";
+  protected static final String PAGE_PARAM = "page";
+  protected static final String PER_PAGE_PARAM = "perPage";
 
   @Autowired
   private MockMvc mvc;
