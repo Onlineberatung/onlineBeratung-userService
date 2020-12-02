@@ -34,16 +34,7 @@ paths:
           description: 'The filter parameters to search for. If no filter is set all sessions are
           being returned. If more than one filter is set the first given filter is used only.'
           schema:
-            type: object
-            properties:
-              agency:
-                type: integer
-              asker:
-                type: string
-              consultant:
-                type: string
-              consultingType:
-                type: integer
+            $ref: '#/components/schemas/SessionFilter'
         - name: page
           in: query
           description: Number of page where to start in the query (1 = first page)
@@ -184,7 +175,46 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
+  /useradmin/consultants:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of consultants by search query parameter. [Authorization: Role: consultant-admin]'
+      operationId: getConsultants
+      parameters:
+        - name: consultantFilter
+          in: query
+          description: 'The filter parameters to search for. If no filter is set all consultant are
+              being returned.'
+          schema:
+            $ref: '#/components/schemas/ConsultantFilter'
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultantSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     RootDTO:
@@ -398,6 +428,16 @@ components:
         _links:
           $ref: '#/components/schemas/UpdateLinks'
 
+    ConsultantSearchResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/SessionAdminResultLinks'
+
     CreateLinks:
       type: object
       required:
@@ -433,6 +473,32 @@ components:
           $ref: '#/components/schemas/HalLink'
         delete:
           $ref: '#/components/schemas/HalLink'
+
+    SessionFilter:
+      type: object
+      properties:
+        agency:
+          type: integer
+        asker:
+          type: string
+        consultant:
+          type: string
+        consultingType:
+          type: integer
+
+    ConsultantFilter:
+      type: object
+      properties:
+        username:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        agencyId:
+          type: integer
+        absent:
+          type: boolean
 
   securitySchemes:
     Bearer:

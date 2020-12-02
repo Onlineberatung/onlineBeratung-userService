@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.admin.pageprovider;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import de.caritas.cob.userservice.api.model.Filter;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import lombok.NonNull;
@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 public class ConsultantSessionPageProvider implements SessionPageProvider {
 
   private final @NonNull SessionRepository sessionRepository;
-  private final @NonNull Filter filter;
+  private final @NonNull SessionFilter sessionFilter;
 
   /**
    * Executes the search query on the repository.
@@ -27,7 +27,7 @@ public class ConsultantSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
-    return this.sessionRepository.findByConsultantId(filter.getConsultant(), pageable);
+    return this.sessionRepository.findByConsultantId(sessionFilter.getConsultant(), pageable);
   }
 
   /**
@@ -37,6 +37,6 @@ public class ConsultantSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public boolean isSupported() {
-    return isNotBlank(this.filter.getConsultant());
+    return isNotBlank(this.sessionFilter.getConsultant());
   }
 }

@@ -9,12 +9,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.controller.UserAdminController;
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.HalLink;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.model.SessionAdminDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultLinks;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +25,7 @@ import org.springframework.data.domain.Page;
  */
 public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
 
-  private Filter filter;
+  private SessionFilter sessionFilter;
   private Integer page;
   private Integer perPage;
   private Page<Session> resultPage;
@@ -44,11 +44,11 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
   /**
    * Sets the filter param.
    *
-   * @param filter the filter object for building links
+   * @param sessionFilter the filter object for building links
    * @return the current {@link SessionAdminResultDTOBuilder}
    */
-  public SessionAdminResultDTOBuilder withFilter(Filter filter) {
-    this.filter = filter;
+  public SessionAdminResultDTOBuilder withFilter(SessionFilter sessionFilter) {
+    this.sessionFilter = sessionFilter;
     return this;
   }
 
@@ -134,16 +134,16 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildSelfLink() {
-    return buildHalLinkForParams(this.page, this.perPage, this.filter);
+    return buildHalLinkForParams(this.page, this.perPage, this.sessionFilter);
   }
 
-  private HalLink buildHalLinkForParams(Integer page, Integer perPage, Filter filter) {
-    return buildHalLink(methodOn(UserAdminController.class).getSessions(page, perPage, filter),
+  private HalLink buildHalLinkForParams(Integer page, Integer perPage, SessionFilter sessionFilter) {
+    return buildHalLink(methodOn(UserAdminController.class).getSessions(page, perPage, sessionFilter),
         MethodEnum.GET);
   }
 
   private HalLink buildNextLink() {
-    return hasNextPage() ? buildHalLinkForParams(this.page + 1, this.perPage, this.filter) : null;
+    return hasNextPage() ? buildHalLinkForParams(this.page + 1, this.perPage, this.sessionFilter) : null;
   }
 
   private boolean hasNextPage() {
@@ -151,7 +151,7 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildPreviousLink() {
-    return hasPreviousPage() ? buildHalLinkForParams(this.page - 1, this.perPage, this.filter) :
+    return hasPreviousPage() ? buildHalLinkForParams(this.page - 1, this.perPage, this.sessionFilter) :
         null;
   }
 

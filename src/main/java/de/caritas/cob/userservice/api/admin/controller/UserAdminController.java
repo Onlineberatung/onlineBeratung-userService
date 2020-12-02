@@ -2,12 +2,15 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
+import de.caritas.cob.userservice.api.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantResponseDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
@@ -46,14 +49,14 @@ public class UserAdminController implements UseradminApi {
    *
    * @param page Number of page where to start in the query (1 = first page) (required)
    * @param perPage Number of items which are being returned (required)
-   * @param filter The filters to restrict results (optional)
+   * @param sessionFilter The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
   public ResponseEntity<SessionAdminResultDTO> getSessions(@NotNull @Valid Integer page,
-      @NotNull @Valid Integer perPage, @Valid Filter filter) {
+      @NotNull @Valid Integer perPage, @Valid SessionFilter sessionFilter) {
     SessionAdminResultDTO sessionAdminResultDTO = this.sessionAdminService
-        .findSessions(page, perPage, filter);
+        .findSessions(page, perPage, sessionFilter);
     return ResponseEntity.ok(sessionAdminResultDTO);
   }
 
@@ -100,6 +103,20 @@ public class UserAdminController implements UseradminApi {
    */
   @Override
   public ResponseEntity<GetConsultantResponseDTO> getConsultant(String consultantId) {
+    return null;
+  }
+
+  /**
+   * Entry point to retrieve consultants.
+   *
+   * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
+   * @param perPage Number of items which are being returned per page (required)
+   * @param consultantFilter The filter parameters to search for. If no filter is set all consultant are being returned. (optional)
+   * @return an entity containing the filtered sessions
+   */
+  @Override
+  public ResponseEntity<ConsultantSearchResultDTO> getConsultants(@NotNull @Valid Integer page,
+      @NotNull @Valid Integer perPage, @Valid ConsultantFilter consultantFilter) {
     return null;
   }
 }

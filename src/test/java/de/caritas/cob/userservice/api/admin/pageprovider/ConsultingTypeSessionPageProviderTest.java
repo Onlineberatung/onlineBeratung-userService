@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.model.Filter;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -30,11 +30,11 @@ public class ConsultingTypeSessionPageProviderTest {
   private SessionRepository sessionRepository;
 
   @Mock
-  private Filter filter;
+  private SessionFilter sessionFilter;
 
   @Test
   public void supports_Should_returnTrue_When_consultantTypeFilterIsSet() {
-    when(this.filter.getConsultingType()).thenReturn(1);
+    when(this.sessionFilter.getConsultingType()).thenReturn(1);
 
     boolean supports = this.consultingTypeSessionPageProvider.isSupported();
 
@@ -43,7 +43,7 @@ public class ConsultingTypeSessionPageProviderTest {
 
   @Test
   public void supports_Should_returnFalse_When_consultantTypeFilterIsNotSet() {
-    when(this.filter.getConsultingType()).thenReturn(null);
+    when(this.sessionFilter.getConsultingType()).thenReturn(null);
 
     boolean supports = this.consultingTypeSessionPageProvider.isSupported();
 
@@ -52,7 +52,7 @@ public class ConsultingTypeSessionPageProviderTest {
 
   @Test
   public void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
-    when(this.filter.getConsultingType()).thenReturn(1);
+    when(this.sessionFilter.getConsultingType()).thenReturn(1);
     PageRequest pageable = PageRequest.of(0, 1);
 
     this.consultingTypeSessionPageProvider.executeQuery(pageable);
@@ -62,7 +62,7 @@ public class ConsultingTypeSessionPageProviderTest {
 
   @Test
   public void executeQuery_Should_notExecuteQueryOnRepositoryAndreturnEmptyPage_When_consultingTypeDoesNotExist() {
-    when(this.filter.getConsultingType()).thenReturn(99);
+    when(this.sessionFilter.getConsultingType()).thenReturn(99);
     PageRequest pageable = PageRequest.of(0, 1);
 
     Page<Session> sessions = this.consultingTypeSessionPageProvider.executeQuery(pageable);

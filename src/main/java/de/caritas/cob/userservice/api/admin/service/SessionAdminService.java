@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.admin.pageprovider.PageProviderFactory;
 import de.caritas.cob.userservice.api.admin.pageprovider.SessionPageProvider;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,20 +27,20 @@ public class SessionAdminService {
    *
    * @param page the current page
    * @param perPage number of items per page
-   * @param filter criteria to filter on sessions
+   * @param sessionFilter criteria to filter on sessions
    * @return a generated {@link SessionAdminResultDTO} containing the results
    */
-  public SessionAdminResultDTO findSessions(Integer page, Integer perPage, Filter filter) {
+  public SessionAdminResultDTO findSessions(Integer page, Integer perPage, SessionFilter sessionFilter) {
     Pageable pageable = PageRequest.of(Math.max(page - 1, 0), Math.max(perPage, 1));
 
     SessionPageProvider sessionPageProvider =
-        PageProviderFactory.getInstance(this.sessionRepository, filter)
+        PageProviderFactory.getInstance(this.sessionRepository, sessionFilter)
             .retrieveFirstSupportedSessionPageProvider();
 
     return SessionAdminResultDTOBuilder.getInstance()
         .withPage(page)
         .withPerPage(perPage)
-        .withFilter(filter)
+        .withFilter(sessionFilter)
         .withResultPage(sessionPageProvider.executeQuery(pageable))
         .build();
   }
