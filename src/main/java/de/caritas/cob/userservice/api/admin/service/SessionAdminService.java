@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.admin.service;
 
 import de.caritas.cob.userservice.api.admin.pageprovider.PageProviderFactory;
 import de.caritas.cob.userservice.api.admin.pageprovider.SessionPageProvider;
-import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -22,7 +21,7 @@ public class SessionAdminService {
   private final @NonNull SessionRepository sessionRepository;
 
   /**
-   * Finds existing sessions filtered by {@link Filter} and retrieves all sessions if no filter
+   * Finds existing sessions filtered by {@link SessionFilter} and retrieves all sessions if no filter
    * is set.
    *
    * @param page the current page
