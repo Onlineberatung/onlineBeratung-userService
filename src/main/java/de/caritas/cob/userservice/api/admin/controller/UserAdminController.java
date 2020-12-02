@@ -5,8 +5,11 @@ import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.Filter;
+import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantResponseDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
@@ -14,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -71,7 +75,31 @@ public class UserAdminController implements UseradminApi {
    * @param consultantId consultant id (required)
    */
   @Override
-  public ResponseEntity<Void> markConsultantForDeletion(String consultantId) {
+  public ResponseEntity<Void> markConsultantForDeletion(@PathVariable String consultantId) {
+    return null;
+  }
+
+  /**
+   * Entry point to update a consultant.
+   *
+   * @param consultantId consultant id (required)
+   * @param updateConsultantDTO  (required)
+   * @return {@link UpdateConsultantResponseDTO}
+   */
+  @Override
+  public ResponseEntity<UpdateConsultantResponseDTO> updateConsultant(@PathVariable  String consultantId,
+      @Valid UpdateConsultantDTO updateConsultantDTO) {
+    return null;
+  }
+
+  /**
+   * Entry point to get a specific consultant.
+   *
+   * @param consultantId consultant id (required)
+   * @return {@link GetConsultantResponseDTO}
+   */
+  @Override
+  public ResponseEntity<GetConsultantResponseDTO> getConsultant(String consultantId) {
     return null;
   }
 }

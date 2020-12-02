@@ -99,6 +99,68 @@ paths:
       security:
         - Bearer: [ ]
   /useradmin/consultant/{consultantId}:
+    get:
+      tags:
+        - admin-agency-controller
+      summary: 'Get a consultant [Authorization: Role: consultant-admin]'
+      operationId: getConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: consultant id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - consultant found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetConsultantResponseDTO'
+        204:
+          description: NO CONTENT - consultant with the specific id was not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    put:
+      tags:
+        - admin-user-controller
+      summary: 'Updates a consultant [Authorization: Role: consultant-admin]'
+      operationId: updateConsultant
+      requestBody:
+        content:
+          'application/hal+json':
+            schema:
+              $ref: '#/components/schemas/UpdateConsultantDTO'
+        required: true
+      parameters:
+        - name: consultantId
+          in: path
+          description: consultant id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - consultant was updated successfully
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UpdateConsultantResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
     delete:
       tags:
         - admin-user-controller
@@ -243,6 +305,34 @@ components:
           type: string
           example: "I am absent until..."
 
+    UpdateConsultantDTO:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - email
+        - formalLanguage
+        - absent
+      properties:
+        firstname:
+          type: string
+          example: "Max"
+        lastname:
+          type: string
+          example: "Mustermann"
+        email:
+          type: string
+          example: "max@mustermann.de"
+        formalLanguage:
+          type: boolean
+          example: true
+        absent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: "I am absent until..."
+
     ConsultantDTO:
       type: object
       properties:
@@ -288,6 +378,26 @@ components:
         _links:
           $ref: '#/components/schemas/CreateLinks'
 
+    GetConsultantResponseDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/GetLinks'
+
+    UpdateConsultantResponseDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/UpdateLinks'
+
     CreateLinks:
       type: object
       required:
@@ -296,6 +406,30 @@ components:
         self:
           $ref: '#/components/schemas/HalLink'
         update:
+          $ref: '#/components/schemas/HalLink'
+        delete:
+          $ref: '#/components/schemas/HalLink'
+
+    GetLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        update:
+          $ref: '#/components/schemas/HalLink'
+        delete:
+          $ref: '#/components/schemas/HalLink'
+
+    UpdateLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        consultant:
           $ref: '#/components/schemas/HalLink'
         delete:
           $ref: '#/components/schemas/HalLink'
