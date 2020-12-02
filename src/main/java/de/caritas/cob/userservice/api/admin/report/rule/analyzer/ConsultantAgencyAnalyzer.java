@@ -21,10 +21,10 @@ public class ConsultantAgencyAnalyzer {
   private final @NonNull List<AgencyAdminResponseDTO> allAgencies;
 
   /**
-   * Analyzes the agency relations of given {@link Consultant} the check if no of the assigned
+   * Analyzes the agency relations of given {@link Consultant} to check if no of the assigned
    * agencies has flag is_team_agency.
    *
-   * @param consultant the {@link Consultant} the perform the analysis on
+   * @param consultant the {@link Consultant} to perform the analysis on
    * @return true if no related agency is a team agency
    */
   public boolean hasNoTeamAgencyAssigned(Consultant consultant) {

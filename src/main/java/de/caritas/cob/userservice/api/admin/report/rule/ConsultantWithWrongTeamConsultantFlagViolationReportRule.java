@@ -38,7 +38,7 @@ public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
   @Override
   public List<ViolationDTO> generateViolations() {
 
-    List<ConsultantAgency> allCosultantAgencies = StreamSupport
+    List<ConsultantAgency> allConsultantAgencies = StreamSupport
         .stream(consultantAgencyRepository.findAll().spliterator(), true)
         .collect(Collectors.toList());
 
@@ -47,7 +47,7 @@ public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
         .collect(Collectors.toList());
 
     ConsultantAgencyAnalyzer consultantAgencyAnalyzer =
-        new ConsultantAgencyAnalyzer(allCosultantAgencies, allAgencies);
+        new ConsultantAgencyAnalyzer(allConsultantAgencies, allAgencies);
 
     return StreamSupport.stream(consultantRepository.findAll().spliterator(), true)
         .filter(Consultant::isTeamConsultant)
