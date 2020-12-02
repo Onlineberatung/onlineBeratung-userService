@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
