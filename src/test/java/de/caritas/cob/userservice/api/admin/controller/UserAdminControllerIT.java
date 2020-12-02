@@ -21,9 +21,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(SessionAdminController.class)
+@WebMvcTest(UserAdminController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class SessionAdminControllerIT {
+public class UserAdminControllerIT {
 
   private static final String ROOT_PATH = "/useradmin";
   private static final String SESSION_PATH = ROOT_PATH + "/session";

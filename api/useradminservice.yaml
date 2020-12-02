@@ -98,6 +98,31 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /useradmin/consultant/{consultantId}:
+    delete:
+      tags:
+        - admin-user-controller
+      summary: 'Mark a consultant for deletion [Authorization: Role: consultant-admin]'
+      operationId: markConsultantForDeletion
+      parameters:
+        - name: consultantId
+          in: path
+          description: consultant id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - consultant was marked for deletion successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
 components:
   schemas:
     RootDTO:

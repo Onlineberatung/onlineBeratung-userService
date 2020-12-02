@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "admin-user-controller")
 @RequiredArgsConstructor
-public class SessionAdminController implements UseradminApi {
+public class UserAdminController implements UseradminApi {
 
   private final @NonNull SessionAdminService sessionAdminService;
 
@@ -62,6 +62,16 @@ public class SessionAdminController implements UseradminApi {
   @Override
   public ResponseEntity<CreateConsultantResponseDTO> createConsultant(
       @Valid CreateConsultantDTO createConsultantDTO) {
+    return null;
+  }
+
+  /**
+   * Entry point to mark a consultant for deletion.
+   *
+   * @param consultantId consultant id (required)
+   */
+  @Override
+  public ResponseEntity<Void> markConsultantForDeletion(String consultantId) {
     return null;
   }
 }

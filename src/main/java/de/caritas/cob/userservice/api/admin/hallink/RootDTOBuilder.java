@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.admin.hallink;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import de.caritas.cob.userservice.api.admin.controller.SessionAdminController;
+import de.caritas.cob.userservice.api.admin.controller.UserAdminController;
 import de.caritas.cob.userservice.api.model.HalLink;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.model.RootDTO;
@@ -29,12 +29,12 @@ public class RootDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildSelfLink() {
-    return buildHalLink(methodOn(SessionAdminController.class).getRoot(), MethodEnum.GET);
+    return buildHalLink(methodOn(UserAdminController.class).getRoot(), MethodEnum.GET);
   }
 
   private HalLink buildSessionsLink() {
     return buildHalLink(
-        methodOn(SessionAdminController.class).getSessions(DEFAULT_PAGE, DEFAULT_PER_PAGE, null),
+        methodOn(UserAdminController.class).getSessions(DEFAULT_PAGE, DEFAULT_PER_PAGE, null),
         MethodEnum.GET);
   }
 
