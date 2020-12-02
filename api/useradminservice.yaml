@@ -71,7 +71,33 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
+  /useradmin/consultant:
+    post:
+      tags:
+        - admin-user-controller
+      summary: 'Creates a new consultant [Authorization: Role: consultant-admin]'
+      operationId: createConsultant
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateConsultantDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - consultant was created successfully
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/CreateConsultantResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     RootDTO:
@@ -158,6 +184,95 @@ components:
         next:
           $ref: '#/components/schemas/HalLink'
         previous:
+          $ref: '#/components/schemas/HalLink'
+
+    CreateConsultantDTO:
+      type: object
+      required:
+        - username
+        - firstname
+        - lastname
+        - email
+        - formalLanguage
+        - absent
+      properties:
+        username:
+          type: string
+          example: "max.mustermann"
+        firstname:
+          type: string
+          example: "Max"
+        lastname:
+          type: string
+          example: "Mustermann"
+        email:
+          type: string
+          example: "max@mustermann.de"
+        formalLanguage:
+          type: boolean
+          example: true
+        absent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: "I am absent until..."
+
+    ConsultantDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "0f2cca9c-9303-4791-a0a5-a1ce16f1524f"
+        username:
+          type: string
+          example: "max.mustermann"
+        firstname:
+          type: string
+          example: "Max"
+        lastname:
+          type: string
+          example: "Mustermann"
+        email:
+          type: string
+          example: "max@mustermann.de"
+        formalLanguage:
+          type: boolean
+          example: true
+        teamConsultant:
+          type: boolean
+          example: false
+        absent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: "I am absent until..."
+        createDate:
+          type: string
+        updateDate:
+          type: string
+
+    CreateConsultantResponseDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/CreateLinks'
+
+    CreateLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        update:
+          $ref: '#/components/schemas/HalLink'
+        delete:
           $ref: '#/components/schemas/HalLink'
 
   securitySchemes:

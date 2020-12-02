@@ -2,10 +2,13 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
+import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
+import io.swagger.annotations.Api;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller to handle all session admin requests.
  */
 @RestController
+@Api(tags = "admin-user-controller")
 @RequiredArgsConstructor
 public class SessionAdminController implements UseradminApi {
 
@@ -49,5 +53,15 @@ public class SessionAdminController implements UseradminApi {
     return ResponseEntity.ok(sessionAdminResultDTO);
   }
 
-
+  /**
+   * Entry point to create a new consultant.
+   *
+   * @param createConsultantDTO  (required)
+   * @return {@link CreateConsultantResponseDTO}
+   */
+  @Override
+  public ResponseEntity<CreateConsultantResponseDTO> createConsultant(
+      @Valid CreateConsultantDTO createConsultantDTO) {
+    return null;
+  }
 }
