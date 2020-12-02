@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.testHelper.ExceptionConstants.CREATE_MO
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
@@ -86,7 +87,8 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserByConsultingType(Mockito.any(), Mockito.any()))
         .thenReturn(SESSION_LIST);
 
-    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(sessionService, times(0)).saveSession(Mockito.any());
   }
@@ -104,7 +106,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenThrow(new InternalServerErrorException(MESSAGE));
 
-    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
@@ -124,7 +127,8 @@ public class CreateSessionFacadeTest {
     when(sessionDataService.saveSessionDataFromRegistration(Mockito.any(), Mockito.any()))
         .thenThrow(INTERNAL_SERVER_ERROR_EXCEPTION);
 
-    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verify(sessionService, times(1)).deleteSession(Mockito.any());
@@ -146,7 +150,8 @@ public class CreateSessionFacadeTest {
     doThrow(CREATE_MONITORING_EXCEPTION).when(monitoringService).createMonitoringIfConfigured(Mockito.any(),
         Mockito.any());
 
-    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
     verify(monitoringService, times(1)).rollbackInitializeMonitoring(Mockito.any());
@@ -163,7 +168,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
 
-    createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
   }
 
   @Test
@@ -179,7 +185,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    Long result = createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     assertThat(result, is(1L));
   }
@@ -197,7 +204,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    Long result = createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     assertThat(result, is(1L));
     verify(sessionDataService, times(1)).saveSessionDataFromRegistration(Mockito.any(),
@@ -218,7 +226,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_SUCHT, USER);
+    Long result = createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     assertThat(result, is(1L));
     verify(monitoringService, times(1)).createMonitoringIfConfigured(Mockito.any(), Mockito.any());
@@ -236,7 +245,8 @@ public class CreateSessionFacadeTest {
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_U25)).thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
 
-    Long result = createSessionFacade.createSession(NEW_REGISTRATION_DTO_U25, USER);
+    Long result = createSessionFacade
+        .createSession(NEW_REGISTRATION_DTO_U25, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     assertThat(result, is(1L));
     verify(monitoringService, times(0)).updateMonitoring(Mockito.any(), Mockito.any());

@@ -55,7 +55,7 @@ public class CreateSessionFacade {
    * @return The ID of the created session
    */
   public Long createSession(NewRegistrationDto newRegistrationDto,
-      User user) {
+      User user, ConsultingTypeSettings consultingTypeSettings) {
 
     ConsultingType consultingType =
         ConsultingType.values()[Integer.parseInt(newRegistrationDto.getConsultingType())];
@@ -77,7 +77,7 @@ public class CreateSessionFacade {
 
     Session session = null;
     try {
-      session = saveNewSession(newRegistrationDto, consultingType,
+      session = saveNewSession(newRegistrationDto, consultingTypeSettings,
           isTrue(agencyDto.getTeamAgency()), user);
       sessionDataService.saveSessionDataFromRegistration(session, new UserDTO());
 
@@ -103,23 +103,17 @@ public class CreateSessionFacade {
   /**
    * Saves the new {@link Session} and creates the initial monitoring.
    *
-   * @param newRegistrationDto {@link NewRegistrationDto}
-   * @param consultingType     {@link ConsultingType}
-   * @param isTeamAgency       {@link AgencyDTO#getTeamAgency()}
+   * @param newRegistrationDto     {@link NewRegistrationDto}
+   * @param consultingTypeSettings {@link ConsultingTypeSettings}
+   * @param isTeamAgency           {@link AgencyDTO#getTeamAgency()}
    * @return the new registered {@link Session}
    * @throws CreateMonitoringException when initialization of monitoring fails
    */
   private Session saveNewSession(NewRegistrationDto newRegistrationDto,
-      ConsultingType consultingType, Boolean isTeamAgency, User user)
+      ConsultingTypeSettings consultingTypeSettings, Boolean isTeamAgency, User user)
       throws CreateMonitoringException {
 
-    ConsultingTypeSettings consultingTypeSettings;
-    try {
-      consultingTypeSettings = consultingTypeManager.getConsultantTypeSettings(consultingType);
-    } catch (MissingConsultingTypeException e) {
-      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
-    }
-    Session session = new Session(user, consultingType,
+    Session session = new Session(user, consultingTypeSettings.getConsultingType(),
         newRegistrationDto.getPostcode(), newRegistrationDto.getAgencyId(), SessionStatus.INITIAL,
         isTrue(isTeamAgency), consultingTypeSettings.isMonitoring());
     session.setCreateDate(LocalDateTime.now());

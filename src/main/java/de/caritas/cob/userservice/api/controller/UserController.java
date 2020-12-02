@@ -9,7 +9,9 @@ import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
+import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
@@ -25,6 +27,8 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
+import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
@@ -49,6 +53,7 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -68,6 +73,7 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.http.HttpStatus;
@@ -115,6 +121,7 @@ public class UserController implements UsersApi {
   private final @NotNull GetChatMembersFacade getChatMembersFacade;
   private final @NotNull CreateUserFacade createUserFacade;
   private final @NotNull CreateSessionFacade createSessionFacade;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Creates a Keycloak user and returns a 201 CREATED on success.
@@ -144,20 +151,47 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<NewRegistrationResponseDto> registerNewConsultingType(
+      @RequestHeader String rcToken, @RequestHeader String rcUserId,
       @RequestBody NewRegistrationDto newRegistrationDto) {
 
     User user = this.userAccountProvider.retrieveValidatedUser();
-    Long createdSessionId = createSessionFacade.createSession(newRegistrationDto, user);
+    ConsultingType consultingType =
+        ConsultingType.values()[Integer.parseInt(newRegistrationDto.getConsultingType())];
+    ConsultingTypeSettings consultingTypeSettings;
+    try {
+      consultingTypeSettings = consultingTypeManager.getConsultantTypeSettings(consultingType);
+    } catch (MissingConsultingTypeException e) {
+      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+    }
+
+    Long createdSessionId = null;
+
+    if (consultingTypeSettings.getConsultingType().equals(ConsultingType.KREUZBUND)) {
+      createUserFacade
+          .createUserChatAgencyRelation(fromUser(user, newRegistrationDto), user,
+              RocketChatCredentials.builder()
+                  .rocketChatToken(rcToken).rocketChatUserId(rcUserId).build());
+
+    } else {
+      createdSessionId = createSessionFacade
+          .createSession(newRegistrationDto, user, consultingTypeSettings);
+    }
 
     return new ResponseEntity<>(new NewRegistrationResponseDto()
         .sessionId(createdSessionId)
         .status(HttpStatus.CREATED), HttpStatus.CREATED);
   }
 
+  private UserDTO fromUser(User user, NewRegistrationDto newRegistrationDto) {
+    return new UserDTO(user.getUsername(), null, newRegistrationDto.getAgencyId(), null, null, null,
+        null);
+  }
+
   /**
    * Accepting an enquiry
    */
   @Override
+
   public ResponseEntity<Void> acceptEnquiry(@PathVariable Long sessionId,
       @RequestHeader String rcUserId) {
 

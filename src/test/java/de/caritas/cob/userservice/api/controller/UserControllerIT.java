@@ -562,11 +562,13 @@ public class UserControllerIT {
       throws Exception {
 
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
-    when(createSessionFacade.createSession(Mockito.any(), Mockito.any())).thenReturn(1L);
+    when(createSessionFacade.createSession(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
     when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
-    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).content(VALID_NEW_REGISTRATION_BODY)
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN).content(VALID_NEW_REGISTRATION_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
   }

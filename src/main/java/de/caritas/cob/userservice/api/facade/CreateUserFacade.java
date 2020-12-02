@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static java.util.Objects.isNull;
+
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -155,7 +157,7 @@ public class CreateUserFacade {
       ConsultingTypeSettings consultingTypeSettings) {
 
     if (consultingTypeSettings.getConsultingType().equals(ConsultingType.KREUZBUND)) {
-      createUserChatAgencyRelation(user, dbUser);
+      createUserChatAgencyRelation(user, dbUser, null);
 
     } else {
       createUserSession(user, dbUser, consultingTypeSettings);
@@ -188,26 +190,36 @@ public class CreateUserFacade {
     }
   }
 
-  private void createUserChatAgencyRelation(UserDTO user, User dbUser) {
+  public void createUserChatAgencyRelation(UserDTO user, User dbUser,
+      RocketChatCredentials rocketChatCredentials) {
 
-    // Log in user to Rocket.Chat
-    ResponseEntity<LoginResponseDTO> rcUserResponse;
-    try {
-      rcUserResponse = rocketChatService
-          .loginUserFirstTime(userHelper.encodeUsername(user.getUsername()), user.getPassword());
-    } catch (RocketChatLoginException e) {
-      throw new InternalServerErrorException(e.getMessage(), LogService::logRocketChatError);
+    ResponseEntity<LoginResponseDTO> rcUserResponse = null;
+
+    if (isNull(rocketChatCredentials) && isNull(dbUser.getRcUserId())) {
+      // Log in user to Rocket.Chat
+      try {
+        rcUserResponse = rocketChatService
+            .loginUserFirstTime(userHelper.encodeUsername(user.getUsername()), user.getPassword());
+      } catch (RocketChatLoginException e) {
+        throw new InternalServerErrorException(e.getMessage(), LogService::logRocketChatError);
+      }
+
+      if (!rcUserResponse.getStatusCode().equals(HttpStatus.OK)
+          || rcUserResponse.getBody() == null) {
+        rollBackUserAccount(dbUser.getUserId(), dbUser, null, null);
+        throw new InternalServerErrorException(String.format(
+            "Rocket.Chat login for Kreuzbund registration was not successful for user %s.",
+            user.getUsername()));
+      }
     }
 
-    if (!rcUserResponse.getStatusCode().equals(HttpStatus.OK) || rcUserResponse.getBody() == null) {
-      rollBackUserAccount(dbUser.getUserId(), dbUser, null, null);
-      throw new InternalServerErrorException(String.format(
-          "Rocket.Chat login for Kreuzbund registration was not successful for user %s.",
-          user.getUsername()));
-    }
-
-    String rcUserToken = rcUserResponse.getBody().getData().getAuthToken();
-    String rcUserId = rcUserResponse.getBody().getData().getUserId();
+    String rcUserToken =
+        isNull(rocketChatCredentials.getRocketChatToken()) ? rcUserResponse.getBody().getData()
+            .getAuthToken() : rocketChatCredentials.getRocketChatToken();
+    String rcUserId =
+        isNull(rocketChatCredentials.getRocketChatUserId()) ? rcUserResponse.getBody().getData()
+            .getUserId()
+            : rocketChatCredentials.getRocketChatUserId();
     if (rcUserToken == null || rcUserToken.equals(StringUtils.EMPTY) || rcUserId == null
         || rcUserId.equals(StringUtils.EMPTY)) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, null, null);
@@ -217,11 +229,11 @@ public class CreateUserFacade {
     }
 
     // Log out user from Rocket.Chat
-    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+    RocketChatCredentials rocketChatCredentials_temp = RocketChatCredentials.builder()
         .rocketChatUserId(rcUserId)
         .rocketChatToken(rcUserToken)
         .build();
-    rocketChatService.logoutUser(rocketChatCredentials);
+    //rocketChatService.logoutUser(rocketChatCredentials_temp);
 
     // Update rcUserId in user table
     dbUser.setRcUserId(rcUserId);
