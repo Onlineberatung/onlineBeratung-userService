@@ -397,6 +397,8 @@ components:
           type: string
         updateDate:
           type: string
+        deleteDate:
+          type: string
 
     CreateConsultantResponseDTO:
       type: object

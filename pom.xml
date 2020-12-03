@@ -60,8 +60,14 @@
 			<version>6.1.6.Final</version>
 		</dependency>
 
-		<!-- Swagger/OpenAPI dependencies -->
+		<!-- Search dependency -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-orm</artifactId>
+			<version>5.11.7.Final</version>
+		</dependency>
 
+		<!-- Swagger/OpenAPI dependencies -->
 		<dependency>
 			<groupId>org.openapitools</groupId>
 			<artifactId>openapi-generator-maven-plugin</artifactId>

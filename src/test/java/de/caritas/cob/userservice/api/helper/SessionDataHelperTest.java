@@ -47,7 +47,7 @@ public class SessionDataHelperTest {
 
   private final User USER = new User(USER_ID, USERNAME, EMAIL, null);
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
-      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null);
+      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null, null);
   private final Session INITALIZED_SESSION_SUCHT = new Session(1L, USER, CONSULTANT,
       ConsultingType.SUCHT, "99999", 0L, SessionStatus.INITIAL, null, null);
   private final Session INITALIZED_SESSION_U25 = new Session(1L, USER, CONSULTANT,
