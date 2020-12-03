@@ -72,6 +72,35 @@ paths:
       security:
         - Bearer: [ ]
 
+  /useradmin/consultant/{consultantId}/agencies:
+    get:
+      tags:
+        - admin-consultant-agency-controller
+      summary: 'Returns the list of consultant-agency connections for a given consultant Id. [Authorization: Role:
+      user-admin]'
+      parameters:
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultantAgencyAdminResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
 components:
   schemas:
     RootDTO:
@@ -147,6 +176,27 @@ components:
           type: string
         updateDate:
           type: string
+
+    ConsultantAgencyAdminResultDTO:
+      type: object
+      properties:
+        consultantId:
+          type: string
+          example: aadc0ecf-c048-4bfc-857d-8c9b2e425500
+        agencyId:
+          type: integer
+          format: int64
+          example: 15
+        role:
+          type: string
+        createDate:
+          type: string
+          format: date
+          example: 2019-10-23
+        editDate:
+          type: string
+          format: date
+          example: 2019-10-23
 
     SessionAdminResultLinks:
       type: object
