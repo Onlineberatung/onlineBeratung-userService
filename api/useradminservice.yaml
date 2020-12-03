@@ -97,7 +97,7 @@ paths:
   /useradmin/consultant/{consultantId}/agencies:
     get:
       tags:
-        - admin-consultant-agency-controller
+        - admin-user-controller
       summary: 'Returns the list of consultant-agency connections for a given consultant Id. [Authorization: Role:
       user-admin]'
       operationId: getConsultantAgency
