@@ -127,7 +127,7 @@ paths:
   /useradmin/consultant/{consultantId}/agency:
     post:
       tags:
-        - admin-consultant-agency-controller
+        - admin-user-controller
       summary: 'Create a consultant-agency relation [Authorization: Role: user-admin]'
       operationId: createConsultantAgency
       parameters:
