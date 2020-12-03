@@ -402,9 +402,7 @@ components:
       type: object
       properties:
         _embedded:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConsultantDTO'
+          $ref: '#/components/schemas/ConsultantDTO'
         _links:
           $ref: '#/components/schemas/CreateLinks'
 
@@ -412,9 +410,7 @@ components:
       type: object
       properties:
         _embedded:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConsultantDTO'
+          $ref: '#/components/schemas/ConsultantDTO'
         _links:
           $ref: '#/components/schemas/GetLinks'
 
@@ -422,9 +418,7 @@ components:
       type: object
       properties:
         _embedded:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConsultantDTO'
+          $ref: '#/components/schemas/ConsultantDTO'
         _links:
           $ref: '#/components/schemas/UpdateLinks'
 
