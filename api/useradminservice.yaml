@@ -93,7 +93,7 @@ paths:
     get:
       tags:
         - admin-agency-controller
-      summary: 'Get a consultant [Authorization: Role: consultant-admin]'
+      summary: 'Get a consultant by given id [Authorization: Role: consultant-admin]'
       operationId: getConsultant
       parameters:
         - name: consultantId
@@ -179,10 +179,10 @@ paths:
     get:
       tags:
         - admin-user-controller
-      summary: 'Returns the list of consultants by search query parameter. [Authorization: Role: consultant-admin]'
+      summary: 'Returns the list of consultants by filter query parameter. [Authorization: Role: consultant-admin]'
       operationId: getConsultants
       parameters:
-        - name: consultantFilter
+        - name: filter
           in: query
           description: 'The filter parameters to search for. If no filter is set all consultant are
               being returned.'
