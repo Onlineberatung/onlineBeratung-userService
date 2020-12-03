@@ -101,6 +101,38 @@ paths:
       security:
         - Bearer: [ ]
 
+  /useradmin/consultant/{consultantId}/agency/{agencyId}:
+    delete:
+      tags:
+        - admin-consultant-agency-controller
+      summary: 'Delete a consultant-agency relation [Authorization: Role: user-admin]'
+      operationId: deleteConsultantAgency
+      parameters:
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+        - name: agencyId
+          in: path
+          description: Agency Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - consultant-agency relation was deleted successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
 components:
   schemas:
     RootDTO:
