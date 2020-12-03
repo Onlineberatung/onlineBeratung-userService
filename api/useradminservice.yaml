@@ -78,6 +78,7 @@ paths:
         - admin-consultant-agency-controller
       summary: 'Returns the list of consultant-agency connections for a given consultant Id. [Authorization: Role:
       user-admin]'
+      operationId: getConsultantAgency
       parameters:
         - name: consultantId
           in: path
