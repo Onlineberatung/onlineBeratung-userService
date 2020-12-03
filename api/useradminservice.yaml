@@ -92,7 +92,7 @@ paths:
   /useradmin/consultant/{consultantId}:
     get:
       tags:
-        - admin-agency-controller
+        - admin-user-controller
       summary: 'Get a consultant by given id [Authorization: Role: consultant-admin]'
       operationId: getConsultant
       parameters:
