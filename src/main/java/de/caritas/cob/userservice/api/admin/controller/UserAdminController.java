@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.controller;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -66,5 +68,19 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<List<ViolationDTO>> generateViolationReport() {
     return ResponseEntity.ok(this.violationReportGenerator.generateReport());
+  }
+
+  /**
+   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies
+   *
+   * @param consultantId Consultant Id (required)
+   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
+   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
+   * condition (status code 500)
+   */
+  @Override
+  public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(
+      @PathVariable String consultantId) {
+    return null;
   }
 }
