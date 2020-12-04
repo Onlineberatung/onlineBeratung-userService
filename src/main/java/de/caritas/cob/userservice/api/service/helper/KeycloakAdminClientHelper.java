@@ -12,16 +12,9 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +26,6 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.ErrorRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -243,7 +235,6 @@ public class KeycloakAdminClientHelper {
   public void updateRole(final String userId, final String roleName) {
     // Get realm and user resources
     RealmResource realmResource = getInstance().realm(KEYCLOAK_REALM);
-    UsersResource userRessource = realmResource.users();
 
     // Assign role
     RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
@@ -255,14 +246,21 @@ public class KeycloakAdminClientHelper {
     logStringBuilder.append("description: " + roleRepresentation.getDescription() + lineSeparator);
     logStringBuilder.append("id: " + roleRepresentation.getId() + lineSeparator);
     logStringBuilder.append("name: " + roleRepresentation.getName() + lineSeparator);
-    logStringBuilder.append("attributes: " + ((nonNull(roleRepresentation.getAttributes())) ? roleRepresentation.getAttributes().toString() : "null") + lineSeparator);
-    logStringBuilder.append("clientRole: " + ((nonNull(roleRepresentation.getClientRole())) ? roleRepresentation.getClientRole().toString() : "null") + lineSeparator);
-    logStringBuilder.append("composites: " + ((nonNull(roleRepresentation.getComposites())) ? roleRepresentation.getComposites().toString() : "null") + lineSeparator);
+    logStringBuilder.append(
+        "attributes: " + ((nonNull(roleRepresentation.getAttributes())) ? roleRepresentation
+            .getAttributes().toString() : "null") + lineSeparator);
+    logStringBuilder.append(
+        "clientRole: " + ((nonNull(roleRepresentation.getClientRole())) ? roleRepresentation
+            .getClientRole().toString() : "null") + lineSeparator);
+    logStringBuilder.append(
+        "composites: " + ((nonNull(roleRepresentation.getComposites())) ? roleRepresentation
+            .getComposites().toString() : "null") + lineSeparator);
     logStringBuilder.append("isComposite: " + roleRepresentation.isComposite() + lineSeparator);
     logStringBuilder.append("==========================");
 
     log.warn(logStringBuilder.toString());
 
+    UsersResource userRessource = realmResource.users();
     UserResource user = userRessource.get(userId);
     boolean isRoleUpdated = false;
 

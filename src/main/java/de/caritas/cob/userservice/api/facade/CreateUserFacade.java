@@ -81,7 +81,6 @@ public class CreateUserFacade {
     logStringBuilder.append("username: " + user.getUsername() + lineSeparator);
     logStringBuilder.append("agencyId: " + user.getAgencyId() + lineSeparator);
 
-
     KeycloakCreateUserResponseDTO response;
     String userId;
 
