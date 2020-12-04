@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.controller;
 
+import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANTS_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.PAGE_PARAM;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.PER_PAGE_PARAM;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.REPORT_PATH;
@@ -13,7 +14,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
+import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
+import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import javax.servlet.http.Cookie;
 import org.junit.Test;
@@ -45,6 +47,9 @@ public class UserAdminControllerAuthorizationIT {
 
   @MockBean
   private SessionAdminService sessionAdminService;
+
+  @MockBean
+  private ConsultantAdminFilterService consultantAdminFilterService;
 
   @MockBean
   private ViolationReportGenerator violationReportGenerator;
@@ -153,6 +158,60 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(violationReportGenerator, times(1)).generateReport();
+  }
+
+  @Test
+  public void getConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
+      throws Exception {
+
+    mvc.perform(get(CONSULTANTS_PATH))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFilterService);
+  }
+
+  @Test
+  public void getConsultants_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+      throws Exception {
+
+    mvc.perform(get(CONSULTANTS_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(consultantAdminFilterService);
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
+          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
+          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT})
+  public void getConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+      throws Exception {
+
+    mvc.perform(get(CONSULTANTS_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFilterService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_ADMIN})
+  public void getConsultants_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
+      throws Exception {
+
+    mvc.perform(get(CONSULTANTS_PATH)
+        .param(PAGE_PARAM, "0")
+        .param(PER_PAGE_PARAM, "1")
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isOk());
+
+    verify(consultantAdminFilterService, times(1)).findFilteredConsultants(any(), anyInt(), any());
   }
 
 }

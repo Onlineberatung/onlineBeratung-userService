@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 

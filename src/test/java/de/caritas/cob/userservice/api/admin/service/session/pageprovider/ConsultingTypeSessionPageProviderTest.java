@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.pageprovider;
+package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;

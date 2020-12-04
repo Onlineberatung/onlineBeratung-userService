@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import de.caritas.cob.userservice.api.service.LogService;
 import lombok.NonNull;

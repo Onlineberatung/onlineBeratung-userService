@@ -256,6 +256,8 @@ components:
           $ref: '#/components/schemas/HalLink'
         sessions:
           $ref: '#/components/schemas/HalLink'
+        consultants:
+          $ref: '#/components/schemas/HalLink'
 
     HalLink:
       type: object

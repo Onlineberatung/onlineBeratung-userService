@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.pageprovider;
+package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -11,10 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Page provider for {@link Session} filtered by asker.
+ * Page provider for {@link Session} filtered by consultant.
  */
 @RequiredArgsConstructor
-public class AskerSessionPageProvider implements SessionPageProvider {
+public class ConsultantSessionPageProvider implements SessionPageProvider {
 
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull SessionFilter sessionFilter;
@@ -27,16 +27,16 @@ public class AskerSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
-    return this.sessionRepository.findByUserUserId(sessionFilter.getAsker(), pageable);
+    return this.sessionRepository.findByConsultantId(sessionFilter.getConsultant(), pageable);
   }
 
   /**
-   * Validates the asker filter.
+   * Validates the consultant filter.
    *
-   * @return true if filter has asker set
+   * @return true if filter has consultant set
    */
   @Override
   public boolean isSupported() {
-    return isNotBlank(this.sessionFilter.getAsker());
+    return isNotBlank(this.sessionFilter.getConsultant());
   }
 }

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.session;
 
 import static de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder.DEFAULT_PAGE;
 import static de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder.DEFAULT_PER_PAGE;

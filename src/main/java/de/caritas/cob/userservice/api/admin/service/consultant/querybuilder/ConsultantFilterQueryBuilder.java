@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.querybuilder;
+package de.caritas.cob.userservice.api.admin.service.consultant.querybuilder;
 
 import static java.util.Objects.nonNull;
 

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.config;
 
-import de.caritas.cob.userservice.api.admin.service.ConsultantReindexer;
+import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantReindexer;
 import javax.persistence.EntityManagerFactory;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.pageprovider;
+package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
 import static java.util.Objects.nonNull;
 

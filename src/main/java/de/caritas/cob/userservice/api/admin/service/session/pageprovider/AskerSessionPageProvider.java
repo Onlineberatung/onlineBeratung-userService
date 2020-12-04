@@ -1,6 +1,6 @@
-package de.caritas.cob.userservice.api.admin.pageprovider;
+package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
-import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -11,10 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Page provider for {@link Session} filtered by agency.
+ * Page provider for {@link Session} filtered by asker.
  */
 @RequiredArgsConstructor
-public class AgencySessionPageProvider implements SessionPageProvider {
+public class AskerSessionPageProvider implements SessionPageProvider {
 
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull SessionFilter sessionFilter;
@@ -27,16 +27,16 @@ public class AgencySessionPageProvider implements SessionPageProvider {
    */
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
-    return this.sessionRepository.findByAgencyId(sessionFilter.getAgency().longValue(), pageable);
+    return this.sessionRepository.findByUserUserId(sessionFilter.getAsker(), pageable);
   }
 
   /**
-   * Validates the agency filter.
+   * Validates the asker filter.
    *
-   * @return true if filter has agency set
+   * @return true if filter has asker set
    */
   @Override
   public boolean isSupported() {
-    return nonNull(this.sessionFilter.getAgency());
+    return isNotBlank(this.sessionFilter.getAsker());
   }
 }

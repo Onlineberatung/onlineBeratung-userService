@@ -1,7 +1,7 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.session;
 
-import de.caritas.cob.userservice.api.admin.pageprovider.PageProviderFactory;
-import de.caritas.cob.userservice.api.admin.pageprovider.SessionPageProvider;
+import de.caritas.cob.userservice.api.admin.service.session.pageprovider.PageProviderFactory;
+import de.caritas.cob.userservice.api.admin.service.session.pageprovider.SessionPageProvider;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;

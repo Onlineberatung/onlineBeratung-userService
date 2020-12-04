@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
@@ -35,6 +35,14 @@ public class ConsultantAdminFilterServiceIT {
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven() {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, new ConsultantFilter());
+
+    assertThat(consultants.getEmbedded(), hasSize(37));
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsNull() {
+    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
+        .findFilteredConsultants(1, 100, null);
 
     assertThat(consultants.getEmbedded(), hasSize(37));
   }
