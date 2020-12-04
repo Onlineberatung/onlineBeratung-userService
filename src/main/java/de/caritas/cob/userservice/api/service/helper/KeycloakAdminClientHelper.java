@@ -1,11 +1,30 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import static java.util.Objects.nonNull;
+
+import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
 import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -14,20 +33,11 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.ErrorRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.authorization.Authority;
-import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Helper class for the KeycloakService. Communicates to the Keycloak Admin API over the Keycloak
@@ -37,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class KeycloakAdminClientHelper {
+
   @Value("${keycloak.auth-server-url}")
   private String KEYCLOAK_SERVER_URL;
 
@@ -237,8 +248,20 @@ public class KeycloakAdminClientHelper {
     boolean isRoleUpdated = false;
 
     // Assign role
+    RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
+    log.warn("=== roleRepresentation ===");
+    log.warn("containerId: " + roleRepresentation.getContainerId());
+    log.warn("description: " + roleRepresentation.getDescription());
+    log.warn("id: " + roleRepresentation.getId());
+    log.warn("name: " + roleRepresentation.getName());
+    log.warn("attributes: " + ((nonNull(roleRepresentation.getAttributes())) ? roleRepresentation.getAttributes().toString() : "null"));
+    log.warn("clientRole: " + ((nonNull(roleRepresentation.getClientRole())) ? roleRepresentation.getClientRole().toString() : "null"));
+    log.warn("composites: " + ((nonNull(roleRepresentation.getComposites())) ? roleRepresentation.getComposites().toString() : "null"));
+    log.warn("isComposite: " + roleRepresentation.isComposite());
+    log.warn("==========================");
+
     user.roles().realmLevel()
-        .add(Arrays.asList(realmResource.roles().get(roleName).toRepresentation()));
+        .add(Arrays.asList(roleRepresentation));
 
     // Check if role has been assigned successfully
     List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
@@ -308,7 +331,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId Keycloak user ID
+   * @param userId    Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */

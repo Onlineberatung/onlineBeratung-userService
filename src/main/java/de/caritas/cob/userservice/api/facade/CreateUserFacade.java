@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -26,6 +28,7 @@ import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +39,7 @@ import org.springframework.stereotype.Service;
  * new session).
  *
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateUserFacade {
@@ -56,12 +60,26 @@ public class CreateUserFacade {
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
    * provided {@link ConsultingType}.
-   * 
+   *
    * @param user {@link UserDTO}
    * @return {@link KeycloakCreateUserResponseDTO}
-   * 
+   *
    */
   public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO user) {
+
+    log.warn("=== UserDTO ===");
+    log.warn("addictiveDrugs: " + user.getAddictiveDrugs());
+    log.warn("age: " + user.getAge());
+    log.warn("consultingType: " + user.getConsultingType());
+    log.warn("email:" + ((nonNull(user.getEmail())) ? "not null" : "null"));
+    log.warn("gender: " + user.getGender());
+    log.warn("postcode: " + user.getPostcode());
+    log.warn("relation: " + user.getRelation());
+    log.warn("state: " + user.getState());
+    log.warn("termsAccepted: " + user.getTermsAccepted());
+    log.warn("username: " + user.getUsername());
+    log.warn("agencyId: " + user.getAgencyId());
+    log.warn("===============");
 
     KeycloakCreateUserResponseDTO response;
     String userId;
@@ -103,7 +121,7 @@ public class CreateUserFacade {
   /**
    * Update the Keycloak account data (roles, password, e-mail address), create the user in MariaDB
    * and initialize a session or chat relation (depending on {@link ConsultingType}).
-   * 
+   *
    * @param userId Keycloak user ID
    * @param user {@link UserDTO} from registration form
    * @param consultingType {@link ConsultingType}
@@ -146,7 +164,7 @@ public class CreateUserFacade {
   /**
    * Initializes the provided {@link User} account depending on the consulting type. Consulting type
    * KREUZBUND will get a chat/agency relation, all others will be provided with a session.
-   * 
+   *
    * @param user {@link UserDTO}
    * @param dbUser {@link User}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
@@ -166,7 +184,7 @@ public class CreateUserFacade {
 
   /**
    * Creates a new session for the provided {@link User}.
-   * 
+   *
    * @param user {@link UserDTO}
    * @param dbUser {@link User}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
@@ -251,7 +269,7 @@ public class CreateUserFacade {
   /**
    * Deletes the provided user in Keycloak and MariaDB and its related session or user <->
    * chat/agency relations.
-   * 
+   *
    * @param userId Keycloak user ID
    * @param session {@link Session}
    * @param dbUser {@link User}
