@@ -247,16 +247,21 @@ public class KeycloakAdminClientHelper {
 
     // Assign role
     RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
-    log.warn("=== roleRepresentation ===");
-    log.warn("containerId: " + roleRepresentation.getContainerId());
-    log.warn("description: " + roleRepresentation.getDescription());
-    log.warn("id: " + roleRepresentation.getId());
-    log.warn("name: " + roleRepresentation.getName());
-    log.warn("attributes: " + ((nonNull(roleRepresentation.getAttributes())) ? roleRepresentation.getAttributes().toString() : "null"));
-    log.warn("clientRole: " + ((nonNull(roleRepresentation.getClientRole())) ? roleRepresentation.getClientRole().toString() : "null"));
-    log.warn("composites: " + ((nonNull(roleRepresentation.getComposites())) ? roleRepresentation.getComposites().toString() : "null"));
-    log.warn("isComposite: " + roleRepresentation.isComposite());
-    log.warn("==========================");
+    String lineSeparator = System.getProperty("line.separator");
+    StringBuilder logStringBuilder = new StringBuilder();
+    logStringBuilder.append("=== roleRepresentation ===" + lineSeparator);
+    logStringBuilder.append("userId: " + userId + lineSeparator);
+    logStringBuilder.append("containerId: " + roleRepresentation.getContainerId() + lineSeparator);
+    logStringBuilder.append("description: " + roleRepresentation.getDescription() + lineSeparator);
+    logStringBuilder.append("id: " + roleRepresentation.getId() + lineSeparator);
+    logStringBuilder.append("name: " + roleRepresentation.getName() + lineSeparator);
+    logStringBuilder.append("attributes: " + ((nonNull(roleRepresentation.getAttributes())) ? roleRepresentation.getAttributes().toString() : "null") + lineSeparator);
+    logStringBuilder.append("clientRole: " + ((nonNull(roleRepresentation.getClientRole())) ? roleRepresentation.getClientRole().toString() : "null") + lineSeparator);
+    logStringBuilder.append("composites: " + ((nonNull(roleRepresentation.getComposites())) ? roleRepresentation.getComposites().toString() : "null") + lineSeparator);
+    logStringBuilder.append("isComposite: " + roleRepresentation.isComposite() + lineSeparator);
+    logStringBuilder.append("==========================");
+
+    log.warn(logStringBuilder.toString());
 
     UserResource user = userRessource.get(userId);
     boolean isRoleUpdated = false;

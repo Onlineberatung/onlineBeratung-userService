@@ -12,8 +12,8 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 /**
  * Facade to encapsulate the steps to initialize an user account (create chat/agency relation or a
  * new session).
- *
  */
 @Slf4j
 @Service
@@ -63,23 +62,25 @@ public class CreateUserFacade {
    *
    * @param user {@link UserDTO}
    * @return {@link KeycloakCreateUserResponseDTO}
-   *
    */
   public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO user) {
 
-    log.warn("=== UserDTO ===");
-    log.warn("addictiveDrugs: " + user.getAddictiveDrugs());
-    log.warn("age: " + user.getAge());
-    log.warn("consultingType: " + user.getConsultingType());
-    log.warn("email:" + ((nonNull(user.getEmail())) ? "not null" : "null"));
-    log.warn("gender: " + user.getGender());
-    log.warn("postcode: " + user.getPostcode());
-    log.warn("relation: " + user.getRelation());
-    log.warn("state: " + user.getState());
-    log.warn("termsAccepted: " + user.getTermsAccepted());
-    log.warn("username: " + user.getUsername());
-    log.warn("agencyId: " + user.getAgencyId());
-    log.warn("===============");
+    String lineSeparator = System.getProperty("line.separator");
+    StringBuilder logStringBuilder = new StringBuilder();
+    logStringBuilder.append("=== UserDTO ===" + lineSeparator);
+    logStringBuilder.append("addictiveDrugs: " + user.getAddictiveDrugs() + lineSeparator);
+    logStringBuilder.append("age: " + user.getAge() + lineSeparator);
+    logStringBuilder.append("consultingType: " + user.getConsultingType() + lineSeparator);
+    logStringBuilder
+        .append("email:" + ((nonNull(user.getEmail())) ? "not null" : "null") + lineSeparator);
+    logStringBuilder.append("gender: " + user.getGender() + lineSeparator);
+    logStringBuilder.append("postcode: " + user.getPostcode() + lineSeparator);
+    logStringBuilder.append("relation: " + user.getRelation() + lineSeparator);
+    logStringBuilder.append("state: " + user.getState() + lineSeparator);
+    logStringBuilder.append("termsAccepted: " + user.getTermsAccepted() + lineSeparator);
+    logStringBuilder.append("username: " + user.getUsername() + lineSeparator);
+    logStringBuilder.append("agencyId: " + user.getAgencyId() + lineSeparator);
+
 
     KeycloakCreateUserResponseDTO response;
     String userId;
@@ -112,6 +113,11 @@ public class CreateUserFacade {
       return response;
     }
 
+    logStringBuilder.append("userId " + userId + lineSeparator);
+    logStringBuilder.append("===============" + lineSeparator);
+
+    log.warn(logStringBuilder.toString());
+
     // Update Keycloak account data and create user and session in MariaDB
     updateAccountData(userId, user, consultingType);
 
@@ -122,8 +128,8 @@ public class CreateUserFacade {
    * Update the Keycloak account data (roles, password, e-mail address), create the user in MariaDB
    * and initialize a session or chat relation (depending on {@link ConsultingType}).
    *
-   * @param userId Keycloak user ID
-   * @param user {@link UserDTO} from registration form
+   * @param userId         Keycloak user ID
+   * @param user           {@link UserDTO} from registration form
    * @param consultingType {@link ConsultingType}
    */
   private void updateAccountData(String userId, UserDTO user, ConsultingType consultingType) {
@@ -165,8 +171,8 @@ public class CreateUserFacade {
    * Initializes the provided {@link User} account depending on the consulting type. Consulting type
    * KREUZBUND will get a chat/agency relation, all others will be provided with a session.
    *
-   * @param user {@link UserDTO}
-   * @param dbUser {@link User}
+   * @param user                   {@link UserDTO}
+   * @param dbUser                 {@link User}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
    */
   private void initializeUserAccount(UserDTO user, User dbUser,
@@ -185,8 +191,8 @@ public class CreateUserFacade {
   /**
    * Creates a new session for the provided {@link User}.
    *
-   * @param user {@link UserDTO}
-   * @param dbUser {@link User}
+   * @param user                   {@link UserDTO}
+   * @param dbUser                 {@link User}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
    */
   private void createUserSession(UserDTO user, User dbUser,
@@ -262,7 +268,8 @@ public class CreateUserFacade {
 
     } catch (InternalServerErrorException serviceException) {
       rollBackUserAccount(dbUser.getUserId(), dbUser, null, userAgency);
-      throw new InternalServerErrorException("Could not create user-agency relation for Kreuzbund registration");
+      throw new InternalServerErrorException(
+          "Could not create user-agency relation for Kreuzbund registration");
     }
   }
 
@@ -270,9 +277,9 @@ public class CreateUserFacade {
    * Deletes the provided user in Keycloak and MariaDB and its related session or user <->
    * chat/agency relations.
    *
-   * @param userId Keycloak user ID
+   * @param userId  Keycloak user ID
    * @param session {@link Session}
-   * @param dbUser {@link User}
+   * @param dbUser  {@link User}
    */
   private void rollBackUserAccount(String userId, User dbUser, Session session,
       UserAgency userAgency) {
