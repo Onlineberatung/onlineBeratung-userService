@@ -1,13 +1,9 @@
 package de.caritas.cob.userservice.api.admin.service;
 
 import de.caritas.cob.userservice.api.admin.querybuilder.ConsultantFilterQueryBuilder;
-import de.caritas.cob.userservice.api.model.ConsultantDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.persistence.EntityManagerFactory;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +28,7 @@ public class ConsultantAdminFilterService {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page    the current requested page
+   * @param page the current requested page
    * @param perPage the amount of items in one page
    * @return the result list
    */
@@ -45,14 +41,15 @@ public class ConsultantAdminFilterService {
     fullTextQuery.setMaxResults(Math.max(perPage, 1));
     fullTextQuery.setFirstResult(Math.max((page - 1) * perPage, 0));
 
-    Stream<Consultant> resultStream = fullTextQuery.getResultStream();
-    List<ConsultantDTO> embedded = resultStream
-        .map(this::fromConsultant)
-        .collect(Collectors.toList());
+    ConsultantSearchResultDTO searchResultDTO = ConsultantSearchResultBuilder
+        .getInstance(fullTextQuery)
+        .withFilter(consultantFilter)
+        .withPage(page)
+        .withPerPage(perPage)
+        .buildConsultantSearchResult();
 
     fullTextEntityManager.close();
-    return new ConsultantSearchResultDTO()
-        .embedded(embedded);
+    return searchResultDTO;
   }
 
   private FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
@@ -68,22 +65,6 @@ public class ConsultantAdminFilterService {
         .buildQuery();
 
     return fullTextEntityManager.createFullTextQuery(query, Consultant.class);
-  }
-
-  private ConsultantDTO fromConsultant(Consultant consultant) {
-    return new ConsultantDTO()
-        .id(consultant.getId())
-        .username(consultant.getUsername())
-        .firstname(consultant.getFirstName())
-        .lastname(consultant.getLastName())
-        .email(consultant.getEmail())
-        .formalLanguage(consultant.isLanguageFormal())
-        .teamConsultant(consultant.isTeamConsultant())
-        .absent(consultant.isAbsent())
-        .absenceMessage(consultant.getAbsenceMessage())
-        .createDate(String.valueOf(consultant.getCreateDate()))
-        .updateDate(String.valueOf(consultant.getUpdateDate()))
-        .deleteDate(String.valueOf(consultant.getDeleteDate()));
   }
 
 }

@@ -1,15 +1,18 @@
 package de.caritas.cob.userservice.api.admin.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.model.ConsultantDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +33,8 @@ public class ConsultantAdminFilterServiceIT {
 
   @Test
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven() {
-    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService.findFilteredConsultants(1,
-        100, new ConsultantFilter());
+    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
+        .findFilteredConsultants(1, 100, new ConsultantFilter());
 
     assertThat(consultants.getEmbedded(), hasSize(37));
   }
@@ -123,6 +126,58 @@ public class ConsultantAdminFilterServiceIT {
 
     result.getEmbedded().forEach(consultant -> assertThat(consultant.getEmail(),
         is("addiction@caritas.de")));
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_returnResultWithSelfLink() {
+    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
+        .findFilteredConsultants(1, 100, new ConsultantFilter());
+
+    assertThat(consultants.getLinks(), notNullValue());
+    assertThat(consultants.getLinks().getSelf(), notNullValue());
+    assertThat(consultants.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
+    assertThat(consultants.getLinks().getSelf().getHref(),
+        endsWith("/useradmin/consultants?page=1&perPage=100"));
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_returnResultWithoutNextLink_When_pageIsTheLast() {
+    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
+        .findFilteredConsultants(1, 100, new ConsultantFilter());
+
+    assertThat(consultants.getLinks(), notNullValue());
+    assertThat(consultants.getLinks().getNext(), nullValue());
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_returnResultWithoutPreviousLink_When_pageIsTheFirst() {
+    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
+        .findFilteredConsultants(1, 100, new ConsultantFilter());
+
+    assertThat(consultants.getLinks(), notNullValue());
+    assertThat(consultants.getLinks().getPrevious(), nullValue());
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast() {
+    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
+        .findFilteredConsultants(1, 10, new ConsultantFilter());
+
+    assertThat(consultants.getLinks(), notNullValue());
+    assertThat(consultants.getLinks().getNext(), notNullValue());
+    assertThat(consultants.getLinks().getNext().getHref(),
+        endsWith("/useradmin/consultants?page=2&perPage=10"));
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst() {
+    ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
+        .findFilteredConsultants(3, 10, new ConsultantFilter());
+
+    assertThat(consultants.getLinks(), notNullValue());
+    assertThat(consultants.getLinks().getPrevious(), notNullValue());
+    assertThat(consultants.getLinks().getPrevious().getHref(),
+        endsWith("/useradmin/consultants?page=2&perPage=10"));
   }
 
 }

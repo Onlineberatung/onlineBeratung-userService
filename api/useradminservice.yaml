@@ -256,7 +256,7 @@ components:
           items:
             $ref: '#/components/schemas/SessionAdminDTO'
         _links:
-          $ref: '#/components/schemas/SessionAdminResultLinks'
+          $ref: '#/components/schemas/PaginationLinks'
 
     SessionAdminDTO:
       type: object
@@ -291,7 +291,7 @@ components:
         updateDate:
           type: string
 
-    SessionAdminResultLinks:
+    PaginationLinks:
       type: object
       required:
         - self
@@ -432,7 +432,7 @@ components:
           items:
             $ref: '#/components/schemas/ConsultantDTO'
         _links:
-          $ref: '#/components/schemas/SessionAdminResultLinks'
+          $ref: '#/components/schemas/PaginationLinks'
 
     CreateLinks:
       type: object
