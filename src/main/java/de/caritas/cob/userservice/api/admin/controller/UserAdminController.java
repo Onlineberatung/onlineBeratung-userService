@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.controller;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
@@ -66,5 +67,21 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<List<ViolationDTO>> generateViolationReport() {
     return ResponseEntity.ok(this.violationReportGenerator.generateReport());
+  }
+
+  /**
+   * POST /useradmin/consultant/{consultantId}/agency: Create a new consultant <> agency relation
+   * [Authorization: Role: user-admin].
+   *
+   * @param consultantId Consultant Id (required)
+   * @param createConsultantAgencyDTO  (required)
+   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
+   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
+   * condition (status code 500)
+   */
+  @Override
+  public ResponseEntity<Void> createConsultantAgency(String consultantId,
+      @Valid CreateConsultantAgencyDTO createConsultantAgencyDTO) {
+    return null;
   }
 }
