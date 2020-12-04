@@ -392,20 +392,20 @@ public class TestConstants {
   public static final UserDTO USER_DTO_WITHOUT_MANDATORY_STATE = new UserDTO(null, null, null, null,
       null, null, Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO =
-      new RocketChatUserDTO(RC_USER_ID, USERNAME);
+      new RocketChatUserDTO(RC_USER_ID, USERNAME, null);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, SUCCESS, NULL, NULL);
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO_2 =
-      new RocketChatUserDTO(RC_USER_ID_2, USERNAME);
+      new RocketChatUserDTO(RC_USER_ID_2, USERNAME, null);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_2 =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO_2, SUCCESS, NULL, NULL);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_FAILED =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, FAILED, ERROR, ERROR);
   public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
       new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE);
-  public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123");
-  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456");
-  public static final RocketChatUserDTO USER_DTO_3 = new RocketChatUserDTO("adg", "789");
+  public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123", null);
+  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456", null);
+  public static final RocketChatUserDTO USER_DTO_3 = new RocketChatUserDTO("adg", "789", null);
 
   /*
    * /* Messages

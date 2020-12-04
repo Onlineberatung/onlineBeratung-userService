@@ -21,6 +21,28 @@ paths:
                 $ref: '#/components/schemas/RootDTO'
       security:
         - Bearer: [ ]
+  /useradmin/report:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns an generated report containing data integration violations. [Authorization:
+      Role: user-admin]'
+      operationId: generateViolationReport
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ViolationDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /useradmin/session:
     get:
       tags:
@@ -495,6 +517,31 @@ components:
           type: integer
         absent:
           type: boolean
+
+    ViolationDTO:
+      type: object
+      properties:
+        violationType:
+          type: string
+          enum:
+            - 'CONSULTANT'
+            - 'ASKER'
+        identifier:
+          type: string
+        reason:
+          type: string
+        additionalInformation:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalInformationDTO'
+
+    AdditionalInformationDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
 
   securitySchemes:
     Bearer:

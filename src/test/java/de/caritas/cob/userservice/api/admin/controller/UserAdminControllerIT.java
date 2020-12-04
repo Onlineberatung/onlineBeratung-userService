@@ -3,16 +3,20 @@ package de.caritas.cob.userservice.api.admin.controller;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,18 +27,23 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserAdminController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class UserAdminControllerIT {
 
-  private static final String ROOT_PATH = "/useradmin";
-  private static final String SESSION_PATH = ROOT_PATH + "/session";
-  private static final String PAGE_PARAM = "page";
-  private static final String PER_PAGE_PARAM = "perPage";
+  protected static final String ROOT_PATH = "/useradmin";
+  protected static final String SESSION_PATH = ROOT_PATH + "/session";
+  protected static final String REPORT_PATH = ROOT_PATH + "/report";
+  protected static final String PAGE_PARAM = "page";
+  protected static final String PER_PAGE_PARAM = "perPage";
 
   @Autowired
   private MockMvc mvc;
 
   @MockBean
   private SessionAdminService sessionAdminService;
+
+  @MockBean
+  private ViolationReportGenerator violationReportGenerator;
 
   @MockBean
   private LinkDiscoverers linkDiscoverers;
@@ -70,8 +79,16 @@ public class UserAdminControllerIT {
         .param(PER_PAGE_PARAM, "1"))
         .andExpect(status().isOk());
 
-    Mockito.verify(this.sessionAdminService, Mockito.times(1))
+    verify(this.sessionAdminService, times(1))
         .findSessions(eq(0), eq(1), any());
+  }
+
+  @Test
+  public void generateReport_Should_returnOk() throws Exception {
+    this.mvc.perform(get(REPORT_PATH))
+        .andExpect(status().isOk());
+
+    verify(this.violationReportGenerator, times(1)).generateReport();
   }
 
 }
