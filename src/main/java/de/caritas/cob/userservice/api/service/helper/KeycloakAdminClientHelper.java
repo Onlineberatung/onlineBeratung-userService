@@ -244,8 +244,6 @@ public class KeycloakAdminClientHelper {
     // Get realm and user resources
     RealmResource realmResource = getInstance().realm(KEYCLOAK_REALM);
     UsersResource userRessource = realmResource.users();
-    UserResource user = userRessource.get(userId);
-    boolean isRoleUpdated = false;
 
     // Assign role
     RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
@@ -259,6 +257,9 @@ public class KeycloakAdminClientHelper {
     log.warn("composites: " + ((nonNull(roleRepresentation.getComposites())) ? roleRepresentation.getComposites().toString() : "null"));
     log.warn("isComposite: " + roleRepresentation.isComposite());
     log.warn("==========================");
+
+    UserResource user = userRessource.get(userId);
+    boolean isRoleUpdated = false;
 
     user.roles().realmLevel()
         .add(Arrays.asList(roleRepresentation));
