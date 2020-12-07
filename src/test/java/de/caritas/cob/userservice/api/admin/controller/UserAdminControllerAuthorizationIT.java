@@ -20,7 +20,6 @@ import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFi
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
-import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import javax.servlet.http.Cookie;
 import org.junit.Test;

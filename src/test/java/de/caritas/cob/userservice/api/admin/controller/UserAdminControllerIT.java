@@ -81,7 +81,7 @@ public class UserAdminControllerIT {
         .andExpect(jsonPath("$._links.self.href", endsWith("/useradmin")))
         .andExpect(jsonPath("$._links.sessions").exists())
         .andExpect(
-            jsonPath("$._links.sessions.href", endsWith("/useradmin/session?page=1&perPage=20")))
+            jsonPath("$._links.sessions.href", endsWith("/useradmin/sessions?page=1&perPage=20")))
         .andExpect(jsonPath("$._links.consultants").exists())
         .andExpect(jsonPath("$._links.consultants.href",
                 endsWith("/useradmin/consultants?page=1&perPage=20")));
