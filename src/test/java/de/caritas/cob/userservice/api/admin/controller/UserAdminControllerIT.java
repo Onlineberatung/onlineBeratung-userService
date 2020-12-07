@@ -5,14 +5,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
+import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,8 @@ public class UserAdminControllerIT {
   protected static final String ROOT_PATH = "/useradmin";
   protected static final String SESSION_PATH = ROOT_PATH + "/session";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
-  protected static final String CONSULTANTS_PATH = ROOT_PATH + "/consultants";
+  protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
+  protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
@@ -45,7 +48,7 @@ public class UserAdminControllerIT {
   private SessionAdminService sessionAdminService;
 
   @MockBean
-  private ConsultantAdminFilterService consultantAdminFilterService;
+  private ConsultantAdminFacade consultantAdminFacade;
 
   @MockBean
   private ViolationReportGenerator violationReportGenerator;
@@ -102,20 +105,39 @@ public class UserAdminControllerIT {
   @Test
   public void getConsultants_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
       throws Exception {
-    this.mvc.perform(get(CONSULTANTS_PATH))
+    this.mvc.perform(get(FILTERED_CONSULTANTS_PATH))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void getConsultants_Should_returnOk_When_requiredPaginationParamsAreGiven()
       throws Exception {
-    this.mvc.perform(get(CONSULTANTS_PATH)
+    this.mvc.perform(get(FILTERED_CONSULTANTS_PATH)
         .param(PAGE_PARAM, "0")
         .param(PER_PAGE_PARAM, "1"))
         .andExpect(status().isOk());
 
-    verify(this.consultantAdminFilterService, times(1))
+    verify(this.consultantAdminFacade, times(1))
         .findFilteredConsultants(eq(0), eq(1), any());
+  }
+
+  @Test
+  public void getConsultant_Should_returnOk_When_requiredConsultantIdParamIsGiven()
+      throws Exception {
+    this.mvc.perform(get(GET_CONSULTANT_PATH + "consultantId"))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .findConsultant(eq("consultantId"));
+  }
+
+  @Test
+  public void getConsultant_Should_returnNoContent_When_requiredConsultantDoesNotExist()
+      throws Exception {
+    when(this.consultantAdminFacade.findConsultant(any())).thenThrow(new NoContentException(""));
+
+    this.mvc.perform(get(GET_CONSULTANT_PATH + "consultantId"))
+        .andExpect(status().isNoContent());
   }
 
 }

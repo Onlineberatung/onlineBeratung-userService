@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.admin.controller;
 
+import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
@@ -36,7 +36,7 @@ public class UserAdminController implements UseradminApi {
 
   private final @NonNull SessionAdminService sessionAdminService;
   private final @NonNull ViolationReportGenerator violationReportGenerator;
-  private final @NonNull ConsultantAdminFilterService consultantAdminFilterService;
+  private final @NonNull ConsultantAdminFacade consultantAdminFacade;
 
   /**
    * Creates the root hal based navigation entity.
@@ -68,7 +68,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to create a new consultant.
    *
-   * @param createConsultantDTO  (required)
+   * @param createConsultantDTO (required)
    * @return {@link CreateConsultantResponseDTO}
    */
   @Override
@@ -104,12 +104,12 @@ public class UserAdminController implements UseradminApi {
    * Entry point to update a consultant.
    *
    * @param consultantId consultant id (required)
-   * @param updateConsultantDTO  (required)
+   * @param updateConsultantDTO (required)
    * @return {@link UpdateConsultantResponseDTO}
    */
   @Override
-  public ResponseEntity<UpdateConsultantResponseDTO> updateConsultant(@PathVariable  String consultantId,
-      @Valid UpdateConsultantDTO updateConsultantDTO) {
+  public ResponseEntity<UpdateConsultantResponseDTO> updateConsultant(
+      @PathVariable String consultantId, @Valid UpdateConsultantDTO updateConsultantDTO) {
     return null;
   }
 
@@ -121,7 +121,8 @@ public class UserAdminController implements UseradminApi {
    */
   @Override
   public ResponseEntity<GetConsultantResponseDTO> getConsultant(String consultantId) {
-    return null;
+    GetConsultantResponseDTO responseDTO = this.consultantAdminFacade.findConsultant(consultantId);
+    return ResponseEntity.ok(responseDTO);
   }
 
   /**
@@ -129,14 +130,15 @@ public class UserAdminController implements UseradminApi {
    *
    * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
    * @param perPage Number of items which are being returned per page (required)
-   * @param consultantFilter The filter parameters to search for. If no filter is set all consultant are being returned. (optional)
+   * @param consultantFilter The filter parameters to search for. If no filter is set all consultant
+   * are being returned. (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
   public ResponseEntity<ConsultantSearchResultDTO> getConsultants(@NotNull @Valid Integer page,
       @NotNull @Valid Integer perPage, @Valid ConsultantFilter consultantFilter) {
     ConsultantSearchResultDTO resultDTO =
-        this.consultantAdminFilterService.findFilteredConsultants(page, perPage, consultantFilter);
+        this.consultantAdminFacade.findFilteredConsultants(page, perPage, consultantFilter);
     return ResponseEntity.ok(resultDTO);
   }
 }

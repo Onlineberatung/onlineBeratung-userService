@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
+import de.caritas.cob.userservice.api.admin.mapper.ConsultantAdminMapper;
 import de.caritas.cob.userservice.api.model.ConsultantDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
@@ -83,7 +84,8 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
   public ConsultantSearchResultDTO buildConsultantSearchResult() {
     Stream<Consultant> resultStream = fullTextQuery.getResultStream();
     List<ConsultantDTO> resultList = resultStream
-        .map(this::fromConsultant)
+        .map(ConsultantAdminMapper::new)
+        .map(ConsultantAdminMapper::mapData)
         .collect(Collectors.toList());
 
     PaginationLinks paginationLinks = new PaginationLinks()
@@ -94,22 +96,6 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
     return new ConsultantSearchResultDTO()
         .embedded(resultList)
         .links(paginationLinks);
-  }
-
-  private ConsultantDTO fromConsultant(Consultant consultant) {
-    return new ConsultantDTO()
-        .id(consultant.getId())
-        .username(consultant.getUsername())
-        .firstname(consultant.getFirstName())
-        .lastname(consultant.getLastName())
-        .email(consultant.getEmail())
-        .formalLanguage(consultant.isLanguageFormal())
-        .teamConsultant(consultant.isTeamConsultant())
-        .absent(consultant.isAbsent())
-        .absenceMessage(consultant.getAbsenceMessage())
-        .createDate(String.valueOf(consultant.getCreateDate()))
-        .updateDate(String.valueOf(consultant.getUpdateDate()))
-        .deleteDate(String.valueOf(consultant.getDeleteDate()));
   }
 
   private HalLink buildSelfLink() {
