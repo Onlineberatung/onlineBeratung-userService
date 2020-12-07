@@ -21,29 +21,7 @@ paths:
                 $ref: '#/components/schemas/RootDTO'
       security:
         - Bearer: [ ]
-  /useradmin/report:
-    get:
-      tags:
-        - admin-user-controller
-      summary: 'Returns an generated report containing data integration violations. [Authorization:
-      Role: user-admin]'
-      operationId: generateViolationReport
-      responses:
-        200:
-          description: OK - successfull operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ViolationDTO'
-        401:
-          description: UNAUTHORIZED - no/invalid role/authorization
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-  /useradmin/session:
+  /useradmin/sessions:
     get:
       tags:
         - admin-user-controller
@@ -93,7 +71,64 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
+  /useradmin/consultingtypes:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the full list of consulting types [Authorization: Role: agency-admin]'
+      operationId: getConsultingTypes
+      parameters:
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+            example: 20
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultingTypeAdminResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /useradmin/report:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns an generated report containing data integration violations. [Authorization:
+        Role: user-admin]'
+      operationId: generateViolationReport
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ViolationDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     RootDTO:
@@ -135,7 +170,7 @@ components:
           items:
             $ref: '#/components/schemas/SessionAdminDTO'
         _links:
-          $ref: '#/components/schemas/SessionAdminResultLinks'
+          $ref: '#/components/schemas/PaginationLinks'
 
     SessionAdminDTO:
       type: object
@@ -170,7 +205,7 @@ components:
         updateDate:
           type: string
 
-    SessionAdminResultLinks:
+    PaginationLinks:
       type: object
       required:
         - self
@@ -181,6 +216,85 @@ components:
           $ref: '#/components/schemas/HalLink'
         previous:
           $ref: '#/components/schemas/HalLink'
+
+    ConsultingTypeAdminResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultingTypeResultDTO'
+        _links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    ConsultingTypeResultDTO:
+      type: object
+      properties:
+        consultingTypeId:
+          type: integer
+          format: int32
+          example: 2
+        name:
+          type: string
+          example: "schwangerschaftsberatung"
+        languageFormal:
+          type: boolean
+          example: false
+        roles:
+          $ref: '#/components/schemas/RoleDTO'
+        sendWelcomeMessage:
+          type: boolean
+          example: true
+        welcomeMessage:
+          type: string
+          example: Willkommen bei der Schwangerschaftsberatung
+        monitoring:
+          type: boolean
+          example: true
+        feedbackChat:
+          type: boolean
+          example: true
+        notifications:
+          $ref: '#/components/schemas/NotificationDTO'
+
+    RoleDTO:
+      type: object
+      properties:
+        consultant:
+          $ref: '#/components/schemas/RoleConsultantDTO'
+
+    RoleConsultantDTO:
+      type: object
+      properties:
+        roleNames:
+          type: array
+          items:
+            type: string
+
+    NotificationDTO:
+      type: object
+      properties:
+        newMessage:
+          $ref: '#/components/schemas/NewMessageDTO'
+
+    NewMessageDTO:
+      type: object
+      properties:
+        teamSession:
+          $ref: '#/components/schemas/TeamSessionDTO'
+
+    TeamSessionDTO:
+      type: object
+      properties:
+        toConsultant:
+          $ref: '#/components/schemas/ToConsultantDTO'
+
+    ToConsultantDTO:
+      type: object
+      properties:
+        allTeamConsultants:
+          type: boolean
+          example: true
 
     ViolationDTO:
       type: object

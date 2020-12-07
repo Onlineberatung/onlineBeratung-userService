@@ -98,7 +98,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
@@ -116,7 +116,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
@@ -138,7 +138,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
@@ -159,7 +159,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
 
@@ -173,7 +173,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
@@ -191,7 +191,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
@@ -212,7 +212,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
@@ -231,7 +231,7 @@ public class CreateSessionFacadeTest {
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_SUCHT);
     when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_U25)).thenReturn(AGENCY_DTO_U25);
     when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);

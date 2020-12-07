@@ -1,8 +1,10 @@
 package de.caritas.cob.userservice.api.admin.controller;
 
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
+import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
+import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
 import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAdminController implements UseradminApi {
 
   private final @NonNull SessionAdminService sessionAdminService;
+  private final @NonNull ConsultingTypeAdminService consultingTypeAdminService;
   private final @NonNull ViolationReportGenerator violationReportGenerator;
 
   /**
@@ -53,6 +56,22 @@ public class UserAdminController implements UseradminApi {
     SessionAdminResultDTO sessionAdminResultDTO = this.sessionAdminService
         .findSessions(page, perPage, filter);
     return ResponseEntity.ok(sessionAdminResultDTO);
+  }
+
+  /**
+   * Entry point to retrieve all consulting types.
+   *
+   * @param page    Number of page where to start in the query (1 = first page) (required)
+   * @param perPage Number of items which are being returned per page (required)
+   * @return an entity containing the consulting types as {@link ConsultingTypeAdminResultDTO}
+   */
+  @Override
+  public ResponseEntity<ConsultingTypeAdminResultDTO> getConsultingTypes(
+      @NotNull @Valid Integer page, @NotNull @Valid Integer perPage) {
+    ConsultingTypeAdminResultDTO consultingTypeAdminResultDTO = this.consultingTypeAdminService
+        .findConsultingTypes(page, perPage);
+
+    return ResponseEntity.ok(consultingTypeAdminResultDTO);
   }
 
   /**

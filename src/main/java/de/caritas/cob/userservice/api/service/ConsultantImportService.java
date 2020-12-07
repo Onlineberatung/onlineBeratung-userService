@@ -147,7 +147,7 @@ public class ConsultantImportService {
           Optional<ConsultingType> consultingType = Optional.of(agency.getConsultingType());
 
           ConsultingTypeSettings consultingTypeSettings =
-              consultingTypeManager.getConsultantTypeSettings(consultingType.get());
+              consultingTypeManager.getConsultingTypeSettings(consultingType.get());
 
           if (!consultingTypeSettings.getRoles().getConsultant().getRoleNames()
               .containsKey(agencyRoleArray[1])) {
@@ -350,7 +350,7 @@ public class ConsultantImportService {
               rocketChatService.addTechnicalUserToGroup(
                   consultantTeamSessionResponseDto.getSession().getGroupId());
               ConsultingTypeSettings consultingTypeSettings =
-                  consultingTypeManager.getConsultantTypeSettings(ConsultingType
+                  consultingTypeManager.getConsultingTypeSettings(ConsultingType
                       .valueOf(consultantTeamSessionResponseDto.getSession().getConsultingType())
                       .get());
               boolean isMainConsultant = keycloakAdminClientHelper

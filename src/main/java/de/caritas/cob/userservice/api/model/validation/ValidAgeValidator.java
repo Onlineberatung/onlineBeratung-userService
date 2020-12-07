@@ -32,7 +32,7 @@ public class ValidAgeValidator implements ConstraintValidator<ValidAge, UserDTO>
       return false;
     }
 
-    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager.getConsultantTypeSettings(
+    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager.getConsultingTypeSettings(
         ConsultingType.values()[Integer.valueOf(userDTO.getConsultingType())]);
 
     if (consultingTypeSettings.getRegistration() == null

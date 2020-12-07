@@ -44,7 +44,7 @@ public class SessionAdminResultDTOBuilderTest {
     assertThat(resultDTO.getLinks().getNext(), nullValue());
     assertThat(resultDTO.getLinks().getPrevious(), nullValue());
     assertThat(resultDTO.getLinks().getSelf(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/session?page=1&perPage=20"));
+    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/sessions?page=1&perPage=20"));
   }
 
   @Test
@@ -60,10 +60,10 @@ public class SessionAdminResultDTOBuilderTest {
 
     assertThat(resultDTO, notNullValue());
     assertThat(resultDTO.getEmbedded(), hasSize(20));
-    assertThat(resultDTO.getLinks().getNext().getHref(), is("/useradmin/session?page=3&perPage=2"));
-    assertThat(resultDTO.getLinks().getPrevious().getHref(), is("/useradmin/session?page=1"
+    assertThat(resultDTO.getLinks().getNext().getHref(), is("/useradmin/sessions?page=3&perPage=2"));
+    assertThat(resultDTO.getLinks().getPrevious().getHref(), is("/useradmin/sessions?page=1"
         + "&perPage=2"));
-    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/session?page=2&perPage=2"));
+    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/sessions?page=2&perPage=2"));
   }
 
   @Test

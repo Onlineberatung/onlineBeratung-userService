@@ -91,7 +91,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper
@@ -127,7 +127,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnEmptyListOfSessionDataItems() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.U25)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.U25)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper
@@ -140,7 +140,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreNull() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper
@@ -155,7 +155,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreEmpty() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper.createRegistrationSessionDataList(
@@ -170,7 +170,7 @@ public class SessionDataHelperTest {
   @Test
   public void getValueOfKey_Should_ReturnCorrectValueToGivenKey() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataHelper
@@ -182,7 +182,7 @@ public class SessionDataHelperTest {
   @Test
   public void getValueOfKey_Should_ReturnNullWhenSessionDataValueIsNull() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataHelper

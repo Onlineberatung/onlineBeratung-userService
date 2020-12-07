@@ -157,7 +157,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -179,7 +179,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -203,7 +203,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -229,7 +229,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -251,7 +251,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -277,7 +277,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -301,7 +301,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -330,7 +330,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -361,7 +361,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -392,7 +392,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -420,7 +420,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -452,7 +452,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
@@ -485,7 +485,7 @@ public class CreateUserFacadeTest {
     when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientHelper.createKeycloakUser(Mockito.any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
