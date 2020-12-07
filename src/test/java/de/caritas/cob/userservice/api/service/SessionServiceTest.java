@@ -7,6 +7,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ROLES;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DRUGS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID;
@@ -14,6 +16,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NOT_OFFLINE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_AGENCY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.OTHERS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
@@ -112,7 +115,7 @@ public class SessionServiceTest {
       .consultingType(ConsultingType.SUCHT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
-      null, null, null, null, null, ConsultingType.SUCHT.getValue() + "");
+      null, null, null, null, null, ConsultingType.SUCHT.getValue() + "", true);
   private LinkedHashMap<String, Object> SUCHT_MAP = new LinkedHashMap<>();
 
   @InjectMocks
@@ -259,7 +262,8 @@ public class SessionServiceTest {
     when(agencyServiceHelper.getAgency(USER_DTO.getAgencyId())).thenReturn(AGENCY_DTO);
     when(sessionRepository.save(Mockito.any())).thenReturn(SESSION);
 
-    Session expectedSession = sessionService.initializeSession(USER, USER_DTO, IS_MONITORING);
+    Session expectedSession = sessionService
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
     Assert.assertEquals(expectedSession, SESSION);
 
   }
@@ -271,7 +275,8 @@ public class SessionServiceTest {
     when(agencyServiceHelper.getAgency(USER_DTO.getAgencyId())).thenReturn(AGENCY_DTO);
     when(sessionRepository.save(Mockito.any())).thenReturn(SESSION);
 
-    Session expectedSession = sessionService.initializeSession(USER, USER_DTO, IS_MONITORING);
+    Session expectedSession = sessionService
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
     Assert.assertEquals(expectedSession, SESSION);
 
   }

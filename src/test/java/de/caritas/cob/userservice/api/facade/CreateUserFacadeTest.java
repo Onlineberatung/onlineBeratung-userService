@@ -89,4 +89,15 @@ public class CreateUserFacadeTest {
     assertThat(createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT).getStatus(),
         is(HttpStatus.CONFLICT));
   }
+
+  @Test(expected = BadRequestException.class)
+  public void createUserAndInitializeAccount_Should_ThrowBadRequest_When_ProvidedConsultingTypeDoesNotMatchAgency() {
+
+    when(userHelper.isUsernameAvailable(Mockito.anyString())).thenReturn(true);
+    when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
+        CONSULTING_TYPE_SUCHT)).thenReturn(false);
+
+    createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
+  }
+
 }

@@ -1,7 +1,11 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import static java.util.Objects.isNull;
+
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
@@ -237,8 +241,12 @@ public class KeycloakAdminClientHelper {
     boolean isRoleUpdated = false;
 
     // Assign role
+    RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
+    if (isNull(roleRepresentation.getAttributes())) {
+      roleRepresentation.setAttributes(new LinkedHashMap<>());
+    }
     user.roles().realmLevel()
-        .add(Arrays.asList(realmResource.roles().get(roleName).toRepresentation()));
+        .add(Arrays.asList(roleRepresentation));
 
     // Check if role has been assigned successfully
     List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
