@@ -48,10 +48,10 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.manager.consultingType.notifications.NewMessage;
-import de.caritas.cob.userservice.api.manager.consultingType.notifications.Notifications;
-import de.caritas.cob.userservice.api.manager.consultingType.notifications.TeamSession;
-import de.caritas.cob.userservice.api.manager.consultingType.notifications.ToConsultant;
+import de.caritas.cob.userservice.api.model.NewMessageDTO;
+import de.caritas.cob.userservice.api.model.NotificationDTO;
+import de.caritas.cob.userservice.api.model.TeamSessionDTO;
+import de.caritas.cob.userservice.api.model.ToConsultantDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
@@ -157,16 +157,18 @@ public class EmailNotificationFacadeTest {
   private final GroupMemberDTO GROUP_MEMBER_2 =
       new GroupMemberDTO(GROUP_MEMBER_2_RC_ID, "status2", "username2", "name2", "");
   private final List<GroupMemberDTO> GROUP_MEMBERS = Arrays.asList(GROUP_MEMBER_1, GROUP_MEMBER_2);
-  private final Notifications NOTIFICATIONS_TO_ALL_TEAM_CONSULTANTS =
-      new Notifications(new NewMessage(new TeamSession(new ToConsultant(true))));
-  private final Notifications NOTIFICATIONS_TO_ASSIGNED_CONSULTANT_ONLY =
-      new Notifications(new NewMessage(new TeamSession(new ToConsultant(false))));
+  private final NotificationDTO NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS =
+      new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
+          new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(true))));
+  private final NotificationDTO NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY =
+      new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
+          new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(false))));
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS =
       new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, true, null, false,
-          NOTIFICATIONS_TO_ALL_TEAM_CONSULTANTS, false, null, null);
+          NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS, false, null, null);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
       new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, true, null, false,
-          NOTIFICATIONS_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
+          NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
 
   @InjectMocks
   private EmailNotificationFacade emailNotificationFacade;
@@ -293,7 +295,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
-    when(consultingTypeManager.getConsultantTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -308,7 +310,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
-    when(consultingTypeManager.getConsultantTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -323,7 +325,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(null);
-    when(consultingTypeManager.getConsultantTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -434,7 +436,7 @@ public class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
-    when(consultingTypeManager.getConsultantTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
 
@@ -448,7 +450,7 @@ public class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
-    when(consultingTypeManager.getConsultantTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);

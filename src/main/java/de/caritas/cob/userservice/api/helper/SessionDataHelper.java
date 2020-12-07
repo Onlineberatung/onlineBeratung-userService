@@ -87,7 +87,7 @@ public class SessionDataHelper {
   }
 
   private SessionDataInitializing getSessionDataInitializing(ConsultingType consultingType) {
-    return consultingTypeManager.getConsultantTypeSettings(consultingType)
+    return consultingTypeManager.getConsultingTypeSettings(consultingType)
         .getSessionDataInitializing();
 
   }

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
+import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
@@ -34,7 +35,8 @@ import org.springframework.test.web.servlet.MockMvc;
 public class UserAdminControllerIT {
 
   protected static final String ROOT_PATH = "/useradmin";
-  protected static final String SESSION_PATH = ROOT_PATH + "/session";
+  protected static final String SESSION_PATH = ROOT_PATH + "/sessions";
+  protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
@@ -58,6 +60,9 @@ public class UserAdminControllerIT {
 
   @MockBean
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
+
+  @MockBean
+  private ConsultingTypeAdminService consultingTypeAdminService;
 
   @Test
   public void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
@@ -92,6 +97,24 @@ public class UserAdminControllerIT {
 
     verify(this.sessionAdminService, times(1))
         .findSessions(eq(0), eq(1), any());
+  }
+
+  @Test
+  public void getConsultingTypes_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
+      throws Exception {
+    this.mvc.perform(get(CONSULTING_TYPE_PATH)).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void getConsultingTypes_Should_returnOk_When_requiredPaginationParamsAreGiven()
+      throws Exception {
+    this.mvc.perform(get(CONSULTING_TYPE_PATH)
+        .param(PAGE_PARAM, "0")
+        .param(PER_PAGE_PARAM, "1"))
+        .andExpect(status().isOk());
+
+    verify(this.consultingTypeAdminService, times(1))
+        .findConsultingTypes(eq(0), eq(1));
   }
 
   @Test

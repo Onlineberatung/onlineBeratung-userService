@@ -115,7 +115,7 @@ public class CreateSessionFacade {
 
     ConsultingTypeSettings consultingTypeSettings;
     try {
-      consultingTypeSettings = consultingTypeManager.getConsultantTypeSettings(consultingType);
+      consultingTypeSettings = consultingTypeManager.getConsultingTypeSettings(consultingType);
     } catch (MissingConsultingTypeException e) {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }

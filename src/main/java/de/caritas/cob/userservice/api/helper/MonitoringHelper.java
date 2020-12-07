@@ -154,7 +154,7 @@ public class MonitoringHelper {
    */
   private InputStream getMonitoringJSONStream(ConsultingType consultingType) {
     return TypeReference.class.getResourceAsStream(
-        consultingTypeManager.getConsultantTypeSettings(consultingType).getMonitoringFile());
+        consultingTypeManager.getConsultingTypeSettings(consultingType).getMonitoringFile());
   }
 
   /**
