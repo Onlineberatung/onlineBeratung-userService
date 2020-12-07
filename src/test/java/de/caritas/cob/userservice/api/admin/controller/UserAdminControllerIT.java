@@ -32,8 +32,8 @@ import org.springframework.test.web.servlet.MockMvc;
 public class UserAdminControllerIT {
 
   protected static final String ROOT_PATH = "/useradmin";
-  protected static final String SESSION_PATH = ROOT_PATH + "/session";
-  private static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
+  protected static final String SESSION_PATH = ROOT_PATH + "/sessions";
+  protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
@@ -102,7 +102,7 @@ public class UserAdminControllerIT {
         .param(PER_PAGE_PARAM, "1"))
         .andExpect(status().isOk());
 
-    Mockito.verify(this.consultingTypeAdminService, Mockito.times(1))
+    verify(this.consultingTypeAdminService, times(1))
         .findConsultingTypes(eq(0), eq(1));
   }
 

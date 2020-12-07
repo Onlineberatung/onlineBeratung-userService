@@ -267,12 +267,9 @@ components:
       type: object
       properties:
         roleNames:
-          $ref: '#/components/schemas/RoleNames'
-
-    RoleNames:
-      type: array
-      items:
-        type: string
+          type: array
+          items:
+            type: string
 
     NotificationDTO:
       type: object

@@ -74,7 +74,7 @@ public class ConsultingTypeAdminServiceTest {
   }
 
   @Test
-  public void buildAgencyAdminSearchResult_Should_haveExpectedLinks_When_AllParamsAreProvided() {
+  public void findConsultingTypes_Should_haveExpectedLinks_When_AllParamsAreProvided() {
     PaginationLinks paginationLinks = this.consultingTypeAdminService
         .findConsultingTypes(1, 19).getLinks();
 

@@ -73,6 +73,7 @@ public class UserAdminController implements UseradminApi {
 
     return ResponseEntity.ok(consultingTypeAdminResultDTO);
   }
+
   /**
    * GET /useradmin/report : Returns an generated report containing data integration violations.
    * [Authorization: Role: user-admin].
