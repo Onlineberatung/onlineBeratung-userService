@@ -48,8 +48,8 @@ public class ConsultingTypeAdminService {
     return consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
         Comparator.comparing(ConsultingTypeSettings::getConsultingType, Comparator.comparing(
             ConsultingType::getUrlName)))
-        .map(this::fromConsultingTypeSettings).collect(
-            Collectors.toList());
+        .map(this::fromConsultingTypeSettings)
+        .collect(Collectors.toList());
   }
 
   private Integer currentPage(Integer page,
