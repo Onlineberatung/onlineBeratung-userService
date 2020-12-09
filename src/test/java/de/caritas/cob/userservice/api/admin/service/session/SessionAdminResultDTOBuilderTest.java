@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.session;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -7,8 +7,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.stream.Stream;
 import org.jeasy.random.EasyRandom;
@@ -52,7 +52,7 @@ public class SessionAdminResultDTOBuilderTest {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
-        .withFilter(new Filter().agency(1))
+        .withFilter(new SessionFilter().agency(1))
         .withPage(2)
         .withPerPage(2)
         .withResultPage(this.resultPage)

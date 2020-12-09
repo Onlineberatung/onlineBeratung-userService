@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.pageprovider;
+package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -6,7 +6,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.model.Filter;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,11 +25,11 @@ public class ConsultantSessionPageProviderTest {
   private SessionRepository sessionRepository;
 
   @Mock
-  private Filter filter;
+  private SessionFilter sessionFilter;
 
   @Test
   public void supports_Should_returnTrue_When_consultantFilterIsSet() {
-    when(this.filter.getConsultant()).thenReturn("consultant");
+    when(this.sessionFilter.getConsultant()).thenReturn("consultant");
 
     boolean supports = this.consultantSessionPageProvider.isSupported();
 
@@ -38,7 +38,7 @@ public class ConsultantSessionPageProviderTest {
 
   @Test
   public void supports_Should_returnFalse_When_consultantFilterIsNotSet() {
-    when(this.filter.getConsultant()).thenReturn(null);
+    when(this.sessionFilter.getConsultant()).thenReturn(null);
 
     boolean supports = this.consultantSessionPageProvider.isSupported();
 
@@ -47,7 +47,7 @@ public class ConsultantSessionPageProviderTest {
 
   @Test
   public void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
-    when(this.filter.getConsultant()).thenReturn("consultant");
+    when(this.sessionFilter.getConsultant()).thenReturn("consultant");
     PageRequest pageable = PageRequest.of(0, 1);
 
     this.consultantSessionPageProvider.executeQuery(pageable);

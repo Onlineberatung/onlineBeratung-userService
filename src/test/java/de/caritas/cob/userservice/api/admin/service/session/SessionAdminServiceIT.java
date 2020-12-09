@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.session;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -6,9 +6,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.model.Filter;
 import de.caritas.cob.userservice.api.model.SessionAdminDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.model.SessionFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,21 +29,21 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnAllSessions_When_noFilterIsGiven() {
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 100, new Filter());
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 100, new SessionFilter());
 
     assertThat(sessions.getEmbedded(), hasSize(100));
   }
 
   @Test
   public void findSessions_Should_returnOneSession_When_perPageIsNegativeValue() {
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, -100, new Filter());
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, -100, new SessionFilter());
 
     assertThat(sessions.getEmbedded(), hasSize(1));
   }
 
   @Test
   public void findSessions_Should_returnFullMappedSessionAdminDTO() {
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 1, new Filter());
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 1, new SessionFilter());
 
     SessionAdminDTO sessionAdminDTO = sessions.getEmbedded().iterator().next();
     assertThat(sessionAdminDTO.getAgencyId(), notNullValue());
@@ -62,8 +62,8 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_haveCorrectPagedResults_When_noFilterIsGiven() {
-    SessionAdminResultDTO firstPage = this.sessionAdminService.findSessions(1, 100, new Filter());
-    SessionAdminResultDTO secondPage = this.sessionAdminService.findSessions(2, 100, new Filter());
+    SessionAdminResultDTO firstPage = this.sessionAdminService.findSessions(1, 100, new SessionFilter());
+    SessionAdminResultDTO secondPage = this.sessionAdminService.findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
     assertThat(secondPage.getEmbedded(), hasSize(41));
@@ -71,9 +71,9 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnSessionsFilteredByAgency_When_filterHasAgencySet() {
-    Filter filter = new Filter().agency(1);
+    SessionFilter sessionFilter = new SessionFilter().agency(1);
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     sessions.getEmbedded().forEach(sessionAdminDTO ->
         assertThat(sessionAdminDTO.getAgencyId(), is(1))
@@ -82,9 +82,9 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnSessionsFilteredByConsultant_When_filterHasConsultantSet() {
-    Filter filter = new Filter().consultant("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc");
+    SessionFilter sessionFilter = new SessionFilter().consultant("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc");
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     sessions.getEmbedded().forEach(sessionAdminDTO ->
         assertThat(sessionAdminDTO.getConsultantId(), is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc"))
@@ -93,9 +93,9 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnSessionsFilteredByAsker_When_filterHasAskerSet() {
-    Filter filter = new Filter().asker("a38983e3-43f7-49ac-ab61-18161fd45b69");
+    SessionFilter sessionFilter = new SessionFilter().asker("a38983e3-43f7-49ac-ab61-18161fd45b69");
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     sessions.getEmbedded().forEach(sessionAdminDTO ->
         assertThat(sessionAdminDTO.getUserId(), is("a38983e3-43f7-49ac-ab61-18161fd45b69"))
@@ -104,9 +104,9 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnSessionsFilteredByConsultingType_When_filterHasConsultingTypeSet() {
-    Filter filter = new Filter().consultingType(1);
+    SessionFilter sessionFilter = new SessionFilter().consultingType(1);
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     sessions.getEmbedded().forEach(sessionAdminDTO ->
         assertThat(sessionAdminDTO.getConsultingType(), is(1))
@@ -115,36 +115,36 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnEmptyResult_When_filterHasInvalidAgencySet() {
-    Filter filter = new Filter().agency(-20);
+    SessionFilter sessionFilter = new SessionFilter().agency(-20);
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     assertThat(sessions.getEmbedded(), hasSize(0));
   }
 
   @Test
   public void findSessions_Should_returnEmptyResult_When_filterHasInvalidConsultantSet() {
-    Filter filter = new Filter().consultant("invalid");
+    SessionFilter sessionFilter = new SessionFilter().consultant("invalid");
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     assertThat(sessions.getEmbedded(), hasSize(0));
   }
 
   @Test
   public void findSessions_Should_returnEmptyResult_When_filterHasInvalidAskerSet() {
-    Filter filter = new Filter().asker("invalid");
+    SessionFilter sessionFilter = new SessionFilter().asker("invalid");
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     assertThat(sessions.getEmbedded(), hasSize(0));
   }
 
   @Test
   public void findSessions_Should_returnEmptyResult_When_filterHasInvalidConsultingTypeSet() {
-    Filter filter = new Filter().consultingType(-20);
+    SessionFilter sessionFilter = new SessionFilter().consultingType(-20);
 
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, filter);
+    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     assertThat(sessions.getEmbedded(), hasSize(0));
   }
