@@ -49,7 +49,7 @@ public class ValidStateValidatorTest {
   @Test
   public void isValid_Should_ReturnFalse_WhenConsultingTypeSettingsAreMissingMandatoryFields() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_STATE_FIELD);
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
@@ -60,7 +60,7 @@ public class ValidStateValidatorTest {
   @Test
   public void isValid_Should_ReturnFalse_WhenStateIsMandatoryAndInvalid() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE);
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_INVALID_STATE, null);
@@ -71,7 +71,7 @@ public class ValidStateValidatorTest {
   @Test
   public void isValid_Should_ReturnTrue_WhenStateIsMandatoryAndValid() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE);
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_STATE, null);
@@ -82,7 +82,7 @@ public class ValidStateValidatorTest {
   @Test
   public void isValid_Should_ReturnTrue_WhenStateIsNotMandatory() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE);
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);

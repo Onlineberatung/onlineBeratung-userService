@@ -62,10 +62,8 @@ public class CreateNewConsultingTypeFacadeTest {
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);
 
-    when(createSessionFacade
-        .createUserSession(any(), any(), any())).thenReturn(1L);
-    when(consultingTypeManager
-        .getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(createSessionFacade.createUserSession(any(), any(), any())).thenReturn(1L);
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     long sessionId = createNewConsultingTypeFacade
@@ -84,8 +82,7 @@ public class CreateNewConsultingTypeFacadeTest {
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);
 
-    when(consultingTypeManager
-        .getConsultantTypeSettings(CONSULTING_TYPE_KREUZBUND))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_KREUZBUND))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
 
     Long sessionId = createNewConsultingTypeFacade

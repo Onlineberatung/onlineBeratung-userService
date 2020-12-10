@@ -223,7 +223,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -408,7 +408,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());

@@ -41,7 +41,7 @@ public class CreateNewConsultingTypeFacade {
       ConsultingType consultingType = ConsultingType
           .fromConsultingType(userRegistrationDTO.getConsultingType());
       ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
-          .getConsultantTypeSettings(consultingType);
+          .getConsultingTypeSettings(consultingType);
 
       return createSessionOrChat(userRegistrationDTO, user,
           consultingTypeSettings, rocketChatCredentials);

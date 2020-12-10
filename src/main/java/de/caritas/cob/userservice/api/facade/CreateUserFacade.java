@@ -96,7 +96,7 @@ public class CreateUserFacade {
     checkIfUserIdNotNull(userId, userDTO);
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(consultingType);
+        consultingTypeManager.getConsultingTypeSettings(consultingType);
     User user;
 
     try {

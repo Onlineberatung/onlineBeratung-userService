@@ -209,7 +209,7 @@ public class UserControllerIT {
   private final User USER = new User(USER_ID, "username", "name@domain.de", null);
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
-          "consultant@cob.de", false, true, "", false, null, null, null);
+          "consultant@cob.de", false, true, "", false, null, null, null, null, null, null);
   private final Optional<Consultant> OPTIONAL_CONSULTANT = Optional.of(TEAM_CONSULTANT);
   private final String DUMMY_ROLE_A = "dummyRoleA";
   private final String DUMMY_ROLE_B = "dummyRoleB";
@@ -418,7 +418,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidAge()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_REGISTER_USER).content(INVALID_U25_USER_REQUEST_BODY_AGE)
@@ -430,7 +430,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidState()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(INVALID_U25_USER_REQUEST_BODY_STATE)
@@ -442,7 +442,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooShort()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(USER_REQUEST_BODY_WITH_USERNAME_TOO_SHORT)
@@ -454,7 +454,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooLong()
       throws Exception {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(USER_REQUEST_BODY_WITH_USERNAME_TOO_LONG)
@@ -468,7 +468,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_USER_REQUEST_BODY)
@@ -482,7 +482,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_U25_USER_REQUEST_BODY)
@@ -496,7 +496,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_USER_REQUEST_BODY)
@@ -533,7 +533,7 @@ public class UserControllerIT {
   @Test
   public void registerNewConsultingType_Should_ReturnBadRequest_When_AgencyIdMissing()
       throws Exception {
-    when(consultingTypeManager.getConsultantTypeSettings(any()))
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -583,7 +583,7 @@ public class UserControllerIT {
     when(createNewConsultingTypeFacade
         .initializeNewConsultingType(any(), any(), any(RocketChatCredentials.class)))
         .thenReturn(1L);
-    when(consultingTypeManager.getConsultantTypeSettings(any()))
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -1496,7 +1496,7 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)
