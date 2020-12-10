@@ -108,6 +108,8 @@ public class TestConstants {
   public static final ConsultingType CONSULTING_TYPE_EMIGRATION = ConsultingType.EMIGRATION;
   public static final ConsultingType CONSULTING_TYPE_HOSPICE = ConsultingType.HOSPICE;
   public static final ConsultingType CONSULTING_TYPE_REGIONAL = ConsultingType.REGIONAL;
+  public static final String INVALID_CONSULTING_TYPE = "invalid";
+  public static final String UNKNOWN_CONSULTING_TYPE = "9999";
 
   /*
    * Session data
@@ -368,16 +370,16 @@ public class TestConstants {
   public static final User USER_NO_DATA = new User(null, null, null, null, true);
   public static final UserDTO USER_DTO_SUCHT =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
+          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_SUCHT_WITH_INVALID_POSTCODE =
       new UserDTO(USERNAME, INVALID_POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null,
-          null, "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
+          null, "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_SUCHT_WITHOUT_EMAIL =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, null, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
+          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_KREUZBUND =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_KREUZBUND.getValue()));
+          "true", Integer.toString(CONSULTING_TYPE_KREUZBUND.getValue()), true);
   public static final UserDTO USER_DTO_WITH_AGE =
       new UserDTO(VALID_AGE, null, Integer.toString(CONSULTING_TYPE_U25.getValue()));
   public static final UserDTO USER_DTO_WITH_INVALID_AGE =
@@ -548,9 +550,11 @@ public class TestConstants {
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_U25 =
       Arrays.asList(USER_SESSION_RESPONSE_DTO_U25);
   public static final NewRegistrationDto NEW_REGISTRATION_DTO_SUCHT =
-      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_SUCHT.getValue()));
+      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_SUCHT.getValue()),
+          true);
   public static final NewRegistrationDto NEW_REGISTRATION_DTO_U25 =
-      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_U25.getValue()));
+      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_U25.getValue()),
+          true);
   public static final SessionDTO SESSION_DTO_1 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1016,7 +1020,7 @@ public class TestConstants {
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CHILDREN =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
+      new ConsultingTypeSettings(CONSULTING_TYPE_CHILDREN, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CURE =
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,

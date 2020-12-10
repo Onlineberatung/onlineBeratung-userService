@@ -12,7 +12,6 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.RELATION_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
 
-import de.caritas.cob.userservice.api.model.registration.IRegistrationDto;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -34,7 +33,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * User model
@@ -48,7 +46,7 @@ import lombok.ToString;
 @ValidAge
 @ValidState
 @ValidPostcode
-public class UserDTO implements IRegistrationDto {
+public class UserDTO implements UserRegistrationDTO {
 
   @NotBlank(message = "{user.username.notBlank}")
   @ApiModelProperty(required = true, example = "max94", position = 0)
@@ -121,6 +119,8 @@ public class UserDTO implements IRegistrationDto {
   @ApiModelProperty(required = true, example = "\"0\"", position = 11)
   @JsonProperty("consultingType")
   private String consultingType;
+
+  private boolean newUserAccount;
 
   public UserDTO(String email) {
     this.email = email;

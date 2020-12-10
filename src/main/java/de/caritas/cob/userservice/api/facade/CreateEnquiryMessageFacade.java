@@ -97,7 +97,6 @@ public class CreateEnquiryMessageFacade {
               .rcGroupId(rcGroupId).rcFeedbackGroupId(rcFeedbackGroupId).build();
 
       saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
-      monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
 
       messageServiceHelper.postMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);

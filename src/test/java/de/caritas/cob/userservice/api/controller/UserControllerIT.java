@@ -58,6 +58,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_MESSAG
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS;
@@ -112,11 +113,13 @@ import de.caritas.cob.userservice.api.authorization.Authorities;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
+import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
@@ -248,7 +251,6 @@ public class UserControllerIT {
       .agency(AGENCY_DTO)
       .consultant(SESSION_CONSULTANT_DTO);
   private final List<AgencyDTO> AGENCY_LIST = new ArrayList<>();
-  @SuppressWarnings("serial")
   private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<String, Object>() {
     {
       put("age", "1");
@@ -380,6 +382,8 @@ public class UserControllerIT {
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
   @MockBean
   private LinkDiscoverers linkDiscoverers;
+  @MockBean
+  private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 
   @Mock
   private Logger logger;
@@ -389,9 +393,9 @@ public class UserControllerIT {
 
   @Before
   public void setUp() {
-    HashMap<String, Object> drugsMap = new HashMap<String, Object>();
+    HashMap<String, Object> drugsMap = new HashMap<>();
     drugsMap.put("others", false);
-    HashMap<String, Object> addictiveDrugsMap = new HashMap<String, Object>();
+    HashMap<String, Object> addictiveDrugsMap = new HashMap<>();
     addictiveDrugsMap.put("drugs", drugsMap);
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
     setInternalState(LogService.class, "LOGGER", logger);
@@ -496,7 +500,7 @@ public class UserControllerIT {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER).content(VALID_USER_REQUEST_BODY)
-        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isConflict());
   }
 
@@ -507,8 +511,10 @@ public class UserControllerIT {
   @Test
   public void registerNewConsultingType_Should_ReturnBadRequest_When_ProvidedWithInvalidRequestBody()
       throws Exception {
-
-    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).content(INVALID_USER_REQUEST_BODY)
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .content(INVALID_USER_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -516,11 +522,9 @@ public class UserControllerIT {
   @Test
   public void registerNewConsultingType_Should_ReturnBadRequest_When_PostcodeMissing()
       throws Exception {
-
-    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
-
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .content(INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -529,11 +533,12 @@ public class UserControllerIT {
   @Test
   public void registerNewConsultingType_Should_ReturnBadRequest_When_AgencyIdMissing()
       throws Exception {
-
-    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .content(INVALID_NEW_REGISTRATION_BODY_WITHOUT_AGENCY_ID)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -542,12 +547,30 @@ public class UserControllerIT {
   @Test
   public void registerNewConsultingType_Should_ReturnBadRequest_When_ConsultingTypeMissing()
       throws Exception {
-
-    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
-
     mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .content(INVALID_NEW_REGISTRATION_BODY_WITHOUT_CONSULTING_TYPE)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerNewConsultingType_Should_ReturnBadRequest_When_RcUserIdIsMissing()
+      throws Exception {
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .content(VALID_NEW_REGISTRATION_BODY)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerNewConsultingType_Should_ReturnBadRequest_When_RcTokenIsMissing()
+      throws Exception {
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+        .content(VALID_NEW_REGISTRATION_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -557,11 +580,16 @@ public class UserControllerIT {
       throws Exception {
 
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
-    when(createSessionFacade.createSession(Mockito.any(), Mockito.any())).thenReturn(1L);
-    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+    when(createNewConsultingTypeFacade
+        .initializeNewConsultingType(any(), any(), any(RocketChatCredentials.class)))
+        .thenReturn(1L);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE).content(VALID_NEW_REGISTRATION_BODY)
+    mvc.perform(post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
+        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .content(VALID_NEW_REGISTRATION_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
   }
@@ -866,10 +894,6 @@ public class UserControllerIT {
   @Test
   public void getSessionsForAuthenticatedConsultant_Should_ReturnSuccess_WhenAuthorizedAndSessionAvailable()
       throws Exception {
-
-    List<ConsultantSessionResponseDTO> session = new ArrayList<>();
-    session.add(new ConsultantSessionResponseDTO());
-
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
 

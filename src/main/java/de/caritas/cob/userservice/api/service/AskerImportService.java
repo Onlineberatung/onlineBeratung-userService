@@ -418,8 +418,9 @@ public class AskerImportService {
         }
 
         // Initialize Session (need session id for Rocket.Chat group name)
-        Session session = sessionService.initializeSession(dbUser, userDTO,
-            consultingTypeSettings.isMonitoring());
+        Session session = sessionService
+            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()),
+                consultingTypeSettings);
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));

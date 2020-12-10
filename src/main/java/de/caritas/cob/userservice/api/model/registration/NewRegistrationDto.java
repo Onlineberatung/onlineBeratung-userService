@@ -6,7 +6,7 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_R
 import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MAX;
 import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MIN;
 
-import de.caritas.cob.userservice.api.model.registration.IRegistrationDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -33,7 +33,7 @@ import lombok.ToString;
 @ApiModel(value = "NewRegistration")
 @ValidPostcode
 @ToString
-public class NewRegistrationDto implements IRegistrationDto {
+public class NewRegistrationDto implements UserRegistrationDTO {
 
   @NotBlank(message = "{user.custom.postcode.notNull}")
   @Min(value = POSTCODE_MIN, message = "{user.custom.postcode.invalid}")
@@ -53,4 +53,7 @@ public class NewRegistrationDto implements IRegistrationDto {
   @ApiModelProperty(required = true, example = "\"0\"", position = 2)
   @JsonProperty("consultingType")
   private String consultingType;
+
+  @ApiModelProperty(hidden = true)
+  private boolean newUserAccount;
 }
