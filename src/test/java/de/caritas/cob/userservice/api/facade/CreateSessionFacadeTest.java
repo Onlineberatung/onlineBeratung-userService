@@ -4,21 +4,23 @@ import static de.caritas.cob.userservice.testHelper.ExceptionConstants.CREATE_MO
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CHILDREN;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PREGNANCY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CHILDREN;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_PREGNANCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.NEW_REGISTRATION_DTO_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.NEW_REGISTRATION_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_LIST;
+import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITH_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
@@ -31,21 +33,17 @@ import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.UserService;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -55,19 +53,15 @@ public class CreateSessionFacadeTest {
   @InjectMocks
   private CreateSessionFacade createSessionFacade;
   @Mock
-  private UserService userService;
-  @Mock
   private SessionService sessionService;
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
-  @Mock
-  private AuthenticatedUser authenticatedUser;
   @Mock
   private AgencyHelper agencyHelper;
   @Mock
   private MonitoringService monitoringService;
   @Mock
   private SessionDataService sessionDataService;
+  @Mock
+  private RollbackFacade rollbackFacade;
   @Mock
   private Logger logger;
 
@@ -77,178 +71,156 @@ public class CreateSessionFacadeTest {
   }
 
   /**
-   * Method: createSession
+   * Method: createUserSession
    */
 
   @Test(expected = ConflictException.class)
-  public void createSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
+  public void createUserSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(sessionService.getSessionsForUserByConsultingType(Mockito.any(), Mockito.any()))
+    when(sessionService.getSessionsForUserByConsultingType(any(), any()))
         .thenReturn(SESSION_LIST);
 
     createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    verify(sessionService, times(0)).saveSession(Mockito.any());
+    verify(sessionService, times(0)).saveSession(any());
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createSession_Should_ReturnInternalServerError_When_SessionCouldNotBeSaved() {
+  public void createUserSession_Should_ReturnInternalServerErrorAndRollbackUserAccount_When_SessionCouldNotBeSaved() {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenThrow(new InternalServerErrorException(MESSAGE));
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+        .thenThrow(new InternalServerErrorException(MESSAGE));
 
     createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createSession_Should_ReturnInternalServerError_When_SessionDataCouldNotBeSaved() {
+  public void createUserSession_Should_ReturnInternalServerErrorAndRollbackUserAccount_When_SessionDataCouldNotBeSaved() {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
-    when(sessionDataService.saveSessionDataFromRegistration(Mockito.any(), Mockito.any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+        .thenThrow(new InternalServerErrorException(MESSAGE));
+    when(sessionDataService.saveSessionDataFromRegistration(any(), any()))
         .thenThrow(INTERNAL_SERVER_ERROR_EXCEPTION);
 
     createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verify(sessionService, times(1)).deleteSession(Mockito.any());
+    verify(sessionService, times(1)).deleteSession(any());
+    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createSession_Should_ReturnInternalServerError_When_MonitoringCouldNotBeSaved()
+  public void createUserSession_Should_ReturnInternalServerErrorAndRollbackUserAccount_When_MonitoringCouldNotBeSaved()
       throws CreateMonitoringException {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
-    doThrow(CREATE_MONITORING_EXCEPTION).when(monitoringService).createMonitoringIfConfigured(Mockito.any(),
-        Mockito.any());
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+        .thenReturn(SESSION_WITH_CONSULTANT);
+    doThrow(CREATE_MONITORING_EXCEPTION).when(monitoringService).createMonitoringIfConfigured(any(),
+        any());
 
     createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verify(monitoringService, times(1)).rollbackInitializeMonitoring(Mockito.any());
+    verify(monitoringService, times(1)).rollbackInitializeMonitoring(any());
+    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 
   @Test(expected = BadRequestException.class)
-  public void createSession_Should_ReturnBadRequest_When_AgencyForConsultingTypeCouldNotBeFound() {
+  public void createUserSession_Should_ReturnBadRequest_When_AgencyForConsultingTypeCouldNotBeFound() {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
 
     createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
   }
 
   @Test
-  public void createSession_Should_ReturnSessionId_OnSuccess() {
+  public void createUserSession_Should_ReturnSessionId_OnSuccess() {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+        .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    assertThat(result, is(1L));
+    assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
   }
 
   @Test
-  public void createSession_Should_CreateSessionData() {
+  public void createUserSession_Should_CreateSessionData() {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+        .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    assertThat(result, is(1L));
-    verify(sessionDataService, times(1)).saveSessionDataFromRegistration(Mockito.any(),
-        Mockito.any());
+    assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
+    verify(sessionDataService, times(1)).saveSessionDataFromRegistration(any(),
+        any());
   }
 
   @Test
-  public void createSession_Should_CreateMonitoring_When_ConsultingTypeContainsMonitoring()
+  public void createUserSession_Should_CreateMonitoring_When_ConsultingTypeContainsMonitoring()
       throws CreateMonitoringException {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+    when(agencyHelper.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), CONSULTING_TYPE_PREGNANCY))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+        .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_PREGNANCY);
 
-    assertThat(result, is(1L));
-    verify(monitoringService, times(1)).createMonitoringIfConfigured(Mockito.any(), Mockito.any());
+    assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
+    verify(monitoringService, times(1)).createMonitoringIfConfigured(any(), any());
   }
 
   @Test
-  public void createSession_ShouldNot_CreateMonitoring_When_ConsultingTypeDoesNotContainsMonitoring() {
+  public void createUserSession_ShouldNot_CreateMonitoring_When_ConsultingTypeDoesNotContainMonitoring() {
 
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_SUCHT);
-    when(userService.getUserViaAuthenticatedUser(Mockito.any())).thenReturn(Optional.of(USER));
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_U25)).thenReturn(AGENCY_DTO_U25);
-    when(sessionService.saveSession(Mockito.any())).thenReturn(SESSION_WITH_CONSULTANT);
+    when(agencyHelper.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), CONSULTING_TYPE_CHILDREN))
+        .thenReturn(AGENCY_DTO_U25);
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+        .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade
-        .createSession(NEW_REGISTRATION_DTO_U25, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_CHILDREN);
 
-    assertThat(result, is(1L));
-    verify(monitoringService, times(0)).updateMonitoring(Mockito.any(), Mockito.any());
+    assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
+    verify(monitoringService, times(0)).updateMonitoring(any(), any());
   }
 }

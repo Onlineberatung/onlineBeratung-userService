@@ -24,6 +24,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Facade to encapsulate the steps to initialize a new session.
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateSessionFacade {
@@ -53,8 +56,7 @@ public class CreateSessionFacade {
   }
 
   private void initializeMonitoring(UserDTO userDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings,
-      Session session) {
+      ConsultingTypeSettings consultingTypeSettings, Session session) {
     try {
       monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
     } catch (CreateMonitoringException exception) {
@@ -72,12 +74,14 @@ public class CreateSessionFacade {
 
   private Session initializeSession(UserDTO userDTO, User user,
       ConsultingTypeSettings consultingTypeSettings, AgencyDTO agencyDTO) {
-    Session session;
 
     try {
-      session = sessionService.initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
-          consultingTypeSettings);
+      Session session = sessionService
+          .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
+              consultingTypeSettings);
       sessionDataService.saveSessionDataFromRegistration(session, userDTO);
+
+      return session;
     } catch (Exception ex) {
       rollbackFacade.rollBackUserAccount(RollbackUserAccountInformation.builder()
           .userId(user.getUserId())
@@ -89,12 +93,9 @@ public class CreateSessionFacade {
           String.format("Could not create session for user %s. %s", user.getUsername(),
               ex.getMessage()));
     }
-
-    return session;
   }
 
-  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO,
-      ConsultingType consultingType) {
+  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, ConsultingType consultingType) {
     AgencyDTO agencyDTO =
         agencyHelper.getVerifiedAgency(userDTO.getAgencyId(), consultingType);
 

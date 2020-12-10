@@ -2,7 +2,8 @@ package de.caritas.cob.userservice.api.service;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -10,17 +11,16 @@ import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgencyRepository;
 
 @Service
+@RequiredArgsConstructor
 public class UserAgencyService {
 
-  @Autowired
-  UserAgencyRepository userAgencyRepository;
+  private final @NonNull UserAgencyRepository userAgencyRepository;
 
   /**
-   * Save a {@link UserAgency} to the database
-   * 
-   * @param userAgency
-   * @return the {@link UserAgency}
-   * 
+   * Save a {@link UserAgency} to the database.
+   *
+   * @param userAgency {@link UserAgency}
+   * @return the updated/created {@link UserAgency}
    */
   public UserAgency saveUserAgency(UserAgency userAgency) {
     try {
@@ -32,9 +32,9 @@ public class UserAgencyService {
   }
 
   /**
-   * Get a list of the user agencies
-   * 
-   * @param user
+   * Get a list of the user agencies.
+   *
+   * @param user {@link User}
    * @return a list with the user agencies
    */
   public List<UserAgency> getUserAgenciesByUser(User user) {
@@ -47,11 +47,9 @@ public class UserAgencyService {
   }
 
   /**
-   * Deletes an {@link UserAgency} relation from database
-   * 
-   * @param userAgency
-   * 
-   * @throws {@link ServiceException}
+   * Deletes an {@link UserAgency} relation from database.
+   *
+   * @param userAgency {@link UserAgency}
    */
   public void deleteUserAgency(UserAgency userAgency) {
     try {

@@ -64,11 +64,11 @@ public class SessionDataHelperTest {
       ConsultingType.SUCHT, "99999", 1L, SessionStatus.IN_PROGRESS, new Date(), null, SESSION_DATA,
       IS_TEAM_SESSION, IS_MONITORING);
   private final UserDTO USER_DTO_WITHOUT_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
-      "x@y.de", null, null, null, null, null, "true", "0");
+      "x@y.de", null, null, null, null, null, "true", "0", true);
   private final UserDTO USER_DTO_WITH_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
-      "x@y.de", ADDICTIVE_DRUGS, RELATION, AGE, GENDER, STATE, "true", "0");
+      "x@y.de", ADDICTIVE_DRUGS, RELATION, AGE, GENDER, STATE, "true", "0", true);
   private final UserDTO USER_DTO_WITH_EMPTY_SESSION_DATA =
-      new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", "", "", "", "", "", "true", "0");
+      new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", "", "", "", "", "", "true", "0", true);
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
       new SessionDataInitializing(true, true, true, true, true);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =

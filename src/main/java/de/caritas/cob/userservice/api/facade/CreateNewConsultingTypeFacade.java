@@ -15,6 +15,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Facade to encapsulate the steps to initialize a new consulting type.
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateNewConsultingTypeFacade {
@@ -25,7 +28,7 @@ public class CreateNewConsultingTypeFacade {
 
   /**
    * Initializes the new consulting type settings and creates a session or a chat-agency relation
-   * depending on its type.
+   * depending on its type. This method should be used for new consulting type registrations.
    *
    * @param userRegistrationDTO   {@link UserRegistrationDTO}
    * @param user                  {@link User}
@@ -34,22 +37,22 @@ public class CreateNewConsultingTypeFacade {
    */
   public Long initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
       RocketChatCredentials rocketChatCredentials) {
-    ConsultingType consultingType =
-        ConsultingType.values()[Integer.parseInt(userRegistrationDTO.getConsultingType())];
-    ConsultingTypeSettings consultingTypeSettings;
     try {
-      consultingTypeSettings = consultingTypeManager.getConsultantTypeSettings(consultingType);
-    } catch (MissingConsultingTypeException e) {
+      ConsultingType consultingType = ConsultingType
+          .fromConsultingType(userRegistrationDTO.getConsultingType());
+      ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
+          .getConsultantTypeSettings(consultingType);
+
+      return createSessionOrChat(userRegistrationDTO, user,
+          consultingTypeSettings, rocketChatCredentials);
+    } catch (MissingConsultingTypeException | IllegalArgumentException e) {
       throw new BadRequestException(e.getMessage(), LogService::logInternalServerError);
     }
-
-    return createSessionOrChat(userRegistrationDTO, user,
-        consultingTypeSettings, rocketChatCredentials);
   }
 
   /**
    * Initializes the new consulting type settings and creates a session or a chat-agency relation
-   * depending on its type.
+   * depending on its type. This method should be used for new user account registrations.
    *
    * @param userRegistrationDTO    {@link UserRegistrationDTO}
    * @param user                   {@link User}
@@ -59,6 +62,25 @@ public class CreateNewConsultingTypeFacade {
       ConsultingTypeSettings consultingTypeSettings) {
 
     createSessionOrChat(userRegistrationDTO, user, consultingTypeSettings, null);
+  }
+
+  private Long createSessionOrChat(UserRegistrationDTO userRegistrationDTO, User user,
+      ConsultingTypeSettings consultingTypeSettings, RocketChatCredentials rocketChatCredentials) {
+
+    Long sessionId = null;
+
+    if (consultingTypeSettings.getConsultingType().equals(ConsultingType.KREUZBUND)) {
+      createUserChatRelationFacade
+          .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
+              rocketChatCredentials);
+
+    } else {
+      sessionId = createSessionFacade
+          .createUserSession(fromUserRegistrationDTO(userRegistrationDTO), user,
+              consultingTypeSettings);
+    }
+
+    return sessionId;
   }
 
   private UserDTO fromUserRegistrationDTO(UserRegistrationDTO userRegistrationDTO) {
@@ -71,24 +93,6 @@ public class CreateNewConsultingTypeFacade {
     }
 
     return (UserDTO) userRegistrationDTO;
-  }
-
-  private Long createSessionOrChat(UserRegistrationDTO user, User dbUser,
-      ConsultingTypeSettings consultingTypeSettings, RocketChatCredentials rocketChatCredentials) {
-
-    Long sessionId = null;
-
-    if (consultingTypeSettings.getConsultingType().equals(ConsultingType.KREUZBUND)) {
-      createUserChatRelationFacade
-          .initializeUserChatAgencyRelation(fromUserRegistrationDTO(user), dbUser,
-              rocketChatCredentials);
-
-    } else {
-      sessionId = createSessionFacade
-          .createUserSession(fromUserRegistrationDTO(user), dbUser, consultingTypeSettings);
-    }
-
-    return sessionId;
   }
 
 }

@@ -66,6 +66,7 @@ import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.MapUtils;
@@ -146,7 +147,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<NewRegistrationResponseDto> registerNewConsultingType(
       @RequestHeader String rcToken, @RequestHeader String rcUserId,
-      @RequestBody NewRegistrationDto newRegistrationDto) {
+      @Valid @RequestBody NewRegistrationDto newRegistrationDto) {
 
     User user = this.userAccountProvider.retrieveValidatedUser();
     RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
@@ -486,7 +487,7 @@ public class UserController implements UsersApi {
    * Returns all consultants of the provided agency id as a list of {@link ConsultantResponseDTO}.
    *
    * @param agencyId Agency Id (required)
-   * @return {@link ResponseEntity} containing {@link List} or {@link ConsultantResponseDTO}
+   * @return {@link ResponseEntity} containing {@link List} of {@link ConsultantResponseDTO}
    */
   @Override
   public ResponseEntity<List<ConsultantResponseDTO>> getConsultants(

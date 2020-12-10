@@ -45,46 +45,42 @@ public class CreateUserFacade {
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
    * provided {@link ConsultingType}.
-   * 
-   * @param user {@link UserDTO}
+   *
+   * @param userDTO {@link UserDTO}
    * @return {@link KeycloakCreateUserResponseDTO}
-   * 
    */
-  public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO user) {
+  public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO userDTO) {
 
-    if (!userHelper.isUsernameAvailable(user.getUsername())) {
+    if (!userHelper.isUsernameAvailable(userDTO.getUsername())) {
       return new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT,
           new CreateUserResponseDTO().usernameAvailable(USERNAME_NOT_AVAILABLE)
               .emailAvailable(EMAIL_AVAILABLE), null);
     }
 
     ConsultingType consultingType =
-        ConsultingType.values()[Integer.parseInt(user.getConsultingType())];
+        ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())];
 
-    checkIfConsultingTypeMatchesToAgency(user, consultingType);
+    checkIfConsultingTypeMatchesToAgency(userDTO, consultingType);
 
-    KeycloakCreateUserResponseDTO response = createKeycloakUser(user);
+    KeycloakCreateUserResponseDTO response = createKeycloakUser(userDTO);
     if (response.getStatus().equals(HttpStatus.CONFLICT)) {
       return response;
     }
 
-    updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), user, consultingType);
+    updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
+        consultingType);
 
     return new KeycloakCreateUserResponseDTO(HttpStatus.CREATED);
   }
 
-  private KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO user) {
-    KeycloakCreateUserResponseDTO response;
-
+  private KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO userDTO) {
     try {
       // Create the user in Keycloak
-      response = keycloakAdminClientHelper.createKeycloakUser(user);
+      return keycloakAdminClientHelper.createKeycloakUser(userDTO);
     } catch (Exception ex) {
       throw new InternalServerErrorException(
-          String.format("Could not create Keycloak account for: %s", user.toString()));
+          String.format("Could not create Keycloak account for: %s", userDTO.toString()));
     }
-
-    return response;
   }
 
   private void checkIfConsultingTypeMatchesToAgency(UserDTO user, ConsultingType consultingType) {
@@ -94,47 +90,50 @@ public class CreateUserFacade {
     }
   }
 
-  private void updateKeycloakAccountAndCreateDatabaseUserAccount(String userId, UserDTO user,
+  private void updateKeycloakAccountAndCreateDatabaseUserAccount(String userId, UserDTO userDTO,
       ConsultingType consultingType) {
 
-    checkIfUserIdNotNull(userId, user);
+    checkIfUserIdNotNull(userId, userDTO);
 
     ConsultingTypeSettings consultingTypeSettings =
         consultingTypeManager.getConsultantTypeSettings(consultingType);
-    User dbUser;
+    User user;
 
     try {
       // We need to set the user roles and password and (dummy) e-mail address after the user was
       // created in Keycloak
       keycloakAdminClientHelper.updateUserRole(userId);
-      keycloakAdminClientHelper.updatePassword(userId, user.getPassword());
+      keycloakAdminClientHelper.updatePassword(userId, userDTO.getPassword());
 
-      dbUser = userService
-          .createUser(userId, user.getUsername(), returnDummyEmailIfNoneGiven(user, userId),
+      user = userService
+          .createUser(userId, userDTO.getUsername(), returnDummyEmailIfNoneGiven(userDTO, userId),
               consultingTypeSettings.isLanguageFormal());
 
     } catch (Exception ex) {
       rollbackFacade
-          .rollBackUserAccount(RollbackUserAccountInformation.builder().userId(userId).build());
+          .rollBackUserAccount(RollbackUserAccountInformation.builder().userId(userId)
+              .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted())).build());
       throw new InternalServerErrorException(
-          String.format("Could not update account data on registration for: %s", user.toString()));
+          String
+              .format("Could not update account data on registration for: %s", userDTO.toString()));
     }
 
-    createNewConsultingTypeFacade.initializeNewConsultingType(user, dbUser, consultingTypeSettings);
+    createNewConsultingTypeFacade
+        .initializeNewConsultingType(userDTO, user, consultingTypeSettings);
   }
 
-  private String returnDummyEmailIfNoneGiven(UserDTO user, String userId) throws Exception {
-    if (isBlank(user.getEmail())) {
-      return keycloakAdminClientHelper.updateDummyEmail(userId, user);
+  private String returnDummyEmailIfNoneGiven(UserDTO userDTO, String userId) throws Exception {
+    if (isBlank(userDTO.getEmail())) {
+      return keycloakAdminClientHelper.updateDummyEmail(userId, userDTO);
     }
 
-    return user.getEmail();
+    return userDTO.getEmail();
   }
 
-  private void checkIfUserIdNotNull(String userId, UserDTO user) {
+  private void checkIfUserIdNotNull(String userId, UserDTO userDTO) {
     if (isNull(userId)) {
       throw new InternalServerErrorException(
-          String.format("Could not create Keycloak account for: %s", user.toString()));
+          String.format("Could not create Keycloak account for: %s", userDTO.toString()));
     }
   }
 

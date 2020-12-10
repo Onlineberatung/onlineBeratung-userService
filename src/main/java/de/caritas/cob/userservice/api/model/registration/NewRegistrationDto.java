@@ -6,6 +6,7 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_R
 import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MAX;
 import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MIN;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -53,5 +54,6 @@ public class NewRegistrationDto implements UserRegistrationDTO {
   @JsonProperty("consultingType")
   private String consultingType;
 
+  @ApiModelProperty(hidden = true)
   private boolean newUserAccount;
 }

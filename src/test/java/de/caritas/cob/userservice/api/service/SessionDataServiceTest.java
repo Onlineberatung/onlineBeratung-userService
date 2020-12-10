@@ -41,7 +41,7 @@ public class SessionDataServiceTest {
   private final Session INITALIZED_SESSION = new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT,
       "99999", 0L, SessionStatus.INITIAL, null, null);
   private final UserDTO USER_DTO = new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", null, null,
-      null, null, null, "true", "0");
+      null, null, null, "true", "0", true);
 
 
   @InjectMocks

@@ -26,7 +26,7 @@ public class RollbackFacade {
 
   /**
    * Deletes the provided user in Keycloak, MariaDB and its related session or user-chat/agency
-   * relations depending on the provided {@link RollbackUserAccountInformation}
+   * relations depending on the provided {@link RollbackUserAccountInformation}.
    *
    * @param rollbackUser {@link RollbackUserAccountInformation}
    */
@@ -50,8 +50,10 @@ public class RollbackFacade {
   }
 
   private void rollbackKeycloakAndMariaDbAccount(RollbackUserAccountInformation rollbackUser) {
-    if (rollbackUser.isRollBackUserAccount() && nonNull(rollbackUser.getUserId())) {
-      keycloakAdminClientHelper.rollBackUser(rollbackUser.getUserId());
+    if (rollbackUser.isRollBackUserAccount()) {
+      if (nonNull(rollbackUser.getUserId())) {
+        keycloakAdminClientHelper.rollBackUser(rollbackUser.getUserId());
+      }
       if (nonNull(rollbackUser.getUser())) {
         userService.deleteUser(rollbackUser.getUser());
       }

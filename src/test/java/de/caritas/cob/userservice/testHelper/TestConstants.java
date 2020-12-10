@@ -108,6 +108,8 @@ public class TestConstants {
   public static final ConsultingType CONSULTING_TYPE_EMIGRATION = ConsultingType.EMIGRATION;
   public static final ConsultingType CONSULTING_TYPE_HOSPICE = ConsultingType.HOSPICE;
   public static final ConsultingType CONSULTING_TYPE_REGIONAL = ConsultingType.REGIONAL;
+  public static final String INVALID_CONSULTING_TYPE = "invalid";
+  public static final String UNKNOWN_CONSULTING_TYPE = "9999";
 
   /*
    * Session data
@@ -1016,7 +1018,7 @@ public class TestConstants {
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CHILDREN =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
+      new ConsultingTypeSettings(CONSULTING_TYPE_CHILDREN, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CURE =
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,

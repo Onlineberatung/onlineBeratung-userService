@@ -12,6 +12,9 @@ public class UserDTOBuilder {
 
   private NewRegistrationDto newRegistrationDto;
 
+  private UserDTOBuilder() {
+  }
+
   /**
    * Creates an {@link UserDTOBuilder} instance.
    *
@@ -38,15 +41,15 @@ public class UserDTOBuilder {
    * @return the generated {@link UserDTO}
    */
   public UserDTO build() {
-    UserDTO userDTO = null;
-
     if (nonNull(this.newRegistrationDto)) {
-      userDTO = new UserDTO();
+      UserDTO userDTO = new UserDTO();
       userDTO.setAgencyId(this.newRegistrationDto.getAgencyId());
       userDTO.setPostcode(this.newRegistrationDto.getPostcode());
       userDTO.setConsultingType(this.newRegistrationDto.getConsultingType());
+
+      return userDTO;
     }
 
-    return userDTO;
+    return null;
   }
 }
