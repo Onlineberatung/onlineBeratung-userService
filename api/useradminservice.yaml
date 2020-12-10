@@ -307,11 +307,9 @@ components:
           example: 15
         createDate:
           type: string
-          format: date
           example: 2019-10-23
         editDate:
           type: string
-          format: date
           example: 2019-10-23
 
     CreateConsultantAgencyDTO:

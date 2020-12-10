@@ -80,7 +80,9 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
 
     return new ConsultantAgencyAdminDTO()
         .agencyId(consultantAgency.getAgencyId())
-        .consultantId(consultantAgency.getConsultant().getId());
+        .consultantId(consultantAgency.getConsultant().getId())
+        .createDate(String.valueOf(consultantAgency.getCreateDate()))
+        .editDate((String.valueOf(consultantAgency.getUpdateDate())));
   }
 
   private ConsultantAgencyAdminResultLinks buildResultLinks() {

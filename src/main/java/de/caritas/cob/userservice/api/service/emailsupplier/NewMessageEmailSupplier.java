@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -99,7 +100,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
       return consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
     } else {
       if (isNotBlank(session.getConsultant().getEmail())) {
-        return singletonList(new ConsultantAgency(null, session.getConsultant(), null));
+        return singletonList(new ConsultantAgency(null, session.getConsultant(), null,
+            LocalDateTime.now(), LocalDateTime.now()));
       }
     }
     return emptyList();
