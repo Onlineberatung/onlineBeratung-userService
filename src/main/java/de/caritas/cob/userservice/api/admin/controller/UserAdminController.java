@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.Filter;
@@ -29,6 +30,7 @@ public class UserAdminController implements UseradminApi {
 
   private final @NonNull SessionAdminService sessionAdminService;
   private final @NonNull ViolationReportGenerator violationReportGenerator;
+  private final @NonNull ConsultantAgencyAdminService consultantAgencyAdminService;
 
   /**
    * Creates the root hal based navigation entity.
@@ -44,9 +46,9 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve sessions.
    *
-   * @param page Number of page where to start in the query (1 = first page) (required)
+   * @param page    Number of page where to start in the query (1 = first page) (required)
    * @param perPage Number of items which are being returned (required)
-   * @param filter The filters to restrict results (optional)
+   * @param filter  The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
@@ -81,6 +83,8 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(
       @PathVariable String consultantId) {
-    return null;
+    ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAgencyAdminService
+        .findConsultantAgencies(consultantId);
+    return ResponseEntity.ok(consultantAgencies);
   }
 }

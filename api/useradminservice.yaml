@@ -206,6 +206,8 @@ components:
           $ref: '#/components/schemas/HalLink'
         sessions:
           $ref: '#/components/schemas/HalLink'
+        consultantagencies:
+          $ref: '#/components/schemas/HalLink'
 
     HalLink:
       type: object
@@ -263,7 +265,37 @@ components:
         updateDate:
           type: string
 
+    SessionAdminResultLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        next:
+          $ref: '#/components/schemas/HalLink'
+        previous:
+          $ref: '#/components/schemas/HalLink'
+
     ConsultantAgencyAdminResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantAgencyAdminDTO'
+        _links:
+          $ref: '#/components/schemas/ConsultantAgencyAdminResultLinks'
+
+    ConsultantAgencyAdminResultLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+
+    ConsultantAgencyAdminDTO:
       type: object
       properties:
         consultantId:
@@ -273,8 +305,6 @@ components:
           type: integer
           format: int64
           example: 15
-        role:
-          type: string
         createDate:
           type: string
           format: date
@@ -293,18 +323,6 @@ components:
            example: 15
          role:
            type: string
-
-    SessionAdminResultLinks:
-      type: object
-      required:
-        - self
-      properties:
-        self:
-          $ref: '#/components/schemas/HalLink'
-        next:
-          $ref: '#/components/schemas/HalLink'
-        previous:
-          $ref: '#/components/schemas/HalLink'
 
     ViolationDTO:
       type: object
