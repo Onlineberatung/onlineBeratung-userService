@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import org.junit.Test;
@@ -44,6 +45,9 @@ public class UserAdminControllerIT {
 
   @MockBean
   private ViolationReportGenerator violationReportGenerator;
+
+  @MockBean
+  private ConsultantAgencyAdminService consultantAgencyAdminService;
 
   @MockBean
   private LinkDiscoverers linkDiscoverers;
