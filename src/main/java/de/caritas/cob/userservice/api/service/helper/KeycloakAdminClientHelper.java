@@ -1,11 +1,23 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
 import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -18,16 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.authorization.Authority;
-import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Helper class for the KeycloakService. Communicates to the Keycloak Admin API over the Keycloak
@@ -37,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class KeycloakAdminClientHelper {
+
   @Value("${keycloak.auth-server-url}")
   private String KEYCLOAK_SERVER_URL;
 
@@ -105,9 +108,9 @@ public class KeycloakAdminClientHelper {
   /**
    * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user ID.
    *
-   * @param user      {@link UserDTO}
+   * @param user {@link UserDTO}
    * @param firstName first name of user
-   * @param lastName  last name of user
+   * @param lastName last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
   @KeycloakAdminClientLogout
@@ -225,20 +228,50 @@ public class KeycloakAdminClientHelper {
   /**
    * Assigns the role with the given name to the given user ID.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param roleName Keycloak role name
    */
   @KeycloakAdminClientLogout
   public void updateRole(final String userId, final String roleName) {
     // Get realm and user resources
     RealmResource realmResource = getInstance().realm(KEYCLOAK_REALM);
-    UsersResource userRessource = realmResource.users();
-    UserResource user = userRessource.get(userId);
-    boolean isRoleUpdated = false;
 
     // Assign role
+    ObjectMapper objectMapper = new ObjectMapper();
+    RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
+    String lineSeparator = System.getProperty("line.separator");
+    StringBuilder logStringBuilder = new StringBuilder();
+    logStringBuilder.append("=== roleRepresentation ===").append(lineSeparator);
+    try {
+      logStringBuilder.append("object: ")
+          .append("user ID: ")
+          .append(userId)
+          .append(objectMapper.writeValueAsString(roleRepresentation))
+          .append(lineSeparator);
+    } catch (JsonProcessingException e) {
+      log.warn("Could not parse object of role representation");
+    }
+    logStringBuilder.append("==========================");
+
+    UsersResource userRessource = realmResource.users();
+    UserResource user = userRessource.get(userId);
+
+    logStringBuilder.append("=== userRessource ===").append(lineSeparator);
+    try {
+      logStringBuilder.append("object: ")
+          .append(objectMapper.writeValueAsString(user.toRepresentation()))
+          .append(lineSeparator);
+    } catch (JsonProcessingException e) {
+      log.warn("Could not parse object of user resource");
+    }
+    logStringBuilder.append("==========================");
+
+    log.warn(logStringBuilder.toString());
+
+    boolean isRoleUpdated = false;
+
     user.roles().realmLevel()
-        .add(Arrays.asList(realmResource.roles().get(roleName).toRepresentation()));
+        .add(Arrays.asList(roleRepresentation));
 
     // Check if role has been assigned successfully
     List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
@@ -257,7 +290,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Updates the Keycloak password for a user.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param password user password
    */
   @KeycloakAdminClientLogout
@@ -274,7 +307,7 @@ public class KeycloakAdminClientHelper {
    * success/error status possible, because the Keycloak Client doesn't provide one either. *
    *
    * @param userId Keycloak user ID
-   * @param user   {@link UserDTO}
+   * @param user {@link UserDTO}
    * @return the (dummy) email address
    * @throws Exception {@link Exception}
    */
