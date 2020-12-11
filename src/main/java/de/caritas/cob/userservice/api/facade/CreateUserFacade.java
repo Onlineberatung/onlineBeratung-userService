@@ -26,7 +26,6 @@ import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +35,6 @@ import org.springframework.stereotype.Service;
  * Facade to encapsulate the steps to initialize an user account (create chat/agency relation or a
  * new session).
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateUserFacade {
@@ -62,11 +60,6 @@ public class CreateUserFacade {
    * @return {@link KeycloakCreateUserResponseDTO}
    */
   public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO user) {
-
-    String lineSeparator = System.getProperty("line.separator");
-    StringBuilder logStringBuilder = new StringBuilder();
-    logStringBuilder.append("=== UserDTO ===" + lineSeparator);
-    logStringBuilder.append("object: " + user.toString());
 
     KeycloakCreateUserResponseDTO response;
     String userId;
@@ -98,11 +91,6 @@ public class CreateUserFacade {
     if (response.getStatus().equals(HttpStatus.CONFLICT)) {
       return response;
     }
-
-    logStringBuilder.append("userId " + userId + lineSeparator);
-    logStringBuilder.append("===============" + lineSeparator);
-
-    log.warn(logStringBuilder.toString());
 
     // Update Keycloak account data and create user and session in MariaDB
     updateAccountData(userId, user, consultingType);
