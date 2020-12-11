@@ -2,11 +2,17 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
-import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.SessionAdminService;
+import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
+import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
+import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
-import de.caritas.cob.userservice.api.model.Filter;
+import de.caritas.cob.userservice.api.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantResponseDTO;
+import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;
@@ -16,6 +22,7 @@ import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import io.swagger.annotations.Api;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -35,6 +42,8 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull SessionAdminService sessionAdminService;
   private final @NonNull ConsultingTypeAdminService consultingTypeAdminService;
   private final @NonNull ViolationReportGenerator violationReportGenerator;
+  private final @NonNull ConsultantAdminFacade consultantAdminFacade;
+  private final @Nonnull ConsultantAgencyAdminService consultantAgencyAdminService;
 
   /**
    * Creates the root hal based navigation entity.
@@ -50,9 +59,9 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve sessions.
    *
-   * @param page    Number of page where to start in the query (1 = first page) (required)
-   * @param perPage Number of items which are being returned (required)
-   * @param filter The filters to restrict results (optional)
+   * @param page          Number of page where to start in the query (1 = first page) (required)
+   * @param perPage       Number of items which are being returned (required)
+   * @param sessionFilter The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
@@ -117,7 +126,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to update a consultant.
    *
-   * @param consultantId consultant id (required)
+   * @param consultantId        consultant id (required)
    * @param updateConsultantDTO (required)
    * @return {@link UpdateConsultantResponseDTO}
    */
@@ -142,10 +151,11 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve consultants.
    *
-   * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
-   * @param perPage Number of items which are being returned per page (required)
+   * @param page             Number of page where to start in the query (1 &#x3D; first page)
+   *                         (required)
+   * @param perPage          Number of items which are being returned per page (required)
    * @param consultantFilter The filter parameters to search for. If no filter is set all consultant
-   * are being returned. (optional)
+   *                         are being returned. (optional)
    * @return an entity containing the filtered sessions
    */
   @Override

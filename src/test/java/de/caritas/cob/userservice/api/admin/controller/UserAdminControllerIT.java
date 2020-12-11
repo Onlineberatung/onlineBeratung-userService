@@ -11,8 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
-import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
+import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
@@ -41,6 +42,8 @@ public class UserAdminControllerIT {
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
+  protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
+  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/" + CONSULTANT_ID + "/agencies";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
@@ -88,7 +91,7 @@ public class UserAdminControllerIT {
             jsonPath("$._links.sessions.href", endsWith("/useradmin/sessions?page=1&perPage=20")))
         .andExpect(jsonPath("$._links.consultants").exists())
         .andExpect(jsonPath("$._links.consultants.href",
-                endsWith("/useradmin/consultants?page=1&perPage=20")));
+            endsWith("/useradmin/consultants?page=1&perPage=20")));
   }
 
   @Test
