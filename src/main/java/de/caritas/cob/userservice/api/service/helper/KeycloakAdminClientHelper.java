@@ -244,6 +244,8 @@ public class KeycloakAdminClientHelper {
     logStringBuilder.append("=== roleRepresentation ===").append(lineSeparator);
     try {
       logStringBuilder.append("object: ")
+          .append("user ID: ")
+          .append(userId)
           .append(objectMapper.writeValueAsString(roleRepresentation))
           .append(lineSeparator);
     } catch (JsonProcessingException e) {

@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static java.util.Objects.nonNull;
-
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -68,18 +66,7 @@ public class CreateUserFacade {
     String lineSeparator = System.getProperty("line.separator");
     StringBuilder logStringBuilder = new StringBuilder();
     logStringBuilder.append("=== UserDTO ===" + lineSeparator);
-    logStringBuilder.append("addictiveDrugs: " + user.getAddictiveDrugs() + lineSeparator);
-    logStringBuilder.append("age: " + user.getAge() + lineSeparator);
-    logStringBuilder.append("consultingType: " + user.getConsultingType() + lineSeparator);
-    logStringBuilder
-        .append("email:" + ((nonNull(user.getEmail())) ? "not null" : "null") + lineSeparator);
-    logStringBuilder.append("gender: " + user.getGender() + lineSeparator);
-    logStringBuilder.append("postcode: " + user.getPostcode() + lineSeparator);
-    logStringBuilder.append("relation: " + user.getRelation() + lineSeparator);
-    logStringBuilder.append("state: " + user.getState() + lineSeparator);
-    logStringBuilder.append("termsAccepted: " + user.getTermsAccepted() + lineSeparator);
-    logStringBuilder.append("username: " + user.getUsername() + lineSeparator);
-    logStringBuilder.append("agencyId: " + user.getAgencyId() + lineSeparator);
+    logStringBuilder.append("object: " + user.toString());
 
     KeycloakCreateUserResponseDTO response;
     String userId;
