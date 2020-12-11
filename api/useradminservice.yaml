@@ -21,29 +21,7 @@ paths:
                 $ref: '#/components/schemas/RootDTO'
       security:
         - Bearer: [ ]
-  /useradmin/report:
-    get:
-      tags:
-        - admin-user-controller
-      summary: 'Returns an generated report containing data integration violations. [Authorization:
-      Role: user-admin]'
-      operationId: generateViolationReport
-      responses:
-        200:
-          description: OK - successfull operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ViolationDTO'
-        401:
-          description: UNAUTHORIZED - no/invalid role/authorization
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-  /useradmin/session:
+  /useradmin/sessions:
     get:
       tags:
         - admin-user-controller
@@ -56,16 +34,7 @@ paths:
           description: 'The filter parameters to search for. If no filter is set all sessions are
           being returned. If more than one filter is set the first given filter is used only.'
           schema:
-            type: object
-            properties:
-              agency:
-                type: integer
-              asker:
-                type: string
-              consultant:
-                type: string
-              consultingType:
-                type: integer
+            $ref: '#/components/schemas/SessionFilter'
         - name: page
           in: query
           description: Number of page where to start in the query (1 = first page)
@@ -93,13 +62,222 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
+  /useradmin/consultant:
+    post:
+      tags:
+        - admin-user-controller
+      summary: 'Creates a new consultant [Authorization: Role: consultant-admin]'
+      operationId: createConsultant
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateConsultantDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - consultant was created successfully
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/CreateConsultantResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /useradmin/consultant/{consultantId}:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Get a consultant by given id [Authorization: Role: consultant-admin]'
+      operationId: getConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: consultant id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - consultant found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GetConsultantResponseDTO'
+        204:
+          description: NO CONTENT - consultant with the specific id was not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    put:
+      tags:
+        - admin-user-controller
+      summary: 'Updates a consultant [Authorization: Role: consultant-admin]'
+      operationId: updateConsultant
+      requestBody:
+        content:
+          'application/hal+json':
+            schema:
+              $ref: '#/components/schemas/UpdateConsultantDTO'
+        required: true
+      parameters:
+        - name: consultantId
+          in: path
+          description: consultant id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - consultant was updated successfully
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UpdateConsultantResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    delete:
+      tags:
+        - admin-user-controller
+      summary: 'Mark a consultant for deletion [Authorization: Role: consultant-admin]'
+      operationId: markConsultantForDeletion
+      parameters:
+        - name: consultantId
+          in: path
+          description: consultant id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - consultant was marked for deletion successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /useradmin/consultants:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of consultants by filter query parameter. [Authorization: Role: consultant-admin]'
+      operationId: getConsultants
+      parameters:
+        - name: filter
+          in: query
+          description: 'The filter parameters to search for. If no filter is set all consultant are
+              being returned.'
+          schema:
+            $ref: '#/components/schemas/ConsultantFilter'
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultantSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /useradmin/consultingtypes:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the full list of consulting types [Authorization: Role: agency-admin]'
+      operationId: getConsultingTypes
+      parameters:
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+            example: 20
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultingTypeAdminResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /useradmin/report:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns an generated report containing data integration violations. [Authorization: Role: user-admin]'
+      operationId: generateViolationReport
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ViolationDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /useradmin/consultant/{consultantId}/agencies:
     get:
       tags:
         - admin-user-controller
       summary: 'Returns the list of consultant-agency connections for a given consultant Id. [Authorization: Role:
-      user-admin]'
+        user-admin]'
       operationId: getConsultantAgency
       parameters:
         - name: consultantId
@@ -208,6 +386,8 @@ components:
           $ref: '#/components/schemas/HalLink'
         consultantagencies:
           $ref: '#/components/schemas/HalLink'
+        consultants:
+          $ref: '#/components/schemas/HalLink'
 
     HalLink:
       type: object
@@ -230,7 +410,7 @@ components:
           items:
             $ref: '#/components/schemas/SessionAdminDTO'
         _links:
-          $ref: '#/components/schemas/SessionAdminResultLinks'
+          $ref: '#/components/schemas/PaginationLinks'
 
     SessionAdminDTO:
       type: object
@@ -265,7 +445,7 @@ components:
         updateDate:
           type: string
 
-    SessionAdminResultLinks:
+    PaginationLinks:
       type: object
       required:
         - self
@@ -276,6 +456,278 @@ components:
           $ref: '#/components/schemas/HalLink'
         previous:
           $ref: '#/components/schemas/HalLink'
+
+    ConsultingTypeAdminResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultingTypeResultDTO'
+        _links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    ConsultingTypeResultDTO:
+      type: object
+      properties:
+        consultingTypeId:
+          type: integer
+          format: int32
+          example: 2
+        name:
+          type: string
+          example: "schwangerschaftsberatung"
+        languageFormal:
+          type: boolean
+          example: false
+        roles:
+          $ref: '#/components/schemas/RoleDTO'
+        sendWelcomeMessage:
+          type: boolean
+          example: true
+        welcomeMessage:
+          type: string
+          example: Willkommen bei der Schwangerschaftsberatung
+        monitoring:
+          type: boolean
+          example: true
+        feedbackChat:
+          type: boolean
+          example: true
+        notifications:
+          $ref: '#/components/schemas/NotificationDTO'
+
+    RoleDTO:
+      type: object
+      properties:
+        consultant:
+          $ref: '#/components/schemas/RoleConsultantDTO'
+
+    RoleConsultantDTO:
+      type: object
+      properties:
+        roleNames:
+          type: array
+          items:
+            type: string
+
+    NotificationDTO:
+      type: object
+      properties:
+        newMessage:
+          $ref: '#/components/schemas/NewMessageDTO'
+
+    NewMessageDTO:
+      type: object
+      properties:
+        teamSession:
+          $ref: '#/components/schemas/TeamSessionDTO'
+
+    TeamSessionDTO:
+      type: object
+      properties:
+        toConsultant:
+          $ref: '#/components/schemas/ToConsultantDTO'
+
+    ToConsultantDTO:
+      type: object
+      properties:
+        allTeamConsultants:
+          type: boolean
+          example: true
+
+    CreateConsultantDTO:
+      type: object
+      required:
+        - username
+        - firstname
+        - lastname
+        - email
+        - formalLanguage
+        - absent
+      properties:
+        username:
+          type: string
+          example: "max.mustermann"
+        firstname:
+          type: string
+          example: "Max"
+        lastname:
+          type: string
+          example: "Mustermann"
+        email:
+          type: string
+          example: "max@mustermann.de"
+        formalLanguage:
+          type: boolean
+          example: true
+        absent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: "I am absent until..."
+
+    UpdateConsultantDTO:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - email
+        - formalLanguage
+        - absent
+      properties:
+        firstname:
+          type: string
+          example: "Max"
+        lastname:
+          type: string
+          example: "Mustermann"
+        email:
+          type: string
+          example: "max@mustermann.de"
+        formalLanguage:
+          type: boolean
+          example: true
+        absent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: "I am absent until..."
+
+    ConsultantDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "0f2cca9c-9303-4791-a0a5-a1ce16f1524f"
+        username:
+          type: string
+          example: "max.mustermann"
+        firstname:
+          type: string
+          example: "Max"
+        lastname:
+          type: string
+          example: "Mustermann"
+        email:
+          type: string
+          example: "max@mustermann.de"
+        formalLanguage:
+          type: boolean
+          example: true
+        teamConsultant:
+          type: boolean
+          example: false
+        absent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: "I am absent until..."
+        createDate:
+          type: string
+        updateDate:
+          type: string
+        deleteDate:
+          type: string
+
+    CreateConsultantResponseDTO:
+      type: object
+      properties:
+        _embedded:
+          $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/CreateLinks'
+
+    GetConsultantResponseDTO:
+      type: object
+      properties:
+        _embedded:
+          $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/GetLinks'
+
+    UpdateConsultantResponseDTO:
+      type: object
+      properties:
+        _embedded:
+          $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/UpdateLinks'
+
+    ConsultantSearchResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantDTO'
+        _links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    CreateLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        update:
+          $ref: '#/components/schemas/HalLink'
+        delete:
+          $ref: '#/components/schemas/HalLink'
+
+    GetLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        update:
+          $ref: '#/components/schemas/HalLink'
+        delete:
+          $ref: '#/components/schemas/HalLink'
+
+    UpdateLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        consultant:
+          $ref: '#/components/schemas/HalLink'
+        delete:
+          $ref: '#/components/schemas/HalLink'
+
+    SessionFilter:
+      type: object
+      properties:
+        agency:
+          type: integer
+        asker:
+          type: string
+        consultant:
+          type: string
+        consultingType:
+          type: integer
+
+    ConsultantFilter:
+      type: object
+      properties:
+        username:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        agencyId:
+          type: integer
+        absent:
+          type: boolean
 
     ConsultantAgencyAdminResultDTO:
       type: object

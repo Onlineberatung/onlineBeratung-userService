@@ -60,8 +60,14 @@
 			<version>6.1.6.Final</version>
 		</dependency>
 
-		<!-- Swagger/OpenAPI dependencies -->
+		<!-- Search dependency -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-orm</artifactId>
+			<version>5.11.7.Final</version>
+		</dependency>
 
+		<!-- Swagger/OpenAPI dependencies -->
 		<dependency>
 			<groupId>org.openapitools</groupId>
 			<artifactId>openapi-generator-maven-plugin</artifactId>
@@ -293,7 +299,7 @@
 								<importMapping>Date=java.util.Date</importMapping>
 								<importMapping>HttpStatus=org.springframework.http.HttpStatus</importMapping>
 								<importMapping>
-									ConsultingType=de.caritas.cob.userservice.api.repository.session.ConsultingType
+									ConsultingType=${project.groupId}.${project.artifactId}.api.repository.session.ConsultingType
 								</importMapping>
 							</importMappings>
 							<typeMappings>
@@ -340,6 +346,11 @@
 							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
+							<typeMappings>
+								<typeMapping>
+									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingType.roles.Consultant
+								</typeMapping>
+							</typeMappings>
 						</configuration>
 					</execution>
 					<!-- Generate client API for live service -->

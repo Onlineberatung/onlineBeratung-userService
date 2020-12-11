@@ -49,7 +49,7 @@ public class ValidAgeValidatorTest {
   @Test
   public void isValid_Should_ReturnFalse_WhenConsultingTypeSettingsAreMissingMandatoryFields() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITHOUT_MANDATORY_AGE, null);
@@ -60,7 +60,7 @@ public class ValidAgeValidatorTest {
   @Test
   public void isValid_Should_ReturnFalse_WhenAgeIsMandatoryAndInvalid() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY);
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITH_INVALID_AGE, null);
@@ -71,7 +71,7 @@ public class ValidAgeValidatorTest {
   @Test
   public void isValid_Should_ReturnTrue_WhenAgeIsMandatoryAndValid() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY);
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITH_AGE, null);
@@ -82,7 +82,7 @@ public class ValidAgeValidatorTest {
   @Test
   public void isValid_Should_ReturnTrue_WhenAgeIsNotMandatory() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_AGE_MANDATORY);
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITHOUT_MANDATORY_AGE, null);

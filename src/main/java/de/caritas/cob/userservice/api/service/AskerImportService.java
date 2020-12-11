@@ -223,7 +223,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -408,7 +408,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -418,8 +418,9 @@ public class AskerImportService {
         }
 
         // Initialize Session (need session id for Rocket.Chat group name)
-        Session session = sessionService.initializeSession(dbUser, userDTO,
-            consultingTypeSettings.isMonitoring());
+        Session session = sessionService
+            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()),
+                consultingTypeSettings);
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));

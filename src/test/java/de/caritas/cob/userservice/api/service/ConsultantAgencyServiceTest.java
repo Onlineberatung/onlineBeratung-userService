@@ -37,7 +37,7 @@ public class ConsultantAgencyServiceTest {
   private final Long AGENCY_ID = 1L;
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
-          "last name", "consultant@cob.de", false, false, null, false, null, null, null);
+          "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now());
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);

@@ -64,7 +64,7 @@ public class ConsultingTypeManagerTest {
   private final String INIT_GROUP_NAME = "init";
   private final String FIELD_NAME_CONSULTING_TYPE_SETTINGS_MAP = "consultingTypeSettingsMap";
   private final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH =
-      "CONSULTING_TYPES_SETTINGS_JSON_PATH";
+      "consultingTypesSettingsJsonPath";
   private final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE =
       "/consulting-type-settings";
   private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP =
@@ -120,10 +120,10 @@ public class ConsultingTypeManagerTest {
         CONSULTING_TYPE_SETTINGS_MAP);
 
     ConsultingTypeSettings result =
-        consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT);
+        consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT);
     assertEquals(CONSULTING_TYPE_SETTINGS_SUCHT, result);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
     assertEquals(CONSULTING_TYPE_SETTINGS_U25, result);
   }
 
@@ -137,7 +137,7 @@ public class ConsultingTypeManagerTest {
         CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25);
 
     try {
-      consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25);
+      consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
       fail("Expected exception: MissingConsultingTypeException");
     } catch (MissingConsultingTypeException missingConsultingTypeException) {
       assertTrue("Excepted MissingConsultingTypeException thrown", true);
@@ -172,7 +172,7 @@ public class ConsultingTypeManagerTest {
     consultantTypeSettingsSucht.setConsultingType(CONSULTING_TYPE_SUCHT);
 
     ConsultingTypeSettings result =
-        consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT);
+        consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT);
     assertEquals(consultantTypeSettingsSucht.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsSucht.isSendWelcomeMessage(), result.isSendWelcomeMessage());
     assertEquals(consultantTypeSettingsSucht.getWelcomeMessage(), result.getWelcomeMessage());
@@ -190,9 +190,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsSucht.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -205,7 +205,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_U25);
     consultantTypeSettingsU25.setConsultingType(CONSULTING_TYPE_U25);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_U25);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
     assertEquals(consultantTypeSettingsU25.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsU25.isSendWelcomeMessage(), result.isSendWelcomeMessage());
     assertEquals(consultantTypeSettingsU25.getWelcomeMessage(), result.getWelcomeMessage());
@@ -221,9 +221,9 @@ public class ConsultingTypeManagerTest {
         result.getSessionDataInitializing().isState());
     assertEquals(
         consultantTypeSettingsU25.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isMonitoring());
     assertTrue(result.isFeedbackChat());
     assertFalse(result.isLanguageFormal());
@@ -238,7 +238,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY);
     consultantTypeSettingsPregnancy.setConsultingType(CONSULTING_TYPE_PREGNANCY);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_PREGNANCY);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY);
     assertEquals(consultantTypeSettingsPregnancy.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsPregnancy.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -257,9 +257,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsPregnancy.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertFalse(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -272,7 +272,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_AIDS);
     consultantTypeSettingsAids.setConsultingType(CONSULTING_TYPE_AIDS);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_AIDS);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_AIDS);
     assertEquals(consultantTypeSettingsAids.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsAids.isSendWelcomeMessage(), result.isSendWelcomeMessage());
     assertEquals(consultantTypeSettingsAids.getWelcomeMessage(), result.getWelcomeMessage());
@@ -290,9 +290,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsAids.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -305,7 +305,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_CHILDREN);
     consultantTypeSettingsChildren.setConsultingType(CONSULTING_TYPE_CHILDREN);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_CHILDREN);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_CHILDREN);
     assertEquals(consultantTypeSettingsChildren.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsChildren.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -324,9 +324,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsChildren.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -339,7 +339,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_CURE);
     consultantTypeSettingsCure.setConsultingType(CONSULTING_TYPE_CURE);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_CURE);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_CURE);
     assertEquals(consultantTypeSettingsCure.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsCure.isSendWelcomeMessage(), result.isSendWelcomeMessage());
     assertEquals(consultantTypeSettingsCure.getWelcomeMessage(), result.getWelcomeMessage());
@@ -357,9 +357,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsCure.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -372,7 +372,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_DEBT);
     consultantTypeSettingsDebt.setConsultingType(CONSULTING_TYPE_DEBT);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_DEBT);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_DEBT);
     assertEquals(consultantTypeSettingsDebt.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsDebt.isSendWelcomeMessage(), result.isSendWelcomeMessage());
     assertEquals(consultantTypeSettingsDebt.getWelcomeMessage(), result.getWelcomeMessage());
@@ -390,9 +390,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsDebt.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -405,7 +405,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_DISABILITY);
     consultantTypeSettingsDisability.setConsultingType(CONSULTING_TYPE_DISABILITY);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_DISABILITY);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_DISABILITY);
     assertEquals(consultantTypeSettingsDisability.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsDisability.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -424,9 +424,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsDisability.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -439,7 +439,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_LAW);
     consultantTypeSettingsLaw.setConsultingType(CONSULTING_TYPE_LAW);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_LAW);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_LAW);
     assertEquals(consultantTypeSettingsLaw.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsLaw.isSendWelcomeMessage(), result.isSendWelcomeMessage());
     assertEquals(consultantTypeSettingsLaw.getWelcomeMessage(), result.getWelcomeMessage());
@@ -457,9 +457,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsLaw.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -472,7 +472,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_OFFENDER);
     consultantTypeSettingsOffender.setConsultingType(CONSULTING_TYPE_OFFENDER);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_OFFENDER);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_OFFENDER);
     assertEquals(consultantTypeSettingsOffender.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsOffender.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -491,9 +491,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsOffender.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -506,7 +506,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_PARENTING);
     consultantTypeSettingsParenting.setConsultingType(CONSULTING_TYPE_PARENTING);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_PARENTING);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_PARENTING);
     assertEquals(consultantTypeSettingsParenting.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsParenting.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -525,9 +525,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsParenting.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -540,7 +540,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_PLANB);
     consultantTypeSettingsPlanB.setConsultingType(CONSULTING_TYPE_PLANB);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_PLANB);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_PLANB);
     assertEquals(consultantTypeSettingsPlanB.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsPlanB.isSendWelcomeMessage(), result.isSendWelcomeMessage());
     assertEquals(consultantTypeSettingsPlanB.getWelcomeMessage(), result.getWelcomeMessage());
@@ -558,9 +558,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsPlanB.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertFalse(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -573,7 +573,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_REHABILITATION);
     consultantTypeSettingsRehabilitation.setConsultingType(CONSULTING_TYPE_REHABILITATION);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_REHABILITATION);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_REHABILITATION);
     assertEquals(consultantTypeSettingsRehabilitation.getConsultingType(),
         result.getConsultingType());
     assertEquals(consultantTypeSettingsRehabilitation.isSendWelcomeMessage(),
@@ -595,9 +595,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsRehabilitation.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -610,7 +610,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_SENIORITY);
     consultantTypeSettingsSeniority.setConsultingType(CONSULTING_TYPE_SENIORITY);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SENIORITY);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SENIORITY);
     assertEquals(consultantTypeSettingsSeniority.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsSeniority.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -629,9 +629,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsSeniority.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -644,7 +644,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_SOCIAL);
     consultantTypeSettingsSocial.setConsultingType(CONSULTING_TYPE_SOCIAL);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SOCIAL);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SOCIAL);
     assertEquals(consultantTypeSettingsSocial.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsSocial.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -663,9 +663,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsSocial.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -678,7 +678,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_KREUZBUND);
     consultantTypeSettingsKreuzbund.setConsultingType(CONSULTING_TYPE_KREUZBUND);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_KREUZBUND);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_KREUZBUND);
     assertEquals(consultantTypeSettingsKreuzbund.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsKreuzbund.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -697,9 +697,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsKreuzbund.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -712,7 +712,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_MIGRATION);
     consultantTypeSettingsMigration.setConsultingType(CONSULTING_TYPE_MIGRATION);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_MIGRATION);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_MIGRATION);
     assertEquals(consultantTypeSettingsMigration.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsMigration.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -731,9 +731,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsMigration.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -746,7 +746,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_EMIGRATION);
     consultantTypeSettingsEmigration.setConsultingType(CONSULTING_TYPE_EMIGRATION);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_EMIGRATION);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_EMIGRATION);
     assertEquals(consultantTypeSettingsEmigration.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsEmigration.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -765,9 +765,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsEmigration.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -780,7 +780,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_HOSPICE);
     consultantTypeSettingsHospice.setConsultingType(CONSULTING_TYPE_HOSPICE);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_HOSPICE);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_HOSPICE);
     assertEquals(consultantTypeSettingsHospice.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsHospice.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -799,9 +799,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsHospice.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
@@ -814,7 +814,7 @@ public class ConsultingTypeManagerTest {
         loadConsultingTypeSettings(CONSULTING_TYPE_REGIONAL);
     consultantTypeSettingsRegional.setConsultingType(CONSULTING_TYPE_REGIONAL);
 
-    result = consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_REGIONAL);
+    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_REGIONAL);
     assertEquals(consultantTypeSettingsRegional.getConsultingType(), result.getConsultingType());
     assertEquals(consultantTypeSettingsRegional.isSendWelcomeMessage(),
         result.isSendWelcomeMessage());
@@ -833,9 +833,9 @@ public class ConsultingTypeManagerTest {
     assertFalse(result.isFeedbackChat());
     assertEquals(
         consultantTypeSettingsRegional.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant().isAllTeamConsultants(),
+            .getToConsultant().getAllTeamConsultants(),
         result.getNotifications().getNewMessage().getTeamSession().getToConsultant()
-            .isAllTeamConsultants());
+            .getAllTeamConsultants());
     assertTrue(result.isLanguageFormal());
     assertFalse(result.getRegistration().getMandatoryFields().isAge());
     assertFalse(result.getRegistration().getMandatoryFields().isState());
