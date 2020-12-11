@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import static java.util.Objects.nonNull;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
@@ -108,9 +108,9 @@ public class KeycloakAdminClientHelper {
   /**
    * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user ID.
    *
-   * @param user      {@link UserDTO}
+   * @param user {@link UserDTO}
    * @param firstName first name of user
-   * @param lastName  last name of user
+   * @param lastName last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
   @KeycloakAdminClientLogout
@@ -228,7 +228,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Assigns the role with the given name to the given user ID.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param roleName Keycloak role name
    */
   @KeycloakAdminClientLogout
@@ -237,31 +237,35 @@ public class KeycloakAdminClientHelper {
     RealmResource realmResource = getInstance().realm(KEYCLOAK_REALM);
 
     // Assign role
+    ObjectMapper objectMapper = new ObjectMapper();
     RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
     String lineSeparator = System.getProperty("line.separator");
     StringBuilder logStringBuilder = new StringBuilder();
-    logStringBuilder.append("=== roleRepresentation ===" + lineSeparator);
-    logStringBuilder.append("userId: " + userId + lineSeparator);
-    logStringBuilder.append("containerId: " + roleRepresentation.getContainerId() + lineSeparator);
-    logStringBuilder.append("description: " + roleRepresentation.getDescription() + lineSeparator);
-    logStringBuilder.append("id: " + roleRepresentation.getId() + lineSeparator);
-    logStringBuilder.append("name: " + roleRepresentation.getName() + lineSeparator);
-    logStringBuilder.append(
-        "attributes: " + ((nonNull(roleRepresentation.getAttributes())) ? roleRepresentation
-            .getAttributes().toString() : "null") + lineSeparator);
-    logStringBuilder.append(
-        "clientRole: " + ((nonNull(roleRepresentation.getClientRole())) ? roleRepresentation
-            .getClientRole().toString() : "null") + lineSeparator);
-    logStringBuilder.append(
-        "composites: " + ((nonNull(roleRepresentation.getComposites())) ? roleRepresentation
-            .getComposites().toString() : "null") + lineSeparator);
-    logStringBuilder.append("isComposite: " + roleRepresentation.isComposite() + lineSeparator);
+    logStringBuilder.append("=== roleRepresentation ===").append(lineSeparator);
+    try {
+      logStringBuilder.append("object: ")
+          .append(objectMapper.writeValueAsString(roleRepresentation))
+          .append(lineSeparator);
+    } catch (JsonProcessingException e) {
+      log.warn("Could not parse object of role representation");
+    }
+    logStringBuilder.append("==========================");
+
+    UsersResource userRessource = realmResource.users();
+    UserResource user = userRessource.get(userId);
+
+    logStringBuilder.append("=== userRessource ===").append(lineSeparator);
+    try {
+      logStringBuilder.append("object: ")
+          .append(objectMapper.writeValueAsString(user.toRepresentation()))
+          .append(lineSeparator);
+    } catch (JsonProcessingException e) {
+      log.warn("Could not parse object of user resource");
+    }
     logStringBuilder.append("==========================");
 
     log.warn(logStringBuilder.toString());
 
-    UsersResource userRessource = realmResource.users();
-    UserResource user = userRessource.get(userId);
     boolean isRoleUpdated = false;
 
     user.roles().realmLevel()
@@ -284,7 +288,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Updates the Keycloak password for a user.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param password user password
    */
   @KeycloakAdminClientLogout
@@ -301,7 +305,7 @@ public class KeycloakAdminClientHelper {
    * success/error status possible, because the Keycloak Client doesn't provide one either. *
    *
    * @param userId Keycloak user ID
-   * @param user   {@link UserDTO}
+   * @param user {@link UserDTO}
    * @return the (dummy) email address
    * @throws Exception {@link Exception}
    */
@@ -335,7 +339,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId    Keycloak user ID
+   * @param userId Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */
