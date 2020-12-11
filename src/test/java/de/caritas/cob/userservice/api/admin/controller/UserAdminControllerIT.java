@@ -31,8 +31,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class UserAdminControllerIT {
 
+  protected static final String CONSULTANT_ID = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
+
   protected static final String ROOT_PATH = "/useradmin";
   protected static final String SESSION_PATH = ROOT_PATH + "/session";
+  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/" + CONSULTANT_ID + "/agencies";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
@@ -85,6 +88,16 @@ public class UserAdminControllerIT {
 
     verify(this.sessionAdminService, times(1))
         .findSessions(eq(0), eq(1), any());
+  }
+
+  @Test
+  public void getConsultantAgency_Should_returnOk_When_requiredConsultantIdParamIsGiven()
+      throws Exception {
+    this.mvc.perform(get(CONSULTANT_AGENCY_PATH))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAgencyAdminService, times(1))
+        .findConsultantAgencies(eq(CONSULTANT_ID));
   }
 
   @Test
