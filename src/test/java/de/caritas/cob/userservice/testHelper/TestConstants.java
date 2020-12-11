@@ -16,7 +16,6 @@ import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.ChatDTO;
 import de.caritas.cob.userservice.api.model.chat.UserChatDTO;
-import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
@@ -36,7 +35,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
@@ -66,7 +64,7 @@ public class TestConstants {
   public static final String HOST_BASE_URL = "https://beratung.caritas.de";
   public static final String APPLICATION_BASE_URL_FIELD_NAME = "applicationBaseUrl";
   public static final String POSTCODE = "12345";
-  public static final String INVALID_POSTCODE = "12";
+  public static final String INVALID_POSTCODE = "1234";
   public static final String NAME = "testname";
   public static final String CITY = "testcity";
   public static final String ERROR = "error";
@@ -114,9 +112,6 @@ public class TestConstants {
   /*
    * Session data
    */
-  public static final String ACLOHOL = "alcohol";
-  public static final String DRUGS = "drugs";
-  public static final String OTHERS = "others";
   public static final String ADDICTIVE_DRUGS = "addictiveDrugs";
   public static final String RELATION = "relation";
   public static final String AGE = "age";
@@ -162,8 +157,6 @@ public class TestConstants {
   public static final GroupMemberDTO GROUP_MEMBER_TECH_USER =
       new GroupMemberDTO(ROCKET_CHAT_TECHNICAL_USER_ID, RC_STATUS_ONLINE, RC_TECHNICAL_USERNAME,
           RC_SYSTEM_USERNAME, RC_UTC_OFFSET);
-  public static final ResponseEntity<LoginResponseDTO> LOGIN_RESPONSE_ENTITY_BAD_REQUEST =
-      new ResponseEntity<>(HttpStatus.BAD_REQUEST);
   public static final DataDTO DATA_DTO_LOGIN = new DataDTO(RC_USER_ID, RC_TOKEN, null);
   public static final DataDTO DATA_DTO_LOGIN_NO_TOKEN = new DataDTO(RC_USER_ID, null, null);
   public static final String STATUS_OK = "OK";
@@ -210,7 +203,6 @@ public class TestConstants {
   public final static String SYSTEM_USER_A_TOKEN = "sysUserAToken";
   public final static String SYSTEM_USER_A_ID = "sysUserAID";
 
-  public final static String SYSTEM_USER_B_USERNAME = "sysUserBName";
   public final static String SYSTEM_USER_B_TOKEN = "sysUserBToken";
   public final static String SYSTEM_USER_B_ID = "sysUserBID";
 
@@ -354,8 +346,6 @@ public class TestConstants {
   public static final User USER = new User(USER_ID, null, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
   public static final User USER_WITH_RC_ID =
       new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null, null);
-  public static final User USER_WITH_RC_ID_2 =
-      new User(USER_ID_2, null, USERNAME, EMAIL, RC_USER_ID_2, IS_LANGUAGE_FORMAL, null, null);
   public static final User USER_NO_RC_USER_ID =
       new User(USER_ID, null, USERNAME, EMAIL, null, false, null, null);
   public static final User USER_NO_RC_USER_ID_2 =
@@ -367,13 +357,9 @@ public class TestConstants {
       new AuthenticatedUser(USER_ID_3, USERNAME, null, ACCESS_TOKEN, null);
   public static final AuthenticatedUser AUTHENTICATED_USER_CONSULTANT =
       new AuthenticatedUser(CONSULTANT_ID, USERNAME, null, ACCESS_TOKEN, null);
-  public static final User USER_NO_DATA = new User(null, null, null, null, true);
   public static final UserDTO USER_DTO_SUCHT =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null, null,
           "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
-  public static final UserDTO USER_DTO_SUCHT_WITH_INVALID_POSTCODE =
-      new UserDTO(USERNAME, INVALID_POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null,
-          null, "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_SUCHT_WITHOUT_EMAIL =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, null, null, null, null, null, null,
           "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
@@ -414,14 +400,12 @@ public class TestConstants {
    */
   public static final String ENCRYPTED_MESSAGE =
       "enc:uWHNUkWrQJikGnVpknvB3SkzT1RWHJuY0igDT9p7fGFHWECLBpV2+0eIZF6Qi7J0";
-  public static final String DECRYPTED_MESSAGE = "Das hier ist jetzt mal eine Test-Message";
   public static final String MESSAGE = "Testnachricht";
   public static final String MESSAGE_TOO_LONG = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magn";
   public static final AbsenceDTO ABSENCE_DTO = new AbsenceDTO().absent(true)
       .message(TestConstants.MESSAGE);
   public static final String MESSAGE_WITH_HTML_AND_JS =
       "<b>Testnachricht</b><script>alert('1');</script>";
-  public static final boolean MESSAGES_READ = true;
   public static final boolean MESSAGES_NOT_READ = false;
   public static final String MESSAGE_EMPTY = StringUtils.EMPTY;
   public static final AbsenceDTO ABSENCE_DTO_WITH_EMPTY_MESSAGE =
@@ -444,25 +428,19 @@ public class TestConstants {
   public static final ConsultantAgency CONSULTANT_AGENCY_3 =
       new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
-      new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY));
-  public static final Set<Long> CONSULTANT_AGENCY_IDS_SET =
-      new HashSet<Long>(Arrays.asList(AGENCY_ID));
+      new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false, null,
-      null, new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY)), null, null, null);
+      null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null, null);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false, null,
-      null, new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY_2)), null, null, null);
+      null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)), null, null, null);
   /**
    * UserAgency
    */
   public static final UserAgency USER_AGENCY = new UserAgency(USER, AGENCY_ID);
   public static final UserAgency USER_AGENCY_2 = new UserAgency(USER, AGENCY_ID_2);
   public static final List<UserAgency> USER_AGENCY_LIST = Arrays.asList(USER_AGENCY, USER_AGENCY_2);
-  public static final Set<UserAgency> USER_AGENCY_SET =
-      new HashSet<>(Arrays.asList(USER_AGENCY, USER_AGENCY_2));
-  public static final User USER_WITH_AGENCIES = new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID,
-      IS_LANGUAGE_FORMAL, null, USER_AGENCY_SET);
   /*
    * Session
    */
@@ -475,7 +453,6 @@ public class TestConstants {
   public static final boolean IS_NO_TEAM_SESSION = false;
   public static final boolean IS_MONITORING = true;
   public static final boolean IS_NOT_MONITORING = false;
-  public static final SessionFilter SESSION_FILTER_ALL = SessionFilter.ALL;
   public static final Long ENQUIRY_ID = 1L;
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
@@ -506,8 +483,8 @@ public class TestConstants {
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
-  public static final List<Session> SESSION_LIST = Arrays.asList(SESSION);
-  public static final Set<Session> SESSION_SET = new HashSet<Session>(
+  public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
+  public static final Set<Session> SESSION_SET = new HashSet<>(
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
   public static final User USER_WITH_SESSIONS =
       new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null);
@@ -546,15 +523,9 @@ public class TestConstants {
           .agency(AGENCY_DTO_U25)
           .consultant(SESSION_CONSULTANT_FOR_USER_DTO);
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_SUCHT =
-      Arrays.asList(USER_SESSION_RESPONSE_DTO_SUCHT);
+      Collections.singletonList(USER_SESSION_RESPONSE_DTO_SUCHT);
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_U25 =
-      Arrays.asList(USER_SESSION_RESPONSE_DTO_U25);
-  public static final NewRegistrationDto NEW_REGISTRATION_DTO_SUCHT =
-      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_SUCHT.getValue()),
-          true);
-  public static final NewRegistrationDto NEW_REGISTRATION_DTO_U25 =
-      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_U25.getValue()),
-          true);
+      Collections.singletonList(USER_SESSION_RESPONSE_DTO_U25);
   public static final SessionDTO SESSION_DTO_1 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -656,7 +627,7 @@ public class TestConstants {
       ChatInterval.WEEKLY, IS_NOT_ACTIVE, CHAT_MAX_PARTICIPANTS, RC_GROUP_ID, CONSULTANT, null);
   public static final ChatAgency CHAT_AGENCY = new ChatAgency(ACTIVE_CHAT, AGENCY_ID);
   public static final Set<ChatAgency> CHAT_AGENCIES =
-      new HashSet<ChatAgency>(Arrays.asList(CHAT_AGENCY));
+      new HashSet<>(Collections.singletonList(CHAT_AGENCY));
   public static final UserChatDTO USER_CHAT_DTO_1 = new UserChatDTO(CHAT_ID, CHAT_TOPIC, null, null,
       CHAT_DURATION_30, IS_REPETITIVE, IS_ACTIVE, ConsultingType.PREGNANCY.getValue(), null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86300000)), MESSAGES_NOT_READ,
@@ -811,7 +782,7 @@ public class TestConstants {
       new RoomsLastMessageDTO("id", RC_GROUP_ID_6, NOW_MINUS_1_DAY, USER_DTO_1, true,
           NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT =
-      Arrays.asList(new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
+      Collections.singletonList(new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
           new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT));
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT =
       Arrays.asList(
@@ -907,7 +878,7 @@ public class TestConstants {
           .session(SESSION_DTO_WITHOUT_FEEDBACK_CHAT)
           .latestMessage(NOW);
   public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT =
-      Arrays.asList(CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT);
+      Collections.singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT);
 
   /**
    * GroupMemberDTO
@@ -936,9 +907,9 @@ public class TestConstants {
    * Roles
    */
   public static final String USER_ROLE = "user";
-  public static final Set<String> USER_ROLES = new HashSet<>(Arrays.asList(USER_ROLE));
+  public static final Set<String> USER_ROLES = new HashSet<>(Collections.singletonList(USER_ROLE));
   public static final String CONSULTANT_ROLE = "consultant";
-  public static final Set<String> CONSULTANT_ROLES = new HashSet<>(Arrays.asList(CONSULTANT_ROLE));
+  public static final Set<String> CONSULTANT_ROLES = new HashSet<>(Collections.singletonList(CONSULTANT_ROLE));
   /**
    * Registration values
    */
@@ -965,9 +936,9 @@ public class TestConstants {
   public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_AGE =
       new MandatoryFields(false, false);
   public static final Registration REGISTRATION_WITH_MANDATORY_AGE =
-      new Registration(3, MANDATORY_FIELDS_WITH_AGE);
+      new Registration(MANDATORY_FIELDS_WITH_AGE);
   public static final Registration REGISTRATION_WITHOUT_MANDATORY_AGE =
-      new Registration(3, MANDATORY_FIELDS_WITHOUT_AGE);
+      new Registration(MANDATORY_FIELDS_WITHOUT_AGE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY =
       new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, null, true, null, false, null,
           false, null, REGISTRATION_WITH_MANDATORY_AGE);
@@ -981,9 +952,9 @@ public class TestConstants {
   public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_STATE =
       new MandatoryFields(false, false);
   public static final Registration REGISTRATION_WITH_MANDATORY_STATE =
-      new Registration(3, MANDATORY_FIELDS_WITH_STATE);
+      new Registration(MANDATORY_FIELDS_WITH_STATE);
   public static final Registration REGISTRATION_WITHOUT_MANDATORY_STATE =
-      new Registration(3, MANDATORY_FIELDS_WITHOUT_STATE);
+      new Registration(MANDATORY_FIELDS_WITHOUT_STATE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE =
       new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, null, true, null, false, null,
           false, null, REGISTRATION_WITH_MANDATORY_STATE);
@@ -995,9 +966,9 @@ public class TestConstants {
   public static final SessionDataInitializing SESSION_DATA_INITIALIZING =
       new SessionDataInitializing(true, true, true, true, true);
   public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_TRUE =
-      new Registration(3, MANDATORY_FIELDS_TRUE);
+      new Registration(MANDATORY_FIELDS_TRUE);
   public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_FALSE =
-      new Registration(3, MANDATORY_FIELDS_FALSE);
+      new Registration(MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS =
       new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, true, "Hallo", SESSION_DATA_INITIALIZING,
           true, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
@@ -1078,20 +1049,6 @@ public class TestConstants {
   public static int COUNT_10 = 10;
   public static int COUNT_1 = 1;
   public static int COUNT_0 = 0;
-  public static final SessionDTO SESSION_DTO_WITH_ENCRYPTED_MESSAGE = new SessionDTO()
-      .id(SESSION_ID)
-      .agencyId(AGENCY_ID)
-      .consultingType(0)
-      .status(0)
-      .groupId(RC_GROUP_ID)
-      .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
-      .askerRcId(RC_USER_ID)
-      .lastMessage(ENCRYPTED_MESSAGE)
-      .messageDate(Helper.getUnixTimestampFromDate(NOW))
-      .messagesRead(false)
-      .feedbackRead(false)
-      .isTeamSession(IS_NO_TEAM_SESSION)
-      .monitoring(IS_MONITORING);
   public static final UserChatDTO USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE = new UserChatDTO(CHAT_ID_3,
       CHAT_TOPIC_3, null, null, CHAT_DURATION_90, IS_NOT_REPETITIVE,
       IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(), ENCRYPTED_MESSAGE,

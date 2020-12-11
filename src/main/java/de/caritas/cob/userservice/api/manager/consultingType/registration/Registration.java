@@ -18,6 +18,5 @@ import lombok.Setter;
 @Setter
 public class Registration {
 
-  private int minPostcodeSize;
   private MandatoryFields mandatoryFields;
 }
