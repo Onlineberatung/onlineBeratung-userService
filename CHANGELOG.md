@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.4.0...v2.4.1) (2020-12-14)
+
+
+### Bug Fixes
+
+* added extended logging for registration ([e27209a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e27209a315e76e9c94d7453b22f96aae4867b6c7))
+* added userid to extended logging ([2e44af1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2e44af1faf7ecbe19f80c8a1acf66d33b309445f))
+* codestyle violation ([98119b3](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/98119b3cf3046f7851dd4e02b1c41f27998bb938))
+* codestyle violation ([a9a7258](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a9a7258f9bcad3674835f2f403fbb8515fdd9834))
+* resolved merge conflicts ([89f1d7c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/89f1d7ce53d7901f4c5d7b2b5d6d9ed4513eae49))
+
 ## [2.4.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.3.0...v2.4.0) (2020-12-14)
 
 
