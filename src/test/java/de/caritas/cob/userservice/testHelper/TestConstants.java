@@ -406,7 +406,8 @@ public class TestConstants {
   public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
       new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE);
   public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123", null);
-  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456", null);
+  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456",
+      null);
   public static final RocketChatUserDTO USER_DTO_3 = new RocketChatUserDTO("adg", "789", null);
 
   /*
@@ -438,11 +439,11 @@ public class TestConstants {
    * ConsultantAgency
    */
   public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID)};
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now())};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2);
+      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, LocalDateTime.now(), LocalDateTime.now());
   public static final ConsultantAgency CONSULTANT_AGENCY_3 =
-      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3);
+      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3, LocalDateTime.now(), LocalDateTime.now());
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Set<Long> CONSULTANT_AGENCY_IDS_SET =
