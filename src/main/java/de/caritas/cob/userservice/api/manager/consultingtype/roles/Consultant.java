@@ -1,10 +1,11 @@
-package de.caritas.cob.userservice.api.manager.consultingType.roles;
+package de.caritas.cob.userservice.api.manager.consultingtype.roles;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class Consultant {
   private LinkedHashMap<String, List<String>> roleNames;
 
   @JsonAnyGetter
-  public LinkedHashMap<String, List<String>> getRoleNames() {
+  public Map<String, List<String>> getRoleNames() {
     return roleNames;
   }
 

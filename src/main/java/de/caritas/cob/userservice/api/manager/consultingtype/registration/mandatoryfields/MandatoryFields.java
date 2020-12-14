@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.manager.consultingType;
+package de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,12 +9,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SessionDataInitializing {
+public class MandatoryFields {
 
-  private boolean addictiveDrugs;
   private boolean age;
-  private boolean gender;
-  private boolean relation;
   private boolean state;
 
 }

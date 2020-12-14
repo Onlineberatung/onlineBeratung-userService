@@ -27,7 +27,7 @@ public class ConsultingTypePaginationLinksBuilderTest {
     PagedListHolder<ConsultingTypeResultDTO> pagedListHolder = new PagedListHolder<>(
         randomConsultingTypeResultDTOList);
     pagedListHolder.setPage(1);
-    pagedListHolder.setPageSize(10);
+    pagedListHolder.setPageSize(11);
     PaginationLinks paginationLinks = ConsultingTypePaginationLinksBuilder.getInstance()
         .withPage(2)
         .withPerPage(10)
@@ -116,7 +116,7 @@ public class ConsultingTypePaginationLinksBuilderTest {
     PagedListHolder<ConsultingTypeResultDTO> pagedListHolder = new PagedListHolder<>(
         randomConsultingTypeResultDTOList);
     pagedListHolder.setPage(1);
-    pagedListHolder.setPageSize(10);
+    pagedListHolder.setPageSize(11);
 
     PaginationLinks paginationLinks = ConsultingTypePaginationLinksBuilder.getInstance()
         .withPage(2)
