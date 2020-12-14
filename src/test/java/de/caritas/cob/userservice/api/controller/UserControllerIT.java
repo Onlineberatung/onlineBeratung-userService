@@ -151,6 +151,7 @@ import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -387,6 +388,8 @@ public class UserControllerIT {
   private LinkDiscoverers linkDiscoverers;
   @MockBean
   private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
+  @MockBean
+  private MandatoryFieldsProvider mandatoryFieldsProvider;
 
   @Mock
   private Logger logger;
@@ -411,6 +414,7 @@ public class UserControllerIT {
   @Test
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithInvalidRequestBody()
       throws Exception {
+
     mvc.perform(post(PATH_REGISTER_USER)
         .content(INVALID_USER_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON)
@@ -436,8 +440,8 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidState()
       throws Exception {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(INVALID_U25_USER_REQUEST_BODY_STATE)
@@ -480,8 +484,8 @@ public class UserControllerIT {
 
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY)
@@ -497,8 +501,8 @@ public class UserControllerIT {
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any()))
         .thenReturn(response);
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_U25_USER_REQUEST_BODY)
@@ -514,8 +518,8 @@ public class UserControllerIT {
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any()))
         .thenReturn(response);
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY)
@@ -528,8 +532,8 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_When_PostcodeIsMissing()
       throws Exception {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -543,8 +547,8 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_When_PostcodeIsInvalid()
       throws Exception {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -1775,8 +1779,8 @@ public class UserControllerIT {
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any()))
         .thenReturn(response);
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)

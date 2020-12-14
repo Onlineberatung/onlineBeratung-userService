@@ -969,6 +969,8 @@ public class TestConstants {
       new Registration(MANDATORY_FIELDS_TRUE);
   public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_FALSE =
       new Registration(MANDATORY_FIELDS_FALSE);
+  public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_NULL =
+      new Registration(null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS =
       new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, true, "Hallo", SESSION_DATA_INITIALIZING,
           true, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
@@ -984,6 +986,14 @@ public class TestConstants {
       new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", SESSION_DATA_INITIALIZING,
+          true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
+          null);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL =
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", SESSION_DATA_INITIALIZING,
+          true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
+          REGISTRATION_WITH_MANDATORY_FIELDS_NULL);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PREGNANCY =
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
