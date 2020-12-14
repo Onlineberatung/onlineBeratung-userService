@@ -348,7 +348,7 @@
 							<output>target/generated-sources</output>
 							<typeMappings>
 								<typeMapping>
-									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingType.roles.Consultant
+									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingtype.roles.Consultant
 								</typeMapping>
 							</typeMappings>
 						</configuration>

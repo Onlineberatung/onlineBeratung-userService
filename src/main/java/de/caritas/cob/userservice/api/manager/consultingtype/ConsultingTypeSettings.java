@@ -1,7 +1,7 @@
-package de.caritas.cob.userservice.api.manager.consultingType;
+package de.caritas.cob.userservice.api.manager.consultingtype;
 
 import de.caritas.cob.userservice.api.model.NotificationDTO;
-import de.caritas.cob.userservice.api.manager.consultingType.registration.Registration;
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.Registration;
 import de.caritas.cob.userservice.api.model.RoleDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import lombok.AllArgsConstructor;
