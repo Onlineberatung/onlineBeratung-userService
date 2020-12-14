@@ -80,7 +80,7 @@ paths:
           content:
             'application/hal+json':
               schema:
-                $ref: '#/components/schemas/CreateConsultantResponseDTO'
+                $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -108,7 +108,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/GetConsultantResponseDTO'
+                $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         204:
           description: NO CONTENT - consultant with the specific id was not found
         400:
@@ -143,7 +143,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/UpdateConsultantResponseDTO'
+                $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request
         401:
@@ -538,39 +538,25 @@ components:
         deleteDate:
           type: string
 
-    CreateConsultantResponseDTO:
+    ConsultantAdminResponseDTO:
       type: object
       properties:
         _embedded:
           $ref: '#/components/schemas/ConsultantDTO'
         _links:
-          $ref: '#/components/schemas/CreateLinks'
-
-    GetConsultantResponseDTO:
-      type: object
-      properties:
-        _embedded:
-          $ref: '#/components/schemas/ConsultantDTO'
-        _links:
-          $ref: '#/components/schemas/GetLinks'
-
-    UpdateConsultantResponseDTO:
-      type: object
-      properties:
-        _embedded:
-          $ref: '#/components/schemas/ConsultantDTO'
-        _links:
-          $ref: '#/components/schemas/UpdateLinks'
+          $ref: '#/components/schemas/ConsultantLinks'
 
     ConsultantSearchResultDTO:
       type: object
       properties:
         _embedded:
-          $ref: '#/components/schemas/ConsultantDTO'
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         _links:
           $ref: '#/components/schemas/PaginationLinks'
 
-    CreateLinks:
+    ConsultantLinks:
       type: object
       required:
         - self
@@ -581,29 +567,9 @@ components:
           $ref: '#/components/schemas/HalLink'
         delete:
           $ref: '#/components/schemas/HalLink'
-
-    GetLinks:
-      type: object
-      required:
-        - self
-      properties:
-        self:
+        agencies:
           $ref: '#/components/schemas/HalLink'
-        update:
-          $ref: '#/components/schemas/HalLink'
-        delete:
-          $ref: '#/components/schemas/HalLink'
-
-    UpdateLinks:
-      type: object
-      required:
-        - self
-      properties:
-        self:
-          $ref: '#/components/schemas/HalLink'
-        consultant:
-          $ref: '#/components/schemas/HalLink'
-        delete:
+        addAgency:
           $ref: '#/components/schemas/HalLink'
 
     SessionFilter:

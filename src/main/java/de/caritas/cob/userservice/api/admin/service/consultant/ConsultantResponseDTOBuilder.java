@@ -5,52 +5,52 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.admin.mapper.ConsultantAdminMapper;
+import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantDTO;
-import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.GetLinks;
+import de.caritas.cob.userservice.api.model.ConsultantLinks;
 import de.caritas.cob.userservice.api.model.HalLink;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 
 /**
- * Builder class to generate a {@link GetConsultantResponseDTO} containing available hal links
+ * Builder class to generate a {@link ConsultantAdminResponseDTO} containing available hal links
  * and result of {@link ConsultantDTO} element.
  */
-public class GetConsultantDTOBuilder implements HalLinkBuilder {
+public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
   private final Consultant consultant;
 
-  private GetConsultantDTOBuilder(Consultant consultant) {
+  private ConsultantResponseDTOBuilder(Consultant consultant) {
     this.consultant = requireNonNull(consultant);
   }
 
   /**
-   * Creates the {@link GetConsultantDTOBuilder} instance.
+   * Creates the {@link ConsultantResponseDTOBuilder} instance.
    *
    * @param consultant the source consultant
-   * @return a instance of {@link GetConsultantDTOBuilder}
+   * @return a instance of {@link ConsultantResponseDTOBuilder}
    */
-  public static GetConsultantDTOBuilder getInstance(Consultant consultant) {
-    return new GetConsultantDTOBuilder(consultant);
+  public static ConsultantResponseDTOBuilder getInstance(Consultant consultant) {
+    return new ConsultantResponseDTOBuilder(consultant);
   }
 
   /**
-   * Generates the {@link GetConsultantResponseDTO} containing the {@link ConsultantDTO} resource
+   * Generates the {@link ConsultantAdminResponseDTO} containing the {@link ConsultantDTO} resource
    * and navigation hal links.
    *
-   * @return the generated {@link GetConsultantResponseDTO}
+   * @return the generated {@link ConsultantAdminResponseDTO}
    */
-  public GetConsultantResponseDTO buildResponseDTO() {
+  public ConsultantAdminResponseDTO buildResponseDTO() {
     ConsultantDTO consultantDTO = new ConsultantAdminMapper(this.consultant).mapData();
-    GetLinks getLinks = new GetLinks()
+    ConsultantLinks consultantLinks = new ConsultantLinks()
         .self(buildSelfLink())
         .update(buildUpdateLink())
         .delete(buildDeleteLink());
 
-    return new GetConsultantResponseDTO()
+    return new ConsultantAdminResponseDTO()
         .embedded(consultantDTO)
-        .links(getLinks);
+        .links(consultantLinks);
   }
 
   private HalLink buildSelfLink() {

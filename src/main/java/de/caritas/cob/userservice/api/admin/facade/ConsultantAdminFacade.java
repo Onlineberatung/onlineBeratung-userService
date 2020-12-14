@@ -2,9 +2,10 @@ package de.caritas.cob.userservice.api.admin.facade;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
+import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,9 @@ public class ConsultantAdminFacade {
    * Finds a consultant by given consultant id.
    *
    * @param consultantId the id of the consultant to search for
-   * @return the generated {@link GetConsultantResponseDTO}
+   * @return the generated {@link ConsultantResponseDTO}
    */
-  public GetConsultantResponseDTO findConsultant(String consultantId) {
+  public ConsultantAdminResponseDTO findConsultant(String consultantId) {
     return this.consultantAdminService.findConsultantById(consultantId);
   }
 

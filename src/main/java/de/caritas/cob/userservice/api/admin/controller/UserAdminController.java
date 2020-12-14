@@ -2,20 +2,18 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
-import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
-import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import io.swagger.annotations.Api;
@@ -88,10 +86,10 @@ public class UserAdminController implements UseradminApi {
    * Entry point to create a new consultant.
    *
    * @param createConsultantDTO (required)
-   * @return {@link CreateConsultantResponseDTO}
+   * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
-  public ResponseEntity<CreateConsultantResponseDTO> createConsultant(
+  public ResponseEntity<ConsultantAdminResponseDTO> createConsultant(
       @Valid CreateConsultantDTO createConsultantDTO) {
     return null;
   }
@@ -124,10 +122,10 @@ public class UserAdminController implements UseradminApi {
    *
    * @param consultantId consultant id (required)
    * @param updateConsultantDTO (required)
-   * @return {@link UpdateConsultantResponseDTO}
+   * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
-  public ResponseEntity<UpdateConsultantResponseDTO> updateConsultant(
+  public ResponseEntity<ConsultantAdminResponseDTO> updateConsultant(
       @PathVariable String consultantId, @Valid UpdateConsultantDTO updateConsultantDTO) {
     return null;
   }
@@ -136,11 +134,11 @@ public class UserAdminController implements UseradminApi {
    * Entry point to get a specific consultant.
    *
    * @param consultantId consultant id (required)
-   * @return {@link GetConsultantResponseDTO}
+   * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
-  public ResponseEntity<GetConsultantResponseDTO> getConsultant(String consultantId) {
-    GetConsultantResponseDTO responseDTO = this.consultantAdminFacade.findConsultant(consultantId);
+  public ResponseEntity<ConsultantAdminResponseDTO> getConsultant(String consultantId) {
+    ConsultantAdminResponseDTO responseDTO = this.consultantAdminFacade.findConsultant(consultantId);
     return ResponseEntity.ok(responseDTO);
   }
 

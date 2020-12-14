@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
-import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +31,7 @@ public class ConsultantAdminServiceIT {
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultant_When_consultantIdExists() {
-    GetConsultantResponseDTO consultantById = this.consultantAdminService
+    ConsultantAdminResponseDTO consultantById = this.consultantAdminService
         .findConsultantById(EXISTING_CONSULTANT);
 
     assertThat(consultantById.getEmbedded(), notNullValue());
@@ -49,7 +49,7 @@ public class ConsultantAdminServiceIT {
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultantLinks_When_consultantIdExists() {
-    GetConsultantResponseDTO consultantById = this.consultantAdminService
+    ConsultantAdminResponseDTO consultantById = this.consultantAdminService
         .findConsultantById(EXISTING_CONSULTANT);
 
     assertThat(consultantById.getLinks(), notNullValue());
