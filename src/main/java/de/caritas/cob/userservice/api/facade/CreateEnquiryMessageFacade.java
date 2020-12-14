@@ -84,7 +84,7 @@ public class CreateEnquiryMessageFacade {
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
       ConsultingTypeSettings consultingTypeSettings =
-          consultingTypeManager.getConsultantTypeSettings(session.getConsultingType());
+          consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
@@ -97,7 +97,6 @@ public class CreateEnquiryMessageFacade {
               .rcGroupId(rcGroupId).rcFeedbackGroupId(rcFeedbackGroupId).build();
 
       saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
-      monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
 
       messageServiceHelper.postMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);

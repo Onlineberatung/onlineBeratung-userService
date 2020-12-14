@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.model.validation;
 
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.registration.IRegistrationDto;
+import de.caritas.cob.userservice.api.model.registration.UserRegistrationDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.Optional;
@@ -11,9 +11,8 @@ import javax.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Checks if the postcode of a {@link IRegistrationDto} is valid (depending on minimum size value in
- * {@link ConsultingTypeSettings}.
- *
+ * Checks if the postcode of a {@link UserRegistrationDTO} is valid (depending on minimum size value
+ * in {@link ConsultingTypeSettings}.
  */
 
 public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode, Object> {
@@ -34,7 +33,7 @@ public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode
     }
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(getConsultingType(value).get());
+        consultingTypeManager.getConsultingTypeSettings(getConsultingType(value).get());
 
     if (consultingTypeSettings.getRegistration() == null) {
       LogService.logValidationError(String.format(
@@ -49,16 +48,16 @@ public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode
 
   /**
    * Returns the {@link ConsultingType} of an given object which needs to use the
-   * {@link IRegistrationDto} interface.
-   * 
-   * @param value Object implementing the {@link IRegistrationDto}
+   * {@link UserRegistrationDTO} interface.
+   *
+   * @param value Object implementing the {@link UserRegistrationDTO}
    * @return {@link Optional} of {@link ConsultingType}
    */
   private Optional<ConsultingType> getConsultingType(Object value) {
-    if (((IRegistrationDto) value).getConsultingType() != null) {
+    if (((UserRegistrationDTO) value).getConsultingType() != null) {
       try {
         return Optional.ofNullable(ConsultingType.values()[Integer
-            .parseInt(((IRegistrationDto) value).getConsultingType())]);
+            .parseInt(((UserRegistrationDTO) value).getConsultingType())]);
       } catch (Exception e) {
         return Optional.empty();
       }
@@ -68,27 +67,27 @@ public class ValidPostcodeValidator implements ConstraintValidator<ValidPostcode
   }
 
   /**
-   * Returns the post code of an given object which needs to use the {@link IRegistrationDto}
+   * Returns the post code of an given object which needs to use the {@link UserRegistrationDTO}
    * interface.
-   * 
-   * @param value Object implementing the {@link IRegistrationDto}
+   *
+   * @param value Object implementing the {@link UserRegistrationDTO}
    * @return {@link String}
    */
   private Optional<String> getPostCode(Object value) {
-    if (((IRegistrationDto) value).getPostcode() != null) {
-      return Optional.ofNullable(((IRegistrationDto) value).getPostcode());
+    if (((UserRegistrationDTO) value).getPostcode() != null) {
+      return Optional.ofNullable(((UserRegistrationDTO) value).getPostcode());
     }
 
     return Optional.empty();
   }
 
   /**
-   * Returns true if given object is of type {@link IRegistrationDto}
-   * 
+   * Returns true if given object is of type {@link UserRegistrationDTO}
+   *
    * @param value {@link Object}
-   * @return true if given object is of type {@link IRegistrationDto}
+   * @return true if given object is of type {@link UserRegistrationDTO}
    */
   private boolean isRegistrationDto(Object value) {
-    return value instanceof IRegistrationDto;
+    return value instanceof UserRegistrationDTO;
   }
 }

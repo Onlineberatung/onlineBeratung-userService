@@ -48,7 +48,7 @@ public class ServiceHelperTest {
   public void getCsrfHttpHeaders_Should_Return_HeaderWithCorrectContentType() {
 
     HttpHeaders result = serviceHelper.getCsrfHttpHeaders();
-    assertEquals(MediaType.APPLICATION_JSON_UTF8, result.getContentType());
+    assertEquals(MediaType.APPLICATION_JSON, result.getContentType());
 
   }
 

@@ -8,6 +8,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
@@ -107,9 +108,9 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private boolean shouldInformAllConsultantsOfTeamSession() {
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(session.getConsultingType());
-    return session.isTeamSession() && consultingTypeSettings.getNotifications().getNewMessage()
-        .getTeamSession().getToConsultant().isAllTeamConsultants();
+        consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
+    return session.isTeamSession() && isTrue(consultingTypeSettings.getNotifications().getNewMessage()
+        .getTeamSession().getToConsultant().getAllTeamConsultants());
   }
 
   private MailDTO toNewConsultantMessageMailDTO(ConsultantAgency agency) {

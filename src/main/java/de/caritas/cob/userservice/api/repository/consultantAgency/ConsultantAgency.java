@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.consultantAgency;
 
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,10 +10,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
+import org.hibernate.search.bridge.builtin.LongBridge;
 
 /**
  * Represents a the relation between consultant and agency
@@ -21,11 +25,10 @@ import lombok.Setter;
 @Entity
 @Table(name = "consultant_agency")
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class ConsultantAgency {
-
-  public ConsultantAgency() {}
 
   @Id
   @SequenceGenerator(name = "id_seq", allocationSize = 1,
@@ -39,6 +42,8 @@ public class ConsultantAgency {
   private Consultant consultant;
 
   @Column(name = "agency_id", updatable = true, nullable = true)
+  @Field
+  @FieldBridge(impl = LongBridge.class)
   private Long agencyId;
 
 }

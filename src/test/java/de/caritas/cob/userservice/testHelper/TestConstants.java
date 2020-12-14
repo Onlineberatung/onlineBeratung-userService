@@ -108,6 +108,8 @@ public class TestConstants {
   public static final ConsultingType CONSULTING_TYPE_EMIGRATION = ConsultingType.EMIGRATION;
   public static final ConsultingType CONSULTING_TYPE_HOSPICE = ConsultingType.HOSPICE;
   public static final ConsultingType CONSULTING_TYPE_REGIONAL = ConsultingType.REGIONAL;
+  public static final String INVALID_CONSULTING_TYPE = "invalid";
+  public static final String UNKNOWN_CONSULTING_TYPE = "9999";
 
   /*
    * Session data
@@ -331,14 +333,16 @@ public class TestConstants {
   public static final String INVALID_STATE = "xxx";
   public static final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME, FIRST_NAME, LAST_NAME, EMAIL,
-          IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null, null);
+          IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null, null,
+          null, null, null);
   public static final Consultant CONSULTANT_2 = new Consultant(CONSULTANT_ID_2, ROCKETCHAT_ID,
-      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null);
+      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null,
+      null, null, null);
   public static final Consultant CONSULTANT_NO_RC_USER_ID = new Consultant(CONSULTANT_ID, "",
-      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null);
+      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null, null, null, null);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
-          "last name", EMAIL, false, false, null, false, null, null, null);
+          "last name", EMAIL, false, false, null, false, null, null, null, null, null, null);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
@@ -366,16 +370,16 @@ public class TestConstants {
   public static final User USER_NO_DATA = new User(null, null, null, null, true);
   public static final UserDTO USER_DTO_SUCHT =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
+          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_SUCHT_WITH_INVALID_POSTCODE =
       new UserDTO(USERNAME, INVALID_POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null,
-          null, "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
+          null, "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_SUCHT_WITHOUT_EMAIL =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, null, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
+          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_KREUZBUND =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_KREUZBUND.getValue()));
+          "true", Integer.toString(CONSULTING_TYPE_KREUZBUND.getValue()), true);
   public static final UserDTO USER_DTO_WITH_AGE =
       new UserDTO(VALID_AGE, null, Integer.toString(CONSULTING_TYPE_U25.getValue()));
   public static final UserDTO USER_DTO_WITH_INVALID_AGE =
@@ -390,20 +394,20 @@ public class TestConstants {
   public static final UserDTO USER_DTO_WITHOUT_MANDATORY_STATE = new UserDTO(null, null, null, null,
       null, null, Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO =
-      new RocketChatUserDTO(RC_USER_ID, USERNAME);
+      new RocketChatUserDTO(RC_USER_ID, USERNAME, null);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, SUCCESS, NULL, NULL);
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO_2 =
-      new RocketChatUserDTO(RC_USER_ID_2, USERNAME);
+      new RocketChatUserDTO(RC_USER_ID_2, USERNAME, null);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_2 =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO_2, SUCCESS, NULL, NULL);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_FAILED =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, FAILED, ERROR, ERROR);
   public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
       new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE);
-  public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123");
-  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456");
-  public static final RocketChatUserDTO USER_DTO_3 = new RocketChatUserDTO("adg", "789");
+  public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123", null);
+  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456", null);
+  public static final RocketChatUserDTO USER_DTO_3 = new RocketChatUserDTO("adg", "789", null);
 
   /*
    * /* Messages
@@ -445,10 +449,10 @@ public class TestConstants {
       new HashSet<Long>(Arrays.asList(AGENCY_ID));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false, null,
-      null, new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY)));
+      null, new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY)), null, null, null);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false, null,
-      null, new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY_2)));
+      null, new HashSet<ConsultantAgency>(Arrays.asList(CONSULTANT_AGENCY_2)), null, null, null);
   /**
    * UserAgency
    */
@@ -546,9 +550,11 @@ public class TestConstants {
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_DTO_LIST_U25 =
       Arrays.asList(USER_SESSION_RESPONSE_DTO_U25);
   public static final NewRegistrationDto NEW_REGISTRATION_DTO_SUCHT =
-      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_SUCHT.getValue()));
+      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_SUCHT.getValue()),
+          true);
   public static final NewRegistrationDto NEW_REGISTRATION_DTO_U25 =
-      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_U25.getValue()));
+      new NewRegistrationDto(POSTCODE, AGENCY_ID, Long.toString(CONSULTING_TYPE_U25.getValue()),
+          true);
   public static final SessionDTO SESSION_DTO_1 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1014,7 +1020,7 @@ public class TestConstants {
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CHILDREN =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,
+      new ConsultingTypeSettings(CONSULTING_TYPE_CHILDREN, false, null, SESSION_DATA_INITIALIZING,
           false, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CURE =
       new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, SESSION_DATA_INITIALIZING,

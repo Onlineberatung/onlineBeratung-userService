@@ -259,7 +259,7 @@ public class ConsultantSessionListService {
     }
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(consultingType.get());
+        consultingTypeManager.getConsultingTypeSettings(consultingType.get());
 
     return consultingTypeSettings.isMonitoring();
   }
