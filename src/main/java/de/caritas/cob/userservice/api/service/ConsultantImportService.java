@@ -1,32 +1,30 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -38,16 +36,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ConsultantImportService {
 
   @Value("${consultant.import.filename}")
@@ -55,46 +55,37 @@ public class ConsultantImportService {
   @Value("${consultant.import.protocol.filename}")
   private String protocolFilename;
 
-  @Autowired
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
-  @Autowired
-  private ConsultantService consultantService;
-  @Autowired
-  private ConsultantAgencyService consultantAgencyService;
-  @Autowired
-  private RocketChatService rocketChatService;
-  @Autowired
-  private ConsultingTypeManager consultingTypeManager;
-  @Autowired
-  private AgencyServiceHelper agencyServiceHelper;
-  @Autowired
-  private SessionService sessionService;
-  @Autowired
-  private UserHelper userHelper;
+  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull ConsultantService consultantService;
+  private final @NonNull ConsultantAgencyService consultantAgencyService;
+  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull SessionService sessionService;
+  private final @NonNull UserHelper userHelper;
+  private final @NonNull ConsultantCreatorService consultantCreatorService;
 
-  private final String DELIMITER = ",";
-  private final String AGENCY_ROLE_DELIMITER = ";";
-  private final String YES = "ja";
-  private final boolean FORMAL_LANGUAGE_DEFAULT = true;
-  private final boolean TEAM_CONSULTANT_DEFAULT = false;
-  private final String NEWLINE_CHAR = "\r\n";
-  private final String IMPORT_LOG_CHARSET = "UTF-8";
+  private static final String DELIMITER = ",";
+  private static final String AGENCY_ROLE_DELIMITER = ";";
+  private static final String YES = "ja";
+  private static final boolean FORMAL_LANGUAGE_DEFAULT = true;
+  private static final boolean TEAM_CONSULTANT_DEFAULT = false;
+  private static final String NEWLINE_CHAR = "\r\n";
   private String protocolFile;
 
   public void startImport() {
 
-    protocolFile = protocolFilename + "." + System.currentTimeMillis();
+    this.protocolFile = protocolFilename + "." + System.currentTimeMillis();
 
     Reader in;
-    Iterable<CSVRecord> records = null;
+    List<CSVRecord> records;
     String logMessage;
-    String keycloakUserId;
     Consultant consultant = null;
     String rocketChatUserId = null;
 
     try {
       in = new FileReader(importFilename);
-      records = CSVFormat.DEFAULT.parse(in);
+      records = CSVFormat.DEFAULT.parse(in).getRecords();
     } catch (Exception exception) {
       throw new InternalServerErrorException(exception.getMessage());
     }
@@ -115,9 +106,9 @@ public class ConsultantImportService {
 
         String[] agencyRoleSetArray = importRecord.getAgenciesAndRoleSets().split(DELIMITER);
 
-        HashSet<String> roles = new HashSet<String>();
-        HashSet<Long> agencyIds = new HashSet<Long>();
-        List<Boolean> formalLanguageList = new ArrayList<Boolean>();
+        HashSet<String> roles = new HashSet<>();
+        HashSet<Long> agencyIds = new HashSet<>();
+        List<Boolean> formalLanguageList = new ArrayList<>();
         for (String agencyRoleSet : agencyRoleSetArray) {
 
           if (!agencyRoleSet.contains(AGENCY_ROLE_DELIMITER)) {
@@ -127,7 +118,7 @@ public class ConsultantImportService {
           }
           String[] agencyRoleArray = agencyRoleSet.split(AGENCY_ROLE_DELIMITER);
 
-          AgencyDTO agency = null;
+          AgencyDTO agency;
           try {
             agency = agencyServiceHelper.getAgencyWithoutCaching(Long.valueOf(agencyRoleArray[0]));
           } catch (AgencyServiceHelperException agencyServiceHelperException) {
@@ -234,58 +225,20 @@ public class ConsultantImportService {
         writeToImportLog(logMessage);
 
         if (importRecord.getConsultantId() == null) {
-          // Create keycloak user
-          UserDTO userDto = getUserDTO(importRecord.getUsername(), importRecord.getEmail());
-          KeycloakCreateUserResponseDTO response;
-          try {
-            response = keycloakAdminClientHelper.createKeycloakUser(userDto,
-                importRecord.getFirstName(), importRecord.getLastName());
-          } catch (KeycloakException keycloakException) {
-            throw new ImportException(String.format("ERROR: Keycloak user could not be created: %s",
-                keycloakException.getMessage()));
-          } catch (Exception ex) {
-            throw new ImportException(
-                String.format("ERROR: Keycloak user could not be created: %s", ex.getMessage()));
-          }
+          consultant = this.consultantCreatorService.createNewConsultant(importRecord, roles);
 
-          if (response.getUserId() == null) {
-            throw new ImportException("ERROR: Keycloak user id is missing");
-          }
-
-          keycloakUserId = response.getUserId();
-
-          logMessage = "Keycloak-ID: " + keycloakUserId;
+          logMessage = "Keycloak-ID: " + consultant.getId();
           writeToImportLog(logMessage);
 
-          // Set keycloak password
-          String password = userHelper.getRandomPassword();
-          keycloakAdminClientHelper.updatePassword(keycloakUserId, password);
-
-          // Set consultant role
-          for (String roleName : roles) {
-            keycloakAdminClientHelper.updateRole(keycloakUserId, roleName);
-          }
-
-          logMessage = "Roles: " + roles.stream().collect(Collectors.joining(","));
+          logMessage = "Roles: " + String.join(",", roles);
           writeToImportLog(logMessage);
 
-          // Get the Rocket.Chat ID
-          rocketChatUserId =
-              rocketChatService.getUserID(importRecord.getUsernameEncoded(), password, true);
-
-          logMessage = "RocketChat-ID: " + rocketChatUserId;
+          logMessage = "RocketChat-ID: " + consultant.getRocketChatId();
           writeToImportLog(logMessage);
-
-          // create consultant in db
-          consultant = consultantService.saveConsultant(getConsultant(keycloakUserId,
-              importRecord.getUsernameEncoded(), importRecord.getFirstName(),
-              importRecord.getLastName(), importRecord.getEmail(), importRecord.isAbsent,
-              importRecord.getAbsenceMessage(), importRecord.isTeamConsultant(),
-              importRecord.getIdOld(), rocketChatUserId, importRecord.isFormalLanguage()));
         }
 
         // create relations to agencies
-        Set<ConsultantAgency> consultantAgencies = new HashSet<ConsultantAgency>();
+        Set<ConsultantAgency> consultantAgencies = new HashSet<>();
         for (Long agencyId : agencyIds) {
           if (!consultantAgencyService.isConsultantInAgency(consultant.getId(), agencyId)) {
             consultantAgencies.add(consultantAgencyService
@@ -294,15 +247,14 @@ public class ConsultantImportService {
         }
         consultant.setConsultantAgencies(consultantAgencies);
 
-        logMessage = "Agencies: " + agencyIds.stream().map(agencyId -> String.valueOf(agencyId))
+        logMessage = "Agencies: " + agencyIds.stream().map(String::valueOf)
             .collect(Collectors.joining(","));
         writeToImportLog(logMessage);
 
         // Enquiries
         List<ConsultantSessionResponseDTO> consultantSessionResponseDtoList =
             sessionService.getSessionsForConsultant(consultant, SessionStatus.NEW.getValue());
-        if (consultantSessionResponseDtoList != null
-            && consultantSessionResponseDtoList.size() > 0) {
+        if (isNotEmpty(consultantSessionResponseDtoList)) {
           for (ConsultantSessionResponseDTO consultantSessionResponseDTO : consultantSessionResponseDtoList) {
             try {
               rocketChatService
@@ -342,8 +294,7 @@ public class ConsultantImportService {
         logMessage = "";
         List<ConsultantSessionResponseDTO> consultantTeamSessionResponseDtoList =
             sessionService.getTeamSessionsForConsultant(consultant);
-        if (consultantTeamSessionResponseDtoList != null
-            && consultantTeamSessionResponseDtoList.size() > 0) {
+        if (isNotEmpty(consultantTeamSessionResponseDtoList)) {
           for (ConsultantSessionResponseDTO consultantTeamSessionResponseDto : consultantTeamSessionResponseDtoList) {
 
             try {
@@ -403,14 +354,8 @@ public class ConsultantImportService {
       } catch (ImportException wontImportException) {
         writeToImportLog(wontImportException.getMessage());
         break;
-      } catch (FileNotFoundException fileNotFoundException) {
+      } catch (Exception fileNotFoundException) {
         fileNotFoundException.printStackTrace();
-        break;
-      } catch (IOException ioException) {
-        ioException.printStackTrace();
-        break;
-      } catch (Exception exception) {
-        exception.printStackTrace();
         break;
       }
 
@@ -429,38 +374,11 @@ public class ConsultantImportService {
     }
 
     try {
-      Files.write(Paths.get(protocolFile), (message + NEWLINE_CHAR).getBytes(IMPORT_LOG_CHARSET),
+      Files.write(Paths.get(protocolFile), (message + NEWLINE_CHAR).getBytes(StandardCharsets.UTF_8),
           StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  private UserDTO getUserDTO(String username, String email) {
-    UserDTO userDto = new UserDTO();
-    userDto.setUsername(userHelper.encodeUsername(username));
-    userDto.setEmail(email);
-    return userDto;
-  }
-
-  private Consultant getConsultant(String consultantId, String username, String firstName,
-      String lastName, String email, boolean isAbsent, String absenceMessage,
-      boolean isTeamConsultant, Long idOld, String rocketChatUserId, boolean languageFormal) {
-    Consultant consultant = new Consultant();
-    consultant.setId(consultantId);
-    consultant.setUsername(username);
-    consultant.setFirstName(firstName);
-    consultant.setLastName(lastName);
-    consultant.setAbsent(isAbsent);
-    consultant.setAbsenceMessage(absenceMessage);
-    consultant.setIdOld(idOld);
-    consultant.setEmail(email);
-    consultant.setTeamConsultant(isTeamConsultant);
-    consultant.setRocketChatId(rocketChatUserId);
-    consultant.setLanguageFormal(languageFormal);
-    return consultant;
   }
 
   private ConsultantAgency getConsultantAgency(Consultant consultant, Long agencyId) {
@@ -484,7 +402,7 @@ public class ConsultantImportService {
     importRecord.setLastName(StringUtils.trim(record.get(4)));
     String email = StringUtils.deleteWhitespace(record.get(5));
     // If there is more than one email addresses...than catch the first one
-    if (email.indexOf(DELIMITER) != -1) {
+    if (email.contains(DELIMITER)) {
       email = email.substring(0, email.indexOf(DELIMITER)).trim();
     }
     if (!EmailValidator.getInstance().isValid(email)) {
@@ -493,7 +411,7 @@ public class ConsultantImportService {
               importRecord.getUsername()));
     }
     importRecord.setEmail(email);
-    importRecord.setAbsent((record.get(6).equals(YES)) ? true : false);
+    importRecord.setAbsent(record.get(6).equals(YES));
     String absenceMessage =
         (record.get(7).trim().equals(StringUtils.EMPTY)) ? null : record.get(7).trim();
     if (absenceMessage != null) {
@@ -506,7 +424,7 @@ public class ConsultantImportService {
 
   @Getter
   @Setter
-  private class ImportRecord {
+  public static class ImportRecord {
 
     String consultantId;
     Long idOld;
