@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
@@ -35,15 +34,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class UserAdminControllerIT {
 
-  protected static final String CONSULTANT_ID = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
-
   protected static final String ROOT_PATH = "/useradmin";
   protected static final String SESSION_PATH = ROOT_PATH + "/sessions";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
   protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
-  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/" + CONSULTANT_ID + "/agencies";
+  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s/agencies";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
@@ -58,9 +55,6 @@ public class UserAdminControllerIT {
 
   @MockBean
   private ViolationReportGenerator violationReportGenerator;
-
-  @MockBean
-  private ConsultantAgencyAdminService consultantAgencyAdminService;
 
   @MockBean
   private LinkDiscoverers linkDiscoverers;
@@ -109,11 +103,15 @@ public class UserAdminControllerIT {
   @Test
   public void getConsultantAgency_Should_returnOk_When_requiredConsultantIdParamIsGiven()
       throws Exception {
-    this.mvc.perform(get(CONSULTANT_AGENCY_PATH))
+    String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
+
+    String consultantAgencyPath = String.format(CONSULTANT_AGENCY_PATH, consultantId);
+
+    this.mvc.perform(get(consultantAgencyPath))
         .andExpect(status().isOk());
 
-    verify(this.consultantAgencyAdminService, times(1))
-        .findConsultantAgencies(eq(CONSULTANT_ID));
+    verify(this.consultantAdminFacade, times(1))
+        .findConsultantAgencies(eq(consultantId));
   }
 
   @Test

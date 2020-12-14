@@ -17,12 +17,20 @@ public class ConsultantAgencyAdminService {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
 
+  /**
+   * Returns all Agencies for the given consultantId.
+   * @param consultantId id of the consultant
+   * @return the list of agencies for the given consultant
+   */
   public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
     List<ConsultantAgency> agencyList = consultantAgencyRepository
         .findByConsultantId(consultantId);
 
-    return ConsultantAgencyAdminResultDTOBuilder.getInstance().withConsultantId(consultantId)
-        .withResult(agencyList).build();
+    return ConsultantAgencyAdminResultDTOBuilder
+        .getInstance()
+        .withConsultantId(consultantId)
+        .withResult(agencyList)
+        .build();
   }
 
 }

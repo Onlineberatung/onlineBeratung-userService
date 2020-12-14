@@ -9,7 +9,6 @@ import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,9 +25,9 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
   @Before
   public void setupResultPageMock() {
     EasyRandom easyRandom = new EasyRandom();
-    Stream<ConsultantAgency> randomSessions = easyRandom
-        .objects(ConsultantAgency.class, MOCKED_CONSULTANT_AGENCY_LIST_SIZE);
-    agencyList = randomSessions.collect(Collectors.toList());
+    agencyList = easyRandom
+        .objects(ConsultantAgency.class, MOCKED_CONSULTANT_AGENCY_LIST_SIZE)
+        .collect(Collectors.toList());
   }
 
   @Test

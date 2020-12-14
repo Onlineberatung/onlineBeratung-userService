@@ -63,7 +63,8 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
    * @return the generated {@link ConsultantAgencyAdminResultDTO}
    */
   public ConsultantAgencyAdminResultDTO build() {
-    return new ConsultantAgencyAdminResultDTO().embedded(buildSessionAdminResult())
+    return new ConsultantAgencyAdminResultDTO()
+        .embedded(buildSessionAdminResult())
         .links(buildResultLinks());
   }
 
@@ -82,7 +83,7 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
         .agencyId(consultantAgency.getAgencyId())
         .consultantId(consultantAgency.getConsultant().getId())
         .createDate(String.valueOf(consultantAgency.getCreateDate()))
-        .editDate((String.valueOf(consultantAgency.getUpdateDate())));
+        .updateDate((String.valueOf(consultantAgency.getUpdateDate())));
   }
 
   private ConsultantAgencyAdminResultLinks buildResultLinks() {

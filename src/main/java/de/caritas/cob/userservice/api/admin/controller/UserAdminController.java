@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.admin.controller;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
@@ -22,7 +21,6 @@ import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import io.swagger.annotations.Api;
 import java.util.List;
-import javax.annotation.Nonnull;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
@@ -43,7 +41,6 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull ConsultingTypeAdminService consultingTypeAdminService;
   private final @NonNull ViolationReportGenerator violationReportGenerator;
   private final @NonNull ConsultantAdminFacade consultantAdminFacade;
-  private final @Nonnull ConsultantAgencyAdminService consultantAgencyAdminService;
 
   /**
    * Creates the root hal based navigation entity.
@@ -167,7 +164,7 @@ public class UserAdminController implements UseradminApi {
   }
 
   /**
-   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies
+   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies.
    *
    * @param consultantId Consultant Id (required)
    * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
@@ -177,7 +174,7 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(
       @PathVariable String consultantId) {
-    ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAgencyAdminService
+    ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAdminFacade
         .findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
   }

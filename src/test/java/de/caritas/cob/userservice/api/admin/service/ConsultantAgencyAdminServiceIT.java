@@ -46,7 +46,7 @@ public class ConsultantAgencyAdminServiceIT {
     assertThat(consultantAgencyAdminDTO.getConsultantId(), notNullValue());
     assertThat(consultantAgencyAdminDTO.getAgencyId(), notNullValue());
     assertThat(consultantAgencyAdminDTO.getCreateDate(), notNullValue());
-    assertThat(consultantAgencyAdminDTO.getEditDate(), notNullValue());
+    assertThat(consultantAgencyAdminDTO.getUpdateDate(), notNullValue());
   }
 
   @Test
