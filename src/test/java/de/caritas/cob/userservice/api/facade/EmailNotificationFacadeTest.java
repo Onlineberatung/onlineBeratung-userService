@@ -69,6 +69,7 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -108,11 +109,12 @@ public class EmailNotificationFacadeTest {
   private final User USER = new User(USER_ID, USERNAME_ENCODED, "email@email.de", null);
   private final User USER_NO_EMAIL = new User(USER_ID, "username", "", null);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID);
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now());
   private final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID);
+      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now());
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID);
+      new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, LocalDateTime.now(),
+          LocalDateTime.now());
   private final Session SESSION =
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID,
           SessionStatus.INITIAL,
