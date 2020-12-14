@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.manager.consultingType.registration;
 
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryFields.MandatoryFields;
+import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryfields.MandatoryFields;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -4,7 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryFields.MandatoryFields;
+import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;

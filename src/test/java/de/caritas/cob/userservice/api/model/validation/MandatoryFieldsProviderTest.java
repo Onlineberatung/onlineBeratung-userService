@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryFields.MandatoryFields;
+import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryfields.MandatoryFields;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

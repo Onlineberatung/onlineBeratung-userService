@@ -6,7 +6,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.manager.consultingType.SessionDataInitializing;
 import de.caritas.cob.userservice.api.manager.consultingType.registration.Registration;
-import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryFields.MandatoryFields;
+import de.caritas.cob.userservice.api.manager.consultingType.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
