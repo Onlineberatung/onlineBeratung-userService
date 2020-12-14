@@ -19,10 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
-import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
-import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
+import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import javax.servlet.http.Cookie;
 import org.junit.Test;
@@ -54,12 +52,6 @@ public class UserAdminControllerAuthorizationIT {
 
   @MockBean
   private SessionAdminService sessionAdminService;
-
-  @MockBean
-  private ConsultantAdminFilterService consultantAdminFilterService;
-
-  @MockBean
-  private ConsultantAdminService consultantAdminService;
 
   @MockBean
   private ConsultingTypeAdminService consultingTypeAdminService;
@@ -237,7 +229,7 @@ public class UserAdminControllerAuthorizationIT {
     mvc.perform(get(FILTERED_CONSULTANTS_PATH))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantAdminFilterService);
+    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -249,7 +241,7 @@ public class UserAdminControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(consultantAdminFilterService);
+    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -266,7 +258,7 @@ public class UserAdminControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantAdminFilterService);
+    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -281,7 +273,7 @@ public class UserAdminControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(consultantAdminFilterService, times(1)).findFilteredConsultants(any(), anyInt(), any());
+    verify(consultantAdminFacade, times(1)).findFilteredConsultants(any(), anyInt(), any());
   }
 
   @Test
@@ -291,7 +283,7 @@ public class UserAdminControllerAuthorizationIT {
     mvc.perform(get(GET_CONSULTANT_PATH))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantAdminService);
+    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -303,7 +295,7 @@ public class UserAdminControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(consultantAdminService);
+    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -320,7 +312,7 @@ public class UserAdminControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantAdminService);
+    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -333,7 +325,7 @@ public class UserAdminControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(consultantAdminService, times(1)).findConsultantById(any());
+    verify(consultantAdminFacade, times(1)).findConsultant(any());
   }
 
   @Test
