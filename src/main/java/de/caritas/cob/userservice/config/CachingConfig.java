@@ -24,7 +24,7 @@ public class CachingConfig {
   @Value("${cache.agencies.configuration.timeToLiveSeconds}")
   private long timeToLiveSeconds;
 
-  public final static String AGENCY_CACHE = "agencyCache";
+  public static final String AGENCY_CACHE = "agencyCache";
 
   @Bean(destroyMethod = "shutdown")
   public net.sf.ehcache.CacheManager ehCacheManager() {

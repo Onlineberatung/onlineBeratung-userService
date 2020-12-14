@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -13,11 +14,13 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
@@ -29,6 +32,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -162,7 +166,7 @@ public class SessionService {
 
     try {
       List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
-      List<Session> sessions = sessionRepository.findByUser_UserId(userId);
+      List<Session> sessions = sessionRepository.findByUserUserId(userId);
       if (isNotEmpty(sessions)) {
         List<AgencyDTO> agencies = agencyServiceHelper.getAgencies(
             sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));
@@ -184,18 +188,19 @@ public class SessionService {
   /**
    * Initialize a {@link Session}.
    *
-   * @param user the user
-   * @param userDto the dto of the user
-   * @param monitoring flag to initialize monitoring
+   * @param user                   the user
+   * @param userDto                the dto of the user
+   * @param consultingTypeSettings flag to initialize monitoring
    * @return the initialized session
    */
-  public Session initializeSession(User user, UserDTO userDto, boolean monitoring)
-      throws AgencyServiceHelperException {
-    AgencyDTO agencyDTO = agencyServiceHelper.getAgency(userDto.getAgencyId());
-    return saveSession(
-        new Session(user, ConsultingType.values()[Integer.parseInt(userDto.getConsultingType())],
-            userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-            isTrue(agencyDTO.getTeamAgency()), monitoring));
+  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
+      ConsultingTypeSettings consultingTypeSettings) {
+    Session session = new Session(user, consultingTypeSettings.getConsultingType(),
+        userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
+        isTeamSession, consultingTypeSettings.isMonitoring());
+    session.setCreateDate(LocalDateTime.now());
+    session.setUpdateDate(LocalDateTime.now());
+    return saveSession(session);
   }
 
   /**
@@ -295,7 +300,8 @@ public class SessionService {
         }
       } else {
         throw new BadRequestException(String.format(
-            "Invalid session status %s submitted for consultant %s", status, consultant.getId()), LogService::logBadRequestException);
+            "Invalid session status %s submitted for consultant %s", status, consultant.getId()),
+            LogService::logBadRequestException);
       }
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error", LogService::logDatabaseError);

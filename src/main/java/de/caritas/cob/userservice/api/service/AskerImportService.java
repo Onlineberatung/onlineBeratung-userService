@@ -2,8 +2,37 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.userservice.api.exception.ImportException;
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.helper.Helper;
+import de.caritas.cob.userservice.api.helper.MonitoringHelper;
+import de.caritas.cob.userservice.api.helper.RocketChatHelper;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -20,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
@@ -31,37 +62,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.authorization.Authority;
-import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.exception.ImportException;
-import de.caritas.cob.userservice.api.exception.SaveUserException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.MonitoringHelper;
-import de.caritas.cob.userservice.api.helper.RocketChatHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
-import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Imports the askers from the created CSV file of the old Caritas system.
@@ -223,7 +223,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -408,7 +408,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -418,8 +418,9 @@ public class AskerImportService {
         }
 
         // Initialize Session (need session id for Rocket.Chat group name)
-        Session session = sessionService.initializeSession(dbUser, userDTO,
-            consultingTypeSettings.isMonitoring());
+        Session session = sessionService
+            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()),
+                consultingTypeSettings);
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));
@@ -501,6 +502,8 @@ public class AskerImportService {
         session.setGroupId(rcGroupId);
         session.setEnquiryMessageDate(new Date());
         session.setStatus(SessionStatus.IN_PROGRESS);
+        session.setCreateDate(LocalDateTime.now());
+        session.setUpdateDate(LocalDateTime.now());
         Session updatedSession = sessionService.saveSession(session);
         if (updatedSession.getId() == null) {
           throw new ImportException(

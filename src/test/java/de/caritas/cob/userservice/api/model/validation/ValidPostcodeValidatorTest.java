@@ -54,7 +54,7 @@ public class ValidPostcodeValidatorTest {
   @Test
   public void isValid_Should_ReturnFalse_WhenPostcodeSizeIsInvalid() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     boolean result = validPostcodeValidator.isValid(USER_DTO_SUCHT_WITH_INVALID_POSTCODE, null);
@@ -65,7 +65,7 @@ public class ValidPostcodeValidatorTest {
   @Test
   public void isValid_Should_ReturnTrue_WhenPostcodeSizeIsValid() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     boolean result = validPostcodeValidator.isValid(USER_DTO_SUCHT, null);

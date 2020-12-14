@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import de.caritas.cob.userservice.api.authorization.Authority;
+import static java.util.Objects.isNull;
+
+import de.caritas.cob.userservice.api.authorization.Authorities;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -11,6 +13,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
@@ -104,9 +107,9 @@ public class KeycloakAdminClientHelper {
   /**
    * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user ID.
    *
-   * @param user {@link UserDTO}
+   * @param user      {@link UserDTO}
    * @param firstName first name of user
-   * @param lastName last name of user
+   * @param lastName  last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
   @KeycloakAdminClientLogout
@@ -224,21 +227,22 @@ public class KeycloakAdminClientHelper {
   /**
    * Assigns the role with the given name to the given user ID.
    *
-   * @param userId Keycloak user ID
+   * @param userId   Keycloak user ID
    * @param roleName Keycloak role name
    */
   @KeycloakAdminClientLogout
   public void updateRole(final String userId, final String roleName) {
     // Get realm and user resources
     RealmResource realmResource = getInstance().realm(KEYCLOAK_REALM);
+    UsersResource userRessource = realmResource.users();
+    UserResource user = userRessource.get(userId);
+    boolean isRoleUpdated = false;
 
     // Assign role
     RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
-    UsersResource userRessource = realmResource.users();
-    UserResource user = userRessource.get(userId);
-
-    boolean isRoleUpdated = false;
-
+    if (isNull(roleRepresentation.getAttributes())) {
+      roleRepresentation.setAttributes(new LinkedHashMap<>());
+    }
     user.roles().realmLevel()
         .add(Arrays.asList(roleRepresentation));
 
@@ -259,7 +263,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Updates the Keycloak password for a user.
    *
-   * @param userId Keycloak user ID
+   * @param userId   Keycloak user ID
    * @param password user password
    */
   @KeycloakAdminClientLogout
@@ -276,7 +280,7 @@ public class KeycloakAdminClientHelper {
    * success/error status possible, because the Keycloak Client doesn't provide one either. *
    *
    * @param userId Keycloak user ID
-   * @param user {@link UserDTO}
+   * @param user   {@link UserDTO}
    * @return the (dummy) email address
    * @throws Exception {@link Exception}
    */
@@ -311,7 +315,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId Keycloak user ID
+   * @param userId    Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */
@@ -332,7 +336,7 @@ public class KeycloakAdminClientHelper {
     for (RoleRepresentation role : userRoles) {
       Optional<UserRole> userRoleOptional = UserRole.getRoleByValue(role.getName());
       if (userRoleOptional.isPresent()) {
-        List<String> authorities = Authority.getAuthoritiesByUserRole(userRoleOptional.get());
+        List<String> authorities = Authorities.getAuthoritiesByUserRole(userRoleOptional.get());
         if (authorities.contains(authority)) {
           return true;
         }

@@ -39,6 +39,17 @@ paths:
         - user-controller
       summary: 'Register a new consulting type for an existing asker [Authorization: Role: user]'
       operationId: registerNewConsultingType
+      parameters:
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: RCUserId
+          in: header
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           'application/json':

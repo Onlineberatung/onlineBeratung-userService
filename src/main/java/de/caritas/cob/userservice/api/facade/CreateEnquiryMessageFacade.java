@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.facade;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
@@ -84,7 +84,7 @@ public class CreateEnquiryMessageFacade {
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
       ConsultingTypeSettings consultingTypeSettings =
-          consultingTypeManager.getConsultantTypeSettings(session.getConsultingType());
+          consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
@@ -97,7 +97,6 @@ public class CreateEnquiryMessageFacade {
               .rcGroupId(rcGroupId).rcFeedbackGroupId(rcFeedbackGroupId).build();
 
       saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
-      monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
 
       messageServiceHelper.postMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);

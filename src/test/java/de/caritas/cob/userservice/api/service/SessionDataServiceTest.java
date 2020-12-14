@@ -37,11 +37,12 @@ public class SessionDataServiceTest {
   private final String CONSULTANT_ROCKETCHAT_ID = "xN3Mobksn3xdp7gEk";
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
-          "last name", "consultant@cob.de", false, false, null, false, null, null, null);
+          "last name", "consultant@cob.de", false, false, null, false, null, null, null, null,
+          null, null);
   private final Session INITALIZED_SESSION = new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT,
       "99999", 0L, SessionStatus.INITIAL, null, null);
   private final UserDTO USER_DTO = new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", null, null,
-      null, null, null, "true", "0");
+      null, null, null, "true", "0", true);
 
 
   @InjectMocks
@@ -49,14 +50,7 @@ public class SessionDataServiceTest {
   @Mock
   private SessionDataRepository sessionDataRepository;
   @Mock
-  private Logger logger;
-  @Mock
   private SessionDataHelper sessionDataHelper;
-
-  @Before
-  public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
-  }
 
   @Test
   public void createSessionDataList_Should_SaveSessionData() {
