@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.3.0...v2.4.0) (2020-12-14)
+
+
+### Features
+
+* added admin call to receive all consulting types ([0f3ee2a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0f3ee2adec893d44b7866314652786eac2d1718e))
+* added create consultant admin api spec ([8bafb71](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8bafb716c64fd9d0fe1fb5d2decd57a2c1bfc329))
+* added delete consultant admin api spec ([6f02682](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6f026822c8f8090ff7913a08b9902a3fc0ad4171))
+* added get consultant admin spec ([6d14199](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6d14199761a92e0a985a369cb64d566e31b063b0))
+* added get consultants admin spec ([8264a37](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8264a37e1b0356e4f5056991cdd469cb43e88462))
+* correct rule for wrong team consultants ([ff0d45d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ff0d45d902405e6e4f1299683d5d2285a8b5ccb5))
+* define api for admin user sessions ([8b41288](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8b412882ac1fcee0321f07ab229c4a0ef837dfc0))
+* implement filterable consultant endpoint ([c82ef06](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c82ef0678c7e0b95c198db1a91faf290e838d649))
+* integrate basic violation rule generation framework ([eb17a96](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/eb17a9645465dff94aca677265e2cf7f37779f9d))
+* integrate service to retrieve filtered sessions ([9e83880](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9e83880384e64a7a221aa3d02ee8b4ff2d964209))
+* provide endpoint for a single consultant resource ([8061734](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8061734b96b32aa71d57074c558576e80834c074))
+* provide filtered search for consultants ([3b60a7e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3b60a7ed411cd8f4ae907f1f969161137cc579e5))
+* provide hal link generation and controller integration ([831c2e5](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/831c2e503e2a52a11f78709541c2a260d2c19578))
+* provide new authorization role for user admin ([1962b75](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1962b75b0e536445a80f15e33c6dbc5287790b14))
+* provide pageable repository methods for sessions ([b9bc8bf](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/b9bc8bfcb098b95879104fa8763f26753b76da92))
+* provide pagination and link generation ([75b0470](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/75b047015d7adafba5fdd610ddde1c2a8eac4e6e))
+* provide rule for askers without session and chat ([526961a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/526961af26012144c2a83ce02cdfb122de057797))
+* provide rule for consultants in team agency without required flag ([c320052](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c320052906220358287d561517b7fad584db5c05))
+* provide rule for consultants with deleted agency relation ([9be3732](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9be37322ee71f38fb411950b5622882b67db93d4))
+* provide rule for consultants with wrong team consultant flag ([1f9cf1e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1f9cf1eb35627ca363f2cf45ef09a8beb69e168b))
+* provide rule for consultants without agencies ([65aa15a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/65aa15ad1840b326605aef14e6984ce28c0e131c))
+* provide rule for missing rocket chat rooms ([9499025](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9499025876adff0f764d8bbb6faa0394d11f259d))
+* refactoring of UserDataFacade and unit tests ([77c378e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/77c378e90a29b4582599619d84f5000095e85987))
+* temporary implementation of new registration for kreuzbund ([86b477a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/86b477a1e0baf17ee8b6777aee8b18eeef6acd05))
+
+
+### Bug Fixes
+
+* behaviour of next link ([2d1750f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2d1750fb93093c6728ffc76e323a8ee980d7cba9))
+* checkstyle violations ([433c639](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/433c6390a36b050a88e12658310d46cf35b67add))
+* emoved unnecessary mock ([30e1552](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/30e1552376f51d3b867246dba735e05e669170a8))
+* fixed code style issues ([b48c3cd](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/b48c3cd87fdaa7d9854a3664ef37466d3c9a1885))
+* provide creation and update date for new sessions ([5adfa89](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5adfa897216201be962f32d1b10de042cfaafe43))
+* remove open in view property to prevent lazy initialization error ([28f9eab](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/28f9eab748ec2d5e8571a44eb0b5e6045ad00de3))
+* removed unused import ([f0dbb2e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f0dbb2e0063eef184fcb8829c93682702f2b8801))
+* removed unused import ([1298a96](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1298a96ad24d5a38cc374064ba5cd31893d95f98))
+
 ## [2.3.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.1.6...v2.3.0) (2020-11-23)
 
 
