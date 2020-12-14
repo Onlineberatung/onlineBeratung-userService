@@ -38,7 +38,7 @@ public class UserAdminControllerIT {
   protected static final String CONSULTANT_ID = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
   protected static final String ROOT_PATH = "/useradmin";
-  protected static final String SESSION_PATH = ROOT_PATH + "/session";
+  protected static final String SESSION_PATH = ROOT_PATH + "/sessions";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
