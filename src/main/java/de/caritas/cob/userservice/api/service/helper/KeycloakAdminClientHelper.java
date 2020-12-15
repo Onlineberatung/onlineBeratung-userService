@@ -312,7 +312,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId Keycloak user ID
+   * @param userId    Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */

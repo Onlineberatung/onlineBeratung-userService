@@ -6,6 +6,7 @@ import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenera
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
@@ -53,8 +54,8 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve sessions.
    *
-   * @param page Number of page where to start in the query (1 = first page) (required)
-   * @param perPage Number of items which are being returned (required)
+   * @param page          Number of page where to start in the query (1 = first page) (required)
+   * @param perPage       Number of items which are being returned (required)
    * @param sessionFilter The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
@@ -120,7 +121,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to update a consultant.
    *
-   * @param consultantId consultant id (required)
+   * @param consultantId        consultant id (required)
    * @param updateConsultantDTO (required)
    * @return {@link ConsultantAdminResponseDTO}
    */
@@ -145,10 +146,11 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve consultants.
    *
-   * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
-   * @param perPage Number of items which are being returned per page (required)
+   * @param page             Number of page where to start in the query (1 &#x3D; first page)
+   *                         (required)
+   * @param perPage          Number of items which are being returned per page (required)
    * @param consultantFilter The filter parameters to search for. If no filter is set all consultant
-   * are being returned. (optional)
+   *                         are being returned. (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
@@ -157,5 +159,21 @@ public class UserAdminController implements UseradminApi {
     ConsultantSearchResultDTO resultDTO =
         this.consultantAdminFacade.findFilteredConsultants(page, perPage, consultantFilter);
     return ResponseEntity.ok(resultDTO);
+  }
+
+  /**
+   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies.
+   *
+   * @param consultantId Consultant Id (required)
+   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
+   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
+   * condition (status code 500)
+   */
+  @Override
+  public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(
+      @PathVariable String consultantId) {
+    ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAdminFacade
+        .findConsultantAgencies(consultantId);
+    return ResponseEntity.ok(consultantAgencies);
   }
 }

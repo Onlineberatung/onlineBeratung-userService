@@ -93,6 +93,6 @@ public class ConsultingTypeAdminServiceTest {
         .findConsultingTypes(0, Integer.MAX_VALUE)
         .getEmbedded();
 
-    assertThat(page, hasSize(20));
+    assertThat(page, hasSize(21));
   }
 }

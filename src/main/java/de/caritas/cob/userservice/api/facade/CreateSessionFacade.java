@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;

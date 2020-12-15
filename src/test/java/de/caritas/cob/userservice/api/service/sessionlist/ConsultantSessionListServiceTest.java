@@ -44,7 +44,7 @@ import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.ChatService;
