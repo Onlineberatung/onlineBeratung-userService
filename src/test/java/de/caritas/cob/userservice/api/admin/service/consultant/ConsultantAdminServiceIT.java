@@ -78,6 +78,14 @@ public class ConsultantAdminServiceIT {
     assertThat(consultantById.getLinks().getDelete().getHref(),
         endsWith("/useradmin/consultant/" + EXISTING_CONSULTANT));
     assertThat(consultantById.getLinks().getDelete().getMethod(), is(MethodEnum.DELETE));
+    assertThat(consultantById.getLinks().getAgencies(), notNullValue());
+    assertThat(consultantById.getLinks().getAgencies().getHref(),
+        endsWith("/useradmin/consultant/" + EXISTING_CONSULTANT + "/agencies"));
+    assertThat(consultantById.getLinks().getAgencies().getMethod(), is(MethodEnum.GET));
+    assertThat(consultantById.getLinks().getAddAgency(), notNullValue());
+    assertThat(consultantById.getLinks().getAddAgency().getHref(),
+        endsWith("/useradmin/consultant/" + EXISTING_CONSULTANT + "/agency"));
+    assertThat(consultantById.getLinks().getAddAgency().getMethod(), is(MethodEnum.POST));
   }
 
   @Test(expected = NoContentException.class)

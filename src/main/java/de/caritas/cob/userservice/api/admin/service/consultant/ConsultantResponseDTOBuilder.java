@@ -14,8 +14,8 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 
 /**
- * Builder class to generate a {@link ConsultantAdminResponseDTO} containing available hal links
- * and result of {@link ConsultantDTO} element.
+ * Builder class to generate a {@link ConsultantAdminResponseDTO} containing available hal links and
+ * result of {@link ConsultantDTO} element.
  */
 public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
@@ -46,7 +46,9 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
     ConsultantLinks consultantLinks = new ConsultantLinks()
         .self(buildSelfLink())
         .update(buildUpdateLink())
-        .delete(buildDeleteLink());
+        .delete(buildDeleteLink())
+        .agencies(buildAgenciesLink())
+        .addAgency(buildAddAgencyLink());
 
     return new ConsultantAdminResponseDTO()
         .embedded(consultantDTO)
@@ -55,7 +57,7 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
   private HalLink buildSelfLink() {
     return buildHalLink(methodOn(UseradminApi.class)
-            .getConsultant(this.consultant.getId()), MethodEnum.GET);
+        .getConsultant(this.consultant.getId()), MethodEnum.GET);
   }
 
   private HalLink buildUpdateLink() {
@@ -66,6 +68,16 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
   private HalLink buildDeleteLink() {
     return buildHalLink(methodOn(UseradminApi.class)
         .markConsultantForDeletion(this.consultant.getId()), MethodEnum.DELETE);
+  }
+
+  private HalLink buildAgenciesLink() {
+    return buildHalLink(methodOn(UseradminApi.class)
+        .getConsultantAgency(this.consultant.getId()), MethodEnum.GET);
+  }
+
+  private HalLink buildAddAgencyLink() {
+    return buildHalLink(methodOn(UseradminApi.class)
+        .createConsultantAgency(this.consultant.getId(), null), MethodEnum.POST);
   }
 
 }

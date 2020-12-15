@@ -27,7 +27,9 @@ public class RootDTOBuilder implements HalLinkBuilder {
         .links(new RootLinks()
             .self(buildSelfLink())
             .sessions(buildSessionsLink())
-            .consultants(buildConsultantsLink()));
+            .consultants(buildConsultantsLink())
+            .consultantAgencies(buildConsultantAgenciesLink())
+            .createConsultant(buildCreateConsultantLink()));
   }
 
   private HalLink buildSelfLink() {
@@ -44,6 +46,14 @@ public class RootDTOBuilder implements HalLinkBuilder {
     return buildHalLink(
         methodOn(UseradminApi.class).getConsultants(DEFAULT_PAGE, DEFAULT_PER_PAGE, null),
         MethodEnum.GET);
+  }
+
+  private HalLink buildConsultantAgenciesLink() {
+    return buildHalLink(methodOn(UseradminApi.class).getConsultantAgency(null), MethodEnum.GET);
+  }
+
+  private HalLink buildCreateConsultantLink() {
+    return buildHalLink(methodOn(UseradminApi.class).createConsultant(null), MethodEnum.POST);
   }
 
 }

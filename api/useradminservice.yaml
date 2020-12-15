@@ -386,6 +386,8 @@ components:
           $ref: '#/components/schemas/HalLink'
         consultants:
           $ref: '#/components/schemas/HalLink'
+        createConsultant:
+          $ref: '#/components/schemas/HalLink'
 
     HalLink:
       type: object
