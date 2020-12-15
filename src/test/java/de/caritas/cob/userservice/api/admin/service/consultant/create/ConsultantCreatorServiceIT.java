@@ -1,18 +1,20 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_VALID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -38,6 +40,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ConsultantCreatorServiceIT {
 
   private static final String DUMMY_RC_ID = "rcUserId";
+  private static final String VALID_USERNAME = "validUsername";
+  private static final String VALID_EMAILADDRESS = "valid@emailaddress.de";
 
   @Autowired
   private ConsultantCreatorService consultantCreatorService;
@@ -58,6 +62,8 @@ public class ConsultantCreatorServiceIT {
     when(keycloakAdminClientHelper.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
 
     Consultant consultant = this.consultantCreatorService.createNewConsultant(createConsultantDTO);
 
@@ -82,6 +88,8 @@ public class ConsultantCreatorServiceIT {
     when(keycloakAdminClientHelper.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
     ImportRecord importRecord = this.easyRandom.nextObject(ImportRecord.class);
+    importRecord.setUsername(VALID_USERNAME);
+    importRecord.setEmail(VALID_EMAILADDRESS);
 
     Consultant consultant = this.consultantCreatorService.createNewConsultant(importRecord,
         asSet(CONSULTANT.getValue()));
@@ -100,20 +108,25 @@ public class ConsultantCreatorServiceIT {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createNewConsultant_Should_throwInternalServerErrorException_When_userCanNotBeCreatedInRocketChat()
+  public void createNewConsultant_Should_throwCustomValidationHttpStatusException_When_userCanNotBeCreatedInRocketChat()
       throws RocketChatLoginException {
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenThrow(new RocketChatLoginException(""));
+    KeycloakCreateUserResponseDTO validKeycloakResponse = easyRandom.nextObject(
+        KeycloakCreateUserResponseDTO.class);
+    validKeycloakResponse.getResponseDTO().setUsernameAvailable(1);
+    validKeycloakResponse.getResponseDTO().setEmailAvailable(1);
     when(keycloakAdminClientHelper.createKeycloakUser(any(), anyString(), any()))
-        .thenReturn(easyRandom.nextObject(
-            KeycloakCreateUserResponseDTO.class));
+        .thenReturn(validKeycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
 
     this.consultantCreatorService.createNewConsultant(createConsultantDTO);
   }
 
-  @Test(expected = KeycloakException.class)
-  public void createNewConsultant_Should_throwKeycloakException_When_keycloakIdIsMissing()
+  @Test(expected = CustomValidationHttpStatusException.class)
+  public void createNewConsultant_Should_throwCustomValidationHttpStatusException_When_keycloakIdIsMissing()
       throws RocketChatLoginException {
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenReturn(DUMMY_RC_ID);
@@ -125,6 +138,20 @@ public class ConsultantCreatorServiceIT {
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
 
     this.consultantCreatorService.createNewConsultant(createConsultantDTO);
+  }
+
+  @Test
+  public void createNewConsultant_Should_throwExpectedException_When_emailIsInvalid() {
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setEmail("invalid");
+
+    try {
+      this.consultantCreatorService.createNewConsultant(createConsultantDTO);
+      fail("Exception should be thrown");
+    } catch (CustomValidationHttpStatusException e) {
+      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
+    }
   }
 
 }

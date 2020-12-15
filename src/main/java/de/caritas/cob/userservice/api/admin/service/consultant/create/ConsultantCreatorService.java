@@ -1,12 +1,10 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
-import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
@@ -34,6 +32,7 @@ public class ConsultantCreatorService {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserHelper userHelper;
+  private final @NonNull ConsultantInputValidator consultantInputValidator;
 
   /**
    * Creates a new {@link Consultant} by {@link CreateConsultantDTO} in database, keycloak and
@@ -80,14 +79,15 @@ public class ConsultantCreatorService {
   private String createKeycloakUser(ConsultantCreationInput consultantCreationInput) {
     UserDTO userDto = buildUserDTO(consultantCreationInput.getUserName(),
         consultantCreationInput.getEmail());
+
+    this.consultantInputValidator.validateUserDTO(userDto);
+
     KeycloakCreateUserResponseDTO response =
         this.keycloakAdminClientHelper
             .createKeycloakUser(userDto, consultantCreationInput.getFirstName(),
                 consultantCreationInput.getLastName());
 
-    if (isNull(response.getUserId())) {
-      throw new KeycloakException("ERROR: Keycloak user id is missing");
-    }
+    this.consultantInputValidator.validateKeycloakResponse(response);
 
     return response.getUserId();
   }

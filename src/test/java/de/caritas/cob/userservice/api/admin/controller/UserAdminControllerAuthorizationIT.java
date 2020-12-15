@@ -15,14 +15,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import javax.servlet.http.Cookie;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +35,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -387,6 +392,59 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findConsultantAgencies(eq(consultantId));
+  }
+
+  @Test
+  public void createConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
+      throws Exception {
+    mvc.perform(post(GET_CONSULTANT_PATH))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  public void createConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+      throws Exception {
+    mvc.perform(post(GET_CONSULTANT_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
+          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
+          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT})
+  public void createConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+      throws Exception {
+    mvc.perform(post(GET_CONSULTANT_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_ADMIN})
+  public void createConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
+      throws Exception {
+    CreateConsultantDTO createConsultantDTO =
+        new EasyRandom().nextObject(CreateConsultantDTO.class);
+
+    mvc.perform(post(GET_CONSULTANT_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(createConsultantDTO)))
+        .andExpect(status().isOk());
+
+    verify(consultantAdminFacade, times(1)).createNewConsultant(any());
   }
 
 }
