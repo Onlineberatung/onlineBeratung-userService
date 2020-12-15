@@ -6,6 +6,8 @@ import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,17 @@ public class ConsultantAdminFacade {
       ConsultantFilter consultantFilter) {
     return this.consultantAdminFilterService.findFilteredConsultants(page, perPage,
         consultantFilter);
+  }
+
+  /**
+   * Creates a new {@link Consultant} based on the {@link CreateConsultantDTO} input.
+   *
+   * @param createConsultantDTO the input data used for {@link Consultant} creation
+   * @return the generated and persisted {@link Consultant} representation as {@link
+   * ConsultantAdminResponseDTO}
+   */
+  public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO) {
+    return this.consultantAdminService.createNewConsultant(createConsultantDTO);
   }
 
 }

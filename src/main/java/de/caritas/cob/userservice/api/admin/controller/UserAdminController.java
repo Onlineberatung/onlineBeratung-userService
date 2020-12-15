@@ -91,7 +91,7 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> createConsultant(
       @Valid CreateConsultantDTO createConsultantDTO) {
-    return null;
+    return ResponseEntity.ok(this.consultantAdminFacade.createNewConsultant(createConsultantDTO));
   }
 
   /**

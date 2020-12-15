@@ -23,7 +23,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Creator class to generate new {@link Consultant} instances in database, keycloak and rocket chat.
+ * Creator class to generate new {@link Consultant} instances in database, keycloak and rocket
+ * chat.
  */
 @Service
 @RequiredArgsConstructor
@@ -48,8 +49,8 @@ public class ConsultantCreatorService {
   }
 
   /**
-   * Creates a new {@link Consultant} by {@link ImportRecord} in database, keycloak and
-   * rocket chat.
+   * Creates a new {@link Consultant} by {@link ImportRecord} in database, keycloak and rocket
+   * chat.
    *
    * @param importRecord the input record from csv used by the importer service
    * @param roles the roles to add to given {@link Consultant}
@@ -76,28 +77,30 @@ public class ConsultantCreatorService {
         buildConsultant(consultantCreationInput, keycloakUserId, rocketChatUserId));
   }
 
-  private String createRocketChatUser(ConsultantCreationInput consultantCreationInput,
-      String keycloakUserId, String password) {
-    try {
-      return rocketChatService
-          .getUserID(consultantCreationInput.getEncodedUsername(), password, true);
-    } catch (RocketChatLoginException e) {
-      throw new InternalServerErrorException(
-          String.format("Unable to login user with id %s first time", keycloakUserId));
-    }
-  }
-
   private String createKeycloakUser(ConsultantCreationInput consultantCreationInput) {
     UserDTO userDto = buildUserDTO(consultantCreationInput.getUserName(),
         consultantCreationInput.getEmail());
-    KeycloakCreateUserResponseDTO response = keycloakAdminClientHelper.createKeycloakUser(userDto,
-        consultantCreationInput.getFirstName(), consultantCreationInput.getLastName());
+    KeycloakCreateUserResponseDTO response =
+        this.keycloakAdminClientHelper
+            .createKeycloakUser(userDto, consultantCreationInput.getFirstName(),
+                consultantCreationInput.getLastName());
 
     if (isNull(response.getUserId())) {
       throw new KeycloakException("ERROR: Keycloak user id is missing");
     }
 
     return response.getUserId();
+  }
+
+  private String createRocketChatUser(ConsultantCreationInput consultantCreationInput,
+      String keycloakUserId, String password) {
+    try {
+      return this.rocketChatService
+          .getUserID(consultantCreationInput.getEncodedUsername(), password, true);
+    } catch (RocketChatLoginException e) {
+      throw new InternalServerErrorException(
+          String.format("Unable to login user with id %s first time", keycloakUserId));
+    }
   }
 
   private Consultant buildConsultant(ConsultantCreationInput consultantCreationInput,
