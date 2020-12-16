@@ -130,7 +130,7 @@ public class ImportRecordCreationInputAdapter implements ConsultantCreationInput
    * @return the updated date
    */
   @Override
-  public LocalDateTime getUpateDate() {
+  public LocalDateTime getUpdateDate() {
     return LocalDateTime.now();
   }
 }

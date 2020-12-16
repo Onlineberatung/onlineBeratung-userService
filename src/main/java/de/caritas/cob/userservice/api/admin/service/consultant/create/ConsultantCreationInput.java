@@ -29,6 +29,6 @@ interface ConsultantCreationInput {
 
   LocalDateTime getCreateDate();
 
-  LocalDateTime getUpateDate();
+  LocalDateTime getUpdateDate();
 
 }

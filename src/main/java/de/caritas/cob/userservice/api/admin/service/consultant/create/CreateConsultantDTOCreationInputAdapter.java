@@ -134,7 +134,7 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
    * @return the updated date
    */
   @Override
-  public LocalDateTime getUpateDate() {
+  public LocalDateTime getUpdateDate() {
     return LocalDateTime.now();
   }
 }
