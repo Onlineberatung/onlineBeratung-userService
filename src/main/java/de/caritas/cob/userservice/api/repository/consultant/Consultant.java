@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -39,6 +40,7 @@ import org.springframework.lang.Nullable;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Indexed
 @AnalyzerDef(name = EMAIL_ANALYZER,
     tokenizer = @TokenizerDef(factory = ClassicTokenizerFactory.class),

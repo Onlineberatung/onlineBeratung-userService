@@ -7,15 +7,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
+import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -176,6 +181,29 @@ public class UserAdminControllerIT {
 
     this.mvc.perform(get(GET_CONSULTANT_PATH + "consultantId"))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  public void createConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven()
+      throws Exception {
+    CreateConsultantDTO createConsultantDTO =
+        new EasyRandom().nextObject(CreateConsultantDTO.class);
+
+    this.mvc.perform(post(GET_CONSULTANT_PATH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(createConsultantDTO)))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .createNewConsultant(any());
+  }
+
+  @Test
+  public void createConsultant_Should_returnBadRequest_When_requiredCreateConsultantIsMissing()
+      throws Exception {
+    this.mvc.perform(post(GET_CONSULTANT_PATH)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
 }

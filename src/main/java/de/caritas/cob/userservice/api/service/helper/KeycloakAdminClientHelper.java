@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
  * Helper class for the KeycloakService. Communicates to the Keycloak Admin API over the Keycloak
  * Admin Client.
  */
-
 @Service
 public class KeycloakAdminClientHelper {
 
@@ -107,14 +106,14 @@ public class KeycloakAdminClientHelper {
   /**
    * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user ID.
    *
-   * @param user      {@link UserDTO}
+   * @param user {@link UserDTO}
    * @param firstName first name of user
-   * @param lastName  last name of user
+   * @param lastName last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
   @KeycloakAdminClientLogout
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
-      final String firstName, final String lastName) throws Exception {
+      final String firstName, final String lastName) {
     UserRepresentation kcUser = getUserRepresentation(user, firstName, lastName);
     Response response = getInstance().realm(KEYCLOAK_REALM).users().create(kcUser);
     KeycloakCreateUserResponseDTO keycloakResponse = new KeycloakCreateUserResponseDTO();
@@ -217,17 +216,16 @@ public class KeycloakAdminClientHelper {
    * Assigns the role "user" to the given user ID.
    *
    * @param userId Keycloak user ID
-   * @throws Exception {@link Exception}
    */
   @KeycloakAdminClientLogout
-  public void updateUserRole(final String userId) throws Exception {
+  public void updateUserRole(final String userId) {
     updateRole(userId, KEYCLOAK_USER_ROLE);
   }
 
   /**
    * Assigns the role with the given name to the given user ID.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param roleName Keycloak role name
    */
   @KeycloakAdminClientLogout
@@ -263,11 +261,11 @@ public class KeycloakAdminClientHelper {
   /**
    * Updates the Keycloak password for a user.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param password user password
    */
   @KeycloakAdminClientLogout
-  public void updatePassword(final String userId, final String password) throws Exception {
+  public void updatePassword(final String userId, final String password) {
     CredentialRepresentation newCredentials = getCredentialRepresentation(password);
     UserResource userResource = getInstance().realm(KEYCLOAK_REALM).users().get(userId);
 
@@ -280,12 +278,11 @@ public class KeycloakAdminClientHelper {
    * success/error status possible, because the Keycloak Client doesn't provide one either. *
    *
    * @param userId Keycloak user ID
-   * @param user   {@link UserDTO}
+   * @param user {@link UserDTO}
    * @return the (dummy) email address
-   * @throws Exception {@link Exception}
    */
   @KeycloakAdminClientLogout
-  public String updateDummyEmail(final String userId, UserDTO user) throws Exception {
+  public String updateDummyEmail(final String userId, UserDTO user) {
     String dummyEmail = userHelper.getDummyEmail(userId);
     user.setEmail(dummyEmail);
     UserResource userResource = getInstance().realm(KEYCLOAK_REALM).users().get(userId);

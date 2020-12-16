@@ -60,4 +60,18 @@ public class ConsultantAdminFacadeTest {
         .findConsultantAgencies(eq(consultantId));
   }
 
+  @Test
+  public void createNewConsultant_Should_useConsultantAdminServiceCorrectly() {
+    this.consultantAdminFacade.createNewConsultant(null);
+
+    verify(this.consultantAdminService, times(1)).createNewConsultant(null);
+  }
+
+  @Test
+  public void findConsultantAgencies_Should_useConsultantAgencyAdminServiceCorrectly() {
+    this.consultantAdminFacade.findConsultantAgencies(null);
+
+    verify(this.consultantAgencyAdminService, times(1)).findConsultantAgencies(null);
+  }
+
 }

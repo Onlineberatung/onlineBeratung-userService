@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.admin.mapper.ConsultantAdminMapper;
+import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
@@ -83,9 +83,9 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
    */
   public ConsultantSearchResultDTO buildConsultantSearchResult() {
     Stream<Consultant> resultStream = fullTextQuery.getResultStream();
-    List<ConsultantDTO> resultList = resultStream
-        .map(ConsultantAdminMapper::new)
-        .map(ConsultantAdminMapper::mapData)
+    List<ConsultantAdminResponseDTO> resultList = resultStream
+        .map(ConsultantResponseDTOBuilder::getInstance)
+        .map(ConsultantResponseDTOBuilder::buildResponseDTO)
         .collect(Collectors.toList());
 
     PaginationLinks paginationLinks = new PaginationLinks()

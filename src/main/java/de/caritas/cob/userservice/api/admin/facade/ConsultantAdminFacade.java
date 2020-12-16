@@ -4,9 +4,12 @@ import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,9 +29,9 @@ public class ConsultantAdminFacade {
    * Finds a consultant by given consultant id.
    *
    * @param consultantId the id of the consultant to search for
-   * @return the generated {@link GetConsultantResponseDTO}
+   * @return the generated {@link ConsultantResponseDTO}
    */
-  public GetConsultantResponseDTO findConsultant(String consultantId) {
+  public ConsultantAdminResponseDTO findConsultant(String consultantId) {
     return this.consultantAdminService.findConsultantById(consultantId);
   }
 
@@ -45,6 +48,17 @@ public class ConsultantAdminFacade {
       ConsultantFilter consultantFilter) {
     return this.consultantAdminFilterService.findFilteredConsultants(page, perPage,
         consultantFilter);
+  }
+
+  /**
+   * Creates a new {@link Consultant} based on the {@link CreateConsultantDTO} input.
+   *
+   * @param createConsultantDTO the input data used for {@link Consultant} creation
+   * @return the generated and persisted {@link Consultant} representation as {@link
+   * ConsultantAdminResponseDTO}
+   */
+  public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO) {
+    return this.consultantAdminService.createNewConsultant(createConsultantDTO);
   }
 
   /**
