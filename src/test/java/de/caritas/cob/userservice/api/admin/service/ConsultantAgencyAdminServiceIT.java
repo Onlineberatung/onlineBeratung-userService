@@ -2,9 +2,13 @@ package de.caritas.cob.userservice.api.admin.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.fail;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import org.junit.Test;
@@ -51,12 +55,15 @@ public class ConsultantAgencyAdminServiceIT {
 
   @Test
   public void findConsultantAgencies_Should_returnEmptyResult_with_incorrectConsultantId() {
-
-    ConsultantAgencyAdminResultDTO consultantAgencies = consultantAgencyAdminService
-        .findConsultantAgencies("5674839f-1234-47e2-8f9c-bb49fc2ddbbe");
-
-    assertThat(consultantAgencies, notNullValue());
-    assertThat(consultantAgencies.getEmbedded(), hasSize(0));
+    try {
+      ConsultantAgencyAdminResultDTO consultantAgencies = consultantAgencyAdminService
+          .findConsultantAgencies("12345678-1234-1234-1234-1234567890ab");
+      fail("There was no BadRequestException");
+    } catch (Exception e) {
+      assertThat(e, instanceOf(BadRequestException.class));
+      assertThat(e.getMessage(),
+          is("Consultant with id 12345678-1234-1234-1234-1234567890ab does not exist"));
+    }
   }
 
 }
