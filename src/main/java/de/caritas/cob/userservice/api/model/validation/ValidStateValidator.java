@@ -1,54 +1,53 @@
 package de.caritas.cob.userservice.api.model.validation;
 
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
- * Checks if the state in a {@link UserDTO} is valid (depending on value in
- * {@link ConsultingTypeSettings}.
- *
+ * Checks if the state in a {@link UserDTO} is valid (depending on value in {@link
+ * ConsultingTypeSettings}.
  */
-
+@RequiredArgsConstructor
 public class ValidStateValidator implements ConstraintValidator<ValidState, UserDTO> {
 
-  private final ConsultingTypeManager consultingTypeManager;
+  private final @NonNull MandatoryFieldsProvider mandatoryFieldsProvider;
 
-  @Autowired
-  public ValidStateValidator(ConsultingTypeManager consultingTypeManager) {
-    this.consultingTypeManager = consultingTypeManager;
-  }
-
+  /**
+   * Checks if the state is valid in relation to the consulting type.
+   *
+   * @param userDTO the {@link UserDTO} instance
+   * @param context the {@link ConstraintValidatorContext}
+   * @return true, if state is valid
+   */
   @Override
   public boolean isValid(UserDTO userDTO, ConstraintValidatorContext context) {
 
-    if (userDTO == null || userDTO.getConsultingType() == null) {
+    if (isNull(userDTO.getConsultingType())) {
       return false;
     }
 
-    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager.getConsultingTypeSettings(
-        ConsultingType.values()[Integer.valueOf(userDTO.getConsultingType())]);
+    MandatoryFields mandatoryFields =
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(userDTO.getConsultingType());
 
-    if (consultingTypeSettings.getRegistration() == null
-        || consultingTypeSettings.getRegistration().getMandatoryFields() == null) {
-      LogService.logValidationError(String.format(
-          "Could not get mandatory fields for consulting type %s. Please check configuration",
-          userDTO.getConsultingType()));
-      return false;
-    }
-
-    if (consultingTypeSettings.getRegistration().getMandatoryFields().isState()) {
-      return userDTO.getState() != null && Pattern.matches("[0-9]|1[0-6]", userDTO.getState());
+    if (mandatoryFields.isState()) {
+      return isStateValid(userDTO);
     }
 
     return true;
 
   }
 
+  private boolean isStateValid(UserDTO userDTO) {
+    return nonNull(userDTO.getState())
+        && Pattern.matches("[0-9]|1[0-6]", userDTO.getState());
+  }
 }

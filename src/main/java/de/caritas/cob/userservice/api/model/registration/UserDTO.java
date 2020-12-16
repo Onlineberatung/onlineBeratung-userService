@@ -6,11 +6,10 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MIN;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.GENDER_REGEXP;
-import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MAX;
-import static de.caritas.cob.userservice.api.helper.UserHelper.POSTCODE_MIN;
 import static de.caritas.cob.userservice.api.helper.UserHelper.RELATION_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
+import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
@@ -25,7 +24,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import de.caritas.cob.userservice.api.model.jsonDeserializer.EncodeUsernameJsonDeserializer;
 import de.caritas.cob.userservice.api.model.jsonDeserializer.UrlDecodePasswordJsonDeserializer;
 import de.caritas.cob.userservice.api.model.validation.ValidAge;
-import de.caritas.cob.userservice.api.model.validation.ValidPostcode;
 import de.caritas.cob.userservice.api.model.validation.ValidState;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -45,18 +43,18 @@ import lombok.Setter;
 @ApiModel(value = "User")
 @ValidAge
 @ValidState
-@ValidPostcode
 public class UserDTO implements UserRegistrationDTO {
 
   @NotBlank(message = "{user.username.notBlank}")
+  @NotNull(message = "{user.username.notBlank}")
   @ApiModelProperty(required = true, example = "max94", position = 0)
   @JsonDeserialize(using = EncodeUsernameJsonDeserializer.class)
   @JsonProperty("username")
   private String username;
 
+  @NotBlank(message = "{user.custom.postcode.notNull}")
   @NotNull(message = "{user.custom.postcode.notNull}")
-  @Min(value = POSTCODE_MIN, message = "{user.custom.postcode.invalid}")
-  @Max(value = POSTCODE_MAX, message = "{user.custom.postcode.invalid}")
+  @Pattern(regexp = VALID_POSTCODE_REGEX, message = "{user.custom.postcode.invalid}")
   @ApiModelProperty(required = true, example = "\"79098\"", position = 1)
   @JsonProperty("postcode")
   private String postcode;
