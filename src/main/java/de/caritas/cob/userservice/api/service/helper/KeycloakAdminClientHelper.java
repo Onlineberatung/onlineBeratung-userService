@@ -1,9 +1,11 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
 import static java.util.Objects.isNull;
 
 import de.caritas.cob.userservice.api.authorization.Authorities;
 import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
@@ -294,6 +296,24 @@ public class KeycloakAdminClientHelper {
   }
 
   /**
+   * Updates first name, last name and email address of user wth given id in keycloak.
+   *
+   * @param userId Keycloak user ID
+   * @param userDTO {@link UserDTO}
+   * @param firstName the new first name
+   * @param lastName the new last name
+   */
+  @KeycloakAdminClientLogout
+  public void updateUserData(final String userId, UserDTO userDTO,
+      String firstName, String lastName) {
+    if (!isEmailAvailable(userDTO.getEmail())) {
+      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
+    }
+    UserResource userResource = getInstance().realm(KEYCLOAK_REALM).users().get(userId);
+    userResource.update(getUserRepresentation(userDTO, firstName, lastName));
+  }
+
+  /**
    * Delete the user if something went wrong during the registration process.
    *
    * @param userId Keycloak user ID
@@ -312,7 +332,7 @@ public class KeycloakAdminClientHelper {
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId    Keycloak user ID
+   * @param userId Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */

@@ -2,12 +2,14 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,6 +21,7 @@ import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -202,6 +205,29 @@ public class UserAdminControllerIT {
   public void createConsultant_Should_returnBadRequest_When_requiredCreateConsultantIsMissing()
       throws Exception {
     this.mvc.perform(post(GET_CONSULTANT_PATH)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void updateConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven()
+      throws Exception {
+    UpdateConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+
+    this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(updateConsultantDTO)))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .updateConsultant(anyString(), any());
+  }
+
+  @Test
+  public void updateConsultant_Should_returnBadRequest_When_requiredParamsAreMissing()
+      throws Exception {
+    this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }

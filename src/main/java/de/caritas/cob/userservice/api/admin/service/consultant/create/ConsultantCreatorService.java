@@ -4,6 +4,8 @@ import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.ConsultantInputValidator;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -42,6 +44,8 @@ public class ConsultantCreatorService {
    * @return the generated {@link Consultant}
    */
   public Consultant createNewConsultant(CreateConsultantDTO createConsultantDTO) {
+    this.consultantInputValidator.validateAbsence(
+        new CreateConsultantDTOAbsenceInputAdapter(createConsultantDTO));
     ConsultantCreationInput consultantCreationInput =
         new CreateConsultantDTOCreationInputAdapter(createConsultantDTO, this.userHelper);
     return createNewConsultant(consultantCreationInput, asSet(CONSULTANT.getValue()));

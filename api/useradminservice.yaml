@@ -126,7 +126,7 @@ paths:
       operationId: updateConsultant
       requestBody:
         content:
-          'application/hal+json':
+          'application/json':
             schema:
               $ref: '#/components/schemas/UpdateConsultantDTO'
         required: true
@@ -141,7 +141,7 @@ paths:
         200:
           description: OK - consultant was updated successfully
           content:
-            'application/json':
+            'application/hal+json':
               schema:
                 $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         400:

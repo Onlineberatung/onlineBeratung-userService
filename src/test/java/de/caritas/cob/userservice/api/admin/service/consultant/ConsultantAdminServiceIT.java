@@ -12,10 +12,12 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -41,6 +43,9 @@ public class ConsultantAdminServiceIT {
 
   @MockBean
   private ConsultantCreatorService consultantCreatorService;
+
+  @MockBean
+  private ConsultantUpdateService consultantUpdateService;
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultant_When_consultantIdExists() {
@@ -104,6 +109,21 @@ public class ConsultantAdminServiceIT {
         this.consultantAdminService.createNewConsultant(createConsultantDTO);
 
     verify(this.consultantCreatorService, times(1)).createNewConsultant(eq(createConsultantDTO));
+    assertThat(result.getLinks(), notNullValue());
+    assertThat(result.getEmbedded(), notNullValue());
+  }
+
+  @Test
+  public void updateConsultant_Should_useUpdaeServiceAndBuildConsultantAdminREsponseDTO() {
+    UpdateConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    when(this.consultantUpdateService.updateConsultant(any(), any()))
+        .thenReturn(new EasyRandom().nextObject(Consultant.class));
+
+    ConsultantAdminResponseDTO result =
+        this.consultantAdminService.updateConsultant("id", updateConsultantDTO);
+
+    verify(this.consultantUpdateService, times(1)).updateConsultant(any(), any());
     assertThat(result.getLinks(), notNullValue());
     assertThat(result.getEmbedded(), notNullValue());
   }

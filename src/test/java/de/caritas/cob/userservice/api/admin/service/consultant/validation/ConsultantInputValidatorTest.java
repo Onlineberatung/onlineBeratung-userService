@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service.consultant.create;
+package de.caritas.cob.userservice.api.admin.service.consultant.validation;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER;
@@ -31,11 +31,12 @@ public class ConsultantInputValidatorTest {
 
   @Test
   public void validateCreateConsultantDTO_ShouldNot_throwException_When_consultantIsNotAbsent() {
-    CreateConsultantDTO createConsultantDTO = new CreateConsultantDTO()
-        .absent(false);
+    AbsenceInputValidation createConsultantDTO = new
+        CreateConsultantDTOAbsenceInputAdapter(new CreateConsultantDTO()
+        .absent(false));
 
     try {
-      this.consultantInputValidator.validateCreateConsultantDTO(createConsultantDTO);
+      this.consultantInputValidator.validateAbsence(createConsultantDTO);
     } catch (CustomValidationHttpStatusException e) {
       fail("Exception should not be thrown");
     }
@@ -43,12 +44,13 @@ public class ConsultantInputValidatorTest {
 
   @Test
   public void validateCreateConsultantDTO_ShouldNot_throwException_When_consultantIsAbsentAndAbsenceMessageIsSet() {
-    CreateConsultantDTO createConsultantDTO = new CreateConsultantDTO()
+    AbsenceInputValidation createConsultantDTO = new
+        CreateConsultantDTOAbsenceInputAdapter(new CreateConsultantDTO()
         .absent(true)
-        .absenceMessage("Absent");
+        .absenceMessage("Absent"));
 
     try {
-      this.consultantInputValidator.validateCreateConsultantDTO(createConsultantDTO);
+      this.consultantInputValidator.validateAbsence(createConsultantDTO);
     } catch (CustomValidationHttpStatusException e) {
       fail("Exception should not be thrown");
     }
@@ -56,12 +58,13 @@ public class ConsultantInputValidatorTest {
 
   @Test
   public void validateCreateConsultantDTO_Should_throwExpectedException_When_consultantIsAbsentAndAbsenceMessageIsEmpty() {
-    CreateConsultantDTO createConsultantDTO = new CreateConsultantDTO()
+    AbsenceInputValidation createConsultantDTO = new
+        CreateConsultantDTOAbsenceInputAdapter(new CreateConsultantDTO()
         .absent(true)
-        .absenceMessage(null);
+        .absenceMessage(null));
 
     try {
-      this.consultantInputValidator.validateCreateConsultantDTO(createConsultantDTO);
+      this.consultantInputValidator.validateAbsence(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader(), notNullValue());
