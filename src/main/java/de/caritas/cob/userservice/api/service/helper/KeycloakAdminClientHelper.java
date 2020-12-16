@@ -1,7 +1,19 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import static java.util.Objects.isNull;
+
+import de.caritas.cob.userservice.api.authorization.Authorities;
+import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
@@ -18,25 +30,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.authorization.Authorities;
-import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Helper class for the KeycloakService. Communicates to the Keycloak Admin API over the Keycloak
  * Admin Client.
  */
 
-@Slf4j
 @Service
 public class KeycloakAdminClientHelper {
+
   @Value("${keycloak.auth-server-url}")
   private String KEYCLOAK_SERVER_URL;
 
@@ -165,7 +167,7 @@ public class KeycloakAdminClientHelper {
     try {
       techUserResource.update(userRepresentation);
     } catch (Exception e) {
-      log.debug("E-Mail address already existing in Keycloak: {}", email);
+      LogService.logDebug(String.format("E-Mail address already existing in Keycloak: %s", email));
       return false;
     }
 
@@ -237,14 +239,18 @@ public class KeycloakAdminClientHelper {
     boolean isRoleUpdated = false;
 
     // Assign role
+    RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
+    if (isNull(roleRepresentation.getAttributes())) {
+      roleRepresentation.setAttributes(new LinkedHashMap<>());
+    }
     user.roles().realmLevel()
-        .add(Arrays.asList(realmResource.roles().get(roleName).toRepresentation()));
+        .add(Arrays.asList(roleRepresentation));
 
     // Check if role has been assigned successfully
     List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
     for (RoleRepresentation role : userRoles) {
       if (role.toString().toUpperCase().equals(roleName.toUpperCase())) {
-        log.debug("Added role \"user\" to {}", userId);
+        LogService.logDebug(String.format("Added role \"user\" to %s", userId));
         isRoleUpdated = true;
       }
     }
@@ -266,7 +272,7 @@ public class KeycloakAdminClientHelper {
     UserResource userResource = getInstance().realm(KEYCLOAK_REALM).users().get(userId);
 
     userResource.resetPassword(newCredentials);
-    log.debug("Updated user credentials for {}", userId);
+    LogService.logDebug(String.format("Updated user credentials for %s", userId));
   }
 
   /**
@@ -285,7 +291,7 @@ public class KeycloakAdminClientHelper {
     UserResource userResource = getInstance().realm(KEYCLOAK_REALM).users().get(userId);
 
     userResource.update(getUserRepresentation(user, null, null));
-    log.debug("Set email dummy for {} to {}", userId, dummyEmail);
+    LogService.logDebug(String.format("Set email dummy for %s to %s", userId, dummyEmail));
 
     return dummyEmail;
   }
@@ -299,16 +305,17 @@ public class KeycloakAdminClientHelper {
   public void rollBackUser(String userId) {
     try {
       getInstance().realm(KEYCLOAK_REALM).users().get(userId).remove();
-      log.debug("User {} has been removed due to rollback", userId);
+      LogService.logDebug(String.format("User %s has been removed due to rollback", userId));
     } catch (Exception e) {
-      log.error("User could not be removed/rolled back: {}", userId);
+      LogService
+          .logKeycloakError(String.format("User could not be removed/rolled back: %s", userId));
     }
   }
 
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId Keycloak user ID
+   * @param userId    Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */

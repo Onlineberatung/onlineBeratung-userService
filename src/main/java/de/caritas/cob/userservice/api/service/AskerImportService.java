@@ -16,8 +16,8 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.MonitoringHelper;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
@@ -223,7 +223,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -408,7 +408,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultantTypeSettings(agencyDTO.getConsultingType());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -418,8 +418,9 @@ public class AskerImportService {
         }
 
         // Initialize Session (need session id for Rocket.Chat group name)
-        Session session = sessionService.initializeSession(dbUser, userDTO,
-            consultingTypeSettings.isMonitoring());
+        Session session = sessionService
+            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()),
+                consultingTypeSettings);
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));

@@ -1,53 +1,52 @@
 package de.caritas.cob.userservice.api.model.validation;
 
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Checks if the age in a {@link UserDTO} is valid (depending on value in
  * {@link ConsultingTypeSettings}.
- *
  */
-
+@RequiredArgsConstructor
 public class ValidAgeValidator implements ConstraintValidator<ValidAge, UserDTO> {
 
-  private final ConsultingTypeManager consultingTypeManager;
+  private final @NonNull MandatoryFieldsProvider mandatoryFieldsProvider;
 
-  @Autowired
-  public ValidAgeValidator(ConsultingTypeManager consultingTypeManager) {
-    this.consultingTypeManager = consultingTypeManager;
-  }
-
+  /**
+   *  Checks if the age is valid in relation to the consulting type.
+   *
+   * @param userDTO the {@link UserDTO} instance
+   * @param context the {@link ConstraintValidatorContext}
+   * @return true, if age is valid
+   */
   @Override
   public boolean isValid(UserDTO userDTO, ConstraintValidatorContext context) {
 
-    if (userDTO == null || userDTO.getConsultingType() == null) {
+    if (isNull(userDTO.getConsultingType())) {
       return false;
     }
 
-    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager.getConsultantTypeSettings(
-        ConsultingType.values()[Integer.valueOf(userDTO.getConsultingType())]);
+    MandatoryFields mandatoryFields =
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(userDTO.getConsultingType());
 
-    if (consultingTypeSettings.getRegistration() == null
-        || consultingTypeSettings.getRegistration().getMandatoryFields() == null) {
-      LogService.logValidationError(String.format(
-          "Could not get mandatory fields for consulting type %s. Please check configuration",
-          userDTO.getConsultingType()));
-      return false;
-    }
-
-    if (consultingTypeSettings.getRegistration().getMandatoryFields().isAge()) {
-      return userDTO.getAge() != null && Pattern.matches("[0-9]+", userDTO.getAge());
+    if (mandatoryFields.isAge()) {
+      return isAgeValid(userDTO);
     }
 
     return true;
+  }
+
+  private boolean isAgeValid(UserDTO userDTO) {
+    return nonNull(userDTO.getAge()) && Pattern.matches("[0-9]+", userDTO.getAge());
   }
 
 }

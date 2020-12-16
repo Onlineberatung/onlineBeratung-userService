@@ -23,14 +23,13 @@
 	"languageFormal": true,
 	"roles": {
 		"consultant": {
-			"default" :	[ 
+			"default" :	[
 				"consultant",
 				"kreuzbund-consultant"
 			]
-		} 
+		}
 	},
 	"registration": {
-		"minPostcodeSize": 3,
 		"mandatoryFields": {
 			"age": false,
 			"state": false

@@ -44,7 +44,7 @@ import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.ChatService;
@@ -93,7 +93,7 @@ public class ConsultantSessionListServiceTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
@@ -122,7 +122,7 @@ public class ConsultantSessionListServiceTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
@@ -159,7 +159,7 @@ public class ConsultantSessionListServiceTest {
     when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -189,7 +189,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
@@ -220,7 +220,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
@@ -313,7 +313,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -347,7 +347,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -373,7 +373,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(
@@ -403,7 +403,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -428,7 +428,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -455,7 +455,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
@@ -525,7 +525,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -582,7 +582,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
@@ -611,7 +611,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(
@@ -641,7 +641,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -668,7 +668,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(
@@ -754,7 +754,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         Mockito.any(), Mockito.any())).thenReturn(false);
@@ -783,7 +783,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         Mockito.any(), Mockito.any())).thenReturn(true);
@@ -814,7 +814,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
@@ -843,7 +843,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
@@ -872,7 +872,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(
@@ -902,7 +902,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(
@@ -932,7 +932,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     List<ConsultantSessionResponseDTO> result =
@@ -959,7 +959,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .isLastMessageForRocketChatGroupIdAvailable(
@@ -991,7 +991,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     SessionListQueryParameter sessionListQueryParameter =
@@ -1026,7 +1026,7 @@ public class ConsultantSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .areMessagesForRocketChatGroupReadByUser(
@@ -1058,7 +1058,7 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(rocketChatRoomInformation);
     when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         Mockito.any(), Mockito.any())).thenReturn(true);
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.any()))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(

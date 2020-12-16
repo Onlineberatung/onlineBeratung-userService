@@ -7,7 +7,7 @@ import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
 import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;

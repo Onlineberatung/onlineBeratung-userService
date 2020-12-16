@@ -31,8 +31,7 @@ public class UserHelper {
 
   public static final int USERNAME_MIN_LENGTH = 5;
   public static final int USERNAME_MAX_LENGTH = 30;
-  public static final long POSTCODE_MIN = 0;
-  public static final long POSTCODE_MAX = 99999;
+  public static final String VALID_POSTCODE_REGEX = "^[0-9]{5}$";
   public static final long AGENCY_ID_MIN = 0;
   public static final long AGENCY_ID_MAX = Long.MAX_VALUE;
   public static final String ADDICTIVE_DRUGS_REGEXP = "(([0-9]+,)+[0-9]+)|[0-9]+|";
@@ -42,8 +41,6 @@ public class UserHelper {
   public static final String STATE_REGEXP = "[0-9]|1[0-6]";
   public static final String TERMS_ACCEPTED_REGEXP = "true|TRUE";
   public static final String CONSULTING_TYPE_REGEXP = "[0-9]+|";
-  public static final String CHAT_DURATION_REGEXP = "[0-9]+";
-  public static final String CHAT_AGENCIES_REGEXP = "(([0-9]+,)+[0-9]+)|[0-9]+|";
   public static final int CHAT_MIN_DURATION = 30;
   public static final int CHAT_MAX_DURATION = 180;
   public static final int CHAT_TOPIC_MIN_LENGTH = 3;

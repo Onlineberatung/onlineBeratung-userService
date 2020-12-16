@@ -11,8 +11,8 @@ import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
@@ -259,7 +259,7 @@ public class ConsultantSessionListService {
     }
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultantTypeSettings(consultingType.get());
+        consultingTypeManager.getConsultingTypeSettings(consultingType.get());
 
     return consultingTypeSettings.isMonitoring();
   }

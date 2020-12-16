@@ -10,8 +10,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -147,7 +147,7 @@ public class ConsultantImportService {
           Optional<ConsultingType> consultingType = Optional.of(agency.getConsultingType());
 
           ConsultingTypeSettings consultingTypeSettings =
-              consultingTypeManager.getConsultantTypeSettings(consultingType.get());
+              consultingTypeManager.getConsultingTypeSettings(consultingType.get());
 
           if (!consultingTypeSettings.getRoles().getConsultant().getRoleNames()
               .containsKey(agencyRoleArray[1])) {
@@ -350,7 +350,7 @@ public class ConsultantImportService {
               rocketChatService.addTechnicalUserToGroup(
                   consultantTeamSessionResponseDto.getSession().getGroupId());
               ConsultingTypeSettings consultingTypeSettings =
-                  consultingTypeManager.getConsultantTypeSettings(ConsultingType
+                  consultingTypeManager.getConsultingTypeSettings(ConsultingType
                       .valueOf(consultantTeamSessionResponseDto.getSession().getConsultingType())
                       .get());
               boolean isMainConsultant = keycloakAdminClientHelper

@@ -23,13 +23,12 @@
 	"languageFormal": false,
 	"roles": {
 		"consultant": {
-			"default" :	[ 
+			"default" :	[
 				"consultant"
 			]
-		} 
+		}
 	},
 	"registration": {
-		"minPostcodeSize": 3,
 		"mandatoryFields": {
 			"age": false,
 			"state": false
