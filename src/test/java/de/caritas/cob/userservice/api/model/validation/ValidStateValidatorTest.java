@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -26,68 +27,54 @@ public class ValidStateValidatorTest {
   @InjectMocks
   private ValidStateValidator validStateValidator;
   @Mock
-  private ConsultingTypeManager consultingTypeManager;
-  @Mock
-  private LogService logService;
+  private MandatoryFieldsProvider mandatoryFieldsProvider;
 
   @Test
-  public void isValid_Should_ReturnFalse_WhenUserDTOIsNull() {
-
-    boolean result = validStateValidator.isValid(null, null);
-
-    assertFalse(result);
-  }
-
-  @Test
-  public void isValid_Should_ReturnFalse_WhenUserDTOHasNoConsultingType() {
+  public void isValid_Should_ReturnFalse_WhenConsultingTypeIsMissing() {
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_CONSULTING_TYPE, null);
-
-    assertFalse(result);
-  }
-
-  @Test
-  public void isValid_Should_ReturnFalse_WhenConsultingTypeSettingsAreMissingMandatoryFields() {
-
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_STATE_FIELD);
-
-    boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
-
     assertFalse(result);
   }
 
   @Test
   public void isValid_Should_ReturnFalse_WhenStateIsMandatoryAndInvalid() {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(CONSULTING_TYPE_U25.getValue())))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields());
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_INVALID_STATE, null);
-
     assertFalse(result);
   }
 
   @Test
   public void isValid_Should_ReturnTrue_WhenStateIsMandatoryAndValid() {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(CONSULTING_TYPE_U25.getValue())))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields());
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_STATE, null);
-
     assertTrue(result);
   }
 
   @Test
   public void isValid_Should_ReturnTrue_WhenStateIsNotMandatory() {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE);
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue())))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE.getRegistration().getMandatoryFields());
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
-
     assertTrue(result);
+  }
+
+  @Test
+  public void isValid_Should_ReturnFalse_WhenStateIsMandatoryButNull() {
+
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue())))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields());
+
+    boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
+    assertFalse(result);
+
   }
 
 }

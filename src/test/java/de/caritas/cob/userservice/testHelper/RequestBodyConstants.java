@@ -14,6 +14,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENCODED_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GENDER_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_AGE_VALUE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.PASSWORD;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RELATION_VALUE;
@@ -26,6 +27,18 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_S
 public class RequestBodyConstants {
   public static final String VALID_USER_REQUEST_BODY = "{\"username\": \"" + USERNAME + "\","
       + "\"postcode\": \"" + POSTCODE + "\", \"agencyId\": " + AGENCY_ID + ", \"password\": \""
+      + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
+      + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
+      + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
+      + TERMS_ACCEPTED + "\", \"consultingType\": \"" + CONSULTING_TYPE_SUCHT.getValue() + "\"}";
+  public static final String INVALID_USER_REQUEST_BODY_WITOUT_POSTCODE = "{\"username\": \"" + USERNAME + "\","
+      + "\"agencyId\": " + AGENCY_ID + ", \"password\": \""
+      + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
+      + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
+      + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
+      + TERMS_ACCEPTED + "\", \"consultingType\": \"" + CONSULTING_TYPE_SUCHT.getValue() + "\"}";
+  public static final String INVALID_USER_REQUEST_BODY_WITH_INVALID_POSTCODE = "{\"username\": \"" + USERNAME + "\","
+      + "\"postcode\": \"" + INVALID_POSTCODE + "\", \"agencyId\": " + AGENCY_ID + ", \"password\": \""
       + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
       + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
       + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
@@ -74,6 +87,9 @@ public class RequestBodyConstants {
       + "  \"startDate\": \"" + CHAT_START_DATE + "\", \"startTime\": \"" + CHAT_START_TIME + "\","
       + "  \"duration\": " + CHAT_DURATION + ", \"repetitive\": " + CHAT_REPETITIVE + " }";
   public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE = "{\"agencyId\": \""
+      + AGENCY_ID + "\", \"consultingType\": " + CONSULTING_TYPE_U25.getValue() + "}";
+  public static final String INVALID_NEW_REGISTRATION_BODY_WITH_INVALID_POSTCODE = "{\"postcode\": \""
+      + INVALID_POSTCODE + "\",\"agencyId\": \""
       + AGENCY_ID + "\", \"consultingType\": " + CONSULTING_TYPE_U25.getValue() + "}";
   public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_AGENCY_ID = "{\"postcode\": \""
       + POSTCODE + "\", \"consultingType\": " + CONSULTING_TYPE_U25.getValue() + "}";

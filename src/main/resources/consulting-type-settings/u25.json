@@ -23,19 +23,18 @@
 	"languageFormal": false,
 	"roles": {
 	   	"consultant": {
-			"main" : [ 
-				"consultant", 
-				"u25-consultant", 
+			"main" : [
+				"consultant",
+				"u25-consultant",
 				"u25-main-consultant"
 			],
-			"peer" : [ 
-				"consultant", 
-				"u25-consultant" 
-			] 
+			"peer" : [
+				"consultant",
+				"u25-consultant"
+			]
 		}
 	},
 	"registration": {
-		"minPostcodeSize": 3,
 		"mandatoryFields": {
 			"age": true,
 			"state": true

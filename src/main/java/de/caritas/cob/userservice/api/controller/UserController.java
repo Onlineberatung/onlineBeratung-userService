@@ -123,7 +123,7 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link CreateUserResponseDTO}
    */
   @Override
-  public ResponseEntity<CreateUserResponseDTO> registerUser(@RequestBody UserDTO user) {
+  public ResponseEntity<CreateUserResponseDTO> registerUser(@Valid @RequestBody UserDTO user) {
 
     user.setNewUserAccount(true);
     KeycloakCreateUserResponseDTO response = createUserFacade.createUserAndInitializeAccount(user);
