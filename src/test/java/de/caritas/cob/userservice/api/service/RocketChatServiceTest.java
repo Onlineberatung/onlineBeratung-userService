@@ -852,7 +852,7 @@ public class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
-        any(), ArgumentMatchers.<Class<UserInfoResponseDTO>>any()))
+        any(), ArgumentMatchers.<Class<UserInfoResponseDTO>>any(), anyString()))
         .thenThrow(exception);
 
     rocketChatService.getUserInfo(RC_USER_ID);
@@ -865,7 +865,8 @@ public class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate
-        .exchange(anyString(), eq(HttpMethod.GET), any(), eq(UserInfoResponseDTO.class)))
+        .exchange(anyString(), eq(HttpMethod.GET), any(), eq(UserInfoResponseDTO.class),
+            anyString()))
         .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO_FAILED, HttpStatus.OK));
 
     rocketChatService.getUserInfo(RC_USER_ID);
@@ -877,7 +878,7 @@ public class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
-        any(), ArgumentMatchers.<Class<UserInfoResponseDTO>>any())).thenReturn(
+        any(), ArgumentMatchers.<Class<UserInfoResponseDTO>>any(), anyString())).thenReturn(
         new ResponseEntity<>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));
 
     UserInfoResponseDTO result = rocketChatService.getUserInfo(RC_USER_ID);

@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
@@ -13,6 +12,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
@@ -185,18 +185,16 @@ public class SessionService {
   /**
    * Initialize a {@link Session}.
    *
-   * @param user the user
-   * @param userDto the dto of the user
-   * @param monitoring flag to initialize monitoring
+   * @param user                   the user
+   * @param userDto                the dto of the user
+   * @param consultingTypeSettings flag to initialize monitoring
    * @return the initialized session
    */
-  public Session initializeSession(User user, UserDTO userDto, boolean monitoring)
-      throws AgencyServiceHelperException {
-    AgencyDTO agencyDTO = agencyServiceHelper.getAgency(userDto.getAgencyId());
-    Session session = new Session(user,
-        ConsultingType.values()[Integer.parseInt(userDto.getConsultingType())],
+  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
+      ConsultingTypeSettings consultingTypeSettings) {
+    Session session = new Session(user, consultingTypeSettings.getConsultingType(),
         userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-        isTrue(agencyDTO.getTeamAgency()), monitoring);
+        isTeamSession, consultingTypeSettings.isMonitoring());
     session.setCreateDate(LocalDateTime.now());
     session.setUpdateDate(LocalDateTime.now());
     return saveSession(session);

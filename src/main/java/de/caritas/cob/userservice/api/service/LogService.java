@@ -441,6 +441,15 @@ public class LogService {
   /**
    * Logs an warning message.
    *
+   * @param message The message
+   */
+  public static void logWarn(String message) {
+    LOGGER.warn(message);
+  }
+
+  /**
+   * Logs an warning message.
+   *
    * @param httpStatus http status
    * @param exception The exception
    */

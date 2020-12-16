@@ -1,5 +1,10 @@
 package de.caritas.cob.userservice.api.repository.consultant;
 
+import static de.caritas.cob.userservice.api.repository.consultant.Consultant.EMAIL_ANALYZER;
+
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import java.time.LocalDateTime;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,14 +12,23 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import org.hibernate.annotations.Type;
-import org.springframework.lang.Nullable;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.Session;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.standard.ClassicTokenizerFactory;
+import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.AnalyzerDef;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
+import org.hibernate.search.annotations.TokenFilterDef;
+import org.hibernate.search.annotations.TokenizerDef;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a consultant
@@ -23,11 +37,19 @@ import lombok.Setter;
 @Entity
 @Table(name = "consultant")
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
+@Builder
+@Indexed
+@AnalyzerDef(name = EMAIL_ANALYZER,
+    tokenizer = @TokenizerDef(factory = ClassicTokenizerFactory.class),
+    filters = {
+        @TokenFilterDef(factory = LowerCaseFilterFactory.class),
+    })
 public class Consultant {
 
-  public Consultant() {}
+  protected static final String EMAIL_ANALYZER = "emailAnalyzer";
 
   @Id
   @Column(name = "consultant_id", updatable = false, nullable = false)
@@ -43,6 +65,7 @@ public class Consultant {
   @Column(name = "username", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
   private String username;
 
   @Column(name = "first_name", updatable = false, nullable = false)
@@ -53,15 +76,19 @@ public class Consultant {
   @Column(name = "last_name", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
   private String lastName;
 
   @Column(name = "email", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
+  @Analyzer(definition = EMAIL_ANALYZER)
   private String email;
 
   @Column(name = "is_absent", nullable = false)
   @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Field
   private boolean absent;
 
   @Column(name = "is_team_consultant", nullable = false)
@@ -83,7 +110,17 @@ public class Consultant {
   private Set<Session> sessions;
 
   @OneToMany(mappedBy = "consultant")
+  @IndexedEmbedded
   private Set<ConsultantAgency> consultantAgencies;
+
+  @Column(name = "create_date")
+  private LocalDateTime createDate;
+
+  @Column(name = "update_date")
+  private LocalDateTime updateDate;
+
+  @Column(name = "delete_date")
+  private LocalDateTime deleteDate;
 
   public String getFullName() {
     return (this.firstName + " " + this.lastName).trim();

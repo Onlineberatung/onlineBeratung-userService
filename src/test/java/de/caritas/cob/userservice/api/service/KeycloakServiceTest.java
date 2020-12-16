@@ -89,10 +89,9 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void changePassword_Should_ReturnFalseAndLogError_WhenKeycloakPasswordChangeFailsWithException()
-      throws Exception {
+  public void changePassword_Should_ReturnFalseAndLogError_WhenKeycloakPasswordChangeFailsWithException() {
 
-    Exception exception = new Exception();
+    Exception exception = new RuntimeException();
     doThrow(exception).when(keycloakAdminClientHelper).updatePassword(USER_ID, NEW_PW);
 
     assertFalse(keycloakService.changePassword(USER_ID, NEW_PW));

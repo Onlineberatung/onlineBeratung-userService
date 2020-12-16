@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.model.HalLink;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.RootLinks;
+import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 
 /**
  * Builder to create the root navigation hal DTO.
@@ -25,7 +26,10 @@ public class RootDTOBuilder implements HalLinkBuilder {
     return new RootDTO()
         .links(new RootLinks()
             .self(buildSelfLink())
-            .sessions(buildSessionsLink()));
+            .sessions(buildSessionsLink())
+            .consultants(buildConsultantsLink())
+            .consultantAgencies(buildConsultantAgenciesLink())
+            .createConsultant(buildCreateConsultantLink()));
   }
 
   private HalLink buildSelfLink() {
@@ -34,8 +38,22 @@ public class RootDTOBuilder implements HalLinkBuilder {
 
   private HalLink buildSessionsLink() {
     return buildHalLink(
-        methodOn(UserAdminController.class).getSessions(DEFAULT_PAGE, DEFAULT_PER_PAGE, null),
+        methodOn(UseradminApi.class).getSessions(DEFAULT_PAGE, DEFAULT_PER_PAGE, null),
         MethodEnum.GET);
+  }
+
+  private HalLink buildConsultantsLink() {
+    return buildHalLink(
+        methodOn(UseradminApi.class).getConsultants(DEFAULT_PAGE, DEFAULT_PER_PAGE, null),
+        MethodEnum.GET);
+  }
+
+  private HalLink buildConsultantAgenciesLink() {
+    return buildHalLink(methodOn(UseradminApi.class).getConsultantAgency(null), MethodEnum.GET);
+  }
+
+  private HalLink buildCreateConsultantLink() {
+    return buildHalLink(methodOn(UseradminApi.class).createConsultant(null), MethodEnum.POST);
   }
 
 }

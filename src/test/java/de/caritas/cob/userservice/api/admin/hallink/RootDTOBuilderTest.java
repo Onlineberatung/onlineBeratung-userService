@@ -19,10 +19,23 @@ public class RootDTOBuilderTest {
     RootLinks rootLinks = rootDTO.getLinks();
     assertThat(rootLinks, notNullValue());
     assertThat(rootLinks.getSessions(), notNullValue());
-    assertThat(rootLinks.getSessions().getHref(), is("/useradmin/session?page=1&perPage=20"));
+    assertThat(rootLinks.getSessions().getHref(), is("/useradmin/sessions?page=1&perPage=20"));
     assertThat(rootLinks.getSessions().getMethod(), is(MethodEnum.GET));
+    assertThat(rootLinks.getConsultants(), notNullValue());
+    assertThat(rootLinks.getConsultants().getHref(),
+        is("/useradmin/consultants?page=1&perPage=20"));
+    assertThat(rootLinks.getConsultants().getMethod(), is(MethodEnum.GET));
     assertThat(rootLinks.getSelf().getHref(), is("/useradmin"));
     assertThat(rootLinks.getSelf().getMethod(), is(MethodEnum.GET));
+    assertThat(rootLinks.getConsultantAgencies(), notNullValue());
+    assertThat(rootLinks.getConsultantAgencies().getHref(),
+        is("/useradmin/consultant/{consultantId}/agencies"));
+    assertThat(rootLinks.getConsultantAgencies().getMethod(), is(MethodEnum.GET));
+    assertThat(rootLinks.getCreateConsultant(), notNullValue());
+    assertThat(rootLinks.getCreateConsultant().getHref(),
+        is("/useradmin/consultant"));
+    assertThat(rootLinks.getCreateConsultant().getMethod(), is(MethodEnum.POST));
+
   }
 
 }

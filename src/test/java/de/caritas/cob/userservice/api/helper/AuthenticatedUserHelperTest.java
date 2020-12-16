@@ -32,9 +32,9 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 public class AuthenticatedUserHelperTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME,
-      FIRST_NAME, LAST_NAME, EMAIL, false, false, null, false, null, null, null);
+      FIRST_NAME, LAST_NAME, EMAIL, false, false, null, false, null, null, null, null, null, null);
   private final Consultant TEAM_CONSULTANT = new Consultant(TEAM_CONSULTANT_ID, ROCKETCHAT_ID,
-      USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null);
+      USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null, null);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT, ConsultingType.SUCHT,
       POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(), null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =

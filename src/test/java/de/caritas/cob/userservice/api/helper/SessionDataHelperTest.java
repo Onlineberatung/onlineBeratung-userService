@@ -26,9 +26,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.manager.consultingType.SessionDataInitializing;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -47,7 +47,7 @@ public class SessionDataHelperTest {
 
   private final User USER = new User(USER_ID, USERNAME, EMAIL, null);
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
-      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null);
+      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null, null);
   private final Session INITALIZED_SESSION_SUCHT = new Session(1L, USER, CONSULTANT,
       ConsultingType.SUCHT, "99999", 0L, SessionStatus.INITIAL, null, null);
   private final Session INITALIZED_SESSION_U25 = new Session(1L, USER, CONSULTANT,
@@ -64,11 +64,11 @@ public class SessionDataHelperTest {
       ConsultingType.SUCHT, "99999", 1L, SessionStatus.IN_PROGRESS, new Date(), null, SESSION_DATA,
       IS_TEAM_SESSION, IS_MONITORING);
   private final UserDTO USER_DTO_WITHOUT_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
-      "x@y.de", null, null, null, null, null, "true", "0");
+      "x@y.de", null, null, null, null, null, "true", "0", true);
   private final UserDTO USER_DTO_WITH_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
-      "x@y.de", ADDICTIVE_DRUGS, RELATION, AGE, GENDER, STATE, "true", "0");
+      "x@y.de", ADDICTIVE_DRUGS, RELATION, AGE, GENDER, STATE, "true", "0", true);
   private final UserDTO USER_DTO_WITH_EMPTY_SESSION_DATA =
-      new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", "", "", "", "", "", "true", "0");
+      new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", "", "", "", "", "", "true", "0", true);
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
       new SessionDataInitializing(true, true, true, true, true);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
@@ -91,7 +91,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper
@@ -127,7 +127,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnEmptyListOfSessionDataItems() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.U25)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.U25)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper
@@ -140,7 +140,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreNull() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper
@@ -155,7 +155,7 @@ public class SessionDataHelperTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreEmpty() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataHelper.createRegistrationSessionDataList(
@@ -170,7 +170,7 @@ public class SessionDataHelperTest {
   @Test
   public void getValueOfKey_Should_ReturnCorrectValueToGivenKey() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataHelper
@@ -182,7 +182,7 @@ public class SessionDataHelperTest {
   @Test
   public void getValueOfKey_Should_ReturnNullWhenSessionDataValueIsNull() {
 
-    when(consultingTypeManager.getConsultantTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.eq(ConsultingType.SUCHT)))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataHelper

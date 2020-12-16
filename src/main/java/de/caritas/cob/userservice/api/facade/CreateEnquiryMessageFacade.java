@@ -19,8 +19,8 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.Now;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -84,7 +84,7 @@ public class CreateEnquiryMessageFacade {
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
       ConsultingTypeSettings consultingTypeSettings =
-          consultingTypeManager.getConsultantTypeSettings(session.getConsultingType());
+          consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
@@ -97,7 +97,6 @@ public class CreateEnquiryMessageFacade {
               .rcGroupId(rcGroupId).rcFeedbackGroupId(rcFeedbackGroupId).build();
 
       saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
-      monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
 
       messageServiceHelper.postMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);
