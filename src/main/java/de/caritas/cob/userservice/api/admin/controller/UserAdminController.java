@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
@@ -114,8 +115,8 @@ public class UserAdminController implements UseradminApi {
    * POST /useradmin/consultant/{consultantId}/agency: Create a new consultant <> agency relation
    * [Authorization: Role: user-admin].
    *
-   * @param consultantId Consultant Id (required)
-   * @param createConsultantAgencyDTO  (required)
+   * @param consultantId              Consultant Id (required)
+   * @param createConsultantAgencyDTO (required)
    * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
    * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
    * condition (status code 500)
