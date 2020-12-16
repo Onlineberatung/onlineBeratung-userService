@@ -6,8 +6,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +16,7 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -40,12 +39,13 @@ public class ConsultantAgencyServiceTest {
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
           "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L);
+      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now());
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
   private final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
   private final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
       Arrays.asList(NULL_CONSULTANT_AGENCY);
-  private final ConsultantAgency CONSULTANT_NULL_AGENCY = new ConsultantAgency(AGENCY_ID, null, 1L);
+  private final ConsultantAgency CONSULTANT_NULL_AGENCY = new ConsultantAgency(AGENCY_ID, null, 1L,
+      LocalDateTime.now(), LocalDateTime.now());
   private final List<ConsultantAgency> CONSULTANT_NULL_AGENCY_LIST =
       Arrays.asList(CONSULTANT_NULL_AGENCY);
   private final String ERROR = "error";
@@ -74,7 +74,8 @@ public class ConsultantAgencyServiceTest {
   public void saveConsultantAgencyt_Should_LogAndThrowInternalServerErrorException_WhenSaveConsultantAgencyFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException dataAccessException = new DataAccessException(ERROR) {};
+    DataAccessException dataAccessException = new DataAccessException(ERROR) {
+    };
     when(consultantAgencyRepository.save(Mockito.any())).thenThrow(dataAccessException);
 
     try {
@@ -87,14 +88,14 @@ public class ConsultantAgencyServiceTest {
 
   /**
    * Method: isConsultantInAgency
-   * 
    */
 
   @Test
   public void isConsultantInAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
     when(consultantAgencyRepository.findByConsultantIdAndAgencyId(CONSULTANT_ID, AGENCY_ID))
         .thenThrow(ex);
 
@@ -127,14 +128,14 @@ public class ConsultantAgencyServiceTest {
 
   /**
    * Method: findConsultantsByAgencyId
-   * 
    */
 
   @Test
   public void findConsultantsByAgencyId_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
     when(consultantAgencyRepository.findByAgencyId(AGENCY_ID)).thenThrow(ex);
 
     try {
@@ -158,14 +159,14 @@ public class ConsultantAgencyServiceTest {
 
   /**
    * Method: getConsultantsOfAgency
-   * 
    */
 
   @Test
   public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
     when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(AGENCY_ID))
         .thenThrow(ex);
 

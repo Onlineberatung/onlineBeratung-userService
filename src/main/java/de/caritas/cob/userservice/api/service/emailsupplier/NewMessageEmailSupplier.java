@@ -13,8 +13,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
 import de.caritas.cob.userservice.api.model.mailservice.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -100,7 +101,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
       return consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
     } else {
       if (isNotBlank(session.getConsultant().getEmail())) {
-        return singletonList(new ConsultantAgency(null, session.getConsultant(), null));
+        return singletonList(new ConsultantAgency(null, session.getConsultant(), null,
+            LocalDateTime.now(), LocalDateTime.now()));
       }
     }
     return emptyList();

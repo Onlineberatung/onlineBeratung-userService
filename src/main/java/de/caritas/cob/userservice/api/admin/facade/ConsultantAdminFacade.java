@@ -1,7 +1,9 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
+import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.GetConsultantResponseDTO;
@@ -18,6 +20,7 @@ public class ConsultantAdminFacade {
 
   private final @NonNull ConsultantAdminService consultantAdminService;
   private final @NonNull ConsultantAdminFilterService consultantAdminFilterService;
+  private final @NonNull ConsultantAgencyAdminService consultantAgencyAdminService;
 
   /**
    * Finds a consultant by given consultant id.
@@ -34,8 +37,8 @@ public class ConsultantAdminFacade {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page the current requested page
-   * @param perPage the amount of items in one page
+   * @param page             the current requested page
+   * @param perPage          the amount of items in one page
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
@@ -44,4 +47,13 @@ public class ConsultantAdminFacade {
         consultantFilter);
   }
 
+  /**
+   * Returns all Agencies for the given consultantId.
+   *
+   * @param consultantId id of the consultant
+   * @return the list of agencies for the given consultant
+   */
+  public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
+    return consultantAgencyAdminService.findConsultantAgencies(consultantId);
+  }
 }

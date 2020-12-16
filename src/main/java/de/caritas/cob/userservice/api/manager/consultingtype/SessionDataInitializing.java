@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.manager.consultingType;
+package de.caritas.cob.userservice.api.manager.consultingtype;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
