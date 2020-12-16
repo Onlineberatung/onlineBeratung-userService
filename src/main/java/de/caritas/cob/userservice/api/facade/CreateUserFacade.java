@@ -122,7 +122,7 @@ public class CreateUserFacade {
         .initializeNewConsultingType(userDTO, user, consultingTypeSettings);
   }
 
-  private String returnDummyEmailIfNoneGiven(UserDTO userDTO, String userId) throws Exception {
+  private String returnDummyEmailIfNoneGiven(UserDTO userDTO, String userId) {
     if (isBlank(userDTO.getEmail())) {
       return keycloakAdminClientHelper.updateDummyEmail(userId, userDTO);
     }

@@ -2,12 +2,17 @@ package de.caritas.cob.userservice.api.exception.httpresponses;
 
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.service.LogService;
 import java.util.function.Consumer;
-import lombok.Setter;
 
 public abstract class CustomHttpStatusException extends RuntimeException {
 
-  private Consumer<Exception> loggingMethod;
+  private final Consumer<Exception> loggingMethod;
+
+  CustomHttpStatusException() {
+    super();
+    this.loggingMethod = LogService::logWarn;
+  }
 
   CustomHttpStatusException(String message, Consumer<Exception> loggingMethod) {
     super(message);

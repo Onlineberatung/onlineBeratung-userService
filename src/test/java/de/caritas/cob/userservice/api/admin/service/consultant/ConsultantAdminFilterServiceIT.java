@@ -60,7 +60,7 @@ public class ConsultantAdminFilterServiceIT {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 1, new ConsultantFilter());
 
-    ConsultantDTO consultantDTO = consultants.getEmbedded().iterator().next();
+    ConsultantDTO consultantDTO = consultants.getEmbedded().iterator().next().getEmbedded();
     assertThat(consultantDTO.getId(), notNullValue());
     assertThat(consultantDTO.getUsername(), notNullValue());
     assertThat(consultantDTO.getFirstname(), notNullValue());
@@ -97,7 +97,7 @@ public class ConsultantAdminFilterServiceIT {
         .findFilteredConsultants(1, 100, consultantFilter);
 
     assertThat(result.getEmbedded(), hasSize(1));
-    ConsultantDTO filteredConsultant = result.getEmbedded().iterator().next();
+    ConsultantDTO filteredConsultant = result.getEmbedded().iterator().next().getEmbedded();
     assertThat(filteredConsultant.getAbsent(), is(false));
     assertThat(filteredConsultant.getEmail(), is("addiction@consultant.de"));
     assertThat(filteredConsultant.getLastname(), is("Consultant"));
@@ -111,7 +111,8 @@ public class ConsultantAdminFilterServiceIT {
     ConsultantSearchResultDTO result = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, consultantFilter);
 
-    result.getEmbedded().forEach(consultant -> assertThat(consultant.getAbsent(), is(false)));
+    result.getEmbedded()
+        .forEach(consultant -> assertThat(consultant.getEmbedded().getAbsent(), is(false)));
   }
 
   @Test
@@ -121,7 +122,7 @@ public class ConsultantAdminFilterServiceIT {
     ConsultantSearchResultDTO result = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, consultantFilter);
 
-    result.getEmbedded().forEach(consultant -> assertThat(consultant.getLastname(),
+    result.getEmbedded().forEach(consultant -> assertThat(consultant.getEmbedded().getLastname(),
         startsWith("Consultant")));
   }
 
@@ -132,7 +133,7 @@ public class ConsultantAdminFilterServiceIT {
     ConsultantSearchResultDTO result = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, consultantFilter);
 
-    result.getEmbedded().forEach(consultant -> assertThat(consultant.getEmail(),
+    result.getEmbedded().forEach(consultant -> assertThat(consultant.getEmbedded().getEmail(),
         is("addiction@caritas.de")));
   }
 
