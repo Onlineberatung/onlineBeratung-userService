@@ -188,7 +188,7 @@ public class ConsultantImportService {
           }
 
           // Check if decoded username is already taken
-          if (!userHelper.isUsernameAvailable(importRecord.getUsername())) {
+          if (!keycloakAdminClientHelper.isUsernameAvailable(importRecord.getUsername())) {
             writeToImportLog(String.format(
                 "Could not create Keycloak user for old id %s - username or e-mail address is already taken.",
                 importRecord.getIdOld()));

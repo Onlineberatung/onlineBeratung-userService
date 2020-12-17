@@ -7,7 +7,10 @@ import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ public class ConsultantUpdateService {
   private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantInputValidator consultantInputValidator;
+  private final @NonNull RocketChatService rocketChatService;
 
   /**
    * Updates the basic data of consultant with given id.
@@ -40,12 +44,10 @@ public class ConsultantUpdateService {
                 String.format("Consultant with id %s does not exist", consultantId)));
 
     UserDTO userDTO = buildValidatedUserDTO(updateConsultantDTO, consultant);
-
     this.keycloakAdminClientHelper.updateUserData(consultant.getId(), userDTO,
         updateConsultantDTO.getFirstname(), updateConsultantDTO.getLastname());
 
-    // TODO Check if user data will be synchronized to rocket chat via openLdap. If not adapt the
-    //  step to update userdata in rocket chat as well.
+    this.rocketChatService.updateUser(consultant.getRocketChatId(), updateConsultantDTO);
 
     return updateDatabaseConsultant(updateConsultantDTO, consultant);
   }
@@ -68,6 +70,7 @@ public class ConsultantUpdateService {
     consultant.setLanguageFormal(updateConsultantDTO.getFormalLanguage());
     consultant.setAbsent(updateConsultantDTO.getAbsent());
     consultant.setAbsenceMessage(updateConsultantDTO.getAbsenceMessage());
+    consultant.setUpdateDate(LocalDateTime.now(ZoneOffset.UTC));
 
     return this.consultantService.saveConsultant(consultant);
   }

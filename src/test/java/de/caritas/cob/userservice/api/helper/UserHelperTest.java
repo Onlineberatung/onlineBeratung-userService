@@ -96,26 +96,6 @@ public class UserHelperTest {
   }
 
   @Test
-  public void isUsernameAvailable_Should_ReturnFalse_WhenUsernameIsAlreadyTaken() {
-    List<UserRepresentation> userRepresentationList = new ArrayList<UserRepresentation>();
-    userRepresentationList.add(USER_REPRESENTATION_WITH_ENCODED_USERNAME);
-
-    when(keycloakAdminClientHelper.findByUsername(Mockito.any()))
-        .thenReturn(userRepresentationList);
-
-    assertFalse(userHelper.isUsernameAvailable(USERNAME));
-  }
-
-  @Test
-  public void isUsernameAvailable_Should_ReturnTrue_WhenUsernameIsAvailable() {
-    List<UserRepresentation> userRepresentationList = new ArrayList<UserRepresentation>();
-    when(keycloakAdminClientHelper.findByUsername(Mockito.any()))
-        .thenReturn(userRepresentationList);
-
-    assertTrue(userHelper.isUsernameAvailable(USERNAME));
-  }
-
-  @Test
   public void generateChatUrl_Should_ReturnChatLinkWithConsultingTypeUrlNameAndEncodedChatId() {
     assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, CONSULTING_TYPE_SUCHT));
   }

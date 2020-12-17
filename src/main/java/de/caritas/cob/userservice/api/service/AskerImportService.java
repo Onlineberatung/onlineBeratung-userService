@@ -187,7 +187,7 @@ public class AskerImportService {
         }
 
         // Check if decoded username is already taken
-        if (!userHelper.isUsernameAvailable(record.getUsername())) {
+        if (!keycloakAdminClientHelper.isUsernameAvailable(record.getUsername())) {
           writeToImportLog(String.format(
               "Could not create Keycloak user %s - username or e-mail address is already taken.",
               record.getUsername()), protocolFile);
@@ -375,7 +375,7 @@ public class AskerImportService {
         UserDTO userDTO = convertAskerToUserDTO(record, agencyDTO.getConsultingType());
 
         // Check if decoded username is already taken
-        if (!userHelper.isUsernameAvailable(record.getUsername())) {
+        if (!keycloakAdminClientHelper.isUsernameAvailable(record.getUsername())) {
           writeToImportLog(String.format(
               "Could not create Keycloak user %s - username or e-mail address is already taken.",
               record.getUsername()), protocolFile);

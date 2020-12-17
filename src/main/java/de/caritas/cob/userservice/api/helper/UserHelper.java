@@ -6,21 +6,21 @@ import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import java.util.Arrays;
 import java.util.List;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class UserHelper {
 
   @Value("${keycloakService.user.dummySuffix}")
@@ -49,17 +49,14 @@ public class UserHelper {
   private static final String BASE32_PLACEHOLDER = "=";
   private static final String BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING = ".";
   private static final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
-  private Base32 base32 = new Base32();
 
-  @Autowired
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
-  @Autowired
-  private UserService userService;
+  private final Base32 base32 = new Base32();
+  private final @NonNull UserService userService;
 
   /**
-   * Generates a random password which complies with the Keycloak policy
+   * Generates a random password which complies with the Keycloak policy.
    *
-   * @return
+   * @return a random generated password
    */
   public String getRandomPassword() {
     List<CharacterRule> rules = Arrays.asList(
@@ -87,20 +84,20 @@ public class UserHelper {
   }
 
   /**
-   * Generates the dummy email for a Keycloak user
+   * Generates the dummy email for a Keycloak user.
    *
-   * @param userId
-   * @return
+   * @param userId the prefix for the dummy email
+   * @return the generated dummy email address
    */
   public String getDummyEmail(String userId) {
     return userId + emailDummySuffix;
   }
 
   /**
-   * Checks if the given username is between minimum and maximum char length
+   * Checks if the given username is between minimum and maximum char length.
    *
-   * @param username
-   * @return
+   * @param username the username to validate
+   * @return true if username is valid
    */
   public boolean isUsernameValid(String username) {
     username = decodeUsername(username);
@@ -111,7 +108,7 @@ public class UserHelper {
    * Returns the Base32 encoded username. The padding char "=" of the Base32 String will be replaced
    * by a dot "." to support Rocket.Chat special chars.
    *
-   * @param username
+   * @param username the username to encode
    * @return encoded username
    */
   private String base32EncodeUsername(String username) {
@@ -123,8 +120,8 @@ public class UserHelper {
    * Returns the Base32 decoded username. Placeholder dot "." (to support Rocket.Chat special chars)
    * will be replaced by the Base32 padding symbol "=".
    *
-   * @param username
-   * @return
+   * @param username the username to decode
+   * @return the decoded username
    */
   private String base32DecodeUsername(String username) {
     try {
@@ -138,9 +135,9 @@ public class UserHelper {
   }
 
   /**
-   * Encodes the given username if it isn't already encoded
+   * Encodes the given username if it isn't already encoded.
    *
-   * @param username
+   * @param username the username to encode
    * @return encoded username
    */
   public String encodeUsername(String username) {
@@ -148,32 +145,13 @@ public class UserHelper {
   }
 
   /**
-   * Descodes the given username if it isn't already decoded
+   * Descodes the given username if it isn't already decoded.
    *
-   * @param username
-   * @return
+   * @param username the username to decode
+   * @return the decoded username
    */
   public String decodeUsername(String username) {
     return username.startsWith(ENCODING_PREFIX) ? base32DecodeUsername(username) : username;
-  }
-
-  /**
-   * Returns true if the decoded username does not exist in Keycloak yet or false if it already
-   * exists.
-   *
-   * @param username (decoded or encoded)
-   * @return true if does not exist, else false
-   */
-  public boolean isUsernameAvailable(String username) {
-    List<UserRepresentation> keycloakUserList =
-        keycloakAdminClientHelper.findByUsername(decodeUsername(username));
-    for (UserRepresentation userRep : keycloakUserList) {
-      if (userRep.getUsername().equalsIgnoreCase(decodeUsername(username))) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   /**
@@ -181,7 +159,7 @@ public class UserHelper {
    *
    * @param firstUsername encoded or decoded first username to compare
    * @param secondUsername encoded or decoded second username to compare
-   * @return
+   * @return true if usernames matches
    */
   public boolean doUsernamesMatch(String firstUsername, String secondUsername) {
     return StringUtils.equals(encodeUsername(firstUsername).toLowerCase(),
@@ -189,7 +167,7 @@ public class UserHelper {
   }
 
   /**
-   * Base32 encodes a given String
+   * Base32 encodes a given String.
    *
    * @param value String to be encoded
    * @return encoded String
@@ -206,7 +184,7 @@ public class UserHelper {
   }
 
   /**
-   * Generates the URL for a chat with the given {@link Chat} id and {@link ConsultingType}
+   * Generates the URL for a chat with the given {@link Chat} id and {@link ConsultingType}.
    *
    * @param chatId the {@link Chat}'s id
    * @param consultingType the chat's {@link ConsultingType}

@@ -51,7 +51,7 @@ public class CreateUserFacade {
    */
   public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO userDTO) {
 
-    if (!userHelper.isUsernameAvailable(userDTO.getUsername())) {
+    if (!keycloakAdminClientHelper.isUsernameAvailable(userDTO.getUsername())) {
       return new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT,
           new CreateUserResponseDTO().usernameAvailable(USERNAME_NOT_AVAILABLE)
               .emailAvailable(EMAIL_AVAILABLE), null);

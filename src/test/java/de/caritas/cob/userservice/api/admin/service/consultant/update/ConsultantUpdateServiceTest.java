@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
@@ -36,6 +37,9 @@ public class ConsultantUpdateServiceTest {
 
   @Mock
   private ConsultantInputValidator consultantInputValidator;
+
+  @Mock
+  private RocketChatService rocketChatService;
 
   @Test(expected = BadRequestException.class)
   public void updateConsultant_Should_throwBadRequestException_When_givenConsultantIdDoesNotExist() {

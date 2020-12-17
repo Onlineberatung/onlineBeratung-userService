@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +36,9 @@ public class ConsultantUpdateServiceIT {
 
   @MockBean
   private KeycloakAdminClientHelper keycloakAdminClientHelper;
+
+  @MockBean
+  private RocketChatService rocketChatService;
 
   @Test
   public void updateConsultant_Should_returnUpdatedPersistedConsultant_When_inputDataIsValid() {
