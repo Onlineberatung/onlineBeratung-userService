@@ -12,7 +12,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHt
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.RocketChatService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class ConsultantUpdateServiceIT {
   private ConsultantUpdateService consultantUpdateService;
 
   @MockBean
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   @MockBean
   private RocketChatService rocketChatService;

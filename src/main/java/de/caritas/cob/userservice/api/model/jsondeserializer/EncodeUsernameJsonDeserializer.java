@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.jsonDeserializer;
+package de.caritas.cob.userservice.api.model.jsondeserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

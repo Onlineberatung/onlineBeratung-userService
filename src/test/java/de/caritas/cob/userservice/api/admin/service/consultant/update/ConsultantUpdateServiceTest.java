@@ -14,7 +14,7 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -30,7 +30,7 @@ public class ConsultantUpdateServiceTest {
   private ConsultantUpdateService consultantUpdateService;
 
   @Mock
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   @Mock
   private ConsultantService consultantService;
@@ -56,7 +56,7 @@ public class ConsultantUpdateServiceTest {
 
     this.consultantUpdateService.updateConsultant("", updateConsultant);
 
-    verify(this.keycloakAdminClientHelper, times(1)).updateUserData(eq(consultant.getId()),
+    verify(this.keycloakAdminClientService, times(1)).updateUserData(eq(consultant.getId()),
         any(UserDTO.class), eq(updateConsultant.getFirstname()),
         eq(updateConsultant.getLastname()));
     verify(this.consultantService, times(1)).saveConsultant(any());

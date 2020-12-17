@@ -8,7 +8,7 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import lombok.NonNull;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ConsultantUpdateService {
 
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantInputValidator consultantInputValidator;
   private final @NonNull RocketChatService rocketChatService;
@@ -44,7 +44,7 @@ public class ConsultantUpdateService {
                 String.format("Consultant with id %s does not exist", consultantId)));
 
     UserDTO userDTO = buildValidatedUserDTO(updateConsultantDTO, consultant);
-    this.keycloakAdminClientHelper.updateUserData(consultant.getId(), userDTO,
+    this.keycloakAdminClientService.updateUserData(consultant.getId(), userDTO,
         updateConsultantDTO.getFirstname(), updateConsultantDTO.getLastname());
 
     this.rocketChatService.updateUser(consultant.getRocketChatId(), updateConsultantDTO);

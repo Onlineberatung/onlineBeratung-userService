@@ -45,10 +45,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class KeycloakAdminClientHelperTest {
+public class KeycloakAdminClientServiceTest {
 
   @InjectMocks
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   @Mock
   private UserHelper userHelper;
@@ -73,7 +73,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.create(any())).thenReturn(response);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientHelper
+    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
         .createKeycloakUser(userDTO);
 
     assertThat(keycloakUser, notNullValue());
@@ -83,7 +83,7 @@ public class KeycloakAdminClientHelperTest {
   @Test
   public void createKeycloakUser_Should_returnExpectedConflictResponse_When_keycloakResponseHasEmailErrorMessage() {
     String emailError = "emailError";
-    ReflectionTestUtils.setField(keycloakAdminClientHelper, "keycloakErrorEmail", emailError);
+    ReflectionTestUtils.setField(keycloakAdminClientService, "keycloakErrorEmail", emailError);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
@@ -93,7 +93,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.create(any())).thenReturn(response);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientHelper
+    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
         .createKeycloakUser(userDTO);
 
     assertThat(keycloakUser, notNullValue());
@@ -107,7 +107,7 @@ public class KeycloakAdminClientHelperTest {
   public void createKeycloakUser_Should_returnExpectedConflictResponse_When_keycloakResponseHasUsernmaeErrorMessage() {
     String keycloakErrorUsername = "keycloakErrorUsername";
     ReflectionTestUtils
-        .setField(keycloakAdminClientHelper, "keycloakErrorUsername", keycloakErrorUsername);
+        .setField(keycloakAdminClientService, "keycloakErrorUsername", keycloakErrorUsername);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UserRepresentation userRepresentation = mock(UserRepresentation.class);
     UserResource userResource = mock(UserResource.class);
@@ -121,7 +121,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.create(any())).thenReturn(response);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientHelper
+    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
         .createKeycloakUser(userDTO);
 
     assertThat(keycloakUser, notNullValue());
@@ -135,7 +135,7 @@ public class KeycloakAdminClientHelperTest {
   public void createKeycloakUser_Should_returnEmailNotAvaliable_When_keycloakMailUpdateFails() {
     String keycloakErrorUsername = "keycloakErrorUsername";
     ReflectionTestUtils
-        .setField(keycloakAdminClientHelper, "keycloakErrorUsername", keycloakErrorUsername);
+        .setField(keycloakAdminClientService, "keycloakErrorUsername", keycloakErrorUsername);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UserRepresentation userRepresentation = mock(UserRepresentation.class);
     UserResource userResource = mock(UserResource.class);
@@ -150,7 +150,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.create(any())).thenReturn(response);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientHelper
+    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
         .createKeycloakUser(userDTO);
 
     assertThat(keycloakUser, notNullValue());
@@ -162,7 +162,6 @@ public class KeycloakAdminClientHelperTest {
 
   @Test(expected = KeycloakException.class)
   public void createKeycloakUser_Should_returnThrowKeycloakException_When_errorIsUnknown() {
-    UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     Response response = mock(Response.class);
     when(usersResource.create(any())).thenReturn(response);
@@ -170,8 +169,9 @@ public class KeycloakAdminClientHelperTest {
     when(errorRepresentation.getErrorMessage()).thenReturn("error");
     when(response.readEntity(ErrorRepresentation.class)).thenReturn(errorRepresentation);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
 
-    this.keycloakAdminClientHelper.createKeycloakUser(userDTO);
+    this.keycloakAdminClientService.createKeycloakUser(userDTO);
   }
 
   @Test
@@ -184,7 +184,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.search(any())).thenReturn(userRepresentations);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    boolean isAvailable = this.keycloakAdminClientHelper.isUsernameAvailable("username");
+    boolean isAvailable = this.keycloakAdminClientService.isUsernameAvailable("username");
 
     assertThat(isAvailable, is(true));
   }
@@ -201,7 +201,7 @@ public class KeycloakAdminClientHelperTest {
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
     when(this.userHelper.decodeUsername(any())).thenReturn(unique);
 
-    boolean isAvailable = this.keycloakAdminClientHelper.isUsernameAvailable(unique);
+    boolean isAvailable = this.keycloakAdminClientService.isUsernameAvailable(unique);
 
     assertThat(isAvailable, is(false));
   }
@@ -227,7 +227,7 @@ public class KeycloakAdminClientHelperTest {
     when(realmResource.roles()).thenReturn(rolesResource);
     when(this.keycloakAdminClientAccessor.getRealmResource()).thenReturn(realmResource);
 
-    this.keycloakAdminClientHelper.updateUserRole("user");
+    this.keycloakAdminClientService.updateUserRole("user");
   }
 
   @Test
@@ -256,7 +256,7 @@ public class KeycloakAdminClientHelperTest {
     when(realmResource.roles()).thenReturn(rolesResource);
     when(this.keycloakAdminClientAccessor.getRealmResource()).thenReturn(realmResource);
 
-    this.keycloakAdminClientHelper.updateRole("user", validRole);
+    this.keycloakAdminClientService.updateRole("user", validRole);
 
     verify(roleScopeResource, times(1)).add(any());
   }
@@ -268,7 +268,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    this.keycloakAdminClientHelper.updatePassword("userId", "password");
+    this.keycloakAdminClientService.updatePassword("userId", "password");
 
     verify(userResource, times(1)).resetPassword(any());
   }
@@ -281,7 +281,7 @@ public class KeycloakAdminClientHelperTest {
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
     when(this.userHelper.getDummyEmail(anyString())).thenReturn("dummy");
 
-    String dummyMail = this.keycloakAdminClientHelper.updateDummyEmail("userId", new UserDTO());
+    String dummyMail = this.keycloakAdminClientService.updateDummyEmail("userId", new UserDTO());
 
     verify(userResource, times(1)).update(any());
     assertThat(dummyMail, is("dummy"));
@@ -296,7 +296,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    this.keycloakAdminClientHelper.updateUserData("userId", new UserDTO(), "firstName", "lastName");
+    this.keycloakAdminClientService.updateUserData("userId", new UserDTO(), "firstName", "lastName");
 
     verify(userResource, times(3)).update(any());
   }
@@ -312,7 +312,7 @@ public class KeycloakAdminClientHelperTest {
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
     try {
-      this.keycloakAdminClientHelper
+      this.keycloakAdminClientService
           .updateUserData("userId", new UserDTO(), "firstName", "lastName");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
@@ -326,7 +326,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    this.keycloakAdminClientHelper.rollBackUser("userId");
+    this.keycloakAdminClientService.rollBackUser("userId");
 
     verify(userResource, times(1)).remove();
   }
@@ -339,7 +339,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    this.keycloakAdminClientHelper.rollBackUser("userId");
+    this.keycloakAdminClientService.rollBackUser("userId");
 
     verify(logger, times(1)).error(anyString(), anyString(), anyString());
   }
@@ -358,7 +358,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    boolean hasAuthority = this.keycloakAdminClientHelper
+    boolean hasAuthority = this.keycloakAdminClientService
         .userHasAuthority("user", Authority.USER_DEFAULT);
 
     assertThat(hasAuthority, is(true));
@@ -371,7 +371,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    this.keycloakAdminClientHelper.userHasAuthority("user", "authority");
+    this.keycloakAdminClientService.userHasAuthority("user", "authority");
   }
 
   @Test
@@ -388,7 +388,7 @@ public class KeycloakAdminClientHelperTest {
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    boolean hasAuthority = this.keycloakAdminClientHelper
+    boolean hasAuthority = this.keycloakAdminClientService
         .userHasAuthority("user", Authority.USER_ADMIN);
 
     assertThat(hasAuthority, is(false));
@@ -399,7 +399,7 @@ public class KeycloakAdminClientHelperTest {
     RealmResource realmResource = mock(RealmResource.class);
     when(this.keycloakAdminClientAccessor.getRealmResource()).thenReturn(realmResource);
 
-    this.keycloakAdminClientHelper.closeSession("sessionId");
+    this.keycloakAdminClientService.closeSession("sessionId");
 
     verify(realmResource, times(1)).deleteSession(anyString());
   }

@@ -3,13 +3,11 @@ package de.caritas.cob.userservice.api.helper;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_HOST_BASE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
-import static de.caritas.cob.userservice.testHelper.KeycloakConstants.USER_REPRESENTATION_WITH_ENCODED_USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_LINK_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.HOST_BASE_URL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
@@ -22,22 +20,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
-import java.util.ArrayList;
-import java.util.List;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -47,7 +40,7 @@ public class UserHelperTest {
   @InjectMocks
   private UserHelper userHelper;
   @Mock
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
   @Mock
   private UserService userService;
 

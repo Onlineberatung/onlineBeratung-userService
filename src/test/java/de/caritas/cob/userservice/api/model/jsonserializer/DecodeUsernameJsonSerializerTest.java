@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.jsonSerializer;
+package de.caritas.cob.userservice.api.model.jsonserializer;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
@@ -26,9 +26,6 @@ public class DecodeUsernameJsonSerializerTest {
 
   @Test
   public void serialize_Schould_DecodeEncodedUsername() throws IOException {
-
-    when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
-
     serializer.serialize(USERNAME_ENCODED, jsonGenerator, null);
 
     verify(jsonGenerator, times(1)).writeObject(USERNAME_DECODED);
@@ -36,9 +33,6 @@ public class DecodeUsernameJsonSerializerTest {
 
   @Test
   public void serialize_SchouldNot_DecodeDecodedUsername() throws IOException {
-
-    when(userHelper.decodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_DECODED);
-
     serializer.serialize(USERNAME_DECODED, jsonGenerator, null);
 
     verify(jsonGenerator, times(1)).writeObject(USERNAME_DECODED);

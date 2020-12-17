@@ -21,7 +21,7 @@ import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseD
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.RocketChatService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +50,7 @@ public class ConsultantCreatorServiceIT {
   private RocketChatService rocketChatService;
 
   @MockBean
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -59,7 +59,7 @@ public class ConsultantCreatorServiceIT {
       throws RocketChatLoginException {
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenReturn(DUMMY_RC_ID);
-    when(keycloakAdminClientHelper.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     createConsultantDTO.setUsername(VALID_USERNAME);
@@ -85,7 +85,7 @@ public class ConsultantCreatorServiceIT {
       throws RocketChatLoginException {
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenReturn(DUMMY_RC_ID);
-    when(keycloakAdminClientHelper.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
     ImportRecord importRecord = this.easyRandom.nextObject(ImportRecord.class);
     importRecord.setUsername(VALID_USERNAME);
@@ -116,7 +116,7 @@ public class ConsultantCreatorServiceIT {
         KeycloakCreateUserResponseDTO.class);
     validKeycloakResponse.getResponseDTO().setUsernameAvailable(1);
     validKeycloakResponse.getResponseDTO().setEmailAvailable(1);
-    when(keycloakAdminClientHelper.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(validKeycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     createConsultantDTO.setUsername(VALID_USERNAME);
@@ -133,7 +133,7 @@ public class ConsultantCreatorServiceIT {
     KeycloakCreateUserResponseDTO keycloakResponse = easyRandom.nextObject(
         KeycloakCreateUserResponseDTO.class);
     keycloakResponse.setUserId(null);
-    when(keycloakAdminClientHelper.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(keycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
 

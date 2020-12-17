@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.model.jsonDeserializer;
+package de.caritas.cob.userservice.api.model.jsondeserializer;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;

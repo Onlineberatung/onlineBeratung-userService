@@ -16,11 +16,11 @@ import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class UserHelper {
 
   @Value("${keycloakService.user.dummySuffix}")
@@ -51,7 +51,9 @@ public class UserHelper {
   private static final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
 
   private final Base32 base32 = new Base32();
-  private final @NonNull UserService userService;
+
+  @Autowired
+  private UserService userService;
 
   /**
    * Generates a random password which complies with the Keycloak policy.

@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
 import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -23,7 +22,6 @@ import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -41,7 +39,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class KeycloakAdminClientHelper {
+public class KeycloakAdminClientService {
 
   @Value("${keycloakService.user.role}")
   private String keycloakUserRole;
@@ -79,7 +77,6 @@ public class KeycloakAdminClientHelper {
    * @param lastName last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
-  @KeycloakAdminClientLogout
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
       final String firstName, final String lastName) {
     UserRepresentation kcUser = getUserRepresentation(user, firstName, lastName);
@@ -140,7 +137,6 @@ public class KeycloakAdminClientHelper {
     return true;
   }
 
-  @KeycloakAdminClientLogout
   @Synchronized
   private boolean isEmailNotAvailable(String email) {
     // Get user resource and change e-mail address of technical user
@@ -205,7 +201,6 @@ public class KeycloakAdminClientHelper {
    *
    * @param userId Keycloak user ID
    */
-  @KeycloakAdminClientLogout
   public void updateUserRole(final String userId) {
     updateRole(userId, keycloakUserRole);
   }
@@ -216,7 +211,6 @@ public class KeycloakAdminClientHelper {
    * @param userId Keycloak user ID
    * @param roleName Keycloak role name
    */
-  @KeycloakAdminClientLogout
   public void updateRole(final String userId, final String roleName) {
     // Get realm and user resources
     RealmResource realmResource = this.keycloakAdminClientAccessor.getRealmResource();
@@ -252,7 +246,6 @@ public class KeycloakAdminClientHelper {
    * @param userId Keycloak user ID
    * @param password user password
    */
-  @KeycloakAdminClientLogout
   public void updatePassword(final String userId, final String password) {
     CredentialRepresentation newCredentials = getCredentialRepresentation(password);
     UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
@@ -270,7 +263,6 @@ public class KeycloakAdminClientHelper {
    * @param user {@link UserDTO}
    * @return the (dummy) email address
    */
-  @KeycloakAdminClientLogout
   public String updateDummyEmail(final String userId, UserDTO user) {
     String dummyEmail = userHelper.getDummyEmail(userId);
     user.setEmail(dummyEmail);
@@ -291,7 +283,6 @@ public class KeycloakAdminClientHelper {
    * @param firstName the new first name
    * @param lastName the new last name
    */
-  @KeycloakAdminClientLogout
   public void updateUserData(final String userId, UserDTO userDTO,
       String firstName, String lastName) {
     if (isEmailNotAvailable(userDTO.getEmail())) {
@@ -307,7 +298,6 @@ public class KeycloakAdminClientHelper {
    *
    * @param userId Keycloak user ID
    */
-  @KeycloakAdminClientLogout
   public void rollBackUser(String userId) {
     try {
       this.keycloakAdminClientAccessor.getUsersResource()
@@ -327,34 +317,21 @@ public class KeycloakAdminClientHelper {
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */
-  @KeycloakAdminClientLogout
   public boolean userHasAuthority(String userId, String authority) {
-
-    List<RoleRepresentation> userRoles;
-
     try {
-      userRoles = getUserRoles(userId);
-
+      return getUserRoles(userId).stream()
+          .map(role -> UserRole.getRoleByValue(role.getName()))
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .map(Authorities::getAuthoritiesByUserRole)
+          .anyMatch(currentAuthority -> currentAuthority.contains(authority));
     } catch (Exception ex) {
       String error = String.format("Could not get roles for user id %s", userId);
       LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
-
-    for (RoleRepresentation role : userRoles) {
-      Optional<UserRole> userRoleOptional = UserRole.getRoleByValue(role.getName());
-      if (userRoleOptional.isPresent()) {
-        List<String> authorities = Authorities.getAuthoritiesByUserRole(userRoleOptional.get());
-        if (authorities.contains(authority)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
   }
 
-  @KeycloakAdminClientLogout
   private List<RoleRepresentation> getUserRoles(String userId) {
     return this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId)
@@ -370,7 +347,6 @@ public class KeycloakAdminClientHelper {
    * @param username Keycloak user name
    * @return {@link List} of found users
    */
-  @KeycloakAdminClientLogout
   public List<UserRepresentation> findByUsername(String username) {
     return this.keycloakAdminClientAccessor.getUsersResource()
         .search(username);
@@ -386,24 +362,4 @@ public class KeycloakAdminClientHelper {
         .deleteSession(sessionId);
   }
 
-  /**
-   * Closes the Keycloak Admin CLI instance.
-   */
-  public void closeInstance() {
-    /**
-     * The Keycloak.close() method does actually only close the connection and does NOT delete the
-     * session at the moment. There is already an issue for this. Will be implemented in a "future"
-     * version: https://issues.jboss.org/browse/KEYCLOAK-7895
-     *
-     * TODO
-     *
-     * -> Thus this close() functionality is commented out (to only maintain one open session at
-     * once).
-     *
-     */
-    // if (this.keycloakInstance != null && !this.keycloakInstance.isClosed()) {
-    // this.keycloakInstance.close();
-    // this.keycloakInstance = null;
-    // }
-  }
 }
