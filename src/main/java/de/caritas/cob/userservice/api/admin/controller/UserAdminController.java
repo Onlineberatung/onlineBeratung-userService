@@ -110,8 +110,7 @@ public class UserAdminController implements UseradminApi {
   }
 
   /**
-   * POST /useradmin/consultant/{consultantId}/agency: Create a new consultant <> agency relation
-   * [Authorization: Role: user-admin].
+   * Entry point to create a new consultant [Authorization: Role: user-admin].
    *
    * @param consultantId              Consultant Id (required)
    * @param createConsultantAgencyDTO (required)
@@ -120,9 +119,10 @@ public class UserAdminController implements UseradminApi {
    * condition (status code 500)
    */
   @Override
-  public ResponseEntity<Void> createConsultantAgency(String consultantId,
+  public ResponseEntity<ConsultantAgencyAdminResultDTO> createConsultantAgency(String consultantId,
       @Valid CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    return null;
+    return ResponseEntity.ok(this.consultantAdminFacade
+        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO));
   }
 
   /**
@@ -156,7 +156,8 @@ public class UserAdminController implements UseradminApi {
    */
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> getConsultant(String consultantId) {
-    ConsultantAdminResponseDTO responseDTO = this.consultantAdminFacade.findConsultant(consultantId);
+    ConsultantAdminResponseDTO responseDTO = this.consultantAdminFacade
+        .findConsultant(consultantId);
     return ResponseEntity.ok(responseDTO);
   }
 

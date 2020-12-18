@@ -119,6 +119,14 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   Optional<Session> findByGroupId(String groupId);
 
   /**
+   * Find all {@link Session}s by a agency ID.
+   *
+   * @param agencyId the id to search for
+   * @return A list of {@link Session}s for the specified agency ID
+   */
+  List<Session> findByAgencyId(Long agencyId);
+
+  /**
    * Find the {@link Session}s by agency id and pageable.
    *
    * @param agencyId the id to search for

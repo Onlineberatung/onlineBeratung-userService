@@ -320,8 +320,12 @@ paths:
               $ref: '#/components/schemas/CreateConsultantAgencyDTO'
         required: true
       responses:
-        200:
-          description: OK - consultant-agency relation was created successfully
+        201:
+          description: CREATED - consultant agency was created successfully
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultantAgencyAdminResultDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request
         401:

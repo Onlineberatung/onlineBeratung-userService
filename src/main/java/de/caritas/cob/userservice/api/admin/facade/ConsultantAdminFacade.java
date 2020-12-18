@@ -3,13 +3,15 @@ package de.caritas.cob.userservice.api.admin.facade;
 import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -69,5 +71,20 @@ public class ConsultantAdminFacade {
    */
   public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
     return consultantAgencyAdminService.findConsultantAgencies(consultantId);
+  }
+
+  /**
+   * Creates a new {@Link ConsultantAgency} based on the consultantId and {@Link
+   * CreateConsultantAgencyDTO} input.
+   *
+   * @param consultantId              the consultant to use
+   * @param createConsultantAgencyDTO the agencyId and role
+   * @return the generated and persisted {@link ConsultantAgency} representation as {@link
+   * ConsultantAgencyAdminResultDTO}
+   */
+  public ConsultantAgencyAdminResultDTO createNewConsultantAgency(String consultantId,
+      CreateConsultantAgencyDTO createConsultantAgencyDTO) {
+    return this.consultantAgencyAdminService
+        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 }
