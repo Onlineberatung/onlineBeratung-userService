@@ -22,7 +22,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.RocketChatRollbackHelper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +49,7 @@ public class AssignSessionFacade {
 
   private final @NonNull SessionService sessionService;
   private final @NonNull RocketChatService rocketChatService;
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatRollbackHelper rocketChatRollbackHelper;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -272,7 +272,7 @@ public class AssignSessionFacade {
     Optional<Consultant> memberConsultant =
         consultantService.getConsultantByRcUserId(member.get_id());
     if (memberConsultant.isPresent()
-        && !keycloakAdminClientHelper.userHasAuthority(memberConsultant.get().getId(),
+        && !keycloakAdminClientService.userHasAuthority(memberConsultant.get().getId(),
         Authority.VIEW_ALL_PEER_SESSIONS)) {
       try {
         rocketChatService.removeUserFromGroup(rcUserIdToRemove.get(), session.getGroupId());
@@ -295,7 +295,7 @@ public class AssignSessionFacade {
       List<GroupMemberDTO> memberList) {
 
     try {
-      if (nonNull(initialConsultant) && !keycloakAdminClientHelper
+      if (nonNull(initialConsultant) && !keycloakAdminClientService
           .userHasAuthority(initialConsultant.getId(),
               Authority.VIEW_ALL_FEEDBACK_SESSIONS)) {
         updateRocketChatUsersForFeedbackGroup(session, consultant, initialConsultant,

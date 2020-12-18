@@ -74,7 +74,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -146,7 +146,7 @@ public class CreateEnquiryMessageFacadeTest {
   @Mock
   private ConsultingTypeManager consultingTypeManager;
   @Mock
-  private KeycloakAdminClientHelper keycloakHelper;
+  private KeycloakAdminClientService keycloakHelper;
   @Mock
   private UserHelper userHelper;
   @Mock

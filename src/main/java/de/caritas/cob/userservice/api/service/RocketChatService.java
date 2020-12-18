@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupAddUserBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCleanHistoryDTO;
@@ -31,6 +32,8 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +44,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -57,10 +61,11 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Service for Rocket.Chat functionalities
+ * Service for Rocket.Chat functionalities.
  */
 @Getter
 @Service
+@RequiredArgsConstructor
 public class RocketChatService {
 
   private static final String ERROR_MESSAGE = "Error during rollback: Rocket.Chat group with id "
@@ -68,7 +73,9 @@ public class RocketChatService {
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 01, 01, 00, 00);
+
   private final LocalDateTime localDateTimeFuture = LocalDateTime.now().plusYears(1L);
+
   @Value("${rocket.chat.header.auth.token}")
   private String rocketChatHeaderAuthToken;
   @Value("${rocket.chat.header.user.id}")
@@ -93,13 +100,13 @@ public class RocketChatService {
   private String rocketChatApiUserLogout;
   @Value("${rocket.chat.api.user.info}")
   private String rocketChatApiUserInfo;
+  @Value("${rocket.chat.api.user.update}")
+  private String rocketChatApiUserUpdate;
   @Value("${rocket.chat.api.rooms.clean.history}")
   private String rocketChatApiCleanRoomHistory;
-  @Autowired
-  private RestTemplate restTemplate;
 
-  @Autowired
-  private RocketChatCredentialsHelper rcCredentialHelper;
+  private final @NonNull RestTemplate restTemplate;
+  private final @NonNull RocketChatCredentialsHelper rcCredentialHelper;
 
   /**
    * Creation of a private Rocket.Chat group.
@@ -638,7 +645,8 @@ public class RocketChatService {
 
     if (!isGetUserInfoIsSuccess(response)) {
       throw new InternalServerErrorException(
-          String.format("Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
+          String.format(
+              "Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
               rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
               response.getBody().getErrorType()),
           LogService::logRocketChatError);
@@ -650,6 +658,57 @@ public class RocketChatService {
   private boolean isGetUserInfoIsSuccess(ResponseEntity<UserInfoResponseDTO> response) {
     return nonNull(response.getBody()) && response.getStatusCode() == HttpStatus.OK
         && response.getBody().isSuccess();
+  }
+
+  /**
+   * Updates the user data of the given Rocket.Chat user.
+   *
+   * @param rcUserId Rocket.Chat user id
+   * @return the dto containing the user infos
+   */
+  public UserInfoResponseDTO updateUser(String rcUserId, UpdateConsultantDTO updateConsultantDTO) {
+    try {
+      return updateUserData(rcUserId, updateConsultantDTO).getBody();
+    } catch (RestClientResponseException | RocketChatUserNotInitializedException ex) {
+      throw new InternalServerErrorException(
+          String.format("Could not update Rocket.Chat user of user id %s", rcUserId), ex,
+          LogService::logRocketChatError);
+    }
+  }
+
+  private ResponseEntity<UserInfoResponseDTO> updateUserData(String rcUserId,
+      UpdateConsultantDTO updateConsultantDTO) throws RocketChatUserNotInitializedException {
+
+    UserUpdateRequestDTO requestDTO = buildUserUpdateRequestDTO(rcUserId, updateConsultantDTO);
+    HttpEntity<UserUpdateRequestDTO> request = buildRocketChatUserUpdateRequestEntity(requestDTO);
+
+    ResponseEntity<UserInfoResponseDTO> response = restTemplate
+        .exchange(rocketChatApiUserUpdate, HttpMethod.POST, request, UserInfoResponseDTO.class);
+
+    if (!isGetUserInfoIsSuccess(response)) {
+      throw new InternalServerErrorException(
+          String.format(
+              "Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
+              rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
+              response.getBody().getErrorType()),
+          LogService::logRocketChatError);
+    }
+
+    return response;
+  }
+
+  private UserUpdateRequestDTO buildUserUpdateRequestDTO(String rcUserId,
+      UpdateConsultantDTO updateConsultantDTO) {
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(updateConsultantDTO.getEmail(),
+        updateConsultantDTO.getFirstname().concat(" ").concat(updateConsultantDTO.getLastname()));
+    return new UserUpdateRequestDTO(rcUserId, userUpdateDataDTO);
+  }
+
+  private HttpEntity<UserUpdateRequestDTO> buildRocketChatUserUpdateRequestEntity(
+      UserUpdateRequestDTO requestDTO) throws RocketChatUserNotInitializedException {
+    RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
+    HttpHeaders header = getStandardHttpHeaders(technicalUser);
+    return new HttpEntity<>(requestDTO, header);
   }
 
 }

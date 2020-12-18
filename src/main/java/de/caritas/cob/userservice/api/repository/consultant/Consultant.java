@@ -68,18 +68,18 @@ public class Consultant {
   @Field
   private String username;
 
-  @Column(name = "first_name", updatable = false, nullable = false)
+  @Column(name = "first_name", nullable = false)
   @Size(max = 255)
   @NonNull
   private String firstName;
 
-  @Column(name = "last_name", updatable = false, nullable = false)
+  @Column(name = "last_name", nullable = false)
   @Size(max = 255)
   @NonNull
   @Field
   private String lastName;
 
-  @Column(name = "email", updatable = false, nullable = false)
+  @Column(name = "email", nullable = false)
   @Size(max = 255)
   @NonNull
   @Field

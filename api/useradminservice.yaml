@@ -126,7 +126,7 @@ paths:
       operationId: updateConsultant
       requestBody:
         content:
-          'application/hal+json':
+          'application/json':
             schema:
               $ref: '#/components/schemas/UpdateConsultantDTO'
         required: true
@@ -141,7 +141,7 @@ paths:
         200:
           description: OK - consultant was updated successfully
           content:
-            'application/json':
+            'application/hal+json':
               schema:
                 $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         400:
@@ -549,15 +549,23 @@ components:
         username:
           type: string
           example: "max.mustermann"
+          minLength: 1
+          maxLength: 255
         firstname:
           type: string
           example: "Max"
+          minLength: 1
+          maxLength: 255
         lastname:
           type: string
           example: "Mustermann"
+          minLength: 1
+          maxLength: 255
         email:
           type: string
           example: "max@mustermann.de"
+          minLength: 1
+          maxLength: 255
         formalLanguage:
           type: boolean
           example: true
@@ -567,6 +575,8 @@ components:
         absenceMessage:
           type: string
           example: "I am absent until..."
+          minLength: 1
+          maxLength: 10000
 
     UpdateConsultantDTO:
       type: object
@@ -580,12 +590,18 @@ components:
         firstname:
           type: string
           example: "Max"
+          minLength: 1
+          maxLength: 255
         lastname:
           type: string
           example: "Mustermann"
+          minLength: 1
+          maxLength: 255
         email:
           type: string
           example: "max@mustermann.de"
+          minLength: 1
+          maxLength: 255
         formalLanguage:
           type: boolean
           example: true
@@ -595,6 +611,8 @@ components:
         absenceMessage:
           type: string
           example: "I am absent until..."
+          minLength: 1
+          maxLength: 10000
 
     ConsultantDTO:
       type: object
@@ -737,6 +755,8 @@ components:
            example: 15
          role:
            type: string
+           minLength: 1
+           maxLength: 255
 
     ViolationDTO:
       type: object

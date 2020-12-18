@@ -20,7 +20,7 @@ import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -55,7 +55,7 @@ public class ConsultantImportService {
   @Value("${consultant.import.protocol.filename}")
   private String protocolFilename;
 
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull RocketChatService rocketChatService;
@@ -188,7 +188,7 @@ public class ConsultantImportService {
           }
 
           // Check if decoded username is already taken
-          if (!userHelper.isUsernameAvailable(importRecord.getUsername())) {
+          if (!keycloakAdminClientService.isUsernameAvailable(importRecord.getUsername())) {
             writeToImportLog(String.format(
                 "Could not create Keycloak user for old id %s - username or e-mail address is already taken.",
                 importRecord.getIdOld()));
@@ -304,7 +304,7 @@ public class ConsultantImportService {
                   consultingTypeManager.getConsultingTypeSettings(ConsultingType
                       .valueOf(consultantTeamSessionResponseDto.getSession().getConsultingType())
                       .get());
-              boolean isMainConsultant = keycloakAdminClientHelper
+              boolean isMainConsultant = keycloakAdminClientService
                   .userHasAuthority(consultant.getId(), Authority.VIEW_ALL_FEEDBACK_SESSIONS)
                   || roles.contains(UserRole.U25_MAIN_CONSULTANT.name());
 

@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,8 @@ public class ConsultantAdminFacade {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page             the current requested page
-   * @param perPage          the amount of items in one page
+   * @param page the current requested page
+   * @param perPage the amount of items in one page
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
@@ -62,12 +63,25 @@ public class ConsultantAdminFacade {
   }
 
   /**
+   * Updates a {@link Consultant} based on the {@link UpdateConsultantDTO} input.
+   *
+   * @param consultantId the id of the consultant to update
+   * @param updateConsultantDTO the input data used for {@link Consultant} update
+   * @return the generated and persisted {@link Consultant} representation as {@link
+   * ConsultantAdminResponseDTO}
+   */
+  public ConsultantAdminResponseDTO updateConsultant(String consultantId,
+      UpdateConsultantDTO updateConsultantDTO) {
+    return this.consultantAdminService.updateConsultant(consultantId, updateConsultantDTO);
+  }
+
+  /**
    * Returns all Agencies for the given consultantId.
    *
    * @param consultantId id of the consultant
    * @return the list of agencies for the given consultant
    */
   public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
-    return consultantAgencyAdminService.findConsultantAgencies(consultantId);
+    return this.consultantAgencyAdminService.findConsultantAgencies(consultantId);
   }
 }

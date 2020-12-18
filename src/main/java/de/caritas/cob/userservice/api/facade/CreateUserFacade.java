@@ -17,7 +17,7 @@ import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseD
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,7 +34,7 @@ public class CreateUserFacade {
   private static final int USERNAME_NOT_AVAILABLE = 0;
   private static final int EMAIL_AVAILABLE = 1;
 
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserService userService;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
@@ -51,7 +51,7 @@ public class CreateUserFacade {
    */
   public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO userDTO) {
 
-    if (!userHelper.isUsernameAvailable(userDTO.getUsername())) {
+    if (!keycloakAdminClientService.isUsernameAvailable(userDTO.getUsername())) {
       return new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT,
           new CreateUserResponseDTO().usernameAvailable(USERNAME_NOT_AVAILABLE)
               .emailAvailable(EMAIL_AVAILABLE), null);
@@ -76,7 +76,7 @@ public class CreateUserFacade {
   private KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO userDTO) {
     try {
       // Create the user in Keycloak
-      return keycloakAdminClientHelper.createKeycloakUser(userDTO);
+      return keycloakAdminClientService.createKeycloakUser(userDTO);
     } catch (Exception ex) {
       throw new InternalServerErrorException(
           String.format("Could not create Keycloak account for: %s", userDTO.toString()));
@@ -102,8 +102,8 @@ public class CreateUserFacade {
     try {
       // We need to set the user roles and password and (dummy) e-mail address after the user was
       // created in Keycloak
-      keycloakAdminClientHelper.updateUserRole(userId);
-      keycloakAdminClientHelper.updatePassword(userId, userDTO.getPassword());
+      keycloakAdminClientService.updateUserRole(userId);
+      keycloakAdminClientService.updatePassword(userId, userDTO.getPassword());
 
       user = userService
           .createUser(userId, userDTO.getUsername(), returnDummyEmailIfNoneGiven(userDTO, userId),
@@ -124,7 +124,7 @@ public class CreateUserFacade {
 
   private String returnDummyEmailIfNoneGiven(UserDTO userDTO, String userId) {
     if (isBlank(userDTO.getEmail())) {
-      return keycloakAdminClientHelper.updateDummyEmail(userId, userDTO);
+      return keycloakAdminClientService.updateDummyEmail(userId, userDTO);
     }
 
     return userDTO.getEmail();

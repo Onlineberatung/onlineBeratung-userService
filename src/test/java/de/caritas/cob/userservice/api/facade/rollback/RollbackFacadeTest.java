@@ -12,7 +12,7 @@ import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +26,7 @@ public class RollbackFacadeTest {
   @InjectMocks
   private RollbackFacade rollbackFacade;
   @Mock
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
   @Mock
   private UserAgencyService userAgencyService;
   @Mock
@@ -75,7 +75,7 @@ public class RollbackFacadeTest {
 
     rollbackFacade.rollBackUserAccount(rbUserInfo);
 
-    verify(keycloakAdminClientHelper, times(1)).rollBackUser(USER_ID);
+    verify(keycloakAdminClientService, times(1)).rollBackUser(USER_ID);
   }
 
   @Test

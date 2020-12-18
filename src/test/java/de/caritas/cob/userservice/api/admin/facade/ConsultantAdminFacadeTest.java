@@ -74,4 +74,11 @@ public class ConsultantAdminFacadeTest {
     verify(this.consultantAgencyAdminService, times(1)).findConsultantAgencies(null);
   }
 
+  @Test
+  public void updateConsultant_Should_useConsultantAdminServiceCorrectly() {
+    this.consultantAdminFacade.updateConsultant(null, null);
+
+    verify(this.consultantAdminService, times(1)).updateConsultant(any(), any());
+  }
+
 }
