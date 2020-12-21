@@ -32,6 +32,7 @@ import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
@@ -84,7 +85,7 @@ public class ConsultantAgencyCreatorServiceIT {
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid()
       throws AgencyServiceHelperException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
 
-    String consultantId = "12345678-1234-1234-1234-1234567890ab";
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
@@ -111,7 +112,7 @@ public class ConsultantAgencyCreatorServiceIT {
     sessionWithFeedbackGroup.setGroupId("this-is-the-group-id-with-feedbackgroup");
     sessionWithFeedbackGroup.setFeedbackGroupId("this-is-the-feedback-group-id");
 
-    when(sessionRepository.findByAgencyId(15L))
+    when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.NEW))
         .thenReturn(Arrays.asList(session, sessionWithFeedbackGroup));
 
     LocalDateTime localDateTime = LocalDateTime.now();
@@ -146,7 +147,7 @@ public class ConsultantAgencyCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwInternalServerErrorException_When_RocketChatCantBeReachedForGroupId()
       throws AgencyServiceHelperException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException {
 
-    String consultantId = "12345678-1234-1234-1234-1234567890ab";
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
@@ -165,10 +166,13 @@ public class ConsultantAgencyCreatorServiceIT {
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session session = new Session();
+    session.setId(123L);
     session.setAgencyId(agencyDTO.getId());
     session.setGroupId("this-is-the-group-id-without-feedbackgroup");
+    session.setTeamSession(false);
 
-    when(sessionRepository.findByAgencyId(15L)).thenReturn(Collections.singletonList(session));
+    when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.NEW))
+        .thenReturn(Collections.singletonList(session));
 
     LocalDateTime localDateTime = LocalDateTime.now();
 
@@ -181,7 +185,7 @@ public class ConsultantAgencyCreatorServiceIT {
     when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
 
     doThrow(new RocketChatAddUserToGroupException("Rocket.Chat test exception"))
-        .when(rocketChatService).addTechnicalUserToGroup(session.getGroupId());
+        .when(rocketChatService).addUserToGroup(consultant.getRocketChatId(), session.getGroupId());
 
     try {
       ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
@@ -190,7 +194,10 @@ public class ConsultantAgencyCreatorServiceIT {
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
       assertThat(e.getMessage(),
-          is("RocketChatService error while setting up a Rocket.Chat room during consultantAgency-creation for groupId (this-is-the-group-id-without-feedbackgroup) and consultantId (12345678-1234-1234-1234-1234567890ab)"));
+          is("RocketChatService error while setting up a Rocket.Chat room during "
+              + "consultantAgency-creation with Method addConsultantToAgencyEnquiries "
+              + "for groupId (this-is-the-group-id-without-feedbackgroup) and "
+              + "consultantId (12345678-1234-1234-1234-1234567890ab)"));
     }
   }
 
@@ -198,7 +205,7 @@ public class ConsultantAgencyCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwInternalServerErrorException_When_RocketChatCantBeReachedForFeedbackGroupId()
       throws AgencyServiceHelperException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException {
 
-    String consultantId = "12345678-1234-1234-1234-1234567890ab";
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
@@ -216,12 +223,22 @@ public class ConsultantAgencyCreatorServiceIT {
     agencyDTO.setTeamAgency(false);
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
-    Session session = new Session();
-    session.setAgencyId(agencyDTO.getId());
-    session.setGroupId("this-is-the-group-id-with-feedbackgroup");
-    session.setFeedbackGroupId("this-is-the-feedbackGroupId");
+    Session session1 = new Session();
+    session1.setId(123L);
+    session1.setAgencyId(agencyDTO.getId());
+    session1.setGroupId("this-is-the-group-id-with-feedbackgroup1");
+    session1.setFeedbackGroupId("this-is-the-feedbackGroupId1");
+    session1.setTeamSession(false);
 
-    when(sessionRepository.findByAgencyId(15L)).thenReturn(Collections.singletonList(session));
+    Session session2 = new Session();
+    session2.setId(124L);
+    session2.setAgencyId(agencyDTO.getId());
+    session2.setGroupId("this-is-the-group-id-with-feedbackgroup2");
+    session2.setFeedbackGroupId("this-is-the-feedbackGroupId2");
+    session2.setTeamSession(false);
+
+    when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.NEW))
+        .thenReturn(Arrays.asList(session1, session2));
 
     LocalDateTime localDateTime = LocalDateTime.now();
 
@@ -234,7 +251,8 @@ public class ConsultantAgencyCreatorServiceIT {
     when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
 
     doThrow(new RocketChatAddUserToGroupException("Rocket.Chat test exception"))
-        .when(rocketChatService).addTechnicalUserToGroup(session.getGroupId());
+        .when(rocketChatService)
+        .addUserToGroup(consultant.getRocketChatId(), session2.getFeedbackGroupId());
 
     try {
       ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
@@ -243,15 +261,131 @@ public class ConsultantAgencyCreatorServiceIT {
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
       assertThat(e.getMessage(),
-          is("RocketChatService error while setting up a Rocket.Chat room during consultantAgency-creation for groupId (this-is-the-group-id-with-feedbackgroup) or feedbackGroupId (this-is-the-feedbackGroupId) and consultantId (12345678-1234-1234-1234-1234567890ab)"));
+          is("RocketChatService error while setting up a Rocket.Chat room "
+              + "during consultantAgency-creation with Method addConsultantToAgencyEnquiries "
+              + "for groupId (this-is-the-group-id-with-feedbackgroup2) "
+              + "or feedbackGroupId (this-is-the-feedbackGroupId2) "
+              + "and consultantId (12345678-1234-1234-1234-1234567890ab)"));
     }
+  }
+
+  @Test
+  public void createNewConsultantAgency_Should_throwInternalServerErrorException_When_EnquiryRollbackFailed()
+      throws AgencyServiceHelperException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
+
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
+
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
+    createConsultantAgencyDTO.setAgencyId(15L);
+    createConsultantAgencyDTO.setRole("a-valid-role");
+
+    Consultant consultant = this.easyRandom.nextObject(Consultant.class);
+    consultant.setId(consultantId);
+    Optional<Consultant> consultantOptional = Optional.of(consultant);
+    when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
+
+    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+
+    AgencyDTO agencyDTO = new AgencyDTO();
+    agencyDTO.setId(15L);
+    agencyDTO.setTeamAgency(false);
+    when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+
+    Session session1 = new Session();
+    session1.setId(123L);
+    session1.setAgencyId(agencyDTO.getId());
+    session1.setGroupId("this-is-the-group-id-with-feedbackgroup1");
+    session1.setFeedbackGroupId("this-is-the-feedbackGroupId1");
+    session1.setTeamSession(false);
+
+    Session session2 = new Session();
+    session2.setId(124L);
+    session2.setAgencyId(agencyDTO.getId());
+    session2.setGroupId("this-is-the-group-id-with-feedbackgroup2");
+    session2.setFeedbackGroupId("this-is-the-feedbackGroupId2");
+    session2.setTeamSession(false);
+
+    when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.NEW))
+        .thenReturn(Arrays.asList(session1, session2));
+
+    LocalDateTime localDateTime = LocalDateTime.now();
+
+    ConsultantAgency consultantAgency = new ConsultantAgency();
+    consultantAgency.setConsultant(consultant);
+    consultantAgency.setAgencyId(agencyDTO.getId());
+    consultantAgency.setCreateDate(localDateTime);
+    consultantAgency.setUpdateDate(localDateTime);
+
+    when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
+
+    doThrow(new RocketChatAddUserToGroupException("Rocket.Chat test exception"))
+        .when(rocketChatService)
+        .addUserToGroup(consultant.getRocketChatId(), session2.getFeedbackGroupId());
+
+    doThrow(new RocketChatRemoveUserFromGroupException("Rocket.Chat test exception"))
+        .when(rocketChatService)
+        .removeUserFromGroup(consultant.getRocketChatId(), session2.getFeedbackGroupId());
+
+    try {
+      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+          .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+      fail("There was no BadRequestException");
+    } catch (Exception e) {
+      assertThat(e, instanceOf(InternalServerErrorException.class));
+      assertThat(e.getMessage(),
+          is("Rollback error while roleback of addConsultantToAgencyEnquiries (consultantId:12345678-1234-1234-1234-1234567890ab, sessions:[sessionId:123, groupId:this-is-the-group-id-with-feedbackgroup1, feedbackGroupId:this-is-the-feedbackGroupId1][sessionId:124, groupId:this-is-the-group-id-with-feedbackgroup2, feedbackGroupId:this-is-the-feedbackGroupId2])"));
+    }
+  }
+
+  @Test
+  public void createNewConsultantAgency_Should_setTeamConsultantInConsultant_When_AgencyIsTeamAgency()
+      throws AgencyServiceHelperException {
+
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
+
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
+    createConsultantAgencyDTO.setAgencyId(15L);
+    createConsultantAgencyDTO.setRole("a-valid-role");
+
+    Consultant consultant = this.easyRandom.nextObject(Consultant.class);
+    consultant.setTeamConsultant(false);
+    Optional<Consultant> consultantOptional = Optional.of(consultant);
+    when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
+
+    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+
+    AgencyDTO agencyDTO = new AgencyDTO();
+    agencyDTO.setId(15L);
+    agencyDTO.setTeamAgency(true);
+    when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+
+    when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.NEW)).thenReturn(emptyList());
+    when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.IN_PROGRESS))
+        .thenReturn(emptyList());
+
+    LocalDateTime localDateTime = LocalDateTime.now();
+
+    ConsultantAgency consultantAgency = new ConsultantAgency();
+    consultantAgency.setConsultant(consultant);
+    consultantAgency.setAgencyId(agencyDTO.getId());
+    consultantAgency.setCreateDate(localDateTime);
+    consultantAgency.setUpdateDate(localDateTime);
+
+    when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
+
+    consultantAgencyCreatorService
+        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+
+    consultant.setTeamConsultant(true);
+
+    verify(consultantRepository, times(1)).save(eq(consultant));
   }
 
   @Test
   public void createNewConsultantAgency_Should_returnExpectedCreatedConsultantAgency_When_ParamsAreValid()
       throws AgencyServiceHelperException {
 
-    String consultantId = "12345678-1234-1234-1234-1234567890ab";
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
@@ -268,7 +402,7 @@ public class ConsultantAgencyCreatorServiceIT {
     agencyDTO.setTeamAgency(false);
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
-    when(sessionRepository.findByAgencyId(15L)).thenReturn(emptyList());
+    when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.NEW)).thenReturn(emptyList());
 
     LocalDateTime localDateTime = LocalDateTime.now();
 
@@ -296,9 +430,9 @@ public class ConsultantAgencyCreatorServiceIT {
   }
 
   @Test
-  public void createNewConsultantAgency_Should_returnBadRequestException_When_ConsultantIdIsUnknown() {
+  public void createNewConsultantAgency_Should_throwBadRequestException_When_ConsultantIdIsUnknown() {
 
-    String consultantId = "12345678-1234-1234-1234-1234567890ab";
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
@@ -321,9 +455,9 @@ public class ConsultantAgencyCreatorServiceIT {
   }
 
   @Test
-  public void createNewConsultantAgency_Should_returnBadRequestException_When_ConsultantHasNotRequestedRole() {
+  public void createNewConsultantAgency_Should_throwBadRequestException_When_ConsultantHasNotRequestedRole() {
 
-    String consultantId = "12345678-1234-1234-1234-1234567890ab";
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
@@ -348,10 +482,39 @@ public class ConsultantAgencyCreatorServiceIT {
   }
 
   @Test
+  public void createNewConsultantAgency_Should_throwBadRequestException_When_AgencyIdIsInvalid()
+      throws AgencyServiceHelperException {
+
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
+
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
+    createConsultantAgencyDTO.setAgencyId(15L);
+    createConsultantAgencyDTO.setRole("a-valid-role");
+
+    Consultant consultant = this.easyRandom.nextObject(Consultant.class);
+    Optional<Consultant> consultantOptional = Optional.of(consultant);
+    when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
+
+    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+
+    when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(null);
+
+    try {
+
+      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+          .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+      fail("There was no BadRequestException");
+    } catch (Exception e) {
+      assertThat(e, instanceOf(BadRequestException.class));
+      assertThat(e.getMessage(), is("AngecyId 15 is not a valid agency"));
+    }
+  }
+
+  @Test
   public void createNewConsultantAgency_Should_throwInternalServerErrorException_When_AgencyCantBeFetched()
       throws AgencyServiceHelperException {
 
-    String consultantId = "12345678-1234-1234-1234-1234567890ab";
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
