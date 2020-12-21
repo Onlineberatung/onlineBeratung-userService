@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.controller;
 
-import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCY_PATH;
+import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCIES_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTING_TYPE_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.FILTERED_CONSULTANTS_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.GET_CONSULTANT_PATH;
@@ -337,7 +337,7 @@ public class UserAdminControllerAuthorizationIT {
   public void getConsultantAgencies_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
       throws Exception {
     String consultantAgencyPath = String
-        .format(CONSULTANT_AGENCY_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
+        .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
 
     mvc.perform(get(consultantAgencyPath))
         .andExpect(status().isForbidden());
@@ -349,7 +349,7 @@ public class UserAdminControllerAuthorizationIT {
   public void getConsultantAgencies_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     String consultantAgencyPath = String
-        .format(CONSULTANT_AGENCY_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
+        .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
 
     mvc.perform(get(consultantAgencyPath)
         .cookie(CSRF_COOKIE)
@@ -368,7 +368,7 @@ public class UserAdminControllerAuthorizationIT {
   public void getConsultantAgencies_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     String consultantAgencyPath = String
-        .format(CONSULTANT_AGENCY_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
+        .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
 
     mvc.perform(get(consultantAgencyPath)
         .cookie(CSRF_COOKIE)
@@ -384,7 +384,7 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
     String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
-    String consultantAgencyPath = String.format(CONSULTANT_AGENCY_PATH, consultantId);
+    String consultantAgencyPath = String.format(CONSULTANT_AGENCIES_PATH, consultantId);
 
     mvc.perform(get(consultantAgencyPath)
         .cookie(CSRF_COOKIE)

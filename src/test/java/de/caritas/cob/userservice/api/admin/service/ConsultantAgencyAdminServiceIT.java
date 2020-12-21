@@ -6,17 +6,22 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -28,6 +33,9 @@ public class ConsultantAgencyAdminServiceIT {
 
   @Autowired
   private ConsultantAgencyAdminService consultantAgencyAdminService;
+
+  @MockBean
+  private ConsultantAgencyCreatorService consultantAgencyCreatorService;
 
   @Test
   public void findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {
@@ -64,6 +72,15 @@ public class ConsultantAgencyAdminServiceIT {
       assertThat(e.getMessage(),
           is("Consultant with id 12345678-1234-1234-1234-1234567890ab does not exist"));
     }
+  }
+
+  @Test
+  public void createNewConsultantAgency_asdf() {
+
+    this.consultantAgencyAdminService.createNewConsultantAgency(null,null);
+
+    verify(this.consultantAgencyCreatorService, times(1)).createNewConsultantAgency(null, null);
+
   }
 
 }

@@ -18,11 +18,9 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,11 +50,18 @@ public class ConsultantAgencyCreatorService {
    */
   public ConsultantAgencyAdminResultDTO createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    Consultant consultant = this.getConsultant(consultantId);
+    CreateConsultantAgencyDTOInputAdapter adapter = new CreateConsultantAgencyDTOInputAdapter(
+        consultantId, createConsultantAgencyDTO);
+    return createNewConsultantAgency(adapter);
+  }
 
-    this.checkConsultantHasRole(consultantId, createConsultantAgencyDTO.getRole());
+  private ConsultantAgencyAdminResultDTO createNewConsultantAgency(
+      ConsultantAgencyCreationInput input) {
+    Consultant consultant = this.getConsultant(input.getConsultantId());
 
-    AgencyDTO agency = getAgency(createConsultantAgencyDTO.getAgencyId());
+    this.checkConsultantHasRole(input);
+
+    AgencyDTO agency = getAgency(input);
 
     // TODO: Check Kreuzbund
 
@@ -77,7 +82,7 @@ public class ConsultantAgencyCreatorService {
     return ConsultantAgencyAdminResultDTOBuilder
         .getInstance()
         .withConsultantId(consultant.getId())
-        .withResult(Stream.of(consultantAgency).collect(Collectors.toList()))
+        .withResult(Collections.singletonList(consultantAgency))
         .build();
   }
 
@@ -93,20 +98,21 @@ public class ConsultantAgencyCreatorService {
     return consultant.get();
   }
 
-  private void checkConsultantHasRole(String consultantId, String role) {
-    if (!keycloakAdminClientHelper.userHasRole(consultantId, role)) {
+  private void checkConsultantHasRole(ConsultantAgencyCreationInput input) {
+    if (!keycloakAdminClientHelper.userHasRole(input.getConsultantId(), input.getRole())) {
       throw new BadRequestException(
-          String.format("Consultant with id %s does not have the role %s", consultantId, role));
+          String.format("Consultant with id %s does not have the role %s", input.getConsultantId(),
+              input.getRole()));
     }
   }
 
-  private AgencyDTO getAgency(Long agencyId) {
+  private AgencyDTO getAgency(ConsultantAgencyCreationInput input) {
     try {
-      return this.agencyServiceHelper.getAgencyWithoutCaching(agencyId);
+      return this.agencyServiceHelper.getAgencyWithoutCaching(input.getAgencyId());
     } catch (AgencyServiceHelperException e) {
       throw new InternalServerErrorException(String.format(
           "AgencyService error while retrieving the agency for the ConsultantAgency-creating for agency %s",
-          agencyId), e, LogService::logAgencyServiceHelperException);
+          input.getAgencyId()), e, LogService::logAgencyServiceHelperException);
     }
   }
 
@@ -136,10 +142,22 @@ public class ConsultantAgencyCreatorService {
 
         rocketChatService.removeTechnicalUserFromGroup(session.getGroupId());
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new InternalServerErrorException(
+            getAddConsultantToAgencyEnquiriesLogMessage(session, consultant), e,
+            LogService::logAgencyServiceHelperException);
       }
 
     }
+  }
+
+  private String getAddConsultantToAgencyEnquiriesLogMessage(Session session,
+      Consultant consultant) {
+    return String.format(
+        "RocketChatService error while setting up a Rocket.Chat room during consultantAgency-creation for groupId (%s)%s and consultantId (%s)",
+        session.getGroupId(),
+        (session.getFeedbackGroupId() == null ? ""
+            : String.format(" or feedbackGroupId (%s)", session.getFeedbackGroupId())),
+        consultant.getId());
   }
 
 }
