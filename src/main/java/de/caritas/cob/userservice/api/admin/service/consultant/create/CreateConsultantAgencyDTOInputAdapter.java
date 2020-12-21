@@ -6,7 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class CreateConsultantAgencyDTOInputAdapter implements ConsultantAgencyCreationInput{
+public class CreateConsultantAgencyDTOInputAdapter implements ConsultantAgencyCreationInput {
 
   private final @NonNull String consultantId;
   private final @NonNull CreateConsultantAgencyDTO createConsultantAgencyDTO;

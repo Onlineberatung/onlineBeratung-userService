@@ -14,7 +14,6 @@ import de.caritas.cob.userservice.api.admin.service.consultant.create.Consultant
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class ConsultantAgencyAdminServiceIT {
   @Test
   public void createNewConsultantAgency_asdf() {
 
-    this.consultantAgencyAdminService.createNewConsultantAgency(null,null);
+    this.consultantAgencyAdminService.createNewConsultantAgency(null, null);
 
     verify(this.consultantAgencyCreatorService, times(1)).createNewConsultantAgency(null, null);
 
