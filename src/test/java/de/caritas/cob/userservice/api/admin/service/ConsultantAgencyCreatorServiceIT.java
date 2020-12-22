@@ -17,6 +17,8 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyCreatorService;
+import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -30,6 +32,7 @@ import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -333,7 +336,12 @@ public class ConsultantAgencyCreatorServiceIT {
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
       assertThat(e.getMessage(),
-          is("Rollback error while roleback of addConsultantToAgencyEnquiries (consultantId:12345678-1234-1234-1234-1234567890ab, sessions:[sessionId:123, groupId:this-is-the-group-id-with-feedbackgroup1, feedbackGroupId:this-is-the-feedbackGroupId1][sessionId:124, groupId:this-is-the-group-id-with-feedbackgroup2, feedbackGroupId:this-is-the-feedbackGroupId2])"));
+          is("Rollback error while roleback of addConsultantToAgencyEnquiries "
+              + "(consultantId:12345678-1234-1234-1234-1234567890ab, sessions:"
+              + "[sessionId:123, groupId:this-is-the-group-id-with-feedbackgroup1, "
+              + "feedbackGroupId:this-is-the-feedbackGroupId1]"
+              + "[sessionId:124, groupId:this-is-the-group-id-with-feedbackgroup2, "
+              + "feedbackGroupId:this-is-the-feedbackGroupId2])"));
     }
   }
 
@@ -379,6 +387,68 @@ public class ConsultantAgencyCreatorServiceIT {
     consultant.setTeamConsultant(true);
 
     verify(consultantRepository, times(1)).save(eq(consultant));
+  }
+
+  @Test
+  public void createNewConsultantAgency_Should_ignoreTeamConsultant_When_ConsultingTypeIsU25()
+      throws AgencyServiceHelperException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
+
+    final String consultantId = "12345678-1234-1234-1234-1234567890ab";
+
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
+    createConsultantAgencyDTO.setAgencyId(15L);
+    createConsultantAgencyDTO.setRole("a-valid-role");
+
+    Consultant consultant = this.easyRandom.nextObject(Consultant.class);
+    consultant.setId(consultantId);
+    consultant.setTeamConsultant(true);
+    Optional<Consultant> consultantOptional = Optional.of(consultant);
+    when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
+
+    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+
+    AgencyDTO agencyDTO = new AgencyDTO();
+    agencyDTO.setId(15L);
+    agencyDTO.setTeamAgency(true);
+    when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+
+    Session session1 = new Session();
+    session1.setAgencyId(agencyDTO.getId());
+    session1.setConsultingType(ConsultingType.U25);
+    session1.setGroupId("this-is-the-group-id-without-feedbackgroup1");
+
+    Session session2 = new Session();
+    session2.setAgencyId(agencyDTO.getId());
+    session2.setConsultingType(ConsultingType.U25);
+    session2.setGroupId("this-is-the-group-id-without-feedbackgroup2");
+
+    when(sessionRepository.findByAgencyIdAndStatus(agencyDTO.getId(), SessionStatus.NEW))
+        .thenReturn(emptyList());
+    when(sessionRepository.findByAgencyIdAndStatus(agencyDTO.getId(), SessionStatus.IN_PROGRESS))
+        .thenReturn(Arrays.asList(session1, session2));
+
+    LocalDateTime localDateTime = LocalDateTime.now();
+
+    ConsultantAgency consultantAgency = new ConsultantAgency();
+    consultantAgency.setConsultant(consultant);
+    consultantAgency.setAgencyId(agencyDTO.getId());
+    consultantAgency.setCreateDate(localDateTime);
+    consultantAgency.setUpdateDate(localDateTime);
+
+    when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
+
+    when(keycloakAdminClientHelper
+        .userHasAuthority(consultantId, Authority.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(false);
+    when(keycloakAdminClientHelper.userHasRole(consultantId, UserRole.U25_MAIN_CONSULTANT.name()))
+        .thenReturn(false);
+
+    ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+
+    verify(rocketChatService, times(0))
+        .addUserToGroup(eq(consultant.getRocketChatId()), eq(session1.getGroupId()));
+    verify(rocketChatService, times(0))
+        .addUserToGroup(eq(consultant.getRocketChatId()), eq(session2.getGroupId()));
   }
 
   @Test

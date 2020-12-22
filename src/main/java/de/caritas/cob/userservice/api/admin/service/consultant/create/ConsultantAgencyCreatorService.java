@@ -6,8 +6,6 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -44,7 +42,6 @@ public class ConsultantAgencyCreatorService {
   private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull SessionRepository sessionRepository;
-  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Creates a new {@Link ConsultantAgency} based on the consultantId and {@Link
@@ -189,10 +186,7 @@ public class ConsultantAgencyCreatorService {
   }
 
   private boolean canAddToTeamConsultingSession(Session session, Consultant consultant) {
-    ConsultingTypeSettings consultingTypeSettings = (ConsultingTypeSettings) consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingType());
-
-    return !consultingTypeSettings.getConsultingType().equals(ConsultingType.U25)
+    return !session.getConsultingType().equals(ConsultingType.U25)
         || isMainConsultant(consultant);
   }
 
