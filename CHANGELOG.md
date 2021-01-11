@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.4.1...v2.5.0) (2021-01-11)
+
+
+### Features
+
+* add basic consultant agency admin get endpoint ([c716437](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c716437658bd8a13a0a4a23953d7db0d1a7ff869))
+* add getConsultantAgency Method stump for further development ([bd7ca8e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/bd7ca8eb54e00772569bb07b745bc1c4f8fe09ca))
+* add handling for unknown consultantId ([eec902d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/eec902ddb39d61ab0f8e59bf9a5f11a8754bc668))
+* added api limits ([f0d1498](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f0d1498e34783833b33dd1571ad343658522b3b3))
+* added ConsultantAgencyAdminResultDTOBuilderTest ([830eb1a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/830eb1a329011a0ac52733ad2e865259b53077d1))
+* added ConsultantAgencyAdminServiceIT ([dc45888](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/dc458883fb35a3856d0afaf239a4a5d7e462af10))
+* added create consultant agencies admin spec ([f569965](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f569965377b6426f4e6ecbe8530fe939c0f43f03))
+* added createDate und editDate to ConsultantAgencyAdminResult ([6c674e1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6c674e1a6bd300ceb643a444b2ee8c72aa9b1595))
+* added delete consultant agencies admin spec ([df2f45c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/df2f45c8bc7a8883a426438cfc60687257662f04))
+* added get consultant agencies admin spec ([89a6dd7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/89a6dd7b9b7a9d78aafe0a7c1f3a78980b810df1))
+* added getConsultantAgency test ([540a678](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/540a6782b6a97f6390129e6027b8c37b7044ca62))
+* changed postcode validation for registration ([f5f04ac](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f5f04ac6c1e3b9ae32ba6afdc29a533c3f6dbc9d))
+* correct api definition and hal links ([7ee6c41](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/7ee6c4178955d87c933b2cd82b04dd1a7eb5f238))
+* create needed hal links ([0b050a0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0b050a00fca0369b314c25965a18825b110c9a35))
+* integrate api endpoint ([d9d221b](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d9d221ba24d6f9804819c6360dbd5a433cf173fe))
+* Integrate update endpoint logic ([6ae40ca](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6ae40ca876a3233890c6b8f437bdc891c10d0806))
+* minor changes ([f4931d1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f4931d19d3283114e66312dca67d98f788c74811))
+* optimize keycloak access, remove unused close call ([c936aee](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c936aeeb97795180f9e1f880d7c01e8f86a21b85))
+* provide basic service to create new consultants ([f44a49d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f44a49d80b405578607c191ed88615ad63196f18))
+* provide custom error handling for different cases ([2bb55e4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2bb55e429b61b98ad4a06691b05a16ff5a2f7857))
+* provide new consulting type for men ([78dcfe7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/78dcfe7245f1390386c15a69e0ca95654c0944c0))
+* refactoring ([45bd648](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/45bd64835abc240a0f25633a0f5b5f060dfbae4d))
+* update consultant data changes also in rocket chat ([26ea1ad](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/26ea1ad94f340aa7bf5ea9e2be3a4e4b5551130d))
+
+
+### Bug Fixes
+
+* added MockBean so legacy test are unaffected ([25a9a95](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/25a9a954f134070b3febc7749862cacaf69ec93b))
+* changed type of _embedded ([8b765a6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8b765a6910a10d461129e551160c2600f130ff22))
+* fixed merging mistakes ([b2d7c08](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/b2d7c087db0663694fff8af9e078832b7a94a53e))
+* fixed merging mistakes ([705506d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/705506d92b80c122584611d637786ee19b5620e6))
+* session hibernate ([142551c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/142551c281de243d658e8e566cc6d8307ba4c48f))
+
 ### [2.4.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.4.0...v2.4.1) (2020-12-14)
 
 
