@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -37,15 +37,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateUserFacadeTest {
@@ -53,7 +52,7 @@ public class CreateUserFacadeTest {
   @InjectMocks
   private CreateUserFacade createUserFacade;
   @Mock
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
   @Mock
   private UserService userService;
   @Mock
@@ -70,7 +69,7 @@ public class CreateUserFacadeTest {
   @Test
   public void createUserAndInitializeAccount_Should_ReturnConflict_When_UsernameIsAlreadyExisting() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(false);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(false);
 
     assertThat(createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT).getStatus(),
         is(HttpStatus.CONFLICT));
@@ -79,7 +78,7 @@ public class CreateUserFacadeTest {
   @Test(expected = BadRequestException.class)
   public void createUserAndInitializeAccount_Should_ThrowBadRequest_When_ProvidedConsultingTypeDoesNotMatchAgency() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(false);
 
@@ -87,26 +86,24 @@ public class CreateUserFacadeTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_KeycloakHelperCreateUserThrowsException()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_KeycloakHelperCreateUserThrowsException() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenThrow(new KeycloakException(ERROR));
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_ReturnConflict_When_KeycloakHelperCreateUserReturnsConflict()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_ReturnConflict_When_KeycloakHelperCreateUserReturnsConflict() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_CONFLICT);
 
     assertThat(createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT).getStatus(),
@@ -114,30 +111,28 @@ public class CreateUserFacadeTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_CreateKeycloakUserReturnsNoUserId()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_CreateKeycloakUserReturnsNoUserId() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID);
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_KeycloakHelperUpdateUserRoleReturnsException()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_KeycloakHelperUpdateUserRoleReturnsException() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doThrow(new KeycloakException(ERROR)).when(keycloakAdminClientHelper).updateUserRole(USER_ID);
+    doThrow(new KeycloakException(ERROR)).when(keycloakAdminClientService).updateUserRole(USER_ID);
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
 
@@ -145,18 +140,17 @@ public class CreateUserFacadeTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakPasswordFails()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakPasswordFails() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doNothing().when(keycloakAdminClientHelper).updateUserRole(anyString());
-    doThrow(new KeycloakException(ERROR)).when(keycloakAdminClientHelper)
+    doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
+    doThrow(new KeycloakException(ERROR)).when(keycloakAdminClientService)
         .updatePassword(anyString(), anyString());
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
@@ -165,24 +159,23 @@ public class CreateUserFacadeTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakDummyEmailFails()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakDummyEmailFails() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
     userDTO.setEmail(null);
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(any(), any(ConsultingType.class)))
         .thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doNothing().when(keycloakAdminClientHelper).updateUserRole(anyString());
-    doNothing().when(keycloakAdminClientHelper).updatePassword(anyString(),
+    doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
+    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
         anyString());
-    doThrow(new KeycloakException(ERROR)).when(keycloakAdminClientHelper)
+    doThrow(new KeycloakException(ERROR)).when(keycloakAdminClientService)
         .updateDummyEmail(anyString(), any());
 
     createUserFacade.createUserAndInitializeAccount(userDTO);
@@ -191,40 +184,38 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_UpdateDummyEmail_When_NoEmailProvided()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_UpdateDummyEmail_When_NoEmailProvided() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doNothing().when(keycloakAdminClientHelper).updateUserRole(anyString());
-    doNothing().when(keycloakAdminClientHelper).updatePassword(anyString(),
+    doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
+    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
         anyString());
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT_WITHOUT_EMAIL);
 
-    verify(keycloakAdminClientHelper, times(1)).updateDummyEmail(anyString(),
+    verify(keycloakAdminClientService, times(1)).updateDummyEmail(anyString(),
         any());
     verify(rollbackFacade, times(0)).rollBackUserAccount(any());
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_CreateAccountInMariaDBFails()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_CreateAccountInMariaDBFails() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
-    doNothing().when(keycloakAdminClientHelper).updateUserRole(anyString());
-    doNothing().when(keycloakAdminClientHelper).updatePassword(anyString(),
+    doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
+    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean()))
         .thenThrow(new InternalServerErrorException(ERROR));
@@ -235,18 +226,17 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_LogOutFromRocketChat_When_ConsultingTypeIsKreuzbundAndRocketChatLoginSucceeded()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_LogOutFromRocketChat_When_ConsultingTypeIsKreuzbundAndRocketChatLoginSucceeded() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doNothing().when(keycloakAdminClientHelper).updateUserRole(anyString());
-    doNothing().when(keycloakAdminClientHelper).updatePassword(anyString(),
+    doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
+    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
@@ -256,18 +246,17 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_CallInitializeNewConsultingTypeAndReturnCreated_When_EverythingSucceeded()
-      throws Exception {
+  public void createUserAndInitializeAccount_Should_CallInitializeNewConsultingTypeAndReturnCreated_When_EverythingSucceeded() {
 
-    when(userHelper.isUsernameAvailable(anyString())).thenReturn(true);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         CONSULTING_TYPE_KREUZBUND)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
-    when(keycloakAdminClientHelper.createKeycloakUser(any()))
+    when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doNothing().when(keycloakAdminClientHelper).updateUserRole(anyString());
-    doNothing().when(keycloakAdminClientHelper).updatePassword(anyString(),
+    doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
+    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 

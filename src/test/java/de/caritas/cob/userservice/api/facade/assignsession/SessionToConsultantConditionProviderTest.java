@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
+import java.time.LocalDateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -206,9 +207,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L),
-        new ConsultantAgency(2L, consultant, 2L),
-        new ConsultantAgency(3L, consultant, 3L)
+        new ConsultantAgency(1L, consultant, 1L, LocalDateTime.now(), LocalDateTime.now()),
+        new ConsultantAgency(2L, consultant, 2L, LocalDateTime.now(), LocalDateTime.now()),
+        new ConsultantAgency(3L, consultant, 3L, LocalDateTime.now(), LocalDateTime.now())
     ));
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
@@ -221,9 +222,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnFalse_When_ConsultantAgenciesContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L),
-        new ConsultantAgency(2L, consultant, 99L),
-        new ConsultantAgency(3L, consultant, 3L)
+        new ConsultantAgency(1L, consultant, 1L, LocalDateTime.now(), LocalDateTime.now()),
+        new ConsultantAgency(2L, consultant, 99L, LocalDateTime.now(), LocalDateTime.now()),
+        new ConsultantAgency(3L, consultant, 3L, LocalDateTime.now(), LocalDateTime.now())
     ));
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)

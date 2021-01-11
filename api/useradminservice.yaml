@@ -80,7 +80,7 @@ paths:
           content:
             'application/hal+json':
               schema:
-                $ref: '#/components/schemas/CreateConsultantResponseDTO'
+                $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -108,7 +108,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/GetConsultantResponseDTO'
+                $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         204:
           description: NO CONTENT - consultant with the specific id was not found
         400:
@@ -126,7 +126,7 @@ paths:
       operationId: updateConsultant
       requestBody:
         content:
-          'application/hal+json':
+          'application/json':
             schema:
               $ref: '#/components/schemas/UpdateConsultantDTO'
         required: true
@@ -141,9 +141,9 @@ paths:
         200:
           description: OK - consultant was updated successfully
           content:
-            'application/json':
+            'application/hal+json':
               schema:
-                $ref: '#/components/schemas/UpdateConsultantResponseDTO'
+                $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request
         401:
@@ -272,6 +272,97 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /useradmin/consultant/{consultantId}/agencies:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of consultant-agency connections for a given consultant Id. [Authorization: Role:
+        user-admin]'
+      operationId: getConsultantAgency
+      parameters:
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultantAgencyAdminResultDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
+  /useradmin/consultant/{consultantId}/agency:
+    post:
+      tags:
+        - admin-consultant-agency-controller
+      summary: 'Create a consultant-agency relation [Authorization: Role: user-admin]'
+      operationId: createConsultantAgency
+      parameters:
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateConsultantAgencyDTO'
+        required: true
+      responses:
+        200:
+          description: OK - consultant-agency relation was created successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
+  /useradmin/consultant/{consultantId}/agency/{agencyId}:
+    delete:
+      tags:
+        - admin-consultant-agency-controller
+      summary: 'Delete a consultant-agency relation [Authorization: Role: user-admin]'
+      operationId: deleteConsultantAgency
+      parameters:
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+        - name: agencyId
+          in: path
+          description: Agency Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - consultant-agency relation was deleted successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
 components:
   schemas:
     RootDTO:
@@ -291,7 +382,11 @@ components:
           $ref: '#/components/schemas/HalLink'
         sessions:
           $ref: '#/components/schemas/HalLink'
+        consultantAgencies:
+          $ref: '#/components/schemas/HalLink'
         consultants:
+          $ref: '#/components/schemas/HalLink'
+        createConsultant:
           $ref: '#/components/schemas/HalLink'
 
     HalLink:
@@ -454,15 +549,23 @@ components:
         username:
           type: string
           example: "max.mustermann"
+          minLength: 1
+          maxLength: 255
         firstname:
           type: string
           example: "Max"
+          minLength: 1
+          maxLength: 255
         lastname:
           type: string
           example: "Mustermann"
+          minLength: 1
+          maxLength: 255
         email:
           type: string
           example: "max@mustermann.de"
+          minLength: 1
+          maxLength: 255
         formalLanguage:
           type: boolean
           example: true
@@ -472,6 +575,8 @@ components:
         absenceMessage:
           type: string
           example: "I am absent until..."
+          minLength: 1
+          maxLength: 10000
 
     UpdateConsultantDTO:
       type: object
@@ -485,12 +590,18 @@ components:
         firstname:
           type: string
           example: "Max"
+          minLength: 1
+          maxLength: 255
         lastname:
           type: string
           example: "Mustermann"
+          minLength: 1
+          maxLength: 255
         email:
           type: string
           example: "max@mustermann.de"
+          minLength: 1
+          maxLength: 255
         formalLanguage:
           type: boolean
           example: true
@@ -500,6 +611,8 @@ components:
         absenceMessage:
           type: string
           example: "I am absent until..."
+          minLength: 1
+          maxLength: 10000
 
     ConsultantDTO:
       type: object
@@ -538,29 +651,13 @@ components:
         deleteDate:
           type: string
 
-    CreateConsultantResponseDTO:
+    ConsultantAdminResponseDTO:
       type: object
       properties:
         _embedded:
           $ref: '#/components/schemas/ConsultantDTO'
         _links:
-          $ref: '#/components/schemas/CreateLinks'
-
-    GetConsultantResponseDTO:
-      type: object
-      properties:
-        _embedded:
-          $ref: '#/components/schemas/ConsultantDTO'
-        _links:
-          $ref: '#/components/schemas/GetLinks'
-
-    UpdateConsultantResponseDTO:
-      type: object
-      properties:
-        _embedded:
-          $ref: '#/components/schemas/ConsultantDTO'
-        _links:
-          $ref: '#/components/schemas/UpdateLinks'
+          $ref: '#/components/schemas/ConsultantLinks'
 
     ConsultantSearchResultDTO:
       type: object
@@ -568,11 +665,11 @@ components:
         _embedded:
           type: array
           items:
-            $ref: '#/components/schemas/ConsultantDTO'
+            $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         _links:
           $ref: '#/components/schemas/PaginationLinks'
 
-    CreateLinks:
+    ConsultantLinks:
       type: object
       required:
         - self
@@ -583,29 +680,9 @@ components:
           $ref: '#/components/schemas/HalLink'
         delete:
           $ref: '#/components/schemas/HalLink'
-
-    GetLinks:
-      type: object
-      required:
-        - self
-      properties:
-        self:
+        agencies:
           $ref: '#/components/schemas/HalLink'
-        update:
-          $ref: '#/components/schemas/HalLink'
-        delete:
-          $ref: '#/components/schemas/HalLink'
-
-    UpdateLinks:
-      type: object
-      required:
-        - self
-      properties:
-        self:
-          $ref: '#/components/schemas/HalLink'
-        consultant:
-          $ref: '#/components/schemas/HalLink'
-        delete:
+        addAgency:
           $ref: '#/components/schemas/HalLink'
 
     SessionFilter:
@@ -633,6 +710,53 @@ components:
           type: integer
         absent:
           type: boolean
+
+    ConsultantAgencyAdminResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantAgencyAdminDTO'
+        _links:
+          $ref: '#/components/schemas/ConsultantAgencyAdminResultLinks'
+
+    ConsultantAgencyAdminResultLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+
+    ConsultantAgencyAdminDTO:
+      type: object
+      properties:
+        consultantId:
+          type: string
+          example: "aadc0ecf-c048-4bfc-857d-8c9b2e425500"
+        agencyId:
+          type: integer
+          format: int64
+          example: 15
+        createDate:
+          type: string
+          example: "2019-08-23T08:52:05"
+        updateDate:
+          type: string
+          example: "2019-08-23T08:52:05"
+
+    CreateConsultantAgencyDTO:
+       type: object
+       properties:
+         agencyId:
+           type: integer
+           format: int64
+           example: 15
+         role:
+           type: string
+           minLength: 1
+           maxLength: 255
 
     ViolationDTO:
       type: object

@@ -6,7 +6,7 @@ import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RollbackFacade {
 
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserAgencyService userAgencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull UserService userService;
@@ -52,7 +52,7 @@ public class RollbackFacade {
   private void rollbackKeycloakAndMariaDbAccount(RollbackUserAccountInformation rollbackUser) {
     if (rollbackUser.isRollBackUserAccount()) {
       if (nonNull(rollbackUser.getUserId())) {
-        keycloakAdminClientHelper.rollBackUser(rollbackUser.getUserId());
+        keycloakAdminClientService.rollBackUser(rollbackUser.getUserId());
       }
       if (nonNull(rollbackUser.getUser())) {
         userService.deleteUser(rollbackUser.getUser());

@@ -14,7 +14,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +61,7 @@ public class KeycloakServiceTest {
   @Mock
   private AuthenticatedUser authenticatedUser;
   @Mock
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
 
 
   @Before
@@ -89,11 +89,10 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void changePassword_Should_ReturnFalseAndLogError_WhenKeycloakPasswordChangeFailsWithException()
-      throws Exception {
+  public void changePassword_Should_ReturnFalseAndLogError_WhenKeycloakPasswordChangeFailsWithException() {
 
-    Exception exception = new Exception();
-    doThrow(exception).when(keycloakAdminClientHelper).updatePassword(USER_ID, NEW_PW);
+    Exception exception = new RuntimeException();
+    doThrow(exception).when(keycloakAdminClientService).updatePassword(USER_ID, NEW_PW);
 
     assertFalse(keycloakService.changePassword(USER_ID, NEW_PW));
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());

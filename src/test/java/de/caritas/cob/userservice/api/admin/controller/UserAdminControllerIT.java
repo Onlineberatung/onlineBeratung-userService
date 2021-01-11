@@ -2,20 +2,27 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
-import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
+import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +32,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -36,10 +44,11 @@ public class UserAdminControllerIT {
 
   protected static final String ROOT_PATH = "/useradmin";
   protected static final String SESSION_PATH = ROOT_PATH + "/sessions";
-  protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
+  protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
+  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s/agencies";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
@@ -84,7 +93,7 @@ public class UserAdminControllerIT {
             jsonPath("$._links.sessions.href", endsWith("/useradmin/sessions?page=1&perPage=20")))
         .andExpect(jsonPath("$._links.consultants").exists())
         .andExpect(jsonPath("$._links.consultants.href",
-                endsWith("/useradmin/consultants?page=1&perPage=20")));
+            endsWith("/useradmin/consultants?page=1&perPage=20")));
   }
 
   @Test
@@ -97,6 +106,20 @@ public class UserAdminControllerIT {
 
     verify(this.sessionAdminService, times(1))
         .findSessions(eq(0), eq(1), any());
+  }
+
+  @Test
+  public void getConsultantAgency_Should_returnOk_When_requiredConsultantIdParamIsGiven()
+      throws Exception {
+    String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
+
+    String consultantAgencyPath = String.format(CONSULTANT_AGENCY_PATH, consultantId);
+
+    this.mvc.perform(get(consultantAgencyPath))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .findConsultantAgencies(eq(consultantId));
   }
 
   @Test
@@ -161,6 +184,52 @@ public class UserAdminControllerIT {
 
     this.mvc.perform(get(GET_CONSULTANT_PATH + "consultantId"))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  public void createConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven()
+      throws Exception {
+    CreateConsultantDTO createConsultantDTO =
+        new EasyRandom().nextObject(CreateConsultantDTO.class);
+
+    this.mvc.perform(post(GET_CONSULTANT_PATH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(createConsultantDTO)))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .createNewConsultant(any());
+  }
+
+  @Test
+  public void createConsultant_Should_returnBadRequest_When_requiredCreateConsultantIsMissing()
+      throws Exception {
+    this.mvc.perform(post(GET_CONSULTANT_PATH)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void updateConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven()
+      throws Exception {
+    UpdateConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+
+    this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(updateConsultantDTO)))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .updateConsultant(anyString(), any());
+  }
+
+  @Test
+  public void updateConsultant_Should_returnBadRequest_When_requiredParamsAreMissing()
+      throws Exception {
+    this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
 }

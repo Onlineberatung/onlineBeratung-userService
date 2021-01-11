@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.repository.consultantAgency;
 
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -45,5 +46,11 @@ public class ConsultantAgency {
   @Field
   @FieldBridge(impl = LongBridge.class)
   private Long agencyId;
+
+  @Column(name = "create_date")
+  private LocalDateTime createDate;
+
+  @Column(name = "update_date")
+  private LocalDateTime updateDate;
 
 }

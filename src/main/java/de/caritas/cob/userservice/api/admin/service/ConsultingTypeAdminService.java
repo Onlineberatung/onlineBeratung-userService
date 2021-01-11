@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.admin.service;
 
 import de.caritas.cob.userservice.api.admin.hallink.ConsultingTypePaginationLinksBuilder;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingType.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultingTypeResultDTO;
 import de.caritas.cob.userservice.api.model.PaginationLinks;

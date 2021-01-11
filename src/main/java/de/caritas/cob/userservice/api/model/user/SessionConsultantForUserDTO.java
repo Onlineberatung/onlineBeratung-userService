@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.model.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import de.caritas.cob.userservice.api.model.jsonSerializer.DecodeUsernameJsonSerializer;
+import de.caritas.cob.userservice.api.model.jsonserializer.DecodeUsernameJsonSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
