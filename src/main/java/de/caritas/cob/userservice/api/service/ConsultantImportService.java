@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -386,8 +387,9 @@ public class ConsultantImportService {
     ConsultantAgency consultantAgency = new ConsultantAgency();
     consultantAgency.setAgencyId(agencyId);
     consultantAgency.setConsultant(consultant);
+    consultantAgency.setCreateDate(LocalDateTime.now());
+    consultantAgency.setUpdateDate(LocalDateTime.now());
     return consultantAgency;
-
   }
 
   private ImportRecord getImportRecord(CSVRecord record) {
