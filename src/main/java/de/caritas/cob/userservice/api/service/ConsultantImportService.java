@@ -227,6 +227,7 @@ public class ConsultantImportService {
 
         if (importRecord.getConsultantId() == null) {
           consultant = this.consultantCreatorService.createNewConsultant(importRecord, roles);
+          rocketChatUserId = consultant.getRocketChatId();
 
           logMessage = "Keycloak-ID: " + consultant.getId();
           writeToImportLog(logMessage);
@@ -383,12 +384,12 @@ public class ConsultantImportService {
   }
 
   private ConsultantAgency getConsultantAgency(Consultant consultant, Long agencyId) {
-
     ConsultantAgency consultantAgency = new ConsultantAgency();
     consultantAgency.setAgencyId(agencyId);
     consultantAgency.setConsultant(consultant);
     consultantAgency.setCreateDate(LocalDateTime.now());
     consultantAgency.setUpdateDate(LocalDateTime.now());
+
     return consultantAgency;
   }
 
