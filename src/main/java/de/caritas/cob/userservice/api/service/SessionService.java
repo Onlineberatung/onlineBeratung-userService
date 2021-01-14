@@ -8,12 +8,15 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
@@ -117,9 +120,9 @@ public class SessionService {
   /**
    * Updates the given session by assigning the provided consultant and {@link SessionStatus}.
    *
-   * @param session the session
+   * @param session    the session
    * @param consultant the consultant
-   * @param status s´the status of the session
+   * @param status     s´the status of the session
    */
   public void updateConsultantAndStatusForSession(Session session, Consultant consultant,
       SessionStatus status) throws UpdateSessionException {
@@ -136,7 +139,7 @@ public class SessionService {
   /**
    * Updates the feedback group id of the given {@link Session}.
    *
-   * @param session an optional session
+   * @param session         an optional session
    * @param feedbackGroupId the id of the feedback group
    */
   public void updateFeedbackGroupId(Optional<Session> session, String feedbackGroupId)
@@ -402,8 +405,8 @@ public class SessionService {
    * role.
    *
    * @param rcGroupId Rocket.Chat group id
-   * @param userId Rocket.Chat user id
-   * @param roles user roles
+   * @param userId    Rocket.Chat user id
+   * @param roles     user roles
    * @return {@link Session}
    */
   public Session getSessionByGroupIdAndUserId(String rcGroupId, String userId, Set<String> roles) {
@@ -450,6 +453,61 @@ public class SessionService {
           "Database error while retrieving session by feedbackGroupId %s", feedbackGroupId),
           LogService::logDatabaseError);
     }
+  }
+
+  /**
+   * Returns a {@link ConsultantSessionDTO} for a specific session.
+   *
+   * @param sessionId the session id to fetch
+   * @param consultant the calling consultant
+   * @return {@link ConsultantSessionDTO} entity for the specific session
+   */
+  public ConsultantSessionDTO fetchSessionForConsultant(@NonNull Long sessionId,
+      @NonNull Consultant consultant) {
+
+    Session session = getSession(sessionId)
+        .orElseThrow(
+            () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
+    checkPermissionForConsultantSession(session, consultant);
+    return toConsultantSessionDTO(session);
+  }
+
+  private ConsultantSessionDTO toConsultantSessionDTO(Session session) {
+
+    return new ConsultantSessionDTO()
+        .isTeamSession(session.isTeamSession())
+        .agencyId(session.getAgencyId())
+        .consultingType(session.getConsultingType().getValue())
+        .id(session.getId())
+        .status(session.getStatus().getValue())
+        .askerId(session.getUser().getUserId())
+        .askerRcId(session.getUser().getRcUserId())
+        .feedbackGroupId(session.getFeedbackGroupId())
+        .groupId(session.getGroupId())
+        .monitoring(session.isMonitoring())
+        .postcode(session.getPostcode())
+        .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
+        .consultantRcId(nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null);
+  }
+
+  private void checkPermissionForConsultantSession(Session session, Consultant consultant) {
+
+    if (!isConsultantAssignedToSession(session, consultant)
+        && !(session.isTeamSession() && isConsultantAssignedToSessionAgency(consultant, session))) {
+      throw new ForbiddenException(String
+          .format("No permission for session %s by consultant %s", session.getId(),
+              consultant.getId()));
+    }
+  }
+
+  private boolean isConsultantAssignedToSession(Session session, Consultant consultant) {
+    return nonNull(session.getConsultant())
+        && session.getConsultant().getId().equals(consultant.getId());
+  }
+
+  private boolean isConsultantAssignedToSessionAgency(Consultant consultant, Session session) {
+    return consultant.getConsultantAgencies().stream()
+        .anyMatch(consultantAgency -> consultantAgency.getAgencyId().equals(session.getAgencyId()));
   }
 
 }

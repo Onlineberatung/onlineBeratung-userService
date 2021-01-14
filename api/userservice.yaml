@@ -644,6 +644,40 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/consultants/sessions/{sessionId}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns the session data for the given session id [Authorization: Role:
+            consultant]'
+      operationId: fetchSessionForConsultant
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ConsultantSessionDTO'
+        204:
+          description: successful operation, but no content
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/chat/new:
     post:
       tags:
@@ -1115,6 +1149,59 @@ components:
           type: string
           example: /9j/2wBDAAYEBQYFBAYGBQY
         fileReceived:
+          type: boolean
+          example: true
+
+    ConsultantSessionDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 153918
+        agencyId:
+          type: integer
+          format: int64
+          example: 100
+        consultingType:
+          type: integer
+          example: 1
+        status:
+          type: integer
+          example: 0
+        postcode:
+          type: string
+          minLength: 1
+          maxLength: 5
+          example: 79098
+        groupId:
+          type: string
+          example: xGklslk2JJKK
+          description: Rocket.Chat room ID
+        feedbackGroupId:
+          type: string
+          example: 8ertjlasdKJA
+          description: Rocket.Chat feedback room ID
+        consultantId:
+          type: string
+          example: 926b9777-4eef-443d-925a-4aa534797bd7
+          description: keycloak id of assigned consultant
+        consultantRcId:
+          type: string
+          example: 8ertjlasdKJA
+          description: Rocket.Chat ID of assigned consultant
+        askerId:
+          type: String
+          example: 926b9777-4eef-443d-925a-4aa534797bd7
+          description: asker keycloak id
+        askerRcId:
+          type: string
+          example: 8ertjlasdKJA
+          description: asker Rocket.Chat ID
+        isTeamSession:
+          type: boolean
+          example: false
+        monitoring:
           type: boolean
           example: true
 
