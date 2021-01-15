@@ -17,7 +17,6 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSI
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSION_FOR_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSION_FOR_CONSULTANT_WITHOUT_INVALID_SESSION_ID;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_COUNT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_OFFSET;
