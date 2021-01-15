@@ -729,7 +729,7 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Get the a specific {@link ConsultantSessionDTO} for a consultant.
+   * Get a specific {@link ConsultantSessionDTO} for a consultant.
    *
    * @param sessionId Session id (required)
    * @return {@link ResponseEntity} containing {@link ConsultantSessionDTO}

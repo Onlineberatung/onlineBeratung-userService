@@ -1201,7 +1201,7 @@ components:
         isTeamSession:
           type: boolean
           example: false
-        monitoring:
+        isMonitoring:
           type: boolean
           example: true
 

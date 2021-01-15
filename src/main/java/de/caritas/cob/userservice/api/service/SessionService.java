@@ -250,7 +250,7 @@ public class SessionService {
 
     List<ConsultantSessionResponseDTO> sessionDTOs = null;
 
-    if (sessions != null) {
+    if (nonNull(sessions)) {
       sessionDTOs = sessions.stream().map(this::convertToConsultantSessionResponseDTO)
           .collect(Collectors.toList());
     }
@@ -280,7 +280,7 @@ public class SessionService {
           case NEW:
 
             Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
-            if (consultantAgencies != null) {
+            if (nonNull(consultantAgencies)) {
               List<Long> consultantAgencyIds = consultantAgencies.stream()
                   .map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
 
@@ -307,7 +307,7 @@ public class SessionService {
       throw new InternalServerErrorException("Database error", LogService::logDatabaseError);
     }
 
-    if (sessions != null) {
+    if (nonNull(sessions)) {
       sessionDTOs = sessions.stream().map(this::convertToConsultantSessionResponseDTO)
           .collect(Collectors.toList());
     }
@@ -426,7 +426,7 @@ public class SessionService {
               rcGroupId, userId), LogService::logDatabaseError);
     }
 
-    if (userSessions != null && !userSessions.isEmpty()) {
+    if (nonNull(userSessions) && !userSessions.isEmpty()) {
       if (userSessions.size() == 1) {
         // There should be only one session with this Rocket.Chat group id and user id combination
         return userSessions.get(0);
@@ -484,7 +484,7 @@ public class SessionService {
         .askerRcId(session.getUser().getRcUserId())
         .feedbackGroupId(session.getFeedbackGroupId())
         .groupId(session.getGroupId())
-        .monitoring(session.isMonitoring())
+        .isMonitoring(session.isMonitoring())
         .postcode(session.getPostcode())
         .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
         .consultantRcId(nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null);
