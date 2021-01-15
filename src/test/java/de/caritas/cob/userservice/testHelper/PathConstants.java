@@ -84,4 +84,6 @@ public class PathConstants {
       "/users/chat/" + INVALID_CHAT_ID + "/update";
   public static final String PATH_POST_IMPORT_ASKERS_WITHOUT_SESSION =
       "/users/askersWithoutSession/import";
+  public static final String PATH_GET_SESSION_FOR_CONSULTANT =
+      "/users/consultants/sessions/1";
 }

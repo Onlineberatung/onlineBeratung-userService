@@ -29,6 +29,7 @@ import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
@@ -727,4 +728,18 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
   }
 
+  /**
+   * Get a specific {@link ConsultantSessionDTO} for a consultant.
+   *
+   * @param sessionId Session id (required)
+   * @return {@link ResponseEntity} containing {@link ConsultantSessionDTO}
+   */
+  @Override
+  public ResponseEntity<ConsultantSessionDTO> fetchSessionForConsultant(@PathVariable Long sessionId) {
+
+    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    ConsultantSessionDTO consultantSessionDTO = sessionService
+        .fetchSessionForConsultant(sessionId, consultant);
+    return new ResponseEntity<>(consultantSessionDTO, HttpStatus.OK);
+  }
 }
