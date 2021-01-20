@@ -7,6 +7,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
+import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -44,7 +45,9 @@ public class LiveEventNotificationService {
   private void triggerLiveEvent(String rcGroupId, List<String> userIds) {
     if (isNotEmpty(userIds)) {
       try {
-        this.liveControllerApi.sendLiveEvent(userIds, DIRECTMESSAGE.toString());
+        LiveEventMessage liveEventMessage = new LiveEventMessage()
+            .eventType(DIRECTMESSAGE);
+        this.liveControllerApi.sendLiveEvent(userIds, liveEventMessage);
       } catch (RestClientException e) {
         LogService.logInternalServerError(
             String.format("Unable to trigger live event for rocket chat group id %s",
