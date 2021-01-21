@@ -65,17 +65,17 @@ components:
       type: object
       required:
         - videoCallUrl
-        - usernameConsultant
+        - username
         - rcRoomId
       properties:
         videoCallUrl:
           type: string
           example: video.domain.com/44c7644a-5977-11eb-ae93-0242ac130002
           description: The url of the video server
-        usernameConsultant:
+        username:
           type: string
           example: consultant
-          description: The username of the calling consultant
+          description: The username of the calling user
         rcRoomId:
           type: string
           example: xGklslk2JJKK
