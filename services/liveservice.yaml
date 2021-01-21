@@ -64,11 +64,11 @@ components:
       description: the request DTO for event type videoCallRequest
       type: object
       required:
-        - videoChatUrl
+        - videoCallUrl
         - usernameConsultant
         - rcRoomId
       properties:
-        videoChatUrl:
+        videoCallUrl:
           type: string
           example: video.domain.com/44c7644a-5977-11eb-ae93-0242ac130002
           description: The url of the video server
