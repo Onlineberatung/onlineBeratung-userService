@@ -80,7 +80,7 @@ components:
           type: string
           example: "ag89h3tjkerg94t"
           description: The Rocket.Chat user id of calling user
-        rcRoomId:
+        rcGroupId:
           type: string
           example: "xGklslk2JJKK"
           description: The Rocket.Chat room id of the session
