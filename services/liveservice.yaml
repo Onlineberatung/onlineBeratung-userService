@@ -76,7 +76,11 @@ components:
           type: string
           example: consultant
           description: The username of the calling user
-        rcRoomId:
+        rcUserId:
           type: string
-          example: xGklslk2JJKK
+          example: "ag89h3tjkerg94t"
+          description: The Rocket.Chat user id of calling user
+        rcGroupId:
+          type: string
+          example: "xGklslk2JJKK"
           description: The Rocket.Chat room id of the session
