@@ -15,7 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 
 /**
  * Service for Keycloak REST API calls
@@ -43,14 +43,14 @@ public class KeycloakService {
 
   private RestTemplate restTemplate;
   private AuthenticatedUser authenticatedUser;
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   @Autowired
   public KeycloakService(RestTemplate restTemplate, AuthenticatedUser authenticatedUser,
-      KeycloakAdminClientHelper keycloakAdminClientHelper) {
+      KeycloakAdminClientService keycloakAdminClientService) {
     this.restTemplate = restTemplate;
     this.authenticatedUser = authenticatedUser;
-    this.keycloakAdminClientHelper = keycloakAdminClientHelper;
+    this.keycloakAdminClientService = keycloakAdminClientService;
   }
 
   /**
@@ -63,7 +63,7 @@ public class KeycloakService {
   public boolean changePassword(final String userId, final String password) {
 
     try {
-      keycloakAdminClientHelper.updatePassword(userId, password);
+      keycloakAdminClientService.updatePassword(userId, password);
 
     } catch (Exception ex) {
       LogService.logKeycloakError(

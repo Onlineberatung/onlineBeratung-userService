@@ -55,8 +55,8 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve sessions.
    *
-   * @param page          Number of page where to start in the query (1 = first page) (required)
-   * @param perPage       Number of items which are being returned (required)
+   * @param page Number of page where to start in the query (1 = first page) (required)
+   * @param perPage Number of items which are being returned (required)
    * @param sessionFilter The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
@@ -71,7 +71,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve all consulting types.
    *
-   * @param page    Number of page where to start in the query (1 = first page) (required)
+   * @param page Number of page where to start in the query (1 = first page) (required)
    * @param perPage Number of items which are being returned per page (required)
    * @return an entity containing the consulting types as {@link ConsultingTypeAdminResultDTO}
    */
@@ -138,14 +138,15 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to update a consultant.
    *
-   * @param consultantId        consultant id (required)
+   * @param consultantId consultant id (required)
    * @param updateConsultantDTO (required)
    * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> updateConsultant(
       @PathVariable String consultantId, @Valid UpdateConsultantDTO updateConsultantDTO) {
-    return null;
+    return ResponseEntity
+        .ok(this.consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO));
   }
 
   /**
@@ -164,11 +165,10 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve consultants.
    *
-   * @param page             Number of page where to start in the query (1 &#x3D; first page)
-   *                         (required)
-   * @param perPage          Number of items which are being returned per page (required)
+   * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
+   * @param perPage Number of items which are being returned per page (required)
    * @param consultantFilter The filter parameters to search for. If no filter is set all consultant
-   *                         are being returned. (optional)
+   * are being returned. (optional)
    * @return an entity containing the filtered sessions
    */
   @Override

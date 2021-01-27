@@ -32,7 +32,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,7 +57,7 @@ public class CreateEnquiryMessageFacade {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull RocketChatHelper rocketChatHelper;
   private final Now now;
@@ -281,7 +281,7 @@ public class CreateEnquiryMessageFacade {
       String rcFeedbackGroupId) throws RocketChatAddUserToGroupException {
 
     for (ConsultantAgency agency : agencyList) {
-      if (keycloakAdminClientHelper.userHasAuthority(agency.getConsultant().getId(),
+      if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
           Authority.VIEW_ALL_FEEDBACK_SESSIONS)) {
         rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
             rcFeedbackGroupId);

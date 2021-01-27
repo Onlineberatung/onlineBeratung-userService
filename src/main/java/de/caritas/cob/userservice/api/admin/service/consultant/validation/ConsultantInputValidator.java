@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service.consultant.create;
+package de.caritas.cob.userservice.api.admin.service.consultant.validation;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_VALID;
@@ -36,11 +36,10 @@ public class ConsultantInputValidator {
    * Validates if given {@link CreateConsultantDTO} has set the property absent to true and no
    * therefore required absence message set.
    *
-   * @param createConsultantDTO the input data to check
+   * @param inputValidation the input data to check
    */
-  public void validateCreateConsultantDTO(CreateConsultantDTO createConsultantDTO) {
-    if (isTrue(createConsultantDTO.getAbsent()) && isBlank(
-        createConsultantDTO.getAbsenceMessage())) {
+  public void validateAbsence(AbsenceInputValidation inputValidation) {
+    if (inputValidation.isAbsent() && isBlank(inputValidation.absenceMessage())) {
       throw new CustomValidationHttpStatusException(MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER);
     }
   }

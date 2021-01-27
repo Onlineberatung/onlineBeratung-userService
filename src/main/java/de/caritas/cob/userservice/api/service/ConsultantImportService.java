@@ -20,7 +20,7 @@ import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +56,7 @@ public class ConsultantImportService {
   @Value("${consultant.import.protocol.filename}")
   private String protocolFilename;
 
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull RocketChatService rocketChatService;
@@ -188,7 +189,7 @@ public class ConsultantImportService {
           }
 
           // Check if decoded username is already taken
-          if (!userHelper.isUsernameAvailable(importRecord.getUsername())) {
+          if (!keycloakAdminClientService.isUsernameAvailable(importRecord.getUsername())) {
             writeToImportLog(String.format(
                 "Could not create Keycloak user for old id %s - username or e-mail address is already taken.",
                 importRecord.getIdOld()));
@@ -226,6 +227,7 @@ public class ConsultantImportService {
 
         if (importRecord.getConsultantId() == null) {
           consultant = this.consultantCreatorService.createNewConsultant(importRecord, roles);
+          rocketChatUserId = consultant.getRocketChatId();
 
           logMessage = "Keycloak-ID: " + consultant.getId();
           writeToImportLog(logMessage);
@@ -304,7 +306,7 @@ public class ConsultantImportService {
                   consultingTypeManager.getConsultingTypeSettings(ConsultingType
                       .valueOf(consultantTeamSessionResponseDto.getSession().getConsultingType())
                       .get());
-              boolean isMainConsultant = keycloakAdminClientHelper
+              boolean isMainConsultant = keycloakAdminClientService
                   .userHasAuthority(consultant.getId(), Authority.VIEW_ALL_FEEDBACK_SESSIONS)
                   || roles.contains(UserRole.U25_MAIN_CONSULTANT.name());
 
@@ -382,12 +384,13 @@ public class ConsultantImportService {
   }
 
   private ConsultantAgency getConsultantAgency(Consultant consultant, Long agencyId) {
-
     ConsultantAgency consultantAgency = new ConsultantAgency();
     consultantAgency.setAgencyId(agencyId);
     consultantAgency.setConsultant(consultant);
-    return consultantAgency;
+    consultantAgency.setCreateDate(LocalDateTime.now());
+    consultantAgency.setUpdateDate(LocalDateTime.now());
 
+    return consultantAgency;
   }
 
   private ImportRecord getImportRecord(CSVRecord record) {

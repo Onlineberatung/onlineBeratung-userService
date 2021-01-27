@@ -10,13 +10,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
+import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +30,8 @@ import org.springframework.web.client.RestClientException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LiveEventNotificationServiceTest {
+
+  private static final LiveEventMessage MESSAGE = new LiveEventMessage().eventType(DIRECTMESSAGE);
 
   @InjectMocks
   private LiveEventNotificationService liveEventNotificationService;
@@ -65,23 +68,23 @@ public class LiveEventNotificationServiceTest {
 
     verify(userIdsProviderFactory, times(1)).byRocketChatGroup("valid");
     verify(liveControllerApi, times(1))
-        .sendLiveEvent(eq(asList("1", "2")), eq(DIRECTMESSAGE.toString()));
+        .sendLiveEvent(eq(asList("1", "2")), eq(MESSAGE));
   }
 
   @Test
   public void sendLiveDirectMessageEventToUsers_Should_doNothing_When_rcGroupIdIsEmpty() {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("");
 
-    verifyZeroInteractions(userIdsProviderFactory);
-    verifyZeroInteractions(liveControllerApi);
+    verifyNoInteractions(userIdsProviderFactory);
+    verifyNoInteractions(liveControllerApi);
   }
 
   @Test
   public void sendLiveDirectMessageEventToUsers_Should_doNothing_When_rcGroupIdIsNull() {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers(null);
 
-    verifyZeroInteractions(userIdsProviderFactory);
-    verifyZeroInteractions(liveControllerApi);
+    verifyNoInteractions(userIdsProviderFactory);
+    verifyNoInteractions(liveControllerApi);
   }
 
   @Test
@@ -89,7 +92,7 @@ public class LiveEventNotificationServiceTest {
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
     when(this.bySessionProvider.collectUserIds(any())).thenReturn(singletonList("test"));
     doThrow(new RestClientException("")).when(this.liveControllerApi)
-        .sendLiveEvent(any(), anyString());
+        .sendLiveEvent(any(), any());
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
@@ -107,7 +110,7 @@ public class LiveEventNotificationServiceTest {
 
     List<String> expectedIds = asList("id1", "id3", "id4");
     verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(expectedIds),
-        eq(DIRECTMESSAGE.toString()));
+        eq(MESSAGE));
   }
 
   @Test
@@ -116,7 +119,7 @@ public class LiveEventNotificationServiceTest {
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
-    verifyZeroInteractions(this.liveControllerApi);
+    verifyNoInteractions(this.liveControllerApi);
   }
 
   @Test
@@ -129,7 +132,7 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
     verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(userIds),
-        eq(DIRECTMESSAGE.toString()));
+        eq(MESSAGE));
   }
 
 }

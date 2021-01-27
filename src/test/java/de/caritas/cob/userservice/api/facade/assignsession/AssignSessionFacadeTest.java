@@ -51,7 +51,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.RocketChatRollbackHelper;
 import java.util.Optional;
 import org.junit.Before;
@@ -80,7 +80,7 @@ public class AssignSessionFacadeTest {
   @Mock
   RocketChatService rocketChatService;
   @Mock
-  KeycloakAdminClientHelper keycloakHelper;
+  KeycloakAdminClientService keycloakHelper;
   @Mock
   ConsultantService consultantService;
   @Mock

@@ -31,7 +31,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
 import java.io.File;
 import java.io.FileReader;
@@ -92,7 +92,7 @@ public class AskerImportService {
   private final String REPLACE_KEY_USERNAME = "username";
   private final String DUMMY_POSTCODE = "00000";
 
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
   private UserService userService;
   private SessionService sessionService;
   private RocketChatService rocketChatService;
@@ -109,7 +109,7 @@ public class AskerImportService {
   private RocketChatHelper rocketChatHelper;
 
   @Autowired
-  public AskerImportService(KeycloakAdminClientHelper keycloakHelper, UserService userService,
+  public AskerImportService(KeycloakAdminClientService keycloakHelper, UserService userService,
       SessionService sessionService, RocketChatService rocketChatService,
       SessionDataService sessionDataService, ConsultantService consultantService,
       ConsultantAgencyService consultantAgencyService, MonitoringService monitoringService,
@@ -117,7 +117,7 @@ public class AskerImportService {
       ConsultingTypeManager consultingTypeManager, AgencyServiceHelper agencyServiceHelper,
       UserHelper userHelper, UserAgencyService userAgencyService,
       RocketChatHelper rocketChatHelper) {
-    this.keycloakAdminClientHelper = keycloakHelper;
+    this.keycloakAdminClientService = keycloakHelper;
     this.userService = userService;
     this.sessionService = sessionService;
     this.rocketChatService = rocketChatService;
@@ -187,7 +187,7 @@ public class AskerImportService {
         }
 
         // Check if decoded username is already taken
-        if (!userHelper.isUsernameAvailable(record.getUsername())) {
+        if (!keycloakAdminClientService.isUsernameAvailable(record.getUsername())) {
           writeToImportLog(String.format(
               "Could not create Keycloak user %s - username or e-mail address is already taken.",
               record.getUsername()), protocolFile);
@@ -199,7 +199,7 @@ public class AskerImportService {
 
         // Create Keycloak user
         KeycloakCreateUserResponseDTO response =
-            keycloakAdminClientHelper.createKeycloakUser(userDTO, "", "");
+            keycloakAdminClientService.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
 
         if (response.getResponseDTO() != null && (response.getResponseDTO().getEmailAvailable() < 1
@@ -212,14 +212,14 @@ public class AskerImportService {
 
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
           userDTO.setEmail(userHelper.getDummyEmail(keycloakUserId));
-          keycloakAdminClientHelper.updateDummyEmail(keycloakUserId, userDTO);
+          keycloakAdminClientService.updateDummyEmail(keycloakUserId, userDTO);
         }
 
         // Set Keycloak password
-        keycloakAdminClientHelper.updatePassword(keycloakUserId, record.getPassword());
+        keycloakAdminClientService.updatePassword(keycloakUserId, record.getPassword());
 
         // Set asker/user role
-        keycloakAdminClientHelper.updateUserRole(keycloakUserId);
+        keycloakAdminClientService.updateUserRole(keycloakUserId);
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
@@ -375,7 +375,7 @@ public class AskerImportService {
         UserDTO userDTO = convertAskerToUserDTO(record, agencyDTO.getConsultingType());
 
         // Check if decoded username is already taken
-        if (!userHelper.isUsernameAvailable(record.getUsername())) {
+        if (!keycloakAdminClientService.isUsernameAvailable(record.getUsername())) {
           writeToImportLog(String.format(
               "Could not create Keycloak user %s - username or e-mail address is already taken.",
               record.getUsername()), protocolFile);
@@ -384,7 +384,7 @@ public class AskerImportService {
 
         // Create Keycloak user
         KeycloakCreateUserResponseDTO response =
-            keycloakAdminClientHelper.createKeycloakUser(userDTO, "", "");
+            keycloakAdminClientService.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
 
         if (response.getResponseDTO() != null && (response.getResponseDTO().getEmailAvailable() < 1
@@ -397,14 +397,14 @@ public class AskerImportService {
 
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
           userDTO.setEmail(userHelper.getDummyEmail(keycloakUserId));
-          keycloakAdminClientHelper.updateDummyEmail(keycloakUserId, userDTO);
+          keycloakAdminClientService.updateDummyEmail(keycloakUserId, userDTO);
         }
 
         // Set Keycloak password
-        keycloakAdminClientHelper.updatePassword(keycloakUserId, record.getPassword());
+        keycloakAdminClientService.updatePassword(keycloakUserId, record.getPassword());
 
         // Set asker/user role
-        keycloakAdminClientHelper.updateUserRole(keycloakUserId);
+        keycloakAdminClientService.updateUserRole(keycloakUserId);
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
@@ -475,7 +475,7 @@ public class AskerImportService {
           // Add the assigned consultant and all consultants of the session's agency to the feedback
           // group that have the right to view all feedback sessions
           for (ConsultantAgency agency : agencyList) {
-            if (keycloakAdminClientHelper.userHasAuthority(agency.getConsultant().getId(),
+            if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
                 Authority.VIEW_ALL_FEEDBACK_SESSIONS)
                 || agency.getConsultant().getId().equals(record.getConsultantId())) {
               rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
@@ -517,7 +517,7 @@ public class AskerImportService {
               // If feedback chat enabled add all main consultants and the assigned consultant. If
               // it is a "normal" team session add all consultants.
               if (consultingTypeSettings.isFeedbackChat()) {
-                if (keycloakAdminClientHelper.userHasAuthority(agency.getConsultant().getId(),
+                if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
                     Authority.VIEW_ALL_FEEDBACK_SESSIONS)
                     || agency.getConsultant().getId().equals(record.getConsultantId())) {
                   rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),

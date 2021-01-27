@@ -1,24 +1,27 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.authorization.Authorities;
 import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.aspect.KeycloakAdminClientLogout;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -26,7 +29,6 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.ErrorRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,62 +38,26 @@ import org.springframework.stereotype.Service;
  * Admin Client.
  */
 @Service
-public class KeycloakAdminClientHelper {
-
-  @Value("${keycloak.auth-server-url}")
-  private String KEYCLOAK_SERVER_URL;
-
-  @Value("${keycloak.realm}")
-  private String KEYCLOAK_REALM;
-
-  @Value("${keycloakService.admin.username}")
-  private String KEYCLOAK_USERNAME;
-
-  @Value("${keycloakService.admin.password}")
-  private String KEYCLOAK_PASSWORD;
-
-  @Value("${keycloakService.admin.clientId}")
-  private String KEYCLOAK_CLIENT_ID;
+@RequiredArgsConstructor
+public class KeycloakAdminClientService {
 
   @Value("${keycloakService.user.role}")
-  private String KEYCLOAK_USER_ROLE;
+  private String keycloakUserRole;
 
   @Value("${keycloakService.techuser.id}")
-  private String KEYCLOAK_TECH_USER_ID;
-
-  @Value("${api.error.userRegistered}")
-  private String ERROR_USER_REGISTERED;
+  private String keycloakTechUserId;
 
   @Value("${api.error.keycloakError}")
-  private String KEYCLOAK_ERROR;
+  private String keycloakError;
 
   @Value("${keycloakApi.error.username}")
-  private String KEYCLOAK_ERROR_USERNAME;
+  private String keycloakErrorUsername;
 
   @Value("${keycloakApi.error.email}")
-  private String KEYCLOAK_ERROR_EMAIL;
+  private String keycloakErrorEmail;
 
-  @Value("${user.password.invalid}")
-  private String PASSWORD_INVALID;
-
-  @Value("${api.error.emailConflict}")
-  private String EMAIL_CONFLICT;
-
-  @Value("${api.error.usernameConflict}")
-  private String USERNAME_CONFLICT;
-
-  private Keycloak keycloakInstance;
-
-  @Autowired
-  private UserHelper userHelper;
-
-  private Keycloak getInstance() {
-
-    this.keycloakInstance = Keycloak.getInstance(KEYCLOAK_SERVER_URL, KEYCLOAK_REALM,
-        KEYCLOAK_USERNAME, KEYCLOAK_PASSWORD, KEYCLOAK_CLIENT_ID);
-
-    return this.keycloakInstance;
-  }
+  private final @NonNull UserHelper userHelper;
+  private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
 
   /**
    * Creates a user in Keycloak and returns its Keycloak user ID.
@@ -99,7 +65,7 @@ public class KeycloakAdminClientHelper {
    * @param user {@link UserDTO}
    * @return {@link KeycloakCreateUserResponseDTO}
    */
-  public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user) throws Exception {
+  public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user) {
     return createKeycloakUser(user, null, null);
   }
 
@@ -111,11 +77,11 @@ public class KeycloakAdminClientHelper {
    * @param lastName  last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
-  @KeycloakAdminClientLogout
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
       final String firstName, final String lastName) {
     UserRepresentation kcUser = getUserRepresentation(user, firstName, lastName);
-    Response response = getInstance().realm(KEYCLOAK_REALM).users().create(kcUser);
+    Response response = this.keycloakAdminClientAccessor.getUsersResource()
+        .create(kcUser);
     KeycloakCreateUserResponseDTO keycloakResponse = new KeycloakCreateUserResponseDTO();
     int usernameAvailable = 1;
     int emailAvailable = 1;
@@ -128,19 +94,19 @@ public class KeycloakAdminClientHelper {
 
       // Check whether username and/or e-mail address are already taken and set the appropriate
       // error codes and messages
-      if (errorMsg.equals(KEYCLOAK_ERROR_EMAIL)) {
+      if (errorMsg.equals(keycloakErrorEmail)) {
         // Only e-mail address is already taken
         emailAvailable = 0;
-      } else if (errorMsg.equals(KEYCLOAK_ERROR_USERNAME)) {
+      } else if (errorMsg.equals(keycloakErrorUsername)) {
         // Username is taken
         usernameAvailable = 0;
 
-        if (!isEmailAvailable(user.getEmail())) {
+        if (isEmailNotAvailable(user.getEmail())) {
           // and e-mail address is taken also
           emailAvailable = 0;
         }
       } else {
-        throw new KeycloakException(KEYCLOAK_ERROR);
+        throw new KeycloakException(keycloakError);
       }
     }
 
@@ -153,12 +119,30 @@ public class KeycloakAdminClientHelper {
     return keycloakResponse;
   }
 
-  @KeycloakAdminClientLogout
+  /**
+   * Returns true if the decoded username does not exist in Keycloak yet or false if it already
+   * exists.
+   *
+   * @param username (decoded or encoded)
+   * @return true if does not exist, else false
+   */
+  public boolean isUsernameAvailable(String username) {
+    List<UserRepresentation> keycloakUserList = findByUsername(userHelper.decodeUsername(username));
+    for (UserRepresentation userRep : keycloakUserList) {
+      if (userRep.getUsername().equalsIgnoreCase(userHelper.decodeUsername(username))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   @Synchronized
-  private boolean isEmailAvailable(String email) {
+  private boolean isEmailNotAvailable(String email) {
     // Get user resource and change e-mail address of technical user
     UserResource techUserResource =
-        getInstance().realm(KEYCLOAK_REALM).users().get(KEYCLOAK_TECH_USER_ID);
+        this.keycloakAdminClientAccessor.getUsersResource()
+            .get(keycloakTechUserId);
     UserRepresentation userRepresentation = techUserResource.toRepresentation();
     String originalEmail = userRepresentation.getEmail();
     userRepresentation.setEmail(email);
@@ -167,14 +151,14 @@ public class KeycloakAdminClientHelper {
       techUserResource.update(userRepresentation);
     } catch (Exception e) {
       LogService.logDebug(String.format("E-Mail address already existing in Keycloak: %s", email));
-      return false;
+      return true;
     }
 
     // Reset technical user
     userRepresentation.setEmail(originalEmail);
     techUserResource.update(userRepresentation);
 
-    return true;
+    return false;
   }
 
   private CredentialRepresentation getCredentialRepresentation(final String password) {
@@ -192,10 +176,10 @@ public class KeycloakAdminClientHelper {
     kcUser.setUsername(user.getUsername());
     kcUser.setEmail(user.getEmail());
     kcUser.setEmailVerified(true);
-    if (firstName != null) {
+    if (nonNull(firstName)) {
       kcUser.setFirstName(firstName);
     }
-    if (lastName != null) {
+    if (nonNull(lastName)) {
       kcUser.setLastName(lastName);
     }
     kcUser.setEnabled(true);
@@ -204,7 +188,7 @@ public class KeycloakAdminClientHelper {
   }
 
   private String getCreatedUserId(final URI location) {
-    if (location != null) {
+    if (nonNull(location)) {
       String path = location.getPath();
       return path.substring(path.lastIndexOf('/') + 1);
     }
@@ -217,9 +201,8 @@ public class KeycloakAdminClientHelper {
    *
    * @param userId Keycloak user ID
    */
-  @KeycloakAdminClientLogout
   public void updateUserRole(final String userId) {
-    updateRole(userId, KEYCLOAK_USER_ROLE);
+    updateRole(userId, keycloakUserRole);
   }
 
   /**
@@ -228,10 +211,9 @@ public class KeycloakAdminClientHelper {
    * @param userId   Keycloak user ID
    * @param roleName Keycloak role name
    */
-  @KeycloakAdminClientLogout
   public void updateRole(final String userId, final String roleName) {
     // Get realm and user resources
-    RealmResource realmResource = getInstance().realm(KEYCLOAK_REALM);
+    RealmResource realmResource = this.keycloakAdminClientAccessor.getRealmResource();
     UsersResource userRessource = realmResource.users();
     UserResource user = userRessource.get(userId);
     boolean isRoleUpdated = false;
@@ -242,12 +224,12 @@ public class KeycloakAdminClientHelper {
       roleRepresentation.setAttributes(new LinkedHashMap<>());
     }
     user.roles().realmLevel()
-        .add(Arrays.asList(roleRepresentation));
+        .add(Collections.singletonList(roleRepresentation));
 
     // Check if role has been assigned successfully
     List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
     for (RoleRepresentation role : userRoles) {
-      if (role.toString().toUpperCase().equals(roleName.toUpperCase())) {
+      if (role.toString().equalsIgnoreCase(roleName)) {
         LogService.logDebug(String.format("Added role \"user\" to %s", userId));
         isRoleUpdated = true;
       }
@@ -264,10 +246,10 @@ public class KeycloakAdminClientHelper {
    * @param userId   Keycloak user ID
    * @param password user password
    */
-  @KeycloakAdminClientLogout
   public void updatePassword(final String userId, final String password) {
     CredentialRepresentation newCredentials = getCredentialRepresentation(password);
-    UserResource userResource = getInstance().realm(KEYCLOAK_REALM).users().get(userId);
+    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId);
 
     userResource.resetPassword(newCredentials);
     LogService.logDebug(String.format("Updated user credentials for %s", userId));
@@ -281,11 +263,11 @@ public class KeycloakAdminClientHelper {
    * @param user   {@link UserDTO}
    * @return the (dummy) email address
    */
-  @KeycloakAdminClientLogout
   public String updateDummyEmail(final String userId, UserDTO user) {
     String dummyEmail = userHelper.getDummyEmail(userId);
     user.setEmail(dummyEmail);
-    UserResource userResource = getInstance().realm(KEYCLOAK_REALM).users().get(userId);
+    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId);
 
     userResource.update(getUserRepresentation(user, null, null));
     LogService.logDebug(String.format("Set email dummy for %s to %s", userId, dummyEmail));
@@ -294,14 +276,33 @@ public class KeycloakAdminClientHelper {
   }
 
   /**
+   * Updates first name, last name and email address of user wth given id in keycloak.
+   *
+   * @param userId Keycloak user ID
+   * @param userDTO {@link UserDTO}
+   * @param firstName the new first name
+   * @param lastName the new last name
+   */
+  public void updateUserData(final String userId, UserDTO userDTO,
+      String firstName, String lastName) {
+    if (isEmailNotAvailable(userDTO.getEmail())) {
+      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
+    }
+    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId);
+    userResource.update(getUserRepresentation(userDTO, firstName, lastName));
+  }
+
+  /**
    * Delete the user if something went wrong during the registration process.
    *
    * @param userId Keycloak user ID
    */
-  @KeycloakAdminClientLogout
   public void rollBackUser(String userId) {
     try {
-      getInstance().realm(KEYCLOAK_REALM).users().get(userId).remove();
+      this.keycloakAdminClientAccessor.getUsersResource()
+          .get(userId)
+          .remove();
       LogService.logDebug(String.format("User %s has been removed due to rollback", userId));
     } catch (Exception e) {
       LogService
@@ -312,33 +313,24 @@ public class KeycloakAdminClientHelper {
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId    Keycloak user ID
+   * @param userId Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */
-  @KeycloakAdminClientLogout
   public boolean userHasAuthority(String userId, String authority) {
-
-    List<RoleRepresentation> userRoles = null;
-
     try {
-      userRoles = getUserRoles(userId);
-
+      return getUserRoles(userId).stream()
+          .map(role -> UserRole.getRoleByValue(role.getName()))
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .map(Authorities::getAuthoritiesByUserRole)
+          .anyMatch(currentAuthority -> currentAuthority.contains(authority));
     } catch (Exception ex) {
       String error = String.format("Could not get roles for user id %s", userId);
       LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
-
-    for (RoleRepresentation role : userRoles) {
-      Optional<UserRole> userRoleOptional = UserRole.getRoleByValue(role.getName());
-      if (userRoleOptional.isPresent()) {
-        List<String> authorities = Authorities.getAuthoritiesByUserRole(userRoleOptional.get());
-        if (authorities.contains(authority)) {
-          return true;
-        }
-      }
-    }
+  }
 
     return false;
   }
@@ -378,7 +370,11 @@ public class KeycloakAdminClientHelper {
 
   @KeycloakAdminClientLogout
   private List<RoleRepresentation> getUserRoles(String userId) {
-    return getInstance().realm(KEYCLOAK_REALM).users().get(userId).roles().realmLevel().listAll();
+    return this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId)
+        .roles()
+        .realmLevel()
+        .listAll();
   }
 
   /**
@@ -388,9 +384,9 @@ public class KeycloakAdminClientHelper {
    * @param username Keycloak user name
    * @return {@link List} of found users
    */
-  @KeycloakAdminClientLogout
   public List<UserRepresentation> findByUsername(String username) {
-    return getInstance().realm(KEYCLOAK_REALM).users().search(username);
+    return this.keycloakAdminClientAccessor.getUsersResource()
+        .search(username);
   }
 
   /**
@@ -399,27 +395,8 @@ public class KeycloakAdminClientHelper {
    * @param sessionId Keycloak session ID
    */
   public void closeSession(String sessionId) {
-    getInstance().realm(KEYCLOAK_REALM).deleteSession(sessionId);
+    this.keycloakAdminClientAccessor.getRealmResource()
+        .deleteSession(sessionId);
   }
 
-  /**
-   * Closes the Keycloak Admin CLI instance.
-   */
-  public void closeInstance() {
-    /**
-     * The Keycloak.close() method does actually only close the connection and does NOT delete the
-     * session at the moment. There is already an issue for this. Will be implemented in a "future"
-     * version: https://issues.jboss.org/browse/KEYCLOAK-7895
-     *
-     * TODO
-     *
-     * -> Thus this close() functionality is commented out (to only maintain one open session at
-     * once).
-     *
-     */
-    // if (this.keycloakInstance != null && !this.keycloakInstance.isClosed()) {
-    // this.keycloakInstance.close();
-    // this.keycloakInstance = null;
-    // }
-  }
 }
