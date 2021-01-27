@@ -235,7 +235,7 @@ public class UserAdminControllerIT {
   }
 
   @Test
-  public void createConsultantAgency_Should_returnOk_When_requiredParamsAreGiven()
+  public void createConsultantAgency_Should_returnCreated_When_requiredParamsAreGiven()
       throws Exception {
     String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
@@ -243,12 +243,12 @@ public class UserAdminControllerIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRole("");
+    createConsultantAgencyDTO.setRole("role");
 
     this.mvc.perform(post(consultantAgencyPath)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(createConsultantAgencyDTO)))
-        .andExpect(status().isOk());
+        .andExpect(status().isCreated());
 
     verify(this.consultantAdminFacade, times(1))
         .createNewConsultantAgency(eq(consultantId), eq(createConsultantAgencyDTO));

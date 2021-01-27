@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -23,7 +23,7 @@ public class ConsultantAgencyAdminService {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull ConsultantAgencyCreatorService consultantAgencyCreatorService;
+  private final @NonNull ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   /**
    * Returns all Agencies for the given consultantId.
@@ -48,17 +48,16 @@ public class ConsultantAgencyAdminService {
   }
 
   /**
-   * Creates a new {@Link ConsultantAgency} based on the consultantId and {@Link
+   * Creates a new {@link ConsultantAgency} based on the consultantId and {@link
    * CreateConsultantAgencyDTO} input.
    *
    * @param consultantId              the consultant to use
    * @param createConsultantAgencyDTO the agencyId and role
-   * @return the generated and persisted {@link ConsultantAgency} representation as {@link
    * ConsultantAgencyAdminResultDTO}
    */
-  public ConsultantAgencyAdminResultDTO createNewConsultantAgency(String consultantId,
+  public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    return consultantAgencyCreatorService
+    consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 }

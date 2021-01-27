@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,8 +56,8 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve sessions.
    *
-   * @param page Number of page where to start in the query (1 = first page) (required)
-   * @param perPage Number of items which are being returned (required)
+   * @param page          Number of page where to start in the query (1 = first page) (required)
+   * @param perPage       Number of items which are being returned (required)
    * @param sessionFilter The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
@@ -71,7 +72,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve all consulting types.
    *
-   * @param page Number of page where to start in the query (1 = first page) (required)
+   * @param page    Number of page where to start in the query (1 = first page) (required)
    * @param perPage Number of items which are being returned per page (required)
    * @return an entity containing the consulting types as {@link ConsultingTypeAdminResultDTO}
    */
@@ -119,10 +120,10 @@ public class UserAdminController implements UseradminApi {
    * condition (status code 500)
    */
   @Override
-  public ResponseEntity<ConsultantAgencyAdminResultDTO> createConsultantAgency(String consultantId,
+  public ResponseEntity<Void> createConsultantAgency(String consultantId,
       @Valid CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    return ResponseEntity.ok(this.consultantAdminFacade
-        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO));
+    this.consultantAdminFacade.createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   /**
@@ -138,7 +139,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to update a consultant.
    *
-   * @param consultantId consultant id (required)
+   * @param consultantId        consultant id (required)
    * @param updateConsultantDTO (required)
    * @return {@link ConsultantAdminResponseDTO}
    */
@@ -165,10 +166,11 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve consultants.
    *
-   * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
-   * @param perPage Number of items which are being returned per page (required)
+   * @param page             Number of page where to start in the query (1 &#x3D; first page)
+   *                         (required)
+   * @param perPage          Number of items which are being returned per page (required)
    * @param consultantFilter The filter parameters to search for. If no filter is set all consultant
-   * are being returned. (optional)
+   *                         are being returned. (optional)
    * @return an entity containing the filtered sessions
    */
   @Override

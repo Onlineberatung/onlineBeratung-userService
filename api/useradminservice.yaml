@@ -321,11 +321,7 @@ paths:
         required: true
       responses:
         201:
-          description: CREATED - consultant agency was created successfully
-          content:
-            'application/hal+json':
-              schema:
-                $ref: '#/components/schemas/ConsultantAgencyAdminResultDTO'
+          description: CREATED - consultant-agency relation was created successfully
         400:
           description: BAD REQUEST - invalid/incomplete request
         401:
@@ -752,6 +748,9 @@ components:
 
     CreateConsultantAgencyDTO:
        type: object
+       required:
+         - agencyId
+         - role
        properties:
          agencyId:
            type: integer

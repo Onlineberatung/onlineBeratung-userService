@@ -332,9 +332,6 @@ public class KeycloakAdminClientService {
     }
   }
 
-    return false;
-  }
-
   /**
    * Returns true if the given user has the provided role.
    *
@@ -342,7 +339,6 @@ public class KeycloakAdminClientService {
    * @param userRole Keycloak role
    * @return true if user hast provided role
    */
-  @KeycloakAdminClientLogout
   public boolean userHasRole(String userId, String userRole) {
 
     List<RoleRepresentation> userRoles = null;
@@ -368,7 +364,6 @@ public class KeycloakAdminClientService {
     return false;
   }
 
-  @KeycloakAdminClientLogout
   private List<RoleRepresentation> getUserRoles(String userId) {
     return this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId)

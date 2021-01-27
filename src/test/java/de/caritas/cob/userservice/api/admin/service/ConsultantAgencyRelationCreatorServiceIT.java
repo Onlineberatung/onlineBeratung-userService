@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
@@ -39,7 +39,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,10 +59,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantAgencyCreatorServiceIT {
+public class ConsultantAgencyRelationCreatorServiceIT {
 
   @Autowired
-  private ConsultantAgencyCreatorService consultantAgencyCreatorService;
+  private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -73,7 +73,7 @@ public class ConsultantAgencyCreatorServiceIT {
   private ConsultantRepository consultantRepository;
 
   @MockBean
-  private KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   @MockBean
   private ConsultantAgencyService consultantAgencyService;
@@ -99,7 +99,7 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -128,7 +128,7 @@ public class ConsultantAgencyCreatorServiceIT {
 
     when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
 
-    ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+    consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
 
     verify(rocketChatService, times(1)).addTechnicalUserToGroup(eq(session.getGroupId()));
@@ -161,7 +161,7 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -191,7 +191,7 @@ public class ConsultantAgencyCreatorServiceIT {
         .when(rocketChatService).addUserToGroup(consultant.getRocketChatId(), session.getGroupId());
 
     try {
-      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+      consultantAgencyRelationCreatorService
           .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
       fail("There was no BadRequestException");
     } catch (Exception e) {
@@ -219,7 +219,7 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -258,7 +258,7 @@ public class ConsultantAgencyCreatorServiceIT {
         .addUserToGroup(consultant.getRocketChatId(), session2.getFeedbackGroupId());
 
     try {
-      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+      consultantAgencyRelationCreatorService
           .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
       fail("There was no BadRequestException");
     } catch (Exception e) {
@@ -287,7 +287,7 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -330,7 +330,7 @@ public class ConsultantAgencyCreatorServiceIT {
         .removeUserFromGroup(consultant.getRocketChatId(), session2.getFeedbackGroupId());
 
     try {
-      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+      consultantAgencyRelationCreatorService
           .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
       fail("There was no BadRequestException");
     } catch (Exception e) {
@@ -360,7 +360,7 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -381,7 +381,7 @@ public class ConsultantAgencyCreatorServiceIT {
 
     when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
 
-    consultantAgencyCreatorService
+    consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
 
     consultant.setTeamConsultant(true);
@@ -405,7 +405,7 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -437,12 +437,12 @@ public class ConsultantAgencyCreatorServiceIT {
 
     when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
 
-    when(keycloakAdminClientHelper
+    when(keycloakAdminClientService
         .userHasAuthority(consultantId, Authority.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(false);
-    when(keycloakAdminClientHelper.userHasRole(consultantId, UserRole.U25_MAIN_CONSULTANT.name()))
+    when(keycloakAdminClientService.userHasRole(consultantId, UserRole.U25_MAIN_CONSULTANT.name()))
         .thenReturn(false);
 
-    ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+    consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
 
     verify(rocketChatService, times(0))
@@ -465,7 +465,7 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -474,29 +474,10 @@ public class ConsultantAgencyCreatorServiceIT {
 
     when(sessionRepository.findByAgencyIdAndStatus(15L, SessionStatus.NEW)).thenReturn(emptyList());
 
-    LocalDateTime localDateTime = LocalDateTime.now();
-
-    ConsultantAgency consultantAgency = new ConsultantAgency();
-    consultantAgency.setConsultant(consultant);
-    consultantAgency.setAgencyId(agencyDTO.getId());
-    consultantAgency.setCreateDate(localDateTime);
-    consultantAgency.setUpdateDate(localDateTime);
-
-    when(consultantAgencyService.saveConsultantAgency(any())).thenReturn(consultantAgency);
-
-    ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+    consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
 
-    assertThat(newConsultantAgency, notNullValue());
-    assertThat(newConsultantAgency.getEmbedded(), hasSize(1));
-
-    ConsultantAgencyAdminDTO consultantAgencyAdminDTO = newConsultantAgency.getEmbedded().iterator()
-        .next();
-
-    assertThat(consultantAgencyAdminDTO.getConsultantId(), equalTo(consultant.getId()));
-    assertThat(consultantAgencyAdminDTO.getAgencyId(), equalTo(agencyDTO.getId()));
-    assertThat(consultantAgencyAdminDTO.getCreateDate(), equalTo(localDateTime.toString()));
-    assertThat(consultantAgencyAdminDTO.getUpdateDate(), equalTo(localDateTime.toString()));
+    verify(this.consultantAgencyService, times(1)).saveConsultantAgency(any());
   }
 
   @Test
@@ -513,8 +494,7 @@ public class ConsultantAgencyCreatorServiceIT {
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
     try {
-
-      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+      consultantAgencyRelationCreatorService
           .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
       fail("There was no BadRequestException");
     } catch (Exception e) {
@@ -537,11 +517,11 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "not-a-valid-role")).thenReturn(false);
+    when(keycloakAdminClientService.userHasRole(consultantId, "not-a-valid-role"))
+        .thenReturn(false);
 
     try {
-
-      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+      consultantAgencyRelationCreatorService
           .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
       fail("There was no BadRequestException");
     } catch (Exception e) {
@@ -565,13 +545,12 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(null);
 
     try {
-
-      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+      consultantAgencyRelationCreatorService
           .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
       fail("There was no BadRequestException");
     } catch (Exception e) {
@@ -594,15 +573,14 @@ public class ConsultantAgencyCreatorServiceIT {
     Optional<Consultant> consultantOptional = Optional.of(consultant);
     when(consultantRepository.findById(consultantId)).thenReturn(consultantOptional);
 
-    when(keycloakAdminClientHelper.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
+    when(keycloakAdminClientService.userHasRole(consultantId, "a-valid-role")).thenReturn(true);
 
     AgencyServiceHelperException agencyServiceHelperException = new AgencyServiceHelperException(
         new Exception());
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenThrow(agencyServiceHelperException);
 
     try {
-
-      ConsultantAgencyAdminResultDTO newConsultantAgency = consultantAgencyCreatorService
+      consultantAgencyRelationCreatorService
           .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
       fail("There was no InternalServerErrorException");
     } catch (Exception e) {

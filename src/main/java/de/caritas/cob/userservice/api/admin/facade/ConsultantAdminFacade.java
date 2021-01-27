@@ -43,8 +43,8 @@ public class ConsultantAdminFacade {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page the current requested page
-   * @param perPage the amount of items in one page
+   * @param page             the current requested page
+   * @param perPage          the amount of items in one page
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
@@ -67,7 +67,7 @@ public class ConsultantAdminFacade {
   /**
    * Updates a {@link Consultant} based on the {@link UpdateConsultantDTO} input.
    *
-   * @param consultantId the id of the consultant to update
+   * @param consultantId        the id of the consultant to update
    * @param updateConsultantDTO the input data used for {@link Consultant} update
    * @return the generated and persisted {@link Consultant} representation as {@link
    * ConsultantAdminResponseDTO}
@@ -88,17 +88,15 @@ public class ConsultantAdminFacade {
   }
 
   /**
-   * Creates a new {@Link ConsultantAgency} based on the consultantId and {@Link
+   * Creates a new {@link ConsultantAgency} based on the consultantId and {@link
    * CreateConsultantAgencyDTO} input.
    *
    * @param consultantId              the consultant to use
-   * @param createConsultantAgencyDTO the agencyId and role
-   * @return the generated and persisted {@link ConsultantAgency} representation as {@link
-   * ConsultantAgencyAdminResultDTO}
+   * @param createConsultantAgencyDTO the agencyId and role ConsultantAgencyAdminResultDTO}
    */
-  public ConsultantAgencyAdminResultDTO createNewConsultantAgency(String consultantId,
+  public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    return this.consultantAgencyAdminService
+    this.consultantAgencyAdminService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 }

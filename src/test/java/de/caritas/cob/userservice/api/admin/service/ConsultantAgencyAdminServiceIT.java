@@ -10,7 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
@@ -34,7 +34,7 @@ public class ConsultantAgencyAdminServiceIT {
   private ConsultantAgencyAdminService consultantAgencyAdminService;
 
   @MockBean
-  private ConsultantAgencyCreatorService consultantAgencyCreatorService;
+  private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   @Test
   public void findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {
@@ -78,7 +78,7 @@ public class ConsultantAgencyAdminServiceIT {
 
     this.consultantAgencyAdminService.createNewConsultantAgency(null, null);
 
-    verify(this.consultantAgencyCreatorService, times(1)).createNewConsultantAgency(null, null);
+    verify(this.consultantAgencyRelationCreatorService, times(1)).createNewConsultantAgency(null, null);
 
   }
 

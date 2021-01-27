@@ -1,13 +1,11 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
-import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminResultDTOBuilder;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -20,9 +18,8 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientHelper;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
@@ -34,32 +31,31 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class ConsultantAgencyCreatorService {
+public class ConsultantAgencyRelationCreatorService {
 
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
-  private final @NonNull KeycloakAdminClientHelper keycloakAdminClientHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull SessionRepository sessionRepository;
 
   /**
-   * Creates a new {@Link ConsultantAgency} based on the consultantId and {@Link
+   * Creates a new {@link ConsultantAgency} based on the consultantId and {@link
    * CreateConsultantAgencyDTO} input.
    *
    * @param consultantId              the consultant to use
    * @param createConsultantAgencyDTO the agencyId and role
-   * @return the generated and persisted {@link ConsultantAgency} representation as {@link
    * ConsultantAgencyAdminResultDTO}
    */
-  public ConsultantAgencyAdminResultDTO createNewConsultantAgency(String consultantId,
+  public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
     CreateConsultantAgencyDTOInputAdapter adapter = new CreateConsultantAgencyDTOInputAdapter(
         consultantId, createConsultantAgencyDTO);
-    return createNewConsultantAgency(adapter);
+    createNewConsultantAgency(adapter);
   }
 
-  private ConsultantAgencyAdminResultDTO createNewConsultantAgency(
+  private void createNewConsultantAgency(
       ConsultantAgencyCreationInput input) {
     Consultant consultant = this.getConsultant(input.getConsultantId());
 
@@ -80,14 +76,7 @@ public class ConsultantAgencyCreatorService {
       }
     }
 
-    ConsultantAgency consultantAgency = consultantAgencyService
-        .saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
-
-    return ConsultantAgencyAdminResultDTOBuilder
-        .getInstance()
-        .withConsultantId(consultant.getId())
-        .withResult(Collections.singletonList(consultantAgency))
-        .build();
+    consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
   }
 
   private Consultant getConsultant(String consultantId) {
@@ -100,7 +89,7 @@ public class ConsultantAgencyCreatorService {
   }
 
   private void checkConsultantHasRole(ConsultantAgencyCreationInput input) {
-    if (!keycloakAdminClientHelper.userHasRole(input.getConsultantId(), input.getRole())) {
+    if (!keycloakAdminClientService.userHasRole(input.getConsultantId(), input.getRole())) {
       throw new BadRequestException(
           String.format("Consultant with id %s does not have the role %s", input.getConsultantId(),
               input.getRole()));
@@ -191,9 +180,9 @@ public class ConsultantAgencyCreatorService {
   }
 
   private boolean isMainConsultant(Consultant consultant) {
-    return keycloakAdminClientHelper
+    return keycloakAdminClientService
         .userHasAuthority(consultant.getId(), Authority.VIEW_ALL_FEEDBACK_SESSIONS)
-        || keycloakAdminClientHelper
+        || keycloakAdminClientService
         .userHasRole(consultant.getId(), UserRole.U25_MAIN_CONSULTANT.name());
   }
 
