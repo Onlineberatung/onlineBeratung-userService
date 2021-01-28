@@ -165,8 +165,9 @@ public class ConsultantSessionListService {
 
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      updateSessionWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
-          consultantSessionResponseDTO, session, groupId);
+      new AvailableLastMessageUpdater(this.sessionListAnalyser)
+          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
+              consultantSessionResponseDTO::setLatestMessage, session, groupId);
     } else {
       setFallbackDate(consultantSessionResponseDTO, session);
     }
@@ -181,21 +182,6 @@ public class ConsultantSessionListService {
           .containsKey(session.getFeedbackGroupId()));
     }
     return consultantSessionResponseDTO;
-  }
-
-  private void updateSessionWithAvailableLastMessage(
-      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
-      ConsultantSessionResponseDTO consultantSessionResponseDTO, SessionDTO session,
-      String groupId) {
-    RoomsLastMessageDTO roomsLastMessage =
-        rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
-    session.setLastMessage(isNotBlank(roomsLastMessage.getMessage()) ? sessionListAnalyser
-        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
-    session.setMessageDate(Helper.getUnixTimestampFromDate(
-        rocketChatRoomInformation.getLastMessagesRoom().get(groupId).getTimestamp()));
-    consultantSessionResponseDTO.setLatestMessage(roomsLastMessage.getTimestamp());
-    session.setAttachment(sessionListAnalyser
-        .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
   }
 
   private void setFallbackDate(ConsultantSessionResponseDTO consultantSessionResponseDTO,
