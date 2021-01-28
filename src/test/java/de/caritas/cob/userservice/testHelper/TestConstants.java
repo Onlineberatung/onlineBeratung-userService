@@ -731,8 +731,8 @@ public class TestConstants {
           MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_2 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_2, NOW_MINUS_3_DAYS, USER_DTO_2, true,
-          NOW_MINUS_3_DAYS, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO)
-          , null);
+          NOW_MINUS_3_DAYS, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
+          null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_3 = new RoomsLastMessageDTO("id",
       RC_GROUP_ID, NOW_MINUS_2_DAYS, USER_DTO_3, true, NOW_MINUS_2_DAYS, MESSAGE, null, null, null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_4 =
