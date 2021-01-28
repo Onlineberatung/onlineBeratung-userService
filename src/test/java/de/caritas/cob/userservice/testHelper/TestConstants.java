@@ -725,24 +725,28 @@ public class TestConstants {
 
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITHOUT_ATTACHMENT =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
-          MESSAGE, null, null);
+          MESSAGE, null, null, null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_1 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
-          MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
+          MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_2 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_2, NOW_MINUS_3_DAYS, USER_DTO_2, true,
-          NOW_MINUS_3_DAYS, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
+          NOW_MINUS_3_DAYS, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
+          null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_3 = new RoomsLastMessageDTO("id",
-      RC_GROUP_ID, NOW_MINUS_2_DAYS, USER_DTO_3, true, NOW_MINUS_2_DAYS, MESSAGE, null, null);
+      RC_GROUP_ID, NOW_MINUS_2_DAYS, USER_DTO_3, true, NOW_MINUS_2_DAYS, MESSAGE, null, null, null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_4 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_4, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
+          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
+          null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_5 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_5, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
+          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
+          null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_6 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_6, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
+          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
+          null);
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST = Arrays.asList(
       new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false, new Date(),
           ROOMS_LAST_MESSAGE_DTO_1),
@@ -778,10 +782,11 @@ public class TestConstants {
       };
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
-          MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
+          MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_6, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO));
+          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
+          null);
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT =
       Collections.singletonList(new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
           new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT));

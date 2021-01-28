@@ -1138,6 +1138,8 @@ components:
           example: true
         attachment:
           $ref: '#/components/schemas/SessionAttachmentDTO'
+        videoCallMessageDTO:
+          $ref: '#/components/schemas/VideoCallMessageDTO'
 
     SessionAttachmentDTO:
       type: object
@@ -1151,6 +1153,54 @@ components:
         fileReceived:
           type: boolean
           example: true
+
+    AliasMessageDTO:
+      type: object
+      properties:
+        forwardMessageDTO:
+          $ref: '#/components/schemas/ForwardMessageDTO'
+        videoCallMessageDTO:
+          $ref: '#/components/schemas/VideoCallMessageDTO'
+
+    ForwardMessageDTO:
+      type: object
+      required:
+        - message
+        - timestamp
+        - username
+        - rcUserId
+      properties:
+        message:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
+        timestamp:
+          type: string
+          description: "Full qualified timestamp"
+          example: "2018-11-15T09:33:00.057Z"
+        username:
+          type: string
+          example: "asker23"
+        rcUserId:
+          type: string
+          example: "ag89h3tjkerg94t"
+
+    VideoCallMessageDTO:
+      type: object
+      required:
+        - eventType
+        - initiatorUserName
+        - rcUserId
+      properties:
+        eventType:
+          type: string
+          enum:
+            - "IGNORED_CALL"
+        initiatorUserName:
+          type: string
+          example: "consultant23"
+        rcUserId:
+          type: string
+          example: "ag89h3tjkerg94t"
 
     ConsultantSessionDTO:
       type: object

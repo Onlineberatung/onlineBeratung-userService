@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.model.rocketchat.room;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import de.caritas.cob.userservice.api.model.AliasMessageDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.room.deserializer.AliasJsonDeserializer;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
@@ -38,5 +41,6 @@ public class RoomsLastMessageDTO {
   private FileDTO file;
   @JsonProperty("attachments")
   private AttachmentDTO[] attachements;
-
+  @JsonDeserialize(using = AliasJsonDeserializer.class)
+  private AliasMessageDTO alias;
 }
