@@ -303,7 +303,7 @@ paths:
   /useradmin/consultant/{consultantId}/agency:
     post:
       tags:
-        - admin-consultant-agency-controller
+        - admin-user-controller
       summary: 'Create a consultant-agency relation [Authorization: Role: user-admin]'
       operationId: createConsultantAgency
       parameters:
@@ -320,8 +320,8 @@ paths:
               $ref: '#/components/schemas/CreateConsultantAgencyDTO'
         required: true
       responses:
-        200:
-          description: OK - consultant-agency relation was created successfully
+        201:
+          description: CREATED - consultant-agency relation was created successfully
         400:
           description: BAD REQUEST - invalid/incomplete request
         401:
@@ -748,6 +748,9 @@ components:
 
     CreateConsultantAgencyDTO:
        type: object
+       required:
+         - agencyId
+         - role
        properties:
          agencyId:
            type: integer

@@ -3,14 +3,17 @@ package de.caritas.cob.userservice.api.admin.facade;
 import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class ConsultantAdminFacade {
   private final @NonNull ConsultantAdminService consultantAdminService;
   private final @NonNull ConsultantAdminFilterService consultantAdminFilterService;
   private final @NonNull ConsultantAgencyAdminService consultantAgencyAdminService;
+  private final @NonNull ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   /**
    * Finds a consultant by given consultant id.
@@ -41,8 +45,8 @@ public class ConsultantAdminFacade {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page the current requested page
-   * @param perPage the amount of items in one page
+   * @param page             the current requested page
+   * @param perPage          the amount of items in one page
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
@@ -65,7 +69,7 @@ public class ConsultantAdminFacade {
   /**
    * Updates a {@link Consultant} based on the {@link UpdateConsultantDTO} input.
    *
-   * @param consultantId the id of the consultant to update
+   * @param consultantId        the id of the consultant to update
    * @param updateConsultantDTO the input data used for {@link Consultant} update
    * @return the generated and persisted {@link Consultant} representation as {@link
    * ConsultantAdminResponseDTO}
@@ -83,5 +87,18 @@ public class ConsultantAdminFacade {
    */
   public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
     return this.consultantAgencyAdminService.findConsultantAgencies(consultantId);
+  }
+
+  /**
+   * Creates a new {@link ConsultantAgency} based on the consultantId and {@link
+   * CreateConsultantAgencyDTO} input.
+   *
+   * @param consultantId              the consultant to use
+   * @param createConsultantAgencyDTO the agencyId and role {@link ConsultantAgencyAdminResultDTO}
+   */
+  public void createNewConsultantAgency(String consultantId,
+      CreateConsultantAgencyDTO createConsultantAgencyDTO) {
+    this.consultantAgencyRelationCreatorService
+        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 }

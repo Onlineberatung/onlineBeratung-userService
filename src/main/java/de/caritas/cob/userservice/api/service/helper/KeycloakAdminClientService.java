@@ -72,9 +72,9 @@ public class KeycloakAdminClientService {
   /**
    * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user ID.
    *
-   * @param user {@link UserDTO}
+   * @param user      {@link UserDTO}
    * @param firstName first name of user
-   * @param lastName last name of user
+   * @param lastName  last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
@@ -208,7 +208,7 @@ public class KeycloakAdminClientService {
   /**
    * Assigns the role with the given name to the given user ID.
    *
-   * @param userId Keycloak user ID
+   * @param userId   Keycloak user ID
    * @param roleName Keycloak role name
    */
   public void updateRole(final String userId, final String roleName) {
@@ -243,7 +243,7 @@ public class KeycloakAdminClientService {
   /**
    * Updates the Keycloak password for a user.
    *
-   * @param userId Keycloak user ID
+   * @param userId   Keycloak user ID
    * @param password user password
    */
   public void updatePassword(final String userId, final String password) {
@@ -260,7 +260,7 @@ public class KeycloakAdminClientService {
    * success/error status possible, because the Keycloak Client doesn't provide one either. *
    *
    * @param userId Keycloak user ID
-   * @param user {@link UserDTO}
+   * @param user   {@link UserDTO}
    * @return the (dummy) email address
    */
   public String updateDummyEmail(final String userId, UserDTO user) {
@@ -330,6 +330,38 @@ public class KeycloakAdminClientService {
       LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
+  }
+
+  /**
+   * Returns true if the given user has the provided role.
+   *
+   * @param userId   Keycloak user ID
+   * @param userRole Keycloak role
+   * @return true if user hast provided role
+   */
+  public boolean userHasRole(String userId, String userRole) {
+
+    List<RoleRepresentation> userRoles = null;
+
+    try {
+      userRoles = getUserRoles(userId);
+
+    } catch (Exception ex) {
+      String error = String.format("Could not get roles for user id %s", userId);
+      LogService.logKeycloakError(error, ex);
+      throw new KeycloakException(error);
+    }
+
+    for (RoleRepresentation role : userRoles) {
+      Optional<UserRole> userRoleOptional = UserRole.getRoleByValue(role.getName());
+      if (userRoleOptional.isPresent()) {
+        if (userRoleOptional.get().getValue().equals(userRole)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   private List<RoleRepresentation> getUserRoles(String userId) {

@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
@@ -23,6 +24,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,8 +56,8 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve sessions.
    *
-   * @param page Number of page where to start in the query (1 = first page) (required)
-   * @param perPage Number of items which are being returned (required)
+   * @param page          Number of page where to start in the query (1 = first page) (required)
+   * @param perPage       Number of items which are being returned (required)
    * @param sessionFilter The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
@@ -70,7 +72,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve all consulting types.
    *
-   * @param page Number of page where to start in the query (1 = first page) (required)
+   * @param page    Number of page where to start in the query (1 = first page) (required)
    * @param perPage Number of items which are being returned per page (required)
    * @return an entity containing the consulting types as {@link ConsultingTypeAdminResultDTO}
    */
@@ -99,13 +101,24 @@ public class UserAdminController implements UseradminApi {
    * GET /useradmin/report : Returns an generated report containing data integration violations.
    * [Authorization: Role: user-admin].
    *
-   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
-   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
-   * condition (status code 500)
+   * @return generated {@link ViolationDTO} list
    */
   @Override
   public ResponseEntity<List<ViolationDTO>> generateViolationReport() {
     return ResponseEntity.ok(this.violationReportGenerator.generateReport());
+  }
+
+  /**
+   * Entry point to create a new consultant [Authorization: Role: user-admin].
+   *
+   * @param consultantId              Consultant Id (required)
+   * @param createConsultantAgencyDTO (required)
+   */
+  @Override
+  public ResponseEntity<Void> createConsultantAgency(@PathVariable String consultantId,
+      @Valid CreateConsultantAgencyDTO createConsultantAgencyDTO) {
+    this.consultantAdminFacade.createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   /**
@@ -121,7 +134,7 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to update a consultant.
    *
-   * @param consultantId consultant id (required)
+   * @param consultantId        consultant id (required)
    * @param updateConsultantDTO (required)
    * @return {@link ConsultantAdminResponseDTO}
    */
@@ -139,7 +152,8 @@ public class UserAdminController implements UseradminApi {
    * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
-  public ResponseEntity<ConsultantAdminResponseDTO> getConsultant(String consultantId) {
+  public ResponseEntity<ConsultantAdminResponseDTO> getConsultant(
+      @PathVariable String consultantId) {
     ConsultantAdminResponseDTO responseDTO = this.consultantAdminFacade
         .findConsultant(consultantId);
     return ResponseEntity.ok(responseDTO);
@@ -148,10 +162,11 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve consultants.
    *
-   * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
-   * @param perPage Number of items which are being returned per page (required)
+   * @param page             Number of page where to start in the query (1 &#x3D; first page)
+   *                         (required)
+   * @param perPage          Number of items which are being returned per page (required)
    * @param consultantFilter The filter parameters to search for. If no filter is set all consultant
-   * are being returned. (optional)
+   *                         are being returned. (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
@@ -166,9 +181,7 @@ public class UserAdminController implements UseradminApi {
    * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies.
    *
    * @param consultantId Consultant Id (required)
-   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
-   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
-   * condition (status code 500)
+   * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
   public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(
