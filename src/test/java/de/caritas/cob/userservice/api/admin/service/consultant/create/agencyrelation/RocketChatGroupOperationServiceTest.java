@@ -112,8 +112,8 @@ public class RocketChatGroupOperationServiceTest {
         .addToGroupsOrRollbackOnFailure();
 
     verify(logMethod, times(1)).accept(
-        eq("ERROR: Technical user could not be removed from rc group " + session.getGroupId() +
-            " (enquiry)."));
+        eq("ERROR: Technical user could not be removed from rc group " + session.getGroupId()
+            + " (enquiry)."));
   }
 
   @Test

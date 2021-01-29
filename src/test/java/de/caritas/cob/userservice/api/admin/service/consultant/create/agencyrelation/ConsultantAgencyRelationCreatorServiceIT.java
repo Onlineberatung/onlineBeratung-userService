@@ -111,12 +111,6 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    List<ConsultantAgency> result = this.consultantAgencyRepository
-        .findByConsultantId(consultant.getId());
-
-    assertThat(result, notNullValue());
-    assertThat(result, hasSize(1));
-
     verify(rocketChatService, times(1))
         .addTechnicalUserToGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
     verify(rocketChatService, times(1))
@@ -127,6 +121,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
     verify(rocketChatService, times(1))
         .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
+    List<ConsultantAgency> result = this.consultantAgencyRepository
+        .findByConsultantId(consultant.getId());
+
+    assertThat(result, notNullValue());
+    assertThat(result, hasSize(1));
   }
 
   @Test
@@ -153,14 +152,6 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    List<ConsultantAgency> result = this.consultantAgencyRepository
-        .findByConsultantId(consultant.getId());
-
-    assertThat(result, notNullValue());
-    assertThat(result, hasSize(1));
-    assertThat(this.consultantRepository.findById(consultant.getId()).get().isTeamConsultant(),
-        is(true));
-
     verify(rocketChatService, times(1))
         .addTechnicalUserToGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
     verify(rocketChatService, times(1))
@@ -171,6 +162,13 @@ public class ConsultantAgencyRelationCreatorServiceIT {
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
     verify(rocketChatService, times(1))
         .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
+    List<ConsultantAgency> result = this.consultantAgencyRepository
+        .findByConsultantId(consultant.getId());
+
+    assertThat(result, notNullValue());
+    assertThat(result, hasSize(1));
+    assertThat(this.consultantRepository.findById(consultant.getId()).get().isTeamConsultant(),
+        is(true));
   }
 
   private Consultant createConsultantWithoutAgencyAndSession() {
@@ -254,8 +252,6 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsU25AndConsultantHasAnotherConsultingTypeAssigned()
       throws AgencyServiceHelperException {
 
-    String consultantIdWIthEmigrationAgency = "0b3b1cc6-be98-4787-aa56-212259d811b9";
-
     AgencyDTO emigrationAgency = new AgencyDTO()
         .consultingType(ConsultingType.EMIGRATION);
 
@@ -263,14 +259,15 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .consultingType(ConsultingType.U25)
         .id(2L);
 
-    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .role("valid role")
-        .agencyId(2L);
-
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
+        .role("valid role")
+        .agencyId(2L);
+
+    String consultantIdWIthEmigrationAgency = "0b3b1cc6-be98-4787-aa56-212259d811b9";
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantIdWIthEmigrationAgency, createConsultantAgencyDTO);
   }
@@ -279,8 +276,6 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsKreuzbundAndConsultantHasAnotherConsultingTypeAssigned()
       throws AgencyServiceHelperException {
 
-    String consultantIdWithEmigrationAgency = "0b3b1cc6-be98-4787-aa56-212259d811b9";
-
     AgencyDTO emigrationAgency = new AgencyDTO()
         .consultingType(ConsultingType.EMIGRATION);
 
@@ -288,16 +283,18 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .consultingType(ConsultingType.KREUZBUND)
         .id(2L);
 
-    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .role("valid role")
-        .agencyId(2L);
-
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
+        .role("valid role")
+        .agencyId(2L);
+
+
     this.consultantAgencyRelationCreatorService
-        .createNewConsultantAgency(consultantIdWithEmigrationAgency, createConsultantAgencyDTO);
+        .createNewConsultantAgency("0b3b1cc6-be98-4787-aa56-212259d811b9",
+            createConsultantAgencyDTO);
   }
 
   @Test
