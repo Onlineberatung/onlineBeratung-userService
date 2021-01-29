@@ -1,7 +1,9 @@
-package de.caritas.cob.userservice.api.admin.service.consultant.create;
+package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
+
+import static org.hibernate.search.util.impl.CollectionHelper.asSet;
 
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
-import java.time.LocalDateTime;
+import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -17,8 +19,8 @@ public class CreateConsultantAgencyDTOInputAdapter implements ConsultantAgencyCr
   }
 
   @Override
-  public String getRole() {
-    return this.createConsultantAgencyDTO.getRole();
+  public Set<String> getRoles() {
+    return asSet(this.createConsultantAgencyDTO.getRole());
   }
 
   @Override
@@ -26,13 +28,4 @@ public class CreateConsultantAgencyDTOInputAdapter implements ConsultantAgencyCr
     return this.createConsultantAgencyDTO.getAgencyId();
   }
 
-  @Override
-  public LocalDateTime getCreateDate() {
-    return LocalDateTime.now();
-  }
-
-  @Override
-  public LocalDateTime getUpdateDate() {
-    return LocalDateTime.now();
-  }
 }

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -57,7 +57,7 @@ public class ConsultantAgencyAdminService {
    */
   public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    consultantAgencyRelationCreatorService
+    this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 }
