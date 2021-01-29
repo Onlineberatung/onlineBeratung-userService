@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Set;
 
 /**
@@ -15,11 +16,11 @@ public interface ConsultantAgencyCreationInput {
   Long getAgencyId();
 
   default LocalDateTime getCreateDate() {
-    return LocalDateTime.now();
+    return LocalDateTime.now(ZoneOffset.UTC);
   }
 
   default LocalDateTime getUpdateDate() {
-    return LocalDateTime.now();
+    return LocalDateTime.now(ZoneOffset.UTC);
   }
 
 }

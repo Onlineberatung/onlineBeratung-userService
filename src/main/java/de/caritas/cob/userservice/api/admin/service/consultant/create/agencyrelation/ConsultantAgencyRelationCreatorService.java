@@ -23,6 +23,7 @@ import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -117,7 +118,7 @@ public class ConsultantAgencyRelationCreatorService {
       AgencyDTO agencyDto = this.agencyServiceHelper.getAgencyWithoutCaching(agencyId);
       return Optional.ofNullable(agencyDto)
           .orElseThrow(() -> new BadRequestException(
-              String.format("AngecyId %s is not a valid agency", agencyId)));
+              String.format("AgencyId %s is not a valid agency", agencyId)));
     } catch (AgencyServiceHelperException e) {
       throw new InternalServerErrorException(String.format(
           "AgencyService error while retrieving the agency for the ConsultantAgency-creating for agency %s",
@@ -155,7 +156,7 @@ public class ConsultantAgencyRelationCreatorService {
         .findByAgencyIdAndStatusAndConsultantIsNull(agency.getId(), SessionStatus.NEW);
     if (isTrue(agency.getTeamAgency())) {
       sessionsToAddConsultant.addAll(sessionRepository
-          .findByAgencyIdAndStatus(agency.getId(), SessionStatus.IN_PROGRESS));
+          .findByAgencyIdAndStatusAndTeamSessionIsTrue(agency.getId(), SessionStatus.IN_PROGRESS));
     }
     return sessionsToAddConsultant;
   }
@@ -170,8 +171,8 @@ public class ConsultantAgencyRelationCreatorService {
         .builder()
         .consultant(consultant)
         .agencyId(agencyId)
-        .createDate(LocalDateTime.now())
-        .updateDate(LocalDateTime.now())
+        .createDate(LocalDateTime.now(ZoneOffset.UTC))
+        .updateDate(LocalDateTime.now(ZoneOffset.UTC))
         .build();
   }
 

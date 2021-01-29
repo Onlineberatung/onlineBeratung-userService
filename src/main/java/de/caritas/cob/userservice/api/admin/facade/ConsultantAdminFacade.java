@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.facade;
 import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
@@ -27,6 +28,7 @@ public class ConsultantAdminFacade {
   private final @NonNull ConsultantAdminService consultantAdminService;
   private final @NonNull ConsultantAdminFilterService consultantAdminFilterService;
   private final @NonNull ConsultantAgencyAdminService consultantAgencyAdminService;
+  private final @NonNull ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   /**
    * Finds a consultant by given consultant id.
@@ -92,11 +94,11 @@ public class ConsultantAdminFacade {
    * CreateConsultantAgencyDTO} input.
    *
    * @param consultantId              the consultant to use
-   * @param createConsultantAgencyDTO the agencyId and role ConsultantAgencyAdminResultDTO}
+   * @param createConsultantAgencyDTO the agencyId and role {@link ConsultantAgencyAdminResultDTO}
    */
   public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    this.consultantAgencyAdminService
+    this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 }

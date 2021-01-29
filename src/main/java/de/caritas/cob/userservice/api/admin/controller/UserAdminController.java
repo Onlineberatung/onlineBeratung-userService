@@ -101,9 +101,7 @@ public class UserAdminController implements UseradminApi {
    * GET /useradmin/report : Returns an generated report containing data integration violations.
    * [Authorization: Role: user-admin].
    *
-   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
-   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
-   * condition (status code 500)
+   * @return generated {@link ViolationDTO} list
    */
   @Override
   public ResponseEntity<List<ViolationDTO>> generateViolationReport() {
@@ -115,12 +113,9 @@ public class UserAdminController implements UseradminApi {
    *
    * @param consultantId              Consultant Id (required)
    * @param createConsultantAgencyDTO (required)
-   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
-   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
-   * condition (status code 500)
    */
   @Override
-  public ResponseEntity<Void> createConsultantAgency(String consultantId,
+  public ResponseEntity<Void> createConsultantAgency(@PathVariable String consultantId,
       @Valid CreateConsultantAgencyDTO createConsultantAgencyDTO) {
     this.consultantAdminFacade.createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
     return new ResponseEntity<>(HttpStatus.CREATED);
@@ -157,7 +152,8 @@ public class UserAdminController implements UseradminApi {
    * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
-  public ResponseEntity<ConsultantAdminResponseDTO> getConsultant(String consultantId) {
+  public ResponseEntity<ConsultantAdminResponseDTO> getConsultant(
+      @PathVariable String consultantId) {
     ConsultantAdminResponseDTO responseDTO = this.consultantAdminFacade
         .findConsultant(consultantId);
     return ResponseEntity.ok(responseDTO);
@@ -185,9 +181,7 @@ public class UserAdminController implements UseradminApi {
    * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies.
    *
    * @param consultantId Consultant Id (required)
-   * @return OK - successfull operation (status code 200) or UNAUTHORIZED - no/invalid
-   * role/authorization (status code 401) or INTERNAL SERVER ERROR - server encountered unexpected
-   * condition (status code 500)
+   * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
   public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(

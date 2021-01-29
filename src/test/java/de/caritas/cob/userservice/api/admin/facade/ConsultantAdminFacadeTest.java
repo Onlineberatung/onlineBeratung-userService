@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,9 @@ public class ConsultantAdminFacadeTest {
 
   @Mock
   private ConsultantAgencyAdminService consultantAgencyAdminService;
+
+  @Mock
+  private ConsultantAgencyRelationCreatorService relationCreatorService;
 
   @Test
   public void findConsultant_Should_useConsultantAdminService() {
@@ -73,7 +77,7 @@ public class ConsultantAdminFacadeTest {
   public void createNewConsultantAgency_Should_useConsultantAgencyAdminServiceCorrectly() {
     this.consultantAdminFacade.createNewConsultantAgency(null, null);
 
-    verify(this.consultantAgencyAdminService, times(1)).createNewConsultantAgency(null, null);
+    verify(this.relationCreatorService, times(1)).createNewConsultantAgency(null, null);
   }
 
   @Test

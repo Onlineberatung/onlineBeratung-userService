@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.controller;
 
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCIES_PATH;
+import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCY_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTING_TYPE_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.FILTERED_CONSULTANTS_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.GET_CONSULTANT_PATH;
@@ -26,6 +27,7 @@ import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenera
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import javax.servlet.http.Cookie;
@@ -501,6 +503,59 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).updateConsultant(anyString(), any());
+  }
+
+  @Test
+  public void createConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
+      throws Exception {
+    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId")))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  public void createConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+      throws Exception {
+    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
+          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
+          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT})
+  public void createConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+      throws Exception {
+    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_ADMIN})
+  public void createConsultantAgency_Should_ReturnCreatedAndCallConsultantAdminFilterService_When_userAdminAuthority()
+      throws Exception {
+    CreateConsultantAgencyDTO createConsultantAgencyDTO =
+        new EasyRandom().nextObject(CreateConsultantAgencyDTO.class);
+
+    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(createConsultantAgencyDTO)))
+        .andExpect(status().isCreated());
+
+    verify(consultantAdminFacade, times(1)).createNewConsultantAgency(anyString(), any());
   }
 
 }

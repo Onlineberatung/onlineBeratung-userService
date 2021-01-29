@@ -135,7 +135,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * @param sessionStatus {@link SessionStatus}
    * @return A list of {@link Session}s for the specified agency ID
    */
-  List<Session> findByAgencyIdAndStatus(Long agencyId,
+  List<Session> findByAgencyIdAndStatusAndTeamSessionIsTrue(Long agencyId,
       SessionStatus sessionStatus);
 
   /**

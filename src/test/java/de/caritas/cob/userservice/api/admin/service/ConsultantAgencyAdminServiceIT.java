@@ -6,8 +6,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
@@ -71,15 +69,6 @@ public class ConsultantAgencyAdminServiceIT {
       assertThat(e.getMessage(),
           is("Consultant with id 12345678-1234-1234-1234-1234567890ab does not exist"));
     }
-  }
-
-  @Test
-  public void createNewConsultantAgency_asdf() {
-
-    this.consultantAgencyAdminService.createNewConsultantAgency(null, null);
-
-    verify(this.consultantAgencyRelationCreatorService, times(1)).createNewConsultantAgency(null, null);
-
   }
 
 }
