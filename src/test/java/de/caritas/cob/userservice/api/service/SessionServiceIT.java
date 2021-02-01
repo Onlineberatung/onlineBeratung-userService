@@ -65,6 +65,7 @@ public class SessionServiceIT {
     assertEquals(session.getConsultant().getRocketChatId(), result.getConsultantRcId());
     assertEquals(session.getUser().getUserId(), result.getAskerId());
     assertEquals(session.getUser().getRcUserId(), result.getAskerRcId());
+    assertEquals(session.getUser().getUsername(), result.getAskerUserName());
     assertEquals(session.getPostcode(), result.getPostcode());
     assertEquals(session.isMonitoring(), result.getIsMonitoring());
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());

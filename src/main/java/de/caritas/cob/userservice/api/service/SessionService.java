@@ -482,6 +482,7 @@ public class SessionService {
         .status(session.getStatus().getValue())
         .askerId(session.getUser().getUserId())
         .askerRcId(session.getUser().getRcUserId())
+        .askerUserName(session.getUser().getUsername())
         .feedbackGroupId(session.getFeedbackGroupId())
         .groupId(session.getGroupId())
         .isMonitoring(session.isMonitoring())
