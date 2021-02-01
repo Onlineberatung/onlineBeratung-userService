@@ -68,7 +68,7 @@ public class AvailableLastMessageUpdaterTest {
             .videoCallMessageDTO(new VideoCallMessageDTO()
                 .eventType(EventTypeEnum.IGNORED_CALL)
                 .initiatorUserName("initiator")
-                .rcUserId("user id")));
+                .initiatorRcUserId("user id")));
 
     this.availableLastMessageUpdater
         .updateSessionWithAvailableLastMessage(this.rocketChatRoomInformation, "",
@@ -77,7 +77,7 @@ public class AvailableLastMessageUpdaterTest {
     assertThat(sessionDTO.getVideoCallMessageDTO(), notNullValue());
     assertThat(sessionDTO.getVideoCallMessageDTO().getEventType(), is(EventTypeEnum.IGNORED_CALL));
     assertThat(sessionDTO.getVideoCallMessageDTO().getInitiatorUserName(), is("initiator"));
-    assertThat(sessionDTO.getVideoCallMessageDTO().getRcUserId(), is("user id"));
+    assertThat(sessionDTO.getVideoCallMessageDTO().getInitiatorRcUserId(), is("user id"));
   }
 
 }

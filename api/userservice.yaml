@@ -1189,7 +1189,7 @@ components:
       required:
         - eventType
         - initiatorUserName
-        - rcUserId
+        - initiatorRcUserId
       properties:
         eventType:
           type: string
@@ -1198,7 +1198,7 @@ components:
         initiatorUserName:
           type: string
           example: "consultant23"
-        rcUserId:
+        initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
 

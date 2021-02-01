@@ -82,7 +82,7 @@ public class AliasJsonDeserializerTest {
         .videoCallMessageDTO(new VideoCallMessageDTO()
             .eventType(IGNORED_CALL)
             .initiatorUserName(ENCODE_USERNAME)
-            .rcUserId("rcUserId")));
+            .initiatorRcUserId("rcUserId")));
 
     AliasMessageDTO result = deserializeNewAliasJson(aliasMessageDTO);
 
@@ -99,7 +99,7 @@ public class AliasJsonDeserializerTest {
         .videoCallMessageDTO(new VideoCallMessageDTO()
             .eventType(IGNORED_CALL)
             .initiatorUserName(DECODED_USERNAME)
-            .rcUserId("rcUserId")));
+            .initiatorRcUserId("rcUserId")));
 
     AliasMessageDTO result = deserializeNewAliasJson(aliasMessageDTO);
 
@@ -121,7 +121,7 @@ public class AliasJsonDeserializerTest {
         .videoCallMessageDTO(new VideoCallMessageDTO()
             .eventType(IGNORED_CALL)
             .initiatorUserName(ENCODE_USERNAME)
-            .rcUserId("rcUserId")));
+            .initiatorRcUserId("rcUserId")));
 
     AliasMessageDTO result = deserializeNewAliasJson(aliasMessageDTO);
 
