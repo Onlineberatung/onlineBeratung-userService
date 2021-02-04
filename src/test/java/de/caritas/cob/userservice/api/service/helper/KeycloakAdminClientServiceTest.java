@@ -288,22 +288,43 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void updateUserData_Should_callServicesCorrectly_When_emailIsAvailable() {
+  public void updateUserData_Should_callServicesCorrectly_When_emailIsChangedAndAvailable() {
     UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    when(userRepresentation.getEmail()).thenReturn("email");
     UserResource userResource = mock(UserResource.class);
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    UserDTO userDTO = new UserDTO();
+    userDTO.setEmail("anotherEmail");
 
-    this.keycloakAdminClientService.updateUserData("userId", new UserDTO(), "firstName", "lastName");
+    this.keycloakAdminClientService.updateUserData("userId", userDTO, "firstName", "lastName");
 
     verify(userResource, times(3)).update(any());
   }
 
   @Test
-  public void updateUserData_Should_throwCustomException_When_emailIsNotAvailable() {
+  public void updateUserData_Should_callServicesCorrectly_When_emailIsUnchanged() {
     UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    when(userRepresentation.getEmail()).thenReturn("email");
+    UserResource userResource = mock(UserResource.class);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    UsersResource usersResource = mock(UsersResource.class);
+    when(usersResource.get(any())).thenReturn(userResource);
+    when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    UserDTO userDTO = new UserDTO();
+    userDTO.setEmail("email");
+
+    this.keycloakAdminClientService.updateUserData("userId", userDTO, "firstName", "lastName");
+
+    verify(userResource, times(1)).update(any());
+  }
+
+  @Test
+  public void updateUserData_Should_throwCustomException_When_emailIsChangedButNotAvailable() {
+    UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    when(userRepresentation.getEmail()).thenReturn("email");
     UserResource userResource = mock(UserResource.class);
     doThrow(new RuntimeException()).when(userResource).update(any());
     when(userResource.toRepresentation()).thenReturn(userRepresentation);

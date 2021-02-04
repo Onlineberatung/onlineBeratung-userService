@@ -285,12 +285,16 @@ public class KeycloakAdminClientService {
    */
   public void updateUserData(final String userId, UserDTO userDTO,
       String firstName, String lastName) {
-    if (isEmailNotAvailable(userDTO.getEmail())) {
-      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
-    }
     UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
+    if (hasEmailAddressChanged(userResource, userDTO) && isEmailNotAvailable(userDTO.getEmail())) {
+      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
+    }
     userResource.update(getUserRepresentation(userDTO, firstName, lastName));
+  }
+
+  private boolean hasEmailAddressChanged(UserResource userResource, UserDTO userDTO) {
+    return !userResource.toRepresentation().getEmail().equals(userDTO.getEmail());
   }
 
   /**
