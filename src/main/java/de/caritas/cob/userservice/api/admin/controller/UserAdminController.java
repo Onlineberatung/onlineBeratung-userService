@@ -190,4 +190,16 @@ public class UserAdminController implements UseradminApi {
         .findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
   }
+
+  /**
+   * Entry point to handle consultant data when agency tpe changes.
+   *
+   * @param agencyId the id of the changed agency
+   * @param isTeamAgency defines the target type
+   */
+  @Override
+  public ResponseEntity<Void> changeAgencyType(Long agencyId, @Valid Boolean isTeamAgency) {
+    this.consultantAdminFacade.changeAgencyType(agencyId, isTeamAgency);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
 }

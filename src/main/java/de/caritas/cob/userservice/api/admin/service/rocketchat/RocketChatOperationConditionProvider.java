@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
+package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
 import static java.util.Objects.isNull;

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
+package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RocketChatGroupOperationServiceTest {
+public class RocketChatAddToGroupOperationServiceTest {
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -48,11 +48,10 @@ public class RocketChatGroupOperationServiceTest {
     session.setStatus(SessionStatus.NEW);
     Consultant consultant = easyRandom.nextObject(Consultant.class);
 
-    RocketChatGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService)
+    RocketChatAddToGroupOperationService
+        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
         .withConsultant(consultant)
-        .withLogMethod(logMethod)
         .addToGroupsOrRollbackOnFailure();
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup(eq(session.getGroupId()));
@@ -77,11 +76,10 @@ public class RocketChatGroupOperationServiceTest {
     when(this.rocketChatService.getMembersOfGroup(anyString())).thenReturn(singletonList(
         memberOfGroup));
 
-    RocketChatGroupOperationService operationService = RocketChatGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService)
+    RocketChatAddToGroupOperationService operationService = RocketChatAddToGroupOperationService
+        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
-        .withConsultant(consultant)
-        .withLogMethod(logMethod);
+        .withConsultant(consultant);
 
     try {
       operationService.addToGroupsOrRollbackOnFailure();
@@ -104,11 +102,10 @@ public class RocketChatGroupOperationServiceTest {
     doThrow(new RocketChatRemoveUserFromGroupException("")).when(this.rocketChatService)
         .removeTechnicalUserFromGroup(anyString());
 
-    RocketChatGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService)
+    RocketChatAddToGroupOperationService
+        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
         .withConsultant(consultant)
-        .withLogMethod(logMethod)
         .addToGroupsOrRollbackOnFailure();
 
     verify(logMethod, times(1)).accept(
@@ -131,11 +128,10 @@ public class RocketChatGroupOperationServiceTest {
     doThrow(new RocketChatRemoveUserFromGroupException("")).when(this.rocketChatService)
         .removeUserFromGroup(anyString(), anyString());
 
-    RocketChatGroupOperationService operationService = RocketChatGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService)
+    RocketChatAddToGroupOperationService operationService = RocketChatAddToGroupOperationService
+        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
-        .withConsultant(consultant)
-        .withLogMethod(logMethod);
+        .withConsultant(consultant);
     try {
       operationService.addToGroupsOrRollbackOnFailure();
       fail("Internal Server Error was not thrown");

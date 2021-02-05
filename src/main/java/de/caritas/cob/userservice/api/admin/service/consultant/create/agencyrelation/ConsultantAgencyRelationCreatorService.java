@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.repository.session.ConsultingType.K
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -143,11 +144,10 @@ public class ConsultantAgencyRelationCreatorService {
   private void addConsultantToSessions(Consultant consultant, AgencyDTO agency,
       Consumer<String> logMethod) {
     List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
-    RocketChatGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService)
+    RocketChatAddToGroupOperationService
+        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
         .onSessions(relevantSessions)
         .withConsultant(consultant)
-        .withLogMethod(logMethod)
         .addToGroupsOrRollbackOnFailure();
   }
 

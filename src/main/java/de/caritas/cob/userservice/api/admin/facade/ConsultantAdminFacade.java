@@ -1,9 +1,14 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
-import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.MISSING_TEAM_AGENCY_BODY_FLAG;
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
+import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
@@ -101,4 +106,22 @@ public class ConsultantAdminFacade {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
+
+  /**
+   * Changes the consultant flag is_team_consultant and assignments for agency type changes.
+   *
+   * @param agencyId     the id of the changed agency
+   * @param isTeamAgency the flag if agency will now be a team agency or not
+   */
+  public void changeAgencyType(Long agencyId, Boolean isTeamAgency) {
+    if (isNull(isTeamAgency)) {
+      throw new CustomValidationHttpStatusException(MISSING_TEAM_AGENCY_BODY_FLAG);
+    }
+    if (isTrue(isTeamAgency)) {
+      this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(agencyId);
+    } else {
+      this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(agencyId);
+    }
+  }
+
 }
