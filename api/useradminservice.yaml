@@ -334,7 +334,7 @@ paths:
   /useradmin/consultant/{consultantId}/agency/{agencyId}:
     delete:
       tags:
-        - admin-consultant-agency-controller
+        - admin-user-controller
       summary: 'Delete a consultant-agency relation [Authorization: Role: user-admin]'
       operationId: deleteConsultantAgency
       parameters:
@@ -354,6 +354,39 @@ paths:
       responses:
         200:
           description: OK - consultant-agency relation was deleted successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /useradmin/agency/{agencyId}/changetype:
+    post:
+      tags:
+        - admin-user-controller
+      summary: 'Change the assigned consultants of an agency when type of agency is changed from
+      team-agency to default and vice-versa [Authorization: Role: user-admin]'
+      operationId: changeAgencyType
+      parameters:
+        - name: agencyId
+          in: path
+          description: Agency Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          isTeamAgency:
+            schema:
+              type: boolean
+              description: 'Flag to decide if assigned consultants will be removed from team
+              sessions or tagged as team consultants.'
+      responses:
+        200:
+          description: OK - assigned consultants were changed successfully
         400:
           description: BAD REQUEST - invalid/incomplete request
         401:
@@ -747,19 +780,19 @@ components:
           example: "2019-08-23T08:52:05"
 
     CreateConsultantAgencyDTO:
-       type: object
-       required:
-         - agencyId
-         - role
-       properties:
-         agencyId:
-           type: integer
-           format: int64
-           example: 15
-         role:
-           type: string
-           minLength: 1
-           maxLength: 255
+      type: object
+      required:
+        - agencyId
+        - role
+      properties:
+        agencyId:
+          type: integer
+          format: int64
+          example: 15
+        role:
+          type: string
+          minLength: 1
+          maxLength: 255
 
     ViolationDTO:
       type: object
