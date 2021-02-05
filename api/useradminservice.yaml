@@ -379,7 +379,7 @@ paths:
             format: int64
       requestBody:
         content:
-          isTeamAgency:
+          'application/json':
             schema:
               type: boolean
               description: 'Flag to decide if assigned consultants will be removed from team
