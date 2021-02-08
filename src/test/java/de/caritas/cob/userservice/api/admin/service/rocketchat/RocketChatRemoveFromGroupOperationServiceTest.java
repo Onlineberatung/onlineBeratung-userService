@@ -19,6 +19,9 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,11 +47,12 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
 
   @Before
   public void setup() {
+    Map<Session, List<Consultant>> sessionConsultants = new HashMap<>();
+    sessionConsultants.put(session, singletonList(consultant));
     this.removeService =
         RocketChatRemoveFromGroupOperationService
             .getInstance(this.rocketChatService, this.keycloakAdminClientService)
-            .onSession(this.session)
-            .withConsultant(this.consultant);
+            .onSessionConsultants(sessionConsultants);
   }
 
   @Test
