@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import org.jeasy.random.EasyRandom;
@@ -48,7 +49,8 @@ public class UserAdminControllerIT {
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
   protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
-  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s/agencies";
+  protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultant/%s/agencies";
+  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s/agency";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
@@ -113,7 +115,7 @@ public class UserAdminControllerIT {
       throws Exception {
     String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
-    String consultantAgencyPath = String.format(CONSULTANT_AGENCY_PATH, consultantId);
+    String consultantAgencyPath = String.format(CONSULTANT_AGENCIES_PATH, consultantId);
 
     this.mvc.perform(get(consultantAgencyPath))
         .andExpect(status().isOk());
@@ -230,6 +232,26 @@ public class UserAdminControllerIT {
     this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void createConsultantAgency_Should_returnCreated_When_requiredParamsAreGiven()
+      throws Exception {
+    String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
+
+    String consultantAgencyPath = String.format(CONSULTANT_AGENCY_PATH, consultantId);
+
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
+    createConsultantAgencyDTO.setAgencyId(15L);
+    createConsultantAgencyDTO.setRole("role");
+
+    this.mvc.perform(post(consultantAgencyPath)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(createConsultantAgencyDTO)))
+        .andExpect(status().isCreated());
+
+    verify(this.consultantAdminFacade, times(1))
+        .createNewConsultantAgency(eq(consultantId), eq(createConsultantAgencyDTO));
   }
 
 }

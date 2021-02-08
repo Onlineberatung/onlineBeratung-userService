@@ -4,6 +4,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_LIS
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ROLES;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID_2;
@@ -11,16 +13,19 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSIO
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_INVALID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_IN_PROGRESS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_NEW;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ROLES;
+import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_RC_ID;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -35,13 +40,16 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -59,6 +67,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.jeasy.random.EasyRandom;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +84,8 @@ import org.springframework.dao.DataAccessException;
 public class SessionServiceTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
-      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null, null);
+      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
+      null, null, null);
   private final User USER = new User(USER_ID, "username", "name@domain.de", null);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, ConsultingType.SUCHT, "99999",
       1L, SessionStatus.NEW, new Date(), null);
@@ -139,7 +149,8 @@ public class SessionServiceTest {
   @Test
   public void getSession_Should_ThrowInternalServerErrorException_WhenRepositoryFails() {
 
-    DataAccessException ex = new DataAccessException("Database error") {};
+    DataAccessException ex = new DataAccessException("Database error") {
+    };
     when(sessionRepository.findById(ENQUIRY_ID)).thenThrow(ex);
     try {
       sessionService.getSession(ENQUIRY_ID);
@@ -165,7 +176,8 @@ public class SessionServiceTest {
   @Test
   public void updateConsultantAndStatusForSession_Should_ThrowUpdateSessionException_WhenSaveSessionFails() {
 
-    InternalServerErrorException ex = new InternalServerErrorException("service error") {};
+    InternalServerErrorException ex = new InternalServerErrorException("service error") {
+    };
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {
@@ -189,7 +201,8 @@ public class SessionServiceTest {
   @Test
   public void saveSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
-    DataAccessException ex = new DataAccessException("database error") {};
+    DataAccessException ex = new DataAccessException("database error") {
+    };
     when(sessionRepository.save(Mockito.any())).thenThrow(ex);
 
     try {
@@ -204,7 +217,8 @@ public class SessionServiceTest {
   @Test
   public void deleteSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
 
-    DataAccessException ex = new DataAccessException("database error") {};
+    DataAccessException ex = new DataAccessException("database error") {
+    };
     Mockito.doThrow(ex).when(sessionRepository).delete(Mockito.any(Session.class));
 
     try {
@@ -585,7 +599,8 @@ public class SessionServiceTest {
   @Test
   public void updateFeedbackGroupId_Should_ThrowUpdateFeedbackGroupIdException_WhenSaveSessionFails() {
 
-    InternalServerErrorException ex = new InternalServerErrorException(ERROR_MSG) {};
+    InternalServerErrorException ex = new InternalServerErrorException(ERROR_MSG) {
+    };
     when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
 
     try {
@@ -602,6 +617,94 @@ public class SessionServiceTest {
 
     sessionService.updateFeedbackGroupId(Optional.of(SESSION), RC_GROUP_ID);
     verify(sessionRepository, times(1)).save(SESSION);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
+
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
+    sessionService.fetchSessionForConsultant(SESSION_ID, CONSULTANT);
+  }
+
+  @Test
+  public void fetchSessionForConsultant_Should_Return_ValidConsultantSessionDTO() {
+
+    EasyRandom easyRandom = new EasyRandom();
+    Session session = easyRandom.nextObject(Session.class);
+    session.setConsultant(CONSULTANT_WITH_AGENCY);
+    session.setUser(USER_WITH_RC_ID);
+    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+
+    ConsultantSessionDTO result = sessionService
+        .fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
+
+    assertEquals(session.getId(), result.getId());
+    assertEquals(session.isTeamSession(), result.getIsTeamSession());
+    assertEquals(session.getAgencyId(), result.getAgencyId());
+    assertEquals(session.getConsultant().getId(), result.getConsultantId());
+    assertEquals(session.getConsultant().getRocketChatId(), result.getConsultantRcId());
+    assertEquals(session.getUser().getUserId(), result.getAskerId());
+    assertEquals(session.getUser().getRcUserId(), result.getAskerRcId());
+    assertEquals(session.getPostcode(), result.getPostcode());
+    assertEquals(session.isMonitoring(), result.getIsMonitoring());
+    assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
+    assertEquals(session.getGroupId(), result.getGroupId());
+    assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
+    assertEquals(session.getConsultingType().getValue(), result.getConsultingType().intValue());
 
   }
+
+  @Test(expected = ForbiddenException.class)
+  public void fetchSessionForConsultant_Should_ThrowForbiddenException_When_NoPermission() {
+
+    EasyRandom easyRandom = new EasyRandom();
+    Session session = easyRandom.nextObject(Session.class);
+    session.setConsultant(CONSULTANT_WITH_AGENCY_2);
+    session.setUser(USER_WITH_RC_ID);
+    session.setAgencyId(CONSULTANT_WITH_AGENCY_2
+        .getConsultantAgencies()
+        .iterator()
+        .next()
+        .getAgencyId());
+    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+
+    sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
+  }
+
+  @Test
+  public void fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_WhenConsultantIsAssigned() {
+
+    EasyRandom easyRandom = new EasyRandom();
+    Session session = easyRandom.nextObject(Session.class);
+    session.setConsultant(CONSULTANT_WITH_AGENCY);
+    session.setUser(USER_WITH_RC_ID);
+    session.setAgencyId(CONSULTANT_WITH_AGENCY
+        .getConsultantAgencies()
+        .iterator()
+        .next()
+        .getAgencyId());
+    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+
+    assertNotNull(
+        sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
+  }
+
+  @Test
+  public void fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_WhenConsultantIsNotAssignedButInAgency() {
+
+    EasyRandom easyRandom = new EasyRandom();
+    Session session = easyRandom.nextObject(Session.class);
+    session.setConsultant(CONSULTANT_WITH_AGENCY_2);
+    session.setUser(USER_WITH_RC_ID);
+    session.setAgencyId(CONSULTANT_WITH_AGENCY
+        .getConsultantAgencies()
+        .iterator()
+        .next()
+        .getAgencyId());
+    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+
+    assertNotNull(
+        sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
+  }
+
 }

@@ -1,0 +1,31 @@
+package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
+
+import static org.hibernate.search.util.impl.CollectionHelper.asSet;
+
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
+import java.util.Set;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class CreateConsultantAgencyDTOInputAdapter implements ConsultantAgencyCreationInput {
+
+  private final @NonNull String consultantId;
+  private final @NonNull CreateConsultantAgencyDTO createConsultantAgencyDTO;
+
+  @Override
+  public String getConsultantId() {
+    return this.consultantId;
+  }
+
+  @Override
+  public Set<String> getRoles() {
+    return asSet(this.createConsultantAgencyDTO.getRole());
+  }
+
+  @Override
+  public Long getAgencyId() {
+    return this.createConsultantAgencyDTO.getAgencyId();
+  }
+
+}

@@ -43,7 +43,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
    * (Keycloak) principal (authorization header).
-   * 
+   *
    * @param keycloakClientRequestFactory
    */
   public SecurityConfig(KeycloakClientRequestFactory keycloakClientRequestFactory) {
@@ -54,7 +54,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * Configure spring security filter chain: disable default Spring Boot CSRF token behavior and add
    * custom {@link StatelessCsrfFilter}, set all sessions to be fully stateless, define necessary
    * Keycloak roles for specific REST API paths
-   * 
+   *
    */
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -94,13 +94,14 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(Authority.START_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/stop")
         .hasAuthority(Authority.STOP_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/update")
         .hasAuthority(Authority.UPDATE_CHAT).antMatchers("/useradmin", "/useradmin/**")
-        .hasAuthority(Authority.USER_ADMIN).anyRequest().denyAll();
+        .hasAuthority(Authority.USER_ADMIN).antMatchers("/users/consultants/sessions/{sessionId:[0-9]+}")
+        .hasAuthority(Authority.CONSULTANT_DEFAULT).anyRequest().denyAll();
   }
 
   /**
    * Use the KeycloakSpringBootConfigResolver to be able to save the Keycloak settings in the spring
    * application properties.
-   * 
+   *
    * @return
    */
   @Bean
@@ -121,7 +122,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * Change the default AuthenticationProvider to KeycloakAuthenticationProvider and register it in
    * the spring security context. Set the GrantedAuthoritiesMapper to map the Keycloak roles to the
    * granted authorities.
-   * 
+   *
    * @param auth
    * @param authorityMapper
    * @throws Exception
@@ -139,11 +140,11 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * the web application context. Therefore, when running the Keycloak Spring Security adapter in a
    * Spring Boot environment, it may be necessary to add FilterRegistrationBeans to your security
    * configuration to prevent the Keycloak filters from being registered twice."
-   * 
+   *
    * https://github.com/keycloak/keycloak-documentation/blob/master/securing_apps/topics/oidc/java/spring-security-adapter.adoc
-   * 
+   *
    * {@link package.class#member label}
-   * 
+   *
    * @param filter
    * @return
    */
@@ -159,7 +160,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   /**
    * see above:
    * {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
-   * 
+   *
    * @param filter
    * @return
    */
@@ -175,7 +176,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   /**
    * see above:
    * {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
-   * 
+   *
    * @param filter
    * @return
    */
@@ -191,7 +192,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   /**
    * see above:
    * {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
-   * 
+   *
    * @param filter
    * @return
    */

@@ -1,24 +1,19 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
-import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.io.FileReader;
@@ -34,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
@@ -65,6 +59,7 @@ public class ConsultantImportService {
   private final @NonNull SessionService sessionService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull ConsultantCreatorService consultantCreatorService;
+  private final @NonNull ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   private static final String DELIMITER = ",";
   private static final String AGENCY_ROLE_DELIMITER = ";";
@@ -82,7 +77,6 @@ public class ConsultantImportService {
     List<CSVRecord> records;
     String logMessage;
     Consultant consultant = null;
-    String rocketChatUserId = null;
 
     try {
       in = new FileReader(importFilename);
@@ -184,7 +178,8 @@ public class ConsultantImportService {
             writeToImportLog(
                 String.format(
                     "Consultant with username %s (%s) exists and won't be "
-                        + "imported.", importRecord.getUsername(), importRecord.getUsernameEncoded()));
+                        + "imported.", importRecord.getUsername(),
+                    importRecord.getUsernameEncoded()));
             continue;
           }
 
@@ -211,10 +206,6 @@ public class ConsultantImportService {
                   importRecord.getUsername()));
               continue;
             }
-
-            consultant = currentConsultant.get();
-            rocketChatUserId = currentConsultant.get().getRocketChatId();
-
           } else {
             writeToImportLog(String.format("Consultant with id %s not found. Skipped entry.",
                 importRecord.getConsultantId()));
@@ -227,7 +218,6 @@ public class ConsultantImportService {
 
         if (importRecord.getConsultantId() == null) {
           consultant = this.consultantCreatorService.createNewConsultant(importRecord, roles);
-          rocketChatUserId = consultant.getRocketChatId();
 
           logMessage = "Keycloak-ID: " + consultant.getId();
           writeToImportLog(logMessage);
@@ -240,115 +230,12 @@ public class ConsultantImportService {
         }
 
         // create relations to agencies
-        Set<ConsultantAgency> consultantAgencies = new HashSet<>();
-        for (Long agencyId : agencyIds) {
-          if (!consultantAgencyService.isConsultantInAgency(consultant.getId(), agencyId)) {
-            consultantAgencies.add(consultantAgencyService
-                .saveConsultantAgency(getConsultantAgency(consultant, agencyId)));
-          }
-        }
-        consultant.setConsultantAgencies(consultantAgencies);
-
         logMessage = "Agencies: " + agencyIds.stream().map(String::valueOf)
             .collect(Collectors.joining(","));
         writeToImportLog(logMessage);
-
-        // Enquiries
-        List<ConsultantSessionResponseDTO> consultantSessionResponseDtoList =
-            sessionService.getSessionsForConsultant(consultant, SessionStatus.NEW.getValue());
-        if (isNotEmpty(consultantSessionResponseDtoList)) {
-          for (ConsultantSessionResponseDTO consultantSessionResponseDTO : consultantSessionResponseDtoList) {
-            try {
-              rocketChatService
-                  .addTechnicalUserToGroup(consultantSessionResponseDTO.getSession().getGroupId());
-              // Add user to Rocket.Chat group
-              rocketChatService.addUserToGroup(rocketChatUserId,
-                  consultantSessionResponseDTO.getSession().getGroupId());
-              logMessage = String.format("Consultant added to rc group %s (enquiry).",
-                  consultantSessionResponseDTO.getSession().getGroupId());
-
-              // Add user to Rocket.Chat feedback group if feedback group is existing
-              if (consultantSessionResponseDTO.getSession().getFeedbackGroupId() != null) {
-                rocketChatService.addUserToGroup(rocketChatUserId,
-                    consultantSessionResponseDTO.getSession().getFeedbackGroupId());
-                logMessage += String.format("Consultant added to rc feedback group %s (enquiry).",
-                    consultantSessionResponseDTO.getSession().getFeedbackGroupId());
-              }
-              writeToImportLog(logMessage);
-              try {
-                rocketChatService.removeTechnicalUserFromGroup(
-                    consultantSessionResponseDTO.getSession().getGroupId());
-              } catch (RocketChatRemoveUserFromGroupException e) {
-                logMessage = String.format(
-                    "ERROR: Technical user could not be removed from rc group %s (enquiry).",
-                    consultantSessionResponseDTO.getSession().getGroupId());
-                writeToImportLog(logMessage);
-              }
-            } catch (Exception e) {
-              throw new ImportException(String.format(
-                  "ERROR: Consultant could not be added to rc group %s: Technical user could not be added to group (enquiry).",
-                  consultantSessionResponseDTO.getSession().getGroupId()));
-            }
-          }
-        }
-
-        // Team-sessions
-        logMessage = "";
-        List<ConsultantSessionResponseDTO> consultantTeamSessionResponseDtoList =
-            sessionService.getTeamSessionsForConsultant(consultant);
-        if (isNotEmpty(consultantTeamSessionResponseDtoList)) {
-          for (ConsultantSessionResponseDTO consultantTeamSessionResponseDto : consultantTeamSessionResponseDtoList) {
-
-            try {
-              rocketChatService.addTechnicalUserToGroup(
-                  consultantTeamSessionResponseDto.getSession().getGroupId());
-              ConsultingTypeSettings consultingTypeSettings =
-                  consultingTypeManager.getConsultingTypeSettings(ConsultingType
-                      .valueOf(consultantTeamSessionResponseDto.getSession().getConsultingType())
-                      .get());
-              boolean isMainConsultant = keycloakAdminClientService
-                  .userHasAuthority(consultant.getId(), Authority.VIEW_ALL_FEEDBACK_SESSIONS)
-                  || roles.contains(UserRole.U25_MAIN_CONSULTANT.name());
-
-              // Add user to Rocket.Chat group if it is no U25 session or if it is an U25 main
-              // consultant
-              if (!consultingTypeSettings.getConsultingType().equals(ConsultingType.U25)
-                  || isMainConsultant) {
-                rocketChatService.addUserToGroup(rocketChatUserId,
-                    consultantTeamSessionResponseDto.getSession().getGroupId());
-                logMessage = String.format("Consultant added to rc group %s (team-session).",
-                    consultantTeamSessionResponseDto.getSession().getGroupId());
-              }
-
-              // Add user to Rocket.Chat feedback group if feedback group is existing and user has
-              // the right to view all feedback sessions
-              if (consultantTeamSessionResponseDto.getSession().getFeedbackGroupId() != null
-                  && isMainConsultant) {
-
-                rocketChatService.addUserToGroup(rocketChatUserId,
-                    consultantTeamSessionResponseDto.getSession().getFeedbackGroupId());
-                logMessage +=
-                    String.format("Consultant added to rc feedback group %s (team-session).",
-                        consultantTeamSessionResponseDto.getSession().getFeedbackGroupId());
-              }
-
-              writeToImportLog(logMessage);
-              try {
-                rocketChatService.removeTechnicalUserFromGroup(
-                    consultantTeamSessionResponseDto.getSession().getGroupId());
-              } catch (RocketChatRemoveUserFromGroupException e) {
-                logMessage = String.format(
-                    "ERROR: Technical user could not be removed from rc group %s (team-session).",
-                    consultantTeamSessionResponseDto.getSession().getGroupId());
-                writeToImportLog(logMessage);
-              }
-            } catch (Exception e) {
-              throw new ImportException(String.format(
-                  "ERROR: Consultant could not be added to rc group %s: Technical user could not be added to group (team-session).",
-                  consultantTeamSessionResponseDto.getSession().getGroupId()));
-            }
-          }
-        }
+        this.consultantAgencyRelationCreatorService
+            .createConsultantAgencyRelations(importRecord.getConsultantId(), agencyIds, roles,
+                this::writeToImportLog);
 
         logMessage = "=== END === " + importRecord.getUsername() + " ===" + NEWLINE_CHAR;
         writeToImportLog(logMessage);
@@ -376,21 +263,12 @@ public class ConsultantImportService {
     }
 
     try {
-      Files.write(Paths.get(protocolFile), (message + NEWLINE_CHAR).getBytes(StandardCharsets.UTF_8),
-          StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+      Files
+          .write(Paths.get(protocolFile), (message + NEWLINE_CHAR).getBytes(StandardCharsets.UTF_8),
+              StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  private ConsultantAgency getConsultantAgency(Consultant consultant, Long agencyId) {
-    ConsultantAgency consultantAgency = new ConsultantAgency();
-    consultantAgency.setAgencyId(agencyId);
-    consultantAgency.setConsultant(consultant);
-    consultantAgency.setCreateDate(LocalDateTime.now());
-    consultantAgency.setUpdateDate(LocalDateTime.now());
-
-    return consultantAgency;
   }
 
   private ImportRecord getImportRecord(CSVRecord record) {

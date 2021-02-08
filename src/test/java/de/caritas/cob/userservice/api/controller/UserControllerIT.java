@@ -16,6 +16,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSI
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSION_FOR_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_COUNT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_OFFSET;
@@ -100,6 +101,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -682,8 +684,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1677,8 +1678,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1711,8 +1711,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -2197,6 +2196,44 @@ public class UserControllerIT {
 
     verify(chatService, times(1))
         .updateChat(Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Method: fetchSessionForConsultant
+   *
+   */
+  @Test
+  public void fetchSessionForConsultant_Should_ReturnOk_WhenRequestOk() throws Exception {
+
+    mvc.perform(get(PATH_GET_SESSION_FOR_CONSULTANT)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(sessionService, atLeastOnce())
+        .fetchSessionForConsultant(Mockito.any(), Mockito.any());
+
+  }
+
+  @Test
+  public void fetchSessionForConsultant_Should_ReturnInternalServerError_WhenAuthorizedButUserNotFound()
+      throws Exception {
+
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenThrow(new InternalServerErrorException(""));
+
+    mvc.perform(get(PATH_GET_SESSION_FOR_CONSULTANT)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+
+    verify(sessionService, never())
+        .fetchSessionForConsultant(Mockito.any(), Mockito.any());
+
   }
 
   private String convertObjectToJson(Object object) throws JsonProcessingException {

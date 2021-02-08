@@ -27,7 +27,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/EventType'
+              $ref: '#/components/schemas/LiveEventMessage'
       responses:
         200:
           description: OK - successfull operation
@@ -38,7 +38,49 @@ paths:
 
 components:
   schemas:
+    LiveEventMessage:
+      type: object
+      required:
+        - eventType
+      properties:
+        eventType:
+          $ref: '#/components/schemas/EventType'
+        eventContent:
+          $ref: '#/components/schemas/EventContent'
+
     EventType:
       type: string
       enum:
         - "directMessage"
+        - "videoCallRequest"
+        - "videoCallDeny"
+
+    EventContent:
+      description: general used object for all possible incoming DTOs used for socket transfer
+      type:
+        object
+
+    VideoCallRequestDTO:
+      description: the request DTO for event type videoCallRequest
+      type: object
+      required:
+        - videoCallUrl
+        - username
+        - rcRoomId
+      properties:
+        videoCallUrl:
+          type: string
+          example: video.domain.com/44c7644a-5977-11eb-ae93-0242ac130002
+          description: The url of the video server
+        username:
+          type: string
+          example: consultant
+          description: The username of the calling user
+        rcUserId:
+          type: string
+          example: "ag89h3tjkerg94t"
+          description: The Rocket.Chat user id of calling user
+        rcGroupId:
+          type: string
+          example: "xGklslk2JJKK"
+          description: The Rocket.Chat room id of the session

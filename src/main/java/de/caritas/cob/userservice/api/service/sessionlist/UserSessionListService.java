@@ -85,25 +85,13 @@ public class UserSessionListService {
         rocketChatRoomInformation.getReadMessages(), groupId));
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      updateUserSessionValuesForAvailableLastMessage(rocketChatRoomInformation, rcUserId,
-          userSessionDTO, session, groupId);
+      new AvailableLastMessageUpdater(this.sessionListAnalyser)
+          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
+              userSessionDTO::setLatestMessage, session, groupId);
     } else {
       userSessionDTO.setLatestMessage(Helper.UNIXTIME_0);
     }
     return userSessionDTO;
-  }
-
-  private void updateUserSessionValuesForAvailableLastMessage(
-      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
-      UserSessionResponseDTO userSessionDTO, SessionDTO session, String groupId) {
-    RoomsLastMessageDTO roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom()
-        .get(groupId);
-    session.setLastMessage(isNotBlank(roomsLastMessage.getMessage()) ? sessionListAnalyser
-        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
-    session.setMessageDate(Helper.getUnixTimestampFromDate(roomsLastMessage.getTimestamp()));
-    userSessionDTO.setLatestMessage(roomsLastMessage.getTimestamp());
-    session.setAttachment(sessionListAnalyser
-        .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
   }
 
   private List<UserSessionResponseDTO> updateUserChatValues(List<UserSessionResponseDTO> chats,
