@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 import java.util.NoSuchElementException;
@@ -181,7 +182,8 @@ public class LogService {
    * @param exception the exception
    */
   public static void logInternalServerError(Exception exception) {
-    LOGGER.error("{}", getStackTrace(exception));
+    LOGGER.error("UserService Api: {}, {}, {}", getStackTrace(exception), exception.getMessage(),
+        nonNull(exception.getCause()) ? getStackTrace(exception.getCause()) : "No Cause");
   }
 
   /**
