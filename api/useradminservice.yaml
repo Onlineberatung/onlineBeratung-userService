@@ -366,8 +366,10 @@ paths:
     post:
       tags:
         - admin-user-controller
-      summary: 'Change the assigned consultants of an agency when type of agency is changed from
-      team-agency to default and vice-versa [Authorization: Role: user-admin]'
+      summary: 'Change an agency from team-agency to default and vice-versa and switch the
+      associated consultant accounts to team consultant or default consultant. Ongoing team
+      counselings change to 1:1 when converting agency to default status. 1:1 counselings remain
+      single counselings when swapping the agency to team-agency. [Authorization: Role: user-admin]'
       operationId: changeAgencyType
       parameters:
         - name: agencyId
@@ -381,9 +383,7 @@ paths:
         content:
           'application/json':
             schema:
-              type: boolean
-              description: 'Flag to decide if assigned consultants will be removed from team
-              sessions or tagged as team consultants.'
+              $ref: '#/components/schemas/AgencyTypeDTO'
       responses:
         200:
           description: OK - assigned consultants were changed successfully
@@ -818,6 +818,17 @@ components:
           type: string
         value:
           type: string
+
+    AgencyTypeDTO:
+      type: object
+      required:
+        - agencyType
+      properties:
+        agencyType:
+          type: string
+          enum:
+            - 'TEAM_AGENCY'
+            - 'DEFAULT_AGENCY'
 
   securitySchemes:
     Bearer:

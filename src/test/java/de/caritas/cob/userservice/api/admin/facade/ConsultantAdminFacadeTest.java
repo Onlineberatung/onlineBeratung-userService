@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
+import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
+import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -9,7 +11,7 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
-import de.caritas.cob.userservice.api.exception.httpresponses.CustomHttpStatusException;
+import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,22 +90,17 @@ public class ConsultantAdminFacadeTest {
     verify(this.consultantAdminService, times(1)).updateConsultant(any(), any());
   }
 
-  @Test(expected = CustomHttpStatusException.class)
-  public void changeAgencyType_Should_throwCustomValidationHttpStatusException_When_isTeamAgencyIsNull() {
-    this.consultantAdminFacade.changeAgencyType(1L, null);
-  }
-
   @Test
-  public void changeAgencyType_Should_callMarkAllAssignedConsultantsAsTeamConsultant_When_isTeamAgencyIsTrue() {
-    this.consultantAdminFacade.changeAgencyType(1L, true);
+  public void changeAgencyType_Should_callMarkAllAssignedConsultantsAsTeamConsultant_When_typeIsTeamAgency() {
+    this.consultantAdminFacade.changeAgencyType(1L, new AgencyTypeDTO().agencyType(TEAM_AGENCY));
 
     verify(this.consultantAgencyAdminService, times(1))
         .markAllAssignedConsultantsAsTeamConsultant(1L);
   }
 
   @Test
-  public void changeAgencyType_Should_callRemoveConsultantsFromTeamSessionsByAgencyId_When_isTeamAgencyIsFalse() {
-    this.consultantAdminFacade.changeAgencyType(1L, false);
+  public void changeAgencyType_Should_callRemoveConsultantsFromTeamSessionsByAgencyId_When_typeIsDefaultAgency() {
+    this.consultantAdminFacade.changeAgencyType(1L, new AgencyTypeDTO().agencyType(DEFAULT_AGENCY));
 
     verify(this.consultantAgencyAdminService, times(1))
         .removeConsultantsFromTeamSessionsByAgencyId(1L);

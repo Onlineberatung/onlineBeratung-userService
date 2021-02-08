@@ -65,11 +65,12 @@ public class ConsultantAgencyAdminService {
    * @param agencyId the id of the agency
    */
   public void markAllAssignedConsultantsAsTeamConsultant(Long agencyId) {
-    List<ConsultantAgency> byAgencyId = this.consultantAgencyRepository.findByAgencyId(agencyId);
-    if (isEmpty(byAgencyId)) {
+    List<ConsultantAgency> consultantAgencies = this.consultantAgencyRepository
+        .findByAgencyId(agencyId);
+    if (isEmpty(consultantAgencies)) {
       throw new NotFoundException(String.format("Agency with id %s does not exist", agencyId));
     }
-    byAgencyId.stream()
+    consultantAgencies.stream()
         .map(ConsultantAgency::getConsultant)
         .filter(this::notAlreadyTeamConsultant)
         .forEach(this::markConsultantAsTeamConsultant);
