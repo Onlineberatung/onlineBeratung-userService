@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
+package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

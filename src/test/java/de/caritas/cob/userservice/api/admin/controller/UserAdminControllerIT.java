@@ -51,6 +51,7 @@ public class UserAdminControllerIT {
   protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
   protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultant/%s/agencies";
   protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s/agency";
+  protected static final String AGENCY_CHANGE_TYPE_PATH = ROOT_PATH + "/agency/1/changetype";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
@@ -252,6 +253,15 @@ public class UserAdminControllerIT {
 
     verify(this.consultantAdminFacade, times(1))
         .createNewConsultantAgency(eq(consultantId), eq(createConsultantAgencyDTO));
+  }
+
+  @Test
+  public void changeAgencyType_Should_returnOk_When_parametersAreValid() throws Exception {
+    this.mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1)).changeAgencyType(any(), any());
   }
 
 }

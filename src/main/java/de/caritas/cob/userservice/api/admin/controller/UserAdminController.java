@@ -5,6 +5,7 @@ import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
+import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
@@ -189,5 +190,17 @@ public class UserAdminController implements UseradminApi {
     ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAdminFacade
         .findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
+  }
+
+  /**
+   * Entry point to handle consultant data when agency type changes.
+   *
+   * @param agencyId      the id of the changed agency
+   * @param agencyTypeDTO contains the target type
+   */
+  @Override
+  public ResponseEntity<Void> changeAgencyType(Long agencyId, @Valid AgencyTypeDTO agencyTypeDTO) {
+    this.consultantAdminFacade.changeAgencyType(agencyId, agencyTypeDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

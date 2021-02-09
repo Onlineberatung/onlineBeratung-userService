@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.service;
+package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
