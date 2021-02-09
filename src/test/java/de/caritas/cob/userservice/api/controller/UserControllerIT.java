@@ -684,8 +684,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1679,8 +1678,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1713,8 +1711,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
