@@ -33,6 +33,7 @@ import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;

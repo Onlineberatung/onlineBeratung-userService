@@ -39,9 +39,9 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESP
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,7 +77,8 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -184,7 +185,7 @@ public class RocketChatServiceTest {
   @Mock
   Logger logger;
   @Mock
-  RocketChatCredentialsHelper rcCredentialsHelper;
+  RocketChatCredentialsProvider rcCredentialsHelper;
   private HttpHeaders HTTP_HEADERS = new HttpHeaders() {
     private static final long serialVersionUID = 1L;
 

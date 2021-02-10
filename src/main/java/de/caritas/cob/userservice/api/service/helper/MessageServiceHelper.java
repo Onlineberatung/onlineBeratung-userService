@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -34,12 +35,12 @@ public class MessageServiceHelper {
 
   private final RestTemplate restTemplate;
   private final ServiceHelper serviceHelper;
-  private final RocketChatCredentialsHelper rcCredentialHelper;
+  private final RocketChatCredentialsProvider rcCredentialHelper;
   private final UserHelper userHelper;
 
   @Autowired
   public MessageServiceHelper(RestTemplate restTemplate, ServiceHelper serviceHelper,
-      RocketChatCredentialsHelper rcCredentialHelper, UserHelper userHelper) {
+      RocketChatCredentialsProvider rcCredentialHelper, UserHelper userHelper) {
     this.serviceHelper = serviceHelper;
     this.restTemplate = restTemplate;
     this.rcCredentialHelper = rcCredentialHelper;

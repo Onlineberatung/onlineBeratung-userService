@@ -49,10 +49,10 @@ import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.helper.RocketChatRollbackHelper;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +84,7 @@ public class AssignSessionFacadeTest {
   @Mock
   ConsultantService consultantService;
   @Mock
-  RocketChatRollbackHelper rocketChatRollbackHelper;
+  RocketChatRollbackService rocketChatRollbackService;
   @Mock
   LogService logService;
   @Mock
@@ -242,7 +242,7 @@ public class AssignSessionFacadeTest {
 
     verify(logService, times(1)).logInternalServerError(anyString(),
         Mockito.eq(rcAddUserEx));
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -266,7 +266,7 @@ public class AssignSessionFacadeTest {
 
     verify(logService, times(1)).logInternalServerError(anyString(),
         Mockito.eq(rcRemoveUserEx));
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -284,7 +284,7 @@ public class AssignSessionFacadeTest {
 
     verify(logService, times(1)).logInternalServerError(anyString(),
         Mockito.eq(rcaddTechUserUserEx));
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -298,7 +298,7 @@ public class AssignSessionFacadeTest {
     assignSessionFacade.assignSession(U25_SESSION_WITH_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verify(logService, times(1)).logInternalServerError(anyString());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -319,7 +319,7 @@ public class AssignSessionFacadeTest {
 
     verify(logService, times(1)).logInternalServerError(anyString(),
         Mockito.eq(keycloakEx));
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -336,7 +336,7 @@ public class AssignSessionFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         FEEDBACKSESSION_WITHOUT_CONSULTANT, FEEDBACKSESSION_WITHOUT_CONSULTANT.getConsultant(),
         FEEDBACKSESSION_WITHOUT_CONSULTANT.getStatus());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -424,7 +424,7 @@ public class AssignSessionFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, U25_SESSION_WITHOUT_CONSULTANT.getConsultant(),
         U25_SESSION_WITHOUT_CONSULTANT.getStatus());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -448,7 +448,7 @@ public class AssignSessionFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, U25_SESSION_WITHOUT_CONSULTANT.getConsultant(),
         U25_SESSION_WITHOUT_CONSULTANT.getStatus());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -467,7 +467,7 @@ public class AssignSessionFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, U25_SESSION_WITHOUT_CONSULTANT.getConsultant(),
         U25_SESSION_WITHOUT_CONSULTANT.getStatus());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -504,7 +504,7 @@ public class AssignSessionFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, U25_SESSION_WITHOUT_CONSULTANT.getConsultant(),
         U25_SESSION_WITHOUT_CONSULTANT.getStatus());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -523,7 +523,7 @@ public class AssignSessionFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, U25_SESSION_WITHOUT_CONSULTANT.getConsultant(),
         U25_SESSION_WITHOUT_CONSULTANT.getStatus());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 
@@ -542,7 +542,7 @@ public class AssignSessionFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, U25_SESSION_WITHOUT_CONSULTANT.getConsultant(),
         U25_SESSION_WITHOUT_CONSULTANT.getStatus());
-    verify(rocketChatRollbackHelper, times(1))
+    verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
   }
 

@@ -4,12 +4,14 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_LIS
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_LIST;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
 import java.lang.reflect.Method;
 import java.util.List;
 import org.junit.Before;
@@ -26,8 +28,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AgencyServiceHelperTest {

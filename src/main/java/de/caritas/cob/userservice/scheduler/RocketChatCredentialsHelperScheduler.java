@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.scheduler;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class RocketChatCredentialsHelperScheduler {
 
   @Autowired
-  private RocketChatCredentialsHelper rcCredentialsHelper;
+  private RocketChatCredentialsProvider rcCredentialsHelper;
 
   @PostConstruct
   public void postConstructInitializer() {

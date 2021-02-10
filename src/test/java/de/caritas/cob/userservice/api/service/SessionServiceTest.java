@@ -96,8 +96,7 @@ public class SessionServiceTest {
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
       ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
-      LocalDateTime
-          .now(), LocalDateTime.now());
+      LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
   private final List<Session> SESSION_LIST = Arrays.asList(SESSION, SESSION_2);
   private final List<Session> SESSION_LIST_SINGLE = Collections.singletonList(SESSION);

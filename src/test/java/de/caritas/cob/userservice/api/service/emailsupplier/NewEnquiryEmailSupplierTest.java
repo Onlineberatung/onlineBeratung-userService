@@ -63,8 +63,10 @@ public class NewEnquiryEmailSupplierTest {
     absentConsultant.setEmail("email");
     when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
         null,
-        new ConsultantAgency(0L, new Consultant(), 0L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(1L, absentConsultant, 1L, LocalDateTime.now(), LocalDateTime.now())));
+        new ConsultantAgency(0L, new Consultant(), 0L, LocalDateTime.now(), LocalDateTime.now(),
+            LocalDateTime.now()),
+        new ConsultantAgency(1L, absentConsultant, 1L, LocalDateTime.now(), LocalDateTime.now(),
+            LocalDateTime.now())));
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
 
@@ -75,8 +77,10 @@ public class NewEnquiryEmailSupplierTest {
   public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound()
       throws AgencyServiceHelperException {
     when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
-        new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now())));
+        new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, LocalDateTime.now(), LocalDateTime.now(),
+            LocalDateTime.now()),
+        new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now(),
+            LocalDateTime.now())));
     when(agencyServiceHelper.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 

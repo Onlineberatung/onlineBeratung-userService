@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,6 +67,9 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
 
     assertThat(resultDTO, notNullValue());
     assertThat(resultDTO.getEmbedded(), hasSize(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
+    assertThat(resultDTO.getEmbedded().get(0).getLinks().getDelete().getHref(), notNullValue());
+    assertThat(resultDTO.getEmbedded().get(0).getLinks().getDelete().getMethod(),
+        is(MethodEnum.DELETE));
     assertThat(resultDTO.getLinks(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf().getHref(),

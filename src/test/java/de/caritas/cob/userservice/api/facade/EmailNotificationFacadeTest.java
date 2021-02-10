@@ -36,7 +36,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
@@ -65,7 +65,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
@@ -94,7 +94,8 @@ public class EmailNotificationFacadeTest {
       new Consultant(CONSULTANT_ID, "XXX", USERNAME_CONSULTANT_ENCODED, "consultant", "consultant",
           "consultant@domain.de", false, false, null, false, 1L, null, null, null, null, null);
   private final Consultant CONSULTANT_WITHOUT_MAIL = new Consultant(CONSULTANT_ID, "XXX",
-      "consultant", "consultant", "consultant", "", false, false, null, false, 1L, null, null, null, null, null);
+      "consultant", "consultant", "consultant", "", false, false, null, false, 1L, null, null, null,
+      null, null);
   private final Consultant CONSULTANT2 =
       new Consultant(CONSULTANT_ID_2, "XXX", "consultant2", "consultant2", "consultant2",
           "consultant2@domain.de", false, false, null, false, 1L, null, null, null, null, null);
@@ -109,12 +110,14 @@ public class EmailNotificationFacadeTest {
   private final User USER = new User(USER_ID, USERNAME_ENCODED, "email@email.de", null);
   private final User USER_NO_EMAIL = new User(USER_ID, "username", "", null);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now());
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
+          LocalDateTime.now());
   private final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now());
+      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
+          LocalDateTime.now());
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, LocalDateTime.now(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
   private final Session SESSION =
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID,
           SessionStatus.INITIAL,
@@ -581,7 +584,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verifyZeroInteractions(logger);
+    verifyNoInteractions(logger);
   }
 
   @Test

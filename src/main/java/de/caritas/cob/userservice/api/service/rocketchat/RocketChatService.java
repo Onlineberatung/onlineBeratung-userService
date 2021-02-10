@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.rocketchat;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
@@ -34,7 +34,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.Subscriptio
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
-import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
+import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -106,7 +106,7 @@ public class RocketChatService {
   private String rocketChatApiCleanRoomHistory;
 
   private final @NonNull RestTemplate restTemplate;
-  private final @NonNull RocketChatCredentialsHelper rcCredentialHelper;
+  private final @NonNull RocketChatCredentialsProvider rcCredentialHelper;
 
   /**
    * Creation of a private Rocket.Chat group.

@@ -13,6 +13,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +50,7 @@ public class MessageServiceHelperTest {
   @Mock
   private ServiceHelper serviceHelper;
   @Mock
-  private RocketChatCredentialsHelper rcCredentialHelper;
+  private RocketChatCredentialsProvider rcCredentialHelper;
   @Mock
   private UserHelper userHelper;
   @Mock

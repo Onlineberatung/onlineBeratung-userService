@@ -331,7 +331,8 @@ public class TestConstants {
       USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null,
       null, null, null);
   public static final Consultant CONSULTANT_NO_RC_USER_ID = new Consultant(CONSULTANT_ID, "",
-      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null, null, null, null);
+      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null, null,
+      null, null);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
           "last name", EMAIL, false, false, null, false, null, null, null, null, null, null);
@@ -423,15 +424,19 @@ public class TestConstants {
    * ConsultantAgency
    */
   public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now())};
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
+          LocalDateTime.now())};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, LocalDateTime.now(), LocalDateTime.now());
+      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, LocalDateTime.now(), LocalDateTime.now(),
+          LocalDateTime.now());
   public static final ConsultantAgency CONSULTANT_AGENCY_3 =
-      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3, LocalDateTime.now(), LocalDateTime.now());
+      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3, LocalDateTime.now(), LocalDateTime.now(),
+          LocalDateTime.now());
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
-      ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false, null,
+      ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false,
+      null,
       null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null, null);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false, null,
@@ -788,8 +793,9 @@ public class TestConstants {
           NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
           null);
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT =
-      Collections.singletonList(new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
-          new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT));
+      Collections.singletonList(
+          new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT));
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT =
       Arrays.asList(
           new RoomsUpdateDTO(RC_GROUP_ID_4, "name1", "fname1", "P", USER_DTO_1, true, false,
@@ -915,7 +921,8 @@ public class TestConstants {
   public static final String USER_ROLE = "user";
   public static final Set<String> USER_ROLES = new HashSet<>(Collections.singletonList(USER_ROLE));
   public static final String CONSULTANT_ROLE = "consultant";
-  public static final Set<String> CONSULTANT_ROLES = new HashSet<>(Collections.singletonList(CONSULTANT_ROLE));
+  public static final Set<String> CONSULTANT_ROLES = new HashSet<>(
+      Collections.singletonList(CONSULTANT_ROLE));
   /**
    * Registration values
    */

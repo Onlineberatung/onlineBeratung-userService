@@ -24,7 +24,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSyste
 import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import org.junit.Before;
 import org.junit.Test;

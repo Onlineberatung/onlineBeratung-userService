@@ -56,9 +56,9 @@ public class ChatHelperTest {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
             new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, LocalDateTime.now(),
-                LocalDateTime.now()),
+                LocalDateTime.now(), LocalDateTime.now()),
             new ConsultantAgency(AGENCY_ID_2, consultant, AGENCY_ID_2, LocalDateTime.now(),
-                LocalDateTime.now())};
+                LocalDateTime.now(), LocalDateTime.now())};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<ConsultantAgency>(Arrays.asList(consultantAgencyArray));
 
@@ -74,9 +74,9 @@ public class ChatHelperTest {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
             new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, LocalDateTime.now(),
-                LocalDateTime.now()),
+                LocalDateTime.now(), LocalDateTime.now()),
             new ConsultantAgency(AGENCY_ID_3, consultant, AGENCY_ID_3, LocalDateTime.now(),
-                LocalDateTime.now())};
+                LocalDateTime.now(), LocalDateTime.now())};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<ConsultantAgency>(Arrays.asList(consultantAgencyArray));
 

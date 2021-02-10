@@ -14,7 +14,7 @@ import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 
 /**
  * Facade for capsuling starting a chat

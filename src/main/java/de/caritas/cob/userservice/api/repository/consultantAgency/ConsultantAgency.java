@@ -55,4 +55,7 @@ public class ConsultantAgency {
   @Column(name = "update_date")
   private LocalDateTime updateDate;
 
+  @Column(name = "delete_date")
+  private LocalDateTime deleteDate;
+
 }

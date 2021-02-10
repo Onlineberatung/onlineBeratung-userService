@@ -1,24 +1,23 @@
-package de.caritas.cob.userservice.api.service.helper;
+package de.caritas.cob.userservice.api.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RocketChatRollbackHelper {
+public class RocketChatRollbackService {
 
   private final RocketChatService rocketChatService;
-  private final RocketChatCredentialsHelper rcCredentialsHelper;
+  private final RocketChatCredentialsProvider rcCredentialsHelper;
 
   @Autowired
-  public RocketChatRollbackHelper(RocketChatService rocketChatService,
-      RocketChatCredentialsHelper rcCredentialsHelper) {
+  public RocketChatRollbackService(RocketChatService rocketChatService,
+      RocketChatCredentialsProvider rcCredentialsHelper) {
     this.rocketChatService = rocketChatService;
     this.rcCredentialsHelper = rcCredentialsHelper;
   }

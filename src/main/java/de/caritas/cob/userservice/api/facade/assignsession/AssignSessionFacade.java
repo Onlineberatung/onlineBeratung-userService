@@ -20,10 +20,10 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.helper.RocketChatRollbackHelper;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +51,7 @@ public class AssignSessionFacade {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
-  private final @NonNull RocketChatRollbackHelper rocketChatRollbackHelper;
+  private final @NonNull RocketChatRollbackService rocketChatRollbackService;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
 
@@ -162,7 +162,7 @@ public class AssignSessionFacade {
       Consultant initialConsultant, SessionStatus initialStatus,
       List<GroupMemberDTO> memberList) {
     rollbackSessionUpdate(session, initialConsultant, initialStatus);
-    rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(session.getGroupId(),
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(session.getGroupId(),
         memberList);
     if (nonNull(initialConsultant)) {
       try {
@@ -185,7 +185,7 @@ public class AssignSessionFacade {
       rollbackSessionUpdate(session, initialConsultant, initialStatus);
 
       if (session.hasFeedbackChat()) {
-        rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(groupId, memberList);
+        rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(groupId, memberList);
       }
 
       String message = String.format(

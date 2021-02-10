@@ -12,7 +12,9 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGr
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -25,7 +27,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RocketChatRollbackHelperTest {
+public class RocketChatRollbackServiceTest {
 
   private final String MEMBER_ID = "asdkds9";
   private final String STATUS = "offline";
@@ -45,13 +47,13 @@ public class RocketChatRollbackHelperTest {
       new RocketChatAddUserToGroupException(EXCEPTION);
 
   @InjectMocks
-  private RocketChatRollbackHelper rocketChatRollbackHelper;
+  private RocketChatRollbackService rocketChatRollbackService;
   @Mock
   private RocketChatService rocketChatService;
   @Mock
   Logger logger;
   @Mock
-  private RocketChatCredentialsHelper rcCredentialHelper;
+  private RocketChatCredentialsProvider rcCredentialHelper;
 
   @Before
   public void setup() {
@@ -73,7 +75,7 @@ public class RocketChatRollbackHelperTest {
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
@@ -90,7 +92,7 @@ public class RocketChatRollbackHelperTest {
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
@@ -107,7 +109,7 @@ public class RocketChatRollbackHelperTest {
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
@@ -124,7 +126,7 @@ public class RocketChatRollbackHelperTest {
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackHelper.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
