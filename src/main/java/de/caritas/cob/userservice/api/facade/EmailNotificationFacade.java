@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
 import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;

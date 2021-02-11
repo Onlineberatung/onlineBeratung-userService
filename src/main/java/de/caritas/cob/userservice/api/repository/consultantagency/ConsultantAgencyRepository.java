@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.repository.consultantAgency;
+package de.caritas.cob.userservice.api.repository.consultantagency;
 
 import java.util.List;
 import org.springframework.data.repository.CrudRepository;

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.repository.sessionData;
+package de.caritas.cob.userservice.api.repository.sessiondata;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.repository.sessionData;
+package de.caritas.cob.userservice.api.repository.sessiondata;
 
 import java.util.List;
 import org.springframework.data.repository.CrudRepository;

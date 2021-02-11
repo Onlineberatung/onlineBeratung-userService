@@ -14,17 +14,15 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionDataRepository;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.util.ArrayList;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)

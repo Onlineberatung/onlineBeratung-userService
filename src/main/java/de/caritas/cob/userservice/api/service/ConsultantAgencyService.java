@@ -2,12 +2,11 @@ package de.caritas.cob.userservice.api.service;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import org.springframework.beans.factory.annotation.Autowired;

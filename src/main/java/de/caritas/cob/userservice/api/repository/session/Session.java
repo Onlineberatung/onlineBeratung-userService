@@ -1,11 +1,12 @@
 package de.caritas.cob.userservice.api.repository.session;
 
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +32,6 @@ import org.springframework.lang.Nullable;
 
 /**
  * Represents a session of a user
- * 
  */
 @Entity
 @Table(name = "session")
@@ -41,7 +41,8 @@ import org.springframework.lang.Nullable;
 @ToString
 public class Session {
 
-  public Session() {}
+  public Session() {
+  }
 
   public Session(User user, ConsultingType consultingType, String postcode, Long agencyId,
       SessionStatus status, boolean teamSession, boolean monitoring) {
@@ -50,36 +51,6 @@ public class Session {
     this.postcode = postcode;
     this.agencyId = agencyId;
     this.status = status;
-    this.teamSession = teamSession;
-    this.monitoring = monitoring;
-  }
-
-  public Session(Long id, User user, Consultant consultant, ConsultingType consultingType,
-      String postcode, Long agencyId, SessionStatus status, Date messageDate, String groupId) {
-    this.id = id;
-    this.user = user;
-    this.consultant = consultant;
-    this.consultingType = consultingType;
-    this.postcode = postcode;
-    this.agencyId = agencyId;
-    this.status = status;
-    this.enquiryMessageDate = messageDate;
-    this.groupId = groupId;
-  }
-
-  public Session(Long id, User user, Consultant consultant, ConsultingType consultingType,
-      @Size(max = 5) String postcode, Long agencyId, SessionStatus status, Date enquiryMessageDate,
-      String groupId, List<SessionData> sessionData, boolean teamSession, boolean monitoring) {
-    this.id = id;
-    this.user = user;
-    this.consultant = consultant;
-    this.consultingType = consultingType;
-    this.postcode = postcode;
-    this.agencyId = agencyId;
-    this.status = status;
-    this.enquiryMessageDate = enquiryMessageDate;
-    this.groupId = groupId;
-    this.sessionData = sessionData;
     this.teamSession = teamSession;
     this.monitoring = monitoring;
   }
@@ -146,69 +117,20 @@ public class Session {
   private LocalDateTime updateDate;
 
   @Override
-  public boolean equals(Object obj) {
-
-    // If i´m compared to myself => true
-    if (obj == this) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-
-    // If the obj ist not an instance of Session => false
-    if (!(obj instanceof Session)) {
+    if (!(o instanceof Session)) {
       return false;
     }
+    Session session = (Session) o;
+    return id.equals(session.id);
+  }
 
-    Session otherSession = (Session) obj;
-
-    if (this.id != otherSession.id) {
-      return false;
-    }
-
-    if (this.agencyId != otherSession.agencyId) {
-      return false;
-    }
-
-    if (this.teamSession != otherSession.teamSession) {
-      return false;
-    }
-
-    if (!this.status.equals(otherSession.status)) {
-      return false;
-    }
-
-    if (!this.consultingType.equals(otherSession.consultingType)) {
-      return false;
-    }
-
-    if (!this.enquiryMessageDate.equals(otherSession.enquiryMessageDate)) {
-      return false;
-    }
-
-    if (!this.postcode.equals(otherSession.postcode)) {
-      return false;
-    }
-
-    if (!this.groupId.equals(otherSession.groupId)) {
-      return false;
-    }
-
-    if (!this.feedbackGroupId.equals(otherSession.feedbackGroupId)) {
-      return false;
-    }
-
-    if (!sessionData.equals(otherSession.sessionData)) {
-      return false;
-    }
-
-    if (!consultant.equals(otherSession.consultant)) {
-      return false;
-    }
-
-    if (!user.equals(otherSession.user)) {
-      return false;
-    }
-
-    return true;
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 
 }

@@ -32,7 +32,7 @@ import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatInterval;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -481,7 +481,7 @@ public class TestConstants {
           AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null,
           IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
-      new Session(SESSION_ID, USER_NO_RC_USER_ID_2, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
   public static final Session U25_SESSION_WITH_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
       CONSULTANT_2, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(),

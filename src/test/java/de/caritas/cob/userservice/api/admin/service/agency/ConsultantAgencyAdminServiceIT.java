@@ -24,6 +24,8 @@ import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +48,9 @@ public class ConsultantAgencyAdminServiceIT {
 
   @Autowired
   private ConsultantRepository consultantRepository;
+
+  @Autowired
+  private ConsultantAgencyRepository consultantAgencyRepository;
 
   @MockBean
   private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
@@ -136,6 +141,20 @@ public class ConsultantAgencyAdminServiceIT {
     assertThat(teamConsultantsAfter, is(lessThan(teamCosnultantsBefore)));
     verify(this.removeConsultantFromRocketChatService, times(1))
         .removeConsultantFromSessions(any());
+  }
+
+  @Test
+  public void markConsultantAgencyForDeletion_Should_setDeletedFlagIndatabase_When_consultantAgencyCanBeDeleted() {
+    ConsultantAgency validRelation = this.consultantAgencyRepository.findAll().iterator().next();
+    String consultantId = validRelation.getConsultant().getId();
+    Long agencyId = validRelation.getAgencyId();
+
+    this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
+
+    ConsultantAgency deletedConsultantAgency =
+        this.consultantAgencyRepository.findByConsultantIdAndAgencyId(consultantId, agencyId)
+            .get(0);
+    assertThat(deletedConsultantAgency.getDeleteDate(), notNullValue());
   }
 
 }

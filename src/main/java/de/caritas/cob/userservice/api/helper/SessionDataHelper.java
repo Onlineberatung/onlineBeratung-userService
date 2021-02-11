@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.helper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,9 +12,9 @@ import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitiali
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionDataKeyRegistration;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionDataType;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
 
 /**
  * 
@@ -38,7 +39,7 @@ public class SessionDataHelper {
    */
   public LinkedHashMap<String, Object> getSessionDataMapFromSession(Session session) {
 
-    LinkedHashMap<String, Object> sessionDataMap = new LinkedHashMap<String, Object>();
+    LinkedHashMap<String, Object> sessionDataMap = new LinkedHashMap<>();
 
     if (session.getSessionData() != null) {
       for (SessionData sessionData : session.getSessionData()) {
@@ -61,7 +62,7 @@ public class SessionDataHelper {
    */
   public List<SessionData> createRegistrationSessionDataList(Session session, UserDTO user) {
 
-    List<SessionData> sessionDataList = new ArrayList<SessionData>();
+    List<SessionData> sessionDataList = new ArrayList<>();
     if (getSessionDataInitializing(session.getConsultingType()).isAddictiveDrugs()) {
       sessionDataList.add(createSessionData(session, SessionDataType.REGISTRATION,
           SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),

@@ -1,5 +1,6 @@
-package de.caritas.cob.userservice.api.repository.sessionData;
+package de.caritas.cob.userservice.api.repository.sessiondata;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -55,41 +56,19 @@ public class SessionData {
   private String value;
 
   @Override
-  public boolean equals(Object obj) {
-
-    // If i´m compared to myself => true
-    if (obj == this) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-
-    // If the obj ist not an instance of SessionData => false
-    if (!(obj instanceof SessionData)) {
+    if (!(o instanceof SessionData)) {
       return false;
     }
-
-    SessionData other = (SessionData) obj;
-
-    if (!this.id.equals(other.id)) {
-      return false;
-    }
-
-    if (!this.session.equals(other.session)) {
-      return false;
-    }
-
-    if (!this.sessionDataType.equals(other.sessionDataType)) {
-      return false;
-    }
-
-    if (!this.key.equals(other.key)) {
-      return false;
-    }
-
-    if (!this.value.equals(other.value)) {
-      return false;
-    }
-
-    return true;
+    SessionData that = (SessionData) o;
+    return id.equals(that.id);
   }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 }

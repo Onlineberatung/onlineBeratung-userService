@@ -14,9 +14,23 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
+import de.caritas.cob.userservice.api.repository.user.User;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -26,18 +40,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionDataKeyRegistration;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionDataType;
-import de.caritas.cob.userservice.api.repository.user.User;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionDataHelperTest {
@@ -47,7 +49,8 @@ public class SessionDataHelperTest {
 
   private final User USER = new User(USER_ID, USERNAME, EMAIL, null);
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
-      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null, null);
+      "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
+      null, null, null);
   private final Session INITALIZED_SESSION_SUCHT = new Session(1L, USER, CONSULTANT,
       ConsultingType.SUCHT, "99999", 0L, SessionStatus.INITIAL, null, null);
   private final Session INITALIZED_SESSION_U25 = new Session(1L, USER, CONSULTANT,
@@ -102,19 +105,19 @@ public class SessionDataHelperTest {
     for (SessionData sessionData : result) {
       switch (sessionData.getKey()) {
         case "addictiveDrugs":
-          assertEquals(sessionData.getValue(), ADDICTIVE_DRUGS);
+          assertEquals(ADDICTIVE_DRUGS, sessionData.getValue());
           break;
         case "age":
-          assertEquals(sessionData.getValue(), AGE);
+          assertEquals(AGE, sessionData.getValue());
           break;
         case "gender":
-          assertEquals(sessionData.getValue(), GENDER);
+          assertEquals(GENDER, sessionData.getValue());
           break;
         case "relation":
-          assertEquals(sessionData.getValue(), RELATION);
+          assertEquals(RELATION, sessionData.getValue());
           break;
         case "state":
-          assertEquals(sessionData.getValue(), STATE);
+          assertEquals(STATE, sessionData.getValue());
           break;
         default:
           fail("Unknown SessionData key");
@@ -147,7 +150,7 @@ public class SessionDataHelperTest {
         .createRegistrationSessionDataList(INITALIZED_SESSION_SUCHT, USER_DTO_WITHOUT_SESSION_DATA);
 
     for (SessionData sessionData : result) {
-      assertEquals(sessionData.getValue(), null);
+      assertNull(sessionData.getValue());
     }
 
   }
@@ -162,7 +165,7 @@ public class SessionDataHelperTest {
         INITALIZED_SESSION_SUCHT, USER_DTO_WITH_EMPTY_SESSION_DATA);
 
     for (SessionData sessionData : result) {
-      assertEquals(sessionData.getValue(), null);
+      assertNull(sessionData.getValue());
     }
 
   }
@@ -188,13 +191,13 @@ public class SessionDataHelperTest {
     List<SessionData> dataList = sessionDataHelper
         .createRegistrationSessionDataList(INITALIZED_SESSION_SUCHT, USER_DTO_WITHOUT_SESSION_DATA);
 
-    assertEquals(null, sessionDataHelper.getValueOfKey(dataList, AGE));
+    assertNull(sessionDataHelper.getValueOfKey(dataList, AGE));
   }
 
   @Test
   public void getValueOfKey_Should_ReturnNullWhenSessionDataListIsNull() {
 
-    assertEquals(null, sessionDataHelper.getValueOfKey(null, AGE));
+    assertNull(sessionDataHelper.getValueOfKey(null, AGE));
   }
 
   @Test

@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultLinks;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyLinks;
 import de.caritas.cob.userservice.api.model.HalLink;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import java.util.List;
 import java.util.stream.Collectors;

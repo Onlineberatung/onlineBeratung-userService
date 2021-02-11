@@ -1,7 +1,8 @@
-package de.caritas.cob.userservice.api.repository.consultantAgency;
+package de.caritas.cob.userservice.api.repository.consultantagency;
 
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -58,4 +59,20 @@ public class ConsultantAgency {
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ConsultantAgency)) {
+      return false;
+    }
+    ConsultantAgency that = (ConsultantAgency) o;
+    return id.equals(that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 }

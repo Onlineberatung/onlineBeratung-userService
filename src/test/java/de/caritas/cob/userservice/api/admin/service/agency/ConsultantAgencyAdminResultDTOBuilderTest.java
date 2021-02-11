@@ -7,7 +7,7 @@ import static org.hamcrest.core.Is.is;
 
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;

@@ -23,7 +23,7 @@ import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
