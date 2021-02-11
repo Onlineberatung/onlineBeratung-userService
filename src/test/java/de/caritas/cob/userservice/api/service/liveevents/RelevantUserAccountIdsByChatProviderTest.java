@@ -83,7 +83,7 @@ public class RelevantUserAccountIdsByChatProviderTest {
   }
 
   private User userWithId(String userId) {
-    return new User(userId, null, null, null);
+    return new User(userId, null, null, null, false);
   }
 
   @Test

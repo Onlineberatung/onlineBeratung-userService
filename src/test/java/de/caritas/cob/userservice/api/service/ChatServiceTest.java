@@ -37,7 +37,7 @@ import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
-import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgencyRepository;
+import de.caritas.cob.userservice.api.repository.chatagency.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import java.time.LocalDate;
 import java.time.LocalTime;

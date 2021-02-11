@@ -24,6 +24,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
@@ -38,13 +39,11 @@ import org.springframework.lang.Nullable;
 @Entity
 @Table(name = "session")
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString
 public class Session {
-
-  public Session() {
-  }
 
   public Session(User user, ConsultingType consultingType, String postcode, Long agencyId,
       SessionStatus status, boolean teamSession, boolean monitoring) {

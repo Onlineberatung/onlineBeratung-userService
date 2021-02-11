@@ -15,7 +15,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
-import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
+import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 

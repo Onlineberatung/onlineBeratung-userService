@@ -11,12 +11,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
+import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;

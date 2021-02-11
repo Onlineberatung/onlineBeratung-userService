@@ -30,7 +30,7 @@ public class SessionDataServiceTest {
 
   private final String USERNAME = "username";
   private final String USER_ID = "9b71cc46-650d-42bb-8299-f8e3f6d7249f";
-  private final User USER = new User(USER_ID, USERNAME, "name@domain.de", null);
+  private final User USER = new User(USER_ID, null, USERNAME, "name@domain.de", false);
   private final String CONSULTANT_ID = "1b71cc46-650d-42bb-8299-f8e3f6d7249a";
   private final String CONSULTANT_ROCKETCHAT_ID = "xN3Mobksn3xdp7gEk";
   private final Consultant CONSULTANT =

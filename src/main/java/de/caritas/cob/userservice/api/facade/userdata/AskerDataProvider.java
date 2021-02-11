@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;

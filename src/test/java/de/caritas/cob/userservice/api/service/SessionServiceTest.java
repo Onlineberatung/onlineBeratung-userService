@@ -86,7 +86,7 @@ public class SessionServiceTest {
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);
-  private final User USER = new User(USER_ID, "username", "name@domain.de", null);
+  private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, ConsultingType.SUCHT, "99999",
       1L, SessionStatus.NEW, new Date(), null, null, null,
       false, false, null, null);

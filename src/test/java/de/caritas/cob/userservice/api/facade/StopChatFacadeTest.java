@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_WEEKLY_PLUS;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_WEEKLY_PLUS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_INTERVAL_WEEKLY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_START_DATETIME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_ACTIVE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_REPETITIVE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static org.junit.Assert.assertEquals;
@@ -185,11 +185,11 @@ public class StopChatFacadeTest {
   }
 
   @Test
-  public void stopChat_Should_ReturnCorrectNextStartDate_When_ChatIsRepetitive()
-      throws RocketChatRemoveSystemMessagesException {
-
-    Chat chatWithDate =
-        new Chat(CHAT_START_DATETIME, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, IS_ACTIVE, RC_GROUP_ID);
+  public void stopChat_Should_ReturnCorrectNextStartDate_When_ChatIsRepetitive() {
+    Chat chatWithDate = new Chat("topic", KREUZBUND, CHAT_START_DATETIME, CHAT_START_DATETIME,
+        1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
+    chatWithDate.setActive(true);
+    chatWithDate.setGroupId("groupId");
 
     when(chatHelper.isChatAgenciesContainConsultantAgency(chatWithDate, CONSULTANT))
         .thenReturn(true);

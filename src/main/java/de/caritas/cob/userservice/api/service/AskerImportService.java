@@ -29,7 +29,7 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;

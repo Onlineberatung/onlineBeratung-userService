@@ -107,8 +107,8 @@ public class EmailNotificationFacadeTest {
   private final Consultant ABSENT_CONSULTANT = new Consultant("XXX", "XXX", "consultant",
       "consultant", "consultant", "consultant@domain.de", true, false, null, false, 1L, null,
       null, null, null, null);
-  private final User USER = new User(USER_ID, USERNAME_ENCODED, "email@email.de", null);
-  private final User USER_NO_EMAIL = new User(USER_ID, "username", "", null);
+  private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
+  private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
           LocalDateTime.now());

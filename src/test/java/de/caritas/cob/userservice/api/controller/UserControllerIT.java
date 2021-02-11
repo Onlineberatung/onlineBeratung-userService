@@ -212,7 +212,7 @@ public class UserControllerIT {
   private final String VALID_ENQUIRY_MESSAGE_BODY = "{\"message\": \"" + MESSAGE + "\"}";
   private final String VALID_ABSENT_MESSAGE_BODY =
       "{\"absent\": true, \"message\": \"" + MESSAGE + "\"}";
-  private final User USER = new User(USER_ID, "username", "name@domain.de", null);
+  private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null, null);

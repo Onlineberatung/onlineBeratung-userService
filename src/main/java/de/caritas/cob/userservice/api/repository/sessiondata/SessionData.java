@@ -12,6 +12,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import lombok.NoArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -20,9 +21,8 @@ import lombok.Setter;
 @Table(name = "session_data")
 @Getter
 @Setter
+@NoArgsConstructor
 public class SessionData {
-
-  public SessionData() {}
 
   public SessionData(Session session, SessionDataType sessionDataType, String key, String value) {
     this.session = session;

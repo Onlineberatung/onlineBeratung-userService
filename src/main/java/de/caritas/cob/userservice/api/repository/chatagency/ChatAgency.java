@@ -1,5 +1,6 @@
-package de.caritas.cob.userservice.api.repository.chatAgency;
+package de.caritas.cob.userservice.api.repository.chatagency;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -46,9 +47,25 @@ public class ChatAgency {
     this.agencyId = agencyId;
   }
 
-
   @Override
   public String toString() {
     return "ChatAgency [id=" + id + ", chat=" + chat.toString() + ", agencyId=" + agencyId + "]";
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ChatAgency)) {
+      return false;
+    }
+    ChatAgency that = (ChatAgency) o;
+    return id.equals(that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 }

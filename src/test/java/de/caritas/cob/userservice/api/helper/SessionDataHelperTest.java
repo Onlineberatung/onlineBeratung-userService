@@ -48,7 +48,7 @@ public class SessionDataHelperTest {
   private SessionDataHelper sessionDataHelper;
   private ConsultingTypeManager consultingTypeManager;
 
-  private final User USER = new User(USER_ID, USERNAME, EMAIL, null);
+  private final User USER = new User(USER_ID, null, USERNAME, EMAIL, false);
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);

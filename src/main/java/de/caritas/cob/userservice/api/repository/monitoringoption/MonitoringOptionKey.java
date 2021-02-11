@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.repository.monitoringOption;
+package de.caritas.cob.userservice.api.repository.monitoringoption;
 
 import java.io.Serializable;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
@@ -8,10 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Composite key for {@link MonitoringOption}
- *
+ * Composite key for {@link MonitoringOption}.
  */
-
 @SuppressWarnings("serial")
 @Getter
 @Setter
@@ -21,6 +19,6 @@ public class MonitoringOptionKey implements Serializable {
 
   private Long sessionId;
   private MonitoringType monitoringType;
-  private String monitoring_key;
+  private String monitoringKey;
   private String key;
 }
