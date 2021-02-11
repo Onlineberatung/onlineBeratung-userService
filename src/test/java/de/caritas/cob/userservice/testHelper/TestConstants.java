@@ -1,5 +1,9 @@
 package de.caritas.cob.userservice.testHelper;
 
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
+import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
@@ -85,9 +89,9 @@ public class TestConstants {
   /**
    * ConsultingTypes
    */
-  public static final String CONSULTING_TYPE_SUCHT_URL_NAME = ConsultingType.SUCHT.getUrlName();
-  public static final ConsultingType CONSULTING_TYPE_SUCHT = ConsultingType.SUCHT;
-  public static final ConsultingType CONSULTING_TYPE_U25 = ConsultingType.U25;
+  public static final String CONSULTING_TYPE_SUCHT_URL_NAME = SUCHT.getUrlName();
+  public static final ConsultingType CONSULTING_TYPE_SUCHT = SUCHT;
+  public static final ConsultingType CONSULTING_TYPE_U25 = U25;
   public static final ConsultingType CONSULTING_TYPE_PREGNANCY = ConsultingType.PREGNANCY;
   public static final ConsultingType CONSULTING_TYPE_AIDS = ConsultingType.AIDS;
   public static final ConsultingType CONSULTING_TYPE_CHILDREN = ConsultingType.CHILDREN;
@@ -462,32 +466,34 @@ public class TestConstants {
   public static final Long ENQUIRY_ID = 1L;
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
-      new Session(SESSION_ID, null, null, null, null, null, null, null, null);
+      new Session(SESSION_ID, null, null, SUCHT, POSTCODE, null, IN_PROGRESS, null, null, null, null, false,
+          false, null, null);
   public static final Session SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID);
+      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, POSTCODE, AGENCY_ID,
+          IN_PROGRESS, new Date(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session ENQUIRY_SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), RC_GROUP_ID);
+      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, POSTCODE, AGENCY_ID,
+          SessionStatus.NEW, new Date(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
+      null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
       null, IS_TEAM_SESSION, IS_MONITORING, null, null);
 
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
+      USER_WITH_RC_ID, null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, ConsultingType.U25, POSTCODE,
-          AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null,
+      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, U25, POSTCODE,
+          AGENCY_ID, IN_PROGRESS, new Date(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null,
           IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
-      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
+      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, SUCHT, POSTCODE,
+          AGENCY_ID, SessionStatus.NEW, new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
+          IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITH_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      CONSULTANT_2, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(),
+      CONSULTANT_2, U25, POSTCODE, AGENCY_ID, IN_PROGRESS, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, ConsultingType.U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
+      USER_WITH_RC_ID, null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET = new HashSet<>(
@@ -940,7 +946,7 @@ public class TestConstants {
    */
 
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, true, null, false, null,
+      new ConsultingTypeSettings(SUCHT, false, null, null, true, null, false, null,
           true, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_KREUZBUND =
       new ConsultingTypeSettings(ConsultingType.KREUZBUND, false, null, null, true, null, false,
@@ -1056,10 +1062,10 @@ public class TestConstants {
       new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, null, true, null, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MONITORING =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, IS_MONITORING, null,
+      new ConsultingTypeSettings(SUCHT, false, null, null, IS_MONITORING, null,
           false, null, false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, IS_NOT_MONITORING, null,
+      new ConsultingTypeSettings(SUCHT, false, null, null, IS_NOT_MONITORING, null,
           false, null, false, null, null);
   public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);
   public static AbsenceDTO ABSENCE_DTO_WITH_HTML_AND_JS = new AbsenceDTO()

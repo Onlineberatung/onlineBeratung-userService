@@ -88,13 +88,17 @@ public class SessionServiceTest {
       null, null, null);
   private final User USER = new User(USER_ID, "username", "name@domain.de", null);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, ConsultingType.SUCHT, "99999",
-      1L, SessionStatus.NEW, new Date(), null);
+      1L, SessionStatus.NEW, new Date(), null, null, null,
+      false, false, null, null);
   private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, ConsultingType.SUCHT,
-      "99999", 1L, SessionStatus.NEW, new Date(), null);
+      "99999", 1L, SessionStatus.NEW, new Date(), null, null, null,
+      false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null);
+      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null, null, null,
+      false, false, null, null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null);
+      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null, null, null,
+      false, false, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();

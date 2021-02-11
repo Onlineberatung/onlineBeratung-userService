@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.repository.session;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -74,25 +76,25 @@ public class Session {
   @NonNull
   private ConsultingType consultingType;
 
-  @Column(name = "postcode", updatable = true, nullable = false)
+  @Column(name = "postcode", nullable = false)
   @Size(max = 5)
   @NonNull
   private String postcode;
 
-  @Column(name = "agency_id", updatable = true, nullable = true)
+  @Column(name = "agency_id")
   private Long agencyId;
 
   @NonNull
   private SessionStatus status;
 
-  @Column(name = "message_date", updatable = true, nullable = true)
+  @Column(name = "message_date")
   @Nullable
   private Date enquiryMessageDate;
 
-  @Column(name = "rc_group_id", updatable = true, nullable = true)
+  @Column(name = "rc_group_id")
   private String groupId;
 
-  @Column(name = "rc_feedback_group_id", updatable = true, nullable = true)
+  @Column(name = "rc_feedback_group_id")
   private String feedbackGroupId;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "session")
@@ -107,7 +109,7 @@ public class Session {
   private boolean monitoring;
 
   public boolean hasFeedbackChat() {
-    return feedbackGroupId != null;
+    return isNotBlank(feedbackGroupId);
   }
 
   @Column(name = "create_date")

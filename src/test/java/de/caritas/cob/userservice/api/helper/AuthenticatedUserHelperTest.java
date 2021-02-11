@@ -16,17 +16,18 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import java.util.Date;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthenticatedUserHelperTest {
@@ -34,18 +35,23 @@ public class AuthenticatedUserHelperTest {
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME,
       FIRST_NAME, LAST_NAME, EMAIL, false, false, null, false, null, null, null, null, null, null);
   private final Consultant TEAM_CONSULTANT = new Consultant(TEAM_CONSULTANT_ID, ROCKETCHAT_ID,
-      USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null, null);
+      USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null,
+      null);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT, ConsultingType.SUCHT,
-      POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(), null);
+      POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(), null, null, null,
+      false, false, null, null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(SESSION_ID, null, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), null);
+          SessionStatus.NEW, new Date(), null, null, null,
+          false, false, null, null);
   private final Session TEAM_SESSION =
       new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), null, null, IS_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.IN_PROGRESS, new Date(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
+          null, null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(TEAM_SESSION_ID, null, CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), null, null, IS_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.IN_PROGRESS, new Date(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
+          null, null);
 
   @InjectMocks
   private AuthenticatedUserHelper authenticatedUserHelper;

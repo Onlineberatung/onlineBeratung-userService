@@ -12,6 +12,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.STATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static java.util.Objects.nonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -33,8 +34,8 @@ import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,9 +53,11 @@ public class SessionDataHelperTest {
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);
   private final Session INITALIZED_SESSION_SUCHT = new Session(1L, USER, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 0L, SessionStatus.INITIAL, null, null);
+      ConsultingType.SUCHT, "99999", 0L, SessionStatus.INITIAL, null, null, null, null, false,
+      false, null, null);
   private final Session INITALIZED_SESSION_U25 = new Session(1L, USER, CONSULTANT,
-      ConsultingType.U25, "99999", 0L, SessionStatus.INITIAL, null, null);
+      ConsultingType.U25, "99999", 0L, SessionStatus.INITIAL, null, null, null, null, false,
+      false, null, null);
   private final SessionData SESSION_DATA_ADDICTIVE_DRUGS = new SessionData(new Session(),
       SessionDataType.REGISTRATION, SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(), "1");
   private final SessionData SESSION_DATA_AGE = new SessionData(new Session(),
@@ -64,8 +67,8 @@ public class SessionDataHelperTest {
   private final List<SessionData> SESSION_DATA =
       Arrays.asList(SESSION_DATA_ADDICTIVE_DRUGS, SESSION_DATA_AGE, SESSION_DATA_GENDER);
   private final Session INITIALIZED_SESSION_WITH_SESSION_DATA = new Session(1L, USER, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.IN_PROGRESS, new Date(), null, SESSION_DATA,
-      IS_TEAM_SESSION, IS_MONITORING);
+      ConsultingType.SUCHT, "99999", 1L, SessionStatus.IN_PROGRESS, new Date(), null,
+      null, SESSION_DATA, IS_TEAM_SESSION, IS_MONITORING, null, null);
   private final UserDTO USER_DTO_WITHOUT_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
       "x@y.de", null, null, null, null, null, "true", "0", true);
   private final UserDTO USER_DTO_WITH_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
@@ -179,7 +182,7 @@ public class SessionDataHelperTest {
     List<SessionData> dataList = sessionDataHelper
         .createRegistrationSessionDataList(INITALIZED_SESSION_SUCHT, USER_DTO_WITH_SESSION_DATA);
 
-    assertEquals(AGE, sessionDataHelper.getValueOfKey(dataList, AGE));
+    assertEquals(AGE, getValueOfKey(dataList, AGE));
   }
 
   @Test
@@ -191,19 +194,19 @@ public class SessionDataHelperTest {
     List<SessionData> dataList = sessionDataHelper
         .createRegistrationSessionDataList(INITALIZED_SESSION_SUCHT, USER_DTO_WITHOUT_SESSION_DATA);
 
-    assertNull(sessionDataHelper.getValueOfKey(dataList, AGE));
+    assertNull(getValueOfKey(dataList, AGE));
   }
 
   @Test
   public void getValueOfKey_Should_ReturnNullWhenSessionDataListIsNull() {
 
-    assertNull(sessionDataHelper.getValueOfKey(null, AGE));
+    assertNull(getValueOfKey(null, AGE));
   }
 
   @Test
   public void getSessionDataMapFromSession_Should_ReturnCorrectMapOfSessionDataItems() {
 
-    LinkedHashMap<String, Object> result =
+    Map<String, Object> result =
         sessionDataHelper.getSessionDataMapFromSession(INITIALIZED_SESSION_WITH_SESSION_DATA);
 
     assertEquals(result.get(SESSION_DATA_ADDICTIVE_DRUGS.getKey()),
@@ -218,6 +221,22 @@ public class SessionDataHelperTest {
     assertFalse(result.containsKey(SessionDataKeyRegistration.RELATION.getValue()));
     assertFalse(result.containsKey(SessionDataKeyRegistration.STATE.getValue()));
 
+  }
+
+  private String getValueOfKey(List<SessionData> sessionDataList, String key) {
+
+    if (nonNull(sessionDataList)) {
+      SessionData sessionData = sessionDataList.stream()
+          .filter(data -> key.equals(data.getKey()))
+          .findAny()
+          .orElse(null);
+
+      if (nonNull(sessionData)) {
+        return sessionData.getValue();
+      }
+    }
+
+    return null;
   }
 
 }

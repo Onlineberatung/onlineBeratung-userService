@@ -1,12 +1,5 @@
 package de.caritas.cob.userservice.api.helper;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -15,31 +8,33 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 /**
- * 
- * Helper class for {@link SessionData}
- *
+ * Helper class for {@link SessionData}.
  */
 @Component
+@RequiredArgsConstructor
 public class SessionDataHelper {
 
-  private static ConsultingTypeManager consultingTypeManager;
-
-  @Autowired
-  public SessionDataHelper(ConsultingTypeManager consultingTypeManager) {
-    SessionDataHelper.consultingTypeManager = consultingTypeManager;
-  }
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
-   * Get map of session data items from registration
-   * 
+   * Get map of session data items from registration.
+   *
    * @param session {@link Session}
    * @return a map with registration session data items of the session
    */
-  public LinkedHashMap<String, Object> getSessionDataMapFromSession(Session session) {
+  public Map<String, Object> getSessionDataMapFromSession(Session session) {
 
-    LinkedHashMap<String, Object> sessionDataMap = new LinkedHashMap<>();
+    Map<String, Object> sessionDataMap = new LinkedHashMap<>();
 
     if (session.getSessionData() != null) {
       for (SessionData sessionData : session.getSessionData()) {
@@ -54,10 +49,10 @@ public class SessionDataHelper {
   }
 
   /**
-   * Get list of session data items for registration
-   * 
+   * Get list of session data items for registration.
+   *
    * @param session the {@link Session}
-   * @param user the {@link UserDTO}
+   * @param user    the {@link UserDTO}
    * @return the list of session data items for registration
    */
   public List<SessionData> createRegistrationSessionDataList(Session session, UserDTO user) {
@@ -91,20 +86,6 @@ public class SessionDataHelper {
     return consultingTypeManager.getConsultingTypeSettings(consultingType)
         .getSessionDataInitializing();
 
-  }
-
-  public String getValueOfKey(List<SessionData> sessionDataList, String key) {
-
-    if (sessionDataList != null) {
-      SessionData sessionData =
-          sessionDataList.stream().filter(data -> key.equals(data.getKey())).findAny().orElse(null);
-
-      if (sessionData != null) {
-        return sessionData.getValue();
-      }
-    }
-
-    return null;
   }
 
   private SessionData createSessionData(Session session, SessionDataType sessionDataType,

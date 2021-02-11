@@ -119,21 +119,21 @@ public class EmailNotificationFacadeTest {
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, LocalDateTime.now(),
           LocalDateTime.now(), LocalDateTime.now());
   private final Session SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID,
-          SessionStatus.INITIAL,
-          new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
+      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.INITIAL,
+          new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(1L, USER, null, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.NEW,
-          new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
+          new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
       ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID,
-      null, IS_NO_TEAM_SESSION, IS_MONITORING);
+      null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
       CONSULTANT_NO_EMAIL, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
-      new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
+      new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session TEAM_SESSION =
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "12345", AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
+          IS_MONITORING, null, null);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)

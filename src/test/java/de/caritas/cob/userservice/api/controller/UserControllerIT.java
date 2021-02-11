@@ -276,19 +276,22 @@ public class UserControllerIT {
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
       ConsultingType.SUCHT, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID,
-      null, IS_NO_TEAM_SESSION, IS_MONITORING);
+      null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), RC_GROUP_ID, null, IS_NO_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.NEW, new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
+          IS_MONITORING, null, null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
+          IS_MONITORING, null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), null, null, IS_TEAM_SESSION, IS_MONITORING);
+          SessionStatus.IN_PROGRESS, new Date(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
+          null, null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
   private final Optional<Session> OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID =
       Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID);
@@ -443,7 +446,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+        .thenReturn(
+            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(INVALID_U25_USER_REQUEST_BODY_STATE)
@@ -487,7 +491,8 @@ public class UserControllerIT {
     KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any())).thenReturn(response);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
+            .getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY)
@@ -504,7 +509,8 @@ public class UserControllerIT {
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any()))
         .thenReturn(response);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+        .thenReturn(
+            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_U25_USER_REQUEST_BODY)
@@ -521,7 +527,8 @@ public class UserControllerIT {
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any()))
         .thenReturn(response);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
+            .getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY)
@@ -679,9 +686,9 @@ public class UserControllerIT {
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
-        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
@@ -700,9 +707,9 @@ public class UserControllerIT {
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
-        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
     verify(logger, atLeastOnce())
@@ -722,9 +729,9 @@ public class UserControllerIT {
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
-        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
     verify(logger, atLeastOnce())
@@ -743,9 +750,9 @@ public class UserControllerIT {
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
-        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.OK.value()));
   }
 
@@ -763,9 +770,9 @@ public class UserControllerIT {
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
-        .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CONFLICT.value()));
   }
 
@@ -799,7 +806,7 @@ public class UserControllerIT {
     doThrow(new ConflictException(ERROR))
         .when(createEnquiryMessageFacade)
         .createEnquiryMessage(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+            Mockito.any(), Mockito.any());
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -849,7 +856,6 @@ public class UserControllerIT {
 
   /**
    * Method: getSessionsForAuthenticatedUser (role: user)
-   *
    */
 
   @Test
@@ -989,7 +995,6 @@ public class UserControllerIT {
 
   /**
    * Method: getSessionsForAuthenticatedConsultant (role: consultant)
-   *
    */
 
   @Test
@@ -1139,7 +1144,6 @@ public class UserControllerIT {
 
   /**
    * Method: getUserData (role: consultant / user)
-   *
    */
 
   @Test
@@ -1239,7 +1243,6 @@ public class UserControllerIT {
 
   /**
    * Method: getTeamSessionsForAuthenticatedConsultant (role: consultant)
-   *
    */
 
   @Test
@@ -1376,9 +1379,7 @@ public class UserControllerIT {
   }
 
   /**
-   *
    * sendNewMessageNotification()
-   *
    */
 
   @Test
@@ -1392,12 +1393,12 @@ public class UserControllerIT {
         .andExpect(status().is2xxSuccessful());
 
     verify(emailNotificationFacade, atLeastOnce())
-        .sendNewMessageNotification(RC_GROUP_ID, authenticatedUser.getRoles(), authenticatedUser.getUserId());
+        .sendNewMessageNotification(RC_GROUP_ID, authenticatedUser.getRoles(),
+            authenticatedUser.getUserId());
   }
 
   /**
    * getMonitoring()
-   *
    */
 
   @Test
@@ -1478,7 +1479,6 @@ public class UserControllerIT {
 
   /**
    * updateMonitoring()
-   *
    */
 
   @Test
@@ -1604,7 +1604,6 @@ public class UserControllerIT {
 
   /**
    * Method: getConsultants (authority: VIEW_AGENCY_CONSULTANTS)
-   *
    */
 
   @Test
@@ -1654,7 +1653,6 @@ public class UserControllerIT {
 
   /**
    * Method: assignSession (role: consultant)
-   *
    */
 
   @Test
@@ -1779,7 +1777,8 @@ public class UserControllerIT {
     when(createUserFacade.createUserAndInitializeAccount(Mockito.any()))
         .thenReturn(response);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
+            .getMandatoryFields());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)
@@ -1796,7 +1795,6 @@ public class UserControllerIT {
 
   /**
    * updatePassword()
-   *
    */
 
   @Test
@@ -1924,7 +1922,6 @@ public class UserControllerIT {
 
   /**
    * Method: createChat (role: kreuzbund-consultant)
-   *
    */
 
   @Test
@@ -1976,7 +1973,6 @@ public class UserControllerIT {
 
   /**
    * Method: startChat
-   *
    */
   @Test
   public void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -2026,7 +2022,6 @@ public class UserControllerIT {
 
   /**
    * Method: getChat
-   *
    */
   @Test
   public void getChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -2056,7 +2051,6 @@ public class UserControllerIT {
 
   /**
    * Method: joinChat
-   *
    */
   @Test
   public void joinChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -2141,7 +2135,6 @@ public class UserControllerIT {
 
   /**
    * Method: getChat
-   *
    */
   @Test
   public void getChatMembers_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -2172,7 +2165,6 @@ public class UserControllerIT {
 
   /**
    * Method: updateChat
-   *
    */
   @Test
   public void updateChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
@@ -2200,7 +2192,6 @@ public class UserControllerIT {
 
   /**
    * Method: fetchSessionForConsultant
-   *
    */
   @Test
   public void fetchSessionForConsultant_Should_ReturnOk_WhenRequestOk() throws Exception {
