@@ -743,6 +743,7 @@ components:
           type: string
         agencyId:
           type: integer
+          format: int64
         absent:
           type: boolean
 
