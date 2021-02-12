@@ -31,10 +31,10 @@ interface ConsultantCreationInput {
 
   default LocalDateTime getCreateDate() {
     return nowInUtc();
-  };
+  }
 
   default LocalDateTime getUpdateDate() {
     return nowInUtc();
-  };
+  }
 
 }
