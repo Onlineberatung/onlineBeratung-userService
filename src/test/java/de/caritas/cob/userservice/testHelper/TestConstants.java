@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.testHelper;
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -216,43 +217,42 @@ public class TestConstants {
 
   public static final RocketChatCredentials RC_CREDENTIALS =
       RocketChatCredentials.builder().rocketChatToken(RC_TOKEN).rocketChatUserId(RC_USER_ID)
-          .rocketChatUsername(RC_USERNAME).timeStampCreated(LocalDateTime.now()).build();
+          .rocketChatUsername(RC_USERNAME).timeStampCreated(nowInUtc()).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_WITH_EMPTY_USER_VALUES =
       RocketChatCredentials.builder()
           .rocketChatToken(RC_TOKEN)
-          .timeStampCreated(LocalDateTime.now()).build();
+          .timeStampCreated(nowInUtc()).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_A =
       RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
           .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
-          .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+          .timeStampCreated(nowInUtc().minusMinutes(5)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_B =
       RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_B_TOKEN)
           .rocketChatUserId(TECHNICAL_USER_B_ID).rocketChatUsername(TECHNICAL_USER_B_USERNAME)
-          .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+          .timeStampCreated(nowInUtc().minusMinutes(1)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_TECHNICAL_C =
       RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_C_TOKEN)
           .rocketChatUserId(TECHNICAL_USER_C_ID).rocketChatUsername(TECHNICAL_USER_C_USERNAME)
-          .timeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
+          .timeStampCreated(nowInUtc().minusMinutes(10)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_A =
       RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
           .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-          .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+          .timeStampCreated(nowInUtc().minusMinutes(5)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_B =
       RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_B_TOKEN)
           .rocketChatUserId(SYSTEM_USER_B_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-          .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+          .timeStampCreated(nowInUtc().minusMinutes(1)).build();
 
   public static final RocketChatCredentials RC_CREDENTIALS_SYSTEM_C =
       RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_C_TOKEN)
           .rocketChatUserId(SYSTEM_USER_C_ID).rocketChatUsername(SYSTEM_USER_C_USERNAME)
-          .timeStampCreated(LocalDateTime.now().minusMinutes(10)).build();
-
+          .timeStampCreated(nowInUtc().minusMinutes(10)).build();
 
   /*
    * Agencies
@@ -428,14 +428,11 @@ public class TestConstants {
    * ConsultantAgency
    */
   public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
-          LocalDateTime.now())};
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc())};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, LocalDateTime.now(), LocalDateTime.now(),
-          LocalDateTime.now());
+      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc());
   public static final ConsultantAgency CONSULTANT_AGENCY_3 =
-      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3, LocalDateTime.now(), LocalDateTime.now(),
-          LocalDateTime.now());
+      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3, nowInUtc(), nowInUtc(), nowInUtc());
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
@@ -643,15 +640,15 @@ public class TestConstants {
   public static final UserChatDTO USER_CHAT_DTO_1 = new UserChatDTO(CHAT_ID, CHAT_TOPIC, null, null,
       CHAT_DURATION_30, IS_REPETITIVE, IS_ACTIVE, ConsultingType.PREGNANCY.getValue(), null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86300000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_4, null, false, null, LocalDateTime.now());
+      RC_GROUP_ID_4, null, false, null, nowInUtc());
   public static final UserChatDTO USER_CHAT_DTO_2 = new UserChatDTO(CHAT_ID_2, CHAT_TOPIC_2, null,
       null, CHAT_DURATION_60, IS_REPETITIVE, IS_NOT_ACTIVE, ConsultingType.DEBT.getValue(), null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86200000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_5, null, false, null, LocalDateTime.now());
+      RC_GROUP_ID_5, null, false, null, nowInUtc());
   public static final UserChatDTO USER_CHAT_DTO_3 = new UserChatDTO(CHAT_ID_3, CHAT_TOPIC_3, null,
       null, CHAT_DURATION_90, IS_NOT_REPETITIVE, IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(),
       null, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_6, null, false, null, LocalDateTime.now());
+      RC_GROUP_ID_6, null, false, null, nowInUtc());
   public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO = new UserSessionResponseDTO()
       .chat(USER_CHAT_DTO_1)
       .agency(EMPTY_AGENCY_DTO)
@@ -1082,7 +1079,7 @@ public class TestConstants {
       CHAT_TOPIC_3, null, null, CHAT_DURATION_90, IS_NOT_REPETITIVE,
       IS_NOT_ACTIVE, ConsultingType.CHILDREN.getValue(), ENCRYPTED_MESSAGE,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_6, null, false, null, LocalDateTime.now());
+      RC_GROUP_ID_6, null, false, null, nowInUtc());
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE =
       new ConsultantSessionResponseDTO()
           .chat(USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE)

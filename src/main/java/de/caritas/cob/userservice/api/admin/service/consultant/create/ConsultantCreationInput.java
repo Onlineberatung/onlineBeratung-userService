@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+
 import java.time.LocalDateTime;
 
 /**
@@ -27,8 +29,12 @@ interface ConsultantCreationInput {
 
   boolean isLanguageFormal();
 
-  LocalDateTime getCreateDate();
+  default LocalDateTime getCreateDate() {
+    return nowInUtc();
+  };
 
-  LocalDateTime getUpdateDate();
+  default LocalDateTime getUpdateDate() {
+    return nowInUtc();
+  };
 
 }

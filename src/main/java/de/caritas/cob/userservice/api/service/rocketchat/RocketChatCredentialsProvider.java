@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.rocketchat;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -160,7 +161,7 @@ public class RocketChatCredentialsProvider {
       throws RocketChatLoginException {
 
     RocketChatCredentials rcc = RocketChatCredentials.builder()
-        .timeStampCreated(LocalDateTime.now())
+        .timeStampCreated(nowInUtc())
         .rocketChatUsername(username)
         .build();
 

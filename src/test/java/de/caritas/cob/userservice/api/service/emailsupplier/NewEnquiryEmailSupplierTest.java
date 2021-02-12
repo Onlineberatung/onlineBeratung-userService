@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MAIN_CONSULTANT;
 import static java.util.Arrays.asList;
@@ -63,10 +64,10 @@ public class NewEnquiryEmailSupplierTest {
     absentConsultant.setEmail("email");
     when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
         null,
-        new ConsultantAgency(0L, new Consultant(), 0L, LocalDateTime.now(), LocalDateTime.now(),
-            LocalDateTime.now()),
-        new ConsultantAgency(1L, absentConsultant, 1L, LocalDateTime.now(), LocalDateTime.now(),
-            LocalDateTime.now())));
+        new ConsultantAgency(0L, new Consultant(), 0L, nowInUtc(), nowInUtc(),
+            nowInUtc()),
+        new ConsultantAgency(1L, absentConsultant, 1L, nowInUtc(), nowInUtc(),
+            nowInUtc())));
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
 
@@ -77,10 +78,10 @@ public class NewEnquiryEmailSupplierTest {
   public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound()
       throws AgencyServiceHelperException {
     when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
-        new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, LocalDateTime.now(), LocalDateTime.now(),
-            LocalDateTime.now()),
-        new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now(),
-            LocalDateTime.now())));
+        new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(),
+            nowInUtc()),
+        new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),
+            nowInUtc())));
     when(agencyServiceHelper.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 

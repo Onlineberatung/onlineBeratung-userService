@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
@@ -100,7 +101,7 @@ public class SessionServiceTest {
       ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null, null, null,
       false, false, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
-      LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
+      nowInUtc(), nowInUtc(), nowInUtc());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
   private final List<Session> SESSION_LIST = Arrays.asList(SESSION, SESSION_2);
   private final List<Session> SESSION_LIST_SINGLE = Collections.singletonList(SESSION);

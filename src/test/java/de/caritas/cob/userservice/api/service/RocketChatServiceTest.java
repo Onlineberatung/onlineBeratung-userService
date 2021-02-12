@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
@@ -161,8 +162,8 @@ public class RocketChatServiceTest {
       new GroupDTO(GROUP_ID, GROUP_NAME, null, null, 0, 0, null, null, false, false, null);
   private final GroupResponseDTO GROUP_RESPONSE_DTO =
       new GroupResponseDTO(GROUP_DTO, true, null, null);
-  private final LocalDateTime DATETIME_OLDEST = LocalDateTime.now();
-  private final LocalDateTime DATETIME_LATEST = LocalDateTime.now();
+  private final LocalDateTime DATETIME_OLDEST = nowInUtc();
+  private final LocalDateTime DATETIME_LATEST = nowInUtc();
   private final String PASSWORD = "password";
   MultiValueMap<String, String> MULTI_VALUE_MAP_WITH_TECH_USER_CREDENTIALS =
       new LinkedMultiValueMap<String, String>() {

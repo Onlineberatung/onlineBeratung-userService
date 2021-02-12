@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.rocketchat;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
@@ -74,7 +75,7 @@ public class RocketChatService {
   private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 01, 01, 00, 00);
 
-  private final LocalDateTime localDateTimeFuture = LocalDateTime.now().plusYears(1L);
+  private final LocalDateTime localDateTimeFuture = nowInUtc().plusYears(1L);
 
   @Value("${rocket.chat.header.auth.token}")
   private String rocketChatHeaderAuthToken;
@@ -181,7 +182,7 @@ public class RocketChatService {
   /**
    * Deletion of a Rocket.Chat group.
    *
-   * @param groupId the group id
+   * @param groupId               the group id
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return true, if successfully
    */
@@ -227,8 +228,8 @@ public class RocketChatService {
   /**
    * Retrieves the userId for the given credentials.
    *
-   * @param username the username
-   * @param password the password
+   * @param username   the username
+   * @param password   the password
    * @param firstLogin true, if first login in Rocket.Chat. This requires a special API call.
    * @return the userid
    * @throws {@link RocketChatLoginException}
@@ -331,7 +332,7 @@ public class RocketChatService {
   /**
    * Adds the provided user to the Rocket.Chat group with given groupId.
    *
-   * @param rcUserId Rocket.Chat userId
+   * @param rcUserId  Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
    */
   public void addUserToGroup(String rcUserId, String rcGroupId)
@@ -371,7 +372,7 @@ public class RocketChatService {
   /**
    * Removes the provided user from the Rocket.Chat group with given groupId.
    *
-   * @param rcUserId Rocket.Chat userId
+   * @param rcUserId  Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
    * @throws {@link RocketChatRemoveUserFromGroupException}
    */
@@ -502,8 +503,8 @@ public class RocketChatService {
    * the last 24 hours (avoiding time zone failures).
    *
    * @param rcGroupId the rocket chat group id
-   * @param oldest the oldest message time
-   * @param latest the latest message time
+   * @param oldest    the oldest message time
+   * @param latest    the latest message time
    */
   public void removeSystemMessages(String rcGroupId, LocalDateTime oldest, LocalDateTime latest)
       throws RocketChatRemoveSystemMessagesException, RocketChatUserNotInitializedException {

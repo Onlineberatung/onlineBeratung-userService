@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
@@ -155,7 +156,7 @@ public class CreateEnquiryMessageFacade {
       addSystemUserToGroup(rcGroupId);
       addConsultantsToGroup(rcGroupId, agencyList);
       rocketChatService.removeSystemMessages(rcGroupId,
-          LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+          nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
 
     } catch (RocketChatAddSystemUserException | RocketChatAddUserToGroupException
         | RocketChatRemoveSystemMessagesException | RocketChatUserNotInitializedException exception) {
@@ -246,8 +247,9 @@ public class CreateEnquiryMessageFacade {
           createEnquiryExceptionInformation);
       addSystemUserToGroup(rcFeedbackGroupId);
       addConsultantsToFeedbackChatGroup(agencyList, rcFeedbackGroupId);
-      rocketChatService.removeSystemMessages(rcFeedbackGroupId,
-          LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+      rocketChatService
+          .removeSystemMessages(rcFeedbackGroupId, nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS),
+              nowInUtc());
 
     } catch (RocketChatAddSystemUserException | RocketChatCreateGroupException | RocketChatAddUserToGroupException
         | RocketChatRemoveSystemMessagesException | RocketChatUserNotInitializedException exception) {

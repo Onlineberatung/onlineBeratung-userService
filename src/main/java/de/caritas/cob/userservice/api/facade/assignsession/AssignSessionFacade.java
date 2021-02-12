@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
@@ -358,7 +359,7 @@ public class AssignSessionFacade {
 
     try {
       rocketChatService.removeSystemMessages(groupId,
-          LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+          nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
     } catch (RocketChatRemoveSystemMessagesException | RocketChatUserNotInitializedException e) {
       if (nonNull(rcUserIdToRemoveOnRollback)) {
         removeUserFromGroupAndRollbackSession(rcUserIdToRemoveOnRollback, session,

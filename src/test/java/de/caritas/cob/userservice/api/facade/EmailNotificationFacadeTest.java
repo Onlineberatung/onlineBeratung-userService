@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
@@ -110,14 +111,11 @@ public class EmailNotificationFacadeTest {
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
-          LocalDateTime.now());
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
-          LocalDateTime.now());
+      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, LocalDateTime.now(),
-          LocalDateTime.now(), LocalDateTime.now());
+      new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final Session SESSION =
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.INITIAL,
           new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);

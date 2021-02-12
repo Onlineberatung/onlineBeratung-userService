@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
@@ -487,7 +488,7 @@ public class AskerImportService {
           // Remove all system messages from feedback group
           try {
             rocketChatService.removeSystemMessages(rcFeedbackGroupId,
-                LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+                nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
           } catch (RocketChatRemoveSystemMessagesException e) {
             throw new ImportException(String.format(
                 "Could not remove system messages from feedback group id %s for user %s",
@@ -503,8 +504,8 @@ public class AskerImportService {
         session.setGroupId(rcGroupId);
         session.setEnquiryMessageDate(new Date());
         session.setStatus(SessionStatus.IN_PROGRESS);
-        session.setCreateDate(LocalDateTime.now());
-        session.setUpdateDate(LocalDateTime.now());
+        session.setCreateDate(nowInUtc());
+        session.setUpdateDate(nowInUtc());
         Session updatedSession = sessionService.saveSession(session);
         if (updatedSession.getId() == null) {
           throw new ImportException(
@@ -560,7 +561,7 @@ public class AskerImportService {
         // Remove all system messages from group
         try {
           rocketChatService.removeSystemMessages(rcGroupId,
-              LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+              nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
         } catch (RocketChatRemoveSystemMessagesException e) {
           throw new ImportException(
               String.format("Could not remove system messages from group id %s for user %s",

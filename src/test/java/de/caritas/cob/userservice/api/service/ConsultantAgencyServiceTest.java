@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,14 +41,13 @@ public class ConsultantAgencyServiceTest {
           "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null,
           null);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now(),
-          LocalDateTime.now());
+      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc());
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
   private final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
   private final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
       Arrays.asList(NULL_CONSULTANT_AGENCY);
   private final ConsultantAgency CONSULTANT_NULL_AGENCY = new ConsultantAgency(AGENCY_ID, null, 1L,
-      LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
+      nowInUtc(), nowInUtc(), nowInUtc());
   private final List<ConsultantAgency> CONSULTANT_NULL_AGENCY_LIST =
       Arrays.asList(CONSULTANT_NULL_AGENCY);
   private final String ERROR = "error";

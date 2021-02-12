@@ -2,8 +2,8 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;

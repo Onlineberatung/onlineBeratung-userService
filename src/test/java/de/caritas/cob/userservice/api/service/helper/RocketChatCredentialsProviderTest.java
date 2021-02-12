@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_B;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_C;
@@ -224,12 +225,12 @@ public class RocketChatCredentialsProviderTest {
 
     // Prepare intercept login technical user
     HttpEntity<MultiValueMap<String, String>> requestTechnical =
-        new HttpEntity<MultiValueMap<String, String>>(
+        new HttpEntity<>(
             MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS, headers);
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
         ArgumentMatchers.eq(requestTechnical), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_B,
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_B,
             HttpStatus.OK));
 
     // Prepare intercept login system user
@@ -239,20 +240,20 @@ public class RocketChatCredentialsProviderTest {
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
         ArgumentMatchers.eq(requestSys), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_SYSTEM_USER_B,
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER_B,
             HttpStatus.OK));
 
     RocketChatCredentials systemA =
         RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
             .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A,
         new AtomicReference<>(systemA));
 
     RocketChatCredentials technicalA =
         RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
             .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
-            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A,
         new AtomicReference<>(technicalA));
 
@@ -295,7 +296,7 @@ public class RocketChatCredentialsProviderTest {
     RocketChatCredentials technicalA =
         RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
             .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
-            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A,
         new AtomicReference<>(technicalA));
 
@@ -303,7 +304,7 @@ public class RocketChatCredentialsProviderTest {
     RocketChatCredentials technicalB =
         RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_B_TOKEN)
             .rocketChatUserId(TECHNICAL_USER_B_ID).rocketChatUsername(TECHNICAL_USER_B_USERNAME)
-            .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+            .timeStampCreated(nowInUtc().minusMinutes(1)).build();
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_B,
         new AtomicReference<>(technicalB));
 
@@ -311,7 +312,7 @@ public class RocketChatCredentialsProviderTest {
     RocketChatCredentials systemA =
         RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
             .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .timeStampCreated(LocalDateTime.now().minusMinutes(5)).build();
+            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A,
         new AtomicReference<>(systemA));
 
@@ -319,7 +320,7 @@ public class RocketChatCredentialsProviderTest {
     RocketChatCredentials systemB =
         RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_B_TOKEN)
             .rocketChatUserId(SYSTEM_USER_B_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .timeStampCreated(LocalDateTime.now().minusMinutes(1)).build();
+            .timeStampCreated(nowInUtc().minusMinutes(1)).build();
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_B,
         new AtomicReference<>(systemB));
 

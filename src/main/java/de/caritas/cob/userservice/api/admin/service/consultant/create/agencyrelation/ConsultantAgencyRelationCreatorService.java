@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrel
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.KREUZBUND;
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
@@ -20,11 +21,9 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -171,8 +170,8 @@ public class ConsultantAgencyRelationCreatorService {
         .builder()
         .consultant(consultant)
         .agencyId(agencyId)
-        .createDate(LocalDateTime.now(ZoneOffset.UTC))
-        .updateDate(LocalDateTime.now(ZoneOffset.UTC))
+        .createDate(nowInUtc())
+        .updateDate(nowInUtc())
         .build();
   }
 

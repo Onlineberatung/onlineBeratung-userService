@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.INITIAL;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NEW;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -26,8 +27,6 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -161,7 +160,7 @@ public class ConsultantAgencyAdminService {
 
   private void markAsDeleted(ConsultantAgency consultantAgency) {
     validateForDeletion(consultantAgency);
-    consultantAgency.setDeleteDate(LocalDateTime.now(ZoneOffset.UTC));
+    consultantAgency.setDeleteDate(nowInUtc());
     this.consultantAgencyRepository.save(consultantAgency);
   }
 

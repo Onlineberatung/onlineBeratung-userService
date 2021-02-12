@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
@@ -198,8 +199,8 @@ public class SessionService {
     Session session = new Session(user, consultingTypeSettings.getConsultingType(),
         userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
         isTeamSession, consultingTypeSettings.isMonitoring());
-    session.setCreateDate(LocalDateTime.now());
-    session.setUpdateDate(LocalDateTime.now());
+    session.setCreateDate(nowInUtc());
+    session.setUpdateDate(nowInUtc());
     return saveSession(session);
   }
 

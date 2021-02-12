@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.RC_ADD_USER_TO_GROUP_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION;
@@ -110,8 +111,7 @@ public class CreateEnquiryMessageFacadeTest {
       ConsultingType.SUCHT, "99999", AGENCY_ID, SessionStatus.INITIAL, new Date(), null, null, null,
       false, false, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, LocalDateTime.now(), LocalDateTime.now(),
-          LocalDateTime.now());
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Collections
       .singletonList(CONSULTANT_AGENCY);
   private final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "rocketChatSystemUserId";

@@ -1,13 +1,11 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
-import java.time.LocalDateTime;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Adapter class to provide a {@link ConsultantCreationInput} based on a
- * {@link ImportRecord}.
+ * Adapter class to provide a {@link ConsultantCreationInput} based on a {@link ImportRecord}.
  */
 @RequiredArgsConstructor
 public class ImportRecordCreationInputAdapter implements ConsultantCreationInput {
@@ -114,23 +112,4 @@ public class ImportRecordCreationInputAdapter implements ConsultantCreationInput
     return this.importRecord.isFormalLanguage();
   }
 
-  /**
-   * Provides the created date.
-   *
-   * @return the created date
-   */
-  @Override
-  public LocalDateTime getCreateDate() {
-    return LocalDateTime.now();
-  }
-
-  /**
-   * Provides the updated date.
-   *
-   * @return the updated date
-   */
-  @Override
-  public LocalDateTime getUpdateDate() {
-    return LocalDateTime.now();
-  }
 }

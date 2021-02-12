@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.KREUZBUND;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_WEEKLY_PLUS;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_WEEKLY_PLUS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
@@ -173,7 +174,7 @@ public class StopChatFacadeTest {
     when(chat.isRepetitive()).thenReturn(true);
     when(chat.getChatInterval()).thenReturn(CHAT_INTERVAL_WEEKLY);
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(chat.getStartDate()).thenReturn(LocalDateTime.now());
+    when(chat.getStartDate()).thenReturn(nowInUtc());
 
     stopChatFacade.stopChat(chat, CONSULTANT);
 

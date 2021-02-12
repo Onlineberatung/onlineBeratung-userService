@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER;
 import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -103,8 +104,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     } else {
       if (isNotBlank(session.getConsultant().getEmail())) {
         return singletonList(new ConsultantAgency(null, session.getConsultant(), null,
-            LocalDateTime.now(ZoneOffset.UTC), LocalDateTime.now(ZoneOffset.UTC),
-            LocalDateTime.now(ZoneOffset.UTC)));
+            nowInUtc(), nowInUtc(), nowInUtc()));
       }
     }
     return emptyList();
