@@ -11,12 +11,13 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -89,7 +90,7 @@ public class AskerDataProvider {
 
     LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
     Optional<Session> consultingTypeSession = findSessionByConsultingType(consultingType, sessionList);
-    Optional<LinkedHashMap<String, Object>> consultingTypeSessionData =
+    Optional<Map<String, Object>> consultingTypeSessionData =
         consultingTypeSession.map(sessionDataHelper::getSessionDataMapFromSession);
     Optional<AgencyDTO> agency = findAgencyByConsultingType(consultingType, agencyDTOs);
 

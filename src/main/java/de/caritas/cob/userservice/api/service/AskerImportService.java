@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
@@ -24,15 +25,17 @@ import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -50,6 +53,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -67,6 +72,7 @@ import org.springframework.stereotype.Service;
  * Imports the askers from the created CSV file of the old Caritas system.
  */
 @Service
+@RequiredArgsConstructor
 public class AskerImportService {
 
   @Value("${asker.import.filename}")
@@ -92,50 +98,22 @@ public class AskerImportService {
   private final String REPLACE_KEY_USERNAME = "username";
   private final String DUMMY_POSTCODE = "00000";
 
-  private KeycloakAdminClientService keycloakAdminClientService;
-  private UserService userService;
-  private SessionService sessionService;
-  private RocketChatService rocketChatService;
-  private SessionDataService sessionDataService;
-  private ConsultantService consultantService;
-  private ConsultantAgencyService consultantAgencyService;
-  private MonitoringService monitoringService;
-  private MessageServiceHelper messageServiceHelper;
-  private MonitoringHelper monitoringHelper;
-  private ConsultingTypeManager consultingTypeManager;
-  private AgencyServiceHelper agencyServiceHelper;
-  private UserHelper userHelper;
-  private UserAgencyService userAgencyService;
-  private RocketChatHelper rocketChatHelper;
-
-  @Autowired
-  public AskerImportService(KeycloakAdminClientService keycloakHelper, UserService userService,
-      SessionService sessionService, RocketChatService rocketChatService,
-      SessionDataService sessionDataService, ConsultantService consultantService,
-      ConsultantAgencyService consultantAgencyService, MonitoringService monitoringService,
-      MessageServiceHelper messageServiceHelper, MonitoringHelper monitoringHelper,
-      ConsultingTypeManager consultingTypeManager, AgencyServiceHelper agencyServiceHelper,
-      UserHelper userHelper, UserAgencyService userAgencyService,
-      RocketChatHelper rocketChatHelper) {
-    this.keycloakAdminClientService = keycloakHelper;
-    this.userService = userService;
-    this.sessionService = sessionService;
-    this.rocketChatService = rocketChatService;
-    this.sessionDataService = sessionDataService;
-    this.consultantService = consultantService;
-    this.consultantAgencyService = consultantAgencyService;
-    this.monitoringService = monitoringService;
-    this.messageServiceHelper = messageServiceHelper;
-    this.monitoringHelper = monitoringHelper;
-    this.consultingTypeManager = consultingTypeManager;
-    this.agencyServiceHelper = agencyServiceHelper;
-    this.userHelper = userHelper;
-    this.userAgencyService = userAgencyService;
-    this.rocketChatHelper = rocketChatHelper;
-  }
-
-  public AskerImportService() {
-  }
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull UserService userService;
+  private final @NonNull SessionService sessionService;
+  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull SessionDataService sessionDataService;
+  private final @NonNull ConsultantService consultantService;
+  private final @NonNull ConsultantAgencyService consultantAgencyService;
+  private final @NonNull MonitoringService monitoringService;
+  private final @NonNull MessageServiceHelper messageServiceHelper;
+  private final @NonNull MonitoringHelper monitoringHelper;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull UserHelper userHelper;
+  private final @NonNull UserAgencyService userAgencyService;
+  private final @NonNull RocketChatHelper rocketChatHelper;
+  private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   /**
    * Imports askers without session by a predefined import list (for the format see readme.md)
@@ -303,7 +281,7 @@ public class AskerImportService {
       in = new FileReader(importFilenameAsker);
       records = CSVFormat.DEFAULT.parse(in);
 
-      ResponseEntity<LoginResponseDTO> rcSystemUserResonse = rocketChatService
+      ResponseEntity<LoginResponseDTO> rcSystemUserResonse = rocketChatCredentialsProvider
           .loginUser(ROCKET_CHAT_SYSTEM_USER_USERNAME, ROCKET_CHAT_SYSTEM_USER_PASSWORD);
       systemUserId = rcSystemUserResonse.getBody().getData().getUserId();
       systemUserToken = rcSystemUserResonse.getBody().getData().getAuthToken();
@@ -486,7 +464,7 @@ public class AskerImportService {
           // Remove all system messages from feedback group
           try {
             rocketChatService.removeSystemMessages(rcFeedbackGroupId,
-                LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+                nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
           } catch (RocketChatRemoveSystemMessagesException e) {
             throw new ImportException(String.format(
                 "Could not remove system messages from feedback group id %s for user %s",
@@ -502,8 +480,8 @@ public class AskerImportService {
         session.setGroupId(rcGroupId);
         session.setEnquiryMessageDate(new Date());
         session.setStatus(SessionStatus.IN_PROGRESS);
-        session.setCreateDate(LocalDateTime.now());
-        session.setUpdateDate(LocalDateTime.now());
+        session.setCreateDate(nowInUtc());
+        session.setUpdateDate(nowInUtc());
         Session updatedSession = sessionService.saveSession(session);
         if (updatedSession.getId() == null) {
           throw new ImportException(
@@ -559,7 +537,7 @@ public class AskerImportService {
         // Remove all system messages from group
         try {
           rocketChatService.removeSystemMessages(rcGroupId,
-              LocalDateTime.now().minusHours(Helper.ONE_DAY_IN_HOURS), LocalDateTime.now());
+              nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
         } catch (RocketChatRemoveSystemMessagesException e) {
           throw new ImportException(
               String.format("Could not remove system messages from group id %s for user %s",

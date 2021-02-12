@@ -106,4 +106,12 @@ public class ConsultantAdminFacadeTest {
         .removeConsultantsFromTeamSessionsByAgencyId(1L);
   }
 
+  @Test
+  public void markConsultantAgencyForDeletion_Should_callMarkConsultantAgencyForDeletion() {
+    this.consultantAdminFacade.markConsultantAgencyForDeletion("1", 1L);
+
+    verify(this.consultantAgencyAdminService, times(1))
+        .markConsultantAgencyForDeletion("1", 1L);
+  }
+
 }

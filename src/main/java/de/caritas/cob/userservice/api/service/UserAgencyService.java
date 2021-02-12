@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 
 @Service
 @RequiredArgsConstructor

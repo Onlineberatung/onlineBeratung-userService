@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserF
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -20,7 +19,7 @@ import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 
 /*
  * Facade to encapsulate the steps to stop a running chat session.

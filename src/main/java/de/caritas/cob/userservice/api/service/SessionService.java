@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
@@ -25,7 +26,7 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -198,8 +199,8 @@ public class SessionService {
     Session session = new Session(user, consultingTypeSettings.getConsultingType(),
         userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
         isTeamSession, consultingTypeSettings.isMonitoring());
-    session.setCreateDate(LocalDateTime.now());
-    session.setUpdateDate(LocalDateTime.now());
+    session.setCreateDate(nowInUtc());
+    session.setUpdateDate(nowInUtc());
     return saveSession(session);
   }
 
@@ -458,7 +459,7 @@ public class SessionService {
   /**
    * Returns a {@link ConsultantSessionDTO} for a specific session.
    *
-   * @param sessionId the session id to fetch
+   * @param sessionId  the session id to fetch
    * @param consultant the calling consultant
    * @return {@link ConsultantSessionDTO} entity for the specific session
    */
@@ -488,7 +489,8 @@ public class SessionService {
         .isMonitoring(session.isMonitoring())
         .postcode(session.getPostcode())
         .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
-        .consultantRcId(nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null);
+        .consultantRcId(
+            nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null);
   }
 
   private void checkPermissionForConsultantSession(Session session, Consultant consultant) {

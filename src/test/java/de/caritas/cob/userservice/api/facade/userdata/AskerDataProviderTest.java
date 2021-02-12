@@ -154,7 +154,7 @@ public class AskerDataProviderTest {
           .getConsultingTypes().get(String.valueOf(consultingType.getValue()));
       if (consultingType.getValue() == ConsultingType.SUCHT.getValue()) {
         assertTrue((boolean) consultingTypeEntry.get("isRegistered"));
-        assertEquals(AGENCY_DTO_SUCHT, (AgencyDTO) consultingTypeEntry.get("agency"));
+        assertEquals(AGENCY_DTO_SUCHT, consultingTypeEntry.get("agency"));
         assertEquals(sessionData, consultingTypeEntry.get("sessionData"));
       } else {
         assertFalse((boolean) consultingTypeEntry.get("isRegistered"));

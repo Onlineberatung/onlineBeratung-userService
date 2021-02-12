@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
@@ -39,9 +40,9 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESP
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,7 +78,8 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.service.helper.RocketChatCredentialsHelper;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,8 +162,8 @@ public class RocketChatServiceTest {
       new GroupDTO(GROUP_ID, GROUP_NAME, null, null, 0, 0, null, null, false, false, null);
   private final GroupResponseDTO GROUP_RESPONSE_DTO =
       new GroupResponseDTO(GROUP_DTO, true, null, null);
-  private final LocalDateTime DATETIME_OLDEST = LocalDateTime.now();
-  private final LocalDateTime DATETIME_LATEST = LocalDateTime.now();
+  private final LocalDateTime DATETIME_OLDEST = nowInUtc();
+  private final LocalDateTime DATETIME_LATEST = nowInUtc();
   private final String PASSWORD = "password";
   MultiValueMap<String, String> MULTI_VALUE_MAP_WITH_TECH_USER_CREDENTIALS =
       new LinkedMultiValueMap<String, String>() {
@@ -184,7 +186,7 @@ public class RocketChatServiceTest {
   @Mock
   Logger logger;
   @Mock
-  RocketChatCredentialsHelper rcCredentialsHelper;
+  RocketChatCredentialsProvider rcCredentialsHelper;
   private HttpHeaders HTTP_HEADERS = new HttpHeaders() {
     private static final long serialVersionUID = 1L;
 
@@ -552,9 +554,8 @@ public class RocketChatServiceTest {
   @Test
   public void getUserId_Should_LoginUser() throws RocketChatLoginException {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
-        new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
+    when(rcCredentialsHelper.loginUser(any(), any())).thenReturn(
+        new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         any(), ArgumentMatchers.<Class<LogoutResponseDTO>>any())).thenReturn(
@@ -562,17 +563,15 @@ public class RocketChatServiceTest {
 
     rocketChatService.getUserID(USERNAME, PASSWORD, false);
 
-    verify(restTemplate, times(1)).postForEntity(Mockito.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), Mockito.eq(LoginResponseDTO.class));
-
+    verify(this.rcCredentialsHelper, times(1)).loginUser(Mockito.eq(USERNAME),
+        Mockito.eq(PASSWORD));
   }
 
   @Test
   public void getUserId_Should_LogoutUser() throws RocketChatLoginException {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
-        new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
+    when(rcCredentialsHelper.loginUser(any(), any())).thenReturn(
+        new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         any(), ArgumentMatchers.<Class<LogoutResponseDTO>>any())).thenReturn(
@@ -580,17 +579,16 @@ public class RocketChatServiceTest {
 
     rocketChatService.getUserID(USERNAME, PASSWORD, false);
 
-    verify(restTemplate, times(1)).postForEntity(Mockito.eq(RC_URL_CHAT_USER_LOGOUT),
-        any(), Mockito.eq(LogoutResponseDTO.class));
+    verify(this.rcCredentialsHelper, times(1)).loginUser(Mockito.eq(USERNAME),
+        Mockito.eq(PASSWORD));
 
   }
 
   @Test
   public void getUserId_Should_ReturnCorrectUserId() throws RocketChatLoginException {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
-        new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
+    when(rcCredentialsHelper.loginUser(any(), any())).thenReturn(
+        new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         any(), ArgumentMatchers.<Class<LogoutResponseDTO>>any())).thenReturn(

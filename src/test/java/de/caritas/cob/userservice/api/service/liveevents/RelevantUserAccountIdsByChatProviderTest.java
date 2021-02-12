@@ -9,12 +9,11 @@ import static org.mockito.Mockito.when;
 import static org.hamcrest.Matchers.is;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.UserService;
 import java.util.List;
 import java.util.Optional;
@@ -84,7 +83,7 @@ public class RelevantUserAccountIdsByChatProviderTest {
   }
 
   private User userWithId(String userId) {
-    return new User(userId, null, null, null);
+    return new User(userId, null, null, null, false);
   }
 
   @Test

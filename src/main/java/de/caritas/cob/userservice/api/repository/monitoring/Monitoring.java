@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.repository.monitoring;
 
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +11,7 @@ import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import de.caritas.cob.userservice.api.repository.monitoringOption.MonitoringOption;
+import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +34,6 @@ public class Monitoring {
 
   public Monitoring(Long sessionId, MonitoringType monitoringType, @Size(max = 255) String key,
       Boolean value) {
-    super();
     this.sessionId = sessionId;
     this.monitoringType = monitoringType;
     this.key = key;
@@ -56,7 +56,7 @@ public class Monitoring {
   private MonitoringType monitoringType;
 
   @Id
-  @Column(name = "key_name", updatable = true, nullable = true)
+  @Column(name = "key_name")
   @NonNull
   @Size(max = 255)
   private String key;
@@ -66,4 +66,23 @@ public class Monitoring {
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "monitoring")
   private List<MonitoringOption> monitoringOptionList;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Monitoring)) {
+      return false;
+    }
+    Monitoring that = (Monitoring) o;
+    return sessionId.equals(that.sessionId)
+        && monitoringType == that.monitoringType
+        && key.equals(that.key);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(sessionId, monitoringType, key);
+  }
 }

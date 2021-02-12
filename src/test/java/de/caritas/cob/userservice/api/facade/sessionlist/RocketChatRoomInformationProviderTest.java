@@ -24,7 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatRoomInformationProviderTest {

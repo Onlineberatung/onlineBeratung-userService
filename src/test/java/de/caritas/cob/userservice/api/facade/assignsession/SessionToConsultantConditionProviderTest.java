@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
@@ -7,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -207,9 +208,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(2L, consultant, 2L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(3L, consultant, 3L, LocalDateTime.now(), LocalDateTime.now())
+        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc()),
+        new ConsultantAgency(2L, consultant, 2L, nowInUtc(), nowInUtc(), nowInUtc()),
+        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc())
     ));
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
@@ -222,9 +223,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnFalse_When_ConsultantAgenciesContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(2L, consultant, 99L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(3L, consultant, 3L, LocalDateTime.now(), LocalDateTime.now())
+        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc()),
+        new ConsultantAgency(2L, consultant, 99L, nowInUtc(), nowInUtc(), nowInUtc()),
+        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc())
     ));
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)

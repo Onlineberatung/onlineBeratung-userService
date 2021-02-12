@@ -1,9 +1,10 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
@@ -14,8 +15,8 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -37,15 +38,16 @@ public class ConsultantAgencyServiceTest {
   private final Long AGENCY_ID = 1L;
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
-          "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null, null);
+          "last name", "consultant@cob.de", false, false, null, false, null, null, null, null, null,
+          null);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now());
+      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc());
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
   private final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
   private final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
       Arrays.asList(NULL_CONSULTANT_AGENCY);
   private final ConsultantAgency CONSULTANT_NULL_AGENCY = new ConsultantAgency(AGENCY_ID, null, 1L,
-      LocalDateTime.now(), LocalDateTime.now());
+      nowInUtc(), nowInUtc(), nowInUtc());
   private final List<ConsultantAgency> CONSULTANT_NULL_AGENCY_LIST =
       Arrays.asList(CONSULTANT_NULL_AGENCY);
   private final String ERROR = "error";

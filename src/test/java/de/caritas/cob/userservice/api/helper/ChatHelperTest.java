@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_3;
@@ -11,12 +12,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
+import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -55,10 +56,10 @@ public class ChatHelperTest {
 
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
-            new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, LocalDateTime.now(),
-                LocalDateTime.now()),
-            new ConsultantAgency(AGENCY_ID_2, consultant, AGENCY_ID_2, LocalDateTime.now(),
-                LocalDateTime.now())};
+            new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
+                nowInUtc(), nowInUtc()),
+            new ConsultantAgency(AGENCY_ID_2, consultant, AGENCY_ID_2, nowInUtc(),
+                nowInUtc(), nowInUtc())};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<ConsultantAgency>(Arrays.asList(consultantAgencyArray));
 
@@ -73,10 +74,10 @@ public class ChatHelperTest {
 
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
-            new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, LocalDateTime.now(),
-                LocalDateTime.now()),
-            new ConsultantAgency(AGENCY_ID_3, consultant, AGENCY_ID_3, LocalDateTime.now(),
-                LocalDateTime.now())};
+            new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
+                nowInUtc(), nowInUtc()),
+            new ConsultantAgency(AGENCY_ID_3, consultant, AGENCY_ID_3, nowInUtc(),
+                nowInUtc(), nowInUtc())};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<ConsultantAgency>(Arrays.asList(consultantAgencyArray));
 
@@ -94,7 +95,7 @@ public class ChatHelperTest {
 
     UserAgency[] userAgencyArray = new UserAgency[]{new UserAgency(AGENCY_ID, user, AGENCY_ID),
         new UserAgency(AGENCY_ID_2, user, AGENCY_ID_2)};
-    Set<UserAgency> userAgencySet = new HashSet<UserAgency>(Arrays.asList(userAgencyArray));
+    Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
 
@@ -107,14 +108,13 @@ public class ChatHelperTest {
 
     UserAgency[] userAgencyArray = new UserAgency[]{new UserAgency(AGENCY_ID, user, AGENCY_ID),
         new UserAgency(AGENCY_ID_3, user, AGENCY_ID_3)};
-    Set<UserAgency> userAgencySet = new HashSet<UserAgency>(Arrays.asList(userAgencyArray));
+    Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
 
     assertFalse(chatHelper.isChatAgenciesContainUserAgency(chat, user));
 
   }
-
 
   /**
    * Method: convertChatDTOtoChat

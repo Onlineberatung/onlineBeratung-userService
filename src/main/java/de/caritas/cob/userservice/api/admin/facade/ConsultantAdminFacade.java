@@ -17,7 +17,7 @@ import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -121,4 +121,13 @@ public class ConsultantAdminFacade {
     }
   }
 
+  /**
+   * Marks the {@link ConsultantAgency} as deleted.
+   *
+   * @param consultantId the consultant id
+   * @param agencyId the agency id
+   */
+  public void markConsultantAgencyForDeletion(String consultantId, Long agencyId) {
+    this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
+  }
 }

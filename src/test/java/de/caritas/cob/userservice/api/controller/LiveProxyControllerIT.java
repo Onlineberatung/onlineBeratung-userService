@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.controller;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,7 +45,7 @@ public class LiveProxyControllerIT {
     this.mockMvc.perform(post(LIVE_EVENT_PATH))
         .andExpect(status().isBadRequest());
 
-    verifyZeroInteractions(liveEventNotificationService);
+    verifyNoInteractions(liveEventNotificationService);
   }
 
   @Test

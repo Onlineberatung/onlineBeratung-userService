@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.user;
 
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,9 +8,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
@@ -23,12 +25,11 @@ import lombok.ToString;
 @Entity
 @Table(name = "user")
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString
 public class User {
-
-  protected User() {}
 
   @Id
   @Column(name = "user_id", updatable = false, nullable = false)
@@ -62,84 +63,6 @@ public class User {
   @OneToMany(mappedBy = "user")
   private Set<UserAgency> userAgencies;
 
-  @Override
-  public boolean equals(Object obj) {
-
-    // If i´m compared to myself => true
-    if (obj == this) {
-      return true;
-    }
-
-    // If the obj is not an instance of User => false
-    if (!(obj instanceof User)) {
-      return false;
-    }
-
-    User other = (User) obj;
-
-    if (!this.userId.equals(other.userId)) {
-      return false;
-    }
-
-    if (this.oldId == null && other.oldId != null) {
-      return false;
-    }
-
-    if (this.oldId != null && other.oldId == null) {
-      return false;
-    }
-
-    if (this.oldId != null && other.oldId != null && !this.oldId.equals(other.oldId)) {
-      return false;
-    }
-
-    if (!this.username.equals(other.username)) {
-      return false;
-    }
-
-    if (!this.email.equals(other.email)) {
-      return false;
-    }
-
-    if (this.rcUserId == null && other.rcUserId != null) {
-      return false;
-    }
-
-    if (this.rcUserId != null && other.rcUserId == null) {
-      return false;
-    }
-
-    if (this.rcUserId != null && other.rcUserId != null && !this.rcUserId.equals(other.rcUserId)) {
-      return false;
-    }
-
-    if (this.languageFormal != other.languageFormal) {
-      return false;
-    }
-
-    if (this.sessions == null && other.sessions != null) {
-      return false;
-    }
-
-    if (this.sessions != null && other.sessions == null) {
-      return false;
-    }
-
-    if (this.sessions != null && other.sessions != null && !this.sessions.equals(other.sessions)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  public User(@Size(max = 36) String userId, @Size(max = 255) String username,
-      @Size(max = 255) String email, Set<Session> sessions) {
-    this.userId = userId;
-    this.username = username;
-    this.email = email;
-    this.sessions = sessions;
-  }
-
   public User(@Size(max = 36) String userId, Long oldId, @Size(max = 255) String username,
       @Size(max = 255) String email, boolean languageFormal) {
     this.userId = userId;
@@ -149,4 +72,20 @@ public class User {
     this.languageFormal = languageFormal;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof User)) {
+      return false;
+    }
+    User user = (User) o;
+    return userId.equals(user.userId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(userId);
+  }
 }

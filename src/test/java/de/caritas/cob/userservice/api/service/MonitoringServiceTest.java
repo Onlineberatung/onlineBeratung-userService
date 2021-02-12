@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
+import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
+import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -44,7 +47,8 @@ public class MonitoringServiceTest {
   private final String ERROR = "error";
   private final Long SESSION_ID = 123L;
   private final Session SESSION =
-      new Session(SESSION_ID, null, null, null, null, null, null, null, null);
+      new Session(SESSION_ID, null, null, SUCHT, POSTCODE, null, IN_PROGRESS, null, null, null,
+          null, false, false, null, null);
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
   @Before
@@ -58,9 +62,7 @@ public class MonitoringServiceTest {
   }
 
   /**
-   *
    * Method: updateMonitoring Role: consultant
-   *
    */
 
   @Test
@@ -68,7 +70,8 @@ public class MonitoringServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
 
     when(monitoringRepository.saveAll(Mockito.any())).thenThrow(ex);
 
@@ -90,9 +93,7 @@ public class MonitoringServiceTest {
   }
 
   /**
-   *
    * Method: deleteMonitoring Role: consultant
-   *
    */
 
   @Test
@@ -100,7 +101,8 @@ public class MonitoringServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
 
     doThrow(ex).when(monitoringRepository).deleteAll(Mockito.any());
 
@@ -122,10 +124,7 @@ public class MonitoringServiceTest {
   }
 
   /**
-   *
    * Method: crateMonitoring
-   *
-   * @throws CreateMonitoringException
    */
 
   @Test
@@ -134,7 +133,8 @@ public class MonitoringServiceTest {
 
     doReturn(MONITORING_DTO).when(monitoringHelper).getMonitoringInitalList(Mockito.any());
 
-    monitoringService.createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
+    monitoringService
+        .createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringHelper, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
@@ -142,7 +142,6 @@ public class MonitoringServiceTest {
   }
 
   /**
-   *
    * Method: deleteInitialMonitoring
    */
 
