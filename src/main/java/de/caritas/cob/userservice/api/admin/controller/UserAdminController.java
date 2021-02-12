@@ -122,6 +122,12 @@ public class UserAdminController implements UseradminApi {
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
+  /**
+   * Entry point to delete a consultant agency relation.
+   *
+   * @param consultantId Consultant Id (required)
+   * @param agencyId Agency Id (required)
+   */
   @Override
   public ResponseEntity<Void> deleteConsultantAgency(String consultantId, Long agencyId) {
     this.consultantAdminFacade.markConsultantAgencyForDeletion(consultantId, agencyId);

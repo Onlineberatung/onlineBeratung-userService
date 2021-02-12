@@ -17,7 +17,6 @@ public class CustomLocalDateTime {
    * @return the {@link LocalDateTime} instance
    */
   public static LocalDateTime nowInUtc() {
-    LocalDateTime localDateTime = LocalDateTime.MAX;
     return LocalDateTime.now(ZoneOffset.UTC);
   }
 

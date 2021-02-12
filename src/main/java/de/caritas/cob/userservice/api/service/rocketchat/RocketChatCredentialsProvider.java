@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.service.LogService;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.NonNull;
@@ -79,7 +78,7 @@ public class RocketChatCredentialsProvider {
     }
 
     return oneOfBothUsersNull(firstUser.get(), secondUser.get())
-        .orElseGet(() -> observeLatestUser(firstUser.get(), secondUser.get()));
+        .orElseGet(() -> retrieveLatestUser(firstUser.get(), secondUser.get()));
   }
 
   private boolean areBothUsersNull(RocketChatCredentials firstUser,
@@ -98,7 +97,7 @@ public class RocketChatCredentialsProvider {
     return Optional.empty();
   }
 
-  private RocketChatCredentials observeLatestUser(RocketChatCredentials firstUser,
+  private RocketChatCredentials retrieveLatestUser(RocketChatCredentials firstUser,
       RocketChatCredentials secondUser) {
     if (firstUser.getTimeStampCreated().isAfter(secondUser.getTimeStampCreated())) {
       return firstUser;
@@ -136,28 +135,22 @@ public class RocketChatCredentialsProvider {
   }
 
   private void loginNullUser(AtomicReference<RocketChatCredentials> firstUser,
-      AtomicReference<RocketChatCredentials> secondUser, String username, String password) throws RocketChatLoginException {
+      AtomicReference<RocketChatCredentials> secondUser, String username, String password)
+      throws RocketChatLoginException {
     if (isNull(firstUser.get()) && isNull(secondUser.get())) {
-      firstUser.set(loginUserServiceUser(username, password));
+      firstUser.set(obtainRocketCredentialsForUser(username, password));
     } else {
       if (isNull(firstUser.get())) {
-        firstUser.set(loginUserServiceUser(username, password));
+        firstUser.set(obtainRocketCredentialsForUser(username, password));
       }
 
       if (isNull(secondUser.get())) {
-        secondUser.set(loginUserServiceUser(username, password));
+        secondUser.set(obtainRocketCredentialsForUser(username, password));
       }
     }
   }
 
-  /**
-   * Login a system user and receive a RocketChatCredentials-Object.
-   *
-   * @param username the username
-   * @param password the password
-   * @return credentials of rocket chat
-   */
-  public RocketChatCredentials loginUserServiceUser(String username, String password)
+  private RocketChatCredentials obtainRocketCredentialsForUser(String username, String password)
       throws RocketChatLoginException {
 
     RocketChatCredentials rcc = RocketChatCredentials.builder()
@@ -176,7 +169,7 @@ public class RocketChatCredentialsProvider {
       throw new RocketChatLoginException("Could not login " + username + " user in Rocket.Chat");
     }
 
-    if (rcc.getRocketChatToken() == null || rcc.getRocketChatUserId() == null) {
+    if (isNull(rcc.getRocketChatToken()) || isNull(rcc.getRocketChatUserId())) {
       String error = "Could not login " + username
           + " user in Rocket.Chat correctly, no authToken or UserId received.";
       throw new RocketChatLoginException(error);
@@ -186,11 +179,12 @@ public class RocketChatCredentialsProvider {
   }
 
   /**
-   * Performs a login with the given credentials and returns the Result.
+   * Performs a login with the given credentials and returns the result.
    *
    * @param username the username
    * @param password the password
-   * @return a response entity with the login dto
+   * @return the response entity of the login dto
+   * @throws RocketChatLoginException on failure
    */
   public ResponseEntity<LoginResponseDTO> loginUser(String username, String password)
       throws RocketChatLoginException {

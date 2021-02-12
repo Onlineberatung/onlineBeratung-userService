@@ -55,8 +55,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -73,7 +71,7 @@ public class RocketChatService {
       + "%s could not be deleted";
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
-  private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 01, 01, 00, 00);
+  private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 1, 1, 0, 0);
 
   private final LocalDateTime localDateTimeFuture = nowInUtc().plusYears(1L);
 
@@ -151,7 +149,7 @@ public class RocketChatService {
    *
    * @param groupName the Rocket.Chat group name
    * @return an {@link Optional} of a {@link GroupResponseDTO}
-   * @throws RocketChatCreateGroupException {@link RocketChatCreateGroupException}
+   * @throws RocketChatCreateGroupException on failure
    */
   public Optional<GroupResponseDTO> createPrivateGroupWithSystemUser(String groupName)
       throws RocketChatCreateGroupException {
@@ -232,7 +230,7 @@ public class RocketChatService {
    * @param password   the password
    * @param firstLogin true, if first login in Rocket.Chat. This requires a special API call.
    * @return the userid
-   * @throws {@link RocketChatLoginException}
+   * @throws RocketChatLoginException on failure
    */
   public String getUserID(String username, String password, boolean firstLogin)
       throws RocketChatLoginException {
@@ -242,7 +240,7 @@ public class RocketChatService {
     if (firstLogin) {
       response = loginUserFirstTime(username, password);
     } else {
-      response = loginUser(username, password);
+      response = this.rcCredentialHelper.loginUser(username, password);
     }
 
     RocketChatCredentials rocketChatCredentials =
@@ -254,6 +252,14 @@ public class RocketChatService {
     return rocketChatCredentials.getRocketChatUserId();
   }
 
+  /**
+   * Initial login to synchronize ldap and Rocket.Chat user.
+   *
+   * @param username the username
+   * @param password the password
+   * @return the login result
+   * @throws RocketChatLoginException on failure
+   */
   public ResponseEntity<LoginResponseDTO> loginUserFirstTime(String username, String password)
       throws RocketChatLoginException {
 
@@ -272,34 +278,6 @@ public class RocketChatService {
     } catch (Exception ex) {
       throw new RocketChatLoginException(
           String.format("Could not login user (%s) in Rocket.Chat for the first time", username));
-    }
-  }
-
-  /**
-   * Performs a login with the given credentials and returns the Result.
-   *
-   * @param username the username
-   * @param password the password
-   * @return the response entity of the login dto
-   * @throws {@link RocketChatLoginException}
-   */
-  public ResponseEntity<LoginResponseDTO> loginUser(String username, String password)
-      throws RocketChatLoginException {
-
-    try {
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-      MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-      map.add("username", username);
-      map.add("password", password);
-
-      HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-      return restTemplate.postForEntity(rocketChatApiUserLogin, request, LoginResponseDTO.class);
-    } catch (Exception ex) {
-      throw new RocketChatLoginException(
-          String.format("Could not login user (%s) in Rocket.Chat", username));
     }
   }
 
@@ -374,7 +352,7 @@ public class RocketChatService {
    *
    * @param rcUserId  Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
-   * @throws {@link RocketChatRemoveUserFromGroupException}
+   * @throws RocketChatRemoveUserFromGroupException on failure
    */
   public void removeUserFromGroup(String rcUserId, String rcGroupId)
       throws RocketChatRemoveUserFromGroupException {

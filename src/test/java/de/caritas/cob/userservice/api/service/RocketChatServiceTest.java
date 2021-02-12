@@ -554,9 +554,8 @@ public class RocketChatServiceTest {
   @Test
   public void getUserId_Should_LoginUser() throws RocketChatLoginException {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
-        new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
+    when(rcCredentialsHelper.loginUser(any(), any())).thenReturn(
+        new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         any(), ArgumentMatchers.<Class<LogoutResponseDTO>>any())).thenReturn(
@@ -564,17 +563,15 @@ public class RocketChatServiceTest {
 
     rocketChatService.getUserID(USERNAME, PASSWORD, false);
 
-    verify(restTemplate, times(1)).postForEntity(Mockito.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), Mockito.eq(LoginResponseDTO.class));
-
+    verify(this.rcCredentialsHelper, times(1)).loginUser(Mockito.eq(USERNAME),
+        Mockito.eq(PASSWORD));
   }
 
   @Test
   public void getUserId_Should_LogoutUser() throws RocketChatLoginException {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
-        new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
+    when(rcCredentialsHelper.loginUser(any(), any())).thenReturn(
+        new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         any(), ArgumentMatchers.<Class<LogoutResponseDTO>>any())).thenReturn(
@@ -582,17 +579,16 @@ public class RocketChatServiceTest {
 
     rocketChatService.getUserID(USERNAME, PASSWORD, false);
 
-    verify(restTemplate, times(1)).postForEntity(Mockito.eq(RC_URL_CHAT_USER_LOGOUT),
-        any(), Mockito.eq(LogoutResponseDTO.class));
+    verify(this.rcCredentialsHelper, times(1)).loginUser(Mockito.eq(USERNAME),
+        Mockito.eq(PASSWORD));
 
   }
 
   @Test
   public void getUserId_Should_ReturnCorrectUserId() throws RocketChatLoginException {
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        any(), ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
-        new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
+    when(rcCredentialsHelper.loginUser(any(), any())).thenReturn(
+        new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         any(), ArgumentMatchers.<Class<LogoutResponseDTO>>any())).thenReturn(
