@@ -219,6 +219,7 @@ public class ConsultantImportService {
         if (importRecord.getConsultantId() == null) {
           consultant = this.consultantCreatorService.createNewConsultant(importRecord, roles);
 
+          importRecord.setConsultantId(consultant.getId());
           logMessage = "Keycloak-ID: " + consultant.getId();
           writeToImportLog(logMessage);
 
