@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrel
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.KREUZBUND;
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
@@ -128,16 +129,18 @@ public class ConsultantAgencyRelationCreatorService {
 
   private void verifyAllAssignedAgenciesHaveSameConsultingType(ConsultingType consultingType,
       Consultant consultant) {
-    consultant.getConsultantAgencies().stream()
-        .map(ConsultantAgency::getAgencyId)
-        .map(this::retrieveAgency)
-        .filter(agency -> !agency.getConsultingType().equals(consultingType))
-        .findFirst()
-        .ifPresent(agency -> {
-          throw new BadRequestException(String
-              .format("ERROR: different consulting types found than %s for consultant with id %s",
-                  consultingType.getUrlName(), consultant.getId()));
-        });
+    if (nonNull(consultant.getConsultantAgencies())) {
+      consultant.getConsultantAgencies().stream()
+          .map(ConsultantAgency::getAgencyId)
+          .map(this::retrieveAgency)
+          .filter(agency -> !agency.getConsultingType().equals(consultingType))
+          .findFirst()
+          .ifPresent(agency -> {
+            throw new BadRequestException(String
+                .format("ERROR: different consulting types found than %s for consultant with id %s",
+                    consultingType.getUrlName(), consultant.getId()));
+          });
+    }
   }
 
   private void addConsultantToSessions(Consultant consultant, AgencyDTO agency,
