@@ -101,7 +101,7 @@ public class ConsultantAgencyAdminServiceIT {
   @Test
   public void markAllAssignedConsultantsAsTeamConsultant_Should_markAssignedConsultantsAsTeamConsultant() {
     long teamCosnultantsBefore = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdIn(singletonList(1L))
+        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
         .stream()
         .filter(Consultant::isTeamConsultant)
         .count();
@@ -109,7 +109,7 @@ public class ConsultantAgencyAdminServiceIT {
     this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
 
     long teamConsultantsAfter = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdIn(singletonList(1L))
+        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
         .stream()
         .filter(Consultant::isTeamConsultant)
         .count();
@@ -124,7 +124,7 @@ public class ConsultantAgencyAdminServiceIT {
     when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
 
     long teamCosnultantsBefore = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdIn(singletonList(0L))
+        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(0L))
         .stream()
         .filter(Consultant::isTeamConsultant)
         .count();
@@ -132,7 +132,7 @@ public class ConsultantAgencyAdminServiceIT {
     this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(0L);
 
     long teamConsultantsAfter = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdIn(singletonList(0L))
+        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(0L))
         .stream()
         .filter(Consultant::isTeamConsultant)
         .count();
@@ -152,8 +152,7 @@ public class ConsultantAgencyAdminServiceIT {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
 
     ConsultantAgency deletedConsultantAgency =
-        this.consultantAgencyRepository.findByConsultantIdAndAgencyId(consultantId, agencyId)
-            .get(0);
+        this.consultantAgencyRepository.findById(validRelation.getId()).get();
     assertThat(deletedConsultantAgency.getDeleteDate(), notNullValue());
   }
 

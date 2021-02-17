@@ -1,9 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_AGENCY_RELATION_DOES_NOT_EXIST;
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES;
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,9 +56,12 @@ public class ConsultantAgencyAdminServiceTest {
   @Mock
   private AgencyServiceHelper agencyServiceHelper;
 
+  @Mock
+  private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
+
   @Test(expected = NotFoundException.class)
   public void markAllAssignedConsultantsAsTeamConsultant_Should_throwNotFoundException_When_agencyWithIdDoesNotExist() {
-    when(this.consultantAgencyRepository.findByAgencyId(any())).thenReturn(Collections.emptyList());
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any())).thenReturn(Collections.emptyList());
 
     this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
   }
@@ -76,7 +76,7 @@ public class ConsultantAgencyAdminServiceTest {
         .filter(Consultant::isTeamConsultant)
         .count();
 
-    when(this.consultantAgencyRepository.findByAgencyId(any())).thenReturn(consultantAgencies);
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any())).thenReturn(consultantAgencies);
 
     this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
 
@@ -111,7 +111,7 @@ public class ConsultantAgencyAdminServiceTest {
 
     when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
         .thenReturn(singletonList(session));
-    when(this.consultantRepository.findByConsultantAgenciesAgencyIdIn(any()))
+    when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(any()))
         .thenReturn(consultants);
     when(this.agencyServiceHelper.getAgency(any())).thenReturn(agencyDTO);
 
@@ -131,7 +131,7 @@ public class ConsultantAgencyAdminServiceTest {
 
     when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
         .thenReturn(singletonList(session));
-    when(this.consultantRepository.findByConsultantAgenciesAgencyIdIn(any()))
+    when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(any()))
         .thenReturn(consultants);
     when(this.agencyServiceHelper.getAgency(any()))
         .thenThrow(new AgencyServiceHelperException(new Exception()));
@@ -151,79 +151,17 @@ public class ConsultantAgencyAdminServiceTest {
   }
 
   @Test
-  public void markConsultantAgencyForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyIsStillOnline()
-      throws AgencyServiceHelperException {
+  public void markConsultantAgencyForDeletion_Should_deleteConsultantAgency_When_consultantAgencyCanBeDeleted() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
-    when(this.consultantAgencyRepository.findByConsultantIdAndAgencyId(any(), any()))
+    when(this.consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(any(), any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.consultantAgencyRepository.findByAgencyId(any()))
-        .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().offline(false));
-
-    try {
-      this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
-      fail("Exception was not thrown");
-    } catch (CustomValidationHttpStatusException e) {
-      assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
-          is(CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE.name()));
-    }
-  }
-
-  @Test(expected = InternalServerErrorException.class)
-  public void markConsultantAgencyForDeletion_Should_throwInternalServerErrorException_When_agencyCanNotBefetched()
-      throws AgencyServiceHelperException {
-    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-    consultantAgency.setDeleteDate(null);
-    when(this.consultantAgencyRepository.findByConsultantIdAndAgencyId(any(), any()))
-        .thenReturn(singletonList(consultantAgency));
-    when(this.consultantAgencyRepository.findByAgencyId(any()))
-        .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any()))
-        .thenThrow(new AgencyServiceHelperException(new Exception()));
-
-    this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
-  }
-
-  @Test
-  public void markConsultantAgencyForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyHasOpenEnquiries()
-      throws AgencyServiceHelperException {
-    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-    consultantAgency.setDeleteDate(null);
-    when(this.consultantAgencyRepository.findByConsultantIdAndAgencyId(any(), any()))
-        .thenReturn(singletonList(consultantAgency));
-    when(this.consultantAgencyRepository.findByAgencyId(any()))
-        .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
-    when(this.sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(any(), any()))
-        .thenReturn(singletonList(mock(Session.class)));
-
-    try {
-      this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
-      fail("Exception was not thrown");
-    } catch (CustomValidationHttpStatusException e) {
-      assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
-          is(CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES.name()));
-    }
-  }
-
-  @Test
-  public void markConsultantAgencyForDeletion_Should_deleteConsultantAgency_When_consultantAgencyCanBeDeleted()
-      throws AgencyServiceHelperException {
-    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-    consultantAgency.setDeleteDate(null);
-    when(this.consultantAgencyRepository.findByConsultantIdAndAgencyId(any(), any()))
-        .thenReturn(singletonList(consultantAgency));
-    when(this.consultantAgencyRepository.findByAgencyId(any()))
-        .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
-    when(this.sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(any(), any()))
-        .thenReturn(emptyList());
 
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
 
     assertThat(consultantAgency.getDeleteDate(), notNullValue());
     verify(this.consultantAgencyRepository, times(1)).save(any(ConsultantAgency.class));
+    verify(this.agencyDeletionValidationService, times(1)).validateForDeletion(any());
   }
 
 }

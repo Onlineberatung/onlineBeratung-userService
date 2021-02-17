@@ -42,7 +42,7 @@ public class ConsultantAgencyService {
    */
   public List<ConsultantAgency> findConsultantsByAgencyId(Long agencyId) {
     try {
-      return consultantAgencyRepository.findByAgencyId(agencyId);
+      return consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while loading consultants by agency",
           LogService::logDatabaseError);
@@ -60,7 +60,7 @@ public class ConsultantAgencyService {
     try {
 
       List<ConsultantAgency> agencyList =
-          consultantAgencyRepository.findByConsultantIdAndAgencyId(consultantId, agencyId);
+          consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, agencyId);
 
       return isNotEmpty(agencyList);
     } catch (DataAccessException ex) {
@@ -82,7 +82,7 @@ public class ConsultantAgencyService {
     List<ConsultantResponseDTO> responseList = null;
 
     try {
-      agencyList = consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(agencyId);
+      agencyList = consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(agencyId);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while loading consultant list",
           LogService::logDatabaseError);

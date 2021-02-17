@@ -36,7 +36,7 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRule implements Vio
   @Override
   public List<ViolationDTO> generateViolations() {
     return retrieveAllTeamAgencies().stream()
-        .map(consultantAgencyRepository::findByAgencyId)
+        .map(consultantAgencyRepository::findByAgencyIdAndDeleteDateIsNull)
         .flatMap(Collection::stream)
         .filter(consultantAgency -> !consultantAgency.getConsultant().isTeamConsultant())
         .map(this::fromConsultantAgency)
@@ -44,7 +44,7 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRule implements Vio
   }
 
   private List<Long> retrieveAllTeamAgencies() {
-    return this.agencyAdminService.retrieveAllAgencies().parallelStream()
+    return this.agencyAdminService.retrieveAllAgencies().stream()
         .filter(agencyAdminResponseDTO -> isTrue(agencyAdminResponseDTO.getTeamAgency()))
         .map(AgencyAdminResponseDTO::getAgencyId)
         .collect(Collectors.toList());

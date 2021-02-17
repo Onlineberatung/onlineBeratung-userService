@@ -98,7 +98,7 @@ public class ConsultantAgencyRelationCreatorService {
   }
 
   private Consultant retrieveConsultant(String consultantId) {
-    return this.consultantRepository.findById(consultantId)
+    return this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
         .orElseThrow(() -> new BadRequestException(
             String.format("Consultant with id %s does not exist", consultantId)));
   }

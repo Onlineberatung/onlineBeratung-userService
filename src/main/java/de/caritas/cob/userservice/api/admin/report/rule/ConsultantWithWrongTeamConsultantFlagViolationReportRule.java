@@ -39,7 +39,7 @@ public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
   public List<ViolationDTO> generateViolations() {
 
     List<ConsultantAgency> allConsultantAgencies = StreamSupport
-        .stream(consultantAgencyRepository.findAll().spliterator(), true)
+        .stream(consultantAgencyRepository.findAll().spliterator(), false)
         .collect(Collectors.toList());
 
     List<AgencyAdminResponseDTO> allAgencies = this.agencyAdminService.retrieveAllAgencies()
@@ -49,7 +49,7 @@ public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
     ConsultantAgencyAnalyzer consultantAgencyAnalyzer =
         new ConsultantAgencyAnalyzer(allConsultantAgencies, allAgencies);
 
-    return StreamSupport.stream(consultantRepository.findAll().spliterator(), true)
+    return StreamSupport.stream(consultantRepository.findAll().spliterator(), false)
         .filter(Consultant::isTeamConsultant)
         .filter(consultantAgencyAnalyzer::hasNoTeamAgencyAssigned)
         .map(this::fromConsultant)

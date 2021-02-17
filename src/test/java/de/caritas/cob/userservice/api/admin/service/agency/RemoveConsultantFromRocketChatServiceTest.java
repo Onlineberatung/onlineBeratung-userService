@@ -59,7 +59,7 @@ public class RemoveConsultantFromRocketChatServiceTest {
     GroupMemberDTO groupMemberDTO = new EasyRandom().nextObject(GroupMemberDTO.class);
     groupMemberDTO.set_id("another");
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    when(this.consultantRepository.findByRocketChatId(any())).thenReturn(Optional.of(consultant));
+    when(this.consultantRepository.findByRocketChatIdAndDeleteDateIsNull(any())).thenReturn(Optional.of(consultant));
     GroupMemberDTO otherConsultant = new GroupMemberDTO();
     otherConsultant.set_id(consultant.getRocketChatId());
     when(this.rocketChatService.getStandardMembersOfGroup(any()))
