@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDelet
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class ConsultantPreDeletionService {
 
   private final @NonNull ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
   private final @NonNull SessionRepository sessionRepository;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
   /**
    * Validates if {@link Consultant} can be deleted and marks the account as inactive in keycloak.
@@ -33,6 +35,7 @@ public class ConsultantPreDeletionService {
     }
     consultant.getConsultantAgencies()
         .forEach(agencyDeletionValidationService::validateForDeletion);
+    this.keycloakAdminClientService.deactivateUser(consultant.getId());
   }
 
   private boolean hasConsultantActiveSessions(Consultant consultant) {

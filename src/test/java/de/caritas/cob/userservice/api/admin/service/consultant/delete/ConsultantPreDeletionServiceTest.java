@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,6 +19,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHt
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +38,9 @@ public class ConsultantPreDeletionServiceTest {
 
   @Mock
   private SessionRepository sessionRepository;
+
+  @Mock
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   @Test
   public void performPreDeletionSteps_Should_throwCustomValidationHttpStatusException_When_consultantHasOpenSessions() {
@@ -61,6 +66,16 @@ public class ConsultantPreDeletionServiceTest {
 
     verify(this.validationService, times(consultant.getConsultantAgencies().size()))
         .validateForDeletion(any());
+  }
+
+  @Test
+  public void performPreDeletionSteps_Should_setConsultantInactiveInKeycloak_When_consultantCanBeDeleted() {
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    when(this.sessionRepository.findByConsultantAndStatus(any(), any())).thenReturn(emptyList());
+
+    this.consultantPreDeletionService.performPreDeletionSteps(consultant);
+
+    verify(this.keycloakAdminClientService, times(1)).deactivateUser(eq(consultant.getId()));
   }
 
 }
