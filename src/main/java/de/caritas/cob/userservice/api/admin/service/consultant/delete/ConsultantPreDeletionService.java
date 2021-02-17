@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.delete;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_HAS_ACTIVE_SESSIONS;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDeletionValidationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -33,8 +34,10 @@ public class ConsultantPreDeletionService {
     if (hasConsultantActiveSessions(consultant)) {
       throw new CustomValidationHttpStatusException(CONSULTANT_HAS_ACTIVE_SESSIONS);
     }
-    consultant.getConsultantAgencies()
-        .forEach(agencyDeletionValidationService::validateForDeletion);
+    if (nonNull(consultant.getConsultantAgencies())) {
+      consultant.getConsultantAgencies()
+          .forEach(agencyDeletionValidationService::validateForDeletion);
+    }
     this.keycloakAdminClientService.deactivateUser(consultant.getId());
   }
 

@@ -14,9 +14,9 @@ import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +55,8 @@ public class ConsultantAgencyRelationCreatorServiceTest {
         .consultingType(ConsultingType.U25)
         .id(2L);
 
-    when(this.consultantRepository.findById(anyString())).thenReturn(Optional.of(new Consultant()));
+    when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))
+        .thenReturn(Optional.of(new Consultant()));
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
