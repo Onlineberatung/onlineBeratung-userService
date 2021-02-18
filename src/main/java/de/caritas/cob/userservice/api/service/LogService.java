@@ -94,6 +94,15 @@ public class LogService {
   }
 
   /**
+   * Logs a Keycloak error.
+   *
+   * @param message error message
+   */
+  public static void logKeycloakError(String message) {
+    LOGGER.error("{}{}", KEYCLOAK_ERROR_TEXT, message);
+  }
+
+  /**
    * Logs a Keycloak info.
    *
    * @param message the message
@@ -102,15 +111,6 @@ public class LogService {
   public static void logKeycloakInfo(String message, Exception exception) {
     LOGGER.info("{}{}", KEYCLOAK_ERROR_TEXT, message);
     LOGGER.info("{}{}", KEYCLOAK_EXCEPTION_TEXT, getStackTrace(exception));
-  }
-
-  /**
-   * Logs a Keycloak error.
-   *
-   * @param message error message
-   */
-  public static void logKeycloakError(String message) {
-    LOGGER.error("{}{}", KEYCLOAK_ERROR_TEXT, message);
   }
 
   /**

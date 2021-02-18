@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -120,10 +121,10 @@ public class MonitoringService {
     }
   }
 
-  private LinkedHashMap<String, Object> convertToMonitoringMap(List<Monitoring> monitoringList,
+  private Map<String, Object> convertToMonitoringMap(List<Monitoring> monitoringList,
       ConsultingType consultingType) {
 
-    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new LinkedHashMap<>();
 
     if (nonNull(monitoringList)) {
       for (MonitoringType type : MonitoringType.values()) {

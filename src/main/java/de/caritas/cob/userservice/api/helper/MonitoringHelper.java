@@ -1,16 +1,13 @@
 package de.caritas.cob.userservice.api.helper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.InitializeMonitoringException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
@@ -20,57 +17,48 @@ import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOpti
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+/**
+ * Builder class to provide sorted monitoring structure representation.
+ */
 @Component
+@RequiredArgsConstructor
 public class MonitoringHelper {
 
-  private ConsultingTypeManager consultingTypeManager;
-
-  @Autowired
-  public MonitoringHelper(ConsultingTypeManager consultingTypeManager) {
-    this.consultingTypeManager = consultingTypeManager;
-  }
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
-   * Returns a list of {@link Monitoring} objects for the given {@link MonitoringDTO} and
-   * {@link Session}
-   * 
-   * @param monitoringDTO
-   * @param sessionId
-   * @return
+   * Returns a list of {@link Monitoring} objects for the given {@link MonitoringDTO} and {@link
+   * Session}.
+   *
+   * @param monitoringDTO the given {@link MonitoringDTO}
+   * @param sessionId     the given id of the session
+   * @return the created monitoring {@link List}
    */
   public List<Monitoring> createMonitoringList(MonitoringDTO monitoringDTO, Long sessionId) {
 
-    if (monitoringDTO != null && sessionId != null) {
+    if (nonNull(monitoringDTO) && nonNull(sessionId)) {
       return createMonitoringList(monitoringDTO.getProperties(), sessionId, null, 0, null, null,
           null);
     }
-    return null;
+    return emptyList();
   }
 
-  /**
-   * Create a list of {@link Monitoring} objects recursively for the given {@link MonitoringDTO} and
-   * {@link Session}
-   * 
-   * @param map
-   * @param sessionId
-   * @param type
-   * @param level
-   * @param monitoring
-   * @param option
-   * @param monitoringList
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  private List<Monitoring> createMonitoringList(LinkedHashMap<String, Object> map, Long sessionId,
+  private List<Monitoring> createMonitoringList(Map<String, Object> map, Long sessionId,
       MonitoringType type, int level, Monitoring monitoring, MonitoringOption option,
       List<Monitoring> monitoringList) {
 
-    if (monitoringList == null) {
-      monitoringList = new ArrayList<Monitoring>();
+    if (isNull(monitoringList)) {
+      monitoringList = new ArrayList<>();
     }
 
     for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -83,7 +71,7 @@ public class MonitoringHelper {
           break;
 
         case 1:
-          if (entry.getValue() != null) {
+          if (nonNull(entry.getValue())) {
             option = null;
 
             if (entry.getValue() instanceof Boolean) {
@@ -92,18 +80,17 @@ public class MonitoringHelper {
               monitoring = null;
             } else {
               monitoring = new Monitoring(sessionId, type, entry.getKey(), null,
-                  new ArrayList<MonitoringOption>());
+                  new ArrayList<>());
               monitoringList.add(monitoring);
             }
           }
           break;
 
         case 2:
-          if (entry.getValue() != null) {
-            if (entry.getValue() instanceof Boolean && monitoring != null) {
-              option = new MonitoringOption(sessionId, type, monitoring.getKey(), entry.getKey(),
-                  (Boolean) entry.getValue(), monitoring);
-            }
+          if (nonNull(entry.getValue()) && entry.getValue() instanceof Boolean
+              && monitoring != null) {
+            option = new MonitoringOption(sessionId, type, monitoring.getKey(), entry.getKey(),
+                (Boolean) entry.getValue(), monitoring);
           }
           break;
 
@@ -111,12 +98,12 @@ public class MonitoringHelper {
           break;
       }
 
-      if (monitoring != null && option != null) {
+      if (nonNull(monitoring) && nonNull(option)) {
         monitoring.getMonitoringOptionList().add(option);
       }
 
-      if (entry.getValue() instanceof LinkedHashMap<?, ?>) {
-        createMonitoringList((LinkedHashMap<String, Object>) entry.getValue(), sessionId, type,
+      if (entry.getValue() instanceof Map) {
+        createMonitoringList((Map<String, Object>) entry.getValue(), sessionId, type,
             level + 1, monitoring, option, monitoringList);
       }
 
@@ -127,15 +114,14 @@ public class MonitoringHelper {
 
   /**
    * Creates the initial monitoring data of a session for the given {@link ConsultingType}. The
-   * structure (JSON) is being imported from the JSON file provided in the
-   * {@link ConsultingTypeSettings}.
-   * 
-   * @return
+   * structure (JSON) is being imported from the JSON file provided in the {@link
+   * ConsultingTypeSettings}.
    */
   public MonitoringDTO getMonitoringInitalList(ConsultingType consultingType) {
     MonitoringDTO monitoring;
     ObjectMapper mapper = new ObjectMapper();
-    TypeReference<MonitoringDTO> typeReference = new TypeReference<MonitoringDTO>() {};
+    TypeReference<MonitoringDTO> typeReference = new TypeReference<MonitoringDTO>() {
+    };
     InputStream inputStream = getMonitoringJSONStream(consultingType);
     try {
       monitoring = mapper.readValue(inputStream, typeReference);
@@ -147,21 +133,25 @@ public class MonitoringHelper {
   }
 
   /**
-   * Returns the path of the monitoring JSON file according to the provided {@link ConsultingType}
-   * 
-   * @param consultingType
-   * @return
+   * Returns the path of the monitoring JSON file according to the provided {@link ConsultingType}.
+   *
+   * @param consultingType the {@link ConsultingType} to load the json file for
+   * @return the {@link InputStream} containing the json content
    */
   private InputStream getMonitoringJSONStream(ConsultingType consultingType) {
-    return TypeReference.class.getResourceAsStream(
-        consultingTypeManager.getConsultingTypeSettings(consultingType).getMonitoringFile());
+    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingType)
+        .getMonitoringFile();
+    try {
+      return TypeReference.class.getResourceAsStream(monitoringFilePath);
+    } catch (NullPointerException e) {
+      throw new InternalServerErrorException(String
+          .format("Stream for monitoring json file with path \" %s \" can not be opened",
+              monitoringFilePath), e, LogService::logInternalServerError);
+    }
   }
 
   /**
    * Returns the corresponding {@link MonitoringType} for the given key String
-   * 
-   * @param key
-   * @return
    */
   private MonitoringType getMonitoringType(String key) {
     for (MonitoringType type : MonitoringType.values()) {
@@ -173,98 +163,51 @@ public class MonitoringHelper {
   }
 
   /**
-   * Returns a sorted {@link LinkedHashMap} of monitoring items according to the order that is
-   * defined in the monitoring JSON file
-   * 
-   * @param unsortedMap
-   * @param consultingType
-   * @return
+   * Returns a sorted {@link Map} of monitoring items according to the order that is defined in the
+   * monitoring JSON file.
+   *
+   * @param unsortedMap    the {@link Map} before sorting
+   * @param consultingType the {@link ConsultingType} to use for sorting
+   * @return the sorted {@link Map}
    */
-  @SuppressWarnings("unchecked")
-  public LinkedHashMap<String, Object> sortMonitoringMap(LinkedHashMap<String, Object> unsortedMap,
+  public Map<String, Object> sortMonitoringMap(Map<String, Object> unsortedMap,
       ConsultingType consultingType) {
 
-    List<DeleteEntry> deleteRecordList = new ArrayList<DeleteEntry>();
-    LinkedHashMap<String, Object> sortedMap =
+    Map<String, Object> sortedMap =
         getMonitoringInitalList(consultingType).getProperties();
-
-    try {
-      // Get root elements (level 0)
-      for (Map.Entry<String, Object> rootEntry : sortedMap.entrySet()) {
-
-        if (rootEntry.getValue() instanceof LinkedHashMap) {
-
-          // Get parent elements (level 1)
-          for (Map.Entry<String, Object> parentEntry : ((LinkedHashMap<String, Object>) rootEntry
-              .getValue()).entrySet()) {
-
-            if (parentEntry.getValue() instanceof LinkedHashMap) {
-
-              // Get child elements (level 2)
-              for (Map.Entry<String, Object> childEntry : ((LinkedHashMap<String, Object>) parentEntry
-                  .getValue()).entrySet()) {
-
-                if (childEntry.getValue() instanceof Boolean) {
-                  // Update the sorted map value with the corresponding value of the unsorted map or
-                  // remove this entry if it is not saved within this monitoring
-                  Boolean unsortedChildValue =
-                      (Boolean) ((LinkedHashMap<String, Object>) ((LinkedHashMap<String, Object>) unsortedMap
-                          .get(rootEntry.getKey())).get(parentEntry.getKey()))
-                              .get(childEntry.getKey());
-                  if (unsortedChildValue != null) {
-                    childEntry.setValue(unsortedChildValue);
-
-                  } else {
-                    LinkedHashMap<String, Boolean> removeChildEntry =
-                        (LinkedHashMap<String, Boolean>) ((LinkedHashMap<String, Object>) sortedMap
-                            .get(rootEntry.getKey())).get(parentEntry.getKey());
-                    deleteRecordList.add(new DeleteEntry(removeChildEntry, childEntry.getKey(),
-                        childEntry.getValue()));
-                  }
-                }
-              }
-
-            } else if (parentEntry.getValue() instanceof Boolean) {
-              // Update the sorted map value with the corresponding value of the unsorted map or
-              // remove this entry if it is not saved within this monitoring
-              Boolean unsortedParentValue =
-                  (Boolean) ((LinkedHashMap<String, Object>) unsortedMap.get(rootEntry.getKey()))
-                      .get(parentEntry.getKey());
-              if (unsortedParentValue != null) {
-                parentEntry.setValue(unsortedParentValue);
-              } else {
-                LinkedHashMap<String, Boolean> removeParentEntry =
-                    (LinkedHashMap<String, Boolean>) sortedMap.get(rootEntry.getKey());
-                deleteRecordList.add(new DeleteEntry(removeParentEntry, parentEntry.getKey(),
-                    parentEntry.getValue()));
-              }
-            }
-          }
-        }
-      }
-    } catch (Exception exception) {
-      LogService.logMonitoringHelperError(exception);
-      return new LinkedHashMap<String, Object>();
-    }
-
-    deleteRecordList.forEach(entry -> {
-      LinkedHashMap<String, Boolean> deleteEntry = entry.getEntry();
-      deleteEntry.remove(entry.getKey(), entry.getValue());
-    });
+    setValuesForSortedMonitoringMap(sortedMap, unsortedMap);
 
     return sortedMap;
   }
 
-  /**
-   * Object that holds the entries which should be deleted from the sorted monitoring map
-   *
-   */
-  @AllArgsConstructor
-  @Getter
-  @Setter
-  private class DeleteEntry {
-    LinkedHashMap<String, Boolean> entry;
-    String key;
-    Object value;
+  private void setValuesForSortedMonitoringMap(Map<String, Object> sortedConfiguration,
+      Map<String, Object> loadedInput) {
+    sortedConfiguration.entrySet()
+        .forEach(entry -> handleEntryValueType(loadedInput, entry));
   }
+
+  @SuppressWarnings("unchecked")
+  private void handleEntryValueType(Map<String, Object> loadedInput,
+      Entry<String, Object> configEntry) {
+    if (configEntry.getValue() instanceof Map) {
+      setValuesForSortedMonitoringMap((Map<String, Object>) configEntry.getValue(), loadedInput);
+    } else if (configEntry.getValue() instanceof Boolean) {
+      Boolean value = findValueForKeyName(configEntry.getKey(), loadedInput);
+      configEntry.setValue(value);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private Boolean findValueForKeyName(String key, Map<String, Object> loadedInput) {
+    if (loadedInput.containsKey(key)) {
+      return (Boolean) loadedInput.get(key);
+    }
+    for (Entry<String, Object> loadedEntry : loadedInput.entrySet()) {
+      if (loadedEntry.getValue() instanceof Map) {
+        return findValueForKeyName(key, (Map<String, Object>) loadedEntry.getValue());
+      }
+    }
+    return false;
+  }
+
 }
