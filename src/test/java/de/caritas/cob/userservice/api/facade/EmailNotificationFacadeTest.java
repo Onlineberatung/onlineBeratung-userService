@@ -31,7 +31,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCOD
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -49,11 +49,11 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.NewMessageDTO;
 import de.caritas.cob.userservice.api.model.NotificationDTO;
 import de.caritas.cob.userservice.api.model.TeamSessionDTO;
 import de.caritas.cob.userservice.api.model.ToConsultantDTO;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -66,11 +66,10 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
-import java.time.LocalDateTime;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -286,7 +285,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger, times(2)).error(anyString(), anyString(), anyString());
   }
 
   /**
@@ -345,7 +344,7 @@ public class EmailNotificationFacadeTest {
         .thenThrow(serviceException);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger, times(2)).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -593,7 +592,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME);
 
-    verify(logger, times(1)).error(anyString(), anyString(), eq("unexpected"));
+    verify(logger, times(1)).error(anyString(), anyString(), contains("unexpected"));
   }
 
   @Test(expected = NewMessageNotificationException.class)

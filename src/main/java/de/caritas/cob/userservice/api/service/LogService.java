@@ -295,6 +295,26 @@ public class LogService {
   }
 
   /**
+   * Error from EmailNotificationFacade.
+   *
+   * @param message the message
+   * @param exception the caused {@link Exception}
+   */
+  public static void logEmailNotificationFacadeError(String message, Exception exception) {
+    LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, message);
+    LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, getStackTrace(exception));
+  }
+
+  /**
+   * Error from EmailNotificationFacade.
+   *
+   * @param exception the caused {@link Exception}
+   */
+  public static void logEmailNotificationFacadeError(Exception exception) {
+    LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, getStackTrace(exception));
+  }
+
+  /**
    * Error from AcceptEnquiryFacade.
    *
    * @param message the message
