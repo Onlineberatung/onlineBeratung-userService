@@ -110,6 +110,15 @@ public class LogServiceTest {
   }
 
   @Test
+  public void logKeycloakInfo_Should_LogExceptionStackTraceAndErrorMessage() {
+
+    LogService.logKeycloakInfo(ERROR_MESSAGE, exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+    verify(logger, times(1)).info(anyString(), eq(KEYCLOAK_ERROR_TEXT), eq(ERROR_MESSAGE));
+
+  }
+
+  @Test
   public void logBadRequestException_Should_LogExceptionStackTrace() {
 
     LogService.logBadRequestException(badRequestException);

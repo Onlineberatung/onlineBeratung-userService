@@ -94,6 +94,17 @@ public class LogService {
   }
 
   /**
+   * Logs a Keycloak info.
+   *
+   * @param message the message
+   * @param exception the exception
+   */
+  public static void logKeycloakInfo(String message, Exception exception) {
+    LOGGER.info("{}{}", KEYCLOAK_ERROR_TEXT, message);
+    LOGGER.info("{}{}", KEYCLOAK_EXCEPTION_TEXT, getStackTrace(exception));
+  }
+
+  /**
    * Logs a Keycloak error.
    *
    * @param message error message
