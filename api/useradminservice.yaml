@@ -171,6 +171,8 @@ paths:
           description: BAD REQUEST - invalid/incomplete request
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - consultant not found
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

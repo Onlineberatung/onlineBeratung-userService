@@ -61,7 +61,7 @@ public class RemoveConsultantFromRocketChatService {
         .stream()
         .filter(notUserAndNotDirectlyAssignedConsultant(session))
         .map(GroupMemberDTO::get_id)
-        .map(this.consultantRepository::findByRocketChatId)
+        .map(this.consultantRepository::findByRocketChatIdAndDeleteDateIsNull)
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(Collectors.toList());

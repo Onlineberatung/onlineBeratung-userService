@@ -30,7 +30,7 @@ public class MissingAgencyForConsultantViolationReportRule implements ViolationR
    */
   @Override
   public List<ViolationDTO> generateViolations() {
-    return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), true)
+    return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), false)
         .filter(consultant -> isEmpty(consultant.getConsultantAgencies()))
         .map(this::fromConsultant)
         .collect(Collectors.toList());

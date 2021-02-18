@@ -120,7 +120,7 @@ public class ConsultantServiceTest {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findById(CONSULTANT_ID)).thenThrow(ex);
+    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenThrow(ex);
 
     try {
       consultantService.getConsultant(CONSULTANT_ID);
@@ -134,7 +134,7 @@ public class ConsultantServiceTest {
   @Test
   public void getConsultant_Should_ReturnConsultantWhenFound() {
 
-    when(consultantRepository.findById(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultant(CONSULTANT_ID);
 
@@ -148,7 +148,7 @@ public class ConsultantServiceTest {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByRocketChatId(RC_USER_ID)).thenThrow(ex);
+    when(consultantRepository.findByRocketChatIdAndDeleteDateIsNull(RC_USER_ID)).thenThrow(ex);
 
     try {
       consultantService.getConsultantByRcUserId(RC_USER_ID);
@@ -162,7 +162,7 @@ public class ConsultantServiceTest {
   @Test
   public void getConsultantByRcUserId_Should_ReturnConsultantWhenFound() {
 
-    when(consultantRepository.findByRocketChatId(RC_USER_ID)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByRocketChatIdAndDeleteDateIsNull(RC_USER_ID)).thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultantByRcUserId(RC_USER_ID);
 
@@ -176,7 +176,7 @@ public class ConsultantServiceTest {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByEmail(EMAIL)).thenThrow(ex);
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenThrow(ex);
 
     try {
       consultantService.getConsultantByEmail(EMAIL);
@@ -190,7 +190,7 @@ public class ConsultantServiceTest {
   @Test
   public void getConsultantByEmail_Should_ReturnConsultant_WhenFound() {
 
-    when(consultantRepository.findByEmail(EMAIL)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultantByEmail(EMAIL);
 
@@ -204,7 +204,7 @@ public class ConsultantServiceTest {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByUsername(USERNAME)).thenThrow(ex);
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME)).thenThrow(ex);
 
     try {
       consultantService.getConsultantByUsername(USERNAME);
@@ -218,7 +218,7 @@ public class ConsultantServiceTest {
   @Test
   public void getConsultantByUsername_Should_ReturnConsultant_WhenFound() {
 
-    when(consultantRepository.findByUsername(USERNAME)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME)).thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultantByUsername(USERNAME);
 
@@ -230,9 +230,9 @@ public class ConsultantServiceTest {
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnEmptyOptional_WhenConsultantIsNotFound() {
 
-    when(consultantRepository.findByUsername(USERNAME_DECODED)).thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.empty());
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
-    when(consultantRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
     Optional<Consultant> result =
         consultantService.findConsultantByUsernameOrEmail(USERNAME_DECODED, EMAIL);
@@ -244,10 +244,10 @@ public class ConsultantServiceTest {
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByDecodedUsername() {
 
-    when(consultantRepository.findByUsername(USERNAME_DECODED)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.of(CONSULTANT));
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
-    when(consultantRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
     Optional<Consultant> result =
         consultantService.findConsultantByUsernameOrEmail(USERNAME_ENCODED, EMAIL);
@@ -260,11 +260,11 @@ public class ConsultantServiceTest {
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEncodedUsername() {
 
-    when(consultantRepository.findByUsername(USERNAME_DECODED)).thenReturn(Optional.empty());
-    when(consultantRepository.findByUsername(USERNAME_ENCODED)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED)).thenReturn(Optional.of(CONSULTANT));
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
-    when(consultantRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
     Optional<Consultant> result =
         consultantService.findConsultantByUsernameOrEmail(USERNAME_DECODED, EMAIL);
@@ -277,11 +277,11 @@ public class ConsultantServiceTest {
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEmail() {
 
-    when(consultantRepository.findByUsername(USERNAME_DECODED)).thenReturn(Optional.empty());
-    when(consultantRepository.findByUsername(USERNAME_ENCODED)).thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED)).thenReturn(Optional.empty());
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
-    when(consultantRepository.findByEmail(EMAIL)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result =
         consultantService.findConsultantByUsernameOrEmail(USERNAME_ENCODED, EMAIL);
@@ -294,7 +294,7 @@ public class ConsultantServiceTest {
   @Test
   public void getConsultantViaAuthenticatedUser_Should_ThrowInternalServerError_WhenConsultantIsNotFound() {
 
-    when(consultantRepository.findById(CONSULTANT_ID)).thenReturn(Optional.empty());
+    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenReturn(Optional.empty());
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
 
     try {
@@ -309,7 +309,7 @@ public class ConsultantServiceTest {
   @Test
   public void getConsultantViaAuthenticatedUser_Should_ReturnConsultantOptional() {
 
-    when(consultantRepository.findById(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
 
     Optional<Consultant> result =
@@ -330,7 +330,7 @@ public class ConsultantServiceTest {
 
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByConsultantAgenciesAgencyIdIn(Mockito.any())).thenThrow(ex);
+    when(consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(Mockito.any())).thenThrow(ex);
 
     try {
       consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);
@@ -344,7 +344,7 @@ public class ConsultantServiceTest {
   @Test
   public void findConsultantsByAgencyIds_Should_ReturnListOfConsultants() {
 
-    when(consultantRepository.findByConsultantAgenciesAgencyIdIn(Mockito.any()))
+    when(consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(Mockito.any()))
         .thenReturn(Collections.singletonList(CONSULTANT));
 
     List<Consultant> result = consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);

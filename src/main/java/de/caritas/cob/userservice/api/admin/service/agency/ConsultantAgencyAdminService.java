@@ -1,15 +1,10 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_AGENCY_RELATION_DOES_NOT_EXIST;
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES;
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.INITIAL;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NEW;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -29,7 +24,6 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +40,7 @@ public class ConsultantAgencyAdminService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull RemoveConsultantFromRocketChatService removeFromRocketChatService;
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
   /**
    * Returns all Agencies for the given consultantId.
@@ -54,13 +49,13 @@ public class ConsultantAgencyAdminService {
    * @return the list of agencies for the given consultant
    */
   public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
-    Optional<Consultant> consultant = consultantRepository.findById(consultantId);
+    Optional<Consultant> consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId);
     if (!consultant.isPresent()) {
       throw new BadRequestException(
           String.format("Consultant with id %s does not exist", consultantId));
     }
     List<ConsultantAgency> agencyList = consultantAgencyRepository
-        .findByConsultantId(consultantId);
+        .findByConsultantIdAndDeleteDateIsNull(consultantId);
 
     return ConsultantAgencyAdminResultDTOBuilder
         .getInstance()
@@ -76,7 +71,7 @@ public class ConsultantAgencyAdminService {
    */
   public void markAllAssignedConsultantsAsTeamConsultant(Long agencyId) {
     List<ConsultantAgency> consultantAgencies = this.consultantAgencyRepository
-        .findByAgencyId(agencyId);
+        .findByAgencyIdAndDeleteDateIsNull(agencyId);
     if (isEmpty(consultantAgencies)) {
       throw new NotFoundException(String.format("Agency with id %s does not exist", agencyId));
     }
@@ -109,7 +104,7 @@ public class ConsultantAgencyAdminService {
     this.removeFromRocketChatService.removeConsultantFromSessions(teamSessionsInProgress);
     teamSessionsInProgress.forEach(this::changeSessionToNonTeamSession);
 
-    this.consultantRepository.findByConsultantAgenciesAgencyIdIn(singletonList(agencyId))
+    this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(agencyId))
         .stream()
         .filter(consultant -> noOtherTeamAgency(consultant, agencyId))
         .forEach(this::removeTeamConsultantFlag);
@@ -149,7 +144,7 @@ public class ConsultantAgencyAdminService {
    */
   public void markConsultantAgencyForDeletion(String consultantId, Long agencyId) {
     List<ConsultantAgency> consultantAgencies =
-        this.consultantAgencyRepository.findByConsultantIdAndAgencyId(consultantId, agencyId);
+        this.consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, agencyId);
     if (isEmpty(consultantAgencies)) {
       throw new CustomValidationHttpStatusException(CONSULTANT_AGENCY_RELATION_DOES_NOT_EXIST);
     }
@@ -159,53 +154,9 @@ public class ConsultantAgencyAdminService {
   }
 
   private void markAsDeleted(ConsultantAgency consultantAgency) {
-    validateForDeletion(consultantAgency);
+    this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
     consultantAgency.setDeleteDate(nowInUtc());
     this.consultantAgencyRepository.save(consultantAgency);
-  }
-
-  private void validateForDeletion(ConsultantAgency consultantAgency) {
-    if (isTheLastConsultantInAgency(consultantAgency)) {
-      if (isAgencyStillActive(consultantAgency)) {
-        throw new CustomValidationHttpStatusException(
-            CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE);
-      }
-      if (hasOpenEnquiries(consultantAgency)) {
-        throw new CustomValidationHttpStatusException(
-            CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES);
-      }
-    }
-  }
-
-  private boolean isTheLastConsultantInAgency(ConsultantAgency consultantAgency) {
-    return this.consultantAgencyRepository.findByAgencyId(consultantAgency.getAgencyId())
-        .stream()
-        .filter(relation -> isNull(relation.getDeleteDate()))
-        .allMatch(sameConsultantAgencyRelation(consultantAgency));
-  }
-
-  private Predicate<ConsultantAgency> sameConsultantAgencyRelation(
-      ConsultantAgency consultantAgency) {
-    return relation -> relation.equals(consultantAgency);
-  }
-
-  private boolean isAgencyStillActive(ConsultantAgency consultantAgency) {
-    try {
-      AgencyDTO agency = this.agencyServiceHelper.getAgency(consultantAgency.getAgencyId());
-      return isFalse(agency.getOffline());
-    } catch (AgencyServiceHelperException e) {
-      throw new InternalServerErrorException(e.getMessage());
-    }
-  }
-
-  private boolean hasOpenEnquiries(ConsultantAgency consultantAgency) {
-    Long agencyId = consultantAgency.getAgencyId();
-    return hasSessionWithStatus(agencyId, NEW) || hasSessionWithStatus(agencyId, INITIAL);
-  }
-
-  private boolean hasSessionWithStatus(Long agencyId, SessionStatus status) {
-    return !this.sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(agencyId, status)
-        .isEmpty();
   }
 
 }

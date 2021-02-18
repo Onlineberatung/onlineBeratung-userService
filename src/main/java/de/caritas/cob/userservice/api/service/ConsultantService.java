@@ -49,7 +49,7 @@ public class ConsultantService {
    */
   public Optional<Consultant> getConsultant(String consultantId) {
     try {
-      return consultantRepository.findById(consultantId);
+      return consultantRepository.findByIdAndDeleteDateIsNull(consultantId);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while loading consultant",
           LogService::logDatabaseError);
@@ -64,7 +64,7 @@ public class ConsultantService {
    */
   public Optional<Consultant> getConsultantByRcUserId(String rcUserId) {
     try {
-      return consultantRepository.findByRocketChatId(rcUserId);
+      return consultantRepository.findByRocketChatIdAndDeleteDateIsNull(rcUserId);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException(String
           .format("Database error while loading consultant by Rocket.Chat user id %s", rcUserId),
@@ -102,7 +102,7 @@ public class ConsultantService {
    */
   public Optional<Consultant> getConsultantByEmail(String email) {
     try {
-      return consultantRepository.findByEmail(email);
+      return consultantRepository.findByEmailAndDeleteDateIsNull(email);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while loading consultant by email",
           LogService::logDatabaseError);
@@ -117,7 +117,7 @@ public class ConsultantService {
    */
   public Optional<Consultant> getConsultantByUsername(String username) {
     try {
-      return consultantRepository.findByUsername(username);
+      return consultantRepository.findByUsernameAndDeleteDateIsNull(username);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException(
           String.format("Database error while loading consultant by username %s", username),
@@ -184,7 +184,7 @@ public class ConsultantService {
         chatAgencies.stream().map(ChatAgency::getAgencyId).collect(Collectors.toList());
 
     try {
-      return consultantRepository.findByConsultantAgenciesAgencyIdIn(agencyIds);
+      return consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(agencyIds);
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException(
           "Database error while loading consultant by agency ids", LogService::logDatabaseError);

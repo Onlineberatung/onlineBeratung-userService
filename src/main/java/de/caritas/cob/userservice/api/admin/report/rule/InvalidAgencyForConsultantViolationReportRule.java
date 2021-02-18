@@ -33,14 +33,14 @@ public class InvalidAgencyForConsultantViolationReportRule implements ViolationR
   @Override
   public List<ViolationDTO> generateViolations() {
     return retrieveAllDeletedAgencies().stream()
-        .map(consultantAgencyRepository::findByAgencyId)
+        .map(consultantAgencyRepository::findByAgencyIdAndDeleteDateIsNull)
         .flatMap(Collection::stream)
         .map(this::fromConsultantAgency)
         .collect(Collectors.toList());
   }
 
   private List<Long> retrieveAllDeletedAgencies() {
-    return this.agencyAdminService.retrieveAllAgencies().parallelStream()
+    return this.agencyAdminService.retrieveAllAgencies().stream()
         .filter(agencyAdminResponseDTO -> !"null".equals(agencyAdminResponseDTO.getDeleteDate()))
         .map(AgencyAdminResponseDTO::getAgencyId)
         .collect(Collectors.toList());

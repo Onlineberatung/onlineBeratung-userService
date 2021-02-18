@@ -1,8 +1,12 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
@@ -23,6 +27,7 @@ public class ConsultantAdminService {
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull ConsultantCreatorService consultantCreatorService;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
+  private final @NonNull ConsultantPreDeletionService consultantPreDeletionService;
 
   /**
    * Finds a {@link Consultant} by the given consultant id and throws a {@link NoContentException}
@@ -32,7 +37,7 @@ public class ConsultantAdminService {
    * @return a generated {@link ConsultantResponseDTO}
    */
   public ConsultantAdminResponseDTO findConsultantById(String consultantId) {
-    Consultant consultant = this.consultantRepository.findById(consultantId)
+    Consultant consultant = this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
         .orElseThrow(() -> new NoContentException(
             String.format("Consultant with id %s not found", consultantId)));
     return ConsultantResponseDTOBuilder.getInstance(consultant)
@@ -57,7 +62,7 @@ public class ConsultantAdminService {
   /**
    * Updates a new {@link Consultant} based on the {@link UpdateConsultantDTO} input.
    *
-   * @param consultantId the id of consultant to be updated
+   * @param consultantId        the id of consultant to be updated
    * @param updateConsultantDTO the input data used for {@link Consultant} update
    * @return the generated and persisted {@link Consultant} representation as {@link
    * ConsultantAdminResponseDTO}
@@ -69,5 +74,21 @@ public class ConsultantAdminService {
 
     return ConsultantResponseDTOBuilder.getInstance(updatedConsultant)
         .buildResponseDTO();
+  }
+
+  /**
+   * Marks the {@link Consultant} as deleted.
+   *
+   * @param consultantId the consultant id
+   */
+  public void markConsultantForDeletion(String consultantId) {
+    Consultant consultant = this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
+        .orElseThrow(() -> new NotFoundException(
+            String.format("Consultant with id %s does not exist", consultantId)));
+
+    this.consultantPreDeletionService.performPreDeletionSteps(consultant);
+
+    consultant.setDeleteDate(nowInUtc());
+    this.consultantRepository.save(consultant);
   }
 }

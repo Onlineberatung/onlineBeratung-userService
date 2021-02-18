@@ -122,7 +122,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     verify(rocketChatService, times(1))
         .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
     List<ConsultantAgency> result = this.consultantAgencyRepository
-        .findByConsultantId(consultant.getId());
+        .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
@@ -163,11 +163,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     verify(rocketChatService, times(1))
         .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
     List<ConsultantAgency> result = this.consultantAgencyRepository
-        .findByConsultantId(consultant.getId());
+        .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
-    assertThat(this.consultantRepository.findById(consultant.getId()).get().isTeamConsultant(),
+    assertThat(this.consultantRepository.findByIdAndDeleteDateIsNull(consultant.getId()).get().isTeamConsultant(),
         is(true));
   }
 
@@ -176,6 +176,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     consultant.setConsultantAgencies(null);
     consultant.setSessions(null);
     consultant.setRocketChatId("RocketChatId");
+    consultant.setDeleteDate(null);
     return this.consultantRepository.save(consultant);
   }
 
