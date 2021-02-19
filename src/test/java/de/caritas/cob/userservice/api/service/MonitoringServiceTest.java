@@ -15,7 +15,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.helper.MonitoringHelper;
+import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -40,7 +40,7 @@ public class MonitoringServiceTest {
   @Mock
   private MonitoringRepository monitoringRepository;
   @Mock
-  private MonitoringHelper monitoringHelper;
+  private MonitoringStructureProvider monitoringStructureProvider;
   @Mock
   private Logger logger;
 
@@ -131,13 +131,13 @@ public class MonitoringServiceTest {
   public void createMonitoring_Should_UpdateMonitoring_WithInitialMonitoringListOfSessionsConsultingType()
       throws CreateMonitoringException {
 
-    doReturn(MONITORING_DTO).when(monitoringHelper).getMonitoringInitalList(Mockito.any());
+    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitalList(Mockito.any());
 
     monitoringService
         .createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
-    verify(monitoringHelper, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
+    verify(monitoringStructureProvider, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
 
   }
 
@@ -148,12 +148,12 @@ public class MonitoringServiceTest {
   @Test
   public void deleteInitialMonitoring_Should_DeleteMonitoring_WithInitialMonitoringListOfSessionsConsultingType() {
 
-    doReturn(MONITORING_DTO).when(monitoringHelper).getMonitoringInitalList(Mockito.any());
+    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitalList(Mockito.any());
 
     monitoringService.rollbackInitializeMonitoring(SESSION);
 
     verify(monitoringService, times(1)).deleteMonitoring(SESSION_ID, MONITORING_DTO);
-    verify(monitoringHelper, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
+    verify(monitoringStructureProvider, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
 
   }
 }
