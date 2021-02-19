@@ -5,12 +5,12 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ConsultantAgencyRepository extends CrudRepository<ConsultantAgency, Long> {
 
-  List<ConsultantAgency> findByAgencyId(Long agencyId);
+  List<ConsultantAgency> findByAgencyIdAndDeleteDateIsNull(Long agencyId);
 
-  List<ConsultantAgency> findByConsultantId(String consultantId);
+  List<ConsultantAgency> findByConsultantIdAndDeleteDateIsNull(String consultantId);
 
-  List<ConsultantAgency> findByAgencyIdOrderByConsultantFirstNameAsc(Long agencyId);
+  List<ConsultantAgency> findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Long agencyId);
 
-  List<ConsultantAgency> findByConsultantIdAndAgencyId(String consultantId, Long agencyId);
+  List<ConsultantAgency> findByConsultantIdAndAgencyIdAndDeleteDateIsNull(String consultantId, Long agencyId);
 
 }

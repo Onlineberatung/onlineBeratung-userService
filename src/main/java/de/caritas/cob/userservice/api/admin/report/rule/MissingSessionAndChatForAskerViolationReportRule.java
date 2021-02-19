@@ -32,7 +32,7 @@ public class MissingSessionAndChatForAskerViolationReportRule implements Violati
    */
   @Override
   public List<ViolationDTO> generateViolations() {
-    return StreamSupport.stream(this.userRepository.findAll().spliterator(), true)
+    return StreamSupport.stream(this.userRepository.findAll().spliterator(), false)
         .filter(this::withoutSessionAndChat)
         .map(this::fromUser)
         .collect(Collectors.toList());

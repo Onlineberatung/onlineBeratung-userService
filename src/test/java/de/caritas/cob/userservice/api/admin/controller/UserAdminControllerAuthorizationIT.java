@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.admin.controller.UserAdminControlle
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCY_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTING_TYPE_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.DELETE_CONSULTANT_AGENCY_PATH;
+import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.DELETE_CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.FILTERED_CONSULTANTS_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.GET_CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.PAGE_PARAM;
@@ -661,6 +662,57 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).markConsultantAgencyForDeletion(any(), any());
+  }
+
+  @Test
+  public void deleteConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
+      throws Exception {
+    mvc.perform(delete(DELETE_CONSULTANT_PATH))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  public void deleteConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+      throws Exception {
+    mvc.perform(delete(DELETE_CONSULTANT_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
+          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
+          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT})
+  public void deleteConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+      throws Exception {
+    mvc.perform(delete(DELETE_CONSULTANT_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_ADMIN})
+  public void deleteConsultant_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
+      throws Exception {
+    mvc.perform(delete(DELETE_CONSULTANT_PATH)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion(any());
   }
 
 }

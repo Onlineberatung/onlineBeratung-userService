@@ -17,7 +17,6 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -98,7 +97,7 @@ public class ConsultantAgencyServiceTest {
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {
     };
-    when(consultantAgencyRepository.findByConsultantIdAndAgencyId(CONSULTANT_ID, AGENCY_ID))
+    when(consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(CONSULTANT_ID, AGENCY_ID))
         .thenThrow(ex);
 
     try {
@@ -113,7 +112,7 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void isConsultantInAgency_Should_ReturnTrue_WhenConsultantFound() {
 
-    when(consultantAgencyRepository.findByConsultantIdAndAgencyId(Mockito.anyString(),
+    when(consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
         Mockito.anyLong())).thenReturn(CONSULTANT_AGENY_LIST);
 
     assertTrue(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
@@ -122,7 +121,7 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void isConsultantInAgency_Should_ReturnFalse_WhenConsultantNotFound() {
 
-    when(consultantAgencyRepository.findByConsultantIdAndAgencyId(Mockito.anyString(),
+    when(consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
         Mockito.anyLong())).thenReturn(null);
 
     assertFalse(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
@@ -138,7 +137,7 @@ public class ConsultantAgencyServiceTest {
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {
     };
-    when(consultantAgencyRepository.findByAgencyId(AGENCY_ID)).thenThrow(ex);
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID)).thenThrow(ex);
 
     try {
       consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID);
@@ -152,7 +151,7 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void findConsultantsByAgencyId_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
 
-    when(consultantAgencyRepository.findByAgencyId(Mockito.anyLong()))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENY_LIST);
 
     assertThat(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID),
@@ -169,7 +168,7 @@ public class ConsultantAgencyServiceTest {
     @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {
     };
-    when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(AGENCY_ID))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(AGENCY_ID))
         .thenThrow(ex);
 
     try {
@@ -184,7 +183,7 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyIsNull() {
 
-    when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(Mockito.anyLong()))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENCY_NULL_LIST);
 
     try {
@@ -199,7 +198,7 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyConsultantIsNull() {
 
-    when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(Mockito.anyLong()))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_NULL_AGENCY_LIST);
 
     try {
@@ -214,7 +213,7 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void getConsultantsOfAgency_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
 
-    when(consultantAgencyRepository.findByAgencyIdOrderByConsultantFirstNameAsc(Mockito.anyLong()))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENY_LIST);
 
     assertThat(consultantAgencyService.getConsultantsOfAgency(AGENCY_ID),

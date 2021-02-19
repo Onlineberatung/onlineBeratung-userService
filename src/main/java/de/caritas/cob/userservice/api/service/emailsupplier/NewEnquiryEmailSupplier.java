@@ -40,7 +40,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
   @Override
   public List<MailDTO> generateEmails() throws AgencyServiceHelperException {
     List<ConsultantAgency> consultantAgencyList =
-        consultantAgencyRepository.findByAgencyId(session.getAgencyId());
+        consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(session.getAgencyId());
 
     if (isEmpty(consultantAgencyList)) {
       return emptyList();

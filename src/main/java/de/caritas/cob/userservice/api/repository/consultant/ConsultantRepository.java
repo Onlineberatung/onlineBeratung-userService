@@ -6,13 +6,13 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ConsultantRepository extends CrudRepository<Consultant, Long> {
 
-  Optional<Consultant> findById(String id);
+  Optional<Consultant> findByIdAndDeleteDateIsNull(String id);
 
-  Optional<Consultant> findByRocketChatId(String id);
+  Optional<Consultant> findByRocketChatIdAndDeleteDateIsNull(String id);
 
-  Optional<Consultant> findByEmail(String email);
+  Optional<Consultant> findByEmailAndDeleteDateIsNull(String email);
 
-  Optional<Consultant> findByUsername(String username);
+  Optional<Consultant> findByUsernameAndDeleteDateIsNull(String username);
 
-  List<Consultant> findByConsultantAgenciesAgencyIdIn(List<Long> agencyIds);
+  List<Consultant> findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(List<Long> agencyIds);
 }

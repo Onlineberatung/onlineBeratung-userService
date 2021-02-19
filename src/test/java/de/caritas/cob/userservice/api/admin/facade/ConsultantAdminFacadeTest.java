@@ -114,4 +114,12 @@ public class ConsultantAdminFacadeTest {
         .markConsultantAgencyForDeletion("1", 1L);
   }
 
+  @Test
+  public void markConsultantForDeletion_Should_callMarkConsultantForDeletion() {
+    this.consultantAdminFacade.markConsultantForDeletion("1");
+
+    verify(this.consultantAdminService, times(1))
+        .markConsultantForDeletion("1");
+  }
+
 }

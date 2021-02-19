@@ -216,7 +216,7 @@ public class EmailNotificationFacadeTest {
   public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants()
       throws AgencyServiceHelperException {
 
-    when(consultantAgencyRepository.findByAgencyId(Mockito.eq(SESSION.getAgencyId())))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(SESSION.getAgencyId())))
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
@@ -230,7 +230,7 @@ public class EmailNotificationFacadeTest {
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser()
       throws AgencyServiceHelperException {
 
-    when(consultantAgencyRepository.findByAgencyId(Mockito.eq(SESSION.getAgencyId())))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(SESSION.getAgencyId())))
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
@@ -243,7 +243,7 @@ public class EmailNotificationFacadeTest {
   public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper()
       throws AgencyServiceHelperException {
 
-    when(consultantAgencyRepository.findByAgencyId(Mockito.eq(SESSION.getAgencyId())))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(SESSION.getAgencyId())))
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
@@ -256,7 +256,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenConsultantAgencyListIsEmpty() {
 
-    when(consultantAgencyRepository.findByAgencyId(Mockito.eq(AGENCY_ID))).thenReturn(null);
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(AGENCY_ID))).thenReturn(null);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
@@ -266,7 +266,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenConsultantIsAbsent() {
 
-    when(consultantAgencyRepository.findByAgencyId(Mockito.eq(AGENCY_ID)))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(AGENCY_ID)))
         .thenReturn(ABSENT_CONSULTANT_AGENCY_LIST);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
@@ -280,7 +280,7 @@ public class EmailNotificationFacadeTest {
     EmailNotificationException emailNotificationException =
         new EmailNotificationException(new Exception());
 
-    when(consultantAgencyRepository.findByAgencyId(Mockito.eq(AGENCY_ID)))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(AGENCY_ID)))
         .thenThrow(emailNotificationException);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);

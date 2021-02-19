@@ -20,7 +20,6 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +61,7 @@ public class NewEnquiryEmailSupplierTest {
     Consultant absentConsultant = new Consultant();
     absentConsultant.setAbsent(true);
     absentConsultant.setEmail("email");
-    when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         null,
         new ConsultantAgency(0L, new Consultant(), 0L, nowInUtc(), nowInUtc(),
             nowInUtc()),
@@ -77,7 +76,7 @@ public class NewEnquiryEmailSupplierTest {
   @Test
   public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound()
       throws AgencyServiceHelperException {
-    when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(),
             nowInUtc()),
         new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),

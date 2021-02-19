@@ -41,10 +41,10 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
    */
   @Override
   public List<ViolationDTO> generateViolations() {
-    return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), true)
+    return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), false)
         .map(consultant -> this.sessionRepository
             .findByConsultantAndStatus(consultant, SessionStatus.IN_PROGRESS))
-        .flatMap(Collection::parallelStream)
+        .flatMap(Collection::stream)
         .map(this::fromMissingSession)
         .filter(Objects::nonNull)
         .collect(Collectors.toList());

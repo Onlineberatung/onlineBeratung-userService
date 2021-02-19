@@ -28,7 +28,7 @@ public class ConsultantAgencyAnalyzer {
    * @return true if no related agency is a team agency
    */
   public boolean hasNoTeamAgencyAssigned(Consultant consultant) {
-    return allConsultantAgencies.parallelStream()
+    return allConsultantAgencies.stream()
         .filter(assignedToConsultant(consultant))
         .map(this::fromConsultantAgency)
         .filter(Objects::nonNull)
@@ -40,7 +40,7 @@ public class ConsultantAgencyAnalyzer {
   }
 
   private AgencyAdminResponseDTO fromConsultantAgency(ConsultantAgency consultantAgency) {
-    return this.allAgencies.parallelStream()
+    return this.allAgencies.stream()
         .filter(byConsultantAgency(consultantAgency))
         .findFirst()
         .orElse(null);

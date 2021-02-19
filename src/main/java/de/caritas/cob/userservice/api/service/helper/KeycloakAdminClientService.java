@@ -344,28 +344,22 @@ public class KeycloakAdminClientService {
    * @return true if user hast provided role
    */
   public boolean userHasRole(String userId, String userRole) {
-
-    List<RoleRepresentation> userRoles = null;
-
     try {
-      userRoles = getUserRoles(userId);
-
+      return getUserRoles(userId).stream()
+          .map(this::toUserRole)
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .map(UserRole::getValue)
+          .anyMatch(userRole::equals);
     } catch (Exception ex) {
       String error = String.format("Could not get roles for user id %s", userId);
       LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
+  }
 
-    for (RoleRepresentation role : userRoles) {
-      Optional<UserRole> userRoleOptional = UserRole.getRoleByValue(role.getName());
-      if (userRoleOptional.isPresent()) {
-        if (userRoleOptional.get().getValue().equals(userRole)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+  private Optional<UserRole> toUserRole(RoleRepresentation roleRepresentation) {
+    return UserRole.getRoleByValue(roleRepresentation.getName());
   }
 
   private List<RoleRepresentation> getUserRoles(String userId) {
@@ -396,6 +390,19 @@ public class KeycloakAdminClientService {
   public void closeSession(String sessionId) {
     this.keycloakAdminClientAccessor.getRealmResource()
         .deleteSession(sessionId);
+  }
+
+  /**
+   * Deactivates the user account.
+   *
+   * @param userId the user id to be deactivated
+   */
+  public void deactivateUser(String userId) {
+    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId);
+    UserRepresentation userRepresentation = userResource.toRepresentation();
+    userRepresentation.setEnabled(false);
+    userResource.update(userRepresentation);
   }
 
 }
