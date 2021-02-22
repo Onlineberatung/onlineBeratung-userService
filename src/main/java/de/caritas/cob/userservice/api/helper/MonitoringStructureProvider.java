@@ -115,7 +115,7 @@ public class MonitoringStructureProvider {
    * @param consultingType the {@link ConsultingType} to load the initial monitoring
    * @return the generated {@link MonitoringDTO}
    */
-  public MonitoringDTO getMonitoringInitalList(ConsultingType consultingType) {
+  public MonitoringDTO getMonitoringInitialList(ConsultingType consultingType) {
     ObjectMapper mapper = new ObjectMapper();
     InputStream inputStream = getMonitoringJSONStream(consultingType);
     try {
@@ -156,7 +156,7 @@ public class MonitoringStructureProvider {
       ConsultingType consultingType) {
 
     Map<String, Object> sortedMap =
-        getMonitoringInitalList(consultingType).getProperties();
+        getMonitoringInitialList(consultingType).getProperties();
     setValuesForSortedMonitoringMap(sortedMap, unsortedMap);
 
     return sortedMap;

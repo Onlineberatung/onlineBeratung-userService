@@ -131,13 +131,13 @@ public class MonitoringServiceTest {
   public void createMonitoring_Should_UpdateMonitoring_WithInitialMonitoringListOfSessionsConsultingType()
       throws CreateMonitoringException {
 
-    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitalList(Mockito.any());
+    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitialList(Mockito.any());
 
     monitoringService
         .createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
-    verify(monitoringStructureProvider, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
+    verify(monitoringStructureProvider, times(1)).getMonitoringInitialList(SESSION.getConsultingType());
 
   }
 
@@ -148,12 +148,12 @@ public class MonitoringServiceTest {
   @Test
   public void deleteInitialMonitoring_Should_DeleteMonitoring_WithInitialMonitoringListOfSessionsConsultingType() {
 
-    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitalList(Mockito.any());
+    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitialList(Mockito.any());
 
     monitoringService.rollbackInitializeMonitoring(SESSION);
 
     verify(monitoringService, times(1)).deleteMonitoring(SESSION_ID, MONITORING_DTO);
-    verify(monitoringStructureProvider, times(1)).getMonitoringInitalList(SESSION.getConsultingType());
+    verify(monitoringStructureProvider, times(1)).getMonitoringInitialList(SESSION.getConsultingType());
 
   }
 }

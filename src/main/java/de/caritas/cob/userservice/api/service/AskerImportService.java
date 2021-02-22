@@ -546,7 +546,7 @@ public class AskerImportService {
         if (consultingTypeSettings.getMonitoringFile() != null
             && !consultingTypeSettings.getMonitoringFile().equals(StringUtils.EMPTY)) {
           MonitoringDTO monitoringDTO =
-              monitoringStructureProvider.getMonitoringInitalList(agencyDTO.getConsultingType());
+              monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
           if (monitoringDTO != null) {
             monitoringService.updateMonitoring(session.getId(), monitoringDTO);
           } else {

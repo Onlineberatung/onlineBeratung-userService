@@ -51,7 +51,7 @@ public class MonitoringService {
     if (nonNull(session) && consultingTypeSettings.isMonitoring()) {
       try {
         updateMonitoring(session.getId(),
-            monitoringStructureProvider.getMonitoringInitalList(session.getConsultingType()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingType()));
       } catch (Exception exception) {
         CreateEnquiryExceptionInformation exceptionInformation = CreateEnquiryExceptionInformation
             .builder().session(session).rcGroupId(session.getGroupId()).build();
@@ -178,7 +178,7 @@ public class MonitoringService {
     if (nonNull(session)) {
       try {
         deleteMonitoring(session.getId(),
-            monitoringStructureProvider.getMonitoringInitalList(session.getConsultingType()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingType()));
 
       } catch (InternalServerErrorException ex) {
         LogService.logInternalServerError(String.format(
