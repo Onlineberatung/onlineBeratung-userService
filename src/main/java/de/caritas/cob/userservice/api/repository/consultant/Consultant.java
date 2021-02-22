@@ -22,6 +22,7 @@ import lombok.Setter;
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.standard.ClassicTokenizerFactory;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.Field;
@@ -33,7 +34,6 @@ import org.springframework.lang.Nullable;
 
 /**
  * Represents a consultant
- *
  */
 @Entity
 @Table(name = "consultant")
@@ -112,6 +112,7 @@ public class Consultant {
 
   @OneToMany(mappedBy = "consultant")
   @IndexedEmbedded
+  @Where(clause = "delete_date IS NULL")
   private Set<ConsultantAgency> consultantAgencies;
 
   @Column(name = "create_date")
