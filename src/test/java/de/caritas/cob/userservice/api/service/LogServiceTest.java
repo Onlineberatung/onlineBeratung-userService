@@ -20,6 +20,7 @@ import static de.caritas.cob.userservice.api.service.LogService.TRUNCATION_ERROR
 import static de.caritas.cob.userservice.api.service.LogService.UNAUTHORIZED_WARNING_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.VALIDATION_ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.EXCEPTION;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -105,6 +106,15 @@ public class LogServiceTest {
 
     LogService.logKeycloakError(ERROR_MESSAGE);
     verify(logger, times(1)).error(anyString(), eq(KEYCLOAK_ERROR_TEXT), eq(ERROR_MESSAGE));
+
+  }
+
+  @Test
+  public void logKeycloakInfo_Should_LogExceptionStackTraceAndErrorMessage() {
+
+    LogService.logKeycloakInfo(ERROR_MESSAGE, exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+    verify(logger, times(1)).info(anyString(), eq(KEYCLOAK_ERROR_TEXT), eq(ERROR_MESSAGE));
 
   }
 
@@ -231,6 +241,24 @@ public class LogServiceTest {
     LogService.logEmailNotificationFacadeError(ERROR_MESSAGE);
     verify(logger, times(1))
         .error(anyString(), eq(EMAIL_NOTIFICATION_ERROR_TEXT), eq(ERROR_MESSAGE));
+  }
+
+  @Test
+  public void logEmailNotificationFacadeError_should_LogErrorMessageAndException() {
+
+    LogService.logEmailNotificationFacadeError(ERROR_MESSAGE, EXCEPTION);
+    verify(logger, times(1))
+        .error(anyString(), eq(EMAIL_NOTIFICATION_ERROR_TEXT), eq(ERROR_MESSAGE));
+    verify(logger, times(1))
+        .error(anyString(), eq(EMAIL_NOTIFICATION_ERROR_TEXT), eq(getStackTrace(EXCEPTION)));
+  }
+
+  @Test
+  public void logEmailNotificationFacadeError_should_LogErrorException() {
+
+    LogService.logEmailNotificationFacadeError(EXCEPTION);
+    verify(logger, times(1))
+        .error(anyString(), eq(EMAIL_NOTIFICATION_ERROR_TEXT), eq(getStackTrace(EXCEPTION)));
   }
 
   @Test

@@ -5,12 +5,13 @@ import static java.util.Objects.nonNull;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
-import de.caritas.cob.userservice.api.helper.MonitoringHelper;
+import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
@@ -27,13 +28,13 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 public class MonitoringService {
 
   private final MonitoringRepository monitoringRepository;
-  private final MonitoringHelper monitoringHelper;
+  private final MonitoringStructureProvider monitoringStructureProvider;
 
   @Autowired
   public MonitoringService(MonitoringRepository monitoringRepository,
-      MonitoringHelper monitoringHelper) {
+      MonitoringStructureProvider monitoringStructureProvider) {
     this.monitoringRepository = monitoringRepository;
-    this.monitoringHelper = monitoringHelper;
+    this.monitoringStructureProvider = monitoringStructureProvider;
   }
 
   /**
@@ -50,7 +51,7 @@ public class MonitoringService {
     if (nonNull(session) && consultingTypeSettings.isMonitoring()) {
       try {
         updateMonitoring(session.getId(),
-            monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingType()));
       } catch (Exception exception) {
         CreateEnquiryExceptionInformation exceptionInformation = CreateEnquiryExceptionInformation
             .builder().session(session).rcGroupId(session.getGroupId()).build();
@@ -90,7 +91,7 @@ public class MonitoringService {
 
     try {
       List<Monitoring> monitoringList =
-          monitoringHelper.createMonitoringList(monitoringDTO, sessionId);
+          monitoringStructureProvider.createMonitoringList(monitoringDTO, sessionId);
 
       monitoringRepository.saveAll(monitoringList);
 
@@ -110,7 +111,7 @@ public class MonitoringService {
 
     try {
       List<Monitoring> monitoringList =
-          monitoringHelper.createMonitoringList(monitoringDTO, sessionId);
+          monitoringStructureProvider.createMonitoringList(monitoringDTO, sessionId);
 
       monitoringRepository.deleteAll(monitoringList);
 
@@ -120,10 +121,10 @@ public class MonitoringService {
     }
   }
 
-  private LinkedHashMap<String, Object> convertToMonitoringMap(List<Monitoring> monitoringList,
+  private Map<String, Object> convertToMonitoringMap(List<Monitoring> monitoringList,
       ConsultingType consultingType) {
 
-    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    Map<String, Object> map = new LinkedHashMap<>();
 
     if (nonNull(monitoringList)) {
       for (MonitoringType type : MonitoringType.values()) {
@@ -134,7 +135,7 @@ public class MonitoringService {
       }
     }
 
-    return monitoringHelper.sortMonitoringMap(map, consultingType);
+    return monitoringStructureProvider.sortMonitoringMap(map, consultingType);
   }
 
   private LinkedHashMap<String, Object> convertToMonitoring(MonitoringType type,
@@ -177,7 +178,7 @@ public class MonitoringService {
     if (nonNull(session)) {
       try {
         deleteMonitoring(session.getId(),
-            monitoringHelper.getMonitoringInitalList(session.getConsultingType()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingType()));
 
       } catch (InternalServerErrorException ex) {
         LogService.logInternalServerError(String.format(

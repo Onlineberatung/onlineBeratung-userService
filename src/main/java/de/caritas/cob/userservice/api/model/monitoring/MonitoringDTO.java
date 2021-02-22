@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.swagger.annotations.ApiModel;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,10 +21,10 @@ import lombok.Setter;
 @ApiModel()
 public class MonitoringDTO {
 
-  private LinkedHashMap<String, Object> properties;
+  private Map<String, Object> properties;
 
   @JsonAnyGetter
-  public LinkedHashMap<String, Object> getProperties() {
+  public Map<String, Object> getProperties() {
     return properties;
   }
 

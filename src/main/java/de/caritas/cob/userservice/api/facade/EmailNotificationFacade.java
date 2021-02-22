@@ -74,7 +74,7 @@ public class EmailNotificationFacade {
       sendMailTasksToMailService(newEnquiryMail);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
-          "Failed to send new enquiry notification for session %s.", session.getId()));
+          "Failed to send new enquiry notification for session %s.", session.getId()), ex);
     }
   }
 
@@ -110,7 +110,7 @@ public class EmailNotificationFacade {
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new message notification with rocket chat group id %s and user id %s.",
-          rcGroupId, userId));
+          rcGroupId, userId), ex);
     }
   }
 
@@ -135,7 +135,7 @@ public class EmailNotificationFacade {
           ex);
     } catch (Exception e) {
       LogService.logEmailNotificationFacadeError(String.format(
-          "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
+          "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId), e);
     }
   }
 
@@ -156,7 +156,7 @@ public class EmailNotificationFacade {
     try {
       sendMailTasksToMailService(assignEnquiryMails);
     } catch (Exception exception) {
-      LogService.logEmailNotificationFacadeError(exception.getMessage());
+      LogService.logEmailNotificationFacadeError(exception);
     }
   }
 

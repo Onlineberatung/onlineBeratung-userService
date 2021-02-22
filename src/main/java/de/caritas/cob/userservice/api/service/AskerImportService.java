@@ -14,7 +14,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroup
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.MonitoringHelper;
+import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -44,7 +44,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -62,7 +61,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -107,7 +105,7 @@ public class AskerImportService {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull MessageServiceHelper messageServiceHelper;
-  private final @NonNull MonitoringHelper monitoringHelper;
+  private final @NonNull MonitoringStructureProvider monitoringStructureProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
   private final @NonNull UserHelper userHelper;
@@ -548,7 +546,7 @@ public class AskerImportService {
         if (consultingTypeSettings.getMonitoringFile() != null
             && !consultingTypeSettings.getMonitoringFile().equals(StringUtils.EMPTY)) {
           MonitoringDTO monitoringDTO =
-              monitoringHelper.getMonitoringInitalList(agencyDTO.getConsultingType());
+              monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
           if (monitoringDTO != null) {
             monitoringService.updateMonitoring(session.getId(), monitoringDTO);
           } else {
