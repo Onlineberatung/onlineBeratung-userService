@@ -395,4 +395,51 @@ public class MonitoringStructureProviderTest {
     assertThat(gambling.get(OFFLINE), is(false));
   }
 
+  @Test
+  public void sortMonitoringMap_Should_setValuesOfSameOtherKeyDependingOnTheirStructurePosition() {
+    Map<String, Object> sortedMap = MonitoringStructureBuilder.getInstance()
+        .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
+            .addEntry(OTHERS, false)
+            .getMonitoringStructure())
+        .addEntry(OTHERS, false)
+        .addSubLevel(GAMBLING, MonitoringStructureBuilder.getInstance()
+            .addEntry(OTHERS, false)
+            .getMonitoringStructure())
+        .addSubLevel(LEGAL_HIGHS, MonitoringStructureBuilder.getInstance()
+            .addEntry(OTHERS, false)
+            .getMonitoringStructure())
+        .getMonitoringStructure();
+    MonitoringDTO monitoringDTO = new MonitoringDTO();
+    monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
+    doReturn(monitoringDTO).when(monitoringStructureProvider)
+        .getMonitoringInitialList(Mockito.any());
+    Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
+        .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
+            .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
+                .addEntry(OTHERS, true)
+                .getMonitoringStructure())
+            .addEntry(OTHERS, true)
+            .addSubLevel(GAMBLING, MonitoringStructureBuilder.getInstance()
+                .addEntry(OTHERS, false)
+                .getMonitoringStructure())
+            .addSubLevel(LEGAL_HIGHS, MonitoringStructureBuilder.getInstance()
+                .addEntry(OTHERS, true)
+                .getMonitoringStructure())
+            .getMonitoringStructure())
+        .getMonitoringStructure();
+
+    Map<String, Object> sortedResultMap = monitoringStructureProvider
+        .sortMonitoringMap(unsortedMap, SUCHT);
+
+    assertThat(sortedResultMap, notNullValue());
+    Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
+    assertThat(rootResult.get(OTHERS), is(true));
+    Map<String, Object> drugs = (Map<String, Object>) rootResult.get(DRUGS);
+    assertThat(drugs.get(OTHERS), is(true));
+    Map<String, Object> gambling = (Map<String, Object>) rootResult.get(GAMBLING);
+    assertThat(gambling.get(OTHERS), is(false));
+    Map<String, Object> legalHighs = (Map<String, Object>) rootResult.get(LEGAL_HIGHS);
+    assertThat(legalHighs.get(OTHERS), is(true));
+  }
+
 }
