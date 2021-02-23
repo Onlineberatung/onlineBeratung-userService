@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 
@@ -172,7 +173,8 @@ public class MonitoringStructureProvider {
   private void handleEntryValueType(Map<String, Object> loadedInput,
       Entry<String, Object> configEntry) {
     if (configEntry.getValue() instanceof Map) {
-      setValuesForSortedMonitoringMap((Map<String, Object>) configEntry.getValue(), loadedInput);
+      setValuesForSortedMonitoringMap((Map<String, Object>) configEntry.getValue(),
+          (Map<String, Object>) loadedInput.getOrDefault(configEntry.getKey(), emptyMap()));
     } else if (configEntry.getValue() instanceof Boolean) {
       Boolean value = findValueForKeyName(configEntry.getKey(), loadedInput);
       configEntry.setValue(value);
@@ -181,15 +183,7 @@ public class MonitoringStructureProvider {
 
   @SuppressWarnings("unchecked")
   private Boolean findValueForKeyName(String key, Map<String, Object> loadedInput) {
-    if (loadedInput.containsKey(key)) {
-      return (Boolean) loadedInput.get(key);
-    }
-    for (Entry<String, Object> loadedEntry : loadedInput.entrySet()) {
-      if (loadedEntry.getValue() instanceof Map) {
-        return findValueForKeyName(key, (Map<String, Object>) loadedEntry.getValue());
-      }
-    }
-    return false;
+    return loadedInput.containsKey(key) ? (Boolean) loadedInput.get(key) : Boolean.FALSE;
   }
 
 }
