@@ -103,6 +103,17 @@ public class LogService {
   }
 
   /**
+   * Logs a Keycloak info.
+   *
+   * @param message the message
+   * @param exception the exception
+   */
+  public static void logKeycloakInfo(String message, Exception exception) {
+    LOGGER.info("{}{}", KEYCLOAK_ERROR_TEXT, message);
+    LOGGER.info("{}{}", KEYCLOAK_EXCEPTION_TEXT, getStackTrace(exception));
+  }
+
+  /**
    * Bad Request Exception.
    *
    * @param exception the exception
@@ -292,6 +303,26 @@ public class LogService {
    */
   public static void logEmailNotificationFacadeError(String message) {
     LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, message);
+  }
+
+  /**
+   * Error from EmailNotificationFacade.
+   *
+   * @param message the message
+   * @param exception the caused {@link Exception}
+   */
+  public static void logEmailNotificationFacadeError(String message, Exception exception) {
+    LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, message);
+    LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, getStackTrace(exception));
+  }
+
+  /**
+   * Error from EmailNotificationFacade.
+   *
+   * @param exception the caused {@link Exception}
+   */
+  public static void logEmailNotificationFacadeError(Exception exception) {
+    LOGGER.error("{}{}", EMAIL_NOTIFICATION_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**

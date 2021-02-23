@@ -13,4 +13,5 @@
 	<include file="db/changelog/changeset/0007_user_agency_relation/0007_changeSet.xml"/>
 	<include file="db/changelog/changeset/0008_chat_extension/0008_changeSet.xml"/>
 	<include file="db/changelog/changeset/0009_delete_timestamp_for_user_consultant/0009_changeSet.xml"/>
+	<include file="db/changelog/changeset/0010_delete_timestamp_for_consultant_agency/0010_changeSet.xml"/>
 </databaseChangeLog>

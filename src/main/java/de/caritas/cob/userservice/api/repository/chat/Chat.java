@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.repository.chat;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +20,7 @@ import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
-import de.caritas.cob.userservice.api.repository.chatAgency.ChatAgency;
+import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import lombok.AllArgsConstructor;
@@ -29,8 +30,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 /**
- * Representation of a chat
- * 
+ * Representation of a chat.
  */
 @Entity
 @Table(name = "chat")
@@ -106,12 +106,20 @@ public class Chat {
     this.chatOwner = chatOwner;
   }
 
-  public Chat(LocalDateTime startDate, boolean repetitive, ChatInterval chatInterval,
-      boolean active, String groupId) {
-    this.startDate = startDate;
-    this.repetitive = repetitive;
-    this.chatInterval = chatInterval;
-    this.active = active;
-    this.groupId = groupId;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Chat)) {
+      return false;
+    }
+    Chat chat = (Chat) o;
+    return id.equals(chat.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 }

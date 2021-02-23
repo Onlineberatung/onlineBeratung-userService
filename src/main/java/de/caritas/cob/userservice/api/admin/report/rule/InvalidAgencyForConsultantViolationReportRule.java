@@ -6,8 +6,8 @@ import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.admin.report.service.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,14 +33,14 @@ public class InvalidAgencyForConsultantViolationReportRule implements ViolationR
   @Override
   public List<ViolationDTO> generateViolations() {
     return retrieveAllDeletedAgencies().stream()
-        .map(consultantAgencyRepository::findByAgencyId)
+        .map(consultantAgencyRepository::findByAgencyIdAndDeleteDateIsNull)
         .flatMap(Collection::stream)
         .map(this::fromConsultantAgency)
         .collect(Collectors.toList());
   }
 
   private List<Long> retrieveAllDeletedAgencies() {
-    return this.agencyAdminService.retrieveAllAgencies().parallelStream()
+    return this.agencyAdminService.retrieveAllAgencies().stream()
         .filter(agencyAdminResponseDTO -> !"null".equals(agencyAdminResponseDTO.getDeleteDate()))
         .map(AgencyAdminResponseDTO::getAgencyId)
         .collect(Collectors.toList());

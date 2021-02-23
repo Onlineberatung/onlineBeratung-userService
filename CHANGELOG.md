@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.6.1...v2.7.0) (2021-02-23)
+
+
+### Features
+
+* adapt logging for monitoring helper and fix potential npe ([9fe2de7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9fe2de7b29c925c63b8517896f224cf4fadc49aa))
+* added deleted flag on consultant agency ([823222d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/823222dcea1e3977036253a95429ef9bc129a816))
+* change rollback handling to consider all sessions ([a93cdcc](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a93cdccdcfd68001913c871fd0d20b9ba545a10a))
+* change wrong credentials keycloak logs to info level ([0646042](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0646042068a4d9baca745fc3b95d41ca5802076f))
+* define api to change consultants for agency change ([6674aa8](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6674aa8235bf55390ecf4e902031dee24af932d6))
+* extend logging for email notification errors ([a00cd45](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a00cd4518f01e4768b073c79fc38fb43774d5d78))
+* implement consultant delete endpoint and validation ([320bb14](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/320bb14644c27700c3a07df2757572b6276f4c82))
+* integrate deactivation in keycloak ([e58f66c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e58f66c491e02a985bcbd952a68b61a74c4cd845))
+* provide deletion for conaultant agency relations ([3c6d870](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3c6d8708931114ca96755df86d045c56e7292e33))
+* provide logic to change agency type from team to default and vice versa ([88e36b1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/88e36b158ecf36b2d23264e244b66f48e657e0cd))
+* refactoring of transformation method from dto to entity ([87be2cf](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/87be2cf441ed6189b0c14f6168eedfd9c740b54c))
+* restructure api call definition ([afb7db4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/afb7db40056fbf90910d6c1ebcce8f30b4b1d973))
+
+
+### Bug Fixes
+
+* add where clause to filter deleted agency relations ([0491f59](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0491f59d34a8702a69186dc25c4479baac1c141c))
+* consultant id for agency relation ([31715c7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/31715c7bffebddc1e58a3a735e48b22b63759947))
+* correct api media type ([9a3957c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9a3957c3b11ce32d407b4d543f6a96d3fc9117be))
+* prevent npe while check other consultant agencies ([4d20053](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4d20053df4320c522131ed1e94f777cd7f09317b))
+* set values of other keys depending on their structure position ([32e2fca](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/32e2fca5b455a8c7f24d1a60668a3fafa662fea3))
+
 ### [2.6.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.6.0...v2.6.1) (2021-02-08)
 
 ## [2.6.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.5.0...v2.6.0) (2021-02-08)

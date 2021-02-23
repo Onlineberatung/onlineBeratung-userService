@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.ConsultantInputValidator;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UpdateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -7,10 +9,8 @@ import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class ConsultantUpdateService {
   /**
    * Updates the basic data of consultant with given id.
    *
-   * @param consultantId the id of the consultant to update
+   * @param consultantId        the id of the consultant to update
    * @param updateConsultantDTO the update input data
    * @return the updated persisted {@link Consultant}
    */
@@ -70,7 +70,7 @@ public class ConsultantUpdateService {
     consultant.setLanguageFormal(updateConsultantDTO.getFormalLanguage());
     consultant.setAbsent(updateConsultantDTO.getAbsent());
     consultant.setAbsenceMessage(updateConsultantDTO.getAbsenceMessage());
-    consultant.setUpdateDate(LocalDateTime.now(ZoneOffset.UTC));
+    consultant.setUpdateDate(nowInUtc());
 
     return this.consultantService.saveConsultant(consultant);
   }

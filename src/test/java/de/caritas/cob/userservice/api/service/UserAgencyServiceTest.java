@@ -6,9 +6,9 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_AGENCY_LIST;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
@@ -25,8 +25,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 
 @RunWith(SpringRunner.class)
 public class UserAgencyServiceTest {

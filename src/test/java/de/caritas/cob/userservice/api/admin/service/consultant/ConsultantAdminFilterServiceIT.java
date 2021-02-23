@@ -87,7 +87,7 @@ public class ConsultantAdminFilterServiceIT {
   @Test
   public void findFilteredConsultants_Should_returnExpectedConsultant_When_allFiltersAreSet() {
     ConsultantFilter consultantFilter = new ConsultantFilter()
-        .agencyId(1)
+        .agencyId(1L)
         .absent(false)
         .email("addiction@consultant.de")
         .lastname("Consultant")

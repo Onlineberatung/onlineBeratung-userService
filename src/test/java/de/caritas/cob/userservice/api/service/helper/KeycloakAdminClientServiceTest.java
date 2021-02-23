@@ -425,4 +425,19 @@ public class KeycloakAdminClientServiceTest {
     verify(realmResource, times(1)).deleteSession(anyString());
   }
 
+  @Test
+  public void deactivateUser_Should_deactivateUser() {
+    UserResource userResource = mock(UserResource.class);
+    UsersResource usersResource = mock(UsersResource.class);
+    UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    when(usersResource.get(any())).thenReturn(userResource);
+    when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+
+    this.keycloakAdminClientService.deactivateUser("userId");
+
+    verify(userRepresentation, times(1)).setEnabled(false);
+    verify(userResource, times(1)).update(userRepresentation);
+  }
+
 }

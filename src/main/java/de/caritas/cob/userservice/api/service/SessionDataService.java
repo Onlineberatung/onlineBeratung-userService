@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.helper.SessionDataHelper;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionData;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionDataRepository;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
 
 /**
  * Service for session data

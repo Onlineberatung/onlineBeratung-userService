@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -48,9 +49,13 @@ public class UserAdminControllerIT {
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
+  protected static final String DELETE_CONSULTANT_PATH = GET_CONSULTANT_PATH + "1234";
   protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
   protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultant/%s/agencies";
   protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s/agency";
+  protected static final String DELETE_CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s"
+      + "/agency/%s";
+  protected static final String AGENCY_CHANGE_TYPE_PATH = ROOT_PATH + "/agency/1/changetype";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
@@ -252,6 +257,43 @@ public class UserAdminControllerIT {
 
     verify(this.consultantAdminFacade, times(1))
         .createNewConsultantAgency(eq(consultantId), eq(createConsultantAgencyDTO));
+  }
+
+  @Test
+  public void changeAgencyType_Should_returnOk_When_parametersAreValid() throws Exception {
+    this.mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1)).changeAgencyType(any(), any());
+  }
+
+  @Test
+  public void deleteConsultantAgency_Should_returnOk_When_requiredParamsAreGiven()
+      throws Exception {
+    String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
+    Long agencyId = 1L;
+
+    String consultantAgencyDeletePath =
+        String.format(DELETE_CONSULTANT_AGENCY_PATH, consultantId, agencyId);
+
+    this.mvc.perform(delete(consultantAgencyDeletePath)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .markConsultantAgencyForDeletion(eq(consultantId), eq(agencyId));
+  }
+
+  @Test
+  public void deleteConsultant_Should_returnOk_When_requiredParamIsGiven()
+      throws Exception {
+    this.mvc.perform(delete(DELETE_CONSULTANT_PATH)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .markConsultantForDeletion(eq("1234"));
   }
 
 }

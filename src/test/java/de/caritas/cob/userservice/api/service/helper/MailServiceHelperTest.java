@@ -105,7 +105,7 @@ public class MailServiceHelperTest {
   private HttpHeaders getCsrfHttpHeaders() {
     String csrfToken = UUID.randomUUID().toString();
     HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     httpHeaders.add("Cookie", "X-CSRF-TOKEN=" + csrfToken);
     httpHeaders.add("CSRF-TOKEN", csrfToken);
 

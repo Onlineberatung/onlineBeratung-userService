@@ -11,12 +11,12 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
 import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
@@ -74,7 +74,7 @@ public class EmailNotificationFacade {
       sendMailTasksToMailService(newEnquiryMail);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
-          "Failed to send new enquiry notification for session %s.", session.getId()));
+          "Failed to send new enquiry notification for session %s.", session.getId()), ex);
     }
   }
 
@@ -110,7 +110,7 @@ public class EmailNotificationFacade {
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new message notification with rocket chat group id %s and user id %s.",
-          rcGroupId, userId));
+          rcGroupId, userId), ex);
     }
   }
 
@@ -135,7 +135,7 @@ public class EmailNotificationFacade {
           ex);
     } catch (Exception e) {
       LogService.logEmailNotificationFacadeError(String.format(
-          "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
+          "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId), e);
     }
   }
 
@@ -156,7 +156,7 @@ public class EmailNotificationFacade {
     try {
       sendMailTasksToMailService(assignEnquiryMails);
     } catch (Exception exception) {
-      LogService.logEmailNotificationFacadeError(exception.getMessage());
+      LogService.logEmailNotificationFacadeError(exception);
     }
   }
 

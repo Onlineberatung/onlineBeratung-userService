@@ -1,9 +1,13 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
-import de.caritas.cob.userservice.api.admin.service.ConsultantAgencyAdminService;
+import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
+import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
+
+import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
@@ -13,7 +17,7 @@ import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -100,5 +104,39 @@ public class ConsultantAdminFacade {
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+  }
+
+  /**
+   * Changes the consultant flag is_team_consultant and assignments for agency type changes.
+   *
+   * @param agencyId      the id of the changed agency
+   * @param agencyTypeDTO the request object containing the target type
+   */
+  public void changeAgencyType(Long agencyId, AgencyTypeDTO agencyTypeDTO) {
+    if (TEAM_AGENCY.equals(agencyTypeDTO.getAgencyType())) {
+      this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(agencyId);
+    }
+    if (DEFAULT_AGENCY.equals(agencyTypeDTO.getAgencyType())) {
+      this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(agencyId);
+    }
+  }
+
+  /**
+   * Marks the {@link ConsultantAgency} as deleted.
+   *
+   * @param consultantId the consultant id
+   * @param agencyId the agency id
+   */
+  public void markConsultantAgencyForDeletion(String consultantId, Long agencyId) {
+    this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
+  }
+
+  /**
+   * Marks the {@link Consultant} as deleted.
+   *
+   * @param consultantId the consultant id
+   */
+  public void markConsultantForDeletion(String consultantId) {
+    this.consultantAdminService.markConsultantForDeletion(consultantId);
   }
 }

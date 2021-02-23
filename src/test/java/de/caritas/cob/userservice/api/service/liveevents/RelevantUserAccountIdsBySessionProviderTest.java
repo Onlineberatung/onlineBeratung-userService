@@ -51,7 +51,7 @@ public class RelevantUserAccountIdsBySessionProviderTest {
     Consultant consultant = new Consultant();
     consultant.setId("consultant");
     session.setConsultant(consultant);
-    User user = new User("user", null, null, null);
+    User user = new User("user", null, null, null, false);
     session.setUser(user);
     return Optional.of(session);
   }

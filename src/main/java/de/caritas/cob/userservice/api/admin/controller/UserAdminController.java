@@ -5,6 +5,7 @@ import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
+import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
@@ -122,13 +123,26 @@ public class UserAdminController implements UseradminApi {
   }
 
   /**
+   * Entry point to delete a consultant agency relation.
+   *
+   * @param consultantId Consultant Id (required)
+   * @param agencyId     Agency Id (required)
+   */
+  @Override
+  public ResponseEntity<Void> deleteConsultantAgency(String consultantId, Long agencyId) {
+    this.consultantAdminFacade.markConsultantAgencyForDeletion(consultantId, agencyId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
    * Entry point to mark a consultant for deletion.
    *
    * @param consultantId consultant id (required)
    */
   @Override
   public ResponseEntity<Void> markConsultantForDeletion(@PathVariable String consultantId) {
-    return null;
+    this.consultantAdminFacade.markConsultantForDeletion(consultantId);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -189,5 +203,17 @@ public class UserAdminController implements UseradminApi {
     ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAdminFacade
         .findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
+  }
+
+  /**
+   * Entry point to handle consultant data when agency type changes.
+   *
+   * @param agencyId      the id of the changed agency
+   * @param agencyTypeDTO contains the target type
+   */
+  @Override
+  public ResponseEntity<Void> changeAgencyType(Long agencyId, @Valid AgencyTypeDTO agencyTypeDTO) {
+    this.consultantAdminFacade.changeAgencyType(agencyId, agencyTypeDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

@@ -2,9 +2,10 @@ package de.caritas.cob.userservice.api.repository.consultant;
 
 import static de.caritas.cob.userservice.api.repository.consultant.Consultant.EMAIL_ANALYZER;
 
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +22,7 @@ import lombok.Setter;
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.standard.ClassicTokenizerFactory;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.Field;
@@ -32,7 +34,6 @@ import org.springframework.lang.Nullable;
 
 /**
  * Represents a consultant
- *
  */
 @Entity
 @Table(name = "consultant")
@@ -111,6 +112,7 @@ public class Consultant {
 
   @OneToMany(mappedBy = "consultant")
   @IndexedEmbedded
+  @Where(clause = "delete_date IS NULL")
   private Set<ConsultantAgency> consultantAgencies;
 
   @Column(name = "create_date")
@@ -127,73 +129,20 @@ public class Consultant {
   }
 
   @Override
-  public boolean equals(Object obj) {
-
-    // If i´m compared to myself => true
-    if (obj == this) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-
-    // If the obj ist not an instance of Consultant => false
-    if (!(obj instanceof Consultant)) {
+    if (!(o instanceof Consultant)) {
       return false;
     }
+    Consultant that = (Consultant) o;
+    return id.equals(that.id);
+  }
 
-    Consultant other = (Consultant) obj;
-
-    if (!this.id.equals(other.id)) {
-      return false;
-    }
-
-    if (!this.rocketChatId.equals(other.rocketChatId)) {
-      return false;
-    }
-
-    if (!this.username.equals(other.username)) {
-      return false;
-    }
-
-    if (!this.firstName.equals(other.firstName)) {
-      return false;
-    }
-
-    if (!this.lastName.equals(other.lastName)) {
-      return false;
-    }
-
-    if (!this.email.equals(other.email)) {
-      return false;
-    }
-
-    if (this.absent != other.absent) {
-      return false;
-    }
-
-    if (this.teamConsultant != other.teamConsultant) {
-      return false;
-    }
-
-    if (!this.absenceMessage.equals(other.absenceMessage)) {
-      return false;
-    }
-
-    if (!this.idOld.equals(other.idOld)) {
-      return false;
-    }
-
-    if (!this.sessions.equals(other.sessions)) {
-      return false;
-    }
-
-    if (!this.consultantAgencies.equals(other.consultantAgencies)) {
-      return false;
-    }
-
-    if (this.languageFormal != other.languageFormal) {
-      return false;
-    }
-
-    return true;
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 
   @Override

@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;

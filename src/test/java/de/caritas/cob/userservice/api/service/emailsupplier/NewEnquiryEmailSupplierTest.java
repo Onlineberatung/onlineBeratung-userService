@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MAIN_CONSULTANT;
 import static java.util.Arrays.asList;
@@ -15,11 +16,10 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
 import de.caritas.cob.userservice.api.model.mailservice.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,10 +61,12 @@ public class NewEnquiryEmailSupplierTest {
     Consultant absentConsultant = new Consultant();
     absentConsultant.setAbsent(true);
     absentConsultant.setEmail("email");
-    when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         null,
-        new ConsultantAgency(0L, new Consultant(), 0L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(1L, absentConsultant, 1L, LocalDateTime.now(), LocalDateTime.now())));
+        new ConsultantAgency(0L, new Consultant(), 0L, nowInUtc(), nowInUtc(),
+            nowInUtc()),
+        new ConsultantAgency(1L, absentConsultant, 1L, nowInUtc(), nowInUtc(),
+            nowInUtc())));
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
 
@@ -74,9 +76,11 @@ public class NewEnquiryEmailSupplierTest {
   @Test
   public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound()
       throws AgencyServiceHelperException {
-    when(consultantAgencyRepository.findByAgencyId(anyLong())).thenReturn(asList(
-        new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, LocalDateTime.now(), LocalDateTime.now()),
-        new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, LocalDateTime.now(), LocalDateTime.now())));
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
+        new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(),
+            nowInUtc()),
+        new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),
+            nowInUtc())));
     when(agencyServiceHelper.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 

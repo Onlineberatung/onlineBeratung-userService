@@ -8,8 +8,8 @@ import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.admin.report.service.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRule implements Vio
   @Override
   public List<ViolationDTO> generateViolations() {
     return retrieveAllTeamAgencies().stream()
-        .map(consultantAgencyRepository::findByAgencyId)
+        .map(consultantAgencyRepository::findByAgencyIdAndDeleteDateIsNull)
         .flatMap(Collection::stream)
         .filter(consultantAgency -> !consultantAgency.getConsultant().isTeamConsultant())
         .map(this::fromConsultantAgency)
@@ -44,7 +44,7 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRule implements Vio
   }
 
   private List<Long> retrieveAllTeamAgencies() {
-    return this.agencyAdminService.retrieveAllAgencies().parallelStream()
+    return this.agencyAdminService.retrieveAllAgencies().stream()
         .filter(agencyAdminResponseDTO -> isTrue(agencyAdminResponseDTO.getTeamAgency()))
         .map(AgencyAdminResponseDTO::getAgencyId)
         .collect(Collectors.toList());

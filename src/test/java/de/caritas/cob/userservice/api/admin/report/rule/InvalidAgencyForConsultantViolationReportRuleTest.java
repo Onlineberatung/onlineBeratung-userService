@@ -13,8 +13,8 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.report.service.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -47,7 +47,7 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
   public void generateViolations_Should_returnExpectedViolation_When_oneViolatedConsultantExists() {
     ConsultantAgency violatedConsultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     violatedConsultantAgency.setAgencyId(1L);
-    when(this.consultantAgencyRepository.findByAgencyId(any()))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(violatedConsultantAgency));
     when(this.agencyAdminService.retrieveAllAgencies())
         .thenReturn(singletonList(new AgencyAdminResponseDTO().agencyId(1L)));
@@ -78,15 +78,15 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
     consultantAgencies.get(4).setAgencyId(3L);
     consultantAgencies.get(6).setAgencyId(4L);
     consultantAgencies.get(9).setAgencyId(5L);
-    when(this.consultantAgencyRepository.findByAgencyId(eq(1L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(1L)))
         .thenReturn(singletonList(consultantAgencies.get(0)));
-    when(this.consultantAgencyRepository.findByAgencyId(eq(2L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(2L)))
         .thenReturn(singletonList(consultantAgencies.get(2)));
-    when(this.consultantAgencyRepository.findByAgencyId(eq(3L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(3L)))
         .thenReturn(singletonList(consultantAgencies.get(4)));
-    when(this.consultantAgencyRepository.findByAgencyId(eq(4L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(4L)))
         .thenReturn(singletonList(consultantAgencies.get(6)));
-    when(this.consultantAgencyRepository.findByAgencyId(eq(5L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(5L)))
         .thenReturn(singletonList(consultantAgencies.get(9)));
     when(this.agencyAdminService.retrieveAllAgencies()).thenReturn(asList(
         new AgencyAdminResponseDTO().agencyId(1L),

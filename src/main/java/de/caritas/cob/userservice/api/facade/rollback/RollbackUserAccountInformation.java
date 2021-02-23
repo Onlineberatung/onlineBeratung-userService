@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.facade.rollback;
 
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import lombok.Builder;
 import lombok.Data;
 

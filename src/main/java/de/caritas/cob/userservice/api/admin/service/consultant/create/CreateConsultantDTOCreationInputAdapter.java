@@ -4,13 +4,12 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import java.time.LocalDateTime;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Adapter class to provide a {@link ConsultantCreationInput} based on a
- * {@link CreateConsultantDTO}.
+ * Adapter class to provide a {@link ConsultantCreationInput} based on a {@link
+ * CreateConsultantDTO}.
  */
 @RequiredArgsConstructor
 public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreationInput {
@@ -118,23 +117,4 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
     return isTrue(this.createConsultantDTO.getFormalLanguage());
   }
 
-  /**
-   * Provides the created date.
-   *
-   * @return the created date
-   */
-  @Override
-  public LocalDateTime getCreateDate() {
-    return LocalDateTime.now();
-  }
-
-  /**
-   * Provides the updated date.
-   *
-   * @return the updated date
-   */
-  @Override
-  public LocalDateTime getUpdateDate() {
-    return LocalDateTime.now();
-  }
 }

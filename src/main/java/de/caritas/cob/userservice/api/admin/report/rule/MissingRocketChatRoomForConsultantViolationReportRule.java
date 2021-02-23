@@ -12,7 +12,7 @@ import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -41,10 +41,10 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
    */
   @Override
   public List<ViolationDTO> generateViolations() {
-    return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), true)
+    return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), false)
         .map(consultant -> this.sessionRepository
             .findByConsultantAndStatus(consultant, SessionStatus.IN_PROGRESS))
-        .flatMap(Collection::parallelStream)
+        .flatMap(Collection::stream)
         .map(this::fromMissingSession)
         .filter(Objects::nonNull)
         .collect(Collectors.toList());

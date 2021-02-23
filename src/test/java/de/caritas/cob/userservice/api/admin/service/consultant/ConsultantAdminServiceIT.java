@@ -114,7 +114,7 @@ public class ConsultantAdminServiceIT {
   }
 
   @Test
-  public void updateConsultant_Should_useUpdaeServiceAndBuildConsultantAdminREsponseDTO() {
+  public void updateConsultant_Should_useUpdateServiceAndBuildConsultantAdminResponseDTO() {
     UpdateConsultantDTO updateConsultantDTO =
         new EasyRandom().nextObject(UpdateConsultantDTO.class);
     when(this.consultantUpdateService.updateConsultant(any(), any()))

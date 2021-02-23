@@ -24,17 +24,17 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgency;
-import de.caritas.cob.userservice.api.repository.userAgency.UserAgencyRepository;
-import de.caritas.cob.userservice.api.service.RocketChatService;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.List;
@@ -122,7 +122,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     verify(rocketChatService, times(1))
         .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
     List<ConsultantAgency> result = this.consultantAgencyRepository
-        .findByConsultantId(consultant.getId());
+        .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
@@ -163,11 +163,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     verify(rocketChatService, times(1))
         .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
     List<ConsultantAgency> result = this.consultantAgencyRepository
-        .findByConsultantId(consultant.getId());
+        .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
-    assertThat(this.consultantRepository.findById(consultant.getId()).get().isTeamConsultant(),
+    assertThat(this.consultantRepository.findByIdAndDeleteDateIsNull(consultant.getId()).get().isTeamConsultant(),
         is(true));
   }
 
@@ -176,6 +176,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     consultant.setConsultantAgencies(null);
     consultant.setSessions(null);
     consultant.setRocketChatId("RocketChatId");
+    consultant.setDeleteDate(null);
     return this.consultantRepository.save(consultant);
   }
 

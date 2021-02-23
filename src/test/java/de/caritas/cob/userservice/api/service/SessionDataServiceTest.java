@@ -14,17 +14,15 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.sessionData.SessionDataRepository;
+import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.util.ArrayList;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +30,7 @@ public class SessionDataServiceTest {
 
   private final String USERNAME = "username";
   private final String USER_ID = "9b71cc46-650d-42bb-8299-f8e3f6d7249f";
-  private final User USER = new User(USER_ID, USERNAME, "name@domain.de", null);
+  private final User USER = new User(USER_ID, null, USERNAME, "name@domain.de", false);
   private final String CONSULTANT_ID = "1b71cc46-650d-42bb-8299-f8e3f6d7249a";
   private final String CONSULTANT_ROCKETCHAT_ID = "xN3Mobksn3xdp7gEk";
   private final Consultant CONSULTANT =
@@ -40,7 +38,7 @@ public class SessionDataServiceTest {
           "last name", "consultant@cob.de", false, false, null, false, null, null, null, null,
           null, null);
   private final Session INITALIZED_SESSION = new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT,
-      "99999", 0L, SessionStatus.INITIAL, null, null);
+      "99999", 0L, SessionStatus.INITIAL, null, null, null, null, false, false, null, null);
   private final UserDTO USER_DTO = new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", null, null,
       null, null, null, "true", "0", true);
 

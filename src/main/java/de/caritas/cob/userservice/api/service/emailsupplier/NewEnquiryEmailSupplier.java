@@ -11,8 +11,8 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
 import de.caritas.cob.userservice.api.model.mailservice.TemplateDataDTO;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantAgency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.List;
@@ -40,7 +40,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
   @Override
   public List<MailDTO> generateEmails() throws AgencyServiceHelperException {
     List<ConsultantAgency> consultantAgencyList =
-        consultantAgencyRepository.findByAgencyId(session.getAgencyId());
+        consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(session.getAgencyId());
 
     if (isEmpty(consultantAgencyList)) {
       return emptyList();
