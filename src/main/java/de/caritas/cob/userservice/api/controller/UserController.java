@@ -742,4 +742,16 @@ public class UserController implements UsersApi {
         .fetchSessionForConsultant(sessionId, consultant);
     return new ResponseEntity<>(consultantSessionDTO, HttpStatus.OK);
   }
+
+  /**
+   * Updates or sets the email address for the current authenticated user.
+   *
+   * @param emailAddress the email address to set
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
+    this.keycloakService.changeEmailAddress(emailAddress);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
 }

@@ -86,4 +86,5 @@ public class PathConstants {
       "/users/askersWithoutSession/import";
   public static final String PATH_GET_SESSION_FOR_CONSULTANT =
       "/users/consultants/sessions/1";
+  public static final String PATH_PUT_UPDATE_EMAIL = "/users/email";
 }

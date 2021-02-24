@@ -1,19 +1,26 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.validation;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_VALID;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import javax.validation.Path;
 import javax.validation.Validator;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,10 +28,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConsultantInputValidatorTest {
+public class UserAccountInputValidatorTest {
 
   @InjectMocks
-  private ConsultantInputValidator consultantInputValidator;
+  private UserAccountInputValidator userAccountInputValidator;
 
   @Mock
   private Validator validator;
@@ -36,7 +43,7 @@ public class ConsultantInputValidatorTest {
         .absent(false));
 
     try {
-      this.consultantInputValidator.validateAbsence(createConsultantDTO);
+      this.userAccountInputValidator.validateAbsence(createConsultantDTO);
     } catch (CustomValidationHttpStatusException e) {
       fail("Exception should not be thrown");
     }
@@ -50,7 +57,7 @@ public class ConsultantInputValidatorTest {
         .absenceMessage("Absent"));
 
     try {
-      this.consultantInputValidator.validateAbsence(createConsultantDTO);
+      this.userAccountInputValidator.validateAbsence(createConsultantDTO);
     } catch (CustomValidationHttpStatusException e) {
       fail("Exception should not be thrown");
     }
@@ -64,7 +71,7 @@ public class ConsultantInputValidatorTest {
         .absenceMessage(null));
 
     try {
-      this.consultantInputValidator.validateAbsence(createConsultantDTO);
+      this.userAccountInputValidator.validateAbsence(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader(), notNullValue());
@@ -79,7 +86,7 @@ public class ConsultantInputValidatorTest {
     responseDTO.setUserId("userId");
 
     try {
-      this.consultantInputValidator.validateKeycloakResponse(responseDTO);
+      this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
     } catch (Exception e) {
       fail("Exception should not be thrown");
     }
@@ -93,7 +100,7 @@ public class ConsultantInputValidatorTest {
     createUserResponseDTO.setUsernameAvailable(1);
     responseDTO.setResponseDTO(createUserResponseDTO);
 
-    this.consultantInputValidator.validateKeycloakResponse(responseDTO);
+    this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
   }
 
   @Test
@@ -105,7 +112,7 @@ public class ConsultantInputValidatorTest {
     responseDTO.setResponseDTO(createUserResponseDTO);
 
     try {
-      this.consultantInputValidator.validateKeycloakResponse(responseDTO);
+      this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader(), notNullValue());
@@ -123,12 +130,30 @@ public class ConsultantInputValidatorTest {
     responseDTO.setResponseDTO(createUserResponseDTO);
 
     try {
-      this.consultantInputValidator.validateKeycloakResponse(responseDTO);
+      this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader(), notNullValue());
       assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
           is(EMAIL_NOT_AVAILABLE.name()));
+    }
+  }
+
+  @Test
+  public void validateEmailAddressShould_throwExpectedException_When_EmailIsInvalid() {
+    ConstraintViolationImpl constraintViolation = mock(ConstraintViolationImpl.class);
+    Path email = mock(Path.class);
+    when(email.toString()).thenReturn("email");
+    when(constraintViolation.getPropertyPath()).thenReturn(email);
+    when(validator.validate(any())).thenReturn(asSet(constraintViolation));
+
+    try {
+      this.userAccountInputValidator.validateEmailAddress("invalid");
+      fail("Exception should be thrown");
+    } catch (CustomValidationHttpStatusException e) {
+      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
+          is(EMAIL_NOT_VALID.name()));
     }
   }
 

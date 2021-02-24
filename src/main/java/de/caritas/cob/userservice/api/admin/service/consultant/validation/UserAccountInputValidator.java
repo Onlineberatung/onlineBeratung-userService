@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class ConsultantInputValidator {
+public class UserAccountInputValidator {
 
   private static final String EMAIL_FIELD = "email";
   private static final String USERNAME_FIELD = "username";
@@ -42,6 +42,17 @@ public class ConsultantInputValidator {
     if (inputValidation.isAbsent() && isBlank(inputValidation.absenceMessage())) {
       throw new CustomValidationHttpStatusException(MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER);
     }
+  }
+
+  /**
+   * Validates email.
+   *
+   * @param emailAddress the email address to be validated
+   */
+  public void validateEmailAddress(String emailAddress) {
+    UserDTO userDTO = new UserDTO();
+    userDTO.setEmail(emailAddress);
+    validateField(userDTO, EMAIL_FIELD, EMAIL_NOT_VALID);
   }
 
   /**

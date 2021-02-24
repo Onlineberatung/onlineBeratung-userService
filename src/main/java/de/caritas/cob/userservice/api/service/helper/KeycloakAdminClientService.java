@@ -276,7 +276,7 @@ public class KeycloakAdminClientService {
   }
 
   /**
-   * Updates first name, last name and email address of user wth given id in keycloak.
+   * Updates first name, last name and email address of user with given id in keycloak.
    *
    * @param userId Keycloak user ID
    * @param userDTO {@link UserDTO}
@@ -287,14 +287,33 @@ public class KeycloakAdminClientService {
       String firstName, String lastName) {
     UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
-    if (hasEmailAddressChanged(userResource, userDTO) && isEmailNotAvailable(userDTO.getEmail())) {
-      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
-    }
+    verifyEmail(userResource, userDTO.getEmail());
     userResource.update(getUserRepresentation(userDTO, firstName, lastName));
   }
 
-  private boolean hasEmailAddressChanged(UserResource userResource, UserDTO userDTO) {
-    return !userResource.toRepresentation().getEmail().equals(userDTO.getEmail());
+  private void verifyEmail(UserResource userResource, String email) {
+    if (hasEmailAddressChanged(userResource, email) && isEmailNotAvailable(email)) {
+      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
+    }
+  }
+
+  private boolean hasEmailAddressChanged(UserResource userResource, String email) {
+    return !userResource.toRepresentation().getEmail().equals(email);
+  }
+
+  /**
+   * Updates the email address of user with given id in keycloak.
+   *
+   * @param userId Keycloak user ID
+   * @param emailAddress the email address to set
+   */
+  public void updateEmail(String userId, String emailAddress) {
+    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId);
+    verifyEmail(userResource, emailAddress);
+    UserRepresentation representation = userResource.toRepresentation();
+    representation.setEmail(emailAddress);
+    userResource.update(representation);
   }
 
   /**

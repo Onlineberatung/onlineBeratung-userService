@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
@@ -48,6 +49,7 @@ public class KeycloakService {
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull UserAccountInputValidator userAccountInputValidator;
 
   /**
    * Changes the (Keycloak) password of a user and returns true on success.
@@ -147,6 +149,17 @@ public class KeycloakService {
         HEADER_BEARER_KEY + authenticatedUser.getAccessToken());
 
     return httpHeaders;
+  }
+
+  /**
+   * Updates the email address of user with given id in keycloak.
+   *
+   * @param emailAddress the email address to set
+   */
+  public void changeEmailAddress(String emailAddress) {
+    this.userAccountInputValidator.validateEmailAddress(emailAddress);
+    String userId = this.authenticatedUser.getUserId();
+    this.keycloakAdminClientService.updateEmail(userId, emailAddress);
   }
 
 }

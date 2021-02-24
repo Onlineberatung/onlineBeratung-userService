@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.validation.ConsultantInputValidator;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UpdateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
@@ -24,7 +24,7 @@ public class ConsultantUpdateService {
 
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
-  private final @NonNull ConsultantInputValidator consultantInputValidator;
+  private final @NonNull UserAccountInputValidator userAccountInputValidator;
   private final @NonNull RocketChatService rocketChatService;
 
   /**
@@ -35,7 +35,7 @@ public class ConsultantUpdateService {
    * @return the updated persisted {@link Consultant}
    */
   public Consultant updateConsultant(String consultantId, UpdateConsultantDTO updateConsultantDTO) {
-    this.consultantInputValidator
+    this.userAccountInputValidator
         .validateAbsence(new UpdateConsultantDTOAbsenceInputAdapter(updateConsultantDTO));
 
     Consultant consultant =
@@ -58,7 +58,7 @@ public class ConsultantUpdateService {
     userDTO.setEmail(updateConsultantDTO.getEmail());
     userDTO.setUsername(consultant.getUsername());
 
-    this.consultantInputValidator.validateUserDTO(userDTO);
+    this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
   }
 

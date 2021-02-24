@@ -37,6 +37,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT_INVALID_PATH_PARAMS;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
@@ -98,6 +99,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -2230,6 +2232,29 @@ public class UserControllerIT {
   private String convertObjectToJson(Object object) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     return mapper.writeValueAsString(object);
+  }
+
+  @Test
+  public void updateEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("email")
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(keycloakService, times(1)).changeEmailAddress(eq("email"));
+  }
+
+  @Test
+  public void updateEmailAddress_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(keycloakService);
   }
 
 }

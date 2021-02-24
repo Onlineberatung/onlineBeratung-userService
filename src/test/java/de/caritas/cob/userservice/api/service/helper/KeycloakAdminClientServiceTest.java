@@ -440,4 +440,20 @@ public class KeycloakAdminClientServiceTest {
     verify(userResource, times(1)).update(userRepresentation);
   }
 
+  @Test
+  public void changeEmailAddress_Should_callServicesCorrectly_When_emailIsChangedAndAvailable() {
+    UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    when(userRepresentation.getEmail()).thenReturn("email");
+    UserResource userResource = mock(UserResource.class);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    UsersResource usersResource = mock(UsersResource.class);
+    when(usersResource.get(any())).thenReturn(userResource);
+    when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+
+    this.keycloakAdminClientService.updateEmail("userId", "anotherEmail");
+
+    verify(userRepresentation, times(2)).setEmail("anotherEmail");
+    verify(userResource, times(3)).update(any());
+  }
+
 }

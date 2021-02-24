@@ -27,6 +27,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CONSU
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_LEAVE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MONITORING;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -1621,6 +1622,66 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService);
+  }
+
+  @Test
+  public void updateEmailAddress_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
+      throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(keycloakService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
+      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
+      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
+      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  public void updateEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
+      throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(keycloakService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  public void updateEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken() throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(keycloakService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  public void updateEmailAddress_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
+      throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("email")
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 
 }
