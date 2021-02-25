@@ -85,6 +85,8 @@ paths:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
+        409:
+          description: CONFLICT - invalid/unavailable username or email address
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
