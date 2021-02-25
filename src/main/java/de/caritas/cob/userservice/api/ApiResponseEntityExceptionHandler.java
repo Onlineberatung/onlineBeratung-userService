@@ -63,7 +63,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
       final WebRequest request) {
     ex.executeLogging();
 
-    return handleExceptionInternal(ex, null, ex.getCustomHttpHeader(), HttpStatus.BAD_REQUEST,
+    return handleExceptionInternal(ex, null, ex.getCustomHttpHeader(), ex.getHttpStatus(),
         request);
   }
 

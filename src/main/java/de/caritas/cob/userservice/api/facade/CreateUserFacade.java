@@ -4,16 +4,17 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.UserService;
@@ -47,30 +48,20 @@ public class CreateUserFacade {
    * provided {@link ConsultingType}.
    *
    * @param userDTO {@link UserDTO}
-   * @return {@link KeycloakCreateUserResponseDTO}
    */
-  public KeycloakCreateUserResponseDTO createUserAndInitializeAccount(final UserDTO userDTO) {
+  public void createUserAndInitializeAccount(final UserDTO userDTO) {
 
     if (!keycloakAdminClientService.isUsernameAvailable(userDTO.getUsername())) {
-      return new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT,
-          new CreateUserResponseDTO().usernameAvailable(USERNAME_NOT_AVAILABLE)
-              .emailAvailable(EMAIL_AVAILABLE), null);
+      throw new CustomValidationHttpStatusException(
+          HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
 
     ConsultingType consultingType =
         ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())];
-
     checkIfConsultingTypeMatchesToAgency(userDTO, consultingType);
-
     KeycloakCreateUserResponseDTO response = createKeycloakUser(userDTO);
-    if (response.getStatus().equals(HttpStatus.CONFLICT)) {
-      return response;
-    }
-
     updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
         consultingType);
-
-    return new KeycloakCreateUserResponseDTO(HttpStatus.CREATED);
   }
 
   private KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO userDTO) {

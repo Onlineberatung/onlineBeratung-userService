@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import javax.validation.Path;
 import javax.validation.Validator;
@@ -93,50 +92,10 @@ public class UserAccountInputValidatorTest {
   }
 
   @Test(expected = KeycloakException.class)
-  public void validateKeycloakResponse_Should_throwKeycloakException_When_userIdIsNullAndUsernameAndEmailIsValid() {
+  public void validateKeycloakResponse_Should_throwKeycloakException_When_userIdIsNull() {
     KeycloakCreateUserResponseDTO responseDTO = new KeycloakCreateUserResponseDTO();
-    CreateUserResponseDTO createUserResponseDTO = new CreateUserResponseDTO();
-    createUserResponseDTO.setEmailAvailable(1);
-    createUserResponseDTO.setUsernameAvailable(1);
-    responseDTO.setResponseDTO(createUserResponseDTO);
 
     this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
-  }
-
-  @Test
-  public void validateKeycloakResponse_Should_throwExpectedException_When_userIdIsNullAndUsernameIsInvalid() {
-    KeycloakCreateUserResponseDTO responseDTO = new KeycloakCreateUserResponseDTO();
-    CreateUserResponseDTO createUserResponseDTO = new CreateUserResponseDTO();
-    createUserResponseDTO.setEmailAvailable(1);
-    createUserResponseDTO.setUsernameAvailable(0);
-    responseDTO.setResponseDTO(createUserResponseDTO);
-
-    try {
-      this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
-      fail("Exception should be thrown");
-    } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
-          is(USERNAME_NOT_AVAILABLE.name()));
-    }
-  }
-
-  @Test
-  public void validateKeycloakResponse_Should_throwExpectedException_When_userIdIsNullAndEmailIsInvalid() {
-    KeycloakCreateUserResponseDTO responseDTO = new KeycloakCreateUserResponseDTO();
-    CreateUserResponseDTO createUserResponseDTO = new CreateUserResponseDTO();
-    createUserResponseDTO.setEmailAvailable(0);
-    createUserResponseDTO.setUsernameAvailable(1);
-    responseDTO.setResponseDTO(createUserResponseDTO);
-
-    try {
-      this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
-      fail("Exception should be thrown");
-    } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
-          is(EMAIL_NOT_AVAILABLE.name()));
-    }
   }
 
   @Test

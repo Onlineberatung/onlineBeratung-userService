@@ -32,7 +32,6 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
@@ -124,17 +123,10 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link CreateUserResponseDTO}
    */
   @Override
-  public ResponseEntity<CreateUserResponseDTO> registerUser(@Valid @RequestBody UserDTO user) {
-
+  public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
     user.setNewUserAccount(true);
-    KeycloakCreateUserResponseDTO response = createUserFacade.createUserAndInitializeAccount(user);
-
-    if (!response.getStatus().equals(HttpStatus.CONFLICT)) {
-      return new ResponseEntity<>(response.getStatus());
-    } else {
-      return new ResponseEntity<>(response.getResponseDTO(),
-          response.getStatus());
-    }
+    createUserFacade.createUserAndInitializeAccount(user);
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   /**
@@ -735,7 +727,8 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link ConsultantSessionDTO}
    */
   @Override
-  public ResponseEntity<ConsultantSessionDTO> fetchSessionForConsultant(@PathVariable Long sessionId) {
+  public ResponseEntity<ConsultantSessionDTO> fetchSessionForConsultant(
+      @PathVariable Long sessionId) {
 
     Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
     ConsultantSessionDTO consultantSessionDTO = sessionService

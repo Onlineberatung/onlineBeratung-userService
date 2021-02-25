@@ -1,12 +1,9 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.validation;
 
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_VALID;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER;
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_VALID;
 import static java.util.Objects.isNull;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -82,12 +79,6 @@ public class UserAccountInputValidator {
    */
   public void validateKeycloakResponse(KeycloakCreateUserResponseDTO keycloakResponse) {
     if (isNull(keycloakResponse.getUserId())) {
-      if (keycloakResponse.getResponseDTO().getUsernameAvailable().equals(0)) {
-        throw new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE);
-      }
-      if (keycloakResponse.getResponseDTO().getEmailAvailable().equals(0)) {
-        throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
-      }
       throw new KeycloakException("ERROR: Keycloak user id is missing");
     }
   }
