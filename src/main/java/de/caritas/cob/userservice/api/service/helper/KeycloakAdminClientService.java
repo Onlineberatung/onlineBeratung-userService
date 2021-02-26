@@ -274,7 +274,7 @@ public class KeycloakAdminClientService {
 
   private void verifyEmail(UserResource userResource, String email) {
     if (hasEmailAddressChanged(userResource, email) && isEmailNotAvailable(email)) {
-      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
+      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
   }
 

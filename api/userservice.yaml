@@ -259,6 +259,8 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        409:
+          description: CONFLICT - invalid/unavailable email
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

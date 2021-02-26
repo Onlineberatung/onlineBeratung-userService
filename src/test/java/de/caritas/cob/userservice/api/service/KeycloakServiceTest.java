@@ -145,7 +145,7 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void changeEmailAddress_Should_userServicesCorrectly() {
+  public void changeEmailAddress_Should_useServicesCorrectly() {
     when(this.authenticatedUser.getUserId()).thenReturn("userId");
     String email = "mail";
 
