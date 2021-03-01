@@ -281,7 +281,7 @@ public class LogService {
    *
    * @param message the message
    */
-  public static void logMailServiceHelperException(String message) {
+  public static void logMailServiceException(String message) {
     LOGGER.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
   }
 
@@ -291,7 +291,7 @@ public class LogService {
    * @param message the message
    * @param exception the exception
    */
-  public static void logMailServiceHelperException(String message, Exception exception) {
+  public static void logMailServiceException(String message, Exception exception) {
     LOGGER.error("{}{}", MAIL_SERVICE_ERROR_TEXT, message);
     LOGGER.error("{}{}", MAIL_SERVICE_ERROR_TEXT, getStackTrace(exception));
   }

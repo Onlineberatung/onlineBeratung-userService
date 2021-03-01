@@ -3,13 +3,13 @@ package de.caritas.cob.userservice.api.facade;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
-import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -24,7 +24,7 @@ import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSuppl
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
+import de.caritas.cob.userservice.api.service.helper.MailService;
 import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
@@ -50,7 +50,7 @@ public class EmailNotificationFacade {
   private String rocketChatSystemUserId;
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
-  private final @NonNull MailServiceHelper mailServiceHelper;
+  private final @NonNull MailService mailService;
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
@@ -82,8 +82,9 @@ public class EmailNotificationFacade {
       throws RocketChatGetGroupMembersException, AgencyServiceHelperException {
     List<MailDTO> generatedMails = mailsToSend.generateEmails();
     if (isNotEmpty(generatedMails)) {
-      MailsDTO mailsDTO = new MailsDTO(generatedMails);
-      mailServiceHelper.sendEmailNotification(mailsDTO);
+      MailsDTO mailsDTO = new MailsDTO()
+          .mails(generatedMails);
+      mailService.sendEmailNotification(mailsDTO);
     }
   }
 

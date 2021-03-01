@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import java.lang.reflect.Method;
 import java.util.List;
 import org.junit.Before;
@@ -30,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AgencyServiceHelperTest {
+public class AgencySecurityHeaderSupplierTest {
 
   private final String FIELD_NAME_GET_AGENCY_API_URL = "agencyServiceApiGetAgenciesUrl";
   private final String AGENCIES_API_URL = "http://caritas.local/service/agencies/";
@@ -42,7 +43,7 @@ public class AgencyServiceHelperTest {
   @Mock
   private RestTemplate restTemplate;
   @Mock
-  private ServiceHelper serviceHelper;
+  private SecurityHeaderSupplier securityHeaderSupplier;
   @InjectMocks
   private AgencyServiceHelper agencyServiceHelper;
 

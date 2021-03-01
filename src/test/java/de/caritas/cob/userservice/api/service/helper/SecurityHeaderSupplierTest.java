@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +21,7 @@ import org.springframework.http.MediaType;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ServiceHelperTest {
+public class SecurityHeaderSupplierTest {
 
   private final String FIELD_NAME_CSRF_TOKEN_HEADER_PROPERTY = "csrfHeaderProperty";
   private final String FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY = "csrfCookieProperty";
@@ -29,25 +31,25 @@ public class ServiceHelperTest {
   private final String BEARER_TOKEN = "sadifsdfj)(JWifa";
 
   @InjectMocks
-  private ServiceHelper serviceHelper;
+  private SecurityHeaderSupplier securityHeaderSupplier;
   @Mock
   private AuthenticatedUser authenticatedUser;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
     // serviceHelper = new ServiceHelper();
-    FieldSetter.setField(serviceHelper,
-        serviceHelper.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_HEADER_PROPERTY),
+    FieldSetter.setField(securityHeaderSupplier,
+        securityHeaderSupplier.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_HEADER_PROPERTY),
         CSRF_TOKEN_HEADER_VALUE);
-    FieldSetter.setField(serviceHelper,
-        serviceHelper.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY),
+    FieldSetter.setField(securityHeaderSupplier,
+        securityHeaderSupplier.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY),
         CSRF_TOKEN_COOKIE_VALUE);
   }
 
   @Test
   public void getCsrfHttpHeaders_Should_Return_HeaderWithCorrectContentType() {
 
-    HttpHeaders result = serviceHelper.getCsrfHttpHeaders();
+    HttpHeaders result = securityHeaderSupplier.getCsrfHttpHeaders();
     assertEquals(MediaType.APPLICATION_JSON, result.getContentType());
 
   }
@@ -55,7 +57,7 @@ public class ServiceHelperTest {
   @Test
   public void getCsrfHttpHeaders_Should_Return_HeaderWithCookiePropertyNameFromProperties() {
 
-    HttpHeaders result = serviceHelper.getCsrfHttpHeaders();
+    HttpHeaders result = securityHeaderSupplier.getCsrfHttpHeaders();
     assertTrue(result.get("Cookie").toString().startsWith("[" + CSRF_TOKEN_COOKIE_VALUE + "="));
 
   }
@@ -63,7 +65,7 @@ public class ServiceHelperTest {
   @Test
   public void getCsrfHttpHeaders_Should_Return_HeaderWithPropertyNameFromProperties() {
 
-    HttpHeaders result = serviceHelper.getCsrfHttpHeaders();
+    HttpHeaders result = securityHeaderSupplier.getCsrfHttpHeaders();
     assertNotNull(result.get(CSRF_TOKEN_HEADER_VALUE));
 
   }
@@ -72,7 +74,8 @@ public class ServiceHelperTest {
   public void getRocketChatAndCsrfHttpHeaders_Should_ReturnHeaderWithRocketChatUserProperties() {
     when(authenticatedUser.getAccessToken()).thenReturn(BEARER_TOKEN);
 
-    HttpHeaders result = serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
+    HttpHeaders result = securityHeaderSupplier
+        .getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
     assertEquals("[" + RC_USER_ID + "]", result.get("rcUserId").toString());
     assertEquals("[" + RC_TOKEN + "]", result.get("rcToken").toString());
     assertEquals("[" + RC_GROUP_ID + "]", result.get("rcGroupId").toString());
@@ -82,7 +85,8 @@ public class ServiceHelperTest {
   public void getRocketChatAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthToken() {
     when(authenticatedUser.getAccessToken()).thenReturn(BEARER_TOKEN);
 
-    HttpHeaders result = serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
+    HttpHeaders result = securityHeaderSupplier
+        .getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
     assertEquals("[Bearer " + BEARER_TOKEN + "]", result.get("Authorization").toString());
   }
 }

@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +39,7 @@ import de.caritas.cob.userservice.api.model.messageService.MessageDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MessageServiceHelperTest {
+public class MessageSecurityHeaderSupplierTest {
 
   private final String FIELD_NAME_POST_MESSAGE_API_URL = "messageServiceApiPostMessageUrl";
   private final String POST_MESSAGE_API_URL = "http://caritas.local/service/messages/new";
@@ -48,7 +49,7 @@ public class MessageServiceHelperTest {
   @Mock
   private RestTemplate restTemplate;
   @Mock
-  private ServiceHelper serviceHelper;
+  private SecurityHeaderSupplier securityHeaderSupplier;
   @Mock
   private RocketChatCredentialsProvider rcCredentialHelper;
   @Mock
@@ -92,7 +93,7 @@ public class MessageServiceHelperTest {
 
     ResponseEntity<Void> response = new ResponseEntity<Void>(HttpStatus.CREATED);
 
-    when(serviceHelper.getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID))
+    when(securityHeaderSupplier.getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID))
         .thenReturn(new HttpHeaders());
     when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
         ArgumentMatchers.<HttpEntity<?>>any(), ArgumentMatchers.<Class<Void>>any()))

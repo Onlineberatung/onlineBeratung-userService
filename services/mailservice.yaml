@@ -1,0 +1,71 @@
+openapi: 3.0.1
+
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+
+servers:
+  - url: /
+
+paths:
+  /mails/send:
+    post:
+      tags:
+        - mails-controller
+      summary: Send e-mails via the mail service
+      operationId: sendMails
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MailsDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+
+components:
+  schemas:
+    MailsDTO:
+      type: object
+      required:
+        - mails
+      properties:
+        mails:
+          type: array
+          items:
+            $ref: '#/components/schemas/MailDTO'
+
+    MailDTO:
+      type: object
+      required:
+        - template
+        - email
+      properties:
+        template:
+          type: string
+          example: "template"
+        email:
+          type: string
+          example: "max@mustermann.de"
+        templateData:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateDataDTO'
+
+    TemplateDataDTO:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          example: "name"
+        value:
+          type: string

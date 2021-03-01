@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminSearchResultDTO;
-import de.caritas.cob.userservice.api.service.helper.ServiceHelper;
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -27,7 +27,7 @@ public class AgencyAdminServiceTest {
   private AdminAgencyControllerApi adminAgencyControllerApi;
 
   @Mock
-  private ServiceHelper serviceHelper;
+  private SecurityHeaderSupplier securityHeaderSupplier;
 
   @Mock
   private ApiClient apiClient;
@@ -37,7 +37,7 @@ public class AgencyAdminServiceTest {
     when(adminAgencyControllerApi.getApiClient()).thenReturn(apiClient);
     when(adminAgencyControllerApi.searchAgencies(any(), any(), any()))
         .thenReturn(new AgencyAdminSearchResultDTO());
-    when(serviceHelper.getKeycloakAndCsrfHttpHeaders()).thenReturn(new HttpHeaders());
+    when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(new HttpHeaders());
 
     this.agencyAdminService.retrieveAllAgencies();
 
