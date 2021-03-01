@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.SaveUserException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
@@ -178,14 +179,6 @@ public class AskerImportService {
             keycloakAdminClientService.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
 
-        if (response.getResponseDTO() != null && (response.getResponseDTO().getEmailAvailable() < 1
-            || response.getResponseDTO().getUsernameAvailable() < 1)) {
-          writeToImportLog(String.format(
-              "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
-              record.getUsername()), protocolFile);
-          continue;
-        }
-
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
           userDTO.setEmail(userHelper.getDummyEmail(keycloakUserId));
           keycloakAdminClientService.updateDummyEmail(keycloakUserId, userDTO);
@@ -250,6 +243,11 @@ public class AskerImportService {
         break;
       } catch (SaveUserException saveUserException) {
         writeToImportLog(saveUserException.getMessage(), protocolFile);
+        break;
+      } catch (CustomValidationHttpStatusException e) {
+        writeToImportLog(String.format(
+            "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
+            getImportRecordAskerWithoutSession(csvRecord).getUsername()), protocolFile);
         break;
       } catch (Exception exception) {
         writeToImportLog(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),
@@ -362,14 +360,6 @@ public class AskerImportService {
         KeycloakCreateUserResponseDTO response =
             keycloakAdminClientService.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
-
-        if (response.getResponseDTO() != null && (response.getResponseDTO().getEmailAvailable() < 1
-            || response.getResponseDTO().getUsernameAvailable() < 1)) {
-          writeToImportLog(String.format(
-              "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
-              record.getUsername()), protocolFile);
-          continue;
-        }
 
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
           userDTO.setEmail(userHelper.getDummyEmail(keycloakUserId));

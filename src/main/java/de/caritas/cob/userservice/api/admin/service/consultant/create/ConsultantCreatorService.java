@@ -4,7 +4,7 @@ import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.validation.ConsultantInputValidator;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
@@ -34,7 +34,7 @@ public class ConsultantCreatorService {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserHelper userHelper;
-  private final @NonNull ConsultantInputValidator consultantInputValidator;
+  private final @NonNull UserAccountInputValidator userAccountInputValidator;
 
   /**
    * Creates a new {@link Consultant} by {@link CreateConsultantDTO} in database, keycloak and
@@ -44,7 +44,7 @@ public class ConsultantCreatorService {
    * @return the generated {@link Consultant}
    */
   public Consultant createNewConsultant(CreateConsultantDTO createConsultantDTO) {
-    this.consultantInputValidator.validateAbsence(
+    this.userAccountInputValidator.validateAbsence(
         new CreateConsultantDTOAbsenceInputAdapter(createConsultantDTO));
     ConsultantCreationInput consultantCreationInput =
         new CreateConsultantDTOCreationInputAdapter(createConsultantDTO, this.userHelper);
@@ -84,14 +84,14 @@ public class ConsultantCreatorService {
     UserDTO userDto = buildUserDTO(consultantCreationInput.getUserName(),
         consultantCreationInput.getEmail());
 
-    this.consultantInputValidator.validateUserDTO(userDto);
+    this.userAccountInputValidator.validateUserDTO(userDto);
 
     KeycloakCreateUserResponseDTO response =
         this.keycloakAdminClientService
             .createKeycloakUser(userDto, consultantCreationInput.getFirstName(),
                 consultantCreationInput.getLastName());
 
-    this.consultantInputValidator.validateKeycloakResponse(response);
+    this.userAccountInputValidator.validateKeycloakResponse(response);
 
     return response.getUserId();
   }

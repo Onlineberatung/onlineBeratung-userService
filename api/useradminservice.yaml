@@ -25,7 +25,7 @@ paths:
     get:
       tags:
         - admin-user-controller
-      summary: 'Returns the list of agencies by search query parameter. [Authorization: Role:
+      summary: 'Returns the list of sessions by filter query parameter. [Authorization: Role:
       user-admin]'
       operationId: getSessions
       parameters:
@@ -85,6 +85,8 @@ paths:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
+        409:
+          description: CONFLICT - invalid/unavailable username or email address
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

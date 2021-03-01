@@ -114,8 +114,6 @@ public class ConsultantCreatorServiceIT {
         .thenThrow(new RocketChatLoginException(""));
     KeycloakCreateUserResponseDTO validKeycloakResponse = easyRandom.nextObject(
         KeycloakCreateUserResponseDTO.class);
-    validKeycloakResponse.getResponseDTO().setUsernameAvailable(1);
-    validKeycloakResponse.getResponseDTO().setEmailAvailable(1);
     when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(validKeycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
