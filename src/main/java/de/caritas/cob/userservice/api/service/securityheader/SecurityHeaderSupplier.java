@@ -1,16 +1,18 @@
-package de.caritas.cob.userservice.api.service.helper;
+package de.caritas.cob.userservice.api.service.securityheader;
 
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 
 @Component
-public class ServiceHelper {
+@RequiredArgsConstructor
+public class SecurityHeaderSupplier {
 
   @Value("${csrf.header.property}")
   private String csrfHeaderProperty;
@@ -18,8 +20,7 @@ public class ServiceHelper {
   @Value("${csrf.cookie.property}")
   private String csrfCookieProperty;
 
-  @Autowired
-  private AuthenticatedUser authenticatedUser;
+  private final @NonNull AuthenticatedUser authenticatedUser;
 
   /**
    * Returns a {@link HttpHeaders} instance with needed settings for the services API (CSRF Token).
@@ -48,7 +49,7 @@ public class ServiceHelper {
    * Adds the Rocket.Chat user id, token and group id to the given {@link HttpHeaders} object.
    *
    * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @param rcGroupId Rocket.Chat group ID
+   * @param rcGroupId             Rocket.Chat group ID
    */
   public HttpHeaders getRocketChatAndCsrfHttpHeaders(RocketChatCredentials rocketChatCredentials,
       String rcGroupId) {

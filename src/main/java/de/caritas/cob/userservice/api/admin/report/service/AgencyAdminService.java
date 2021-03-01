@@ -5,7 +5,7 @@ import static de.caritas.cob.userservice.config.CachingConfig.AGENCY_CACHE;
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.service.helper.ServiceHelper;
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class AgencyAdminService {
 
   private final @NonNull AdminAgencyControllerApi adminAgencyControllerApi;
-  private final @NonNull ServiceHelper serviceHelper;
+  private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
 
   /**
    * Retrieves all agencies provided by agency service. Important hint: Depending on the amount
@@ -37,7 +37,7 @@ public class AgencyAdminService {
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
-    HttpHeaders headers = this.serviceHelper.getKeycloakAndCsrfHttpHeaders();
+    HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +32,7 @@ public class AgencyServiceHelper {
   private RestTemplate restTemplate;
 
   @Autowired
-  private ServiceHelper serviceHelper;
+  private SecurityHeaderSupplier securityHeaderSupplier;
 
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
@@ -80,7 +81,7 @@ public class AgencyServiceHelper {
     String agencyIdsCommaSeparated = StringUtils.join(agencyIds, ",");
 
     try {
-      HttpHeaders header = serviceHelper.getCsrfHttpHeaders();
+      HttpHeaders header = securityHeaderSupplier.getCsrfHttpHeaders();
       HttpEntity<?> request = new HttpEntity<>(header);
 
       response = restTemplate.exchange(agencyServiceApiGetAgenciesUrl + agencyIdsCommaSeparated,

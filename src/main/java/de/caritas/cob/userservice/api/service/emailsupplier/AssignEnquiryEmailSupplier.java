@@ -8,11 +8,11 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
-import de.caritas.cob.userservice.api.model.mailservice.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -69,15 +69,14 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForAssignEnquiryNotification(String email, String nameSender,
       String nameRecipient, String nameUser) {
-    return MailDTO.builder()
+    return new MailDTO()
         .template(TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION)
         .email(email)
         .templateData(asList(
-            new TemplateDataDTO("name_sender", nameSender),
-            new TemplateDataDTO("name_recipient", nameRecipient),
-            new TemplateDataDTO("name_user", nameUser),
-            new TemplateDataDTO("url", applicationBaseUrl)))
-        .build();
+            new TemplateDataDTO().key("name_sender").value(nameSender),
+            new TemplateDataDTO().key("name_recipient").value(nameRecipient),
+            new TemplateDataDTO().key("name_user").value(nameUser),
+            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
   }
 
 }

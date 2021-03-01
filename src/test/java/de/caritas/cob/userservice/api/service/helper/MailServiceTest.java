@@ -1,0 +1,81 @@
+package de.caritas.cob.userservice.api.service.helper;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
+
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.mailservice.generated.ApiClient;
+import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
+@RunWith(MockitoJUnitRunner.class)
+public class MailServiceTest {
+
+  @Mock
+  private Logger logger;
+
+  @Mock
+  private SecurityHeaderSupplier securityHeaderSupplier;
+
+  @Mock
+  private MailsControllerApi mailsControllerApi;
+
+  @Mock
+  private ApiClient apiClient;
+
+  @InjectMocks
+  private MailService mailService;
+
+  @Before
+  public void setup() throws NoSuchFieldException, SecurityException {
+    setInternalState(LogService.class, "LOGGER", logger);
+    when(this.mailsControllerApi.getApiClient()).thenReturn(this.apiClient);
+  }
+
+  @Test
+  public void sendEmailNotification_Should_CallMailService() {
+    when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(getCsrfHttpHeaders());
+
+    mailService.sendEmailNotification(new MailsDTO());
+
+    verify(mailsControllerApi, times(1)).sendMails(any());
+  }
+
+  @Test
+  public void sendEmailNotification_ShouldLogException_WhenExceptionOccursWhileCallingTheMailService() {
+    when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(getCsrfHttpHeaders());
+    doThrow(new RuntimeException()).when(this.mailsControllerApi).sendMails(any());
+
+    mailService.sendEmailNotification(new MailsDTO());
+
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+  }
+
+  private HttpHeaders getCsrfHttpHeaders() {
+    String csrfToken = UUID.randomUUID().toString();
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+    httpHeaders.add("Cookie", "X-CSRF-TOKEN=" + csrfToken);
+    httpHeaders.add("CSRF-TOKEN", csrfToken);
+
+    return httpHeaders;
+  }
+
+}
