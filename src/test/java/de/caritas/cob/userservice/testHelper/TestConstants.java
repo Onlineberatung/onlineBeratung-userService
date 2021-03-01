@@ -350,11 +350,11 @@ public class TestConstants {
       GROUP_MEMBER_SYS_USER, GROUP_MEMBER_TECH_USER, GROUP_MEMBER_USER_1, GROUP_MEMBER_USER_2);
   public static final User USER = new User(USER_ID, null, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
   public static final User USER_WITH_RC_ID =
-      new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null, null);
+      new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null, null, null);
   public static final User USER_NO_RC_USER_ID =
-      new User(USER_ID, null, USERNAME, EMAIL, null, false, null, null);
+      new User(USER_ID, null, USERNAME, EMAIL, null, false, null, null, null);
   public static final User USER_NO_RC_USER_ID_2 =
-      new User(USER_ID_2, null, USERNAME, EMAIL, null, false, null, null);
+      new User(USER_ID_2, null, USERNAME, EMAIL, null, false, null, null, null);
   public static final String ACCESS_TOKEN = "DASDLAJS835u83hKSAJDF";
   public static final AuthenticatedUser AUTHENTICATED_USER =
       new AuthenticatedUser(USER_ID, USERNAME, null, ACCESS_TOKEN, null);
@@ -496,7 +496,8 @@ public class TestConstants {
   public static final Set<Session> SESSION_SET = new HashSet<>(
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
   public static final User USER_WITH_SESSIONS =
-      new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null);
+      new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null,
+          null);
   public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
