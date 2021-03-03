@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.service.securityheader;
 
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import java.util.UUID;
 import lombok.NonNull;
@@ -40,24 +39,6 @@ public class SecurityHeaderSupplier {
    */
   public HttpHeaders getKeycloakAndCsrfHttpHeaders() {
     HttpHeaders header = getCsrfHttpHeaders();
-    this.addKeycloakAuthorizationHeader(header);
-
-    return header;
-  }
-
-  /**
-   * Adds the Rocket.Chat user id, token and group id to the given {@link HttpHeaders} object.
-   *
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @param rcGroupId             Rocket.Chat group ID
-   */
-  public HttpHeaders getRocketChatAndCsrfHttpHeaders(RocketChatCredentials rocketChatCredentials,
-      String rcGroupId) {
-    HttpHeaders header = getCsrfHttpHeaders();
-    header.add("rcUserId", rocketChatCredentials.getRocketChatUserId());
-    header.add("rcToken", rocketChatCredentials.getRocketChatToken());
-    header.add("rcGroupId", rcGroupId);
-
     this.addKeycloakAuthorizationHeader(header);
 
     return header;

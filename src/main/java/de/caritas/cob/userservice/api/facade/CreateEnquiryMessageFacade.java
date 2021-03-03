@@ -17,7 +17,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroup
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.Now;
 import de.caritas.cob.userservice.api.helper.RocketChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -31,11 +30,10 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
+import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,14 +52,14 @@ public class CreateEnquiryMessageFacade {
   private final @NonNull SessionService sessionService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
-  private final @NonNull MessageServiceHelper messageServiceHelper;
+  private final @NonNull MessageServiceProvider messageServiceProvider;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull RocketChatHelper rocketChatHelper;
-  private final Now now;
+
   @Value("${rocket.systemuser.id}")
   private String rocketChatSystemUserId;
 
@@ -99,9 +97,11 @@ public class CreateEnquiryMessageFacade {
 
       saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
 
-      messageServiceHelper.postMessage(message, rocketChatCredentials, rcGroupId,
+      messageServiceProvider.postEnquiryMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);
-      messageServiceHelper.postWelcomeMessageIfConfigured(rcGroupId, user,
+      messageServiceProvider.postFurtherStepsMessageIfConfigured(rcGroupId, consultingTypeSettings,
+          createEnquiryExceptionInformation);
+      messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, user,
           consultingTypeSettings, createEnquiryExceptionInformation);
 
       updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
@@ -312,7 +312,7 @@ public class CreateEnquiryMessageFacade {
       session.setGroupId(rcGroupId);
       session.setFeedbackGroupId(rcFeedbackGroupId);
       session.setStatus(SessionStatus.NEW);
-      session.setEnquiryMessageDate(now.getDate());
+      session.setEnquiryMessageDate(nowInUtc());
       sessionService.saveSession(session);
     } catch (InternalServerErrorException exception) {
       throw new CreateEnquiryException(String

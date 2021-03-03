@@ -59,11 +59,9 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +71,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -89,16 +86,16 @@ public class SessionServiceTest {
       null, null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, ConsultingType.SUCHT, "99999",
-      1L, SessionStatus.NEW, new Date(), null, null, null,
+      1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, ConsultingType.SUCHT,
-      "99999", 1L, SessionStatus.NEW, new Date(), null, null, null,
+      "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null, null, null,
+      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, new Date(), null, null, null,
+      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
@@ -146,8 +143,8 @@ public class SessionServiceTest {
     sessionService.getSessionsForConsultant(consultant, SESSION_STATUS_NEW);
 
     verify(sessionRepository, times(1))
-        .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-            ArgumentMatchers.eq(agencyIds), ArgumentMatchers.eq(SessionStatus.NEW));
+        .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(agencyIds,
+            SessionStatus.NEW);
   }
 
   @Test
@@ -165,7 +162,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSession_Should_ReturnSession_WhenGetSessionIsSuccessfull() {
+  public void getSession_Should_ReturnSession_WhenGetSessionIsSuccessful() {
 
     Optional<Session> session = Optional.of(SESSION);
 
