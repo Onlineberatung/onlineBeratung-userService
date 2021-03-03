@@ -304,14 +304,23 @@ public class KeycloakAdminClientService {
    */
   public void rollBackUser(String userId) {
     try {
-      this.keycloakAdminClientAccessor.getUsersResource()
-          .get(userId)
-          .remove();
+      deleteUser(userId);
       LogService.logDebug(String.format("User %s has been removed due to rollback", userId));
     } catch (Exception e) {
       LogService
           .logKeycloakError(String.format("User could not be removed/rolled back: %s", userId));
     }
+  }
+
+  /**
+   * Deletes the user with the given user id in keycloak.
+   *
+   * @param userId the userId
+   */
+  public void deleteUser(String userId) {
+    this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId)
+        .remove();
   }
 
   /**

@@ -28,6 +28,25 @@ paths:
           description: BAD REQUEST - invalid/incomplete request or body object
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /mails/error/send:
+    post:
+      tags:
+        - mails-controller
+      summary: Send a error e-mail via the mail service
+      operationId: sendErrorMail
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ErrorMailDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
 
 components:
   schemas:
@@ -69,3 +88,16 @@ components:
           example: "name"
         value:
           type: string
+
+    ErrorMailDTO:
+      type: object
+      required:
+        - template
+      properties:
+        template:
+          type: string
+          example: "template"
+        templateData:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateDataDTO'

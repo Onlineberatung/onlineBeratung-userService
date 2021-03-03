@@ -498,4 +498,13 @@ public class LogService {
   public static void logDebug(String message) {
     LOGGER.debug(message);
   }
+
+  /**
+   * Logs an delete workflow error.
+   *
+   * @param e the cause exception
+   */
+  public static void logDeleteWorkflowError(Exception e) {
+    LOGGER.error("UserService delete workflow error: {}", getStackTrace(e));
+  }
 }

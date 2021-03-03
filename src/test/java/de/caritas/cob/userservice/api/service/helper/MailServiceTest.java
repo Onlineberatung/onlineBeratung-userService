@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
+import de.caritas.cob.userservice.mailservice.generated.web.model.ErrorMailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.UUID;
 import org.junit.Before;
@@ -64,6 +65,25 @@ public class MailServiceTest {
     doThrow(new RuntimeException()).when(this.mailsControllerApi).sendMails(any());
 
     mailService.sendEmailNotification(new MailsDTO());
+
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  public void sendErrorEmailNotification_Should_CallMailService() {
+    when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(getCsrfHttpHeaders());
+
+    mailService.sendErrorEmailNotification(new ErrorMailDTO());
+
+    verify(mailsControllerApi, times(1)).sendErrorMail(any());
+  }
+
+  @Test
+  public void sendErrorEmailNotification_ShouldLogException_WhenExceptionOccursWhileCallingTheMailService() {
+    when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(getCsrfHttpHeaders());
+    doThrow(new RuntimeException()).when(this.mailsControllerApi).sendErrorMail(any());
+
+    mailService.sendErrorEmailNotification(new ErrorMailDTO());
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
