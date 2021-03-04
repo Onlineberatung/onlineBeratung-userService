@@ -595,14 +595,6 @@ public class EmailNotificationFacadeTest {
     verify(logger, times(1)).error(anyString(), anyString(), contains("unexpected"));
   }
 
-  @Test(expected = NewMessageNotificationException.class)
-  public void sendNewFeedbackMessageNotification_Should_ThrowNewMessageNotificationException_When_SessionServiceThrowsServerError() {
-    when(sessionService.getSessionByFeedbackGroupId(any()))
-        .thenThrow(new InternalServerErrorException(""));
-
-    emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID);
-  }
-
   @Test
   public void sendAssignEnquiryEmailNotification_Should_LogError_When_SessionServiceThrowsRuntimeException() {
     when(sessionService.getSessionByFeedbackGroupId(any())).thenThrow(new RuntimeException(""));
