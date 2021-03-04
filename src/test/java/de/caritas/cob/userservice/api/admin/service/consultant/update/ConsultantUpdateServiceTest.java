@@ -7,7 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.validation.ConsultantInputValidator;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -36,7 +36,7 @@ public class ConsultantUpdateServiceTest {
   private ConsultantService consultantService;
 
   @Mock
-  private ConsultantInputValidator consultantInputValidator;
+  private UserAccountInputValidator userAccountInputValidator;
 
   @Mock
   private RocketChatService rocketChatService;
