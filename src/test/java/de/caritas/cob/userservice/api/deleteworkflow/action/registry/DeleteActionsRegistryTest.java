@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.registry;
 
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIFTH;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIRST;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.SECOND;
@@ -17,6 +18,7 @@ import de.caritas.cob.userservice.api.deleteworkflow.action.DeleteRocketChatUser
 import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteAskerAction;
 import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteAskerRoomsAndSessionsAction;
 import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteDatabaseAskerAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteDatabaseAskerAgencyAction;
 import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteChatAction;
 import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteConsultantAction;
 import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteDatabaseConsultantAction;
@@ -28,6 +30,7 @@ import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
@@ -64,7 +67,8 @@ public class DeleteActionsRegistryTest {
             SessionDataRepository.class), mock(MonitoringRepository.class),
             mock(RocketChatService.class)),
         new DeleteKeycloakUserAction(mock(KeycloakAdminClientService.class)),
-        new DeleteRocketChatUserAction(mock(RocketChatService.class)));
+        new DeleteRocketChatUserAction(mock(RocketChatService.class)),
+        new DeleteDatabaseAskerAgencyAction(mock(UserAgencyRepository.class)));
 
     Map<String, Object> beans = deleteAskerActions.stream()
         .collect(Collectors.toMap(action -> action.getClass().getName(), action -> action));
@@ -72,11 +76,12 @@ public class DeleteActionsRegistryTest {
 
     List<DeleteAskerAction> resultActions = this.deleteActionsRegistry.getAskerDeleteActions();
 
-    assertThat(resultActions, hasSize(4));
+    assertThat(resultActions, hasSize(5));
     assertThat(resultActions.get(0).getOrder(), is(FIRST.getOrder()));
     assertThat(resultActions.get(1).getOrder(), is(SECOND.getOrder()));
     assertThat(resultActions.get(2).getOrder(), is(THIRD.getOrder()));
     assertThat(resultActions.get(3).getOrder(), is(FOURTH.getOrder()));
+    assertThat(resultActions.get(4).getOrder(), is(FIFTH.getOrder()));
   }
 
   @Test
@@ -100,7 +105,7 @@ public class DeleteActionsRegistryTest {
     assertThat(resultActions.get(1).getOrder(), is(SECOND.getOrder()));
     assertThat(resultActions.get(2).getOrder(), is(THIRD.getOrder()));
     assertThat(resultActions.get(3).getOrder(), is(FOURTH.getOrder()));
-    assertThat(resultActions.get(4).getOrder(), is(FOURTH.getOrder()));
+    assertThat(resultActions.get(4).getOrder(), is(FIFTH.getOrder()));
   }
 
 }

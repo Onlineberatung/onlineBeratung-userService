@@ -24,7 +24,7 @@ public class MailService {
   private final @NonNull MailsControllerApi mailsControllerApi;
 
   /**
-   * Send a email notification asynchron via the MailService.
+   * Send a email notification via the MailService.
    *
    * @param mailsDTO the transfer object to be handled in MailService
    */

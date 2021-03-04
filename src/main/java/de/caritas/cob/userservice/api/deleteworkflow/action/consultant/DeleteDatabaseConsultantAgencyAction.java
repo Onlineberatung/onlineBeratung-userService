@@ -17,6 +17,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/**
+ * Deletes a {@link ConsultantAgency} in database.
+ */
 @Component
 @RequiredArgsConstructor
 public class DeleteDatabaseConsultantAgencyAction implements DeleteConsultantAction {

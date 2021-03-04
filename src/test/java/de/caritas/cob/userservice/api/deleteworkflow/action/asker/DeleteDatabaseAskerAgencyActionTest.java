@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.THIRD;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,7 +17,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
 import org.junit.Before;
@@ -29,13 +29,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeleteDatabaseAskerActionTest {
+public class DeleteDatabaseAskerAgencyActionTest {
 
   @InjectMocks
-  private DeleteDatabaseAskerAction deleteDatabaseAskerAction;
+  private DeleteDatabaseAskerAgencyAction deleteDatabaseAskerAgencyAction;
 
   @Mock
-  private UserRepository userRepository;
+  private UserAgencyRepository userAgencyRepository;
 
   @Mock
   private Logger logger;
@@ -46,32 +46,33 @@ public class DeleteDatabaseAskerActionTest {
   }
 
   @Test
-  public void getOrder_Should_returnThird() {
-    assertThat(this.deleteDatabaseAskerAction.getOrder(), is(FOURTH.getOrder()));
+  public void getOrder_Should_returnSecond() {
+    assertThat(this.deleteDatabaseAskerAgencyAction.getOrder(), is(THIRD.getOrder()));
   }
 
   @Test
-  public void execute_Should_returnEmptyList_When_deletionOfUserIsSuccessful() {
-    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseAskerAction.execute(new User());
+  public void execute_Should_returnEmptyListAndPerformDeletion_When_userHasNoAgencyAssigned() {
+    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseAskerAgencyAction
+        .execute(new User());
 
     assertThat(workflowErrors, hasSize(0));
-    verify(this.userRepository, times(1)).delete(any());
     verifyNoMoreInteractions(this.logger);
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deletionOfUserFails() {
-    doThrow(new RuntimeException()).when(this.userRepository).delete(any());
+  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deletionFails() {
+    doThrow(new RuntimeException()).when(this.userAgencyRepository).deleteAll(any());
 
     User user = new User();
-    user.setUserId("user id");
-    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseAskerAction.execute(user);
+    user.setUserId("userId");
+    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseAskerAgencyAction
+        .execute(user);
 
     assertThat(workflowErrors, hasSize(1));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
-    assertThat(workflowErrors.get(0).getIdentifier(), is("user id"));
-    assertThat(workflowErrors.get(0).getReason(), is("Unable to delete user"));
+    assertThat(workflowErrors.get(0).getIdentifier(), is("userId"));
+    assertThat(workflowErrors.get(0).getReason(), is("Could not delete user agency relations"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(this.logger, times(1)).error(anyString(), anyString());
   }

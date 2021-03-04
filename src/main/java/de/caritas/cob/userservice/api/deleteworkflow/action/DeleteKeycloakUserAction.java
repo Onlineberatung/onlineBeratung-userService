@@ -32,7 +32,7 @@ public class DeleteKeycloakUserAction implements DeleteAskerAction, DeleteConsul
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
   /**
-   * Deletes the given {@link User} in keycloak
+   * Deletes the given {@link User} in keycloak.
    *
    * @param user the {@link User} to delete
    * @return a possible generated {@link DeletionWorkflowError}
@@ -57,7 +57,7 @@ public class DeleteKeycloakUserAction implements DeleteAskerAction, DeleteConsul
   }
 
   /**
-   * Deletes the given {@link Consultant} in keycloak
+   * Deletes the given {@link Consultant} in keycloak.
    *
    * @param consultant the {@link Consultant} to delete
    * @return a possible generated {@link DeletionWorkflowError}

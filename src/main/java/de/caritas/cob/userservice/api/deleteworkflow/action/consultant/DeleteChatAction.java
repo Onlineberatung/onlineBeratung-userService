@@ -34,7 +34,7 @@ public class DeleteChatAction implements DeleteConsultantAction {
   private final @NonNull RocketChatService rocketChatService;
 
   /**
-   * Deletes all chats in database and Rocket.Chat owned by giveb {@link Consultant}.
+   * Deletes all chats in database and Rocket.Chat owned by given {@link Consultant}.
    *
    * @param consultant the {@link Consultant}
    * @return possible generated {@link DeletionWorkflowError}

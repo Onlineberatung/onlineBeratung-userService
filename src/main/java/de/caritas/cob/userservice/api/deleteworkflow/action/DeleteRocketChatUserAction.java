@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIFTH;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.CONSULTANT;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.ROCKET_CHAT;
@@ -88,6 +88,6 @@ public class DeleteRocketChatUserAction implements DeleteAskerAction, DeleteCons
    */
   @Override
   public int getOrder() {
-    return FOURTH.getOrder();
+    return FIFTH.getOrder();
   }
 }

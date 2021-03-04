@@ -39,7 +39,8 @@ public class DeleteAskerRoomsAndSessionsAction implements DeleteAskerAction {
   private final @NonNull RocketChatService rocketChatService;
 
   /**
-   * Deletes all Rocket.Chat rooms and sessions in database of a given {@link User}.
+   * Deletes all Rocket.Chat rooms containing all messages and uploads and sessions in database
+   * of a given {@link User}.
    *
    * @param user the user for session and room deletion
    * @return a generated {@link List} containing possible {@link DeletionWorkflowError}
