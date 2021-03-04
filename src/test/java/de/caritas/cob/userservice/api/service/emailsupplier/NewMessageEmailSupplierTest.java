@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER;
-import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;

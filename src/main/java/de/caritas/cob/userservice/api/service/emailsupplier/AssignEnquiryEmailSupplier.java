@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;

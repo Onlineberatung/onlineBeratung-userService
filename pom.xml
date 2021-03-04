@@ -233,6 +233,13 @@
       <artifactId>commons-collections4</artifactId>
       <version>4.1</version>
     </dependency>
+
+		<!-- Documentation dependencies -->
+		<dependency>
+			<groupId>net.sourceforge.plantuml</groupId>
+			<artifactId>plantuml</artifactId>
+			<version>1.2021.1</version>
+		</dependency>
   </dependencies>
 
 	<build>

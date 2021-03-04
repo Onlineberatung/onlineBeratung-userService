@@ -3,10 +3,6 @@ package de.caritas.cob.userservice.api.facade;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
-import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
-import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -16,7 +12,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
@@ -25,6 +20,9 @@ import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupp
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
@@ -131,9 +129,6 @@ public class EmailNotificationFacade {
           rcFeedbackGroupId, userId, applicationBaseUrl, userHelper, consultantService,
           rocketChatService, rocketChatSystemUserId);
       sendMailTasksToMailService(newFeedbackMessages);
-    } catch (InternalServerErrorException ex) {
-      throw new NewMessageNotificationException("Error while sending new message notification: ",
-          ex);
     } catch (Exception e) {
       LogService.logEmailNotificationFacadeError(String.format(
           "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId), e);

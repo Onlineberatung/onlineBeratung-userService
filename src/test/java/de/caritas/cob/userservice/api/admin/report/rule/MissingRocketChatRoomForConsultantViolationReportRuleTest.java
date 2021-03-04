@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserRoomDTO;
@@ -18,6 +19,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
@@ -135,7 +137,7 @@ public class MissingRocketChatRoomForConsultantViolationReportRuleTest {
         new EasyRandom().nextObject(UserInfoResponseDTO.class);
     userInfoResponseDTO.getUser().setRooms(asList(
         new UserRoomDTO(violatedSession.getGroupId()),
-            new UserRoomDTO(violatedSession.getFeedbackGroupId())));
+        new UserRoomDTO(violatedSession.getFeedbackGroupId())));
 
     when(this.consultantRepository.findAll()).thenReturn(singletonList(violatedConsultant));
     when(this.sessionRepository.findByConsultantAndStatus(any(), any()))
@@ -145,6 +147,30 @@ public class MissingRocketChatRoomForConsultantViolationReportRuleTest {
     List<ViolationDTO> violations = this.reportRule.generateViolations();
 
     assertThat(violations, hasSize(0));
+  }
+
+  @Test
+  public void generateViolations_Should_returnViolation_When_userDoesNotExistInRocketChat() {
+    Consultant violatedConsultant = new EasyRandom().nextObject(Consultant.class);
+    Session violatedSession = new EasyRandom().nextObject(Session.class);
+    violatedConsultant.setSessions(singleton(violatedSession));
+    UserInfoResponseDTO userInfoResponseDTO =
+        new EasyRandom().nextObject(UserInfoResponseDTO.class);
+    userInfoResponseDTO.getUser().setRooms(asList(
+        new UserRoomDTO(violatedSession.getGroupId()),
+        new UserRoomDTO(violatedSession.getFeedbackGroupId())));
+
+    when(this.consultantRepository.findAll()).thenReturn(singletonList(violatedConsultant));
+    when(this.sessionRepository.findByConsultantAndStatus(any(), any()))
+        .thenReturn(singletonList(violatedSession));
+    when(this.rocketChatService.getUserInfo(any()))
+        .thenThrow(new InternalServerErrorException("message", new RuntimeException("caused "
+            + "message"), LogService::logRocketChatError));
+
+    List<ViolationDTO> violations = this.reportRule.generateViolations();
+
+    assertThat(violations, hasSize(1));
+    assertThat(violations.get(0).getReason(), is("caused message"));
   }
 
 }

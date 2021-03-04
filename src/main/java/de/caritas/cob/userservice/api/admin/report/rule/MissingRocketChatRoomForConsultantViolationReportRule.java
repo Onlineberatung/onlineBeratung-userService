@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserRoomDTO;
@@ -51,8 +52,15 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
   }
 
   private ViolationDTO fromMissingSession(Session session) {
-    UserInfoResponseDTO userInfoWithRooms = this.rocketChatService
-        .getUserInfo(session.getConsultant().getRocketChatId());
+    UserInfoResponseDTO userInfoWithRooms;
+    try {
+      userInfoWithRooms = this.rocketChatService
+          .getUserInfo(session.getConsultant().getRocketChatId());
+    } catch (InternalServerErrorException e) {
+      return ViolationByConsultantBuilder.getInstance(session.getConsultant())
+          .withReason(e.getCause().getMessage())
+          .build();
+    }
     List<UserRoomDTO> rooms = userInfoWithRooms.getUser().getRooms();
     List<String> rocketChatRoomsOfUser = rooms.stream()
         .map(UserRoomDTO::getRoomId)
