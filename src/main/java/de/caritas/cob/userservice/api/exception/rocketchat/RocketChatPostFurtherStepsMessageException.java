@@ -3,6 +3,9 @@ package de.caritas.cob.userservice.api.exception.rocketchat;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
 
+/**
+ * Exception when posting a further step message fails.
+ */
 public class RocketChatPostFurtherStepsMessageException extends CreateEnquiryException {
 
   private static final long serialVersionUID = -1247285841233110339L;

@@ -57,8 +57,7 @@ public class MessageServiceProvider {
     }
   }
 
-  private void postMessage(String message, RocketChatCredentials rcCredentials, String rcGroupId)
-      throws RestClientException {
+  private void postMessage(String message, RocketChatCredentials rcCredentials, String rcGroupId) {
 
     addDefaultHeaders(this.messageControllerApi.getApiClient());
     this.messageControllerApi.createMessage(rcCredentials.getRocketChatToken(),
@@ -99,7 +98,7 @@ public class MessageServiceProvider {
   }
 
   private void postMessageAsSystemUser(String message, String rcGroupId)
-      throws RestClientException, RocketChatUserNotInitializedException {
+      throws RocketChatUserNotInitializedException {
 
     RocketChatCredentials systemUser = rocketChatCredentialsProvider.getSystemUser();
     this.postMessage(message, systemUser, rcGroupId);
