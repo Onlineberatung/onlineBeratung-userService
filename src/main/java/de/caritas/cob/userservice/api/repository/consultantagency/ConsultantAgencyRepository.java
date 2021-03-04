@@ -13,4 +13,6 @@ public interface ConsultantAgencyRepository extends CrudRepository<ConsultantAge
 
   List<ConsultantAgency> findByConsultantIdAndAgencyIdAndDeleteDateIsNull(String consultantId, Long agencyId);
 
+  List<ConsultantAgency> findByConsultantId(String consultantId);
+
 }

@@ -221,7 +221,7 @@ public class LogServiceTest {
   @Test
   public void logMailServiceHelperException_Should_LogErrorMessageAndExceptionStackTrace() {
 
-    LogService.logMailServiceHelperException(ERROR_MESSAGE, exception);
+    LogService.logMailServiceException(ERROR_MESSAGE, exception);
     verify(logger, times(1))
         .error(anyString(), eq(MAIL_SERVICE_ERROR_TEXT), eq(ERROR_MESSAGE));
     verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
@@ -230,7 +230,7 @@ public class LogServiceTest {
   @Test
   public void logMailServiceHelperException_Should_LogExceptionStackTrace() {
 
-    LogService.logMailServiceHelperException(ERROR_MESSAGE);
+    LogService.logMailServiceException(ERROR_MESSAGE);
     verify(logger, times(1))
         .error(anyString(), eq(MAIL_SERVICE_ERROR_TEXT), eq(ERROR_MESSAGE));
   }

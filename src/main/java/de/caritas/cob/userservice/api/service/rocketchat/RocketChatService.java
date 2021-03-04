@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.rocketchat;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
@@ -9,6 +10,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
@@ -32,6 +35,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserDeleteBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
@@ -101,6 +105,8 @@ public class RocketChatService {
   private String rocketChatApiUserInfo;
   @Value("${rocket.chat.api.user.update}")
   private String rocketChatApiUserUpdate;
+  @Value("${rocket.chat.api.user.delete}")
+  private String rocketChatApiUserDelete;
   @Value("${rocket.chat.api.rooms.clean.history}")
   private String rocketChatApiCleanRoomHistory;
 
@@ -174,6 +180,22 @@ public class RocketChatService {
       return rollbackGroup(groupId, systemUser);
     } catch (RocketChatUserNotInitializedException e) {
       throw new InternalServerErrorException(e.getMessage(), LogService::logRocketChatError);
+    }
+  }
+
+  /**
+   * Deletion of a Rocket.Chat group as technical user.
+   *
+   * @param groupId the Rocket.Chat group id
+   * @throws RocketChatDeleteGroupException when deletion of group fails
+   */
+  public void deleteGroupAsTechnicalUser(String groupId) throws RocketChatDeleteGroupException {
+    try {
+      this.addTechnicalUserToGroup(groupId);
+      RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
+      rollbackGroup(groupId, technicalUser);
+    } catch (Exception e) {
+      throw new RocketChatDeleteGroupException(e);
     }
   }
 
@@ -600,7 +622,6 @@ public class RocketChatService {
    *
    * @param rcUserId Rocket.Chat user id
    * @return the dto containing the user infos
-   * @throws {@link InternalServerErrorException}
    */
   public UserInfoResponseDTO getUserInfo(String rcUserId) {
 
@@ -622,7 +643,7 @@ public class RocketChatService {
 
     }
 
-    if (!isGetUserInfoIsSuccess(response)) {
+    if (isResponseNotSuccess(response)) {
       throw new InternalServerErrorException(
           String.format(
               "Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
@@ -634,9 +655,9 @@ public class RocketChatService {
     return response.getBody();
   }
 
-  private boolean isGetUserInfoIsSuccess(ResponseEntity<UserInfoResponseDTO> response) {
-    return nonNull(response.getBody()) && response.getStatusCode() == HttpStatus.OK
-        && response.getBody().isSuccess();
+  private boolean isResponseNotSuccess(ResponseEntity<UserInfoResponseDTO> response) {
+    return isNull(response.getBody()) || response.getStatusCode() != HttpStatus.OK
+        || !response.getBody().isSuccess();
   }
 
   /**
@@ -664,7 +685,7 @@ public class RocketChatService {
     ResponseEntity<UserInfoResponseDTO> response = restTemplate
         .exchange(rocketChatApiUserUpdate, HttpMethod.POST, request, UserInfoResponseDTO.class);
 
-    if (!isGetUserInfoIsSuccess(response)) {
+    if (isResponseNotSuccess(response)) {
       throw new InternalServerErrorException(
           String.format(
               "Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
@@ -688,6 +709,41 @@ public class RocketChatService {
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
     HttpHeaders header = getStandardHttpHeaders(technicalUser);
     return new HttpEntity<>(requestDTO, header);
+  }
+
+  /**
+   * Deletes the user data of the given Rocket.Chat user.
+   *
+   * @param rcUserId Rocket.Chat user id
+   * @throws RocketChatDeleteUserException when deletion of user fails
+   */
+  public void deleteUser(String rcUserId) throws RocketChatDeleteUserException {
+    try {
+      deleteUserData(rcUserId);
+    } catch (Exception e) {
+      throw new RocketChatDeleteUserException(e);
+    }
+  }
+
+  private void deleteUserData(String rcUserId)
+      throws RocketChatUserNotInitializedException {
+
+    UserDeleteBodyDTO requestDTO = new UserDeleteBodyDTO(rcUserId);
+    RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
+    HttpHeaders header = getStandardHttpHeaders(technicalUser);
+    HttpEntity<UserDeleteBodyDTO> request = new HttpEntity<>(requestDTO, header);
+
+    ResponseEntity<UserInfoResponseDTO> response = restTemplate
+        .exchange(rocketChatApiUserDelete, HttpMethod.POST, request, UserInfoResponseDTO.class);
+
+    if (isResponseNotSuccess(response)) {
+      throw new InternalServerErrorException(
+          String.format(
+              "Could not delete Rocket.Chat user with user id %s.%n Status: %s.%n error: %s.%n "
+                  + "error type: %s",
+              rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
+              response.getBody().getErrorType()), LogService::logRocketChatError);
+    }
   }
 
 }

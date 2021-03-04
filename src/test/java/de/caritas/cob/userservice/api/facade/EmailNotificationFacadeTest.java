@@ -54,7 +54,6 @@ import de.caritas.cob.userservice.api.model.NewMessageDTO;
 import de.caritas.cob.userservice.api.model.NotificationDTO;
 import de.caritas.cob.userservice.api.model.TeamSessionDTO;
 import de.caritas.cob.userservice.api.model.ToConsultantDTO;
-import de.caritas.cob.userservice.api.model.mailservice.MailsDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -68,8 +67,9 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
-import de.caritas.cob.userservice.api.service.helper.MailServiceHelper;
+import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -177,7 +177,7 @@ public class EmailNotificationFacadeTest {
   @Mock
   private ConsultantAgencyRepository consultantAgencyRepository;
   @Mock
-  private MailServiceHelper mailServiceHelper;
+  private MailService mailService;
   @Mock
   private AgencyServiceHelper agencyServiceHelper;
   @Mock
@@ -222,7 +222,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
 
   }
 
@@ -236,7 +236,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -260,7 +260,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -271,7 +271,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -303,7 +303,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
     verify(consultantAgencyService, times(1)).findConsultantsByAgencyId(AGENCY_ID);
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -318,7 +318,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
     verify(consultantAgencyService, times(1)).findConsultantsByAgencyId(AGENCY_ID);
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -332,7 +332,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -355,7 +355,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
@@ -367,7 +367,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
@@ -379,7 +379,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -390,7 +390,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -402,7 +402,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
@@ -415,7 +415,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
 
-    verify(mailServiceHelper, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -430,7 +430,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -444,7 +444,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
   }
 
   @Test
@@ -457,7 +457,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
   }
 
   /**
@@ -478,7 +478,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID, CONSULTANT_ID);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
 
   }
 
@@ -492,7 +492,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID_2);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
 
   }
 
@@ -540,7 +540,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME);
 
-    verify(mailServiceHelper, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
   }
 
   @Test
@@ -586,21 +586,13 @@ public class EmailNotificationFacadeTest {
 
   @Test
   public void sendAssignEnquiryEmailNotification_Should_LogError_When_MailServiceHelperThrowsException() {
-    doThrow(new RuntimeException("unexpected")).when(mailServiceHelper)
+    doThrow(new RuntimeException("unexpected")).when(mailService)
         .sendEmailNotification(any());
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(CONSULTANT));
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME);
 
     verify(logger, times(1)).error(anyString(), anyString(), contains("unexpected"));
-  }
-
-  @Test(expected = NewMessageNotificationException.class)
-  public void sendNewFeedbackMessageNotification_Should_ThrowNewMessageNotificationException_When_SessionServiceThrownsServerError() {
-    when(sessionService.getSessionByFeedbackGroupId(any()))
-        .thenThrow(new InternalServerErrorException(""));
-
-    emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID);
   }
 
   @Test

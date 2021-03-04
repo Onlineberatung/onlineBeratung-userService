@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.helper;
 
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -34,14 +35,14 @@ public class MessageServiceHelper {
   private String messageServiceApiPostMessageUrl;
 
   private final RestTemplate restTemplate;
-  private final ServiceHelper serviceHelper;
+  private final SecurityHeaderSupplier securityHeaderSupplier;
   private final RocketChatCredentialsProvider rcCredentialHelper;
   private final UserHelper userHelper;
 
   @Autowired
-  public MessageServiceHelper(RestTemplate restTemplate, ServiceHelper serviceHelper,
+  public MessageServiceHelper(RestTemplate restTemplate, SecurityHeaderSupplier securityHeaderSupplier,
       RocketChatCredentialsProvider rcCredentialHelper, UserHelper userHelper) {
-    this.serviceHelper = serviceHelper;
+    this.securityHeaderSupplier = securityHeaderSupplier;
     this.restTemplate = restTemplate;
     this.rcCredentialHelper = rcCredentialHelper;
     this.userHelper = userHelper;
@@ -75,7 +76,7 @@ public class MessageServiceHelper {
 
     try {
       HttpHeaders header =
-          serviceHelper.getRocketChatAndCsrfHttpHeaders(rocketChatCredentials, rcGroupId);
+          securityHeaderSupplier.getRocketChatAndCsrfHttpHeaders(rocketChatCredentials, rcGroupId);
       HttpEntity<MessageDTO> request = new HttpEntity<>(messageDTO, header);
 
       response = restTemplate.exchange(messageServiceApiPostMessageUrl, HttpMethod.POST, request,

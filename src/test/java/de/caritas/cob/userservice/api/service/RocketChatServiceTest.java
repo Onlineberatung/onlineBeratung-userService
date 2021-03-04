@@ -11,15 +11,19 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_RO
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_INFO;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_USER_ID;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_ADD_USER;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_DELETE;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGIN;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGOUT;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_UPDATE;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CLEAN_ROOM_HISTORY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_CREATE;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_DELETE;
@@ -49,20 +53,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCounterResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
@@ -84,6 +93,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -207,39 +217,29 @@ public class RocketChatServiceTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN),
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
         RC_TOKEN_HEADER_PARAMETER_NAME);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID),
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
         RC_USER_ID_HEADER_PARAMETER_NAME);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN),
-        RC_URL_CHAT_USER_LOGIN);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT),
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN, RC_URL_CHAT_USER_LOGIN);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT,
         RC_URL_CHAT_USER_LOGOUT);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL),
-        RC_URL_CHAT_ADD_USER);
-    FieldSetter.setField(rocketChatService, rocketChatService.getClass().getDeclaredField(
-        FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL), RC_URL_GROUPS_REMOVE_USER);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL),
-        RC_URL_GROUPS_DELETE);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL),
-        RC_URL_GROUPS_CREATE);
-    FieldSetter.setField(rocketChatService, rocketChatService.getClass().getDeclaredField(
-        FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY), RC_URL_CLEAN_ROOM_HISTORY);
-    FieldSetter.setField(rocketChatService, rocketChatService.getClass().getDeclaredField(
-        FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL), RC_URL_SUBSCRIPTIONS_GET);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL),
-        RC_URL_ROOMS_GET);
-    FieldSetter.setField(rocketChatService,
-        rocketChatService.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_USER_INFO),
-        RC_URL_USERS_INFO_GET);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL, RC_URL_CHAT_ADD_USER);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL,
+        RC_URL_GROUPS_REMOVE_USER);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL, RC_URL_GROUPS_DELETE);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL, RC_URL_GROUPS_CREATE);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY,
+        RC_URL_CLEAN_ROOM_HISTORY);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL,
+        RC_URL_SUBSCRIPTIONS_GET);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL, RC_URL_ROOMS_GET);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_INFO, RC_URL_USERS_INFO_GET);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL,
+        RC_URL_CHAT_USER_DELETE);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL,
+        RC_URL_CHAT_USER_UPDATE);
+
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -883,4 +883,117 @@ public class RocketChatServiceTest {
 
     assertEquals(result.getUser().getId(), RC_USER_ID);
   }
+
+  @Test
+  public void updateUser_Should_performRocketChatUpdate()
+      throws RocketChatUserNotInitializedException {
+    UpdateConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate
+        .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
+            eq(UserInfoResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));
+
+    this.rocketChatService.updateUser("", updateConsultantDTO);
+
+    verify(this.restTemplate, times(1))
+        .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
+            eq(UserInfoResponseDTO.class));
+  }
+
+  @Test(expected = InternalServerErrorException.class)
+  public void updateUser_Should_throwInternalServerErrorException_When_rocketChatUpdateFails()
+      throws RocketChatUserNotInitializedException {
+    UpdateConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate
+        .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
+            eq(UserInfoResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
+
+    this.rocketChatService.updateUser("", updateConsultantDTO);
+  }
+
+  @Test(expected = InternalServerErrorException.class)
+  public void updateUser_Should_throwInternalServerErrorException_When_rocketChatIsNotReachable()
+      throws RocketChatUserNotInitializedException {
+    UpdateConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate
+        .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
+            eq(UserInfoResponseDTO.class)))
+        .thenThrow(mock(RestClientResponseException.class));
+
+    this.rocketChatService.updateUser("", updateConsultantDTO);
+  }
+
+  @Test
+  public void deleteUser_Should_performRocketDeleteUser() throws Exception {
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(),
+        eq(UserInfoResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));
+
+    this.rocketChatService.deleteUser("");
+
+    verify(this.restTemplate, times(1))
+        .exchange(eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(),
+            eq(UserInfoResponseDTO.class));
+  }
+
+  @Test(expected = RocketChatDeleteUserException.class)
+  public void deleteUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
+      throws Exception {
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(),
+        eq(UserInfoResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
+
+    this.rocketChatService.deleteUser("");
+  }
+
+  @Test
+  public void deleteGroupAsTechnicalUser_Should_performRocketDeleteUser() throws Exception {
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.postForObject(eq(RC_URL_GROUPS_DELETE), any(), any()))
+        .thenReturn(new ResponseEntity<>(new GroupDeleteResponseDTO(true), HttpStatus.OK));
+
+    this.rocketChatService.deleteGroupAsTechnicalUser("");
+
+    verify(this.restTemplate, times(1))
+        .postForObject(eq(RC_URL_GROUPS_DELETE), any(), any());
+  }
+
+  @Test(expected = RocketChatDeleteGroupException.class)
+  public void deleteGroupAsTechnicalUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
+      throws Exception {
+    when(rcCredentialsHelper.getTechnicalUser()).thenThrow(new RuntimeException());
+
+    this.rocketChatService.deleteGroupAsTechnicalUser("");
+  }
+
+  @Test
+  public void deleteGroupAsSystemUser_Should_performRocketDeleteUser() throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(restTemplate.postForObject(eq(RC_URL_GROUPS_DELETE), any(), any()))
+        .thenReturn(new ResponseEntity<>(new GroupDeleteResponseDTO(true), HttpStatus.OK));
+
+    this.rocketChatService.deleteGroupAsSystemUser("");
+
+    verify(this.restTemplate, times(1))
+        .postForObject(eq(RC_URL_GROUPS_DELETE), any(), any());
+  }
+
+  @Test(expected = InternalServerErrorException.class)
+  public void deleteGroupAsSystemUser_Should_throwInternalServerErrorException_When_responseIsNotSuccess()
+      throws Exception {
+    when(rcCredentialsHelper.getSystemUser())
+        .thenThrow(new RocketChatUserNotInitializedException(""));
+
+    this.rocketChatService.deleteGroupAsSystemUser("");
+  }
+
 }

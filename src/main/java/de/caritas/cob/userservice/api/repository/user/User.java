@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.user;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
@@ -62,6 +63,9 @@ public class User {
 
   @OneToMany(mappedBy = "user")
   private Set<UserAgency> userAgencies;
+
+  @Column(name = "delete_date")
+  private LocalDateTime deleteDate;
 
   public User(@Size(max = 36) String userId, Long oldId, @Size(max = 255) String username,
       @Size(max = 255) String email, boolean languageFormal) {
