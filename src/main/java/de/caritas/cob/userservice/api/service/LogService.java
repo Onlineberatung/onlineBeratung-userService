@@ -23,13 +23,12 @@ public class LogService {
   public static final String KEYCLOAK_ERROR_TEXT = "Keycloak error: ";
   public static final String KEYCLOAK_EXCEPTION_TEXT = "Keycloak exception: ";
   public static final String BAD_REQUEST_ERROR_TEXT = "Bad Request: ";
-  public static final String DB_INCONSITENCY_ERROR_TEXT = "Database inconsistency: ";
+  public static final String DB_INCONSISTENCY_ERROR_TEXT = "Database inconsistency: ";
   public static final String UNAUTHORIZED_WARNING_TEXT = "Unauthorized: ";
   public static final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
   public static final String ILLEGAL_ARGUMENT_ERROR_TEXT = "Illegal Argument: ";
   public static final String EMAIL_NOTIFICATION_ERROR_TEXT = "EmailNotificationFacade error: ";
   public static final String ACCEPT_ENQUIRY_ERROR_TEXT = "AcceptEnquiryFacade error: ";
-  public static final String MESSAGESERVICE_HELPER_ERROR_TEXT = "MessageServiceHelper error: ";
   public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
   public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
   public static final String MONITORING_HELPER_ERROR_TEXT = "MonitoringHelper error: ";
@@ -70,7 +69,7 @@ public class LogService {
    * @param message the message
    */
   public static void logDatabaseInconsistency(String message) {
-    LOGGER.error("{}{}", DB_INCONSITENCY_ERROR_TEXT, message);
+    LOGGER.error("{}{}", DB_INCONSISTENCY_ERROR_TEXT, message);
   }
 
   /**
@@ -332,17 +331,6 @@ public class LogService {
    */
   public static void logAcceptEnquiryFacadeError(String message) {
     LOGGER.error("{}{}", ACCEPT_ENQUIRY_ERROR_TEXT, message);
-  }
-
-  /**
-   * MessageService (helper) exception.
-   *
-   * @param message the message
-   * @param exception the exception
-   */
-  public static void logMessageServiceHelperException(String message, Exception exception) {
-    LOGGER.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, message);
-    LOGGER.error("{}{}", MESSAGESERVICE_HELPER_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**

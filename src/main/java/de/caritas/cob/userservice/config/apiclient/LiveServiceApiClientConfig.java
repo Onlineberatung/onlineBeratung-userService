@@ -8,17 +8,32 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Configuration class for the LiveService API client.
+ */
 @Configuration
 public class LiveServiceApiClientConfig {
 
   @Value("${live.service.api.url}")
   private String liveServiceApiUrl;
 
+  /**
+   * LiveService controller bean.
+   *
+   * @param liveServiceApiClient {@link ApiClient}
+   * @return the LiveService controller {@link LiveControllerApi}
+   */
   @Bean
   public LiveControllerApi liveControllerApi(ApiClient liveServiceApiClient) {
     return new LiveControllerApi(liveServiceApiClient);
   }
 
+  /**
+   * LiveService API client bean.
+   *
+   * @param restTemplate {@link RestTemplate}
+   * @return the LiveService {@link ApiClient}
+   */
   @Bean
   @Primary
   public ApiClient liveServiceApiClient(RestTemplate restTemplate) {

@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import org.junit.Before;
@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,7 +26,6 @@ public class SecurityHeaderSupplierTest {
   private final String FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY = "csrfCookieProperty";
   private final String CSRF_TOKEN_HEADER_VALUE = "X-CSRF-TOKEN";
   private final String CSRF_TOKEN_COOKIE_VALUE = "CSRF-TOKEN";
-  private final String RC_GROUP_ID = "fR2Rz7dmWmHdXE8u2";
   private final String BEARER_TOKEN = "sadifsdfj)(JWifa";
 
   @InjectMocks
@@ -37,56 +35,48 @@ public class SecurityHeaderSupplierTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    // serviceHelper = new ServiceHelper();
-    FieldSetter.setField(securityHeaderSupplier,
+    setField(securityHeaderSupplier,
         securityHeaderSupplier.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_HEADER_PROPERTY),
         CSRF_TOKEN_HEADER_VALUE);
-    FieldSetter.setField(securityHeaderSupplier,
+    setField(securityHeaderSupplier,
         securityHeaderSupplier.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY),
         CSRF_TOKEN_COOKIE_VALUE);
   }
 
   @Test
   public void getCsrfHttpHeaders_Should_Return_HeaderWithCorrectContentType() {
-
     HttpHeaders result = securityHeaderSupplier.getCsrfHttpHeaders();
     assertEquals(MediaType.APPLICATION_JSON, result.getContentType());
-
   }
 
   @Test
   public void getCsrfHttpHeaders_Should_Return_HeaderWithCookiePropertyNameFromProperties() {
-
     HttpHeaders result = securityHeaderSupplier.getCsrfHttpHeaders();
-    assertTrue(result.get("Cookie").toString().startsWith("[" + CSRF_TOKEN_COOKIE_VALUE + "="));
-
+    assertThat(result.get("Cookie").get(0), startsWith(CSRF_TOKEN_COOKIE_VALUE + "="));
   }
 
   @Test
   public void getCsrfHttpHeaders_Should_Return_HeaderWithPropertyNameFromProperties() {
-
     HttpHeaders result = securityHeaderSupplier.getCsrfHttpHeaders();
     assertNotNull(result.get(CSRF_TOKEN_HEADER_VALUE));
-
   }
 
   @Test
-  public void getRocketChatAndCsrfHttpHeaders_Should_ReturnHeaderWithRocketChatUserProperties() {
+  public void getKeycloakAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthorizationHeader() {
     when(authenticatedUser.getAccessToken()).thenReturn(BEARER_TOKEN);
 
-    HttpHeaders result = securityHeaderSupplier
-        .getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
-    assertEquals("[" + RC_USER_ID + "]", result.get("rcUserId").toString());
-    assertEquals("[" + RC_TOKEN + "]", result.get("rcToken").toString());
-    assertEquals("[" + RC_GROUP_ID + "]", result.get("rcGroupId").toString());
+    HttpHeaders result = securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
+
+    assertThat("Bearer " + BEARER_TOKEN, is(result.get("Authorization").get(0)));
   }
 
   @Test
-  public void getRocketChatAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthToken() {
+  public void getKeycloakAndCsrfHttpHeaders_Should_ReturnHeaderWithValidCsrfHeaderProperties() {
     when(authenticatedUser.getAccessToken()).thenReturn(BEARER_TOKEN);
 
-    HttpHeaders result = securityHeaderSupplier
-        .getRocketChatAndCsrfHttpHeaders(RC_CREDENTIALS, RC_GROUP_ID);
-    assertEquals("[Bearer " + BEARER_TOKEN + "]", result.get("Authorization").toString());
+    HttpHeaders result = securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
+
+    assertThat(result.get("Cookie").get(0), startsWith(CSRF_TOKEN_COOKIE_VALUE + "="));
+    assertNotNull(result.get(CSRF_TOKEN_HEADER_VALUE));
   }
 }

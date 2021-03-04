@@ -1,6 +1,7 @@
 {
-	"sendWelcomeMessage" : false,
-	"welcomeMessage" : null,
+	"sendWelcomeMessage": false,
+	"welcomeMessage": null,
+	"sendFurtherStepsMessage": true,
 	"sessionDataInitializing": {
 		"addictiveDrugs": false,
 		"age": false,
@@ -23,7 +24,7 @@
 	"languageFormal": false,
 	"roles": {
 		"consultant": {
-			"default" :	[
+			"default": [
 				"consultant"
 			]
 		}

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
@@ -100,7 +101,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -151,7 +151,6 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -180,7 +179,6 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -279,22 +277,22 @@ public class UserControllerIT {
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
-      ConsultingType.SUCHT, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID,
+      ConsultingType.SUCHT, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
       null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
+          SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
+          SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
+          SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
   private final Optional<Session> OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID =
@@ -1771,7 +1769,6 @@ public class UserControllerIT {
   @Test
   public void registerUser_Should_DecodePassword() throws Exception {
 
-    KeycloakCreateUserResponseDTO response = new KeycloakCreateUserResponseDTO(USER_ID);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
             .getMandatoryFields());
@@ -2237,7 +2234,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(keycloakService, times(1)).changeEmailAddress(eq("email"));
+    verify(keycloakService, times(1)).changeEmailAddress("email");
   }
 
   @Test

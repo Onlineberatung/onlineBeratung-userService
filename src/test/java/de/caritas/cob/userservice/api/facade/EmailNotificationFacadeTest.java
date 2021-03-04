@@ -72,7 +72,6 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -116,20 +115,21 @@ public class EmailNotificationFacadeTest {
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final Session SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.INITIAL,
-          new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID,
+          SessionStatus.INITIAL,
+          nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(1L, USER, null, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.NEW,
-          new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+          nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
-      ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID,
+      ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
       null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
       CONSULTANT_NO_EMAIL, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
-      new Date(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session TEAM_SESSION =
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "12345", AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
+          SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO()
       .id(AGENCY_ID)
@@ -166,10 +166,10 @@ public class EmailNotificationFacadeTest {
       new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
           new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(false))));
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, true, null, false,
+      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, null, true, null, false,
           NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS, false, null, null);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, null, true, null, false,
+      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, null, true, null, false,
           NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
 
   @InjectMocks
@@ -216,7 +216,7 @@ public class EmailNotificationFacadeTest {
   public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants()
       throws AgencyServiceHelperException {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(SESSION.getAgencyId())))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
@@ -230,7 +230,7 @@ public class EmailNotificationFacadeTest {
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser()
       throws AgencyServiceHelperException {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(SESSION.getAgencyId())))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
@@ -243,7 +243,7 @@ public class EmailNotificationFacadeTest {
   public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper()
       throws AgencyServiceHelperException {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(SESSION.getAgencyId())))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
@@ -256,7 +256,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenConsultantAgencyListIsEmpty() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(AGENCY_ID))).thenReturn(null);
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID)).thenReturn(null);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
@@ -266,7 +266,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenConsultantIsAbsent() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(AGENCY_ID)))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID))
         .thenReturn(ABSENT_CONSULTANT_AGENCY_LIST);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
@@ -280,7 +280,7 @@ public class EmailNotificationFacadeTest {
     EmailNotificationException emailNotificationException =
         new EmailNotificationException(new Exception());
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.eq(AGENCY_ID)))
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID))
         .thenThrow(emailNotificationException);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
@@ -464,7 +464,7 @@ public class EmailNotificationFacadeTest {
    * Method: sendNewFeedbackMessageNotification
    */
   @Test
-  public void sendNewFeedbackMessageNotification_Should_SendEmailToAllFeedbackChatGroupMembersWithDecodedUsernames_WhenAssigendConsultantWroteAFeedbackMessage()
+  public void sendNewFeedbackMessageNotification_Should_SendEmailToAllFeedbackChatGroupMembersWithDecodedUsernames_WhenAssignedConsultantWroteAFeedbackMessage()
       throws Exception {
 
     when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
@@ -596,7 +596,7 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendAssignEnquiryEmailNotification_Should_LogError_When_SessionServiceThrowsRuntmeException() {
+  public void sendAssignEnquiryEmailNotification_Should_LogError_When_SessionServiceThrowsRuntimeException() {
     when(sessionService.getSessionByFeedbackGroupId(any())).thenThrow(new RuntimeException(""));
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID);

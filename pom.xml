@@ -400,8 +400,37 @@
 							<generateApis>true</generateApis>
 							<generateApiTests>false</generateApiTests>
 							<generateModelTests>false</generateModelTests>
-							<apiPackage>${project.groupId}.${project.artifactId}.agencyadminserivce.generated.web</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.agencyadminserivce.generated.web.model</modelPackage>
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.agencyadminserivce.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.agencyadminserivce.generated.web.model
+							</modelPackage>
+						</configuration>
+					</execution>
+					<!-- Generate client API for MessageService -->
+					<execution>
+						<id>messageservice-client-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<library>resttemplate</library>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/messageservice.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<generateApis>true</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<apiPackage>${project.groupId}.${project.artifactId}.messageservice.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.messageservice.generated.web.model
+							</modelPackage>
 						</configuration>
 					</execution>
 					<!-- Generate client API for mail service -->

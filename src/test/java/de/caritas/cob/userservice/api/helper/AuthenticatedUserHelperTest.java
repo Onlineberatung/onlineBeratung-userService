@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
@@ -22,7 +23,6 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
-import java.util.Date;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,19 +38,19 @@ public class AuthenticatedUserHelperTest {
       USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null,
       null);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT, ConsultingType.SUCHT,
-      POSTCODE, AGENCY_ID, SessionStatus.NEW, new Date(), null, null, null,
+      POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(SESSION_ID, null, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.NEW, new Date(), null, null, null,
+          SessionStatus.NEW, nowInUtc(), null, null, null,
           false, false, null, null);
   private final Session TEAM_SESSION =
       new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
+          SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(TEAM_SESSION_ID, null, CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, new Date(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
+          SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
 
   @InjectMocks
@@ -61,8 +61,7 @@ public class AuthenticatedUserHelperTest {
   private ConsultantAgencyService consultantAgencyService;
 
   @Test
-  public void hasPermissionForSession_Should_ReturnFalse_WhenConsultantIsNotAssignedToSingleSession()
-      throws Exception {
+  public void hasPermissionForSession_Should_ReturnFalse_WhenConsultantIsNotAssignedToSingleSession() {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT.getId());
 
@@ -73,8 +72,7 @@ public class AuthenticatedUserHelperTest {
   }
 
   @Test
-  public void hasPermissionForSession_Should_ReturnFalse_WhenConsultantIsNotAssignedToAgencyOfTeamSessionOrToSession()
-      throws Exception {
+  public void hasPermissionForSession_Should_ReturnFalse_WhenConsultantIsNotAssignedToAgencyOfTeamSessionOrToSession() {
 
     when(authenticatedUser.getUserId()).thenReturn(TEAM_CONSULTANT.getId());
 
@@ -85,8 +83,7 @@ public class AuthenticatedUserHelperTest {
   }
 
   @Test
-  public void hasPermissionForSession_Should_ReturnTrue_WhenConsultantIsAssignedToSingleSession()
-      throws Exception {
+  public void hasPermissionForSession_Should_ReturnTrue_WhenConsultantIsAssignedToSingleSession() {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT.getId());
 
@@ -96,8 +93,7 @@ public class AuthenticatedUserHelperTest {
   }
 
   @Test
-  public void hasPermissionForSession_Should_ReturnTrue_WhenConsultantIsAssignedToAgencyOfTeamSession()
-      throws Exception {
+  public void hasPermissionForSession_Should_ReturnTrue_WhenConsultantIsAssignedToAgencyOfTeamSession() {
 
     when(authenticatedUser.getUserId()).thenReturn(TEAM_CONSULTANT.getId());
     when(consultantAgencyService.isConsultantInAgency(TEAM_CONSULTANT.getId(),
