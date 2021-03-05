@@ -10,7 +10,6 @@ import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -49,7 +48,8 @@ public class ConsultantAgencyAdminService {
    * @return the list of agencies for the given consultant
    */
   public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
-    Optional<Consultant> consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId);
+    Optional<Consultant> consultant = consultantRepository
+        .findByIdAndDeleteDateIsNull(consultantId);
     if (!consultant.isPresent()) {
       throw new BadRequestException(
           String.format("Consultant with id %s does not exist", consultantId));
@@ -70,12 +70,8 @@ public class ConsultantAgencyAdminService {
    * @param agencyId the id of the agency
    */
   public void markAllAssignedConsultantsAsTeamConsultant(Long agencyId) {
-    List<ConsultantAgency> consultantAgencies = this.consultantAgencyRepository
-        .findByAgencyIdAndDeleteDateIsNull(agencyId);
-    if (isEmpty(consultantAgencies)) {
-      throw new NotFoundException(String.format("Agency with id %s does not exist", agencyId));
-    }
-    consultantAgencies.stream()
+    this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId)
+        .stream()
         .map(ConsultantAgency::getConsultant)
         .filter(this::notAlreadyTeamConsultant)
         .forEach(this::markConsultantAsTeamConsultant);
@@ -104,7 +100,8 @@ public class ConsultantAgencyAdminService {
     this.removeFromRocketChatService.removeConsultantFromSessions(teamSessionsInProgress);
     teamSessionsInProgress.forEach(this::changeSessionToNonTeamSession);
 
-    this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(agencyId))
+    this.consultantRepository
+        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(agencyId))
         .stream()
         .filter(consultant -> noOtherTeamAgency(consultant, agencyId))
         .forEach(this::removeTeamConsultantFlag);
@@ -144,7 +141,8 @@ public class ConsultantAgencyAdminService {
    */
   public void markConsultantAgencyForDeletion(String consultantId, Long agencyId) {
     List<ConsultantAgency> consultantAgencies =
-        this.consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, agencyId);
+        this.consultantAgencyRepository
+            .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, agencyId);
     if (isEmpty(consultantAgencies)) {
       throw new CustomValidationHttpStatusException(CONSULTANT_AGENCY_RELATION_DOES_NOT_EXIST);
     }

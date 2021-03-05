@@ -7,8 +7,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -59,11 +58,13 @@ public class ConsultantAgencyAdminServiceTest {
   @Mock
   private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
-  @Test(expected = NotFoundException.class)
-  public void markAllAssignedConsultantsAsTeamConsultant_Should_throwNotFoundException_When_agencyWithIdDoesNotExist() {
-    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any())).thenReturn(Collections.emptyList());
+  @Test
+  public void markAllAssignedConsultantsAsTeamConsultant_Should_notThrowNotFoundException_When_agencyWithIdDoesNotExist() {
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
+        .thenReturn(Collections.emptyList());
 
-    this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
+    assertDoesNotThrow(
+        () -> this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L));
   }
 
   @Test
@@ -76,7 +77,8 @@ public class ConsultantAgencyAdminServiceTest {
         .filter(Consultant::isTeamConsultant)
         .count();
 
-    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any())).thenReturn(consultantAgencies);
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
+        .thenReturn(consultantAgencies);
 
     this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
 
@@ -154,7 +156,8 @@ public class ConsultantAgencyAdminServiceTest {
   public void markConsultantAgencyForDeletion_Should_deleteConsultantAgency_When_consultantAgencyCanBeDeleted() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
-    when(this.consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(any(), any()))
+    when(this.consultantAgencyRepository
+        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(any(), any()))
         .thenReturn(singletonList(consultantAgency));
 
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
