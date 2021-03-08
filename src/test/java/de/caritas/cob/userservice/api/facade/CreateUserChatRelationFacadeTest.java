@@ -5,14 +5,16 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.LOGIN_RESPONSE
 import static de.caritas.cob.userservice.testHelper.TestConstants.LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_RC_ID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
@@ -53,7 +55,7 @@ public class CreateUserChatRelationFacadeTest {
 
   @Test
   public void initializeUserChatAgencyRelation_Should_CreateUserChatAgencyRelation_ForNewUserAccountCreation()
-      throws RocketChatLoginException, SaveUserException {
+      throws RocketChatLoginException {
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     user.setRcUserId(null);
@@ -84,7 +86,7 @@ public class CreateUserChatRelationFacadeTest {
 
   @Test
   public void initializeUserChatAgencyRelation_Should_LoginUserInRocketChatAndUpdateRocketChatUserIdInDatabase_IfNotAlreadySet_ForNewUserAccountCreation()
-      throws RocketChatLoginException, SaveUserException {
+      throws RocketChatLoginException {
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     user.setRcUserId(null);
@@ -106,8 +108,7 @@ public class CreateUserChatRelationFacadeTest {
   }
 
   @Test
-  public void initializeUserChatAgencyRelation_Should_UpdateRocketChatUserIdInDatabase_IfNotAlreadySet_ForNewConsultingTypeRegistrations()
-      throws SaveUserException {
+  public void initializeUserChatAgencyRelation_Should_UpdateRocketChatUserIdInDatabase_IfNotAlreadySet_ForNewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     User user = easyRandom.nextObject(User.class);
@@ -168,9 +169,8 @@ public class CreateUserChatRelationFacadeTest {
     assertEquals(true, captor.getValue().isRollBackUserAccount());
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void initializeUserChatAgencyRelation_Should_ThrowInternalServerErrorExceptionAndRollBackUserAccount_IfUpdatingRocketChatUserIdInDbFails()
-      throws SaveUserException {
+  @Test
+  public void initializeUserChatAgencyRelation_Should_ThrowInternalServerErrorExceptionAndRollBackUserAccount_IfUpdatingRocketChatUserIdInDbFails() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     User user = easyRandom.nextObject(User.class);
@@ -180,14 +180,17 @@ public class CreateUserChatRelationFacadeTest {
     ArgumentCaptor<RollbackUserAccountInformation> captor = ArgumentCaptor
         .forClass(RollbackUserAccountInformation.class);
 
-    when(userService.saveUser(any())).thenThrow(new SaveUserException(MESSAGE));
+    when(userService.saveUser(any())).thenThrow(new RuntimeException(MESSAGE));
 
-    createUserChatRelationFacade
-        .initializeUserChatAgencyRelation(userDTO, user, rocketChatCredentials);
+    try {
+      createUserChatRelationFacade
+          .initializeUserChatAgencyRelation(userDTO, user, rocketChatCredentials);
+    } catch (Exception e) {
+      assertThat(e, instanceOf(RuntimeException.class));
+    }
 
     verify(rollbackFacade).rollBackUserAccount(captor.capture());
     assertEquals(user, captor.getValue().getUser());
-    assertEquals(true, captor.getValue().isRollBackUserAccount());
   }
 
   @Test(expected = InternalServerErrorException.class)

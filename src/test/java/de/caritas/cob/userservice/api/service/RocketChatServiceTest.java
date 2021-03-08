@@ -87,6 +87,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
@@ -887,15 +888,15 @@ public class RocketChatServiceTest {
   @Test
   public void updateUser_Should_performRocketChatUpdate()
       throws RocketChatUserNotInitializedException {
-    UpdateConsultantDTO updateConsultantDTO =
-        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    UserUpdateRequestDTO userUpdateRequestDTO =
+        new EasyRandom().nextObject(UserUpdateRequestDTO.class);
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate
         .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
             eq(UserInfoResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));
 
-    this.rocketChatService.updateUser("", updateConsultantDTO);
+    this.rocketChatService.updateUser(userUpdateRequestDTO);
 
     verify(this.restTemplate, times(1))
         .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
@@ -905,29 +906,29 @@ public class RocketChatServiceTest {
   @Test(expected = InternalServerErrorException.class)
   public void updateUser_Should_throwInternalServerErrorException_When_rocketChatUpdateFails()
       throws RocketChatUserNotInitializedException {
-    UpdateConsultantDTO updateConsultantDTO =
-        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    UserUpdateRequestDTO userUpdateRequestDTO =
+        new EasyRandom().nextObject(UserUpdateRequestDTO.class);
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate
         .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
             eq(UserInfoResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
 
-    this.rocketChatService.updateUser("", updateConsultantDTO);
+    this.rocketChatService.updateUser(userUpdateRequestDTO);
   }
 
   @Test(expected = InternalServerErrorException.class)
   public void updateUser_Should_throwInternalServerErrorException_When_rocketChatIsNotReachable()
       throws RocketChatUserNotInitializedException {
-    UpdateConsultantDTO updateConsultantDTO =
-        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    UserUpdateRequestDTO userUpdateRequestDTO =
+        new EasyRandom().nextObject(UserUpdateRequestDTO.class);
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate
         .exchange(eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(),
             eq(UserInfoResponseDTO.class)))
         .thenThrow(mock(RestClientResponseException.class));
 
-    this.rocketChatService.updateUser("", updateConsultantDTO);
+    this.rocketChatService.updateUser(userUpdateRequestDTO);
   }
 
   @Test

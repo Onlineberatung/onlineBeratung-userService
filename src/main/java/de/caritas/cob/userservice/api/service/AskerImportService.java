@@ -8,7 +8,6 @@ import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformatio
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
-import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
@@ -239,9 +238,6 @@ public class AskerImportService {
         break;
       } catch (RocketChatLoginException rcLoginException) {
         writeToImportLog(rcLoginException.getMessage(), protocolFile);
-        break;
-      } catch (SaveUserException saveUserException) {
-        writeToImportLog(saveUserException.getMessage(), protocolFile);
         break;
       } catch (CustomValidationHttpStatusException e) {
         writeToImportLog(String.format(
@@ -547,9 +543,6 @@ public class AskerImportService {
         break;
       } catch (RocketChatCreateGroupException rcCreateGroupException) {
         writeToImportLog(rcCreateGroupException.getMessage(), protocolFile);
-        break;
-      } catch (SaveUserException saveUserException) {
-        writeToImportLog(saveUserException.getMessage(), protocolFile);
         break;
       } catch (Exception exception) {
         writeToImportLog(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),

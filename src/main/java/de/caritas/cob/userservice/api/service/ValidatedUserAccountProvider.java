@@ -4,8 +4,11 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,10 +23,12 @@ public class ValidatedUserAccountProvider {
   private final @NonNull UserService userService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull AuthenticatedUser authenticatedUser;
+  private final @NonNull KeycloakService keycloakService;
+  private final @NonNull RocketChatService rocketChatService;
 
   /**
-   * Tries to retrieve the user of the current {@link AuthenticatedUser} and throws an 500 -
-   * Server Error if {@link User} is not present.
+   * Tries to retrieve the user of the current {@link AuthenticatedUser} and throws an 500 - Server
+   * Error if {@link User} is not present.
    *
    * @return the validated {@link User}
    */
@@ -44,8 +49,8 @@ public class ValidatedUserAccountProvider {
   }
 
   /**
-   * Tries to retrieve the consultant by given id and throws an 500 -
-   * Server Error if {@link Consultant} is not present.
+   * Tries to retrieve the consultant by given id and throws an 500 - Server Error if {@link
+   * Consultant} is not present.
    *
    * @param consultantId the id to search for
    * @return the validated {@link Consultant}
@@ -81,6 +86,41 @@ public class ValidatedUserAccountProvider {
   public void updateConsultantAbsent(AbsenceDTO absence) {
     Consultant consultant = retrieveValidatedConsultant();
     consultantService.updateConsultantAbsent(consultant, absence);
+  }
+
+  /**
+   * Updates the email address of current autheticated user in Keycloak, Rocket.Chat and database.
+   *
+   * @param email the new email address
+   */
+  public void changeUserAccountEmailAddress(String email) {
+    this.keycloakService.changeEmailAddress(email);
+
+    this.consultantService.getConsultant(this.authenticatedUser.getUserId())
+        .ifPresent(consultant -> updateConsultantEmail(consultant, email));
+
+    this.userService.getUser(this.authenticatedUser.getUserId())
+        .ifPresent(user -> updateUserEmail(user, email));
+  }
+
+  private void updateConsultantEmail(Consultant consultant, String email) {
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, consultant.getFullName());
+    UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(consultant.getRocketChatId(),
+        userUpdateDataDTO);
+    this.rocketChatService.updateUser(requestDTO);
+
+    consultant.setEmail(email);
+    this.consultantService.saveConsultant(consultant);
+  }
+
+  private void updateUserEmail(User user, String email) {
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, user.getUsername());
+    UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(user.getRcUserId(),
+        userUpdateDataDTO);
+    this.rocketChatService.updateUser(requestDTO);
+
+    user.setEmail(email);
+    this.userService.saveUser(user);
   }
 
 }

@@ -743,7 +743,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
-    this.keycloakService.changeEmailAddress(emailAddress);
+    this.userAccountProvider.changeUserAccountEmailAddress(emailAddress);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }
