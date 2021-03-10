@@ -7,15 +7,20 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -36,6 +41,12 @@ public class ValidatedUserAccountProviderTest {
 
   @Mock
   private AuthenticatedUser authenticatedUser;
+
+  @Mock
+  private KeycloakService keycloakService;
+
+  @Mock
+  private RocketChatService rocketChatService;
 
   @Test
   public void retrieveValidatedUser_Should_ReturnUser_When_UserIsPresent() {
@@ -99,6 +110,44 @@ public class ValidatedUserAccountProviderTest {
     this.accountProvider.updateConsultantAbsent(absenceDTO);
 
     verify(consultantService, times(1)).updateConsultantAbsent(eq(consultantMock), eq(absenceDTO));
+  }
+
+  @Test
+  public void changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    when(this.authenticatedUser.getUserId()).thenReturn("consultant");
+    when(this.consultantService.getConsultant("consultant")).thenReturn(Optional.of(consultant));
+
+    this.accountProvider.changeUserAccountEmailAddress("newMail");
+
+    verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
+    verify(this.rocketChatService, times(1))
+        .updateUser(eq(new UserUpdateRequestDTO(consultant.getRocketChatId(),
+            new UserUpdateDataDTO("newMail", consultant.getFullName()))));
+    consultant.setEmail("newMail");
+    verify(this.consultantService, times(1)).saveConsultant(consultant);
+    verifyNoMoreInteractions(this.rocketChatService);
+    verify(this.userService, times(1)).getUser(any());
+    verifyNoMoreInteractions(this.userService);
+  }
+
+  @Test
+  public void changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
+    User user = new EasyRandom().nextObject(User.class);
+    when(this.authenticatedUser.getUserId()).thenReturn("user");
+    when(this.userService.getUser("user")).thenReturn(Optional.of(user));
+
+    this.accountProvider.changeUserAccountEmailAddress("newMail");
+
+    verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
+    verify(this.rocketChatService, times(1))
+        .updateUser(eq(new UserUpdateRequestDTO(user.getRcUserId(),
+            new UserUpdateDataDTO("newMail", user.getUsername()))));
+    user.setEmail("newMail");
+    verify(this.userService, times(1)).saveUser(user);
+    verifyNoMoreInteractions(this.rocketChatService);
+    verify(this.consultantService, times(1)).getConsultant(any());
+    verifyNoMoreInteractions(this.consultantService);
   }
 
 }

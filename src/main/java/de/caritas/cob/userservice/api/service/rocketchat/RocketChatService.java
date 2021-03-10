@@ -17,7 +17,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupAddUserBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCleanHistoryDTO;
@@ -37,7 +36,6 @@ import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.Subscriptio
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserDeleteBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
@@ -663,23 +661,21 @@ public class RocketChatService {
   /**
    * Updates the user data of the given Rocket.Chat user.
    *
-   * @param rcUserId Rocket.Chat user id
+   * @param requestDTO the input dto
    * @return the dto containing the user infos
    */
-  public UserInfoResponseDTO updateUser(String rcUserId, UpdateConsultantDTO updateConsultantDTO) {
+  public UserInfoResponseDTO updateUser(UserUpdateRequestDTO requestDTO) {
     try {
-      return updateUserData(rcUserId, updateConsultantDTO).getBody();
+      return updateUserData(requestDTO).getBody();
     } catch (RestClientResponseException | RocketChatUserNotInitializedException ex) {
       throw new InternalServerErrorException(
-          String.format("Could not update Rocket.Chat user of user id %s", rcUserId), ex,
-          LogService::logRocketChatError);
+          String.format("Could not update Rocket.Chat user of user id %s", requestDTO.getUserId()),
+          ex, LogService::logRocketChatError);
     }
   }
 
-  private ResponseEntity<UserInfoResponseDTO> updateUserData(String rcUserId,
-      UpdateConsultantDTO updateConsultantDTO) throws RocketChatUserNotInitializedException {
-
-    UserUpdateRequestDTO requestDTO = buildUserUpdateRequestDTO(rcUserId, updateConsultantDTO);
+  private ResponseEntity<UserInfoResponseDTO> updateUserData(UserUpdateRequestDTO requestDTO)
+      throws RocketChatUserNotInitializedException {
     HttpEntity<UserUpdateRequestDTO> request = buildRocketChatUserUpdateRequestEntity(requestDTO);
 
     ResponseEntity<UserInfoResponseDTO> response = restTemplate
@@ -689,19 +685,12 @@ public class RocketChatService {
       throw new InternalServerErrorException(
           String.format(
               "Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
-              rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
+              requestDTO.getUserId(), response.getStatusCodeValue(), response.getBody().getError(),
               response.getBody().getErrorType()),
           LogService::logRocketChatError);
     }
 
     return response;
-  }
-
-  private UserUpdateRequestDTO buildUserUpdateRequestDTO(String rcUserId,
-      UpdateConsultantDTO updateConsultantDTO) {
-    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(updateConsultantDTO.getEmail(),
-        updateConsultantDTO.getFirstname().concat(" ").concat(updateConsultantDTO.getLastname()));
-    return new UserUpdateRequestDTO(rcUserId, userUpdateDataDTO);
   }
 
   private HttpEntity<UserUpdateRequestDTO> buildRocketChatUserUpdateRequestEntity(
