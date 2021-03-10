@@ -17,6 +17,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -66,7 +67,7 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void createKeycloakUser_Should_createExpectedUser_When_keycloakReturnesCreated() {
+  public void createKeycloakUser_Should_createExpectedUser_When_keycloakReturnsCreated() {
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     Response response = mock(Response.class);
@@ -146,8 +147,8 @@ public class KeycloakAdminClientServiceTest {
     }
   }
 
-  @Test(expected = KeycloakException.class)
-  public void createKeycloakUser_Should_returnThrowKeycloakException_When_errorIsUnknown() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createKeycloakUser_Should_ThrowInternalServerException_When_errorIsUnknown() {
     UsersResource usersResource = mock(UsersResource.class);
     Response response = mock(Response.class);
     when(usersResource.create(any())).thenReturn(response);
