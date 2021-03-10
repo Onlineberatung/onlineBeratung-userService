@@ -8,6 +8,7 @@ import static java.util.Objects.nonNull;
 import de.caritas.cob.userservice.api.authorization.Authorities;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -80,14 +81,17 @@ public class KeycloakAdminClientService {
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
       final String firstName, final String lastName) {
     UserRepresentation kcUser = getUserRepresentation(user, firstName, lastName);
-    Response response = this.keycloakAdminClientAccessor.getUsersResource()
-        .create(kcUser);
+    try (Response response = this.keycloakAdminClientAccessor.getUsersResource()
+        .create(kcUser)) {
 
-    if (response.getStatus() == HttpStatus.CREATED.value()) {
-      return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));
+      if (response.getStatus() == HttpStatus.CREATED.value()) {
+        return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));
+      }
+      handleCreateKeycloakUserError(response);
     }
-    handleCreateKeycloakUserError(response);
-    throw new KeycloakException(keycloakError);
+    throw new InternalServerErrorException(
+        String.format("Could not create Keycloak account for: %s %nKeycloak error: %s",
+            user.toString(), keycloakError));
   }
 
   private void handleCreateKeycloakUserError(Response response) {
