@@ -9,6 +9,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
@@ -25,6 +26,9 @@ public class ExceptionConstants {
    * Common exceptions
    */
   public static final Exception EXCEPTION = new Exception();
+  @SuppressWarnings("serial")
+  public static final DataAccessException DATA_ACCESS_EXCEPTION =
+      new DataAccessException(MESSAGE) {};
 
   /*
    * Enquiry exceptions
@@ -32,6 +36,8 @@ public class ExceptionConstants {
   public static final CreateEnquiryExceptionInformation CREATE_ENQUIRY_EXCEPTION_PARAMETER =
       CreateEnquiryExceptionInformation.builder().rcGroupId(RC_GROUP_ID)
           .rcFeedbackGroupId(RC_FEEDBACK_GROUP_ID).session(SESSION).build();
+  public static final SaveUserException SAVE_USER_EXCEPTION =
+      new SaveUserException(MESSAGE, EXCEPTION);
 
   /**
    * Monitoring exceptions

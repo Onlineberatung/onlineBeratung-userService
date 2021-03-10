@@ -1,19 +1,24 @@
 package de.caritas.cob.userservice.api.service;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import java.util.Optional;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
-  private final @NonNull UserRepository userRepository;
+  private final UserRepository userRepository;
+
+  @Autowired
+  public UserService(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
 
   /**
    * Deletes a user.
@@ -21,15 +26,20 @@ public class UserService {
    * @param user the user to be deleted
    */
   public void deleteUser(User user) {
-    userRepository.delete(user);
+    try {
+      userRepository.delete(user);
+    } catch (DataAccessException ex) {
+      throw new InternalServerErrorException("Deletion of user failed",
+          LogService::logDatabaseError);
+    }
   }
 
   /**
    * Creates a new {@link User}.
    *
-   * @param userId         the new user id
-   * @param username       the name for the user
-   * @param email          the email of the user
+   * @param userId the new user id
+   * @param username the name for the user
+   * @param email the email of the user
    * @param languageFormal flag for language formal
    * @return The created {@link User}
    */
@@ -40,16 +50,20 @@ public class UserService {
   /**
    * Creates a new {@link User}.
    *
-   * @param userId         the new user id
-   * @param oldId          an optional old user id
-   * @param username       the name for the user
-   * @param email          the email of the user
+   * @param userId the new user id
+   * @param oldId an optional old user id
+   * @param username the name for the user
+   * @param email the email of the user
    * @param languageFormal flag for language formal
    * @return The created {@link User}
    */
   public User createUser(String userId, Long oldId, String username, String email,
       boolean languageFormal) {
-    return userRepository.save(new User(userId, oldId, username, email, languageFormal));
+    try {
+      return userRepository.save(new User(userId, oldId, username, email, languageFormal));
+    } catch (DataAccessException ex) {
+      throw new InternalServerErrorException(ex.getMessage(), LogService::logInternalServerError);
+    }
   }
 
   /**
@@ -59,7 +73,11 @@ public class UserService {
    * @return An {@link Optional} with the {@link User}, if found
    */
   public Optional<User> getUser(String userId) {
-    return userRepository.findByUserId(userId);
+    try {
+      return userRepository.findByUserId(userId);
+    } catch (DataAccessException ex) {
+      throw new InternalServerErrorException(ex.getMessage(), LogService::logInternalServerError);
+    }
   }
 
   /**
@@ -68,8 +86,12 @@ public class UserService {
    * @param user the {@link User} to save
    * @return the saved {@link User}
    */
-  public User saveUser(User user) {
-    return userRepository.save(user);
+  public User saveUser(User user) throws SaveUserException {
+    try {
+      return userRepository.save(user);
+    } catch (DataAccessException ex) {
+      throw new SaveUserException("Database error while saving user.", ex);
+    }
   }
 
   /**
@@ -97,7 +119,13 @@ public class UserService {
    * @return the user as an {@link Optional}
    */
   public Optional<User> findUserByRcUserId(String rcUserId) {
-    return userRepository.findByRcUserId(rcUserId);
+    try {
+      return userRepository.findByRcUserId(rcUserId);
+    } catch (DataAccessException ex) {
+      throw new InternalServerErrorException(String
+          .format("Database error while loading user by Rocket.Chat user id %s", rcUserId),
+          LogService::logDatabaseError);
+    }
   }
 
 }

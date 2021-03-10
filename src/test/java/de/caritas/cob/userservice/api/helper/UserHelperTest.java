@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
@@ -123,7 +124,8 @@ public class UserHelperTest {
   }
 
   @Test
-  public void updateRocketChatIdInDatabase_Should_UpdateUserObjectAndSaveToDb() {
+  public void updateRocketChatIdInDatabase_Should_UpdateUserObjectAndSaveToDb()
+      throws SaveUserException {
 
     ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
 

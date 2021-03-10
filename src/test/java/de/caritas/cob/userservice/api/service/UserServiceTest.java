@@ -11,13 +11,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +25,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
+import de.caritas.cob.userservice.api.exception.SaveUserException;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.repository.user.UserRepository;
 
 @RunWith(SpringRunner.class)
 public class UserServiceTest {
@@ -37,6 +39,26 @@ public class UserServiceTest {
   @Mock
   private UserRepository userRepository;
 
+  /**
+   * Method: createUser
+   * 
+   */
+
+  @Test
+  public void createUser_Should_ReturnInternalServerErrorException_When_RepositoryFails() throws Exception {
+
+    @SuppressWarnings("serial")
+    DataAccessException ex = new DataAccessException(ERROR) {};
+    when(userRepository.save(Mockito.any())).thenThrow(ex);
+
+    try {
+      userService.createUser(USER_ID, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceEx) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
+    }
+  }
+
   @Test
   public void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessfull() {
 
@@ -46,6 +68,26 @@ public class UserServiceTest {
 
     assertNotNull(result);
     assertEquals(USER, result);
+  }
+
+  /**
+   * Method: getUser(String userId)
+   * 
+   */
+
+  @Test
+  public void getUser_Should_ReturnInternalServerErrorException_When_RepositoryFails() throws Exception {
+
+    @SuppressWarnings("serial")
+    DataAccessException ex = new DataAccessException(ERROR) {};
+    when(userRepository.findByUserId(Mockito.anyString())).thenThrow(ex);
+
+    try {
+      userService.getUser(USER_ID);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceEx) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
+    }
   }
 
   @Test
@@ -61,10 +103,12 @@ public class UserServiceTest {
 
   /**
    * Method: getUserViaAuthenticatedUser
+   * 
    */
 
   @Test
-  public void getUserViaAuthenticatedUser_Should_InternalServerErrorException_When_UserWasNotFound() {
+  public void getUserViaAuthenticatedUser_Should_InternalServerErrorException_When_UserWasNotFound()
+      throws Exception {
 
     try {
       userService.getUserViaAuthenticatedUser(AUTHENTICATED_USER);
@@ -85,8 +129,29 @@ public class UserServiceTest {
     assertEquals(USER, result.get());
   }
 
+  /**
+   * Method: saveUser
+   * 
+   */
+
   @Test
-  public void saveUser_Should_UserObject() {
+  public void saveUser_Should_ThrowSaveUserException_When_DatabaseFails() {
+
+    @SuppressWarnings("serial")
+    DataAccessException ex = new DataAccessException(ERROR) {};
+    when(userRepository.save(Mockito.any())).thenThrow(ex);
+
+    try {
+      userService.saveUser(USER);
+      fail("Expected exception: SaveUserException");
+    } catch (SaveUserException saveUserException) {
+      assertTrue("Excepted SaveUserException thrown", true);
+    }
+
+  }
+
+  @Test
+  public void saveUser_Should_UserObject() throws SaveUserException {
 
     when(userRepository.save(Mockito.any())).thenReturn(USER);
 
@@ -96,12 +161,41 @@ public class UserServiceTest {
     assertEquals(USER, result);
   }
 
+  /**
+   * Method: deleteUser
+   * 
+   */
+
+  @Test
+  public void deleteUser_Should_ThrowSaveUserException_When_DatabaseFails() {
+
+    @SuppressWarnings("serial")
+    DataAccessException ex = new DataAccessException(ERROR) {};
+    doThrow(ex).when(userRepository).delete(Mockito.any());
+
+    try {
+      userService.deleteUser(USER);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
+    }
+
+  }
+
   @Test
   public void deleteUser_Should_CallDeleteUserRepository() {
 
     userService.deleteUser(USER);
 
     verify(userRepository, times(1)).delete(Mockito.any());
+  }
+
+  @Test(expected = InternalServerErrorException.class)
+  public void findUserByRcUserId_Should_ReturnInternalServerErrorException_When_RepositoryFails() throws Exception {
+    DataAccessException ex = new DataAccessException(ERROR) {};
+    when(userRepository.findByRcUserId(Mockito.anyString())).thenThrow(ex);
+
+    userService.findUserByRcUserId(USER_ID);
   }
 
   @Test

@@ -38,7 +38,7 @@ public class User {
   @NonNull
   private String userId;
 
-  @Column(name = "id_old", updatable = false)
+  @Column(name = "id_old", updatable = false, nullable = true)
   private Long oldId;
 
   @Column(name = "username", updatable = false, nullable = false)
@@ -46,15 +46,15 @@ public class User {
   @NonNull
   private String username;
 
-  @Column(name = "email", nullable = false)
+  @Column(name = "email", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
   private String email;
 
-  @Column(name = "rc_user_id")
+  @Column(name = "rc_user_id", updatable = true, nullable = true)
   private String rcUserId;
 
-  @Column(name = "language_formal", nullable = false)
+  @Column(name = "language_formal", updatable = true, nullable = false)
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean languageFormal;
 

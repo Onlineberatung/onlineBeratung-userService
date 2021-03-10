@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.RC_ADD_USER_TO_GROUP_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.RC_POST_MESSAGE_EXCEPTION;
+import static de.caritas.cob.userservice.testHelper.ExceptionConstants.SAVE_USER_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
@@ -45,6 +46,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -503,7 +505,7 @@ public class CreateEnquiryMessageFacadeTest {
 
   @Test(expected = InternalServerErrorException.class)
   public void createEnquiryMessage_Should_ThrowInternalServerErrorException_When_UpdateRocketChatIdForUserFails()
-      throws RocketChatCreateGroupException {
+      throws RocketChatCreateGroupException, SaveUserException {
 
     session.setUser(user);
     session.setConsultingType(CONSULTING_TYPE_SUCHT);
@@ -515,6 +517,7 @@ public class CreateEnquiryMessageFacadeTest {
     groupResponseDTO.setGroup(groupDTO);
     rocketChatCredentials.setRocketChatUserId(RC_USER_ID);
     rocketChatCredentials.setRocketChatUsername(RC_USERNAME);
+    SaveUserException saveUserException = new SaveUserException(MESSAGE, null);
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
@@ -526,7 +529,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(session.getId().toString());
     when(rocketChatService.createPrivateGroup(anyString(), any()))
         .thenReturn(Optional.of(groupResponseDTO));
-    doThrow(new InternalServerErrorException("")).when(userHelper)
+    doThrow(saveUserException).when(userHelper)
         .updateRocketChatIdInDatabase(user, rocketChatCredentials.getRocketChatUserId());
 
     createEnquiryMessageFacade
@@ -890,7 +893,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
     when(rocketChatHelper.generateGroupName(Mockito.any(Session.class)))
         .thenReturn(SESSION_WITHOUT_ENQUIRY_MESSAGE.getId().toString());
-    doThrow(new RuntimeException()).when(userHelper)
+    doThrow(SAVE_USER_EXCEPTION).when(userHelper)
         .updateRocketChatIdInDatabase(USER, RC_CREDENTIALS.getRocketChatUserId());
 
     try {
