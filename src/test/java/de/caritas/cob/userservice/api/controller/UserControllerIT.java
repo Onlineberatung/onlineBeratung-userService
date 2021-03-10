@@ -2234,7 +2234,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(accountProvider, times(1)).changeUserAccountEmailAddress("email");
+    verify(keycloakService, times(1)).changeEmailAddress("email");
   }
 
   @Test
@@ -2245,7 +2245,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verifyNoMoreInteractions(accountProvider);
+    verifyNoMoreInteractions(keycloakService);
   }
 
 }

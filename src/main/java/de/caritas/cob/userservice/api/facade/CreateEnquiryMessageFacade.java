@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -29,10 +30,10 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -296,9 +297,10 @@ public class CreateEnquiryMessageFacade {
 
     try {
       userHelper.updateRocketChatIdInDatabase(user, rocketChatCredentials.getRocketChatUserId());
-    } catch (Exception exception) {
+    } catch (SaveUserException exception) {
       throw new CreateEnquiryException(String.format("Could not update user %s", user.getUserId()),
-          exception, createEnquiryExceptionInformation);
+          exception,
+          createEnquiryExceptionInformation);
     }
   }
 

@@ -1,12 +1,15 @@
 package de.caritas.cob.userservice.api.helper;
 
 import de.caritas.cob.userservice.api.exception.HelperException;
+import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.UserService;
 import java.util.Arrays;
 import java.util.List;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
 import org.passay.CharacterData;
@@ -201,7 +204,7 @@ public class UserHelper {
    * @param user {@link User}
    * @param rcUserId Rocket.Chat user ID
    */
-  public void updateRocketChatIdInDatabase(User user, String rcUserId) {
+  public void updateRocketChatIdInDatabase(User user, String rcUserId) throws SaveUserException {
     if (user != null && StringUtils.isEmpty(user.getRcUserId())) {
       user.setRcUserId(rcUserId);
       userService.saveUser(user);

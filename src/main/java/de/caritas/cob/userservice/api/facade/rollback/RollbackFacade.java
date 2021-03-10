@@ -36,16 +36,16 @@ public class RollbackFacade {
     rollbackKeycloakAndMariaDbAccount(rollbackUser);
   }
 
-  private void rollbackUserAgency(RollbackUserAccountInformation rollbackUser) {
-    if (nonNull(rollbackUser.getUserAgency())) {
-      userAgencyService.deleteUserAgency(rollbackUser.getUserAgency());
-    }
-  }
-
   private void rollbackSession(RollbackUserAccountInformation rollbackUser) {
     if (nonNull(rollbackUser.getSession())) {
       sessionService.deleteSession(rollbackUser.getSession());
       monitoringService.rollbackInitializeMonitoring(rollbackUser.getSession());
+    }
+  }
+
+  private void rollbackUserAgency(RollbackUserAccountInformation rollbackUser) {
+    if (nonNull(rollbackUser.getUserAgency())) {
+      userAgencyService.deleteUserAgency(rollbackUser.getUserAgency());
     }
   }
 
