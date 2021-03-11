@@ -1,12 +1,10 @@
 package de.caritas.cob.userservice.api.service;
 
-import static java.util.Objects.nonNull;
-
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,15 +68,13 @@ public class KeycloakService {
   }
 
   /**
-   * Performs a Keycloak login and returns the Keycloak {@link LoginResponseDTO} on success
+   * Performs a Keycloak login and returns the Keycloak {@link LoginResponseDTO} on success.
    *
    * @param userName the username
    * @param password the password
-   * @return an {@link Optional} containing a {@link ResponseEntity} with the {@link
-   * LoginResponseDTO}
+   * @return {@link LoginResponseDTO}
    */
-  public Optional<ResponseEntity<LoginResponseDTO>> loginUser(final String userName,
-      final String password) {
+  public LoginResponseDTO loginUser(final String userName, final String password) {
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add(BODY_KEY_USERNAME, userName);
@@ -88,14 +84,13 @@ public class KeycloakService {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, getFormHttpHeaders());
 
     try {
-      ResponseEntity<LoginResponseDTO> response = restTemplate
-          .postForEntity(keycloakLoginUrl, request, LoginResponseDTO.class);
-      return nonNull(response.getBody()) ? Optional.of(response) : Optional.empty();
+      return restTemplate
+          .postForEntity(keycloakLoginUrl, request, LoginResponseDTO.class).getBody();
+
     } catch (HttpClientErrorException http4xxEx) {
-      LogService.logKeycloakInfo(String.format(
+      throw new BadRequestException(String.format(
           "Could not log in user %s because of Keycloak API response 4xx (wrong credentials)",
-          userName), http4xxEx);
-      return Optional.of(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+          userName));
     }
   }
 
@@ -135,12 +130,6 @@ public class KeycloakService {
     return true;
   }
 
-  /**
-   * Creates and returns {@link HttpHeaders} containing the x-www-form-urlencoded {@link MediaType}
-   * and the Bearer Authorization token.
-   *
-   * @return the created http headers
-   */
   private HttpHeaders getFormHttpHeaders() {
 
     HttpHeaders httpHeaders = new HttpHeaders();

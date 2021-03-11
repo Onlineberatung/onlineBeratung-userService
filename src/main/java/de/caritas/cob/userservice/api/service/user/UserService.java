@@ -1,9 +1,14 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.user;
+
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +19,9 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final @NonNull UserRepository userRepository;
+  private final @NonNull UserAccountValidator userAccountValidator;
+  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
   /**
    * Deletes a user.
@@ -59,7 +67,7 @@ public class UserService {
    * @return An {@link Optional} with the {@link User}, if found
    */
   public Optional<User> getUser(String userId) {
-    return userRepository.findByUserId(userId);
+    return userRepository.findByUserIdAndDeleteDateIsNull(userId);
   }
 
   /**
@@ -97,7 +105,21 @@ public class UserService {
    * @return the user as an {@link Optional}
    */
   public Optional<User> findUserByRcUserId(String rcUserId) {
-    return userRepository.findByRcUserId(rcUserId);
+    return userRepository.findByRcUserIdAndDeleteDateIsNull(rcUserId);
   }
 
+  /**
+   * Deactivates the Keycloak account of the currently authenticated user and flags this account
+   * for deletion if the provided password is valid.
+   *
+   * @param deleteUserAccountDTO {@link DeleteUserAccountDTO}
+   */
+  public void deactivateAndFlagAskerAccountForDeletion(DeleteUserAccountDTO deleteUserAccountDTO) {
+    User user = userAccountProvider.retrieveValidatedUser();
+    this.userAccountValidator
+        .checkPasswordValidity(user.getUsername(), deleteUserAccountDTO.getPassword());
+    this.keycloakAdminClientService.deactivateUser(user.getUserId());
+    user.setDeleteDate(nowInUtc());
+    this.saveUser(user);
+  }
 }

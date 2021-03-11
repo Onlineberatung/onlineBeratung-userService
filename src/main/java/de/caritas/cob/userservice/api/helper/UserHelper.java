@@ -4,7 +4,7 @@ import de.caritas.cob.userservice.api.exception.HelperException;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.binary.Base32;

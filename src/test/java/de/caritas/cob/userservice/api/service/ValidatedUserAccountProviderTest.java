@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,12 +12,14 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -32,21 +33,18 @@ public class ValidatedUserAccountProviderTest {
 
   @InjectMocks
   private ValidatedUserAccountProvider accountProvider;
-
   @Mock
   private UserService userService;
-
   @Mock
   private ConsultantService consultantService;
-
   @Mock
   private AuthenticatedUser authenticatedUser;
-
   @Mock
   private KeycloakService keycloakService;
-
   @Mock
   private RocketChatService rocketChatService;
+  @Mock
+  private UserAccountValidator userAccountValidator;
 
   @Test
   public void retrieveValidatedUser_Should_ReturnUser_When_UserIsPresent() {
@@ -102,17 +100,6 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void updateConsultantAbsent_Should_CallUpdateConsultantAbsent_When_ConsultantIsPresent() {
-    Consultant consultantMock = mock(Consultant.class);
-    when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultantMock));
-
-    AbsenceDTO absenceDTO = mock(AbsenceDTO.class);
-    this.accountProvider.updateConsultantAbsent(absenceDTO);
-
-    verify(consultantService, times(1)).updateConsultantAbsent(eq(consultantMock), eq(absenceDTO));
-  }
-
-  @Test
   public void changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.authenticatedUser.getUserId()).thenReturn("consultant");
@@ -121,9 +108,9 @@ public class ValidatedUserAccountProviderTest {
     this.accountProvider.changeUserAccountEmailAddress("newMail");
 
     verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
-    verify(this.rocketChatService, times(1))
-        .updateUser(eq(new UserUpdateRequestDTO(consultant.getRocketChatId(),
-            new UserUpdateDataDTO("newMail", consultant.getFullName()))));
+    verify(this.rocketChatService, times(1)).updateUser(
+        new UserUpdateRequestDTO(consultant.getRocketChatId(),
+            new UserUpdateDataDTO("newMail", consultant.getFullName())));
     consultant.setEmail("newMail");
     verify(this.consultantService, times(1)).saveConsultant(consultant);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -140,9 +127,8 @@ public class ValidatedUserAccountProviderTest {
     this.accountProvider.changeUserAccountEmailAddress("newMail");
 
     verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
-    verify(this.rocketChatService, times(1))
-        .updateUser(eq(new UserUpdateRequestDTO(user.getRcUserId(),
-            new UserUpdateDataDTO("newMail", user.getUsername()))));
+    verify(this.rocketChatService, times(1)).updateUser(new UserUpdateRequestDTO(user.getRcUserId(),
+        new UserUpdateDataDTO("newMail", user.getUsername())));
     user.setEmail("newMail");
     verify(this.userService, times(1)).saveUser(user);
     verifyNoMoreInteractions(this.rocketChatService);

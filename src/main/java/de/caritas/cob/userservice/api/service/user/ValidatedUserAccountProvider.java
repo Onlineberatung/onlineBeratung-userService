@@ -1,20 +1,23 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.user;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.AbsenceDTO;
+import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Service class to provide access to user accounts and validate them.
+ * Service class to provide methods to access and modify the currently validated user account.
  */
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class ValidatedUserAccountProvider {
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakService keycloakService;
   private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull UserAccountValidator userAccountValidator;
 
   /**
    * Tries to retrieve the user of the current {@link AuthenticatedUser} and throws an 500 - Server
@@ -79,17 +83,7 @@ public class ValidatedUserAccountProvider {
   }
 
   /**
-   * Updates an absent user.
-   *
-   * @param absence the dto to update the absence
-   */
-  public void updateConsultantAbsent(AbsenceDTO absence) {
-    Consultant consultant = retrieveValidatedConsultant();
-    consultantService.updateConsultantAbsent(consultant, absence);
-  }
-
-  /**
-   * Updates the email address of current autheticated user in Keycloak, Rocket.Chat and database.
+   * Updates the email address of current authenticated user in Keycloak, Rocket.Chat and database.
    *
    * @param email the new email address
    */
@@ -123,4 +117,20 @@ public class ValidatedUserAccountProvider {
     this.userService.saveUser(user);
   }
 
+  /**
+   * Updates the password of the currently authenticated user and checks if the given old password
+   * is correct.
+   *
+   * @param passwordDTO {@link PasswordDTO}
+   */
+  public void changePassword(PasswordDTO passwordDTO) {
+    userAccountValidator
+        .checkPasswordValidity(authenticatedUser.getUsername(), passwordDTO.getOldPassword());
+
+    if (!keycloakService
+        .changePassword(authenticatedUser.getUserId(), passwordDTO.getNewPassword())) {
+      throw new InternalServerErrorException(
+          String.format("Could not update password of user %s", authenticatedUser.getUserId()));
+    }
+  }
 }

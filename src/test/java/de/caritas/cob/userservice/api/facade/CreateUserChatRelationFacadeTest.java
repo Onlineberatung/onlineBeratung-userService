@@ -24,9 +24,9 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
-import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Collections;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
@@ -145,7 +145,7 @@ public class CreateUserChatRelationFacadeTest {
 
     verify(rollbackFacade).rollBackUserAccount(captor.capture());
     assertEquals(user, captor.getValue().getUser());
-    assertEquals(true, captor.getValue().isRollBackUserAccount());
+    assertTrue(captor.getValue().isRollBackUserAccount());
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -166,7 +166,7 @@ public class CreateUserChatRelationFacadeTest {
 
     verify(rollbackFacade).rollBackUserAccount(captor.capture());
     assertEquals(user, captor.getValue().getUser());
-    assertEquals(true, captor.getValue().isRollBackUserAccount());
+    assertTrue(captor.getValue().isRollBackUserAccount());
   }
 
   @Test
@@ -211,7 +211,7 @@ public class CreateUserChatRelationFacadeTest {
 
     verify(rollbackFacade).rollBackUserAccount(captor.capture());
     assertEquals(user, captor.getValue().getUser());
-    assertEquals(true, captor.getValue().isRollBackUserAccount());
+    assertTrue(captor.getValue().isRollBackUserAccount());
   }
 
   @Test(expected = BadRequestException.class)

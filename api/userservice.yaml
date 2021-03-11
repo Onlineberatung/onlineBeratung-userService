@@ -967,6 +967,32 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/account:
+    delete:
+      tags:
+        - user-controller
+      summary: 'Flags an asker account for deletion. The account will be deactivated and deleted
+       within 48 hours. [Authorization: Role: user]'
+      operationId: deactivateAndFlagUserAccountForDeletion
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/DeleteUserAccountDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /liveproxy/send:
     post:
       tags:
@@ -1680,6 +1706,15 @@ components:
         rcGroupId:
           type: string
           example: fR2Rz7dmWmHdXE8uz
+
+    DeleteUserAccountDTO:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          example: p@ssw0rd
 
   securitySchemes:
     Bearer:

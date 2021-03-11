@@ -8,7 +8,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_AGENCIES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
@@ -28,6 +27,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -38,30 +38,30 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class ConsultantServiceTest {
 
-  @MockBean
-  private ConsultantRepository consultantRepository;
-  @MockBean
-  private UserHelper userHelper;
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @MockBean private ConsultantRepository consultantRepository;
+  @MockBean private UserHelper userHelper;
+  @MockBean private ValidatedUserAccountProvider validatedUserAccountProvider;
+  @Mock private AuthenticatedUser authenticatedUser;
 
   private ConsultantService consultantService;
 
   @Before
   public void setUp() {
-    this.consultantService = new ConsultantService(consultantRepository, userHelper);
+    this.consultantService = new ConsultantService(consultantRepository, userHelper,
+        validatedUserAccountProvider);
   }
 
   @Test
   public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() {
+    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
-    Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO);
+
+    Consultant consultant = consultantService.updateConsultantAbsent(ABSENCE_DTO);
 
     Assert.assertEquals(consultant.getAbsenceMessage(), ABSENCE_DTO.getMessage());
     Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO.getAbsent());
@@ -69,66 +69,35 @@ public class ConsultantServiceTest {
 
   @Test
   public void saveEnquiryMessageAndRocketChatGroupId_Should_RemoveHtmlCodeAndJsFromMessageForXssProtection() {
+    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
-    Consultant consultant =
-        consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_HTML_AND_JS);
+
+    Consultant consultant = consultantService.updateConsultantAbsent(ABSENCE_DTO_WITH_HTML_AND_JS);
 
     Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO_WITH_HTML_AND_JS.getAbsent());
-    Assert.assertNotEquals(consultant.getAbsenceMessage(),
-        ABSENCE_DTO_WITH_HTML_AND_JS.getMessage());
+    Assert
+        .assertNotEquals(consultant.getAbsenceMessage(), ABSENCE_DTO_WITH_HTML_AND_JS.getMessage());
     Assert.assertEquals(MESSAGE, consultant.getAbsenceMessage());
   }
 
   @Test
   public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsEmpty() {
-
     Consultant consultant = Mockito.mock(Consultant.class);
-    consultantService.updateConsultantAbsent(consultant, ABSENCE_DTO_WITH_EMPTY_MESSAGE);
+    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
+
+    consultantService.updateConsultantAbsent(ABSENCE_DTO_WITH_EMPTY_MESSAGE);
 
     verify(consultant, times(1)).setAbsenceMessage(null);
-
   }
 
   @Test
   public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsNull() {
-
     Consultant consultant = Mockito.mock(Consultant.class);
-    consultantService.updateConsultantAbsent(consultant, ABSENCE_DTO_WITH_NULL_MESSAGE);
+    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
+
+    consultantService.updateConsultantAbsent(ABSENCE_DTO_WITH_NULL_MESSAGE);
 
     verify(consultant, times(1)).setAbsenceMessage(null);
-
-  }
-
-  @Test
-  public void saveConsultant_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.save(Mockito.any())).thenThrow(ex);
-
-    try {
-      consultantService.saveConsultant(CONSULTANT);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
-  }
-
-  @Test
-  public void getConsultant_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenThrow(ex);
-
-    try {
-      consultantService.getConsultant(CONSULTANT_ID);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
   }
 
   @Test
@@ -140,22 +109,6 @@ public class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
-  }
-
-  @Test
-  public void getConsultantByRcUserId_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByRocketChatIdAndDeleteDateIsNull(RC_USER_ID)).thenThrow(ex);
-
-    try {
-      consultantService.getConsultantByRcUserId(RC_USER_ID);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
 
   }
 
@@ -172,22 +125,6 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantByEmail_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenThrow(ex);
-
-    try {
-      consultantService.getConsultantByEmail(EMAIL);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
-  }
-
-  @Test
   public void getConsultantByEmail_Should_ReturnConsultant_WhenFound() {
 
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.of(CONSULTANT));
@@ -196,22 +133,6 @@ public class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
-  }
-
-  @Test
-  public void getConsultantByUsername_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME)).thenThrow(ex);
-
-    try {
-      consultantService.getConsultantByUsername(USERNAME);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
 
   }
 
@@ -325,22 +246,6 @@ public class ConsultantServiceTest {
    * Method: findConsultantsByAgencyIds
    * 
    */
-  @Test
-  public void findConsultantsByAgencyIds_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
-    when(consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(Mockito.any())).thenThrow(ex);
-
-    try {
-      consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
-  }
-
   @Test
   public void findConsultantsByAgencyIds_Should_ReturnListOfConsultants() {
 

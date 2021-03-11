@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.controller;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
@@ -32,6 +31,7 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
+import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
@@ -40,7 +40,6 @@ import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.ChatDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -55,12 +54,13 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -102,7 +102,6 @@ public class UserController implements UsersApi {
   private final @NotNull SessionListFacade sessionListFacade;
   private final @NotNull ConsultantAgencyService consultantAgencyService;
   private final @NotNull AssignSessionFacade assignSessionFacade;
-  private final @NotNull KeycloakService keycloakService;
   private final @NotNull DecryptionService decryptionService;
   private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
   private final @NotNull ChatService chatService;
@@ -114,12 +113,14 @@ public class UserController implements UsersApi {
   private final @NotNull GetChatMembersFacade getChatMembersFacade;
   private final @NotNull CreateUserFacade createUserFacade;
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
+  private final @NotNull ConsultantService consultantService;
+  private final @NotNull UserService userService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
    *
    * @param user the {@link UserDTO}
-   * @return {@link ResponseEntity} containing {@link CreateUserResponseDTO}
+   * @return {@link ResponseEntity} with possible registration conflict information in header
    */
   @Override
   public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
@@ -236,8 +237,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateAbsence(@RequestBody AbsenceDTO absence) {
-
-    this.userAccountProvider.updateConsultantAbsent(absence);
+    this.consultantService.updateConsultantAbsent(absence);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -541,30 +541,15 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Changes the (Keycloak) password of a user.
+   * Changes the (Keycloak) password of the currently authenticated user.
    *
-   * @param passwordDTO (required)
+   * @param passwordDTO (required) {@link PasswordDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
   public ResponseEntity<Void> updatePassword(@RequestBody PasswordDTO passwordDTO) {
-
-    // Check if old password is valid
-    Optional<ResponseEntity<LoginResponseDTO>> loginResponse =
-        keycloakService.loginUser(authenticatedUser.getUsername(), passwordDTO.getOldPassword());
-
-    if (loginResponse.isPresent() && loginResponse.get().getStatusCode().equals(HttpStatus.OK)
-        && keycloakService
-        .logoutUser(requireNonNull(loginResponse.get().getBody()).getRefresh_token())
-        && keycloakService.changePassword(authenticatedUser.getUserId(),
-        passwordDTO.getNewPassword())) {
-      return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    return new ResponseEntity<>(loginResponse.isPresent()
-        && loginResponse.get().getStatusCode().equals(HttpStatus.BAD_REQUEST)
-        ? HttpStatus.BAD_REQUEST
-        : HttpStatus.INTERNAL_SERVER_ERROR);
+    this.userAccountProvider.changePassword(passwordDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -744,6 +729,19 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
     this.userAccountProvider.changeUserAccountEmailAddress(emailAddress);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Flags an user account for deletion and deactivates the Keycloak account.
+   *
+   * @param deleteUserAccountDTO (required) {@link DeleteUserAccountDTO}
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> deactivateAndFlagUserAccountForDeletion(
+      @Valid DeleteUserAccountDTO deleteUserAccountDTO) {
+    this.userService.deactivateAndFlagAskerAccountForDeletion(deleteUserAccountDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

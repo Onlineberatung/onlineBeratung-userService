@@ -1,16 +1,9 @@
 package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -18,6 +11,14 @@ import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class ConsultantService {
 
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull UserHelper userHelper;
+  private final @NonNull ValidatedUserAccountProvider validatedUserAccountProvider;
 
   /**
    * Save a {@link Consultant} to the database.
@@ -33,27 +35,17 @@ public class ConsultantService {
    * @return the {@link Consultant}
    */
   public Consultant saveConsultant(Consultant consultant) {
-    try {
-      return consultantRepository.save(consultant);
-    } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new InternalServerErrorException("Database error while saving consultant");
-    }
+    return consultantRepository.save(consultant);
   }
 
   /**
    * Load a {@link Consultant}.
    *
    * @param consultantId consultant ID
-   * @return An {@link Optional} with the {@link Consultant}, if found
+   * @return An {@link Optional} with the {@link Consultant} if found
    */
   public Optional<Consultant> getConsultant(String consultantId) {
-    try {
-      return consultantRepository.findByIdAndDeleteDateIsNull(consultantId);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while loading consultant",
-          LogService::logDatabaseError);
-    }
+    return consultantRepository.findByIdAndDeleteDateIsNull(consultantId);
   }
 
   /**
@@ -63,27 +55,20 @@ public class ConsultantService {
    * @return An {@link Optional} with the {@link Consultant}
    */
   public Optional<Consultant> getConsultantByRcUserId(String rcUserId) {
-    try {
-      return consultantRepository.findByRocketChatIdAndDeleteDateIsNull(rcUserId);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(String
-          .format("Database error while loading consultant by Rocket.Chat user id %s", rcUserId),
-          LogService::logDatabaseError);
-    }
+    return consultantRepository.findByRocketChatIdAndDeleteDateIsNull(rcUserId);
   }
 
   /**
-   * Update a {@link Consultant} with the absence data from a (@Link AbsenceDTO).
+   * Updates a {@link Consultant} with the absence data from a (@Link AbsenceDTO).
    *
-   * @param consultant {@link Consultant}
-   * @param absence    {@link AbsenceDTO}
+   * @param absence {@link AbsenceDTO}
    * @return The updated {@link Consultant}
    */
-  public Consultant updateConsultantAbsent(Consultant consultant, AbsenceDTO absence) {
-
+  public Consultant updateConsultantAbsent(AbsenceDTO absence) {
+    Consultant consultant = validatedUserAccountProvider.retrieveValidatedConsultant();
     consultant.setAbsent(isTrue(absence.getAbsent()));
 
-    if (absence.getMessage() != null && !absence.getMessage().isEmpty()) {
+    if (isNotBlank(absence.getMessage())) {
       consultant.setAbsenceMessage(Helper.removeHTMLFromText(absence.getMessage()));
     } else {
       consultant.setAbsenceMessage(null);
@@ -101,12 +86,7 @@ public class ConsultantService {
    * @return An {@link Optional} with the {@link Consultant}
    */
   public Optional<Consultant> getConsultantByEmail(String email) {
-    try {
-      return consultantRepository.findByEmailAndDeleteDateIsNull(email);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while loading consultant by email",
-          LogService::logDatabaseError);
-    }
+    return consultantRepository.findByEmailAndDeleteDateIsNull(email);
   }
 
   /**
@@ -116,20 +96,14 @@ public class ConsultantService {
    * @return An {@link Optional} with the {@link Consultant}
    */
   public Optional<Consultant> getConsultantByUsername(String username) {
-    try {
-      return consultantRepository.findByUsernameAndDeleteDateIsNull(username);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Database error while loading consultant by username %s", username),
-          LogService::logDatabaseError);
-    }
+    return consultantRepository.findByUsernameAndDeleteDateIsNull(username);
   }
 
   /**
    * Find a consultant by these steps: 1. username 2. encoded username 3. email.
    *
    * @param username username
-   * @param email    email address
+   * @param email email address
    * @return an optional with the consultant found or an empty optional
    */
   public Optional<Consultant> findConsultantByUsernameOrEmail(String username, String email) {
@@ -156,7 +130,7 @@ public class ConsultantService {
    *
    * @param authenticatedUser {@link AuthenticatedUser}
    * @return {@link Optional} of {@link Consultant}
-   * @throws {@link InternalServerErrorException}
+   * @throws InternalServerErrorException if consultant was not found
    */
   public Optional<Consultant> getConsultantViaAuthenticatedUser(
       AuthenticatedUser authenticatedUser) {
@@ -176,19 +150,11 @@ public class ConsultantService {
    *
    * @param chatAgencies {@link Set} of {@link ChatAgency}
    * @return {@link List} of {@link Consultant}
-   * @throws {@link InternalServerErrorException}
    */
   public List<Consultant> findConsultantsByAgencyIds(Set<ChatAgency> chatAgencies) {
-
     List<Long> agencyIds =
         chatAgencies.stream().map(ChatAgency::getAgencyId).collect(Collectors.toList());
 
-    try {
-      return consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(agencyIds);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          "Database error while loading consultant by agency ids", LogService::logDatabaseError);
-    }
+    return consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(agencyIds);
   }
-
 }

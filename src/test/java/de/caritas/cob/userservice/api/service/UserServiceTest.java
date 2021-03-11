@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_LANGUAGE_FORMAL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
@@ -18,13 +17,17 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import java.util.Optional;
+import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -36,6 +39,12 @@ public class UserServiceTest {
   private LogService logService;
   @Mock
   private UserRepository userRepository;
+  @Mock
+  private UserAccountValidator userAccountValidator;
+  @Mock
+  private ValidatedUserAccountProvider userAccountProvider;
+  @Mock
+  private KeycloakAdminClientService keycloakAdminClientService;
 
   @Test
   public void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessfull() {
@@ -49,9 +58,10 @@ public class UserServiceTest {
   }
 
   @Test
-  public void getUser_Should_ReturnUser_WhenRepositoryCallIsSuccessfull() {
+  public void getUser_Should_ReturnUser_WhenRepositoryCallIsSuccessful() {
 
-    when(userRepository.findByUserId(Mockito.anyString())).thenReturn(Optional.of(USER));
+    when(userRepository.findByUserIdAndDeleteDateIsNull(Mockito.anyString()))
+        .thenReturn(Optional.of(USER));
 
     Optional<User> result = userService.getUser(USER_ID);
 
@@ -77,7 +87,8 @@ public class UserServiceTest {
   @Test
   public void getUserViaAuthenticatedUser_Should_UserOptionalObject() {
 
-    when(userRepository.findByUserId(Mockito.any())).thenReturn(Optional.of(USER));
+    when(userRepository.findByUserIdAndDeleteDateIsNull(Mockito.any()))
+        .thenReturn(Optional.of(USER));
 
     Optional<User> result = userService.getUserViaAuthenticatedUser(AUTHENTICATED_USER);
 
@@ -107,7 +118,8 @@ public class UserServiceTest {
   @Test
   public void findUserByRcUserId_Should_ReturnUser_WhenRepositoryCallIsSuccessfull() {
 
-    when(userRepository.findByRcUserId(Mockito.anyString())).thenReturn(Optional.of(USER));
+    when(userRepository.findByRcUserIdAndDeleteDateIsNull(Mockito.anyString()))
+        .thenReturn(Optional.of(USER));
 
     Optional<User> result = userService.findUserByRcUserId(USER_ID);
 
