@@ -10,7 +10,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpS
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -32,14 +31,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CreateUserFacade {
 
-  private static final int USERNAME_NOT_AVAILABLE = 0;
-  private static final int EMAIL_AVAILABLE = 1;
-
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserService userService;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull UserHelper userHelper;
   private final @NonNull AgencyHelper agencyHelper;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 

@@ -893,7 +893,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
     when(rocketChatHelper.generateGroupName(Mockito.any(Session.class)))
         .thenReturn(SESSION_WITHOUT_ENQUIRY_MESSAGE.getId().toString());
-    doThrow(new RuntimeException()).when(userService)
+    doThrow(new IllegalArgumentException()).when(userService)
         .updateRocketChatIdInDatabase(USER, RC_CREDENTIALS.getRocketChatUserId());
 
     try {

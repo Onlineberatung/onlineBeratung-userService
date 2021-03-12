@@ -29,10 +29,10 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Objects;
@@ -298,9 +298,10 @@ public class CreateEnquiryMessageFacade {
 
     try {
       userService.updateRocketChatIdInDatabase(user, rocketChatCredentials.getRocketChatUserId());
-    } catch (Exception exception) {
+    } catch (IllegalArgumentException exception) {
       throw new CreateEnquiryException(String.format("Could not update user %s", user.getUserId()),
-          exception, createEnquiryExceptionInformation);
+          exception,
+          createEnquiryExceptionInformation);
     }
   }
 

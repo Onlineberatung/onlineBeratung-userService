@@ -66,7 +66,7 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void createKeycloakUser_Should_createExpectedUser_When_keycloakReturnesCreated() {
+  public void createKeycloakUser_Should_createExpectedUser_When_keycloakReturnsCreated() {
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     Response response = mock(Response.class);
@@ -82,7 +82,7 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void createKeycloakUser_Should_thrwoExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
+  public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
     String emailError = "emailError";
     ReflectionTestUtils.setField(keycloakAdminClientService, "keycloakErrorEmail", emailError);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
