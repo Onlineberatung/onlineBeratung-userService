@@ -4,11 +4,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -95,17 +98,19 @@ public class KeycloakServiceTest {
     assertThat(response, instanceOf(LoginResponseDTO.class));
   }
 
-  //  @Test
-  //  public void loginUser_Should_ReturnBadRequestAndLogError_WhenKeycloakLoginFailsWithException() {
-  //    HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
-  //    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
-  //        ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenThrow(exception);
-  //
-  //    HttpStatus status = keycloakService.loginUser(USER_ID, OLD_PW).get().getStatusCode();
-  //
-  //    assertEquals(HttpStatus.BAD_REQUEST, status);
-  //    verify(logger, atLeastOnce()).info(anyString(), anyString(), anyString());
-  //  }
+  @Test
+  public void loginUser_Should_ReturnBadRequest_When_KeycloakLoginFails() {
+    RestClientResponseException exception = mock(RestClientResponseException.class);
+    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
+        ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenThrow(exception);
+
+    try {
+      keycloakService.loginUser(USER_ID, OLD_PW);
+      fail("Expected exception: BadRequestException");
+    } catch (BadRequestException badRequestException) {
+      assertTrue("Excepted BadRequestException thrown", true);
+    }
+  }
 
   @Test
   public void logoutUser_Should_ReturnTrue_WhenKeycloakLoginWasSuccessful() {

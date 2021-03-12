@@ -1,14 +1,12 @@
 package de.caritas.cob.userservice.api.service.user;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +17,9 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final @NonNull UserRepository userRepository;
-  private final @NonNull UserAccountValidator userAccountValidator;
-  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
   /**
-   * Deletes a user.
+   * Deletes an user.
    *
    * @param user the user to be deleted
    */
@@ -61,7 +56,7 @@ public class UserService {
   }
 
   /**
-   * Load a {@link User}.
+   * Loads an {@link User}.
    *
    * @param userId the id of the user to search for
    * @return An {@link Optional} with the {@link User}, if found
@@ -81,7 +76,7 @@ public class UserService {
   }
 
   /**
-   * Find a user via the {@link AuthenticatedUser}.
+   * Finds an user via the {@link AuthenticatedUser}.
    *
    * @return Optional of user
    */
@@ -99,7 +94,7 @@ public class UserService {
   }
 
   /**
-   * Find a user by the given rocket chat user id.
+   * Finds an user by the given rocket chat user id.
    *
    * @param rcUserId the rocket chat user id to search for
    * @return the user as an {@link Optional}
@@ -109,17 +104,15 @@ public class UserService {
   }
 
   /**
-   * Deactivates the Keycloak account of the currently authenticated user and flags this account
-   * for deletion if the provided password is valid.
+   * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
    *
-   * @param deleteUserAccountDTO {@link DeleteUserAccountDTO}
+   * @param user {@link User}
+   * @param rcUserId Rocket.Chat user ID
    */
-  public void deactivateAndFlagAskerAccountForDeletion(DeleteUserAccountDTO deleteUserAccountDTO) {
-    User user = userAccountProvider.retrieveValidatedUser();
-    this.userAccountValidator
-        .checkPasswordValidity(user.getUsername(), deleteUserAccountDTO.getPassword());
-    this.keycloakAdminClientService.deactivateUser(user.getUserId());
-    user.setDeleteDate(nowInUtc());
-    this.saveUser(user);
+  public void updateRocketChatIdInDatabase(User user, String rcUserId) {
+    if (nonNull(user) && isEmpty(user.getRcUserId())) {
+      user.setRcUserId(rcUserId);
+      saveUser(user);
+    }
   }
 }

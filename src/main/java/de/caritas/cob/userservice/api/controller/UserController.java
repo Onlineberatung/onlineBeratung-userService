@@ -59,7 +59,6 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
@@ -114,7 +113,6 @@ public class UserController implements UsersApi {
   private final @NotNull CreateUserFacade createUserFacade;
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantService consultantService;
-  private final @NotNull UserService userService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -237,7 +235,8 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateAbsence(@RequestBody AbsenceDTO absence) {
-    this.consultantService.updateConsultantAbsent(absence);
+    Consultant consultant = userAccountProvider.retrieveValidatedConsultant();
+    this.consultantService.updateConsultantAbsent(consultant, absence);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -741,7 +740,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> deactivateAndFlagUserAccountForDeletion(
       @Valid DeleteUserAccountDTO deleteUserAccountDTO) {
-    this.userService.deactivateAndFlagAskerAccountForDeletion(deleteUserAccountDTO);
+    this.userAccountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

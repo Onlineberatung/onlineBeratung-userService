@@ -2163,10 +2163,10 @@ public class UserControllerIT {
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED).contentType(MediaType.APPLICATION_JSON)
         .content(bodyPayload).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-    verify(userService, times(1)).deactivateAndFlagAskerAccountForDeletion(deleteUserAccountDTO);
+    verify(accountProvider, times(1)).deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
   }
 
-  @Test public void deactivateAndFlagUserAccountForDeletion_Should_ReturnBadRequest_When_bodyIsEmpty()
+  @Test public void deactivateAndFlagUserAccountForDeletion_Should_ReturnBadRequest_When_BodyValuesAreMissing()
       throws Exception {
 
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED).contentType(MediaType.APPLICATION_JSON)

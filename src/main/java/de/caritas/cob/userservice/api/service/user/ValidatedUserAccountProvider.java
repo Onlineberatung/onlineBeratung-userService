@@ -1,8 +1,11 @@
 package de.caritas.cob.userservice.api.service.user;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
@@ -10,6 +13,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import lombok.NonNull;
@@ -29,6 +33,7 @@ public class ValidatedUserAccountProvider {
   private final @NonNull KeycloakService keycloakService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull UserAccountValidator userAccountValidator;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
   /**
    * Tries to retrieve the user of the current {@link AuthenticatedUser} and throws an 500 - Server
@@ -132,5 +137,20 @@ public class ValidatedUserAccountProvider {
       throw new InternalServerErrorException(
           String.format("Could not update password of user %s", authenticatedUser.getUserId()));
     }
+  }
+
+  /**
+   * Deactivates the Keycloak account of the currently authenticated user and flags this account
+   * for deletion if the provided password is valid.
+   *
+   * @param deleteUserAccountDTO {@link DeleteUserAccountDTO}
+   */
+  public void deactivateAndFlagUserAccountForDeletion(DeleteUserAccountDTO deleteUserAccountDTO) {
+    User user = retrieveValidatedUser();
+    this.userAccountValidator
+        .checkPasswordValidity(user.getUsername(), deleteUserAccountDTO.getPassword());
+    this.keycloakAdminClientService.deactivateUser(user.getUserId());
+    user.setDeleteDate(nowInUtc());
+    userService.saveUser(user);
   }
 }

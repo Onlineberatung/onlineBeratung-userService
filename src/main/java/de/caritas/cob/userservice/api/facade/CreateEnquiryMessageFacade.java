@@ -33,6 +33,7 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -58,6 +59,7 @@ public class CreateEnquiryMessageFacade {
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull RocketChatHelper rocketChatHelper;
+  private final @NonNull UserService userService;
 
   @Value("${rocket.systemuser.id}")
   private String rocketChatSystemUserId;
@@ -177,7 +179,7 @@ public class CreateEnquiryMessageFacade {
 
       Optional<GroupResponseDTO> rcGroupDTO = rocketChatService
           .createPrivateGroup(rocketChatHelper.generateGroupName(session), rocketChatCredentials);
-      return retrieveRcGroupResponceDto(rcGroupDTO, session.getId(),
+      return retrieveRcGroupResponseDto(rcGroupDTO, session.getId(),
           rocketChatCredentials.getRocketChatUserId()).getGroup().getId();
 
     } catch (RocketChatCreateGroupException exception) {
@@ -190,7 +192,7 @@ public class CreateEnquiryMessageFacade {
 
   }
 
-  private GroupResponseDTO retrieveRcGroupResponceDto(Optional<GroupResponseDTO> groupResponseDTO,
+  private GroupResponseDTO retrieveRcGroupResponseDto(Optional<GroupResponseDTO> groupResponseDTO,
       long sessionId, String rocketChatUserId) {
     return groupResponseDTO.orElseThrow(() -> new InternalServerErrorException(
         String.format("Could not create Rocket.Chat room for session %s and Rocket.Chat user %s",
@@ -295,7 +297,7 @@ public class CreateEnquiryMessageFacade {
       throws CreateEnquiryException {
 
     try {
-      userHelper.updateRocketChatIdInDatabase(user, rocketChatCredentials.getRocketChatUserId());
+      userService.updateRocketChatIdInDatabase(user, rocketChatCredentials.getRocketChatUserId());
     } catch (Exception exception) {
       throw new CreateEnquiryException(String.format("Could not update user %s", user.getUserId()),
           exception, createEnquiryExceptionInformation);

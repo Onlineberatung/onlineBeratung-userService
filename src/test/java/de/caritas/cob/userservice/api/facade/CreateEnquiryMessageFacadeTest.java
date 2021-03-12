@@ -76,6 +76,7 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -153,6 +154,8 @@ public class CreateEnquiryMessageFacadeTest {
   private UserHelper userHelper;
   @Mock
   private RocketChatHelper rocketChatHelper;
+  @Mock
+  private UserService userService;
 
   private Session session;
   private Consultant consultant;
@@ -219,7 +222,7 @@ public class CreateEnquiryMessageFacadeTest {
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, rocketChatCredentials);
 
-    verify(userHelper, atLeastOnce()).updateRocketChatIdInDatabase(any(), anyString());
+    verify(userService, atLeastOnce()).updateRocketChatIdInDatabase(any(), anyString());
     verify(consultantAgencyService, atLeastOnce()).findConsultantsByAgencyId(anyLong());
     verify(consultingTypeManager, atLeastOnce()).getConsultingTypeSettings(any());
     verify(messageServiceProvider, atLeastOnce()).postEnquiryMessage(any(), any(), any(), any());
@@ -526,7 +529,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(session.getId().toString());
     when(rocketChatService.createPrivateGroup(anyString(), any()))
         .thenReturn(Optional.of(groupResponseDTO));
-    doThrow(new InternalServerErrorException("")).when(userHelper)
+    doThrow(new InternalServerErrorException("")).when(userService)
         .updateRocketChatIdInDatabase(user, rocketChatCredentials.getRocketChatUserId());
 
     createEnquiryMessageFacade
@@ -890,7 +893,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
     when(rocketChatHelper.generateGroupName(Mockito.any(Session.class)))
         .thenReturn(SESSION_WITHOUT_ENQUIRY_MESSAGE.getId().toString());
-    doThrow(new RuntimeException()).when(userHelper)
+    doThrow(new RuntimeException()).when(userService)
         .updateRocketChatIdInDatabase(USER, RC_CREDENTIALS.getRocketChatUserId());
 
     try {

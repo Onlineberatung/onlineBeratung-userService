@@ -16,6 +16,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCOD
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
@@ -27,6 +28,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +37,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -43,25 +47,23 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class ConsultantServiceTest {
 
-  @MockBean private ConsultantRepository consultantRepository;
-  @MockBean private UserHelper userHelper;
-  @MockBean private ValidatedUserAccountProvider validatedUserAccountProvider;
-  @Mock private AuthenticatedUser authenticatedUser;
-
+  @InjectMocks
   private ConsultantService consultantService;
-
-  @Before
-  public void setUp() {
-    this.consultantService = new ConsultantService(consultantRepository, userHelper,
-        validatedUserAccountProvider);
-  }
+  @Mock
+  private ConsultantRepository consultantRepository;
+  @Mock
+  private UserHelper userHelper;
+  @Mock
+  private ValidatedUserAccountProvider validatedUserAccountProvider;
+  @Mock
+  private AuthenticatedUser authenticatedUser;
 
   @Test
   public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() {
     when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
 
-    Consultant consultant = consultantService.updateConsultantAbsent(ABSENCE_DTO);
+    Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO);
 
     Assert.assertEquals(consultant.getAbsenceMessage(), ABSENCE_DTO.getMessage());
     Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO.getAbsent());
@@ -72,7 +74,8 @@ public class ConsultantServiceTest {
     when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
     when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
 
-    Consultant consultant = consultantService.updateConsultantAbsent(ABSENCE_DTO_WITH_HTML_AND_JS);
+    Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT,
+        ABSENCE_DTO_WITH_HTML_AND_JS);
 
     Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO_WITH_HTML_AND_JS.getAbsent());
     Assert
@@ -85,9 +88,11 @@ public class ConsultantServiceTest {
     Consultant consultant = Mockito.mock(Consultant.class);
     when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
 
-    consultantService.updateConsultantAbsent(ABSENCE_DTO_WITH_EMPTY_MESSAGE);
+    consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_EMPTY_MESSAGE);
 
-    verify(consultant, times(1)).setAbsenceMessage(null);
+    ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
+    verify(consultantRepository).save(captor.capture());
+    assertNull(captor.getValue().getAbsenceMessage());
   }
 
   @Test
@@ -95,9 +100,11 @@ public class ConsultantServiceTest {
     Consultant consultant = Mockito.mock(Consultant.class);
     when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
 
-    consultantService.updateConsultantAbsent(ABSENCE_DTO_WITH_NULL_MESSAGE);
+    consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_NULL_MESSAGE);
 
-    verify(consultant, times(1)).setAbsenceMessage(null);
+    ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
+    verify(consultantRepository).save(captor.capture());
+    assertNull(captor.getValue().getAbsenceMessage());
   }
 
   @Test

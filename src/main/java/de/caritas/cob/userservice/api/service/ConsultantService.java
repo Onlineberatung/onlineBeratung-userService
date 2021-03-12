@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,7 +25,6 @@ public class ConsultantService {
 
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull UserHelper userHelper;
-  private final @NonNull ValidatedUserAccountProvider validatedUserAccountProvider;
 
   /**
    * Save a {@link Consultant} to the database.
@@ -64,8 +62,7 @@ public class ConsultantService {
    * @param absence {@link AbsenceDTO}
    * @return The updated {@link Consultant}
    */
-  public Consultant updateConsultantAbsent(AbsenceDTO absence) {
-    Consultant consultant = validatedUserAccountProvider.retrieveValidatedConsultant();
+  public Consultant updateConsultantAbsent(Consultant consultant, AbsenceDTO absence) {
     consultant.setAbsent(isTrue(absence.getAbsent()));
 
     if (isNotBlank(absence.getMessage())) {

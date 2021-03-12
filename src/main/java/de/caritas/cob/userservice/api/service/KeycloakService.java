@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -87,10 +87,9 @@ public class KeycloakService {
       return restTemplate
           .postForEntity(keycloakLoginUrl, request, LoginResponseDTO.class).getBody();
 
-    } catch (HttpClientErrorException http4xxEx) {
-      throw new BadRequestException(String.format(
-          "Could not log in user %s because of Keycloak API response 4xx (wrong credentials)",
-          userName));
+    } catch (RestClientResponseException exception) {
+      throw new BadRequestException(String.format("Could not log in user %s into Keycloak: %s",
+          userName, exception.getMessage()));
     }
   }
 
