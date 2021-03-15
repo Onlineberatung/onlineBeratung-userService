@@ -21,14 +21,12 @@ paths:
       responses:
         201:
           description: CREATED - user was created successfully
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/CreateUserResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         403:
           description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - invalid/unavailable username
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -1071,19 +1069,6 @@ components:
         consultingType:
           type: string
           example: 3
-
-    CreateUserResponseDTO:
-      type: object
-      required:
-        - usernameAvailable
-        - emailAvailable
-      properties:
-        usernameAvailable:
-          type: integer
-          example: 0
-        emailAvailable:
-          type: integer
-          example: 1
 
     ConsultantSessionListResponseDTO:
       type: object
