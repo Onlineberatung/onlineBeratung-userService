@@ -1211,6 +1211,8 @@ components:
           $ref: '#/components/schemas/ForwardMessageDTO'
         videoCallMessageDTO:
           $ref: '#/components/schemas/VideoCallMessageDTO'
+        messageType:
+          $ref: '#/components/schemas/MessageType'
 
     ForwardMessageDTO:
       type: object
@@ -1251,6 +1253,13 @@ components:
         initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
+
+    MessageType:
+      type: string
+      enum:
+        - "FURTHER_STEPS"
+        - "FORWARD"
+        - "VIDEOCALL"
 
     ConsultantSessionDTO:
       type: object
