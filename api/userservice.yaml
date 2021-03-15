@@ -1213,6 +1213,13 @@ components:
           type: string
           example: "ag89h3tjkerg94t"
 
+    MessageType:
+      type: string
+      enum:
+        - "FURTHER_STEPS"
+        - "FORWARD"
+        - "VIDEOCALL"
+
     ConsultantSessionDTO:
       type: object
       properties:
