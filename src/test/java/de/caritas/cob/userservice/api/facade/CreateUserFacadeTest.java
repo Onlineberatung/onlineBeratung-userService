@@ -91,18 +91,6 @@ public class CreateUserFacadeTest {
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_KeycloakHelperCreateUserThrowsException() {
-
-    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
-    when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
-        CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientService.createKeycloakUser(any()))
-        .thenThrow(new KeycloakException(ERROR));
-
-    createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-  }
-
   @Test
   public void createUserAndInitializeAccount_Should_throwConflictException_When_usernameIsNotAvailable() {
 

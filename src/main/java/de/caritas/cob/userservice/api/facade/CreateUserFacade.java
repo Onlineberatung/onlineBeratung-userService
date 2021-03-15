@@ -54,19 +54,9 @@ public class CreateUserFacade {
     ConsultingType consultingType =
         ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())];
     checkIfConsultingTypeMatchesToAgency(userDTO, consultingType);
-    KeycloakCreateUserResponseDTO response = createKeycloakUser(userDTO);
+    KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDTO);
     updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
         consultingType);
-  }
-
-  private KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO userDTO) {
-    try {
-      // Create the user in Keycloak
-      return keycloakAdminClientService.createKeycloakUser(userDTO);
-    } catch (Exception ex) {
-      throw new InternalServerErrorException(
-          String.format("Could not create Keycloak account for: %s", userDTO.toString()));
-    }
   }
 
   private void checkIfConsultingTypeMatchesToAgency(UserDTO user, ConsultingType consultingType) {
