@@ -1170,6 +1170,8 @@ components:
           $ref: '#/components/schemas/ForwardMessageDTO'
         videoCallMessageDTO:
           $ref: '#/components/schemas/VideoCallMessageDTO'
+        messageType:
+          $ref: '#/components/schemas/MessageType'
 
     ForwardMessageDTO:
       type: object
