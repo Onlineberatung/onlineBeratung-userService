@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.model.keycloak;
 
+import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 public class KeycloakCreateUserResponseDTO {
 
   private HttpStatus status;
+  private CreateUserResponseDTO responseDTO;
   private String userId;
 
   public KeycloakCreateUserResponseDTO(String userId) {

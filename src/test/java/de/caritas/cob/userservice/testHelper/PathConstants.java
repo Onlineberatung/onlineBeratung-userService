@@ -69,8 +69,6 @@ public class PathConstants {
   public static final String PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/join";
   public static final String PATH_PUT_LEAVE_CHAT = "/users/chat/" + CHAT_ID + "/leave";
-  public static final String PATH_PUT_LEAVE_CHAT_WITH_INVALID_PATH_PARAMS =
-      "/users/chat/" + INVALID_CHAT_ID + "/leave";
   public static final String PATH_GET_CHAT = "/users/chat/" + CHAT_ID;
   public static final String PATH_GET_CHAT_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID;
@@ -87,4 +85,5 @@ public class PathConstants {
   public static final String PATH_GET_SESSION_FOR_CONSULTANT =
       "/users/consultants/sessions/1";
   public static final String PATH_PUT_UPDATE_EMAIL = "/users/email";
+  public static final String PATH_DELETE_FLAG_USER_DELETED = "/users/account";
 }

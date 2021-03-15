@@ -81,8 +81,7 @@ public class KeycloakAdminClientService {
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
       final String firstName, final String lastName) {
     UserRepresentation kcUser = getUserRepresentation(user, firstName, lastName);
-    try (Response response = this.keycloakAdminClientAccessor.getUsersResource()
-        .create(kcUser)) {
+    try (Response response = this.keycloakAdminClientAccessor.getUsersResource().create(kcUser)) {
 
       if (response.getStatus() == HttpStatus.CREATED.value()) {
         return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));

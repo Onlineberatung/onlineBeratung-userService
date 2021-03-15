@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

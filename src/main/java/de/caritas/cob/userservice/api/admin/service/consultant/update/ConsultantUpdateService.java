@@ -7,6 +7,8 @@ import de.caritas.cob.userservice.api.admin.service.consultant.validation.Update
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
@@ -47,7 +49,8 @@ public class ConsultantUpdateService {
     this.keycloakAdminClientService.updateUserData(consultant.getId(), userDTO,
         updateConsultantDTO.getFirstname(), updateConsultantDTO.getLastname());
 
-    this.rocketChatService.updateUser(consultant.getRocketChatId(), updateConsultantDTO);
+    this.rocketChatService
+        .updateUser(buildUserUpdateRequestDTO(consultant.getRocketChatId(), updateConsultantDTO));
 
     return updateDatabaseConsultant(updateConsultantDTO, consultant);
   }
@@ -60,6 +63,13 @@ public class ConsultantUpdateService {
 
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
+  }
+
+  private UserUpdateRequestDTO buildUserUpdateRequestDTO(String rcUserId,
+      UpdateConsultantDTO updateConsultantDTO) {
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(updateConsultantDTO.getEmail(),
+        updateConsultantDTO.getFirstname().concat(" ").concat(updateConsultantDTO.getLastname()));
+    return new UserUpdateRequestDTO(rcUserId, userUpdateDataDTO);
   }
 
   private Consultant updateDatabaseConsultant(UpdateConsultantDTO updateConsultantDTO,

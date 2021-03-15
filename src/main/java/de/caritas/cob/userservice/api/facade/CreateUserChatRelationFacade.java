@@ -5,7 +5,6 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
@@ -20,7 +19,7 @@ import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
-import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -136,17 +135,16 @@ public class CreateUserChatRelationFacade {
     try {
       User updatedUser = userService.saveUser(user);
       checkUpdatedUserId(user, updatedUser, deleteUserOnRollback);
-    } catch (SaveUserException e) {
+    } catch (Exception e) {
       rollBackAndLogMariaDbError(user, e, deleteUserOnRollback);
     }
 
   }
 
-  private void checkUpdatedUserId(User user, User updatedUser, boolean deleteUserOnRollback)
-      throws SaveUserException {
+  private void checkUpdatedUserId(User user, User updatedUser, boolean deleteUserOnRollback) {
     if (isBlank(updatedUser.getRcUserId())) {
-      rollBackAndLogMariaDbError(user, new SaveUserException("Rocket.Chat user ID is empty."),
-          deleteUserOnRollback);
+      rollBackAndLogMariaDbError(user,
+          new IllegalArgumentException("Rocket.Chat user ID is empty."), deleteUserOnRollback);
     }
   }
 
@@ -196,7 +194,7 @@ public class CreateUserChatRelationFacade {
   }
 
   private void rollBackAndLogMariaDbError(User user,
-      SaveUserException exception, boolean deleteUser) {
+      Exception exception, boolean deleteUser) {
     rollBackUserAccount(user, deleteUser);
     throw new InternalServerErrorException(String.format(
         "Could not update Rocket.Chat user ID for user %s. %s",

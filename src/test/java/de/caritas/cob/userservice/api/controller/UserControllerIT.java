@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS_WITH_INVALID_PATH_PARAMS;
@@ -96,7 +97,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID_HEADER_PARAMETER_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -110,6 +110,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -148,6 +149,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
@@ -169,13 +171,15 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -397,15 +401,16 @@ public class UserControllerIT {
   private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   @MockBean
   private MandatoryFieldsProvider mandatoryFieldsProvider;
+  @MockBean
+  private ConsultantService consultantService;
+  @MockBean
+  private UserService userService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
-  @Mock
-  private Chat chat;
+  @Mock private Chat chat;
 
-  @Before
-  public void setUp() {
+  @Before public void setUp() {
     HashMap<String, Object> drugsMap = new HashMap<>();
     drugsMap.put("others", false);
     HashMap<String, Object> addictiveDrugsMap = new HashMap<>();
@@ -957,36 +962,21 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
   }
 
-  @Test
-  public void updateAbsence_Should_ReturnOk_WhenSaved() throws Exception {
+  @Test public void updateAbsence_Should_ReturnOk_When_Saved() throws Exception {
 
-    when(authenticatedUser.getUserId())
-        .thenReturn(CONSULTANT_ID);
-    when(accountProvider.retrieveValidatedTeamConsultant())
-        .thenReturn(TEAM_CONSULTANT);
+    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
+    when(accountProvider.retrieveValidatedTeamConsultant()).thenReturn(TEAM_CONSULTANT);
 
-    mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT)
-        .content(VALID_ABSENT_MESSAGE_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).content(VALID_ABSENT_MESSAGE_BODY)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
-  @Test
-  public void updateAbsence_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
+  @Test public void updateAbsence_Should_ReturnBadRequest_When_RequestBodyIsMissing()
       throws Exception {
-
-    when(authenticatedUser.getUserId())
-        .thenReturn(CONSULTANT_ID);
-    doThrow(new InternalServerErrorException(""))
-        .when(accountProvider)
-        .updateConsultantAbsent(any());
-
-    mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT)
-        .content(VALID_ABSENT_MESSAGE_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
+    mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        .andExpect(status().isBadRequest());
   }
 
   /**
@@ -1790,100 +1780,19 @@ public class UserControllerIT {
    * updatePassword()
    */
 
-  @Test
-  public void updatePassword_Should_ReturnInternalServerError_WhenKeycloakDoesntRespond()
+  @Test public void updatePassword_Should_ReturnBadRequest_When_PasswordsAreMissing()
       throws Exception {
 
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD)
-        .content(VALID_PASSWORT_REQUEST_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+
+    verify(keycloakService, times(0)).changePassword(anyString(), anyString());
   }
 
-  @Test
-  public void updatePassword_Should_ReturnInternalServerErrorAndNotChangePassword_WhenKeycloakLogoutFails()
+  @Test public void updatePassword_Should_ReturnOK_When_UpdatingThePasswordWasSuccessful()
       throws Exception {
-
-    when(authenticatedUser.getUserId())
-        .thenReturn(USER_ID);
-    when(authenticatedUser.getUsername())
-        .thenReturn(USERNAME);
-    when(keycloakService.loginUser(anyString(), anyString()))
-        .thenReturn(LOGIN_RESPONSE_ENTITY_OK);
-    when(keycloakService.logoutUser(anyString()))
-        .thenReturn(false);
-
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD)
-        .content(VALID_PASSWORT_REQUEST_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-
-    verify(keycloakService, times(0))
-        .changePassword(anyString(), anyString());
-  }
-
-  @Test
-  public void updatePassword_Should_ReturnInternalServerError_WhenUpdatingThePasswordFailsInKeycloak()
-      throws Exception {
-
-    when(authenticatedUser.getUserId())
-        .thenReturn(USER_ID);
-    when(authenticatedUser.getUsername())
-        .thenReturn(USERNAME);
-    when(keycloakService.loginUser(anyString(), anyString()))
-        .thenReturn(LOGIN_RESPONSE_ENTITY_OK);
-    when(keycloakService.logoutUser(anyString()))
-        .thenReturn(true);
-    when(keycloakService.changePassword(anyString(), anyString()))
-        .thenReturn(false);
-
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD)
-        .content(VALID_PASSWORT_REQUEST_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-  }
-
-  @Test
-  public void updatePassword_Should_ReturnBadRequestAndNotChangePassword_WhenOldPasswordIsInvalid()
-      throws Exception {
-
-    when(authenticatedUser.getUsername())
-        .thenReturn(USERNAME);
-    when(keycloakService.loginUser(anyString(), anyString()))
-        .thenReturn(LOGIN_RESPONSE_ENTITY_BAD_REQUEST);
-
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD)
-        .content(VALID_PASSWORT_REQUEST_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-
-    verify(keycloakService, times(0))
-        .changePassword(anyString(), anyString());
-  }
-
-  @Test
-  public void updatePassword_Should_ReturnOK_WhenUpdatingThePasswordWasSuccessful()
-      throws Exception {
-
-    when(authenticatedUser.getUsername())
-        .thenReturn(USERNAME);
-    when(authenticatedUser.getUserId())
-        .thenReturn(USER_ID);
-    when(keycloakService.loginUser(anyString(), anyString()))
-        .thenReturn(LOGIN_RESPONSE_ENTITY_OK);
-    when(keycloakService.logoutUser(anyString()))
-        .thenReturn(true);
-    when(keycloakService.changePassword(anyString(), anyString()))
-        .thenReturn(true);
-
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD)
-        .content(VALID_PASSWORT_REQUEST_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(VALID_PASSWORT_REQUEST_BODY)
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.OK.value()));
   }
 
@@ -2234,16 +2143,34 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(keycloakService, times(1)).changeEmailAddress("email");
+    verify(accountProvider, times(1)).changeUserAccountEmailAddress("email");
   }
 
-  @Test
-  public void updateEmailAddress_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
+  @Test public void updateEmailAddress_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
 
-    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL).contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(accountProvider);
+  }
+
+  @Test public void deactivateAndFlagUserAccountForDeletion_Should_ReturnOk_When_RequestOk()
+      throws Exception {
+
+    DeleteUserAccountDTO deleteUserAccountDTO = new DeleteUserAccountDTO().password("p@ssword");
+    String bodyPayload = new ObjectMapper().writeValueAsString(deleteUserAccountDTO);
+
+    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED).contentType(MediaType.APPLICATION_JSON)
+        .content(bodyPayload).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+
+    verify(accountProvider, times(1)).deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
+  }
+
+  @Test public void deactivateAndFlagUserAccountForDeletion_Should_ReturnBadRequest_When_BodyValuesAreMissing()
+      throws Exception {
+
+    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED).contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(keycloakService);
   }

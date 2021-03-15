@@ -8,7 +8,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 /**
- * Representation of the via Keyclcoak authentificated user
+ * Representation of the via Keycloak authenticated user
  */
 @AllArgsConstructor
 @NoArgsConstructor

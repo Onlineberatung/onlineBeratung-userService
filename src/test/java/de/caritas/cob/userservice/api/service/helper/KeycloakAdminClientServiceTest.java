@@ -83,7 +83,7 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void createKeycloakUser_Should_thrwoExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
+  public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
     String emailError = "emailError";
     ReflectionTestUtils.setField(keycloakAdminClientService, "keycloakErrorEmail", emailError);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
