@@ -58,12 +58,6 @@ public class SpringFoxConfig {
   @Value("${springfox.docuLicenseUrl}")
   private String docuLicenseUrl;
 
-  // White list for path patterns that should be white listed so that swagger UI can be accessed
-  // without authorization
-  public static final String[] WHITE_LIST =
-      new String[] {"/users/docs", "/users/docs/**", "/v2/api-docs", "/configuration/ui",
-          "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**"};
-
   @Bean
   public Docket apiDocket() {
     return new Docket(DocumentationType.SWAGGER_2).select()

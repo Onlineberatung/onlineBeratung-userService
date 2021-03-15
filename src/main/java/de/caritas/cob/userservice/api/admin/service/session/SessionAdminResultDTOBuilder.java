@@ -94,7 +94,8 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
     ensureNonNullPaginationParams();
     return new SessionAdminResultDTO()
         .embedded(buildSessionAdminResult())
-        .links(buildResultLinks());
+        .links(buildResultLinks())
+        .total(buildTotal());
   }
 
   private void ensureNonNullPaginationParams() {
@@ -113,6 +114,7 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
 
   private SessionAdminDTO fromSession(Session session) {
     return new SessionAdminDTO()
+        .id(session.getId())
         .agencyId(session.getAgencyId().intValue())
         .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
         .consultingType(session.getConsultingType().getValue())
@@ -157,6 +159,10 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
 
   private boolean hasPreviousPage() {
     return this.page > 1;
+  }
+
+  private int buildTotal() {
+    return nonNull(this.resultPage) ? (int) this.resultPage.getTotalElements() : 0;
   }
 
 }

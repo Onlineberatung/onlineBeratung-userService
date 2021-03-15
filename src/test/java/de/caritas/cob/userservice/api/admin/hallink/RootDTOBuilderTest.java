@@ -29,11 +29,11 @@ public class RootDTOBuilderTest {
     assertThat(rootLinks.getSelf().getMethod(), is(MethodEnum.GET));
     assertThat(rootLinks.getConsultantAgencies(), notNullValue());
     assertThat(rootLinks.getConsultantAgencies().getHref(),
-        is("/useradmin/consultant/{consultantId}/agencies"));
+        is("/useradmin/consultants/{consultantId}/agencies"));
     assertThat(rootLinks.getConsultantAgencies().getMethod(), is(MethodEnum.GET));
     assertThat(rootLinks.getCreateConsultant(), notNullValue());
     assertThat(rootLinks.getCreateConsultant().getHref(),
-        is("/useradmin/consultant"));
+        is("/useradmin/consultants"));
     assertThat(rootLinks.getCreateConsultant().getMethod(), is(MethodEnum.POST));
 
   }
