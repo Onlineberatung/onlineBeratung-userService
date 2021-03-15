@@ -15,7 +15,6 @@ import static de.caritas.cob.userservice.api.admin.controller.UserAdminControlle
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -400,7 +399,7 @@ public class UserAdminControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(consultantAdminFacade, times(1)).findConsultantAgencies(eq(consultantId));
+    verify(consultantAdminFacade, times(1)).findConsultantAgencies(consultantId);
   }
 
   @Test

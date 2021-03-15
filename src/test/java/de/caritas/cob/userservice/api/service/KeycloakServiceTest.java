@@ -1,13 +1,15 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,10 +17,11 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,22 +32,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KeycloakServiceTest {
 
-  private final String FIELD_NAME_ROCKET_CHAT_SYSTEM_AUTH_TOKEN = "systemUserAuthToken";
-  private final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "systemUserId";
   private final String USER_ID = "asdh89sdfsjodifjsdf";
   private final String OLD_PW = "oldP@66w0rd!";
   private final String NEW_PW = "newP@66w0rd!";
   private final String REFRESH_TOKEN = "s09djf0w9ejf09wsejf09wjef";
-  private final LoginResponseDTO LOGIN_RESPONSE_DTO_SYSTEM_USER =
-      new LoginResponseDTO("status", new DataDTO(FIELD_NAME_ROCKET_CHAT_SYSTEM_AUTH_TOKEN,
-          FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID, null));
 
   @InjectMocks
   private KeycloakService keycloakService;
@@ -89,33 +87,36 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void loginUser_Should_ReturnHttpStatusOK_WhenKeycloakLoginWasSuccessful() {
+  public void loginUser_Should_ReturnLoginResponseDTO_When_KeycloakLoginWasSuccessful() {
+    LoginResponseDTO loginResponseDTO = new EasyRandom().nextObject(LoginResponseDTO.class);
     when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
-        ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenReturn(
-        new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER, HttpStatus.OK));
+        ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+        .thenReturn(new ResponseEntity<>(loginResponseDTO, HttpStatus.OK));
 
-    HttpStatus status = keycloakService.loginUser(USER_ID, OLD_PW).get().getStatusCode();
+    LoginResponseDTO response = keycloakService.loginUser(USER_ID, OLD_PW);
 
-    assertEquals(HttpStatus.OK, status);
+    assertThat(response, instanceOf(LoginResponseDTO.class));
   }
 
   @Test
-  public void loginUser_Should_ReturnBadRequestAndLogError_WhenKeycloakLoginFailsWithException() {
-    HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+  public void loginUser_Should_ReturnBadRequest_When_KeycloakLoginFails() {
+    RestClientResponseException exception = mock(RestClientResponseException.class);
     when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
         ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenThrow(exception);
 
-    HttpStatus status = keycloakService.loginUser(USER_ID, OLD_PW).get().getStatusCode();
-
-    assertEquals(HttpStatus.BAD_REQUEST, status);
-    verify(logger, atLeastOnce()).info(anyString(), anyString(), anyString());
+    try {
+      keycloakService.loginUser(USER_ID, OLD_PW);
+      fail("Expected exception: BadRequestException");
+    } catch (BadRequestException badRequestException) {
+      assertTrue("Excepted BadRequestException thrown", true);
+    }
   }
 
   @Test
   public void logoutUser_Should_ReturnTrue_WhenKeycloakLoginWasSuccessful() {
-    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
-        ArgumentMatchers.<Class<Void>>any()))
-        .thenReturn(new ResponseEntity<Void>(HttpStatus.NO_CONTENT));
+    when(restTemplate
+        .postForEntity(ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<Void>>any()))
+        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
     assertTrue(keycloakService.logoutUser(REFRESH_TOKEN));
   }
@@ -134,9 +135,9 @@ public class KeycloakServiceTest {
 
   @Test
   public void logoutUser_Should_ReturnFalseAndLogError_WhenKeycloakLogoutFails() {
-    when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
-        ArgumentMatchers.<Class<Void>>any()))
-        .thenReturn(new ResponseEntity<Void>(HttpStatus.BAD_REQUEST));
+    when(restTemplate
+        .postForEntity(ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<Void>>any()))
+        .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 
     boolean response = keycloakService.logoutUser(REFRESH_TOKEN);
 
@@ -153,6 +154,6 @@ public class KeycloakServiceTest {
 
     verify(this.userAccountInputValidator, times(1)).validateEmailAddress(email);
     verify(this.authenticatedUser, times(1)).getUserId();
-    verify(this.keycloakAdminClientService, times(1)).updateEmail(eq("userId"), eq(email));
+    verify(this.keycloakAdminClientService, times(1)).updateEmail("userId", email);
   }
 }

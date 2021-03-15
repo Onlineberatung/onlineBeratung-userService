@@ -1,22 +1,16 @@
 package de.caritas.cob.userservice.api.helper;
 
 import de.caritas.cob.userservice.api.exception.HelperException;
-import de.caritas.cob.userservice.api.exception.SaveUserException;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.UserService;
 import java.util.Arrays;
 import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
 import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,9 +45,6 @@ public class UserHelper {
   private static final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
 
   private final Base32 base32 = new Base32();
-
-  @Autowired
-  private UserService userService;
 
   /**
    * Generates a random password which complies with the Keycloak policy.
@@ -147,7 +138,7 @@ public class UserHelper {
   }
 
   /**
-   * Descodes the given username if it isn't already decoded.
+   * Decodes the given username if it isn't already decoded.
    *
    * @param username the username to decode
    * @return the decoded username
@@ -197,18 +188,4 @@ public class UserHelper {
         + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
             BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }
-
-  /**
-   * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
-   *
-   * @param user {@link User}
-   * @param rcUserId Rocket.Chat user ID
-   */
-  public void updateRocketChatIdInDatabase(User user, String rcUserId) throws SaveUserException {
-    if (user != null && StringUtils.isEmpty(user.getRcUserId())) {
-      user.setRcUserId(rcUserId);
-      userService.saveUser(user);
-    }
-  }
-
 }

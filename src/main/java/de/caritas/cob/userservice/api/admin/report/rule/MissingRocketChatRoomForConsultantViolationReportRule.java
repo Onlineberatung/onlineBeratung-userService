@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserRoomDTO;
@@ -22,6 +21,7 @@ import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Violation rule to find consultants without necessary rocket chat room for directly assigned
@@ -41,6 +41,7 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
    * @return the generated violations
    */
   @Override
+  @Transactional
   public List<ViolationDTO> generateViolations() {
     return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), false)
         .map(consultant -> this.sessionRepository
@@ -56,7 +57,7 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
     try {
       userInfoWithRooms = this.rocketChatService
           .getUserInfo(session.getConsultant().getRocketChatId());
-    } catch (InternalServerErrorException e) {
+    } catch (Exception e) {
       return ViolationByConsultantBuilder.getInstance(session.getConsultant())
           .withReason(e.getCause().getMessage())
           .build();

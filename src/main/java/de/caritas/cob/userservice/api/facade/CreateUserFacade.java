@@ -10,15 +10,14 @@ import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpS
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,14 +31,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CreateUserFacade {
 
-  private static final int USERNAME_NOT_AVAILABLE = 0;
-  private static final int EMAIL_AVAILABLE = 1;
-
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserService userService;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull UserHelper userHelper;
   private final @NonNull AgencyHelper agencyHelper;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 
@@ -59,19 +54,9 @@ public class CreateUserFacade {
     ConsultingType consultingType =
         ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())];
     checkIfConsultingTypeMatchesToAgency(userDTO, consultingType);
-    KeycloakCreateUserResponseDTO response = createKeycloakUser(userDTO);
+    KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDTO);
     updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
         consultingType);
-  }
-
-  private KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO userDTO) {
-    try {
-      // Create the user in Keycloak
-      return keycloakAdminClientService.createKeycloakUser(userDTO);
-    } catch (Exception ex) {
-      throw new InternalServerErrorException(
-          String.format("Could not create Keycloak account for: %s", userDTO.toString()));
-    }
   }
 
   private void checkIfConsultingTypeMatchesToAgency(UserDTO user, ConsultingType consultingType) {

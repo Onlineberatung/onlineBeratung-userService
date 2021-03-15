@@ -1,12 +1,10 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static java.util.Objects.requireNonNull;
-
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

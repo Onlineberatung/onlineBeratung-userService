@@ -36,8 +36,8 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.UserService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -87,18 +87,6 @@ public class CreateUserFacadeTest {
     when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         CONSULTING_TYPE_SUCHT)).thenReturn(false);
-
-    createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-  }
-
-  @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_KeycloakHelperCreateUserThrowsException() {
-
-    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
-    when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
-        CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientService.createKeycloakUser(any()))
-        .thenThrow(new KeycloakException(ERROR));
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
