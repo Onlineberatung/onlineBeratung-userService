@@ -41,7 +41,8 @@ public class ConsultingTypeAdminService {
     return new ConsultingTypeAdminResultDTO()
         .embedded(page > pagedListHolder.getPageCount() ? Collections.emptyList()
             : pagedListHolder.getPageList())
-        .links(buildPaginationLinks(page, perPage, pagedListHolder));
+        .links(buildPaginationLinks(page, perPage, pagedListHolder))
+        .total(pagedListHolder.getNrOfElements());
   }
 
   private List<ConsultingTypeResultDTO> fullSortedConsultingTypeResponseList() {
@@ -59,7 +60,7 @@ public class ConsultingTypeAdminService {
 
   private ConsultingTypeResultDTO fromConsultingTypeSettings(ConsultingTypeSettings ctSettings) {
     return new ConsultingTypeResultDTO()
-        .consultingTypeId(ctSettings.getConsultingType().getValue())
+        .id(ctSettings.getConsultingType().getValue())
         .name(ctSettings.getConsultingType().getUrlName())
         .languageFormal(ctSettings.isLanguageFormal())
         .roles(ctSettings.getRoles())

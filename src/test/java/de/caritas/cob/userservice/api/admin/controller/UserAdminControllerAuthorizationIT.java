@@ -76,16 +76,6 @@ public class UserAdminControllerAuthorizationIT {
   private ConsultantAdminFacade consultantAdminFacade;
 
   @Test
-  public void getSessions_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-
-    mvc.perform(get(SESSION_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(sessionAdminService);
-  }
-
-  @Test
   public void getSessions_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
 
@@ -127,16 +117,6 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(sessionAdminService, times(1)).findSessions(any(), anyInt(), any());
-  }
-
-  @Test
-  public void getConsultingTypes_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-
-    mvc.perform(get(CONSULTING_TYPE_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(this.consultingTypeAdminService);
   }
 
   @Test
@@ -184,16 +164,6 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  public void generateViolationReport_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-
-    mvc.perform(get(REPORT_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(violationReportGenerator);
-  }
-
-  @Test
   public void generateViolationReport_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
 
@@ -233,16 +203,6 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(violationReportGenerator, times(1)).generateReport();
-  }
-
-  @Test
-  public void getConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-
-    mvc.perform(get(FILTERED_CONSULTANTS_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -290,16 +250,6 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  public void getConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-
-    mvc.perform(get(GET_CONSULTANT_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
-  }
-
-  @Test
   public void getConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
 
@@ -339,18 +289,6 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findConsultant(any());
-  }
-
-  @Test
-  public void getConsultantAgencies_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-    String consultantAgencyPath = String
-        .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
-
-    mvc.perform(get(consultantAgencyPath))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -403,15 +341,6 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  public void createConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-    mvc.perform(post(GET_CONSULTANT_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
-  }
-
-  @Test
   public void createConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(post(GET_CONSULTANT_PATH)
@@ -453,15 +382,6 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).createNewConsultant(any());
-  }
-
-  @Test
-  public void updateConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-    mvc.perform(put(GET_CONSULTANT_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -509,15 +429,6 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  public void createConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId")))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
-  }
-
-  @Test
   public void createConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
@@ -559,15 +470,6 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isCreated());
 
     verify(consultantAdminFacade, times(1)).createNewConsultantAgency(anyString(), any());
-  }
-
-  @Test
-  public void changeAgencyType_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-    mvc.perform(post(AGENCY_CHANGE_TYPE_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
@@ -613,15 +515,6 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  public void deleteConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-    mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L)))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
-  }
-
-  @Test
   public void deleteConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
@@ -661,15 +554,6 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).markConsultantAgencyForDeletion(any(), any());
-  }
-
-  @Test
-  public void deleteConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokenIsSet()
-      throws Exception {
-    mvc.perform(delete(DELETE_CONSULTANT_PATH))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test

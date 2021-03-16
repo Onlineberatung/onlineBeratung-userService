@@ -31,6 +31,10 @@ import org.springframework.security.web.csrf.CsrfFilter;
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
+  public static final String[] WHITE_LIST =
+      new String[] {"/users/docs", "/users/docs/**", "/v2/api-docs", "/configuration/ui",
+          "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**"};
+
   @SuppressWarnings("unused")
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
 
@@ -64,7 +68,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             CsrfFilter.class)
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-        .antMatchers(SpringFoxConfig.WHITE_LIST).permitAll().antMatchers("/users/askers/new")
+        .antMatchers(WHITE_LIST).permitAll().antMatchers("/users/askers/new")
         .permitAll()
         .antMatchers("/users/data", "/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",

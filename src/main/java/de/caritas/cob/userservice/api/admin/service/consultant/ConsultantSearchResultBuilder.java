@@ -95,7 +95,8 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
 
     return new ConsultantSearchResultDTO()
         .embedded(resultList)
-        .links(paginationLinks);
+        .links(paginationLinks)
+        .total(fullTextQuery.getResultSize());
   }
 
   private HalLink buildSelfLink() {
