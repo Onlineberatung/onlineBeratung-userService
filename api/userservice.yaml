@@ -271,9 +271,9 @@ paths:
     put:
       tags:
         - user-controller
-      summary: 'Sets or updates the mobile registration token of the authorized user account.
+      summary: 'Sets or updates the mobile registration token of the authorized asker account.
       This token is used to send push notifications to native mobile applications on android an
-      ios. [Authorization: Role: asker/consultant]'
+      ios. [Authorization: Role: asker]'
       operationId: updateMobileToken
       requestBody:
         content:

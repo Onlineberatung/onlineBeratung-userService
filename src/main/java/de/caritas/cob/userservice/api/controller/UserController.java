@@ -775,7 +775,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateMobileToken(@Valid String mobileToken) {
-    this.userAccountProvider.changeUserMobileToken(mobileToken);
+    this.userAccountProvider.updateUserMobileToken(mobileToken);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

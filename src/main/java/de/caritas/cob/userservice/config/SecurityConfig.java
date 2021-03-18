@@ -66,13 +66,13 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
         .antMatchers(WHITE_LIST).permitAll().antMatchers("/users/askers/new")
         .permitAll()
-        .antMatchers("/users/data", "/users/email", "/users/mobiletoken",
-            "/users/mails/messages/new", "/users/password/change", "/users/chat/{chatId:[0-9]+}",
+        .antMatchers("/users/data", "/users/email", "/users/mails/messages/new",
+            "/users/password/change", "/users/chat/{chatId:[0-9]+}",
             "/users/chat/{chatId:[0-9]+}/join", "/users/chat/{chatId:[0-9]+}/members",
             "/users/chat/{chatId:[0-9]+}/leave")
         .hasAnyAuthority(Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new", "/users/sessions/askers",
-            "/users/askers/consultingType/new", "/users/account")
+            "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken")
         .hasAuthority(Authority.USER_DEFAULT)
         .antMatchers("/users/sessions/open", "/users/sessions/consultants/new",
             "/users/sessions/new/{sessionId:[0-9]+}", "/users/consultants/absences",

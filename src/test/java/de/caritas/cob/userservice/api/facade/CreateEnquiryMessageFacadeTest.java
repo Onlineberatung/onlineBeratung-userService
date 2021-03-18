@@ -180,7 +180,7 @@ public class CreateEnquiryMessageFacadeTest {
     consultant.setId(USER_ID);
     consultant.setRocketChatId(RC_USER_ID);
     this.user = new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null,
-        null, null);
+        null, null, null);
     this.consultingTypeSettings = new ConsultingTypeSettings();
     this.userInfoResponseDTO = new UserInfoResponseDTO();
     this.rocketChatUserDTO = new RocketChatUserDTO();

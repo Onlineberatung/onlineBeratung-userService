@@ -2199,7 +2199,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(accountProvider, times(1)).changeUserMobileToken("AksagAosagZZZ");
+    verify(accountProvider, times(1)).updateUserMobileToken("AksagAosagZZZ");
   }
 
   @Test
