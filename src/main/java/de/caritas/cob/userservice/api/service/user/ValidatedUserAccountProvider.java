@@ -153,4 +153,12 @@ public class ValidatedUserAccountProvider {
     user.setDeleteDate(nowInUtc());
     userService.saveUser(user);
   }
+
+  /**
+   * Updates or sets the mobile client token of the current authenticated user in database.
+   *
+   * @param email the new email address
+   */
+  public void changeUserMobileToken(String mobileToken) {
+  }
 }
