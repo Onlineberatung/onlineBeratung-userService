@@ -60,6 +60,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Service for Rocket.Chat functionalities.
@@ -480,7 +481,7 @@ public class RocketChatService {
       HttpHeaders header = getStandardHttpHeaders(systemUser);
       HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
 
-      response = restTemplate.exchange(rocketChatApiGetGroupMembersUrl + "?roomId=" + rcGroupId,
+      response = restTemplate.exchange(buildGetGroupMembersPath(rcGroupId),
           HttpMethod.GET, request, GroupMemberResponseDTO.class);
 
     } catch (Exception ex) {
@@ -494,6 +495,14 @@ public class RocketChatService {
       String error = "Could not get Rocket.Chat group members for room id %s";
       throw new RocketChatGetGroupMembersException(String.format(error, rcGroupId));
     }
+  }
+
+  private String buildGetGroupMembersPath(String rcGroupId) {
+    return UriComponentsBuilder
+        .fromUriString(rocketChatApiGetGroupMembersUrl)
+        .queryParam("roomId", rcGroupId)
+        .queryParam("count", 0)
+        .build().encode().toUriString();
   }
 
   /**
