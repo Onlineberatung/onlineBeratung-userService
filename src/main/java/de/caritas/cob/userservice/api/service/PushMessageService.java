@@ -62,8 +62,6 @@ public class PushMessageService {
    */
   public void pushNewMessageEvent(String registrationToken) {
     if (!this.isEnabled) {
-      LogService.logInfo(
-          "Message event will not be pushed because firebase push notifications are disabled");
       return;
     }
     Message message = Message.builder()
