@@ -8,7 +8,10 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -38,7 +41,8 @@ public class PushMessageService {
   @EventListener(ApplicationReadyEvent.class)
   public void initializeFirebase() {
     if (this.isEnabled) {
-      InputStream inputStream = PushMessageService.class.getResourceAsStream(firebaseConfiguration);
+      Path path = FileUtils.getFile(firebaseConfiguration).toPath();
+      InputStream inputStream = Files.newInputStream(path);
 
       FirebaseOptions options = FirebaseOptions.builder()
           .setCredentials(GoogleCredentials.fromStream(inputStream))
