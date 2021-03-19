@@ -45,9 +45,6 @@ public class KeycloakAdminClientService {
   @Value("${keycloakService.user.role}")
   private String keycloakUserRole;
 
-  @Value("${keycloakService.techuser.id}")
-  private String keycloakTechUserId;
-
   @Value("${api.error.keycloakError}")
   private String keycloakError;
 
@@ -123,26 +120,10 @@ public class KeycloakAdminClientService {
 
   @Synchronized
   private boolean isEmailNotAvailable(String email) {
-    // Get user resource and change e-mail address of technical user
-    UserResource techUserResource =
-        this.keycloakAdminClientAccessor.getUsersResource()
-            .get(keycloakTechUserId);
-    UserRepresentation userRepresentation = techUserResource.toRepresentation();
-    String originalEmail = userRepresentation.getEmail();
-    userRepresentation.setEmail(email);
-    // Try to update technical user's e-mail address
-    try {
-      techUserResource.update(userRepresentation);
-    } catch (Exception e) {
-      LogService.logDebug(String.format("E-Mail address already existing in Keycloak: %s", email));
-      return true;
-    }
-
-    // Reset technical user
-    userRepresentation.setEmail(originalEmail);
-    techUserResource.update(userRepresentation);
-
-    return false;
+    return this.keycloakAdminClientAccessor.getUsersResource()
+        .search(email, 0, Integer.MAX_VALUE)
+        .stream()
+        .anyMatch(userRepresentation -> userRepresentation.getEmail().equals(email));
   }
 
   private CredentialRepresentation getCredentialRepresentation(final String password) {

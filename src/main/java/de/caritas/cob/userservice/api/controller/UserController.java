@@ -766,4 +766,16 @@ public class UserController implements UsersApi {
     this.userAccountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
+
+  /**
+   * Updates or sets the mobile client token for the current authenticated user.
+   *
+   * @param mobileToken the mobile devide identifier
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateMobileToken(@Valid String mobileToken) {
+    this.userAccountProvider.updateUserMobileToken(mobileToken);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
 }
