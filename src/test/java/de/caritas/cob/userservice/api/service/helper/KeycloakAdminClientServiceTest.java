@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -288,7 +289,7 @@ public class KeycloakAdminClientServiceTest {
 
     this.keycloakAdminClientService.updateUserData("userId", userDTO, "firstName", "lastName");
 
-    verify(userResource, times(3)).update(any());
+    verify(userResource, times(1)).update(any());
   }
 
   @Test
@@ -312,16 +313,21 @@ public class KeycloakAdminClientServiceTest {
   public void updateUserData_Should_throwCustomException_When_emailIsChangedButNotAvailable() {
     UserRepresentation userRepresentation = mock(UserRepresentation.class);
     when(userRepresentation.getEmail()).thenReturn("email");
+    UserRepresentation otherUserRepresentation = mock(UserRepresentation.class);
+    when(otherUserRepresentation.getEmail()).thenReturn("newemail");
     UserResource userResource = mock(UserResource.class);
-    doThrow(new RuntimeException()).when(userResource).update(any());
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
+    when(usersResource.search(any(), any(), any())).thenReturn(singletonList(otherUserRepresentation));
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    UserDTO userDTO = new UserDTO();
+    userDTO.setEmail("newemail");
 
     try {
       this.keycloakAdminClientService
-          .updateUserData("userId", new UserDTO(), "firstName", "lastName");
+          .updateUserData("userId", userDTO, "firstName", "lastName");
+      fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
     }
@@ -439,8 +445,8 @@ public class KeycloakAdminClientServiceTest {
 
     this.keycloakAdminClientService.updateEmail("userId", "anotherEmail");
 
-    verify(userRepresentation, times(2)).setEmail("anotherEmail");
-    verify(userResource, times(3)).update(any());
+    verify(userRepresentation, times(1)).setEmail("anotherEmail");
+    verify(userResource, times(1)).update(any());
   }
 
 }
