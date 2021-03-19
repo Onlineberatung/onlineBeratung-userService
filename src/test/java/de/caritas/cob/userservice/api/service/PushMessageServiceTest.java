@@ -83,7 +83,6 @@ public class PushMessageServiceTest {
 
     this.pushMessageService.pushNewMessageEvent("registrationToken");
 
-    verify(logger, times(1)).info(anyString());
     verifyNoMoreInteractions(this.firebaseMessaging);
   }
 
