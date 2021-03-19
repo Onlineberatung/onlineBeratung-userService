@@ -194,6 +194,13 @@
 			<version>5.2.10.RELEASE</version>
 		</dependency>
 
+		<!-- Push notification firebase dependency -->
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>7.1.0</version>
+		</dependency>
+
 		<!-- Test scope dependencies -->
 		<dependency>
 			<groupId>com.h2database</groupId>
