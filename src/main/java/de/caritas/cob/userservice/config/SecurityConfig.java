@@ -43,6 +43,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Value("${csrf.header.property}")
   private String csrfHeaderProperty;
 
+  @Value("${csrf.whitelist.header.property}")
+  private String csrfWhitelistHeaderProperty;
+
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
    * (Keycloak) principal (authorization header).
@@ -60,8 +63,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     super.configure(http);
     http.csrf().disable()
-        .addFilterBefore(new StatelessCsrfFilter(csrfCookieProperty, csrfHeaderProperty),
-            CsrfFilter.class)
+        .addFilterBefore(new StatelessCsrfFilter(csrfCookieProperty, csrfHeaderProperty,
+                csrfWhitelistHeaderProperty), CsrfFilter.class)
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
         .antMatchers(WHITE_LIST).permitAll().antMatchers("/users/askers/new")
