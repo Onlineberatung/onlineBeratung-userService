@@ -58,7 +58,7 @@ public class RootDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildDeleteAskerLink() {
-    return buildHalLink(methodOn(UseradminApi.class).deleteAsker(null), MethodEnum.DELETE);
+    return buildHalLink(methodOn(UseradminApi.class).markAskerForDeletion(null), MethodEnum.DELETE);
   }
 
 }

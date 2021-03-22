@@ -223,7 +223,7 @@ paths:
       tags:
         - admin-user-controller
       summary: 'Delete a asker by given id [Authorization: Role: consultant-admin]'
-      operationId: deleteAsker
+      operationId: markAskerForDeletion
       parameters:
         - name: askerId
           in: path
