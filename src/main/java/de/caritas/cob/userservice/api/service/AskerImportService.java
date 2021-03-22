@@ -8,10 +8,11 @@ import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformatio
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
-import de.caritas.cob.userservice.api.exception.SaveUserException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
@@ -33,9 +34,10 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.helper.MessageServiceHelper;
+import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -46,7 +48,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,7 +60,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -104,7 +104,7 @@ public class AskerImportService {
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull MonitoringService monitoringService;
-  private final @NonNull MessageServiceHelper messageServiceHelper;
+  private final @NonNull MessageServiceProvider messageServiceProvider;
   private final @NonNull MonitoringStructureProvider monitoringStructureProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
@@ -178,14 +178,6 @@ public class AskerImportService {
             keycloakAdminClientService.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
 
-        if (response.getResponseDTO() != null && (response.getResponseDTO().getEmailAvailable() < 1
-            || response.getResponseDTO().getUsernameAvailable() < 1)) {
-          writeToImportLog(String.format(
-              "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
-              record.getUsername()), protocolFile);
-          continue;
-        }
-
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
           userDTO.setEmail(userHelper.getDummyEmail(keycloakUserId));
           keycloakAdminClientService.updateDummyEmail(keycloakUserId, userDTO);
@@ -248,8 +240,10 @@ public class AskerImportService {
       } catch (RocketChatLoginException rcLoginException) {
         writeToImportLog(rcLoginException.getMessage(), protocolFile);
         break;
-      } catch (SaveUserException saveUserException) {
-        writeToImportLog(saveUserException.getMessage(), protocolFile);
+      } catch (CustomValidationHttpStatusException e) {
+        writeToImportLog(String.format(
+            "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
+            getImportRecordAskerWithoutSession(csvRecord).getUsername()), protocolFile);
         break;
       } catch (Exception exception) {
         writeToImportLog(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),
@@ -363,14 +357,6 @@ public class AskerImportService {
             keycloakAdminClientService.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
 
-        if (response.getResponseDTO() != null && (response.getResponseDTO().getEmailAvailable() < 1
-            || response.getResponseDTO().getUsernameAvailable() < 1)) {
-          writeToImportLog(String.format(
-              "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
-              record.getUsername()), protocolFile);
-          continue;
-        }
-
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
           userDTO.setEmail(userHelper.getDummyEmail(keycloakUserId));
           keycloakAdminClientService.updateDummyEmail(keycloakUserId, userDTO);
@@ -476,7 +462,7 @@ public class AskerImportService {
         // Update session data by Rocket.Chat group id and consultant id
         session.setConsultant(consultant.get());
         session.setGroupId(rcGroupId);
-        session.setEnquiryMessageDate(new Date());
+        session.setEnquiryMessageDate(nowInUtc());
         session.setStatus(SessionStatus.IN_PROGRESS);
         session.setCreateDate(nowInUtc());
         session.setUpdateDate(nowInUtc());
@@ -514,23 +500,9 @@ public class AskerImportService {
         rocketChatService.addUserToGroup(systemUserId, rcGroupId);
 
         // Send welcome message
-        String welcomeMessage = welcomeMessageMap.get(agencyDTO.getConsultingType());
-        if (welcomeMessage != null && !welcomeMessage.equals(StringUtils.EMPTY)) {
-          Map<String, String> replaceValues = new HashMap<>();
-          replaceValues.put(REPLACE_KEY_USERNAME, record.getUsername());
-          welcomeMessage = StringSubstitutor.replace(welcomeMessage, replaceValues,
-              REPLACE_START_TOKEN, REPLACE_END_TOKEN);
-          if (welcomeMessage != null && !welcomeMessage.equals(StringUtils.EMPTY)) {
-            RocketChatCredentials rocketChatSystemCredentials = RocketChatCredentials.builder()
-                .rocketChatToken(systemUserToken).rocketChatUserId(systemUserId).build();
-            messageServiceHelper.postMessage(welcomeMessage, rocketChatSystemCredentials, rcGroupId,
+        messageServiceProvider
+            .postWelcomeMessageIfConfigured(rcGroupId, dbUser, consultingTypeSettings,
                 CreateEnquiryExceptionInformation.builder().build());
-          } else {
-            throw new ImportException(
-                String.format("Could not substitute welcome message for group id %s (user: %s)",
-                    rcGroupId, record.getUsername()));
-          }
-        }
 
         // Remove all system messages from group
         try {
@@ -564,7 +536,7 @@ public class AskerImportService {
       } catch (ImportException importException) {
         writeToImportLog(importException.getMessage(), protocolFile);
         break;
-      } catch (InternalServerErrorException serviceException) {
+      } catch (InternalServerErrorException | RocketChatPostWelcomeMessageException serviceException) {
         writeToImportLog(serviceException.getMessage(), protocolFile);
         break;
       } catch (RocketChatLoginException rcLoginException) {
@@ -572,9 +544,6 @@ public class AskerImportService {
         break;
       } catch (RocketChatCreateGroupException rcCreateGroupException) {
         writeToImportLog(rcCreateGroupException.getMessage(), protocolFile);
-        break;
-      } catch (SaveUserException saveUserException) {
-        writeToImportLog(saveUserException.getMessage(), protocolFile);
         break;
       } catch (Exception exception) {
         writeToImportLog(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_CONFLICT;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID;
 import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
@@ -15,7 +15,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_SUCHT
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -26,12 +26,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
+import de.caritas.cob.userservice.api.helper.AgencyHelper;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.user.UserService;
+import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,12 +46,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.helper.AgencyHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.service.UserService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateUserFacadeTest {
@@ -67,12 +68,17 @@ public class CreateUserFacadeTest {
   private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 
   @Test
-  public void createUserAndInitializeAccount_Should_ReturnConflict_When_UsernameIsAlreadyExisting() {
+  public void createUserAndInitializeAccount_Should_throwExpectedStatusException_When_UsernameIsAlreadyExisting() {
 
     when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(false);
 
-    assertThat(createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT).getStatus(),
-        is(HttpStatus.CONFLICT));
+    try {
+      this.createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
+    } catch (CustomValidationHttpStatusException e) {
+      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
+          Matchers.is(USERNAME_NOT_AVAILABLE.name()));
+    }
   }
 
   @Test(expected = BadRequestException.class)
@@ -85,29 +91,19 @@ public class CreateUserFacadeTest {
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorException_When_KeycloakHelperCreateUserThrowsException() {
-
-    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
-    when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
-        CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientService.createKeycloakUser(any()))
-        .thenThrow(new KeycloakException(ERROR));
-
-    createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
-  }
-
   @Test
-  public void createUserAndInitializeAccount_Should_ReturnConflict_When_KeycloakHelperCreateUserReturnsConflict() {
+  public void createUserAndInitializeAccount_Should_throwConflictException_When_usernameIsNotAvailable() {
 
-    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
-    when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
-        CONSULTING_TYPE_SUCHT)).thenReturn(true);
-    when(keycloakAdminClientService.createKeycloakUser(any()))
-        .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_CONFLICT);
+    when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(false);
 
-    assertThat(createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT).getStatus(),
-        is(HttpStatus.CONFLICT));
+    try {
+      this.createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
+    } catch (CustomValidationHttpStatusException e) {
+      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
+          Matchers.is(USERNAME_NOT_AVAILABLE.name()));
+      assertThat(e.getHttpStatus(), is(HttpStatus.CONFLICT));
+    }
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -246,7 +242,7 @@ public class CreateUserFacadeTest {
   }
 
   @Test
-  public void createUserAndInitializeAccount_Should_CallInitializeNewConsultingTypeAndReturnCreated_When_EverythingSucceeded() {
+  public void createUserAndInitializeAccount_Should_CallInitializeNewConsultingType_When_EverythingSucceeded() {
 
     when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyHelper.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
@@ -260,12 +256,10 @@ public class CreateUserFacadeTest {
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
-    KeycloakCreateUserResponseDTO responseDTO = createUserFacade
-        .createUserAndInitializeAccount(USER_DTO_KREUZBUND);
+    createUserFacade.createUserAndInitializeAccount(USER_DTO_KREUZBUND);
 
     verify(createNewConsultingTypeFacade, times(1))
         .initializeNewConsultingType(any(), any(), any(ConsultingTypeSettings.class));
     verify(rollbackFacade, times(0)).rollBackUserAccount(any());
-    assertEquals(HttpStatus.CREATED, responseDTO.getStatus());
   }
 }

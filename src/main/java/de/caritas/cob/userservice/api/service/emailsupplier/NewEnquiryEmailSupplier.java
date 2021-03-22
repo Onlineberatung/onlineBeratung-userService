@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
@@ -9,12 +9,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
-import de.caritas.cob.userservice.api.model.mailservice.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,8 +32,8 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
   private final String applicationBaseUrl;
 
   /**
-   * Generates the enquiry notification mails sent to regarding consultants when a new enquiry
-   * has been created.
+   * Generates the enquiry notification mails sent to regarding consultants when a new enquiry has
+   * been created.
    *
    * @return a list of the generated {@link MailDTO}
    */
@@ -69,15 +69,14 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewEnquiryNotificationConsultant(String email, String name,
       String postCode, String agency) {
-    return MailDTO.builder()
+    return new MailDTO()
         .template(TEMPLATE_NEW_ENQUIRY_NOTIFICATION)
         .email(email)
         .templateData(asList(
-            new TemplateDataDTO("name", name),
-            new TemplateDataDTO("plz", postCode),
-            new TemplateDataDTO("beratungsstelle", agency),
-            new TemplateDataDTO("url", applicationBaseUrl)))
-        .build();
+            new TemplateDataDTO().key("name").value(name),
+            new TemplateDataDTO().key("plz").value(postCode),
+            new TemplateDataDTO().key("beratungsstelle").value(agency),
+            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
   }
 
 }

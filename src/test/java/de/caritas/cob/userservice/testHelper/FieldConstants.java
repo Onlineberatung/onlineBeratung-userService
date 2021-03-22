@@ -30,6 +30,8 @@ public class FieldConstants {
       "rocketChatApiGroupCreateUrl";
   public static final String FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL =
       "rocketChatApiGroupDeleteUrl";
+  public static final String FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS =
+      "rocketChatApiGetGroupMembersUrl";
   public static final String FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL =
       "rocketChatApiSubscriptionsGet";
   public static final String FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL = "rocketChatApiRoomsGet";
@@ -41,21 +43,22 @@ public class FieldConstants {
   public static final String FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL =
       "rocketChatApiGroupRemoveUserUrl";
   public static final String FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL = "rocketChatApiUserDelete";
+  public static final String FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL = "rocketChatApiUserUpdate";
   public static final String FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY =
       "rocketChatApiCleanRoomHistory";
   public static final String FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN = "technUserAuthToken";
   public static final String FIELD_NAME_ROCKET_CHAT_TECH_USER_ID = "technUserId";
-  public static final String FIELD_NAME_ROCKET_CHAT_SYSTEM_AUTH_TOKEN = "systemUserAuthToken";
-  public static final String FIELD_NAME_ROCKET_CHAT_SERVICE_SYSTEM_USER_ID = "systemUserId";
   public static final String FIELD_NAME_ROCKET_CHAT_API_USER_INFO = "rocketChatApiUserInfo";
 
   public static final String RC_URL_GROUPS_CREATE = "http://localhost/api/v1/groups.create";
   public static final String RC_URL_GROUPS_DELETE = "http://localhost/api/v1/groups.delete";
   public static final String RC_URL_GROUPS_REMOVE_USER = "http://localhost/api/v1/groups.kick";
+  public static final String RC_URL_GROUPS_MEMBERS_GET = "http://localhost/api/v1/groups.members";
   public static final String RC_URL_CHAT_USER_LOGIN = "http://localhost/api/v1/login";
   public static final String RC_URL_CHAT_USER_LOGOUT = "http://localhost/api/v1/logout";
   public static final String RC_URL_CHAT_ADD_USER = "http://localhost/api/v1/groups.invite";
   public static final String RC_URL_CHAT_USER_DELETE = "http://localhost/api/v1/users.delete";
+  public static final String RC_URL_CHAT_USER_UPDATE = "http://localhost/api/v1/users.update";
   public static final String RC_URL_CLEAN_ROOM_HISTORY =
       "http://localhost/api/v1/rooms.cleanHistory";
   public static final String RC_URL_SUBSCRIPTIONS_GET = "http://localhost/api/v1/subscriptions.get";

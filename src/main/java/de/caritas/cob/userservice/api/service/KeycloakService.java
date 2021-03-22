@@ -1,11 +1,10 @@
 package de.caritas.cob.userservice.api.service;
 
-import static java.util.Objects.nonNull;
-
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -48,6 +47,7 @@ public class KeycloakService {
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull UserAccountInputValidator userAccountInputValidator;
 
   /**
    * Changes the (Keycloak) password of a user and returns true on success.
@@ -68,15 +68,13 @@ public class KeycloakService {
   }
 
   /**
-   * Performs a Keycloak login and returns the Keycloak {@link LoginResponseDTO} on success
+   * Performs a Keycloak login and returns the Keycloak {@link LoginResponseDTO} on success.
    *
    * @param userName the username
    * @param password the password
-   * @return an {@link Optional} containing a {@link ResponseEntity} with the {@link
-   * LoginResponseDTO}
+   * @return {@link LoginResponseDTO}
    */
-  public Optional<ResponseEntity<LoginResponseDTO>> loginUser(final String userName,
-      final String password) {
+  public LoginResponseDTO loginUser(final String userName, final String password) {
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add(BODY_KEY_USERNAME, userName);
@@ -86,14 +84,12 @@ public class KeycloakService {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, getFormHttpHeaders());
 
     try {
-      ResponseEntity<LoginResponseDTO> response = restTemplate
-          .postForEntity(keycloakLoginUrl, request, LoginResponseDTO.class);
-      return nonNull(response.getBody()) ? Optional.of(response) : Optional.empty();
-    } catch (HttpClientErrorException http4xxEx) {
-      LogService.logKeycloakInfo(String.format(
-          "Could not log in user %s because of Keycloak API response 4xx (wrong credentials)",
-          userName), http4xxEx);
-      return Optional.of(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+      return restTemplate
+          .postForEntity(keycloakLoginUrl, request, LoginResponseDTO.class).getBody();
+
+    } catch (RestClientResponseException exception) {
+      throw new BadRequestException(String.format("Could not log in user %s into Keycloak: %s",
+          userName, exception.getMessage()));
     }
   }
 
@@ -133,12 +129,6 @@ public class KeycloakService {
     return true;
   }
 
-  /**
-   * Creates and returns {@link HttpHeaders} containing the x-www-form-urlencoded {@link MediaType}
-   * and the Bearer Authorization token.
-   *
-   * @return the created http headers
-   */
   private HttpHeaders getFormHttpHeaders() {
 
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -147,6 +137,17 @@ public class KeycloakService {
         HEADER_BEARER_KEY + authenticatedUser.getAccessToken());
 
     return httpHeaders;
+  }
+
+  /**
+   * Updates the email address of user with given id in keycloak.
+   *
+   * @param emailAddress the email address to set
+   */
+  public void changeEmailAddress(String emailAddress) {
+    this.userAccountInputValidator.validateEmailAddress(emailAddress);
+    String userId = this.authenticatedUser.getUserId();
+    this.keycloakAdminClientService.updateEmail(userId, emailAddress);
   }
 
 }

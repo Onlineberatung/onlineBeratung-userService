@@ -1,10 +1,12 @@
 package de.caritas.cob.userservice.api.service.helper;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -16,6 +18,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -65,7 +68,7 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void createKeycloakUser_Should_createExpectedUser_When_keycloakReturnesCreated() {
+  public void createKeycloakUser_Should_createExpectedUser_When_keycloakReturnsCreated() {
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     Response response = mock(Response.class);
@@ -81,7 +84,7 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void createKeycloakUser_Should_returnExpectedConflictResponse_When_keycloakResponseHasEmailErrorMessage() {
+  public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
     String emailError = "emailError";
     ReflectionTestUtils.setField(keycloakAdminClientService, "keycloakErrorEmail", emailError);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
@@ -93,27 +96,21 @@ public class KeycloakAdminClientServiceTest {
     when(usersResource.create(any())).thenReturn(response);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
-        .createKeycloakUser(userDTO);
-
-    assertThat(keycloakUser, notNullValue());
-    assertThat(keycloakUser.getStatus(), is(HttpStatus.CONFLICT));
-    assertThat(keycloakUser.getResponseDTO(), notNullValue());
-    assertThat(keycloakUser.getResponseDTO().getEmailAvailable(), is(0));
-    assertThat(keycloakUser.getResponseDTO().getUsernameAvailable(), is(1));
+    try {
+      this.keycloakAdminClientService.createKeycloakUser(userDTO);
+    } catch (CustomValidationHttpStatusException e) {
+      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
+    }
   }
 
   @Test
-  public void createKeycloakUser_Should_returnExpectedConflictResponse_When_keycloakResponseHasUsernmaeErrorMessage() {
+  public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasUsernameErrorMessage() {
     String keycloakErrorUsername = "keycloakErrorUsername";
     ReflectionTestUtils
         .setField(keycloakAdminClientService, "keycloakErrorUsername", keycloakErrorUsername);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
-    UserRepresentation userRepresentation = mock(UserRepresentation.class);
-    UserResource userResource = mock(UserResource.class);
-    when(userResource.toRepresentation()).thenReturn(userRepresentation);
     UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
     ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
     when(errorRepresentation.getErrorMessage()).thenReturn(keycloakErrorUsername);
     Response response = mock(Response.class);
@@ -121,28 +118,21 @@ public class KeycloakAdminClientServiceTest {
     when(usersResource.create(any())).thenReturn(response);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
-        .createKeycloakUser(userDTO);
-
-    assertThat(keycloakUser, notNullValue());
-    assertThat(keycloakUser.getStatus(), is(HttpStatus.CONFLICT));
-    assertThat(keycloakUser.getResponseDTO(), notNullValue());
-    assertThat(keycloakUser.getResponseDTO().getEmailAvailable(), is(1));
-    assertThat(keycloakUser.getResponseDTO().getUsernameAvailable(), is(0));
+    try {
+      this.keycloakAdminClientService.createKeycloakUser(userDTO);
+    } catch (CustomValidationHttpStatusException e) {
+      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(USERNAME_NOT_AVAILABLE.name()));
+    }
   }
 
   @Test
-  public void createKeycloakUser_Should_returnEmailNotAvaliable_When_keycloakMailUpdateFails() {
+  public void createKeycloakUser_Should_throwExpectedResponseException_When_keycloakMailUpdateFails() {
     String keycloakErrorUsername = "keycloakErrorUsername";
     ReflectionTestUtils
         .setField(keycloakAdminClientService, "keycloakErrorUsername", keycloakErrorUsername);
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
-    UserRepresentation userRepresentation = mock(UserRepresentation.class);
-    UserResource userResource = mock(UserResource.class);
-    doThrow(new RuntimeException()).when(userResource).update(any());
-    when(userResource.toRepresentation()).thenReturn(userRepresentation);
     UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
     ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
     when(errorRepresentation.getErrorMessage()).thenReturn(keycloakErrorUsername);
     Response response = mock(Response.class);
@@ -150,18 +140,16 @@ public class KeycloakAdminClientServiceTest {
     when(usersResource.create(any())).thenReturn(response);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
-        .createKeycloakUser(userDTO);
-
-    assertThat(keycloakUser, notNullValue());
-    assertThat(keycloakUser.getStatus(), is(HttpStatus.CONFLICT));
-    assertThat(keycloakUser.getResponseDTO(), notNullValue());
-    assertThat(keycloakUser.getResponseDTO().getEmailAvailable(), is(0));
-    assertThat(keycloakUser.getResponseDTO().getUsernameAvailable(), is(0));
+    try {
+      this.keycloakAdminClientService.createKeycloakUser(userDTO);
+    } catch (CustomValidationHttpStatusException e) {
+      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(USERNAME_NOT_AVAILABLE.name()));
+    }
   }
 
-  @Test(expected = KeycloakException.class)
-  public void createKeycloakUser_Should_returnThrowKeycloakException_When_errorIsUnknown() {
+  @Test(expected = InternalServerErrorException.class)
+  public void createKeycloakUser_Should_ThrowInternalServerException_When_errorIsUnknown() {
     UsersResource usersResource = mock(UsersResource.class);
     Response response = mock(Response.class);
     when(usersResource.create(any())).thenReturn(response);
@@ -301,7 +289,7 @@ public class KeycloakAdminClientServiceTest {
 
     this.keycloakAdminClientService.updateUserData("userId", userDTO, "firstName", "lastName");
 
-    verify(userResource, times(3)).update(any());
+    verify(userResource, times(1)).update(any());
   }
 
   @Test
@@ -325,16 +313,21 @@ public class KeycloakAdminClientServiceTest {
   public void updateUserData_Should_throwCustomException_When_emailIsChangedButNotAvailable() {
     UserRepresentation userRepresentation = mock(UserRepresentation.class);
     when(userRepresentation.getEmail()).thenReturn("email");
+    UserRepresentation otherUserRepresentation = mock(UserRepresentation.class);
+    when(otherUserRepresentation.getEmail()).thenReturn("newemail");
     UserResource userResource = mock(UserResource.class);
-    doThrow(new RuntimeException()).when(userResource).update(any());
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
+    when(usersResource.search(any(), any(), any())).thenReturn(singletonList(otherUserRepresentation));
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    UserDTO userDTO = new UserDTO();
+    userDTO.setEmail("newemail");
 
     try {
       this.keycloakAdminClientService
-          .updateUserData("userId", new UserDTO(), "firstName", "lastName");
+          .updateUserData("userId", userDTO, "firstName", "lastName");
+      fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
     }
@@ -438,6 +431,22 @@ public class KeycloakAdminClientServiceTest {
 
     verify(userRepresentation, times(1)).setEnabled(false);
     verify(userResource, times(1)).update(userRepresentation);
+  }
+
+  @Test
+  public void changeEmailAddress_Should_callServicesCorrectly_When_emailIsChangedAndAvailable() {
+    UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    when(userRepresentation.getEmail()).thenReturn("email");
+    UserResource userResource = mock(UserResource.class);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    UsersResource usersResource = mock(UsersResource.class);
+    when(usersResource.get(any())).thenReturn(userResource);
+    when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+
+    this.keycloakAdminClientService.updateEmail("userId", "anotherEmail");
+
+    verify(userRepresentation, times(1)).setEmail("anotherEmail");
+    verify(userResource, times(1)).update(any());
   }
 
 }

@@ -21,6 +21,7 @@ import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Violation rule to find consultants without necessary rocket chat room for directly assigned
@@ -40,6 +41,7 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
    * @return the generated violations
    */
   @Override
+  @Transactional
   public List<ViolationDTO> generateViolations() {
     return StreamSupport.stream(this.consultantRepository.findAll().spliterator(), false)
         .map(consultant -> this.sessionRepository
@@ -51,8 +53,15 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
   }
 
   private ViolationDTO fromMissingSession(Session session) {
-    UserInfoResponseDTO userInfoWithRooms = this.rocketChatService
-        .getUserInfo(session.getConsultant().getRocketChatId());
+    UserInfoResponseDTO userInfoWithRooms;
+    try {
+      userInfoWithRooms = this.rocketChatService
+          .getUserInfo(session.getConsultant().getRocketChatId());
+    } catch (Exception e) {
+      return ViolationByConsultantBuilder.getInstance(session.getConsultant())
+          .withReason(e.getCause().getMessage())
+          .build();
+    }
     List<UserRoomDTO> rooms = userInfoWithRooms.getUser().getRooms();
     List<String> rocketChatRoomsOfUser = rooms.stream()
         .map(UserRoomDTO::getRoomId)

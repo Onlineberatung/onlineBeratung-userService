@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.8.0...v2.8.1) (2021-03-22)
+
+## [2.8.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.7.1...v2.8.0) (2021-03-22)
+
+
+### Features
+
+* adapt api changes to match react admin requirements ([ba60865](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ba60865772176aaea46fc657fb98268055312c0d))
+* adapt email change on database and rocket chat ([76a293a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/76a293afcc03d9cb69daf8e29d26b9637d408305))
+* add documentation and delete action for asker agencies ([2b22613](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2b2261350bfdd5c610841b6408db659e5fa66084))
+* add endpoint to set mobile device token ([0b7d1b9](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0b7d1b9e816c985945f0810927a951cb3dac2895))
+* added call to mark an asker's account for deletion ([7dcdb85](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/7dcdb852be7a00eb8c28e5307c1d346d59b5534c))
+* added configurable csrf whitelist header property ([5fab78b](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5fab78b21852715ffbe4bc65c0f870c068ff0f65))
+* added further steps message to enquiry message process ([3e8d2e6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3e8d2e63db2f8bc03a9ba5e5e4daaca7c11abae3))
+* added message service api client generation ([3da47b8](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3da47b800942be6f8b4a7d3a81c1c649c7bc32cf))
+* append user and consultant repository to retrieve all deleted user accounts ([a159768](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a1597687e7ab3a8ee27191f189cd8b9c3ec4aa82))
+* clean registration model ([d275a66](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d275a6688ffeca0fd05614272f4fb4ef2f3c525b))
+* generate and integrate mail service api client ([1e9cc66](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1e9cc66cd36a8e8af3cf4f8bf12ba15796c50bc7))
+* integrate configurable firebase push notification service ([d87424c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d87424c0d1fcb8fe28b8887b3272a743e4ef7f08))
+* integrate firebase push message service trigger ([42b21a5](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/42b21a5f91cf5375598ee72ee0f2d24a3eb1a2f0))
+* provide deletion framework for user accounts ([da2272f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/da2272fabb1912307bb4df0d669bf03bb22089ec))
+* provide persistence for mobile token on user ([5a196dc](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5a196dc8efa09f276e53538a64c5822e3099ea27))
+* provide setting and changing for an email address ([6858989](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/685898962f06e37d50b4139f66fae02fdeafc23a))
+* spike for u25 push notifications ([f2f43c1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f2f43c13b052931b0caaf1b8e770326abbb45d9a))
+
+
+### Bug Fixes
+
+* adapt file handling ([07b1867](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/07b18676a0e4ad7d8e8f5147a704262bccde36c9))
+* added count parameter to retrieve all group members ([265e095](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/265e09541c9d9dd3e4f933a9639487088854acec))
+* change email available check hanlding on keycloak ([e14e47f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e14e47f5d0998071b3d5afeca4c1a5cd73ca5a22))
+* do not throw not found when agency has no consultant ([023c28a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/023c28a60080936dc16eb32b879c1a86b0b65917))
+* fixed error during email or username already taken check ([e4a2df2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e4a2df2a2e945f3a012565d53606abe89c02946c))
+* fixed error during email or username already taken check ([6b2bb8f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6b2bb8f54700cc22fb971365876ee1276599e1ac))
+* generalize exception ([f1f9f3f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f1f9f3f646fe2b60323bfdf9065163cb65539ce1))
+* remove obsolete test condition ([c6d4cb9](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c6d4cb90d22cccbbe8faaa9b97a1d9618e92042a))
+* removed obsolete test ([471df8f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/471df8f2a63f1ce1689522667c46795d122b52ad))
+
+### [2.7.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.7.0...v2.7.1) (2021-02-23)
+
 ## [2.7.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.6.1...v2.7.0) (2021-02-23)
 
 

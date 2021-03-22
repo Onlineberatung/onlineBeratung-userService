@@ -48,13 +48,13 @@ public class UserAdminControllerIT {
   protected static final String SESSION_PATH = ROOT_PATH + "/sessions";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
-  protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultant/";
+  protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultants/";
   protected static final String DELETE_CONSULTANT_PATH = GET_CONSULTANT_PATH + "1234";
   protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
-  protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultant/%s/agencies";
-  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s/agency";
-  protected static final String DELETE_CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultant/%s"
-      + "/agency/%s";
+  protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultants/%s/agencies";
+  protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultants/%s/agencies";
+  protected static final String DELETE_CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultants/%s"
+      + "/agencies/%s";
   protected static final String AGENCY_CHANGE_TYPE_PATH = ROOT_PATH + "/agency/1/changetype";
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";

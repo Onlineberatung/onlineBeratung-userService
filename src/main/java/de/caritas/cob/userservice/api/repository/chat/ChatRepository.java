@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.chat;
 
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,4 +24,6 @@ public interface ChatRepository extends CrudRepository<Chat, Long> {
   List<Chat> findByAgencyIds(@Param(value = "agency_ids") Set<Long> agencyIds);
 
   Optional<Chat> findByGroupId(String groupId);
+
+  List<Chat> findByChatOwner(Consultant chatOwner);
 }

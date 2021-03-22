@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -66,7 +65,7 @@ public class Session {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @ManyToOne(optional = true)
+  @ManyToOne
   @JoinColumn(name = "consultant_id", nullable = false)
   @Fetch(FetchMode.SELECT)
   private Consultant consultant;
@@ -88,7 +87,7 @@ public class Session {
 
   @Column(name = "message_date")
   @Nullable
-  private Date enquiryMessageDate;
+  private LocalDateTime enquiryMessageDate;
 
   @Column(name = "rc_group_id")
   private String groupId;

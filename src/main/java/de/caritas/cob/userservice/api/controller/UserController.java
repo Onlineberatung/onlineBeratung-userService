@@ -1,8 +1,9 @@
 package de.caritas.cob.userservice.api.controller;
 
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
@@ -10,6 +11,8 @@ import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
@@ -33,6 +36,7 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
@@ -41,8 +45,6 @@ import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.ChatDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -57,12 +59,12 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -71,6 +73,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -104,7 +107,6 @@ public class UserController implements UsersApi {
   private final @NotNull SessionListFacade sessionListFacade;
   private final @NotNull ConsultantAgencyService consultantAgencyService;
   private final @NotNull AssignSessionFacade assignSessionFacade;
-  private final @NotNull KeycloakService keycloakService;
   private final @NotNull DecryptionService decryptionService;
   private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
   private final @NotNull ChatService chatService;
@@ -116,25 +118,36 @@ public class UserController implements UsersApi {
   private final @NotNull GetChatMembersFacade getChatMembersFacade;
   private final @NotNull CreateUserFacade createUserFacade;
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
+  private final @NotNull ConsultantService consultantService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
    *
    * @param user the {@link UserDTO}
-   * @return {@link ResponseEntity} containing {@link CreateUserResponseDTO}
+   * @return {@link ResponseEntity} with possible registration conflict information in header
    */
   @Override
   public ResponseEntity<CreateUserResponseDTO> registerUser(@Valid @RequestBody UserDTO user) {
-
     user.setNewUserAccount(true);
-    KeycloakCreateUserResponseDTO response = createUserFacade.createUserAndInitializeAccount(user);
-
-    if (!response.getStatus().equals(HttpStatus.CONFLICT)) {
-      return new ResponseEntity<>(response.getStatus());
-    } else {
-      return new ResponseEntity<>(response.getResponseDTO(),
-          response.getStatus());
+    try {
+      createUserFacade.createUserAndInitializeAccount(user);
+    } catch (CustomValidationHttpStatusException exception) {
+      return new ResponseEntity<>(buildCreateUserResponseDTO(exception.getCustomHttpHeader()),
+          HttpStatus.CONFLICT);
     }
+
+    return new ResponseEntity<>(HttpStatus.CREATED);
+  }
+
+  private CreateUserResponseDTO buildCreateUserResponseDTO(HttpHeaders header) {
+    List<String> reasonList = header.get("X-Reason");
+    if (isNull(reasonList)) {
+      throw new InternalServerErrorException(String.format("No X-Reason Header defined for "
+          + "header: %s", header));
+    }
+    return new CreateUserResponseDTO()
+          .usernameAvailable(reasonList.contains(USERNAME_NOT_AVAILABLE.toString()) ? 0 : 1)
+          .emailAvailable(reasonList.contains(EMAIL_NOT_AVAILABLE.toString()) ? 0 : 1);
   }
 
   /**
@@ -245,8 +258,8 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateAbsence(@RequestBody AbsenceDTO absence) {
-
-    this.userAccountProvider.updateConsultantAbsent(absence);
+    Consultant consultant = userAccountProvider.retrieveValidatedConsultant();
+    this.consultantService.updateConsultantAbsent(consultant, absence);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -550,30 +563,15 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Changes the (Keycloak) password of a user.
+   * Changes the (Keycloak) password of the currently authenticated user.
    *
-   * @param passwordDTO (required)
+   * @param passwordDTO (required) {@link PasswordDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
   public ResponseEntity<Void> updatePassword(@RequestBody PasswordDTO passwordDTO) {
-
-    // Check if old password is valid
-    Optional<ResponseEntity<LoginResponseDTO>> loginResponse =
-        keycloakService.loginUser(authenticatedUser.getUsername(), passwordDTO.getOldPassword());
-
-    if (loginResponse.isPresent() && loginResponse.get().getStatusCode().equals(HttpStatus.OK)
-        && keycloakService
-        .logoutUser(requireNonNull(loginResponse.get().getBody()).getRefresh_token())
-        && keycloakService.changePassword(authenticatedUser.getUserId(),
-        passwordDTO.getNewPassword())) {
-      return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    return new ResponseEntity<>(loginResponse.isPresent()
-        && loginResponse.get().getStatusCode().equals(HttpStatus.BAD_REQUEST)
-        ? HttpStatus.BAD_REQUEST
-        : HttpStatus.INTERNAL_SERVER_ERROR);
+    this.userAccountProvider.changePassword(passwordDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
@@ -735,11 +733,49 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link ConsultantSessionDTO}
    */
   @Override
-  public ResponseEntity<ConsultantSessionDTO> fetchSessionForConsultant(@PathVariable Long sessionId) {
+  public ResponseEntity<ConsultantSessionDTO> fetchSessionForConsultant(
+      @PathVariable Long sessionId) {
 
     Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
     ConsultantSessionDTO consultantSessionDTO = sessionService
         .fetchSessionForConsultant(sessionId, consultant);
     return new ResponseEntity<>(consultantSessionDTO, HttpStatus.OK);
+  }
+
+  /**
+   * Updates or sets the email address for the current authenticated user.
+   *
+   * @param emailAddress the email address to set
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
+    this.userAccountProvider.changeUserAccountEmailAddress(emailAddress);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Flags an user account for deletion and deactivates the Keycloak account.
+   *
+   * @param deleteUserAccountDTO (required) {@link DeleteUserAccountDTO}
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> deactivateAndFlagUserAccountForDeletion(
+      @Valid DeleteUserAccountDTO deleteUserAccountDTO) {
+    this.userAccountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Updates or sets the mobile client token for the current authenticated user.
+   *
+   * @param mobileToken the mobile devide identifier
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateMobileToken(@Valid String mobileToken) {
+    this.userAccountProvider.updateUserMobileToken(mobileToken);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

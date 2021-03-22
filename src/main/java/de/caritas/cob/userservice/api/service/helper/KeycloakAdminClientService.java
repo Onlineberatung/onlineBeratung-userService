@@ -1,15 +1,16 @@
 package de.caritas.cob.userservice.api.service.helper;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.authorization.Authorities;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -44,9 +45,6 @@ public class KeycloakAdminClientService {
   @Value("${keycloakService.user.role}")
   private String keycloakUserRole;
 
-  @Value("${keycloakService.techuser.id}")
-  private String keycloakTechUserId;
-
   @Value("${api.error.keycloakError}")
   private String keycloakError;
 
@@ -80,43 +78,26 @@ public class KeycloakAdminClientService {
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
       final String firstName, final String lastName) {
     UserRepresentation kcUser = getUserRepresentation(user, firstName, lastName);
-    Response response = this.keycloakAdminClientAccessor.getUsersResource()
-        .create(kcUser);
-    KeycloakCreateUserResponseDTO keycloakResponse = new KeycloakCreateUserResponseDTO();
-    int usernameAvailable = 1;
-    int emailAvailable = 1;
+    try (Response response = this.keycloakAdminClientAccessor.getUsersResource().create(kcUser)) {
 
-    if (response.getStatus() == HttpStatus.CREATED.value()) {
-      return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));
-    } else {
-      String errorMsg = response.readEntity(ErrorRepresentation.class).getErrorMessage();
-      keycloakResponse.setStatus(HttpStatus.CONFLICT);
-
-      // Check whether username and/or e-mail address are already taken and set the appropriate
-      // error codes and messages
-      if (errorMsg.equals(keycloakErrorEmail)) {
-        // Only e-mail address is already taken
-        emailAvailable = 0;
-      } else if (errorMsg.equals(keycloakErrorUsername)) {
-        // Username is taken
-        usernameAvailable = 0;
-
-        if (isEmailNotAvailable(user.getEmail())) {
-          // and e-mail address is taken also
-          emailAvailable = 0;
-        }
-      } else {
-        throw new KeycloakException(keycloakError);
+      if (response.getStatus() == HttpStatus.CREATED.value()) {
+        return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));
       }
+      handleCreateKeycloakUserError(response);
     }
+    throw new InternalServerErrorException(
+        String.format("Could not create Keycloak account for: %s %nKeycloak error: %s",
+            user.toString(), keycloakError));
+  }
 
-    if (keycloakResponse.getStatus().equals(HttpStatus.CONFLICT)) {
-      keycloakResponse.setResponseDTO(
-          new CreateUserResponseDTO().usernameAvailable(usernameAvailable)
-              .emailAvailable(emailAvailable));
+  private void handleCreateKeycloakUserError(Response response) {
+    String errorMsg = response.readEntity(ErrorRepresentation.class).getErrorMessage();
+    if (errorMsg.equals(keycloakErrorEmail)) {
+      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
-
-    return keycloakResponse;
+    if (errorMsg.equals(keycloakErrorUsername)) {
+      throw new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT);
+    }
   }
 
   /**
@@ -139,26 +120,10 @@ public class KeycloakAdminClientService {
 
   @Synchronized
   private boolean isEmailNotAvailable(String email) {
-    // Get user resource and change e-mail address of technical user
-    UserResource techUserResource =
-        this.keycloakAdminClientAccessor.getUsersResource()
-            .get(keycloakTechUserId);
-    UserRepresentation userRepresentation = techUserResource.toRepresentation();
-    String originalEmail = userRepresentation.getEmail();
-    userRepresentation.setEmail(email);
-    // Try to update technical user's e-mail address
-    try {
-      techUserResource.update(userRepresentation);
-    } catch (Exception e) {
-      LogService.logDebug(String.format("E-Mail address already existing in Keycloak: %s", email));
-      return true;
-    }
-
-    // Reset technical user
-    userRepresentation.setEmail(originalEmail);
-    techUserResource.update(userRepresentation);
-
-    return false;
+    return this.keycloakAdminClientAccessor.getUsersResource()
+        .search(email, 0, Integer.MAX_VALUE)
+        .stream()
+        .anyMatch(userRepresentation -> userRepresentation.getEmail().equals(email));
   }
 
   private CredentialRepresentation getCredentialRepresentation(final String password) {
@@ -276,25 +241,44 @@ public class KeycloakAdminClientService {
   }
 
   /**
-   * Updates first name, last name and email address of user wth given id in keycloak.
+   * Updates first name, last name and email address of user with given id in keycloak.
    *
-   * @param userId Keycloak user ID
-   * @param userDTO {@link UserDTO}
+   * @param userId    Keycloak user ID
+   * @param userDTO   {@link UserDTO}
    * @param firstName the new first name
-   * @param lastName the new last name
+   * @param lastName  the new last name
    */
   public void updateUserData(final String userId, UserDTO userDTO,
       String firstName, String lastName) {
     UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
-    if (hasEmailAddressChanged(userResource, userDTO) && isEmailNotAvailable(userDTO.getEmail())) {
-      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE);
-    }
+    verifyEmail(userResource, userDTO.getEmail());
     userResource.update(getUserRepresentation(userDTO, firstName, lastName));
   }
 
-  private boolean hasEmailAddressChanged(UserResource userResource, UserDTO userDTO) {
-    return !userResource.toRepresentation().getEmail().equals(userDTO.getEmail());
+  private void verifyEmail(UserResource userResource, String email) {
+    if (hasEmailAddressChanged(userResource, email) && isEmailNotAvailable(email)) {
+      throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE, HttpStatus.CONFLICT);
+    }
+  }
+
+  private boolean hasEmailAddressChanged(UserResource userResource, String email) {
+    return !userResource.toRepresentation().getEmail().equals(email);
+  }
+
+  /**
+   * Updates the email address of user with given id in keycloak.
+   *
+   * @param userId       Keycloak user ID
+   * @param emailAddress the email address to set
+   */
+  public void updateEmail(String userId, String emailAddress) {
+    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId);
+    verifyEmail(userResource, emailAddress);
+    UserRepresentation representation = userResource.toRepresentation();
+    representation.setEmail(emailAddress);
+    userResource.update(representation);
   }
 
   /**
@@ -304,9 +288,7 @@ public class KeycloakAdminClientService {
    */
   public void rollBackUser(String userId) {
     try {
-      this.keycloakAdminClientAccessor.getUsersResource()
-          .get(userId)
-          .remove();
+      deleteUser(userId);
       LogService.logDebug(String.format("User %s has been removed due to rollback", userId));
     } catch (Exception e) {
       LogService
@@ -315,9 +297,20 @@ public class KeycloakAdminClientService {
   }
 
   /**
+   * Deletes the user with the given user id in keycloak.
+   *
+   * @param userId the userId
+   */
+  public void deleteUser(String userId) {
+    this.keycloakAdminClientAccessor.getUsersResource()
+        .get(userId)
+        .remove();
+  }
+
+  /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId Keycloak user ID
+   * @param userId    Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */

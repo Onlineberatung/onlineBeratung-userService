@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER;
-import static de.caritas.cob.userservice.api.helper.EmailNotificationHelper.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -16,15 +16,13 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
-import de.caritas.cob.userservice.api.model.mailservice.MailDTO;
-import de.caritas.cob.userservice.api.model.mailservice.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -126,14 +124,13 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewMessageNotificationConsultant(String email, String name,
       String postCode) {
-    return MailDTO.builder()
+    return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT)
         .email(email)
         .templateData(asList(
-            new TemplateDataDTO("name", name),
-            new TemplateDataDTO("plz", postCode),
-            new TemplateDataDTO("url", applicationBaseUrl)))
-        .build();
+            new TemplateDataDTO().key("name").value(name),
+            new TemplateDataDTO().key("plz").value(postCode),
+            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
   }
 
   private List<MailDTO> buildMailForAsker() {
@@ -165,14 +162,13 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewMessageNotificationAsker(String email, String consultantName,
       String askerName) {
-    return MailDTO.builder()
+    return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER)
         .email(email)
         .templateData(asList(
-            new TemplateDataDTO("consultantName", consultantName),
-            new TemplateDataDTO("askerName", askerName),
-            new TemplateDataDTO("url", applicationBaseUrl)))
-        .build();
+            new TemplateDataDTO().key("consultantName").value(consultantName),
+            new TemplateDataDTO().key("askerName").value(askerName),
+            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
   }
 
 }

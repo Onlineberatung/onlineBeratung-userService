@@ -2,11 +2,13 @@ package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.validation.ConsultantInputValidator;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UpdateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
@@ -24,7 +26,7 @@ public class ConsultantUpdateService {
 
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
-  private final @NonNull ConsultantInputValidator consultantInputValidator;
+  private final @NonNull UserAccountInputValidator userAccountInputValidator;
   private final @NonNull RocketChatService rocketChatService;
 
   /**
@@ -35,7 +37,7 @@ public class ConsultantUpdateService {
    * @return the updated persisted {@link Consultant}
    */
   public Consultant updateConsultant(String consultantId, UpdateConsultantDTO updateConsultantDTO) {
-    this.consultantInputValidator
+    this.userAccountInputValidator
         .validateAbsence(new UpdateConsultantDTOAbsenceInputAdapter(updateConsultantDTO));
 
     Consultant consultant =
@@ -47,7 +49,8 @@ public class ConsultantUpdateService {
     this.keycloakAdminClientService.updateUserData(consultant.getId(), userDTO,
         updateConsultantDTO.getFirstname(), updateConsultantDTO.getLastname());
 
-    this.rocketChatService.updateUser(consultant.getRocketChatId(), updateConsultantDTO);
+    this.rocketChatService
+        .updateUser(buildUserUpdateRequestDTO(consultant.getRocketChatId(), updateConsultantDTO));
 
     return updateDatabaseConsultant(updateConsultantDTO, consultant);
   }
@@ -58,8 +61,15 @@ public class ConsultantUpdateService {
     userDTO.setEmail(updateConsultantDTO.getEmail());
     userDTO.setUsername(consultant.getUsername());
 
-    this.consultantInputValidator.validateUserDTO(userDTO);
+    this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
+  }
+
+  private UserUpdateRequestDTO buildUserUpdateRequestDTO(String rcUserId,
+      UpdateConsultantDTO updateConsultantDTO) {
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(updateConsultantDTO.getEmail(),
+        updateConsultantDTO.getFirstname().concat(" ").concat(updateConsultantDTO.getLastname()));
+    return new UserUpdateRequestDTO(rcUserId, userUpdateDataDTO);
   }
 
   private Consultant updateDatabaseConsultant(UpdateConsultantDTO updateConsultantDTO,

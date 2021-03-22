@@ -9,6 +9,7 @@ CREATE TABLE USER
     CREATE_DATE     datetime,
     UPDATE_DATE     datetime,
     DELETE_DATE     datetime,
+    MOBILE_TOKEN    longtext DEFAULT NULL,
     PRIMARY KEY (USER_ID)
 );
 CREATE SEQUENCE SEQUENCE_USER

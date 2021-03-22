@@ -1,34 +1,43 @@
 package de.caritas.cob.userservice.filter;
 
+import static de.caritas.cob.userservice.config.SecurityConfig.WHITE_LIST;
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import de.caritas.cob.userservice.config.SpringFoxConfig;
 
 /**
- * This custom filter checks CSRF cookie and header token for equality
- *
+ * This custom filter checks CSRF cookie and header token for equality.
  */
 public class StatelessCsrfFilter extends OncePerRequestFilter {
 
-  private final RequestMatcher requireCsrfProtectionMatcher = new DefaultRequiresCsrfMatcher();
+  private final RequestMatcher requireCsrfProtectionMatcher;
   private final AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandlerImpl();
   private final String csrfCookieProperty;
   private final String csrfHeaderProperty;
 
-  public StatelessCsrfFilter(String cookieProperty, String headerProperty) {
+  public StatelessCsrfFilter(String cookieProperty, String headerProperty,
+      String csrfWhitelistHeaderProperty) {
     this.csrfCookieProperty = cookieProperty;
     this.csrfHeaderProperty = headerProperty;
+    this.requireCsrfProtectionMatcher = new DefaultRequiresCsrfMatcher(csrfWhitelistHeaderProperty);
   }
 
   @Override
@@ -36,19 +45,10 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
 
     if (requireCsrfProtectionMatcher.matches(request)) {
-      final String csrfTokenValue = request.getHeader(csrfHeaderProperty);
-      final Cookie[] cookies = request.getCookies();
+      final String csrfTokenValue = request.getHeader(this.csrfHeaderProperty);
+      String csrfCookieValue = retrieveCsrfCookieValue(request);
 
-      String csrfCookieValue = null;
-      if (cookies != null) {
-        for (Cookie cookie : cookies) {
-          if (cookie.getName().equals(csrfCookieProperty)) {
-            csrfCookieValue = cookie.getValue();
-          }
-        }
-      }
-
-      if (csrfTokenValue == null || !csrfTokenValue.equals(csrfCookieValue)) {
+      if (isNull(csrfTokenValue) || !csrfTokenValue.equals(csrfCookieValue)) {
         accessDeniedHandler.handle(request, response,
             new AccessDeniedException("Missing or non-matching CSRF-token"));
         return;
@@ -57,19 +57,39 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  public static final class DefaultRequiresCsrfMatcher implements RequestMatcher {
+  private String retrieveCsrfCookieValue(HttpServletRequest request) {
+    final Cookie[] cookies = request.getCookies();
+    return isNull(cookies) ? null : Stream.of(cookies)
+        .filter(cookie -> cookie.getName().equals(this.csrfCookieProperty))
+        .map(Cookie::getValue)
+        .findFirst()
+        .orElse(null);
+  }
+
+  @RequiredArgsConstructor
+  private static final class DefaultRequiresCsrfMatcher implements RequestMatcher {
     private final Pattern allowedMethods = Pattern.compile("^(HEAD|TRACE|OPTIONS)$");
+    private final @NonNull String csrfWhitelistHeaderProperty;
 
     @Override
     public boolean matches(HttpServletRequest request) {
-
-      // Allow specific whitelist items to disable CSRF protection for Swagger UI documentation
-      if (Arrays.stream(SpringFoxConfig.WHITE_LIST).parallel()
-          .anyMatch(request.getRequestURI().toLowerCase()::contains)) {
-        return false;
-      }
-
-      return !allowedMethods.matcher(request.getMethod()).matches();
+      return !(isWhiteListUrl(request) || isWhiteListHeader(request) || isAllowedMehod(request));
     }
+
+    private boolean isWhiteListUrl(HttpServletRequest request) {
+      List<String> csrfWhitelist = new ArrayList<>(Arrays.asList(WHITE_LIST));
+      csrfWhitelist.add("/useradmin");
+      return csrfWhitelist.parallelStream()
+          .anyMatch(request.getRequestURI().toLowerCase()::contains);
+    }
+
+    private boolean isWhiteListHeader(HttpServletRequest request) {
+      return isNotBlank(request.getHeader(this.csrfWhitelistHeaderProperty));
+    }
+
+    private boolean isAllowedMehod(HttpServletRequest request) {
+      return allowedMethods.matcher(request.getMethod()).matches();
+    }
+
   }
 }

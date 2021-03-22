@@ -7,14 +7,13 @@ import static de.caritas.cob.userservice.api.service.LogService.ASSIGN_SESSION_F
 import static de.caritas.cob.userservice.api.service.LogService.BAD_REQUEST_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.CREATE_SESSION_FACADE_ERROR;
 import static de.caritas.cob.userservice.api.service.LogService.DB_ERROR_TEXT;
-import static de.caritas.cob.userservice.api.service.LogService.DB_INCONSITENCY_ERROR_TEXT;
+import static de.caritas.cob.userservice.api.service.LogService.DB_INCONSISTENCY_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.DECRYPTION_ERROR;
 import static de.caritas.cob.userservice.api.service.LogService.EMAIL_NOTIFICATION_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.FORBIDDEN_WARNING_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.INTERNAL_SERVER_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.KEYCLOAK_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.MAIL_SERVICE_ERROR_TEXT;
-import static de.caritas.cob.userservice.api.service.LogService.MESSAGESERVICE_HELPER_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.ROCKET_CHAT_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.TRUNCATION_ERROR;
 import static de.caritas.cob.userservice.api.service.LogService.UNAUTHORIZED_WARNING_TEXT;
@@ -57,7 +56,7 @@ public class LogServiceTest {
   NoSuchElementException noSuchElementException;
 
   @Mock
-  IllegalArgumentException illegalArgumentEcxeption;
+  IllegalArgumentException illegalArgumentException;
 
   @Mock
   private Logger logger;
@@ -80,7 +79,7 @@ public class LogServiceTest {
 
     LogService.logDatabaseInconsistency(ERROR_MESSAGE);
     verify(logger, times(1))
-        .error(anyString(), eq(DB_INCONSITENCY_ERROR_TEXT), eq(ERROR_MESSAGE));
+        .error(anyString(), eq(DB_INCONSISTENCY_ERROR_TEXT), eq(ERROR_MESSAGE));
 
   }
 
@@ -214,14 +213,14 @@ public class LogServiceTest {
   @Test
   public void logIllegalArgumentException_Should_LogExceptionStackTrace() {
 
-    LogService.logIllegalArgumentException(illegalArgumentEcxeption);
-    verify(illegalArgumentEcxeption, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+    LogService.logIllegalArgumentException(illegalArgumentException);
+    verify(illegalArgumentException, atLeastOnce()).printStackTrace(any(PrintWriter.class));
   }
 
   @Test
   public void logMailServiceHelperException_Should_LogErrorMessageAndExceptionStackTrace() {
 
-    LogService.logMailServiceHelperException(ERROR_MESSAGE, exception);
+    LogService.logMailServiceException(ERROR_MESSAGE, exception);
     verify(logger, times(1))
         .error(anyString(), eq(MAIL_SERVICE_ERROR_TEXT), eq(ERROR_MESSAGE));
     verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
@@ -230,7 +229,7 @@ public class LogServiceTest {
   @Test
   public void logMailServiceHelperException_Should_LogExceptionStackTrace() {
 
-    LogService.logMailServiceHelperException(ERROR_MESSAGE);
+    LogService.logMailServiceException(ERROR_MESSAGE);
     verify(logger, times(1))
         .error(anyString(), eq(MAIL_SERVICE_ERROR_TEXT), eq(ERROR_MESSAGE));
   }
@@ -267,23 +266,6 @@ public class LogServiceTest {
     LogService.logAcceptEnquiryFacadeError(ERROR_MESSAGE);
     verify(logger, times(1))
         .error(anyString(), eq(ACCEPT_ENQUIRY_ERROR_TEXT), eq(ERROR_MESSAGE));
-  }
-
-  @Test
-  public void logMessageServiceHelperException_should_LogErrorMessage() {
-
-    LogService.logMessageServiceHelperException(ERROR_MESSAGE, EXCEPTION);
-    verify(logger, times(1))
-        .error(anyString(), eq(MESSAGESERVICE_HELPER_ERROR_TEXT), eq(ERROR_MESSAGE));
-  }
-
-  @Test
-  public void logMessageServiceHelperException_Should_LogErrorMessageAndExceptionStackTrace() {
-
-    LogService.logMessageServiceHelperException(ERROR_MESSAGE, exception);
-    verify(logger, times(1))
-        .error(anyString(), eq(MESSAGESERVICE_HELPER_ERROR_TEXT), eq(ERROR_MESSAGE));
-    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
   }
 
   @Test
@@ -327,7 +309,7 @@ public class LogServiceTest {
   public void logInfo_Should_LogMessage() {
 
     LogService.logInfo(ERROR_MESSAGE);
-    verify(logger, times(1)).info(eq(ERROR_MESSAGE));
+    verify(logger, times(1)).info(ERROR_MESSAGE);
   }
 
   @Test

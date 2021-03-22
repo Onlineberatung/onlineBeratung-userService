@@ -239,6 +239,61 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/email:
+    put:
+      tags:
+        - user-controller
+      summary: 'Sets or updates the email address of the authorized user account [Authorization:
+          Role: asker/consultant]'
+      operationId: updateEmailAddress
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: string
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        409:
+          description: CONFLICT - invalid/unavailable email
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/mobiletoken:
+    put:
+      tags:
+        - user-controller
+      summary: 'Sets or updates the mobile registration token of the authorized asker account.
+      This token is used to send push notifications to native mobile applications on android and
+      ios. [Authorization: Role: asker]'
+      operationId: updateMobileToken
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: string
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/consultants:
     get:
       tags:
@@ -941,6 +996,32 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/account:
+    delete:
+      tags:
+        - user-controller
+      summary: 'Flags an asker account for deletion. The account will be deactivated and deleted
+       within 48 hours. [Authorization: Role: user]'
+      operationId: deactivateAndFlagUserAccountForDeletion
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/DeleteUserAccountDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /liveproxy/send:
     post:
       tags:
@@ -995,10 +1076,6 @@ components:
           type: string
           format: password
           example: pass@w0rd
-        email:
-          type: string
-          format: email
-          example: max@mustermann.de
         addictiveDrugs:
           type: string
           example: 2,4
@@ -1161,6 +1238,8 @@ components:
           $ref: '#/components/schemas/ForwardMessageDTO'
         videoCallMessageDTO:
           $ref: '#/components/schemas/VideoCallMessageDTO'
+        messageType:
+          $ref: '#/components/schemas/MessageType'
 
     ForwardMessageDTO:
       type: object
@@ -1201,6 +1280,13 @@ components:
         initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
+
+    MessageType:
+      type: string
+      enum:
+        - "FURTHER_STEPS"
+        - "FORWARD"
+        - "VIDEOCALL"
 
     ConsultantSessionDTO:
       type: object
@@ -1671,6 +1757,15 @@ components:
         rcGroupId:
           type: string
           example: fR2Rz7dmWmHdXE8uz
+
+    DeleteUserAccountDTO:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          example: p@ssw0rd
 
   securitySchemes:
     Bearer:

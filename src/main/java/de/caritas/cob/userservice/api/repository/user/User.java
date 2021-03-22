@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.user;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
@@ -37,7 +38,7 @@ public class User {
   @NonNull
   private String userId;
 
-  @Column(name = "id_old", updatable = false, nullable = true)
+  @Column(name = "id_old", updatable = false)
   private Long oldId;
 
   @Column(name = "username", updatable = false, nullable = false)
@@ -45,15 +46,15 @@ public class User {
   @NonNull
   private String username;
 
-  @Column(name = "email", updatable = false, nullable = false)
+  @Column(name = "email", nullable = false)
   @Size(max = 255)
   @NonNull
   private String email;
 
-  @Column(name = "rc_user_id", updatable = true, nullable = true)
+  @Column(name = "rc_user_id")
   private String rcUserId;
 
-  @Column(name = "language_formal", updatable = true, nullable = false)
+  @Column(name = "language_formal", nullable = false)
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean languageFormal;
 
@@ -62,6 +63,12 @@ public class User {
 
   @OneToMany(mappedBy = "user")
   private Set<UserAgency> userAgencies;
+
+  @Column(name = "mobile_token")
+  private String mobileToken;
+
+  @Column(name = "delete_date")
+  private LocalDateTime deleteDate;
 
   public User(@Size(max = 36) String userId, Long oldId, @Size(max = 255) String username,
       @Size(max = 255) String email, boolean languageFormal) {

@@ -2,11 +2,6 @@ package de.caritas.cob.userservice.api.facade;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import java.util.Optional;
-import java.util.Set;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -18,7 +13,12 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.UserService;
+import de.caritas.cob.userservice.api.service.user.UserService;
+import java.util.Optional;
+import java.util.Set;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 /**
  * Facade for capsuling to get a chat
