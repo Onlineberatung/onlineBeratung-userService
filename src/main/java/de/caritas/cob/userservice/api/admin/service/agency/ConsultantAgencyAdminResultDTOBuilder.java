@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
@@ -66,16 +66,18 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
   public ConsultantAgencyAdminResultDTO build() {
     return new ConsultantAgencyAdminResultDTO()
         .embedded(buildSessionAdminResult())
-        .links(buildResultLinks());
+        .links(buildResultLinks())
+        .total(nonNullConsultantAgencies().size());
   }
 
   private List<ConsultantAgencyAdminDTO> buildSessionAdminResult() {
-    if (isNull(this.agencyList)) {
-      return emptyList();
-    }
-    return this.agencyList.stream()
+    return nonNullConsultantAgencies().stream()
         .map(this::fromConsultantAgency)
         .collect(Collectors.toList());
+  }
+
+  private List<ConsultantAgency> nonNullConsultantAgencies() {
+    return nonNull(this.agencyList) ? this.agencyList : emptyList();
   }
 
   private ConsultantAgencyAdminDTO fromConsultantAgency(ConsultantAgency consultantAgency) {
