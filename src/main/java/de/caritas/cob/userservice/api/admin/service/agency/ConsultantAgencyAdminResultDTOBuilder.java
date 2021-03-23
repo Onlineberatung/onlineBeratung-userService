@@ -84,6 +84,7 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
     ConsultantAgencyLinks consultantAgencyLinks = new ConsultantAgencyLinks()
         .delete(buildDeleteConsultantAgencyLink(consultantAgency));
     return new ConsultantAgencyAdminDTO()
+        .id(consultantAgency.getId())
         .agencyId(consultantAgency.getAgencyId())
         .consultantId(consultantAgency.getConsultant().getId())
         .createDate(String.valueOf(consultantAgency.getCreateDate()))
