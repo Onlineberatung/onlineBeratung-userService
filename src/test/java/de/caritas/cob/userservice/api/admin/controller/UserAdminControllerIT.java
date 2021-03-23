@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
+import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
@@ -50,6 +51,7 @@ public class UserAdminControllerIT {
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultants/";
   protected static final String DELETE_CONSULTANT_PATH = GET_CONSULTANT_PATH + "1234";
+  protected static final String DELETE_ASKER_PATH = ROOT_PATH + "/askers/1234";
   protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
   protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultants/%s/agencies";
   protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultants/%s/agencies";
@@ -79,6 +81,9 @@ public class UserAdminControllerIT {
 
   @MockBean
   private ConsultingTypeAdminService consultingTypeAdminService;
+
+  @MockBean
+  private UserAdminFacade userAdminFacade;
 
   @Test
   public void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
@@ -294,6 +299,17 @@ public class UserAdminControllerIT {
 
     verify(this.consultantAdminFacade, times(1))
         .markConsultantForDeletion(eq("1234"));
+  }
+
+  @Test
+  public void deleteAsker_Should_returnOk_When_requiredParamIsGiven()
+      throws Exception {
+    this.mvc.perform(delete(DELETE_ASKER_PATH)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.userAdminFacade, times(1))
+        .markAskerForDeletion(eq("1234"));
   }
 
 }
