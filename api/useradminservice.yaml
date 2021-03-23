@@ -218,6 +218,34 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /useradmin/askers/{askerId}:
+    delete:
+      tags:
+        - admin-user-controller
+      summary: 'Delete a asker by given id [Authorization: Role: consultant-admin]'
+      operationId: markAskerForDeletion
+      parameters:
+        - name: askerId
+          in: path
+          description: asker id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - asker was marked for deletion successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - asker not found
+        409:
+          description: CONFLICT - asker is already marked for deletion
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /useradmin/consultingtypes:
     get:
       tags:
@@ -422,6 +450,8 @@ components:
         consultants:
           $ref: '#/components/schemas/HalLink'
         createConsultant:
+          $ref: '#/components/schemas/HalLink'
+        deleteAsker:
           $ref: '#/components/schemas/HalLink'
 
     HalLink:
