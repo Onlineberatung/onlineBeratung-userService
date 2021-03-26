@@ -55,6 +55,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.AskerImportService;
@@ -1805,7 +1806,8 @@ public class UserControllerAuthorizationIT {
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
-        .content("token")
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token(
+            "token")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
