@@ -151,6 +151,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
@@ -2195,11 +2196,11 @@ public class UserControllerIT {
   public void updateMobileToken_Should_ReturnOk_When_RequestOk() throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
         .contentType(MediaType.APPLICATION_JSON)
-        .content("AksagAosagZZZ")
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token("token")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(accountProvider, times(1)).updateUserMobileToken("AksagAosagZZZ");
+    verify(accountProvider, times(1)).updateUserMobileToken("token");
   }
 
   @Test
