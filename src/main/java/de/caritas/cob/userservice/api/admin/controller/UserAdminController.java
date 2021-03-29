@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.controller;
 
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
+import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
@@ -42,6 +43,7 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull ConsultingTypeAdminService consultingTypeAdminService;
   private final @NonNull ViolationReportGenerator violationReportGenerator;
   private final @NonNull ConsultantAdminFacade consultantAdminFacade;
+  private final @NonNull UserAdminFacade userAdminFacade;
 
   /**
    * Creates the root hal based navigation entity.
@@ -214,6 +216,17 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<Void> changeAgencyType(Long agencyId, @Valid AgencyTypeDTO agencyTypeDTO) {
     this.consultantAdminFacade.changeAgencyType(agencyId, agencyTypeDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Entry point to mark a asker for deletion.
+   *
+   * @param askerId asker id (required)
+   */
+  @Override
+  public ResponseEntity<Void> markAskerForDeletion(String askerId) {
+    this.userAdminFacade.markAskerForDeletion(askerId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }
