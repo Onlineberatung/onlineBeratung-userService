@@ -27,9 +27,9 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
@@ -100,8 +100,6 @@ public class SessionServiceTest {
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
-  private final List<Session> SESSION_LIST = Arrays.asList(SESSION, SESSION_2);
-  private final List<Session> SESSION_LIST_SINGLE = Collections.singletonList(SESSION);
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = Collections
       .singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
@@ -120,6 +118,8 @@ public class SessionServiceTest {
   private SessionDataHelper sessionDataHelper;
   @Mock
   private UserHelper userHelper;
+  @Mock
+  private ConsultantService consultantService;
 
   @Before
   public void setUp() {
@@ -179,7 +179,7 @@ public class SessionServiceTest {
 
     InternalServerErrorException ex = new InternalServerErrorException("service error") {
     };
-    when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
+    when(sessionService.saveSession(any())).thenThrow(ex);
 
     try {
       sessionService.updateConsultantAndStatusForSession(SESSION, CONSULTANT, SessionStatus.NEW);
@@ -204,7 +204,7 @@ public class SessionServiceTest {
 
     DataAccessException ex = new DataAccessException("database error") {
     };
-    when(sessionRepository.save(Mockito.any())).thenThrow(ex);
+    when(sessionRepository.save(any())).thenThrow(ex);
 
     try {
       sessionService.saveSession(SESSION);
@@ -220,7 +220,7 @@ public class SessionServiceTest {
 
     DataAccessException ex = new DataAccessException("database error") {
     };
-    Mockito.doThrow(ex).when(sessionRepository).delete(Mockito.any(Session.class));
+    Mockito.doThrow(ex).when(sessionRepository).delete(any(Session.class));
 
     try {
       sessionService.deleteSession(SESSION);
@@ -242,7 +242,7 @@ public class SessionServiceTest {
   @Test
   public void initializeSession_Should_ReturnSession() {
 
-    when(sessionRepository.save(Mockito.any())).thenReturn(SESSION);
+    when(sessionRepository.save(any())).thenReturn(SESSION);
 
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
@@ -253,7 +253,7 @@ public class SessionServiceTest {
   @Test
   public void initializeSession_TeamSession_Should_ReturnSession() {
 
-    when(sessionRepository.save(Mockito.any())).thenReturn(SESSION);
+    when(sessionRepository.save(any())).thenReturn(SESSION);
 
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
@@ -287,7 +287,7 @@ public class SessionServiceTest {
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(Mockito.any())).thenThrow(ex);
+    when(agencyServiceHelper.getAgencies(any())).thenThrow(ex);
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -305,7 +305,7 @@ public class SessionServiceTest {
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(Mockito.any())).thenReturn(AGENCY_DTO_LIST);
+    when(agencyServiceHelper.getAgencies(any())).thenReturn(AGENCY_DTO_LIST);
 
     assertThat(sessionService.getSessionsForUserId(USER_ID),
         everyItem(instanceOf(UserSessionResponseDTO.class)));
@@ -393,7 +393,7 @@ public class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository.findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-        Mockito.any(), Mockito.any())).thenThrow(ex);
+        any(), any())).thenThrow(ex);
 
     try {
       sessionService.getSessionsForConsultant(consultant, SESSION_STATUS_NEW);
@@ -416,7 +416,7 @@ public class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository.findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-        Mockito.any(), Mockito.any())).thenReturn(SESSION_LIST_WITH_CONSULTANT);
+        any(), any())).thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     assertThat(sessionService.getSessionsForConsultant(consultant, SESSION_STATUS_NEW),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
@@ -425,7 +425,7 @@ public class SessionServiceTest {
   @Test
   public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusInProgress() {
 
-    when(sessionRepository.findByConsultantAndStatus(Mockito.any(), Mockito.any()))
+    when(sessionRepository.findByConsultantAndStatus(any(), any()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     assertThat(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS),
@@ -433,110 +433,76 @@ public class SessionServiceTest {
   }
 
   /**
-   * Method: getSessionByGroupIdAndUserId Role: user
+   * Method: getSessionByGroupIdAndUser
    */
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsUserAuthority() {
+  public void getSessionByGroupIdAndUser_Should_ReturnSession_WhenAskerIsSessionOwner() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    session.getUser().setUserId(USER_ID);
+    when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
 
-    DataAccessException ex = new DataAccessException("reason") {
-    };
+    Session result = sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES);
 
-    when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any())).thenThrow(ex);
-
-    try {
-      sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
+    assertThat(result, instanceOf(Session.class));
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsUserAuthority() {
+  public void getSessionByGroupIdAndUser_Should_ReturnSession_WhenConsultantIsAssignedToSession() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    session.getConsultant().setId(USER_ID);
+    when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
+    when(consultantService.getConsultant(anyString()))
+        .thenReturn(Optional.of(session.getConsultant()));
 
-    when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any()))
-        .thenReturn(SESSION_LIST);
+    Session result =
+        sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
 
-    try {
-      sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
+    assertThat(result, instanceOf(Session.class));
   }
 
   @Test
-  public void getSessionByGroupIdAndUserId_Should_ReturnSession_WhenProvidedWithValidGroupIdAndUserId_AsUserAuthority() {
+  public void getSessionByGroupIdAndUser_Should_ReturnSession_WhenConsultantIsAssignedToAgencyOfSession() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
+    when(consultantService.getConsultant(anyString()))
+        .thenReturn(Optional.of(session.getConsultant()));
+    session.setAgencyId(AGENCY_ID);
+    session.getConsultant().getConsultantAgencies()
+        .forEach(consultantAgency -> consultantAgency.setAgencyId(AGENCY_ID));
 
-    when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any()))
-        .thenReturn(SESSION_LIST_SINGLE);
+    Session result =
+        sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
 
-    assertThat(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES),
-        instanceOf(Session.class));
+    assertThat(result, instanceOf(Session.class));
   }
 
-  @Test
-  public void getSessionByGroupIdAndUserId_Should_ReturnNull_WhenNoSessionFound_AsUserAuthority() {
+  @Test(expected = NotFoundException.class)
+  public void getSessionByGroupIdAndUser_Should_ThrowNotFoundException_When_SessionDoesNotExist() {
+    when(sessionRepository.findByGroupId(any())).thenReturn(Optional.empty());
 
-    when(sessionRepository.findByGroupIdAndUserUserId(Mockito.any(), Mockito.any()))
-        .thenReturn(null);
-
-    assertNull(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES));
+    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
   }
 
-  /**
-   * Method: getSessionByGroupIdAndUserId Role: consultant
-   */
+  @Test(expected = ForbiddenException.class)
+  public void getSessionByGroupIdAndUser_Should_ThrowForbiddenException_When_AskerIsNotOwnerOfSession() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
 
-  @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnDatabaseError_AsConsultantAuthority() {
-
-    DataAccessException ex = new DataAccessException("reason") {
-    };
-
-    when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
-        .thenThrow(ex);
-
-    try {
-      sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
+    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES);
   }
 
-  @Test
-  public void getSessionByGroupIdAndUserId__Should_ThrowInternalServerErrorExceptionOnCorruptData_AsConsultantAuthority() {
+  @Test(expected = ForbiddenException.class)
+  public void getSessionByGroupIdAndUser_Should_ThrowForbiddenException_When_ConsultantIsNotAssignedToSessionOrToSessionsAgency() {
+    EasyRandom easyRandom = new EasyRandom();
+    Session session = easyRandom.nextObject(Session.class);
+    session.getConsultant().setId("notDirectlyAssignedId");
+    Consultant consultant = easyRandom.nextObject(Consultant.class);
+    when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
+    when(consultantService.getConsultant(anyString()))
+        .thenReturn(Optional.of(consultant));
 
-    when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
-        .thenReturn(SESSION_LIST);
-
-    try {
-      sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-  }
-
-  @Test
-  public void getSessionByGroupIdAndUserId_Should_ReturnSession_WhenProvidedWithValidGroupIdAndUserId_AsConsultantAuthority() {
-
-    when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
-        .thenReturn(SESSION_LIST_SINGLE);
-
-    assertThat(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES),
-        instanceOf(Session.class));
-  }
-
-  @Test
-  public void getSessionByGroupIdAndUserId_Should_ReturnNull_WhenNoSessionFound_AsConsultantAuthority() {
-
-    when(sessionRepository.findByGroupIdAndConsultantId(Mockito.any(), Mockito.any()))
-        .thenReturn(null);
-
-    assertNull(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES));
+    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
   }
 
   /**
@@ -553,7 +519,7 @@ public class SessionServiceTest {
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenThrow(ex);
+            any(), any(), any(), Mockito.anyBoolean())).thenThrow(ex);
 
     try {
       sessionService.getTeamSessionsForConsultant(consultant);
@@ -571,7 +537,7 @@ public class SessionServiceTest {
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            any(), any(), any(), Mockito.anyBoolean()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     assertThat(sessionService.getTeamSessionsForConsultant(consultant),
@@ -586,7 +552,7 @@ public class SessionServiceTest {
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            any(), any(), any(), Mockito.anyBoolean()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     SessionConsultantForConsultantDTO sessionDTO =
@@ -602,7 +568,7 @@ public class SessionServiceTest {
 
     InternalServerErrorException ex = new InternalServerErrorException(ERROR_MSG) {
     };
-    when(sessionService.saveSession(Mockito.any())).thenThrow(ex);
+    when(sessionService.saveSession(any())).thenThrow(ex);
 
     try {
       sessionService.updateFeedbackGroupId(Optional.of(SESSION), RC_GROUP_ID);

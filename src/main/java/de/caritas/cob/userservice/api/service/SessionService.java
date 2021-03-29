@@ -55,6 +55,7 @@ public class SessionService {
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
   private final @NonNull SessionDataHelper sessionDataHelper;
   private final @NonNull UserHelper userHelper;
+  private final @NonNull ConsultantService consultantService;
 
   /**
    * Returns the sessions for a user
@@ -401,42 +402,49 @@ public class SessionService {
   }
 
   /**
-   * Returns the session for the specified user id and Rocket.Chat group id depending on the user's
-   * role.
+   * Returns the session for the provided Rocket.Chat group ID. Logs a warning if the given user is
+   * not allowed to access this session.
    *
    * @param rcGroupId Rocket.Chat group id
    * @param userId    Rocket.Chat user id
    * @param roles     user roles
    * @return {@link Session}
    */
-  public Session getSessionByGroupIdAndUserId(String rcGroupId, String userId, Set<String> roles) {
+  public Session getSessionByGroupIdAndUser(String rcGroupId, String userId, Set<String> roles) {
 
-    List<Session> userSessions = null;
+    Session session = getSessionByGroupId(rcGroupId);
+    checkUserPermissionForSession(session, userId, roles);
 
-    try {
-      if (roles.contains(UserRole.USER.getValue())) {
-        userSessions = sessionRepository.findByGroupIdAndUserUserId(rcGroupId, userId);
-      }
-      if (roles.contains(UserRole.CONSULTANT.getValue())) {
-        userSessions = sessionRepository.findByGroupIdAndConsultantId(rcGroupId, userId);
-      }
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Database error while retrieving user sessions by groupId %s and userId %s",
-              rcGroupId, userId), LogService::logDatabaseError);
+    return session;
+  }
+
+  private Session getSessionByGroupId(String rcGroupId) {
+    return sessionRepository.findByGroupId(rcGroupId).orElseThrow(
+        () -> new NotFoundException(String.format("Session with groupId %s not found.", rcGroupId),
+            LogService::logDatabaseError));
+  }
+
+  private void checkUserPermissionForSession(Session session, String userId, Set<String> roles) {
+    checkIfUserAndNotOwnerOfSession(session, userId, roles);
+    checkIfConsultantAndNotAssignedToSessionOrAgency(session, userId, roles);
+  }
+
+  private void checkIfUserAndNotOwnerOfSession(Session session, String userId, Set<String> roles) {
+    if (roles.contains(UserRole.USER.getValue()) && !session.getUser().getUserId().equals(userId)) {
+      throw new ForbiddenException(
+          String.format("User %s has no permission to access session %s", userId, session.getId()),
+          LogService::logAssignSessionFacadeWarning);
     }
+  }
 
-    if (nonNull(userSessions) && !userSessions.isEmpty()) {
-      if (userSessions.size() == 1) {
-        // There should be only one session with this Rocket.Chat group id and user id combination
-        return userSessions.get(0);
-      }
-      throw new InternalServerErrorException(String.format(
-          "More than one matching session found by groupId %s and userId %s in database. Aborting due to corrupt data.",
-          rcGroupId, userId));
+  private void checkIfConsultantAndNotAssignedToSessionOrAgency(Session session, String userId,
+      Set<String> roles) {
+    if (roles.contains(UserRole.CONSULTANT.getValue())) {
+      Consultant consultant = this.consultantService.getConsultant(userId)
+          .orElseThrow(() -> new BadRequestException(String
+              .format("Consultant with id %s does not exist", userId)));
+      checkPermissionForConsultantSession(session, consultant);
     }
-
-    return null;
   }
 
   /**
