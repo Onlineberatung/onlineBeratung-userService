@@ -505,6 +505,15 @@ public class SessionServiceTest {
     sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
   }
 
+  @Test(expected = ForbiddenException.class)
+  public void getSessionByGroupIdAndUser_Should_ThrowForbiddenException_When_NotAskerOrConsultantRole() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
+
+    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, new HashSet<>(
+        Collections.singletonList("no-role")));
+  }
+
   /**
    * method: getTeamSessionsForConsultant
    */

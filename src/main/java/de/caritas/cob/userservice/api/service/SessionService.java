@@ -411,7 +411,6 @@ public class SessionService {
    * @return {@link Session}
    */
   public Session getSessionByGroupIdAndUser(String rcGroupId, String userId, Set<String> roles) {
-
     Session session = getSessionByGroupId(rcGroupId);
     checkUserPermissionForSession(session, userId, roles);
 
@@ -421,19 +420,28 @@ public class SessionService {
   private Session getSessionByGroupId(String rcGroupId) {
     return sessionRepository.findByGroupId(rcGroupId).orElseThrow(
         () -> new NotFoundException(String.format("Session with groupId %s not found.", rcGroupId),
-            LogService::logDatabaseError));
+            LogService::logWarn));
   }
 
   private void checkUserPermissionForSession(Session session, String userId, Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
     checkIfUserAndNotOwnerOfSession(session, userId, roles);
     checkIfConsultantAndNotAssignedToSessionOrAgency(session, userId, roles);
+  }
+
+  private void checkForUserOrConsultantRole(Set<String> roles) {
+    if (!roles.contains(UserRole.USER.getValue())
+        && !roles.contains(UserRole.CONSULTANT.getValue())) {
+      throw new ForbiddenException("No user or consultant role to retrieve sessions",
+          LogService::logForbidden);
+    }
   }
 
   private void checkIfUserAndNotOwnerOfSession(Session session, String userId, Set<String> roles) {
     if (roles.contains(UserRole.USER.getValue()) && !session.getUser().getUserId().equals(userId)) {
       throw new ForbiddenException(
           String.format("User %s has no permission to access session %s", userId, session.getId()),
-          LogService::logAssignSessionFacadeWarning);
+          LogService::logForbidden);
     }
   }
 
