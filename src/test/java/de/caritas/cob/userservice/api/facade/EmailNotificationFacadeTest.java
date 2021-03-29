@@ -44,7 +44,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
-import de.caritas.cob.userservice.api.exception.NewMessageNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -294,7 +293,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultant_WhenCalledAsUserAuthorityAndIsTeamSession() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
     when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
@@ -309,7 +308,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_ShouldNot_SendEmailNotificationToUser_WhenCalledAsUserAuthorityAndIsTeamSession() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
     when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
@@ -324,7 +323,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_ShouldNot_SendEmail_WhenMailListIsEmptyAndCalledAsUserAuthorityAndIsTeamSession() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(null);
     when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
@@ -340,7 +339,7 @@ public class EmailNotificationFacadeTest {
 
     InternalServerErrorException serviceException = new InternalServerErrorException(ERROR_MSG);
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenThrow(serviceException);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -350,7 +349,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_ShouldNot_SendEmailAndLogEmailNotificationFacadeError_WhenSessionIsNullOrEmpty() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(null);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -362,7 +361,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_ShouldNot_SendEmailAndLogEmailNotificationFacadeError_WhenSessionIsNotInProgress() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(SESSION);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -374,7 +373,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_ShouldNot_SendEmail_WhenCalledAsUserAuthorityAndIsSingleSessionAndConsultantHasNoEmailProvided() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(SESSION_IN_PROGRESS_NO_EMAIL);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -385,7 +384,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_Should_SendEmailNotificationViaMailServiceHelper_WhenCalledAsUserAuthorityAndIsSingleSession() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(SESSION_IN_PROGRESS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -396,7 +395,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_ShouldNot_SendEmailAndLogEmailNotificationFacadeError_WhenSessionIsNullOrEmpty_WithConsultantRole() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
         .thenReturn(null);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
@@ -409,7 +408,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_ShouldNot_SendEmail_WhenCalledAsConsultantAuthorityAndAskerHasNoEmailProvided() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
         .thenReturn(SESSION_IN_PROGRESS_NO_EMAIL);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
@@ -421,7 +420,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_Should_SendEmailToUserWithEncodedUsernames_WhenCalledAsConsultantAuthorityAndAskerHasEmail() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
         .thenReturn(SESSION_IN_PROGRESS);
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
     when(userHelper.decodeUsername(USERNAME_CONSULTANT_ENCODED))
@@ -436,7 +435,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_Should_SendEmailToAllConsultants_WhenIsTeamSessionAndConsultingTypeSettingsToSendToAllTeamConsultantsIsTrue() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
@@ -450,7 +449,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewMessageNotification_Should_SendEmailToAssignConsultantOnly_WhenIsTeamSessionAndConsultingTypeSettingsToSendToAllTeamConsultantsIsFalse() {
 
-    when(sessionService.getSessionByGroupIdAndUserId(RC_GROUP_ID, USER_ID, USER_ROLES))
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY);
@@ -577,7 +576,7 @@ public class EmailNotificationFacadeTest {
     when(session.getStatus()).thenReturn(SessionStatus.NEW);
     when(session.getUser()).thenReturn(USER);
 
-    when(sessionService.getSessionByGroupIdAndUserId(any(), any(), any())).thenReturn(session);
+    when(sessionService.getSessionByGroupIdAndUser(any(), any(), any())).thenReturn(session);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
 
