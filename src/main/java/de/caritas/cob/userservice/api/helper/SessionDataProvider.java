@@ -87,9 +87,9 @@ public class SessionDataProvider {
   }
 
   private SessionData obtainSessionData(Session session, String key, String value) {
-    return nonNull(session.getSessionData()) ?
-        obtainUpdatedOrInitialSessionData(session, key, value) :
-        obtainInitialSessionData(session, key, value);
+    return nonNull(session.getSessionData())
+        ? obtainUpdatedOrInitialSessionData(session, key, value)
+        : obtainInitialSessionData(session, key, value);
   }
 
   private SessionData obtainUpdatedOrInitialSessionData(Session session, String key, String value) {
