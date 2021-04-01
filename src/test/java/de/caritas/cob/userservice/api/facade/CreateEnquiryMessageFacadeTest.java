@@ -117,15 +117,15 @@ public class CreateEnquiryMessageFacadeTest {
   private final SessionDataInitializing SESSION_DATA_INITIALIZING =
       new SessionDataInitializing(true, true, true, true, true);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NO_WELCOME_MESSAGE =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false,
+      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, false,
           SESSION_DATA_INITIALIZING, true,
           CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null, null);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false,
+      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, false,
           SESSION_DATA_INITIALIZING, true,
           CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, true, null, false, null, null);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT_AND_WELCOME_MESSAGE =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, true, MESSAGE, false,
+      new ConsultingTypeSettings(ConsultingType.SUCHT, true, MESSAGE, false, false,
           SESSION_DATA_INITIALIZING,
           true,
           CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, true, null, false, null, null);
@@ -946,7 +946,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(messageServiceProvider, times(1))
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(messageServiceProvider, times(1))
-        .postFurtherStepsMessageIfConfigured(anyString(), any(), any());
+        .postFurtherStepsOrSaveSessionDataMessageIfConfigured(anyString(), any(), any());
   }
 
 }

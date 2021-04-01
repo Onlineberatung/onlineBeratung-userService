@@ -12,6 +12,8 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSetti
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
@@ -105,22 +107,34 @@ public class MessageServiceProvider {
   }
 
   /**
-   * Posts a further steps message as system user in the provided Rocket.Chat group ID.
+   * Posts a further steps message and/or save session data message as system user in the provided
+   * Rocket.Chat group ID.
    *
    * @param rcGroupId Rocket.Chat group ID
+   * @param consultingTypeSettings {@link ConsultingTypeSettings}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
-  public void postFurtherStepsMessageIfConfigured(String rcGroupId,
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
       ConsultingTypeSettings consultingTypeSettings,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {
 
-    if (!consultingTypeSettings.isSendFurtherStepsMessage()) {
-      return;
+    if (consultingTypeSettings.isSendFurtherStepsMessage()) {
+      this.postAliasOnlyMessage(rcGroupId, MessageType.FURTHER_STEPS, exceptionInformation);
     }
 
+    if (consultingTypeSettings.isSendSaveSessionDataMessage()) {
+      this.postAliasOnlyMessage(rcGroupId, MessageType.UPDATE_SESSION_DATA, exceptionInformation);
+    }
+  }
+
+  private void postAliasOnlyMessage(String rcGroupId, MessageType messageType,
+      CreateEnquiryExceptionInformation exceptionInformation)
+      throws RocketChatPostFurtherStepsMessageException {
+    addDefaultHeaders(this.messageControllerApi.getApiClient());
     try {
-      addDefaultHeaders(this.messageControllerApi.getApiClient());
-      this.messageControllerApi.saveFurtherStepsMessage(rcGroupId);
+      this.messageControllerApi.saveAliasOnlyMessage(rcGroupId, new AliasOnlyMessageDTO()
+          .messageType(messageType));
 
     } catch (RestClientException exception) {
       throw new RocketChatPostFurtherStepsMessageException(String

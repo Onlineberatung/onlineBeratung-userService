@@ -186,7 +186,7 @@ public class MessageServiceProviderTest {
         CreateEnquiryExceptionInformation.class);
 
     this.messageServiceProvider
-        .postFurtherStepsMessageIfConfigured(RC_GROUP_ID,
+        .postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
             CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS_MESSAGE, exceptionInformation);
 
     verifyNoInteractions(messageControllerApi);
@@ -199,10 +199,10 @@ public class MessageServiceProviderTest {
     HttpHeaders headers = mock(HttpHeaders.class);
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
     doThrow(restClientException).when(this.messageControllerApi)
-        .saveFurtherStepsMessage(any());
+        .saveAliasOnlyMessage(any(), any());
 
     try {
-      this.messageServiceProvider.postFurtherStepsMessageIfConfigured(RC_GROUP_ID,
+      this.messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
           CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE, exceptionInformation);
       fail("Expected exception: RocketChatPostFurtherStepsMessageException");
     } catch (RocketChatPostFurtherStepsMessageException exception) {
@@ -219,9 +219,9 @@ public class MessageServiceProviderTest {
     HttpHeaders headers = mock(HttpHeaders.class);
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
 
-    this.messageServiceProvider.postFurtherStepsMessageIfConfigured(RC_GROUP_ID,
+    this.messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
         CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE, exceptionInformation);
 
-    verify(messageControllerApi, times(1)).saveFurtherStepsMessage(RC_GROUP_ID);
+    verify(messageControllerApi, times(1)).saveAliasOnlyMessage(any(), any());
   }
 }

@@ -923,10 +923,11 @@ public class TestConstants {
    */
 
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE =
-      new ConsultingTypeSettings(SUCHT, false, null, false, null, true, null, false, null,
+      new ConsultingTypeSettings(SUCHT, false, null, false, false, null, true, null, false, null,
           true, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_KREUZBUND =
-      new ConsultingTypeSettings(ConsultingType.KREUZBUND, false, null, false, null, true, null,
+      new ConsultingTypeSettings(ConsultingType.KREUZBUND, false, null, false, false, null, true,
+          null,
           false,
           null, true, null, null);
   public static final MandatoryFields MANDATORY_FIELDS_FALSE = new MandatoryFields(false, false);
@@ -940,106 +941,106 @@ public class TestConstants {
   public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_NULL =
       new Registration(null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS =
-      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, true, "Hallo", false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING,
           true, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SUCHT =
-      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_U25 =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
           null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
           null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS_MESSAGE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
           null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, true,
+      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, true, false,
           SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
           null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING,
           true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_NULL);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PREGNANCY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_AIDS =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CHILDREN =
-      new ConsultingTypeSettings(CONSULTING_TYPE_CHILDREN, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_CHILDREN, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CURE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_DEBT =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_DISABILITY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_LAW =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_OFFENDER =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PARENTING =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PLANB =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_REHABILITATION =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SENIORITY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SOCIAL =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
           SESSION_DATA_INITIALIZING,
           false, null, false, null, true, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WIT_MONITORING =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, null, true, null, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false, null, true, null, false,
           null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MONITORING =
-      new ConsultingTypeSettings(SUCHT, false, null, false, null, IS_MONITORING, null,
+      new ConsultingTypeSettings(SUCHT, false, null, false, false, null, IS_MONITORING, null,
           false, null, false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING =
-      new ConsultingTypeSettings(SUCHT, false, null, false, null, IS_NOT_MONITORING, null,
+      new ConsultingTypeSettings(SUCHT, false, null, false, false, null, IS_NOT_MONITORING, null,
           false, null, false, null, null);
   public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);
   public static AbsenceDTO ABSENCE_DTO_WITH_HTML_AND_JS = new AbsenceDTO()

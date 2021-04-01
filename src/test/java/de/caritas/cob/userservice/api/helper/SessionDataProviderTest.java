@@ -85,13 +85,13 @@ public class SessionDataProviderTest {
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
       new SessionDataInitializing(true, true, true, true, true);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false,
+      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, false,
           SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS, true, null, false, null, false,
           null, null);
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS =
       new SessionDataInitializing(false, false, false, false, false);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
-      new ConsultingTypeSettings(ConsultingType.U25, false, null, false,
+      new ConsultingTypeSettings(ConsultingType.U25, false, null, false, false,
           SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS, true, null, false, null, false,
           null, null);
 

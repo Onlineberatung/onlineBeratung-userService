@@ -100,8 +100,8 @@ public class CreateEnquiryMessageFacade {
 
       messageServiceProvider.postEnquiryMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);
-      messageServiceProvider.postFurtherStepsMessageIfConfigured(rcGroupId, consultingTypeSettings,
-          createEnquiryExceptionInformation);
+      messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(rcGroupId,
+          consultingTypeSettings, createEnquiryExceptionInformation);
       messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, user,
           consultingTypeSettings, createEnquiryExceptionInformation);
 

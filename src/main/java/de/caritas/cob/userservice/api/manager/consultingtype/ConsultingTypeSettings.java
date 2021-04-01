@@ -19,6 +19,7 @@ public class ConsultingTypeSettings {
   private boolean sendWelcomeMessage;
   private String welcomeMessage;
   private boolean sendFurtherStepsMessage;
+  private boolean sendSaveSessionDataMessage;
   private SessionDataInitializing sessionDataInitializing;
   private boolean monitoring;
   private String monitoringFile;
