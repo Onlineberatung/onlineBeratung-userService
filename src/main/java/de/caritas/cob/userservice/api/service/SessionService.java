@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
+import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -34,7 +34,6 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,16 +43,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for sessions
- */
+/** Service for sessions */
 @Service
 @RequiredArgsConstructor
 public class SessionService {
 
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
-  private final @NonNull SessionDataHelper sessionDataHelper;
+  private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull UserHelper userHelper;
 
   /**
@@ -62,18 +59,7 @@ public class SessionService {
    * @return the sessions
    */
   public List<Session> getSessionsForUser(User user) {
-
-    List<Session> userSessions;
-
-    try {
-      userSessions = sessionRepository.findByUser(user);
-    } catch (DataAccessException ex) {
-      LogService.logDatabaseError(ex);
-      throw new InternalServerErrorException(String.format(
-          "Database error while retrieving sessions for user with id %s", user.getUserId()));
-    }
-
-    return userSessions;
+    return sessionRepository.findByUser(user);
   }
 
   /**
@@ -83,17 +69,7 @@ public class SessionService {
    * @return {@link Session}
    */
   public Optional<Session> getSession(Long sessionId) {
-    Optional<Session> session;
-
-    try {
-      session = sessionRepository.findById(sessionId);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Database error while retrieving session with id %s", sessionId),
-          LogService::logDatabaseError);
-    }
-
-    return session;
+    return sessionRepository.findById(sessionId);
   }
 
   /**
@@ -104,17 +80,7 @@ public class SessionService {
    */
   public List<Session> getSessionsForUserByConsultingType(User user,
       ConsultingType consultingType) {
-
-    List<Session> userSessions;
-
-    try {
-      userSessions = sessionRepository.findByUserAndConsultingType(user, consultingType);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while retrieving user sessions",
-          LogService::logDatabaseError);
-    }
-
-    return userSessions != null ? userSessions : Collections.emptyList();
+    return sessionRepository.findByUserAndConsultingType(user, consultingType);
   }
 
   /**
@@ -210,13 +176,7 @@ public class SessionService {
    * @return the {@link Session}
    */
   public Session saveSession(Session session) {
-    try {
-      return sessionRepository.save(session);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Database error while saving session with id %s", session.getId()),
-          LogService::logDatabaseError);
-    }
+    return sessionRepository.save(session);
   }
 
   /**
@@ -230,22 +190,14 @@ public class SessionService {
 
     List<Session> sessions = null;
 
-    try {
-      Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
-      if (consultantAgencies != null) {
-        List<Long> consultantAgencyIds = consultantAgencies.stream()
-            .map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
+    Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
+    if (consultantAgencies != null) {
+      List<Long> consultantAgencyIds = consultantAgencies.stream()
+          .map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
 
-        sessions = sessionRepository
-            .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-                consultantAgencyIds, consultant, SessionStatus.IN_PROGRESS, true);
-      }
-
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(String.format(
-          "Database error while getting the team sessions for consultant %s", consultant.getId()),
-          LogService::logDatabaseError);
-
+      sessions = sessionRepository
+          .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
+              consultantAgencyIds, consultant, SessionStatus.IN_PROGRESS, true);
     }
 
     List<ConsultantSessionResponseDTO> sessionDTOs = null;
@@ -278,7 +230,6 @@ public class SessionService {
       if (sessionStatus.isPresent()) {
         switch (sessionStatus.get()) {
           case NEW:
-
             Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
             if (nonNull(consultantAgencies)) {
               List<Long> consultantAgencyIds = consultantAgencies.stream()
@@ -378,7 +329,7 @@ public class SessionService {
     if (nonNull(session.getUser()) && nonNull(session.getSessionData())) {
       SessionUserDTO sessionUserDto = new SessionUserDTO();
       sessionUserDto.setUsername(userHelper.decodeUsername(session.getUser().getUsername()));
-      sessionUserDto.setSessionData(sessionDataHelper.getSessionDataMapFromSession(session));
+      sessionUserDto.setSessionData(sessionDataProvider.getSessionDataMapFromSession(session));
       return sessionUserDto;
     }
 
@@ -391,13 +342,7 @@ public class SessionService {
    * @param session the {@link Session}
    */
   public void deleteSession(Session session) {
-    try {
-      sessionRepository.delete(session);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Deletion of session with id %s failed", session.getId()),
-          LogService::logDatabaseError);
-    }
+    sessionRepository.delete(session);
   }
 
   /**
@@ -405,8 +350,8 @@ public class SessionService {
    * role.
    *
    * @param rcGroupId Rocket.Chat group id
-   * @param userId    Rocket.Chat user id
-   * @param roles     user roles
+   * @param userId Rocket.Chat user id
+   * @param roles user roles
    * @return {@link Session}
    */
   public Session getSessionByGroupIdAndUserId(String rcGroupId, String userId, Set<String> roles) {
@@ -446,19 +391,13 @@ public class SessionService {
    * @return the session
    */
   public Session getSessionByFeedbackGroupId(String feedbackGroupId) {
-    try {
-      return sessionRepository.findByFeedbackGroupId(feedbackGroupId).orElse(null);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(String.format(
-          "Database error while retrieving session by feedbackGroupId %s", feedbackGroupId),
-          LogService::logDatabaseError);
-    }
+    return sessionRepository.findByFeedbackGroupId(feedbackGroupId).orElse(null);
   }
 
   /**
    * Returns a {@link ConsultantSessionDTO} for a specific session.
    *
-   * @param sessionId  the session id to fetch
+   * @param sessionId the session id to fetch
    * @param consultant the calling consultant
    * @return {@link ConsultantSessionDTO} entity for the specific session
    */
@@ -511,5 +450,4 @@ public class SessionService {
     return consultant.getConsultantAgencies().stream()
         .anyMatch(consultantAgency -> consultantAgency.getAgencyId().equals(session.getAgencyId()));
   }
-
 }

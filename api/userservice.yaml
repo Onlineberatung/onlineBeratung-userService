@@ -117,6 +117,41 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/{sessionId}/data:
+    put:
+      tags:
+        - user-controller
+      summary: 'Update the (user) information of a session [Authorization: Role: user]'
+      operationId: updateSessionData
+      parameters:
+        - name: sessionId
+          in: path
+          description: session ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/SessionDataDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        404:
+          description: NOT FOUND - Session not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/new/{sessionId}:
     put:
       tags:
@@ -1074,6 +1109,16 @@ components:
           type: string
           format: password
           example: pass@w0rd
+        termsAccepted:
+          type: string
+          example: true
+        consultingType:
+          type: string
+          example: 3
+
+    SessionDataDTO:
+      type: object
+      properties:
         addictiveDrugs:
           type: string
           example: 2,4
@@ -1090,12 +1135,6 @@ components:
         state:
           type: string
           example: 8
-        termsAccepted:
-          type: string
-          example: true
-        consultingType:
-          type: string
-          example: 3
 
     ConsultantSessionListResponseDTO:
       type: object

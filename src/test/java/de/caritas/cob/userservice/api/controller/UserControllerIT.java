@@ -43,6 +43,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -51,8 +53,6 @@ import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITH_INVALID_POSTCODE;
-import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_U25_USER_REQUEST_BODY_AGE;
-import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_U25_USER_REQUEST_BODY_STATE;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_USER_REQUEST_BODY;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_USER_REQUEST_BODY_WITH_INVALID_POSTCODE;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_USER_REQUEST_BODY_WITOUT_POSTCODE;
@@ -69,11 +69,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CREATE_CHAT_RESPONSE_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DECODED_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
@@ -160,7 +157,7 @@ import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
+import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsValidator;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -178,6 +175,7 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
+import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -206,7 +204,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -314,14 +311,10 @@ public class UserControllerIT {
           + "\", \"lastName\": \"" + LAST_NAME + "\"}]";
   private final String VALID_PASSWORT_REQUEST_BODY =
       "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
-  private final Optional<ResponseEntity<LoginResponseDTO>> LOGIN_RESPONSE_ENTITY_BAD_REQUEST =
-      Optional.of(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
   private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final LoginResponseDTO LOGIN_RESPONSE_DTO =
       new LoginResponseDTO(ACCESS_TOKEN, 0, 0, REFRESH_TOKEN, null, null, null);
-  private final Optional<ResponseEntity<LoginResponseDTO>> LOGIN_RESPONSE_ENTITY_OK =
-      Optional.of(new ResponseEntity<>(LOGIN_RESPONSE_DTO, HttpStatus.OK));
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
@@ -402,11 +395,13 @@ public class UserControllerIT {
   @MockBean
   private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   @MockBean
-  private MandatoryFieldsProvider mandatoryFieldsProvider;
+  private MandatoryFieldsValidator mandatoryFieldsValidator;
   @MockBean
   private ConsultantService consultantService;
   @MockBean
   private UserService userService;
+  @MockBean
+  private SessionDataService sessionDataService;
 
   @Mock
   private Logger logger;
@@ -429,7 +424,7 @@ public class UserControllerIT {
    */
 
   @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedWithInvalidRequestBody()
+  public void registerUser_Should_ReturnBadRequest_When_ProvidedWithInvalidRequestBody()
       throws Exception {
 
     mvc.perform(post(PATH_REGISTER_USER)
@@ -440,36 +435,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidAge()
-      throws Exception {
-
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
-
-    mvc.perform(post(PATH_REGISTER_USER)
-        .content(INVALID_U25_USER_REQUEST_BODY_AGE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidState()
-      throws Exception {
-
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
-
-    mvc.perform(post(PATH_REGISTER_USER)
-        .content(INVALID_U25_USER_REQUEST_BODY_STATE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooShort()
+  public void registerUser_Should_ReturnBadRequest_When_ProvidedUsernameIsTooShort()
       throws Exception {
 
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
@@ -483,7 +449,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooLong()
+  public void registerUser_Should_ReturnBadRequest_When_ProvidedUsernameIsTooLong()
       throws Exception {
 
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
@@ -497,13 +463,8 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnCreated_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsSuccessfull()
+  public void registerUser_Should_ReturnCreated_When_ProvidedWithValidRequestBodyAndKeycloakResponseIsSuccessful()
       throws Exception {
-
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
-            .getMandatoryFields());
-
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON)
@@ -512,13 +473,8 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnCreated_WhenProvidedWithValidU25RequestBodyAndKeycloakResponseIsSuccessfull()
+  public void registerUser_Should_ReturnCreated_When_ProvidedWithValidU25RequestBodyAndKeycloakResponseIsSuccessful()
       throws Exception {
-
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
-
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_U25_USER_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON)
@@ -527,12 +483,8 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnConflict_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsConflict()
+  public void registerUser_Should_ReturnConflict_When_ProvidedWithValidRequestBodyAndKeycloakResponseIsConflict()
       throws Exception {
-
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
     doThrow(new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT))
         .when(createUserFacade).createUserAndInitializeAccount(Mockito.any());
 
@@ -546,10 +498,6 @@ public class UserControllerIT {
   @Test
   public void registerUser_Should_ReturnBadRequest_When_PostcodeIsMissing()
       throws Exception {
-
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
-
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -561,16 +509,26 @@ public class UserControllerIT {
   @Test
   public void registerUser_Should_ReturnBadRequest_When_PostcodeIsInvalid()
       throws Exception {
-
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
-
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .content(INVALID_USER_REQUEST_BODY_WITOUT_POSTCODE)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerUser_Should_DecodePassword() throws Exception {
+    mvc.perform(post(PATH_REGISTER_USER)
+        .content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated());
+
+    ArgumentCaptor<UserDTO> argument = ArgumentCaptor.forClass(UserDTO.class);
+    verify(createUserFacade, times(1))
+        .createUserAndInitializeAccount(argument.capture());
+    assertEquals(DECODED_PASSWORD, argument.getValue().getPassword());
   }
 
   /**
@@ -1763,26 +1721,6 @@ public class UserControllerIT {
         .warn(anyString(), anyString(), anyString());
   }
 
-  @Test
-  public void registerUser_Should_DecodePassword() throws Exception {
-
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
-            .getMandatoryFields());
-
-    mvc.perform(post(PATH_REGISTER_USER)
-        .content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isCreated());
-
-    ArgumentCaptor<UserDTO> argument = ArgumentCaptor.forClass(UserDTO.class);
-    verify(createUserFacade, times(1))
-        .createUserAndInitializeAccount(argument.capture());
-    assertEquals(DECODED_PASSWORD, argument.getValue().getPassword());
-
-  }
-
   /**
    * updatePassword()
    */
@@ -2213,4 +2151,35 @@ public class UserControllerIT {
     verifyNoMoreInteractions(accountProvider);
   }
 
+  @Test
+  public void updateSessionData_Should_ReturnBadRequest_When_BodyIsEmpty() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionDataService);
+  }
+
+  @Test
+  public void updateSessionData_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionDataService);
+  }
+
+  @Test
+  public void updateSessionData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
+        .content(new ObjectMapper().writeValueAsString(new SessionDTO()))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(sessionDataService, times(1)).saveSessionData(any(), any());
+  }
 }

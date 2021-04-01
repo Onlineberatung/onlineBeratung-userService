@@ -313,6 +313,13 @@ public class LogServiceTest {
   }
 
   @Test
+  public void logInfo_Should_LogExceptionMessage() {
+
+    LogService.logInfo(exception);
+    verify(logger, times(1)).info(exception.getMessage());
+  }
+
+  @Test
   public void logDecryptionError_Should_LogExceptionStackTraceAndErrorMessage() {
 
     LogService.logDecryptionError(ERROR_MESSAGE, exception);

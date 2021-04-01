@@ -1,8 +1,10 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class SessionDataHelper {
+public class SessionDataProvider {
 
   private final @NonNull ConsultingTypeManager consultingTypeManager;
 
@@ -49,35 +50,36 @@ public class SessionDataHelper {
   }
 
   /**
-   * Get list of session data items for registration.
+   * Get list of session data items for session.
    *
-   * @param session the {@link Session}
-   * @param user    the {@link UserDTO}
-   * @return the list of session data items for registration
+   * @param session       the {@link Session}
+   * @param sessionData   the {@link SessionDataDTO}
+   * @return the list of session data items
    */
-  public List<SessionData> createRegistrationSessionDataList(Session session, UserDTO user) {
+  public List<SessionData> createInitialSessionDataList(Session session,
+      SessionDataDTO sessionData) {
 
     List<SessionData> sessionDataList = new ArrayList<>();
     if (getSessionDataInitializing(session.getConsultingType()).isAddictiveDrugs()) {
-      sessionDataList.add(createSessionData(session, SessionDataType.REGISTRATION,
+      sessionDataList.add(createRegistrationSessionData(session,
           SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),
-          getAddictiveDrugsValueFromUser(user)));
+          getAddictiveDrugsValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isAge()) {
-      sessionDataList.add(createSessionData(session, SessionDataType.REGISTRATION,
-          SessionDataKeyRegistration.AGE.getValue(), getAgeValueFromUser(user)));
+      sessionDataList.add(createRegistrationSessionData(session,
+          SessionDataKeyRegistration.AGE.getValue(), getAgeValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isGender()) {
-      sessionDataList.add(createSessionData(session, SessionDataType.REGISTRATION,
-          SessionDataKeyRegistration.GENDER.getValue(), getGenderValueFromUser(user)));
+      sessionDataList.add(createRegistrationSessionData(session,
+          SessionDataKeyRegistration.GENDER.getValue(), getGenderValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isRelation()) {
-      sessionDataList.add(createSessionData(session, SessionDataType.REGISTRATION,
-          SessionDataKeyRegistration.RELATION.getValue(), getRelationValueFromUser(user)));
+      sessionDataList.add(createRegistrationSessionData(session,
+          SessionDataKeyRegistration.RELATION.getValue(), getRelationValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isState()) {
-      sessionDataList.add(createSessionData(session, SessionDataType.REGISTRATION,
-          SessionDataKeyRegistration.STATE.getValue(), getStateValueFromUser(user)));
+      sessionDataList.add(createRegistrationSessionData(session,
+          SessionDataKeyRegistration.STATE.getValue(), getStateValue(sessionData)));
     }
     return sessionDataList;
   }
@@ -88,37 +90,28 @@ public class SessionDataHelper {
 
   }
 
-  private SessionData createSessionData(Session session, SessionDataType sessionDataType,
-      String key, String value) {
-    return new SessionData(session, sessionDataType, key, value);
+  private SessionData createRegistrationSessionData(Session session, String key, String value) {
+    return new SessionData(session, SessionDataType.REGISTRATION, key, value);
   }
 
-  private String getAddictiveDrugsValueFromUser(UserDTO user) {
-    return (user.getAddictiveDrugs() != null && !user.getAddictiveDrugs().equals(StringUtils.EMPTY))
-        ? user.getAddictiveDrugs()
-        : null;
+  private String getAddictiveDrugsValue(SessionDataDTO sessionData) {
+    return isEmpty(sessionData.getAddictiveDrugs()) ? null : sessionData.getAddictiveDrugs();
   }
 
-  private String getAgeValueFromUser(UserDTO user) {
-    return (user.getAge() != null && !user.getAge().equals(StringUtils.EMPTY)) ? user.getAge()
-        : null;
+  private String getAgeValue(SessionDataDTO sessionData) {
+    return isEmpty(sessionData.getAge()) ? null : sessionData.getAge();
   }
 
-  private String getGenderValueFromUser(UserDTO user) {
-    return (user.getGender() != null && !user.getGender().equals(StringUtils.EMPTY))
-        ? user.getGender()
-        : null;
+  private String getGenderValue(SessionDataDTO sessionData) {
+    return isEmpty(sessionData.getGender()) ? null : sessionData.getGender();
   }
 
-  private String getRelationValueFromUser(UserDTO user) {
-    return (user.getRelation() != null && !user.getRelation().equals(StringUtils.EMPTY))
-        ? user.getRelation()
-        : null;
+  private String getRelationValue(SessionDataDTO sessionData) {
+    return isEmpty(sessionData.getRelation()) ? null : sessionData.getRelation();
   }
 
-  private String getStateValueFromUser(UserDTO user) {
-    return (user.getState() != null && !user.getState().equals(StringUtils.EMPTY)) ? user.getState()
-        : null;
+  private String getStateValue(SessionDataDTO sessionData) {
+    return isEmpty(sessionData.getState()) ? null : sessionData.getState();
   }
 
 

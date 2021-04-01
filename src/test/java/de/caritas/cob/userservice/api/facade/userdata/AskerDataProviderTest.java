@@ -21,7 +21,7 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
+import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -44,8 +44,7 @@ public class AskerDataProviderTest {
   AgencyServiceHelper agencyServiceHelper;
   @Mock
   AuthenticatedUser authenticatedUser;
-  @Mock
-  SessionDataHelper sessionDataHelper;
+  @Mock SessionDataProvider sessionDataProvider;
   @InjectMocks
   private AskerDataProvider askerDataProvider;
 
@@ -132,7 +131,7 @@ public class AskerDataProviderTest {
         Collections.singletonList(AGENCY_DTO_SUCHT));
     LinkedHashMap<String, Object> sessionData = new LinkedHashMap<>();
     sessionData.put("addictiveDrugs", "3");
-    when(sessionDataHelper.getSessionDataMapFromSession(any())).thenReturn(sessionData);
+    when(sessionDataProvider.getSessionDataMapFromSession(any())).thenReturn(sessionData);
 
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(asSet(GRANTED_AUTHORIZATION_USER));

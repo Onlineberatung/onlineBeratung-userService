@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.CREATE_MONITORING_EXCEPTION;
-import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CHILDREN;
@@ -37,7 +36,6 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,8 +56,6 @@ public class CreateSessionFacadeTest {
   private AgencyHelper agencyHelper;
   @Mock
   private MonitoringService monitoringService;
-  @Mock
-  private SessionDataService sessionDataService;
   @Mock
   private RollbackFacade rollbackFacade;
   @Mock
@@ -100,26 +96,6 @@ public class CreateSessionFacadeTest {
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
-  }
-
-  @Test(expected = InternalServerErrorException.class)
-  public void createUserSession_Should_ReturnInternalServerErrorAndRollbackUserAccount_When_SessionDataCouldNotBeSaved() {
-
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
-        .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
-        .thenThrow(new InternalServerErrorException(MESSAGE));
-    when(sessionDataService.saveSessionDataFromRegistration(any(), any()))
-        .thenThrow(INTERNAL_SERVER_ERROR_EXCEPTION);
-
-    createSessionFacade
-        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verify(sessionService, times(1)).deleteSession(any());
     verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 
@@ -169,24 +145,6 @@ public class CreateSessionFacadeTest {
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
-  }
-
-  @Test
-  public void createUserSession_Should_CreateSessionData() {
-
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
-        .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
-        .thenReturn(SESSION_WITHOUT_CONSULTANT);
-
-    Long result = createSessionFacade
-        .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
-
-    assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
-    verify(sessionDataService, times(1)).saveSessionDataFromRegistration(any(),
-        any());
   }
 
   @Test

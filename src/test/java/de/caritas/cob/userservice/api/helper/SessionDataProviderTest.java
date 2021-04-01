@@ -1,16 +1,17 @@
 package de.caritas.cob.userservice.api.helper;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ADDICTIVE_DRUGS;
+import static de.caritas.cob.userservice.testHelper.TestConstants.ADDICTIVE_DRUGS_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.AGE_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GENDER;
+import static de.caritas.cob.userservice.testHelper.TestConstants.GENDER_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RELATION;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RELATION_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.STATE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.STATE_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static java.util.Objects.nonNull;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -43,9 +44,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SessionDataHelperTest {
+public class SessionDataProviderTest {
 
-  private SessionDataHelper sessionDataHelper;
+  private SessionDataProvider sessionDataProvider;
   private ConsultingTypeManager consultingTypeManager;
 
   private final User USER = new User(USER_ID, null, USERNAME, EMAIL, false);
@@ -69,12 +70,11 @@ public class SessionDataHelperTest {
   private final Session INITIALIZED_SESSION_WITH_SESSION_DATA = new Session(1L, USER, CONSULTANT,
       ConsultingType.SUCHT, "99999", 1L, SessionStatus.IN_PROGRESS, nowInUtc(), null,
       null, SESSION_DATA, IS_TEAM_SESSION, IS_MONITORING, null, null);
-  private final UserDTO USER_DTO_WITHOUT_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
-      "x@y.de", null, null, null, null, null, "true", "0", true);
-  private final UserDTO USER_DTO_WITH_SESSION_DATA = new UserDTO(USERNAME, "99999", 99L, "xyz",
-      "x@y.de", ADDICTIVE_DRUGS, RELATION, AGE, GENDER, STATE, "true", "0", true);
-  private final UserDTO USER_DTO_WITH_EMPTY_SESSION_DATA =
-      new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", "", "", "", "", "", "true", "0", true);
+  private final SessionDataDTO SESSION_DATA_DTO = new SessionDataDTO()
+      .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).age(AGE_VALUE).gender(GENDER_VALUE)
+      .relation(RELATION_VALUE).state(STATE_VALUE);
+  private final SessionDataDTO EMPTY_SESSION_DATA_DTO = new SessionDataDTO().addictiveDrugs("")
+      .age("").gender("").state("").relation("");
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
       new SessionDataInitializing(true, true, true, true, true);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
@@ -91,7 +91,7 @@ public class SessionDataHelperTest {
   @Before
   public void setup() {
     consultingTypeManager = Mockito.mock(ConsultingTypeManager.class);
-    sessionDataHelper = new SessionDataHelper(consultingTypeManager);
+    sessionDataProvider = new SessionDataProvider(consultingTypeManager);
   }
 
   @Test
@@ -100,27 +100,27 @@ public class SessionDataHelperTest {
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataHelper
-        .createRegistrationSessionDataList(INITIALIZED_SESSION_SUCHT, USER_DTO_WITH_SESSION_DATA);
+    List<SessionData> result = sessionDataProvider
+        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT, SESSION_DATA_DTO);
 
     assertEquals(5, result.size());
 
     for (SessionData sessionData : result) {
       switch (sessionData.getKey()) {
         case "addictiveDrugs":
-          assertEquals(ADDICTIVE_DRUGS, sessionData.getValue());
+          assertEquals(ADDICTIVE_DRUGS_VALUE, sessionData.getValue());
           break;
         case "age":
-          assertEquals(AGE, sessionData.getValue());
+          assertEquals(AGE_VALUE, sessionData.getValue());
           break;
         case "gender":
-          assertEquals(GENDER, sessionData.getValue());
+          assertEquals(GENDER_VALUE, sessionData.getValue());
           break;
         case "relation":
-          assertEquals(RELATION, sessionData.getValue());
+          assertEquals(RELATION_VALUE, sessionData.getValue());
           break;
         case "state":
-          assertEquals(STATE, sessionData.getValue());
+          assertEquals(STATE_VALUE, sessionData.getValue());
           break;
         default:
           fail("Unknown SessionData key");
@@ -136,8 +136,8 @@ public class SessionDataHelperTest {
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataHelper
-        .createRegistrationSessionDataList(INITIALIZED_SESSION_U25, USER_DTO_WITH_SESSION_DATA);
+    List<SessionData> result = sessionDataProvider
+        .createInitialSessionDataList(INITIALIZED_SESSION_U25, SESSION_DATA_DTO);
 
     assertEquals(0, result.size());
 
@@ -149,9 +149,9 @@ public class SessionDataHelperTest {
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataHelper
-        .createRegistrationSessionDataList(INITIALIZED_SESSION_SUCHT,
-            USER_DTO_WITHOUT_SESSION_DATA);
+    List<SessionData> result = sessionDataProvider
+        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT,
+            new SessionDataDTO());
 
     for (SessionData sessionData : result) {
       assertNull(sessionData.getValue());
@@ -165,8 +165,8 @@ public class SessionDataHelperTest {
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataHelper.createRegistrationSessionDataList(
-        INITIALIZED_SESSION_SUCHT, USER_DTO_WITH_EMPTY_SESSION_DATA);
+    List<SessionData> result = sessionDataProvider.createInitialSessionDataList(
+        INITIALIZED_SESSION_SUCHT, EMPTY_SESSION_DATA_DTO);
 
     for (SessionData sessionData : result) {
       assertNull(sessionData.getValue());
@@ -180,10 +180,10 @@ public class SessionDataHelperTest {
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> dataList = sessionDataHelper
-        .createRegistrationSessionDataList(INITIALIZED_SESSION_SUCHT, USER_DTO_WITH_SESSION_DATA);
+    List<SessionData> dataList = sessionDataProvider
+        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT, SESSION_DATA_DTO);
 
-    assertEquals(AGE, getValueOfKey(dataList, AGE));
+    assertEquals(AGE_VALUE, getValueOfKey(dataList, AGE));
   }
 
   @Test
@@ -192,9 +192,9 @@ public class SessionDataHelperTest {
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> dataList = sessionDataHelper
-        .createRegistrationSessionDataList(INITIALIZED_SESSION_SUCHT,
-            USER_DTO_WITHOUT_SESSION_DATA);
+    List<SessionData> dataList = sessionDataProvider
+        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT,
+            new SessionDataDTO());
 
     assertNull(getValueOfKey(dataList, AGE));
   }
@@ -209,7 +209,7 @@ public class SessionDataHelperTest {
   public void getSessionDataMapFromSession_Should_ReturnCorrectMapOfSessionDataItems() {
 
     Map<String, Object> result =
-        sessionDataHelper.getSessionDataMapFromSession(INITIALIZED_SESSION_WITH_SESSION_DATA);
+        sessionDataProvider.getSessionDataMapFromSession(INITIALIZED_SESSION_WITH_SESSION_DATA);
 
     assertEquals(result.get(SESSION_DATA_ADDICTIVE_DRUGS.getKey()),
         SESSION_DATA_ADDICTIVE_DRUGS.getValue());

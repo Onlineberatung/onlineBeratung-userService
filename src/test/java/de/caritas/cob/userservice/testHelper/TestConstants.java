@@ -319,10 +319,6 @@ public class TestConstants {
   public static final String PASSWORD_URL_ENCODED = "TestPw!%23123";
   public static final boolean IS_TEAM_CONSULTANT = true;
   public static final boolean IS_LANGUAGE_FORMAL = true;
-  public static final String VALID_AGE = "1";
-  public static final String INVALID_AGE = "xxx";
-  public static final String VALID_STATE = "1";
-  public static final String INVALID_STATE = "xxx";
   public static final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME, FIRST_NAME, LAST_NAME, EMAIL,
           IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null, null,
@@ -360,27 +356,14 @@ public class TestConstants {
   public static final AuthenticatedUser AUTHENTICATED_USER_CONSULTANT =
       new AuthenticatedUser(CONSULTANT_ID, USERNAME, null, ACCESS_TOKEN, null);
   public static final UserDTO USER_DTO_SUCHT =
-      new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
+      new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, "true",
+          Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_SUCHT_WITHOUT_EMAIL =
-      new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, null, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
+      new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, null, "true",
+          Integer.toString(CONSULTING_TYPE_SUCHT.getValue()), true);
   public static final UserDTO USER_DTO_KREUZBUND =
-      new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null, null, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_KREUZBUND.getValue()), true);
-  public static final UserDTO USER_DTO_WITH_AGE =
-      new UserDTO(VALID_AGE, null, Integer.toString(CONSULTING_TYPE_U25.getValue()));
-  public static final UserDTO USER_DTO_WITH_INVALID_AGE =
-      new UserDTO(INVALID_AGE, null, Integer.toString(CONSULTING_TYPE_U25.getValue()));
-  public static final UserDTO USER_DTO_WITHOUT_MANDATORY_AGE = new UserDTO(null, null, null, null,
-      null, null, Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
-  public static final UserDTO USER_DTO_WITHOUT_CONSULTING_TYPE = new UserDTO();
-  public static final UserDTO USER_DTO_WITH_STATE =
-      new UserDTO(null, VALID_STATE, Integer.toString(CONSULTING_TYPE_U25.getValue()));
-  public static final UserDTO USER_DTO_WITH_INVALID_STATE =
-      new UserDTO(null, INVALID_STATE, Integer.toString(CONSULTING_TYPE_U25.getValue()));
-  public static final UserDTO USER_DTO_WITHOUT_MANDATORY_STATE = new UserDTO(null, null, null, null,
-      null, null, Integer.toString(CONSULTING_TYPE_SUCHT.getValue()));
+      new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, "true",
+          Integer.toString(CONSULTING_TYPE_KREUZBUND.getValue()), true);
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO =
       new RocketChatUserDTO(RC_USER_ID, USERNAME, null);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO =
@@ -946,39 +929,6 @@ public class TestConstants {
       new ConsultingTypeSettings(ConsultingType.KREUZBUND, false, null, false, null, true, null,
           false,
           null, true, null, null);
-  public static final MandatoryFields MANDATORY_FIELDS_WITH_AGE = new MandatoryFields(true, false);
-  public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_AGE =
-      new MandatoryFields(false, false);
-  public static final Registration REGISTRATION_WITH_MANDATORY_AGE =
-      new Registration(MANDATORY_FIELDS_WITH_AGE);
-  public static final Registration REGISTRATION_WITHOUT_MANDATORY_AGE =
-      new Registration(MANDATORY_FIELDS_WITHOUT_AGE);
-  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, null, true, null, false,
-          null,
-          false, null, REGISTRATION_WITH_MANDATORY_AGE);
-  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_AGE_MANDATORY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, null, true, null, false,
-          null,
-          false, null, REGISTRATION_WITHOUT_MANDATORY_AGE);
-  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_STATE_FIELD =
-      new ConsultingTypeSettings();
-  public static final MandatoryFields MANDATORY_FIELDS_WITH_STATE =
-      new MandatoryFields(false, true);
-  public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_STATE =
-      new MandatoryFields(false, false);
-  public static final Registration REGISTRATION_WITH_MANDATORY_STATE =
-      new Registration(MANDATORY_FIELDS_WITH_STATE);
-  public static final Registration REGISTRATION_WITHOUT_MANDATORY_STATE =
-      new Registration(MANDATORY_FIELDS_WITHOUT_STATE);
-  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, null, true, null, false,
-          null,
-          false, null, REGISTRATION_WITH_MANDATORY_STATE);
-  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, null, true, null, false,
-          null,
-          false, null, REGISTRATION_WITHOUT_MANDATORY_STATE);
   public static final MandatoryFields MANDATORY_FIELDS_FALSE = new MandatoryFields(false, false);
   public static final MandatoryFields MANDATORY_FIELDS_TRUE = new MandatoryFields(true, true);
   public static final SessionDataInitializing SESSION_DATA_INITIALIZING =
@@ -993,10 +943,6 @@ public class TestConstants {
       new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, true, "Hallo", false,
           SESSION_DATA_INITIALIZING,
           true, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
-  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false,
-          SESSION_DATA_INITIALIZING,
-          true, null, false, null, false, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SUCHT =
       new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, false,

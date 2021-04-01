@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -526,9 +527,6 @@ public class AskerImportService {
                 record.getUsername()));
           }
         }
-
-        // Save session data
-        sessionDataService.saveSessionDataFromRegistration(session, userDTO);
 
         writeToImportLog(String.format("User with old id %s and username %s imported. New id: %s",
             record.getIdOld(), record.getUsername(), dbUser.getUserId()), protocolFile);

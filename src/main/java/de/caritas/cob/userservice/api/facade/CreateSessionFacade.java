@@ -17,7 +17,6 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import java.util.List;
 import lombok.NonNull;
@@ -34,7 +33,6 @@ public class CreateSessionFacade {
   private final @NonNull SessionService sessionService;
   private final @NonNull AgencyHelper agencyHelper;
   private final @NonNull MonitoringService monitoringService;
-  private final @NonNull SessionDataService sessionDataService;
   private final @NonNull RollbackFacade rollbackFacade;
 
   /**
@@ -76,12 +74,8 @@ public class CreateSessionFacade {
       ConsultingTypeSettings consultingTypeSettings, AgencyDTO agencyDTO) {
 
     try {
-      Session session = sessionService
-          .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
-              consultingTypeSettings);
-      sessionDataService.saveSessionDataFromRegistration(session, userDTO);
-
-      return session;
+      return sessionService.initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
+          consultingTypeSettings);
     } catch (Exception ex) {
       rollbackFacade.rollBackUserAccount(RollbackUserAccountInformation.builder()
           .userId(user.getUserId())

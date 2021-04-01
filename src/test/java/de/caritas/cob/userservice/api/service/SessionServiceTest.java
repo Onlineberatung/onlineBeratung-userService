@@ -30,10 +30,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
@@ -44,7 +43,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
+import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -106,7 +105,7 @@ public class SessionServiceTest {
       .singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
-      null, null, null, null, null, ConsultingType.SUCHT.getValue() + "", true);
+      ConsultingType.SUCHT.getValue() + "", true);
 
   @InjectMocks
   private SessionService sessionService;
@@ -117,7 +116,7 @@ public class SessionServiceTest {
   @Mock
   private Logger logger;
   @Mock
-  private SessionDataHelper sessionDataHelper;
+  private SessionDataProvider sessionDataProvider;
   @Mock
   private UserHelper userHelper;
 
@@ -145,20 +144,6 @@ public class SessionServiceTest {
     verify(sessionRepository, times(1))
         .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(agencyIds,
             SessionStatus.NEW);
-  }
-
-  @Test
-  public void getSession_Should_ThrowInternalServerErrorException_WhenRepositoryFails() {
-
-    DataAccessException ex = new DataAccessException("Database error") {
-    };
-    when(sessionRepository.findById(ENQUIRY_ID)).thenThrow(ex);
-    try {
-      sessionService.getSession(ENQUIRY_ID);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
   }
 
   @Test
@@ -196,38 +181,6 @@ public class SessionServiceTest {
 
     sessionService.updateConsultantAndStatusForSession(SESSION, CONSULTANT, SessionStatus.NEW);
     verify(sessionRepository, times(1)).save(SESSION);
-
-  }
-
-  @Test
-  public void saveSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    DataAccessException ex = new DataAccessException("database error") {
-    };
-    when(sessionRepository.save(Mockito.any())).thenThrow(ex);
-
-    try {
-      sessionService.saveSession(SESSION);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
-  }
-
-  @Test
-  public void deleteSession_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    DataAccessException ex = new DataAccessException("database error") {
-    };
-    Mockito.doThrow(ex).when(sessionRepository).delete(Mockito.any(Session.class));
-
-    try {
-      sessionService.deleteSession(SESSION);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
 
   }
 
@@ -330,21 +283,6 @@ public class SessionServiceTest {
 
   }
 
-  @Test
-  public void getSessionsForUser_Should_ThrowInternalServerErrorExceptionAndLogExceptionOnDatabaseError() {
-
-    DataAccessException ex = new DataAccessException("Database error") {
-    };
-    when(sessionRepository.findByUser(USER)).thenThrow(ex);
-    try {
-      sessionService.getSessionsForUser(USER);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-  }
-
   /**
    * method: getSessionsForUserByConsultingType
    */
@@ -364,20 +302,6 @@ public class SessionServiceTest {
 
     assertEquals(sessions, result);
     assertThat(result.get(0), instanceOf(Session.class));
-  }
-
-  @Test
-  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
-
-    DataAccessException ex = new DataAccessException("Database error") {
-    };
-    when(sessionRepository.findByUserAndConsultingType(USER, ConsultingType.SUCHT)).thenThrow(ex);
-    try {
-      sessionService.getSessionsForUserByConsultingType(USER, ConsultingType.SUCHT);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
   }
 
   /**
@@ -405,8 +329,11 @@ public class SessionServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void getSessionsForConsultant_Should_ThrowBadRequestException_WhenStatusParameterIsInvalid() {
-
     sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_INVALID);
+
+    verifyNoMoreInteractions(sessionRepository);
+    verifyNoMoreInteractions(sessionDataProvider);
+    verifyNoMoreInteractions(userHelper);
   }
 
   @Test
@@ -542,27 +469,6 @@ public class SessionServiceTest {
   /**
    * method: getTeamSessionsForConsultant
    */
-
-  @Test
-  public void getTeamSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError() {
-
-    DataAccessException ex = new DataAccessException(ERROR_MSG) {
-    };
-    Consultant consultant = Mockito.mock(Consultant.class);
-
-    when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(sessionRepository
-        .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean())).thenThrow(ex);
-
-    try {
-      sessionService.getTeamSessionsForConsultant(consultant);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-  }
-
   @Test
   public void getTeamSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultant() {
 
