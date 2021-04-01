@@ -15,6 +15,10 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.STATE_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static java.util.Objects.nonNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -34,9 +38,11 @@ import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
 import de.caritas.cob.userservice.api.repository.user.User;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +55,7 @@ public class SessionDataProviderTest {
   private SessionDataProvider sessionDataProvider;
   private ConsultingTypeManager consultingTypeManager;
 
+  private final EasyRandom easyRandom = new EasyRandom();
   private final User USER = new User(USER_ID, null, USERNAME, EMAIL, false);
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
@@ -96,12 +103,19 @@ public class SessionDataProviderTest {
 
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems() {
-
+    Session sessionWithInitializedItem = easyRandom.nextObject(Session.class);
+    sessionWithInitializedItem.setConsultingType(ConsultingType.SUCHT);
+    SessionData data = easyRandom.nextObject(SessionData.class);
+    data.setKey("addictiveDrugs");
+    data.setValue("updatedValue");
+    List<SessionData> sessionDataList = new ArrayList<>();
+    sessionDataList.add(data);
+    sessionWithInitializedItem.setSessionData(sessionDataList);
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider
-        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT, SESSION_DATA_DTO);
+        .createSessionDataList(sessionWithInitializedItem, SESSION_DATA_DTO);
 
     assertEquals(5, result.size());
 
@@ -109,18 +123,23 @@ public class SessionDataProviderTest {
       switch (sessionData.getKey()) {
         case "addictiveDrugs":
           assertEquals(ADDICTIVE_DRUGS_VALUE, sessionData.getValue());
+          assertThat(sessionData.getId(), is(notNullValue()));
           break;
         case "age":
           assertEquals(AGE_VALUE, sessionData.getValue());
+          assertThat(sessionData.getId(), is(nullValue()));
           break;
         case "gender":
           assertEquals(GENDER_VALUE, sessionData.getValue());
+          assertThat(sessionData.getId(), is(nullValue()));
           break;
         case "relation":
           assertEquals(RELATION_VALUE, sessionData.getValue());
+          assertThat(sessionData.getId(), is(nullValue()));
           break;
         case "state":
           assertEquals(STATE_VALUE, sessionData.getValue());
+          assertThat(sessionData.getId(), is(nullValue()));
           break;
         default:
           fail("Unknown SessionData key");
@@ -137,7 +156,7 @@ public class SessionDataProviderTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider
-        .createInitialSessionDataList(INITIALIZED_SESSION_U25, SESSION_DATA_DTO);
+        .createSessionDataList(INITIALIZED_SESSION_U25, SESSION_DATA_DTO);
 
     assertEquals(0, result.size());
 
@@ -145,31 +164,28 @@ public class SessionDataProviderTest {
 
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreNull() {
-
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider
-        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT,
+        .createSessionDataList(INITIALIZED_SESSION_SUCHT,
             new SessionDataDTO());
 
     for (SessionData sessionData : result) {
-      assertNull(sessionData.getValue());
+      assertThat(sessionData.getValue(), is(nullValue()));
     }
-
   }
 
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreEmpty() {
-
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataProvider.createInitialSessionDataList(
+    List<SessionData> result = sessionDataProvider.createSessionDataList(
         INITIALIZED_SESSION_SUCHT, EMPTY_SESSION_DATA_DTO);
 
     for (SessionData sessionData : result) {
-      assertNull(sessionData.getValue());
+      assertThat(sessionData.getValue(), is(nullValue()));
     }
 
   }
@@ -181,7 +197,7 @@ public class SessionDataProviderTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataProvider
-        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT, SESSION_DATA_DTO);
+        .createSessionDataList(INITIALIZED_SESSION_SUCHT, SESSION_DATA_DTO);
 
     assertEquals(AGE_VALUE, getValueOfKey(dataList, AGE));
   }
@@ -193,7 +209,7 @@ public class SessionDataProviderTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataProvider
-        .createInitialSessionDataList(INITIALIZED_SESSION_SUCHT,
+        .createSessionDataList(INITIALIZED_SESSION_SUCHT,
             new SessionDataDTO());
 
     assertNull(getValueOfKey(dataList, AGE));

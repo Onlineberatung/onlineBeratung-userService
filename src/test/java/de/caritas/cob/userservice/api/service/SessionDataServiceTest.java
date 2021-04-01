@@ -45,7 +45,7 @@ public class SessionDataServiceTest {
     sessionDataService.saveSessionData(SESSION_ID, sessionData);
 
     verify(mandatoryFieldsValidator, times(1)).validateFields(any(), any());
-    verify(sessionDataProvider, times(1)).createInitialSessionDataList(any(), any());
+    verify(sessionDataProvider, times(1)).createSessionDataList(any(), any());
     verify(sessionDataRepository, times(1)).saveAll(any());
   }
 

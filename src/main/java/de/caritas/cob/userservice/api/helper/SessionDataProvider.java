@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -34,19 +35,15 @@ public class SessionDataProvider {
    * @return a map with registration session data items of the session
    */
   public Map<String, Object> getSessionDataMapFromSession(Session session) {
-
     Map<String, Object> sessionDataMap = new LinkedHashMap<>();
 
-    if (session.getSessionData() != null) {
-      for (SessionData sessionData : session.getSessionData()) {
-        if (SessionDataKeyRegistration.containsKey(sessionData.getKey())) {
-          sessionDataMap.put(sessionData.getKey(), sessionData.getValue());
-        }
+    session.getSessionData().forEach(sessionData -> {
+      if (SessionDataKeyRegistration.containsKey(sessionData.getKey())) {
+        sessionDataMap.put(sessionData.getKey(), sessionData.getValue());
       }
-    }
+    });
 
     return sessionDataMap;
-
   }
 
   /**
@@ -56,29 +53,29 @@ public class SessionDataProvider {
    * @param sessionData   the {@link SessionDataDTO}
    * @return the list of session data items
    */
-  public List<SessionData> createInitialSessionDataList(Session session,
+  public List<SessionData> createSessionDataList(Session session,
       SessionDataDTO sessionData) {
 
     List<SessionData> sessionDataList = new ArrayList<>();
     if (getSessionDataInitializing(session.getConsultingType()).isAddictiveDrugs()) {
-      sessionDataList.add(createRegistrationSessionData(session,
+      sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),
           getAddictiveDrugsValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isAge()) {
-      sessionDataList.add(createRegistrationSessionData(session,
+      sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.AGE.getValue(), getAgeValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isGender()) {
-      sessionDataList.add(createRegistrationSessionData(session,
+      sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.GENDER.getValue(), getGenderValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isRelation()) {
-      sessionDataList.add(createRegistrationSessionData(session,
+      sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.RELATION.getValue(), getRelationValue(sessionData)));
     }
     if (getSessionDataInitializing(session.getConsultingType()).isState()) {
-      sessionDataList.add(createRegistrationSessionData(session,
+      sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.STATE.getValue(), getStateValue(sessionData)));
     }
     return sessionDataList;
@@ -87,10 +84,26 @@ public class SessionDataProvider {
   private SessionDataInitializing getSessionDataInitializing(ConsultingType consultingType) {
     return consultingTypeManager.getConsultingTypeSettings(consultingType)
         .getSessionDataInitializing();
-
   }
 
-  private SessionData createRegistrationSessionData(Session session, String key, String value) {
+  private SessionData obtainSessionData(Session session, String key, String value) {
+    return nonNull(session.getSessionData()) ?
+        obtainUpdatedOrInitialSessionData(session, key, value) :
+        obtainInitialSessionData(session, key, value);
+  }
+
+  private SessionData obtainUpdatedOrInitialSessionData(Session session, String key, String value) {
+    SessionData sessionData = session.getSessionData()
+        .stream()
+        .filter(data -> data.getKey().equals(key))
+        .findFirst()
+        .orElse(obtainInitialSessionData(session, key, value));
+    sessionData.setValue(value);
+
+    return sessionData;
+  }
+
+  private SessionData obtainInitialSessionData(Session session, String key, String value) {
     return new SessionData(session, SessionDataType.REGISTRATION, key, value);
   }
 
