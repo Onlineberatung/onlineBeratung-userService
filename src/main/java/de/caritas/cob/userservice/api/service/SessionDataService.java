@@ -3,10 +3,7 @@ package de.caritas.cob.userservice.api.service;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsValidator;
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,29 +34,9 @@ public class SessionDataService {
     Session session = sessionService.getSession(sessionId).orElseThrow(() -> new NotFoundException(
         String.format("Session with id %s not found for mandatory field check.", sessionId)));
     mandatoryFieldsValidator.validateFields(session.getConsultingType(), sessionData);
-    List<SessionData> sessionDataList = this.buildSessionDataList(session, sessionData);
+    List<SessionData> sessionDataList =
+        sessionDataProvider.createSessionDataList(session, sessionData);
 
     sessionDataRepository.saveAll(sessionDataList);
-  }
-
-  private List<SessionData> buildSessionDataList(Session session, SessionDataDTO sessionData) {
-    return sessionDataProvider.createInitialSessionDataList(session, sessionData);
-  }
-
-  private List<SessionData> buildUpdatedSessionDataList(Session session, SessionDataDTO sessionData) {
-    session.getSessionData()
-        .forEach(data -> data.setValue(obtainNewValue(data.getKey(), sessionData)));
-
-    return session.getSessionData();
-  }
-
-  private String obtainNewValue(String key, SessionDataDTO sessionData) {
-    try {
-      Field f = sessionData.getClass().getDeclaredField(key);
-      f.setAccessible(true);
-      return f.get(sessionData).toString();
-    } catch (Exception exception) {
-      return "";
-    }
   }
 }
