@@ -1,12 +1,9 @@
 package de.caritas.cob.userservice.api.model.registration;
 
-import static de.caritas.cob.userservice.api.helper.UserHelper.ADDICTIVE_DRUGS_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MAX;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MIN;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_REGEXP;
-import static de.caritas.cob.userservice.api.helper.UserHelper.GENDER_REGEXP;
-import static de.caritas.cob.userservice.api.helper.UserHelper.RELATION_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
@@ -47,7 +44,7 @@ public class UserDTO implements UserRegistrationDTO {
 
   @NotBlank(message = "{user.username.notBlank}")
   @NotNull(message = "{user.username.notBlank}")
-  @ApiModelProperty(required = true, example = "max94", position = 0)
+  @ApiModelProperty(required = true, example = "max94")
   @JsonDeserialize(using = EncodeUsernameJsonDeserializer.class)
   @JsonProperty("username")
   private String username;
@@ -74,38 +71,20 @@ public class UserDTO implements UserRegistrationDTO {
 
   @JsonInclude(value = Include.NON_NULL)
   @Email(message = "{user.email.invalid}")
-  @ApiModelProperty(required = false, example = "max@mustermann.de", position = 4)
+  @ApiModelProperty(example = "max@mustermann.de", position = 4)
   @JsonProperty("email")
   private String email;
 
   @JsonInclude(value = Include.NON_NULL)
-  @Pattern(regexp = ADDICTIVE_DRUGS_REGEXP, message = "{user.custom.addictiveDrugs.invalid}")
-  @ApiModelProperty(required = false, example = "\"2,4\"", position = 5)
-  @JsonProperty("addictiveDrugs")
-  private String addictiveDrugs;
-
-  @JsonInclude(value = Include.NON_NULL)
-  @Pattern(regexp = RELATION_REGEXP, message = "{user.custom.relation.invalid}")
-  @ApiModelProperty(required = false, example = "\"2\"", position = 6)
-  @JsonProperty("relation")
-  private String relation;
-
-  @JsonInclude(value = Include.NON_NULL)
   @Pattern(regexp = AGE_REGEXP, message = "{user.custom.age.invalid}")
-  @ApiModelProperty(required = false, example = "1", position = 7)
+  @ApiModelProperty(example = "1", position = 7)
   @JsonProperty("age")
   private String age;
 
   @JsonInclude(value = Include.NON_NULL)
-  @Pattern(regexp = GENDER_REGEXP, message = "{user.custom.gender.invalid}")
-  @ApiModelProperty(required = false, example = "\"1\"", position = 8)
-  @JsonProperty("gender")
-  private String gender;
-
-  @JsonInclude(value = Include.NON_NULL)
   @Pattern(regexp = STATE_REGEXP, message = "{user.custom.state.invalid}")
   @JsonProperty("state")
-  @ApiModelProperty(required = false, example = "\"16\"", position = 9)
+  @ApiModelProperty(example = "\"16\"", position = 9)
   private String state;
 
   @Pattern(regexp = TERMS_ACCEPTED_REGEXP, message = "{user.custom.termsAccepted.invalid}")
@@ -147,10 +126,7 @@ public class UserDTO implements UserRegistrationDTO {
         + "username='" + username + '\''
         + ", postcode='" + postcode + '\''
         + ", agencyId=" + agencyId
-        + ", addictiveDrugs='" + addictiveDrugs + '\''
-        + ", relation='" + relation + '\''
         + ", age='" + age + '\''
-        + ", gender='" + gender + '\''
         + ", state='" + state + '\''
         + ", termsAccepted='" + termsAccepted + '\''
         + ", consultingType='" + consultingType + '\''

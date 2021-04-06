@@ -132,7 +132,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * @param request the invoking request
    * @param ex the thrown exception
    */
-  @ExceptionHandler({InvalidDataAccessApiUsageException.class, DataAccessException.class})
+  @ExceptionHandler({InvalidDataAccessApiUsageException.class})
   protected ResponseEntity<Object> handleConflict(final RuntimeException ex,
       final WebRequest request) {
     LogService.logWarn(HttpStatus.CONFLICT, ex);
@@ -189,7 +189,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * @param ex the thrown exception
    */
   @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class,
-      IllegalStateException.class, KeycloakException.class,
+      IllegalStateException.class, KeycloakException.class, DataAccessException.class,
       UnknownHostException.class, CustomCryptoException.class, NoMasterKeyException.class})
   public ResponseEntity<Object> handleInternal(final RuntimeException ex,
       final WebRequest request) {

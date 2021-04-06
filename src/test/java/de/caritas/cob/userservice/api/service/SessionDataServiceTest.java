@@ -1,96 +1,55 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.helper.SessionDataProvider;
+import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
-import java.util.ArrayList;
+import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionDataServiceTest {
-
-  private final String USERNAME = "username";
-  private final String USER_ID = "9b71cc46-650d-42bb-8299-f8e3f6d7249f";
-  private final User USER = new User(USER_ID, null, USERNAME, "name@domain.de", false);
-  private final String CONSULTANT_ID = "1b71cc46-650d-42bb-8299-f8e3f6d7249a";
-  private final String CONSULTANT_ROCKETCHAT_ID = "xN3Mobksn3xdp7gEk";
-  private final Consultant CONSULTANT =
-      new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
-          "last name", "consultant@cob.de", false, false, null, false, null, null, null, null,
-          null, null);
-  private final Session INITALIZED_SESSION = new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT,
-      "99999", 0L, SessionStatus.INITIAL, null, null, null, null, false, false, null, null);
-  private final UserDTO USER_DTO = new UserDTO(USERNAME, "99999", 99L, "xyz", "x@y.de", null, null,
-      null, null, null, "true", "0", true);
-
 
   @InjectMocks
   private SessionDataService sessionDataService;
   @Mock
   private SessionDataRepository sessionDataRepository;
   @Mock
-  private SessionDataHelper sessionDataHelper;
+  private SessionDataProvider sessionDataProvider;
+  @Mock
+  private SessionService sessionService;
+
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  public void createSessionDataList_Should_SaveSessionData() {
+  public void createSessionDataList_Should_SaveValidatedSessionData() {
+    SessionDataDTO sessionData = easyRandom.nextObject(SessionDataDTO.class);
+    Session session = easyRandom.nextObject(Session.class);
+    when(sessionService.getSession(any())).thenReturn(Optional.of(session));
 
-    sessionDataService.saveSessionDataFromRegistration(INITALIZED_SESSION, USER_DTO);
-    verify(sessionDataRepository, times(1)).saveAll(Mockito.any());
+    sessionDataService.saveSessionData(SESSION_ID, sessionData);
+
+    verify(sessionDataProvider, times(1)).createSessionDataList(any(), any());
+    verify(sessionDataRepository, times(1)).saveAll(any());
   }
 
-  @Test
-  public void createSessionDataList_Should_ThrowInternalServerErrorException_WhenSaveSessionDataFails() {
+  @Test(expected = NotFoundException.class)
+  public void createSessionDataList_Should_ThrowNotFoundException_When_SessionDoesNotExist() {
+    SessionDataDTO sessionData = easyRandom.nextObject(SessionDataDTO.class);
+    when(sessionService.getSession(any())).thenReturn(Optional.empty());
 
-    when(sessionDataHelper.createRegistrationSessionDataList(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<>());
-
-    @SuppressWarnings("serial")
-    DataAccessException dataAccessException = new DataAccessException("reson") {};
-    when(sessionDataRepository.saveAll(Mockito.any())).thenThrow(dataAccessException);
-
-    try {
-      sessionDataService.saveSessionDataFromRegistration(INITALIZED_SESSION, USER_DTO);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
+    sessionDataService.saveSessionData(SESSION_ID, sessionData);
   }
-
-  @Test
-  public void createSessionDataList_Should_ThrowInternalServerErrorException_WhenProvidedSessionIsNull() {
-
-    when(sessionDataHelper.createRegistrationSessionDataList(Mockito.any(), Mockito.any()))
-        .thenReturn(null);
-
-    @SuppressWarnings("serial")
-    IllegalArgumentException illegalArgumentException = new IllegalArgumentException("reson") {};
-    when(sessionDataRepository.saveAll(Mockito.any())).thenThrow(illegalArgumentException);
-
-    try {
-      sessionDataService.saveSessionDataFromRegistration(INITALIZED_SESSION, USER_DTO);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-  }
-
 }

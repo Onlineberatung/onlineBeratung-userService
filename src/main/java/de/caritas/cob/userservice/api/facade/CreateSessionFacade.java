@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInforma
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -79,7 +80,7 @@ public class CreateSessionFacade {
       Session session = sessionService
           .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
               consultingTypeSettings);
-      sessionDataService.saveSessionDataFromRegistration(session, userDTO);
+      sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 
       return session;
     } catch (Exception ex) {
@@ -117,5 +118,11 @@ public class CreateSessionFacade {
           String.format("User %s is already registered to consulting type %s", user.getUserId(),
               consultingType.getValue()));
     }
+  }
+
+  private SessionDataDTO fromUserDTO(UserDTO userDTO) {
+    return (SessionDataDTO) new SessionDataDTO()
+        .age(userDTO.getAge())
+        .state(userDTO.getState());
   }
 }
