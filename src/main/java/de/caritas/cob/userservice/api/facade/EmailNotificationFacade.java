@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Facade for capsuling the mail notification via the MailService
@@ -95,10 +96,11 @@ public class EmailNotificationFacade {
    * @param userId the user id of initiating user
    */
   @Async
+  @Transactional
   public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId) {
 
     try {
-      Session session = sessionService.getSessionByGroupIdAndUserId(rcGroupId, userId, roles);
+      Session session = sessionService.getSessionByGroupIdAndUser(rcGroupId, userId, roles);
 
       EmailSupplier newMessageMails = new NewMessageEmailSupplier(session, rcGroupId, roles,
           userId, consultantAgencyService, consultingTypeManager, applicationBaseUrl,
