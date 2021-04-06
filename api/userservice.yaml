@@ -279,7 +279,7 @@ paths:
         content:
           'application/json':
             schema:
-              type: string
+              $ref: '#/components/schemas/MobileTokenDTO'
         required: true
       responses:
         200:
@@ -1575,6 +1575,15 @@ components:
 
     ConsultingType:
       type: object
+
+    MobileTokenDTO:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: "8cc2058"
 
     MonitoringDTO:
       type: object
