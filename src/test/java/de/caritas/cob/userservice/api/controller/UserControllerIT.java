@@ -41,6 +41,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT_INVALID_PATH_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
@@ -150,6 +151,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
@@ -406,11 +408,14 @@ public class UserControllerIT {
   @MockBean
   private UserService userService;
 
-  @Mock private Logger logger;
+  @Mock
+  private Logger logger;
 
-  @Mock private Chat chat;
+  @Mock
+  private Chat chat;
 
-  @Before public void setUp() {
+  @Before
+  public void setUp() {
     HashMap<String, Object> drugsMap = new HashMap<>();
     drugsMap.put("others", false);
     HashMap<String, Object> addictiveDrugsMap = new HashMap<>();
@@ -962,7 +967,8 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
   }
 
-  @Test public void updateAbsence_Should_ReturnOk_When_Saved() throws Exception {
+  @Test
+  public void updateAbsence_Should_ReturnOk_When_Saved() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedTeamConsultant()).thenReturn(TEAM_CONSULTANT);
@@ -972,7 +978,8 @@ public class UserControllerIT {
         .andExpect(status().isOk());
   }
 
-  @Test public void updateAbsence_Should_ReturnBadRequest_When_RequestBodyIsMissing()
+  @Test
+  public void updateAbsence_Should_ReturnBadRequest_When_RequestBodyIsMissing()
       throws Exception {
     mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
@@ -1780,7 +1787,8 @@ public class UserControllerIT {
    * updatePassword()
    */
 
-  @Test public void updatePassword_Should_ReturnBadRequest_When_PasswordsAreMissing()
+  @Test
+  public void updatePassword_Should_ReturnBadRequest_When_PasswordsAreMissing()
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).contentType(MediaType.APPLICATION_JSON)
@@ -1789,7 +1797,8 @@ public class UserControllerIT {
     verify(keycloakService, times(0)).changePassword(anyString(), anyString());
   }
 
-  @Test public void updatePassword_Should_ReturnOK_When_UpdatingThePasswordWasSuccessful()
+  @Test
+  public void updatePassword_Should_ReturnOK_When_UpdatingThePasswordWasSuccessful()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(VALID_PASSWORT_REQUEST_BODY)
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -2136,7 +2145,6 @@ public class UserControllerIT {
 
   @Test
   public void updateEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
-
     mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
         .contentType(MediaType.APPLICATION_JSON)
         .content("email")
@@ -2146,33 +2154,63 @@ public class UserControllerIT {
     verify(accountProvider, times(1)).changeUserAccountEmailAddress("email");
   }
 
-  @Test public void updateEmailAddress_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
-
-    mvc.perform(put(PATH_PUT_UPDATE_EMAIL).contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+  @Test
+  public void updateEmailAddress_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(accountProvider);
   }
 
-  @Test public void deactivateAndFlagUserAccountForDeletion_Should_ReturnOk_When_RequestOk()
+  @Test
+  public void deactivateAndFlagUserAccountForDeletion_Should_ReturnOk_When_RequestOk()
       throws Exception {
 
     DeleteUserAccountDTO deleteUserAccountDTO = new DeleteUserAccountDTO().password("p@ssword");
     String bodyPayload = new ObjectMapper().writeValueAsString(deleteUserAccountDTO);
 
-    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED).contentType(MediaType.APPLICATION_JSON)
-        .content(bodyPayload).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(bodyPayload)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
 
     verify(accountProvider, times(1)).deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
   }
 
-  @Test public void deactivateAndFlagUserAccountForDeletion_Should_ReturnBadRequest_When_BodyValuesAreMissing()
+  @Test
+  public void deactivateAndFlagUserAccountForDeletion_Should_ReturnBadRequest_When_BodyValuesAreMissing()
       throws Exception {
 
-    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED).contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(keycloakService);
+  }
+
+  @Test
+  public void updateMobileToken_Should_ReturnOk_When_RequestOk() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token("token")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(accountProvider, times(1)).updateUserMobileToken("token");
+  }
+
+  @Test
+  public void updateMobileToken_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(accountProvider);
   }
 
 }

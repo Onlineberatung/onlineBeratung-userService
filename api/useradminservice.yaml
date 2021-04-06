@@ -62,7 +62,46 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /useradmin/consultant:
+  /useradmin/consultants:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of consultants by filter query parameter. [Authorization: Role: consultant-admin]'
+      operationId: getConsultants
+      parameters:
+        - name: filter
+          in: query
+          description: 'The filter parameters to search for. If no filter is set all consultant are
+                being returned.'
+          schema:
+            $ref: '#/components/schemas/ConsultantFilter'
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/ConsultantSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
     post:
       tags:
         - admin-user-controller
@@ -91,7 +130,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /useradmin/consultant/{consultantId}:
+  /useradmin/consultants/{consultantId}:
     get:
       tags:
         - admin-user-controller
@@ -179,42 +218,30 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /useradmin/consultants:
-    get:
+  /useradmin/askers/{askerId}:
+    delete:
       tags:
         - admin-user-controller
-      summary: 'Returns the list of consultants by filter query parameter. [Authorization: Role: consultant-admin]'
-      operationId: getConsultants
+      summary: 'Delete a asker by given id [Authorization: Role: consultant-admin]'
+      operationId: markAskerForDeletion
       parameters:
-        - name: filter
-          in: query
-          description: 'The filter parameters to search for. If no filter is set all consultant are
-              being returned.'
-          schema:
-            $ref: '#/components/schemas/ConsultantFilter'
-        - name: page
-          in: query
-          description: Number of page where to start in the query (1 = first page)
+        - name: askerId
+          in: path
+          description: asker id
           required: true
           schema:
-            type: integer
-        - name: perPage
-          in: query
-          description: Number of items which are being returned per page
-          required: true
-          schema:
-            type: integer
+            type: string
       responses:
         200:
-          description: OK - successfull operation
-          content:
-            'application/hal+json':
-              schema:
-                $ref: '#/components/schemas/ConsultantSearchResultDTO'
+          description: OK - asker was marked for deletion successfully
         400:
-          description: BAD REQUEST - invalid/incomplete request or body object
+          description: BAD REQUEST - invalid/incomplete request
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - asker not found
+        409:
+          description: CONFLICT - asker is already marked for deletion
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -276,7 +303,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /useradmin/consultant/{consultantId}/agencies:
+  /useradmin/consultants/{consultantId}/agencies:
     get:
       tags:
         - admin-user-controller
@@ -303,8 +330,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
-  /useradmin/consultant/{consultantId}/agency:
     post:
       tags:
         - admin-user-controller
@@ -334,8 +359,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
-  /useradmin/consultant/{consultantId}/agency/{agencyId}:
+  /useradmin/consultants/{consultantId}/agencies/{agencyId}:
     delete:
       tags:
         - admin-user-controller
@@ -427,6 +451,8 @@ components:
           $ref: '#/components/schemas/HalLink'
         createConsultant:
           $ref: '#/components/schemas/HalLink'
+        deleteAsker:
+          $ref: '#/components/schemas/HalLink'
 
     HalLink:
       type: object
@@ -450,10 +476,16 @@ components:
             $ref: '#/components/schemas/SessionAdminDTO'
         _links:
           $ref: '#/components/schemas/PaginationLinks'
+        total:
+          type: integer
 
     SessionAdminDTO:
       type: object
       properties:
+        id:
+          type: integer
+          format: int64
+          example: 94
         userId:
           type: string
           example: "1da238c6-cd46-4162-80f1-bff74eafe77f"
@@ -505,11 +537,13 @@ components:
             $ref: '#/components/schemas/ConsultingTypeResultDTO'
         _links:
           $ref: '#/components/schemas/PaginationLinks'
+        total:
+          type: integer
 
     ConsultingTypeResultDTO:
       type: object
       properties:
-        consultingTypeId:
+        id:
           type: integer
           format: int32
           example: 2
@@ -707,6 +741,8 @@ components:
             $ref: '#/components/schemas/ConsultantAdminResponseDTO'
         _links:
           $ref: '#/components/schemas/PaginationLinks'
+        total:
+          type: integer
 
     ConsultantLinks:
       type: object
@@ -760,6 +796,8 @@ components:
             $ref: '#/components/schemas/ConsultantAgencyAdminDTO'
         _links:
           $ref: '#/components/schemas/ConsultantAgencyAdminResultLinks'
+        total:
+          type: integer
 
     ConsultantAgencyAdminResultLinks:
       type: object
@@ -772,6 +810,10 @@ components:
     ConsultantAgencyAdminDTO:
       type: object
       properties:
+        id:
+          type: integer
+          format: int64
+          example: 15
         consultantId:
           type: string
           example: "aadc0ecf-c048-4bfc-857d-8c9b2e425500"

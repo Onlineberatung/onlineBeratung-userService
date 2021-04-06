@@ -41,7 +41,7 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
     assertThat(resultDTO.getLinks(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/consultant/{consultantId}/agencies"));
+        is("/useradmin/consultants/{consultantId}/agencies"));
   }
 
   @Test
@@ -55,7 +55,7 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
     assertThat(resultDTO.getLinks(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/consultant/1da238c6-cd46-4162-80f1-bff74eafe77f/agencies"));
+        is("/useradmin/consultants/1da238c6-cd46-4162-80f1-bff74eafe77f/agencies"));
   }
 
   @Test
@@ -73,7 +73,18 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
     assertThat(resultDTO.getLinks(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf(), notNullValue());
     assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/consultant/1da238c6-cd46-4162-80f1-bff74eafeAAA/agencies"));
+        is("/useradmin/consultants/1da238c6-cd46-4162-80f1-bff74eafeAAA/agencies"));
+  }
+
+  @Test
+  public void build_Should_returnEmptyConsultantAgencyAdminResultDTOWithTotal_When_ParametersAreSet() {
+    ConsultantAgencyAdminResultDTO resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
+        .withConsultantId("1da238c6-cd46-4162-80f1-bff74eafeAAA")
+        .withResult(agencyList)
+        .build();
+
+    assertThat(resultDTO, notNullValue());
+    assertThat(resultDTO.getTotal(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
   }
 
 }

@@ -64,6 +64,9 @@ public class User {
   @OneToMany(mappedBy = "user")
   private Set<UserAgency> userAgencies;
 
+  @Column(name = "mobile_token")
+  private String mobileToken;
+
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
 

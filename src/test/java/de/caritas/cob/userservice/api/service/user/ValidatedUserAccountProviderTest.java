@@ -74,8 +74,7 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void
-      retrieveValidatedUser_Should_Throw_InternalServerErrorException_When_UserIsNotPresent() {
+  public void retrieveValidatedUser_Should_Throw_InternalServerErrorException_When_UserIsNotPresent() {
     when(userService.getUser(any())).thenReturn(Optional.empty());
 
     this.accountProvider.retrieveValidatedUser();
@@ -92,16 +91,14 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void
-      retrieveValidatedConsultant_Should_Throw_InternalServerErrorException_When_ConsultantIsNotPresent() {
+  public void retrieveValidatedConsultant_Should_Throw_InternalServerErrorException_When_ConsultantIsNotPresent() {
     when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
 
     this.accountProvider.retrieveValidatedConsultant();
   }
 
   @Test
-  public void
-      retrieveValidatedTeamConsultant_Should_ReturnTeamConsultant_When_TeamConsultantIsPresent() {
+  public void retrieveValidatedTeamConsultant_Should_ReturnTeamConsultant_When_TeamConsultantIsPresent() {
     Consultant teamConsultantMock = mock(Consultant.class);
     when(teamConsultantMock.isTeamConsultant()).thenReturn(true);
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(teamConsultantMock));
@@ -112,8 +109,7 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void
-      retrieveValidatedTeamConsultant_Should_Throw_ForbiddenException_When_ConsultantIsNotATeamConsultant() {
+  public void retrieveValidatedTeamConsultant_Should_Throw_ForbiddenException_When_ConsultantIsNotATeamConsultant() {
     Consultant consultantMock = mock(Consultant.class);
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultantMock));
 
@@ -121,8 +117,7 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void
-      changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
+  public void changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.authenticatedUser.getUserId()).thenReturn("consultant");
     when(this.consultantService.getConsultant("consultant")).thenReturn(Optional.of(consultant));
@@ -143,8 +138,7 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void
-      changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
+  public void changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
     User user = new EasyRandom().nextObject(User.class);
     when(this.authenticatedUser.getUserId()).thenReturn("user");
     when(this.userService.getUser("user")).thenReturn(Optional.of(user));
@@ -164,8 +158,7 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void
-      changePassword_Should_ThrowInternalServerErrorException_When_KeycloakPwChangeCallFails() {
+  public void changePassword_Should_ThrowInternalServerErrorException_When_KeycloakPwChangeCallFails() {
     PasswordDTO passwordDTO = new EasyRandom().nextObject(PasswordDTO.class);
 
     this.accountProvider.changePassword(passwordDTO);
@@ -211,5 +204,27 @@ public class ValidatedUserAccountProviderTest {
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(userService, times(1)).saveUser(captor.capture());
     assertNotNull(captor.getValue().getDeleteDate());
+  }
+
+  @Test
+  public void updateUserMobileToken_Should_updateUsersMobileToken_When_mobileTokenIsValidString() {
+    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+
+    this.accountProvider.updateUserMobileToken("mobileToken");
+
+    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+    verify(this.userService, times(1)).saveUser(captor.capture());
+    assertThat(captor.getValue().getMobileToken(), is("mobileToken"));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateUserMobileToken_Should_throwBadRequestException_When_mobileTokenIsNull() {
+    this.accountProvider.updateUserMobileToken(null);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateUserMobileToken_Should_throwBadRequestException_When_mobileTokenIsEmptyString() {
+    this.accountProvider.updateUserMobileToken("");
   }
 }

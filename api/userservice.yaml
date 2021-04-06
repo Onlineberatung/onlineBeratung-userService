@@ -265,6 +265,33 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/mobiletoken:
+    put:
+      tags:
+        - user-controller
+      summary: 'Sets or updates the mobile registration token of the authorized asker account.
+      This token is used to send push notifications to native mobile applications on android and
+      ios. [Authorization: Role: asker]'
+      operationId: updateMobileToken
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MobileTokenDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/consultants:
     get:
       tags:
@@ -1533,6 +1560,15 @@ components:
 
     ConsultingType:
       type: object
+
+    MobileTokenDTO:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: "8cc2058"
 
     MonitoringDTO:
       type: object

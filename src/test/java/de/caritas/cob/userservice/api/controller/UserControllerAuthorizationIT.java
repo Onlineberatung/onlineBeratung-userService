@@ -29,6 +29,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_LEAVE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MONITORING;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -54,6 +55,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.AskerImportService;
@@ -1748,4 +1750,66 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
+
+  @Test
+  public void updateMobileToken_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
+      throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(validatedUserAccountProvider);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
+      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
+      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
+      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  public void updateMobileToken_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
+      throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(validatedUserAccountProvider);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  public void updateMobileToken_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken() throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(validatedUserAccountProvider);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  public void updateMobileToken_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
+      throws Exception {
+
+    mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token(
+            "token")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
 }

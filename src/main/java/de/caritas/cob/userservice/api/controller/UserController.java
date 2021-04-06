@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
+import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
@@ -742,6 +743,18 @@ public class UserController implements UsersApi {
   public ResponseEntity<Void> deactivateAndFlagUserAccountForDeletion(
       @Valid DeleteUserAccountDTO deleteUserAccountDTO) {
     this.userAccountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Updates or sets the mobile client token for the current authenticated user.
+   *
+   * @param mobileTokenDTO (required) the mobile device identifier {@link MobileTokenDTO}
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateMobileToken(@Valid MobileTokenDTO mobileTokenDTO) {
+    this.userAccountProvider.updateUserMobileToken(mobileTokenDTO.getToken());
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

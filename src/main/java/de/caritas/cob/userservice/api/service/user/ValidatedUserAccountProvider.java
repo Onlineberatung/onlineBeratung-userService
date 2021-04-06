@@ -1,7 +1,9 @@
 package de.caritas.cob.userservice.api.service.user;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -153,4 +155,23 @@ public class ValidatedUserAccountProvider {
     user.setDeleteDate(nowInUtc());
     userService.saveUser(user);
   }
+
+  /**
+   * Updates or sets the mobile client token of the current authenticated user in database.
+   *
+   * @param mobileToken the new mobile device identifier token
+   */
+  public void updateUserMobileToken(String mobileToken) {
+    if (isBlank(mobileToken)) {
+      throw new BadRequestException("Mobile token must not be empty");
+    }
+    this.userService.getUser(this.authenticatedUser.getUserId())
+        .ifPresent(user -> updateMobileToken(user, mobileToken));
+  }
+
+  private void updateMobileToken(User user, String mobileToken) {
+    user.setMobileToken(mobileToken);
+    this.userService.saveUser(user);
+  }
+
 }

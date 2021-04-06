@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL;
@@ -27,6 +28,7 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_U
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CLEAN_ROOM_HISTORY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_CREATE;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_DELETE;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_MEMBERS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_REMOVE_USER;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_ROOMS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_SUBSCRIPTIONS_GET;
@@ -44,6 +46,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESP
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -96,6 +99,7 @@ import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -105,9 +109,11 @@ import org.slf4j.Logger;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatServiceTest {
@@ -196,6 +202,8 @@ public class RocketChatServiceTest {
         RC_URL_CHAT_USER_DELETE);
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL,
         RC_URL_CHAT_USER_UPDATE);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS,
+        RC_URL_GROUPS_MEMBERS_GET);
 
     setInternalState(LogService.class, "LOGGER", logger);
   }
@@ -407,7 +415,6 @@ public class RocketChatServiceTest {
   @Test
   public void getMembersOfGroup_Should_ReturnListOfGroupMemberDTO_WhenAPICallIsSuccessful()
       throws Exception {
-
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     when(restTemplate.exchange(ArgumentMatchers.anyString(), any(),
@@ -416,6 +423,26 @@ public class RocketChatServiceTest {
 
     assertThat(rocketChatService.getMembersOfGroup(GROUP_ID),
         everyItem(instanceOf(GroupMemberDTO.class)));
+  }
+
+  @Test
+  public void getMembersOfGroup_Should_AddCorrectCountParameterToRocketChatCall()
+      throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(restTemplate.exchange(ArgumentMatchers.anyString(), any(), any(),
+        ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
+        .thenReturn(GROUP_MEMBER_RESPONSE_ENTITY);
+
+    rocketChatService.getMembersOfGroup(GROUP_ID);
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(restTemplate).exchange(captor.capture(), any(), any(),
+        ArgumentMatchers.<Class<GroupMemberResponseDTO>>any());
+    MultiValueMap<String, String> queryParams = UriComponentsBuilder
+        .fromUriString(captor.getValue())
+        .build()
+        .getQueryParams();
+    assertThat(queryParams.get("count").get(0), is("0"));
   }
 
   /**
@@ -835,7 +862,7 @@ public class RocketChatServiceTest {
 
     UserInfoResponseDTO result = rocketChatService.getUserInfo(RC_USER_ID);
 
-    assertEquals(result.getUser().getId(), RC_USER_ID);
+    assertEquals(RC_USER_ID, result.getUser().getId());
   }
 
   @Test

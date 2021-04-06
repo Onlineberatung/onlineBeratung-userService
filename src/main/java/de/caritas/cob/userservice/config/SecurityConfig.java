@@ -26,10 +26,13 @@ import org.springframework.security.web.csrf.CsrfFilter;
 
 /**
  * Provides the Keycloak/Spring Security configuration.
- *
  */
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+
+  public static final String[] WHITE_LIST =
+      new String[]{"/users/docs", "/users/docs/**", "/v2/api-docs", "/configuration/ui",
+          "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**"};
 
   @SuppressWarnings("unused")
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
@@ -40,11 +43,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Value("${csrf.header.property}")
   private String csrfHeaderProperty;
 
+  @Value("${csrf.whitelist.header.property}")
+  private String csrfWhitelistHeaderProperty;
+
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
    * (Keycloak) principal (authorization header).
-   *
-   * @param keycloakClientRequestFactory
    */
   public SecurityConfig(KeycloakClientRequestFactory keycloakClientRequestFactory) {
     this.keycloakClientRequestFactory = keycloakClientRequestFactory;
@@ -54,17 +58,16 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * Configure spring security filter chain: disable default Spring Boot CSRF token behavior and add
    * custom {@link StatelessCsrfFilter}, set all sessions to be fully stateless, define necessary
    * Keycloak roles for specific REST API paths
-   *
    */
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     super.configure(http);
     http.csrf().disable()
-        .addFilterBefore(new StatelessCsrfFilter(csrfCookieProperty, csrfHeaderProperty),
-            CsrfFilter.class)
+        .addFilterBefore(new StatelessCsrfFilter(csrfCookieProperty, csrfHeaderProperty,
+                csrfWhitelistHeaderProperty), CsrfFilter.class)
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-        .antMatchers(SpringFoxConfig.WHITE_LIST).permitAll().antMatchers("/users/askers/new")
+        .antMatchers(WHITE_LIST).permitAll().antMatchers("/users/askers/new")
         .permitAll()
         .antMatchers("/users/data", "/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
@@ -72,7 +75,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/chat/{chatId:[0-9]+}/leave")
         .hasAnyAuthority(Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new", "/users/sessions/askers",
-            "/users/askers/consultingType/new", "/users/account")
+            "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken")
         .hasAuthority(Authority.USER_DEFAULT)
         .antMatchers("/users/sessions/open", "/users/sessions/consultants/new",
             "/users/sessions/new/{sessionId:[0-9]+}", "/users/consultants/absences",
@@ -87,7 +90,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/consultants/import", "/users/askers/import",
             "/users/askersWithoutSession/import")
         .hasAuthority(Authority.TECHNICAL_DEFAULT)
-        .antMatchers("/liveproxy/send").hasAnyAuthority(Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT)
+        .antMatchers("/liveproxy/send")
+        .hasAnyAuthority(Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT)
         .antMatchers("/users/mails/messages/feedback/new")
         .hasAuthority(Authority.USE_FEEDBACK).antMatchers("/users/messages/key")
         .hasAuthority(Authority.TECHNICAL_DEFAULT).antMatchers("/users/chat/new")
@@ -95,15 +99,14 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(Authority.START_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/stop")
         .hasAuthority(Authority.STOP_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/update")
         .hasAuthority(Authority.UPDATE_CHAT).antMatchers("/useradmin", "/useradmin/**")
-        .hasAuthority(Authority.USER_ADMIN).antMatchers("/users/consultants/sessions/{sessionId:[0-9]+}")
+        .hasAuthority(Authority.USER_ADMIN)
+        .antMatchers("/users/consultants/sessions/{sessionId:[0-9]+}")
         .hasAuthority(Authority.CONSULTANT_DEFAULT).anyRequest().denyAll();
   }
 
   /**
    * Use the KeycloakSpringBootConfigResolver to be able to save the Keycloak settings in the spring
    * application properties.
-   *
-   * @return
    */
   @Bean
   public KeycloakConfigResolver keyCloakConfigResolver() {
@@ -123,10 +126,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * Change the default AuthenticationProvider to KeycloakAuthenticationProvider and register it in
    * the spring security context. Set the GrantedAuthoritiesMapper to map the Keycloak roles to the
    * granted authorities.
-   *
-   * @param auth
-   * @param authorityMapper
-   * @throws Exception
    */
   @Autowired
   public void configureGlobal(final AuthenticationManagerBuilder auth,
@@ -145,9 +144,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * https://github.com/keycloak/keycloak-documentation/blob/master/securing_apps/topics/oidc/java/spring-security-adapter.adoc
    *
    * {@link package.class#member label}
-   *
-   * @param filter
-   * @return
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -159,11 +155,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above:
-   * {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
-   *
-   * @param filter
-   * @return
+   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -175,11 +167,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above:
-   * {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
-   *
-   * @param filter
-   * @return
+   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -191,11 +179,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above:
-   * {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
-   *
-   * @param filter
-   * @return
+   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean

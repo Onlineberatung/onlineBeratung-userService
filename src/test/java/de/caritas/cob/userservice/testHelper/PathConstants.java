@@ -86,4 +86,5 @@ public class PathConstants {
       "/users/consultants/sessions/1";
   public static final String PATH_PUT_UPDATE_EMAIL = "/users/email";
   public static final String PATH_DELETE_FLAG_USER_DELETED = "/users/account";
+  public static final String PATH_PUT_UPDATE_MOBILE_TOKEN = "/users/mobiletoken";
 }

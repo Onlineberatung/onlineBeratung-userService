@@ -40,6 +40,7 @@ public class SessionAdminResultDTOBuilderTest {
 
     assertThat(resultDTO, notNullValue());
     assertThat(resultDTO.getEmbedded(), hasSize(0));
+    assertThat(resultDTO.getTotal(), is(0));
     assertThat(resultDTO.getLinks(), notNullValue());
     assertThat(resultDTO.getLinks().getNext(), nullValue());
     assertThat(resultDTO.getLinks().getPrevious(), nullValue());
@@ -50,6 +51,7 @@ public class SessionAdminResultDTOBuilderTest {
   @Test
   public void build_Should_returnSessionAdminResultDTOWithAllLinks_When_parametersAreSet() {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
+    when(this.resultPage.getTotalElements()).thenReturn(Long.valueOf(MOCKED_SESSIONS_SIZE));
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
         .withFilter(new SessionFilter().agency(1))
@@ -60,6 +62,7 @@ public class SessionAdminResultDTOBuilderTest {
 
     assertThat(resultDTO, notNullValue());
     assertThat(resultDTO.getEmbedded(), hasSize(20));
+    assertThat(resultDTO.getTotal(), is(MOCKED_SESSIONS_SIZE));
     assertThat(resultDTO.getLinks().getNext().getHref(), is("/useradmin/sessions?page=3&perPage=2"));
     assertThat(resultDTO.getLinks().getPrevious().getHref(), is("/useradmin/sessions?page=1"
         + "&perPage=2"));
