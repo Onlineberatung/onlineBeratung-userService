@@ -1862,14 +1862,13 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {Authority.USER_DEFAULT})
-  public void updateSessionData_Should_ReturnOK_When_ProperlyAuthorizedWithUpdateMobileTokenAuthority()
+  public void updateSessionData_Should_ReturnOK_When_ProperlyAuthorizedWithUserAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(new SessionDataDTO().age(
-            "2")))
+        .content(new ObjectMapper().writeValueAsString(new SessionDataDTO().age("2")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
