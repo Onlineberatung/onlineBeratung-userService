@@ -2,6 +2,7 @@
 	"sendWelcomeMessage": true,
 	"welcomeMessage": "Liebe*r Klient*in,\n\ndanke für deine Nachricht, dein Vertrauen und dass du den Mut gefunden hast, dich mit uns in Verbindung zu setzen.\nHier findest du nochmal die wichtigsten Hinweise über unsere Online-Beratung:\n• Innerhalb der nächsten 2 Werktage wirst du eine persönliche Nachricht erhalten.\n• Wir beraten ausschließlich per MAIL und sind KEINE Chatberatung.\n• [U25] ist eine Peerberatung, im Hintergrund sind hauptamtliche Fachkräfte tätig, die den gesamten Mailverlauf mit verfolgen.\n• Wir unterliegen der Schweigepflicht, tauschen uns aber intern im Rahmen der Team-Supervisionen aus.\n• Deine IP-Adresse wird NICHT von uns erfasst. Deine Anonymität bleibt allerdings nur gewahrt, wenn du in der Beratung keine persönlichen Daten (z. B. Adresse, E-Mail, Instagram-Username, Bilder, Dokumente, usw.) preisgibst.\n• Bitte merke dir unbedingt deinen Nutzernamen und dein Passwort, weil du dich nur damit wieder einloggen kannst.\n• Wenn du schneller Hilfe benötigst, wende dich bitte an eine Vertrauensperson, die Telefonseelsorge unter: 0800 1110111 oder 0800 1110222, oder wähle den Notruf 112.\n\nWir wünschen dir viel Kraft für die kommenden Tage, dein [U25]-/#gemeinsamstatteinsam-Team",
 	"sendFurtherStepsMessage": false,
+	"sendSaveSessionDataMessage": true,
 	"sessionDataInitializing": {
 		"addictiveDrugs": false,
 		"age": true,
