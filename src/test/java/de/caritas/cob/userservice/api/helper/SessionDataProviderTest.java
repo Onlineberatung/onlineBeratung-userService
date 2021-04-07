@@ -80,6 +80,10 @@ public class SessionDataProviderTest {
   private final SessionDataDTO SESSION_DATA_DTO = (SessionDataDTO) new SessionDataDTO()
       .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
       .age(AGE_VALUE).state(STATE_VALUE);
+  private final SessionDataDTO SESSION_DATA_DTO_WITH_NO_AGE_VALUE =
+      (SessionDataDTO) new SessionDataDTO()
+      .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
+      .state(STATE_VALUE);
   private final SessionDataDTO EMPTY_SESSION_DATA_DTO =
       new SessionDataDTO();
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
@@ -108,14 +112,18 @@ public class SessionDataProviderTest {
     SessionData data = easyRandom.nextObject(SessionData.class);
     data.setKey("addictiveDrugs");
     data.setValue("updatedValue");
+    SessionData dataAge = easyRandom.nextObject(SessionData.class);
+    dataAge.setKey("age");
+    dataAge.setValue(null);
     List<SessionData> sessionDataList = new ArrayList<>();
     sessionDataList.add(data);
+    sessionDataList.add(dataAge);
     sessionWithInitializedItem.setSessionData(sessionDataList);
     when(consultingTypeManager.getConsultingTypeSettings(ConsultingType.SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider
-        .createSessionDataList(sessionWithInitializedItem, SESSION_DATA_DTO);
+        .createSessionDataList(sessionWithInitializedItem, SESSION_DATA_DTO_WITH_NO_AGE_VALUE);
 
     assertEquals(5, result.size());
 
@@ -126,8 +134,8 @@ public class SessionDataProviderTest {
           assertThat(sessionData.getId(), is(notNullValue()));
           break;
         case "age":
-          assertEquals(AGE_VALUE, sessionData.getValue());
-          assertThat(sessionData.getId(), is(nullValue()));
+          assertThat(sessionData.getValue(), is(nullValue()));
+          assertThat(sessionData.getId(), is(notNullValue()));
           break;
         case "gender":
           assertEquals(GENDER_VALUE, sessionData.getValue());

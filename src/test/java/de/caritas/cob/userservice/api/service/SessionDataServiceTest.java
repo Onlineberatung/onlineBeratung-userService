@@ -33,8 +33,16 @@ public class SessionDataServiceTest {
 
   private final EasyRandom easyRandom = new EasyRandom();
 
+  @Test(expected = NotFoundException.class)
+  public void saveSessionDataForSessionId_Should_ThrowNotFoundException_When_SessionNotFound() {
+    SessionDataDTO sessionData = easyRandom.nextObject(SessionDataDTO.class);
+    when(sessionService.getSession(any())).thenReturn(Optional.empty());
+
+    sessionDataService.saveSessionData(SESSION_ID, sessionData);
+  }
+
   @Test
-  public void createSessionDataList_Should_SaveValidatedSessionData() {
+  public void saveSessionDataForSessionId_Should_SaveSessionData() {
     SessionDataDTO sessionData = easyRandom.nextObject(SessionDataDTO.class);
     Session session = easyRandom.nextObject(Session.class);
     when(sessionService.getSession(any())).thenReturn(Optional.of(session));
@@ -45,11 +53,15 @@ public class SessionDataServiceTest {
     verify(sessionDataRepository, times(1)).saveAll(any());
   }
 
-  @Test(expected = NotFoundException.class)
-  public void createSessionDataList_Should_ThrowNotFoundException_When_SessionDoesNotExist() {
+  @Test
+  public void saveSessionData_Should_SaveValidatedSessionData() {
     SessionDataDTO sessionData = easyRandom.nextObject(SessionDataDTO.class);
-    when(sessionService.getSession(any())).thenReturn(Optional.empty());
+    Session session = easyRandom.nextObject(Session.class);
+    when(sessionService.getSession(any())).thenReturn(Optional.of(session));
 
     sessionDataService.saveSessionData(SESSION_ID, sessionData);
+
+    verify(sessionDataProvider, times(1)).createSessionDataList(any(), any());
+    verify(sessionDataRepository, times(1)).saveAll(any());
   }
 }

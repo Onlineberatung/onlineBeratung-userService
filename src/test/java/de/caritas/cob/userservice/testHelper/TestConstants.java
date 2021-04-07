@@ -1004,12 +1004,16 @@ public class TestConstants {
       new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
-  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS_MESSAGE =
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE =
       new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE =
       new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, true, false,
+          SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
+          false, null, null);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE =
+      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, false, true,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL =

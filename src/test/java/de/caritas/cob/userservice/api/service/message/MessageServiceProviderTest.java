@@ -2,8 +2,9 @@ package de.caritas.cob.userservice.api.service.message;
 
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS_MESSAGE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
@@ -35,7 +36,9 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
+import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -114,6 +117,7 @@ public class MessageServiceProviderTest {
             CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE, exceptionInformation);
 
     verifyNoInteractions(messageControllerApi);
+    verifyNoInteractions(userHelper);
   }
 
   @Test
@@ -180,20 +184,22 @@ public class MessageServiceProviderTest {
   }
 
   @Test
-  public void postFurtherStepsMessageIfConfigured_ShouldNot_CallMessageService_When_NoFurtherStepsMessageConfigured()
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured_ShouldNot_CallMessageService_When_NoFurtherStepsAndNoSaveSessionDataMessageConfigured()
       throws RocketChatPostFurtherStepsMessageException {
     CreateEnquiryExceptionInformation exceptionInformation = mock(
         CreateEnquiryExceptionInformation.class);
 
     this.messageServiceProvider
         .postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
-            CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS_MESSAGE, exceptionInformation);
+            CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE,
+            exceptionInformation);
 
     verifyNoInteractions(messageControllerApi);
   }
 
-  @Test
-  public void postFurtherStepsMessageIfConfigured_Should_ThrowRocketChatPostFurtherStepsMessageExceptionWithExceptionInformation_When_PostRcMessageFails() {
+  @Test(expected = RocketChatPostFurtherStepsMessageException.class)
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured_Should_ThrowRocketChatPostFurtherStepsMessageExceptionWithExceptionInformation_When_PostRcMessageFails()
+      throws RocketChatPostFurtherStepsMessageException {
     CreateEnquiryExceptionInformation exceptionInformation = mock(
         CreateEnquiryExceptionInformation.class);
     HttpHeaders headers = mock(HttpHeaders.class);
@@ -201,27 +207,39 @@ public class MessageServiceProviderTest {
     doThrow(restClientException).when(this.messageControllerApi)
         .saveAliasOnlyMessage(any(), any());
 
-    try {
-      this.messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
-          CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE, exceptionInformation);
-      fail("Expected exception: RocketChatPostFurtherStepsMessageException");
-    } catch (RocketChatPostFurtherStepsMessageException exception) {
-      assertTrue("Excepted RocketChatPostFurtherStepsMessageException thrown", true);
-      assertNotNull(exception.getExceptionInformation());
-    }
+    this.messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
+        CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE, exceptionInformation);
   }
 
   @Test
-  public void postFurtherStepsMessageIfConfigured_Should_CallSaveFurtherStepsMessageFromMessageServiceWithCorrectParams_When_EverythingSucceeds()
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured_Should_SaveFurtherStepsMessage_When_Configured()
       throws RocketChatPostFurtherStepsMessageException {
     CreateEnquiryExceptionInformation exceptionInformation = mock(
         CreateEnquiryExceptionInformation.class);
     HttpHeaders headers = mock(HttpHeaders.class);
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
+    ArgumentCaptor<AliasOnlyMessageDTO> captor = ArgumentCaptor.forClass(AliasOnlyMessageDTO.class);
 
     this.messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
         CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE, exceptionInformation);
 
-    verify(messageControllerApi, times(1)).saveAliasOnlyMessage(any(), any());
+    verify(messageControllerApi, times(1)).saveAliasOnlyMessage(any(), captor.capture());
+    assertThat(captor.getValue().getMessageType(), is(MessageType.FURTHER_STEPS));
+  }
+
+  @Test
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured_Should_SaveSessionDataMessage_When_Configured()
+      throws RocketChatPostFurtherStepsMessageException {
+    CreateEnquiryExceptionInformation exceptionInformation = mock(
+        CreateEnquiryExceptionInformation.class);
+    HttpHeaders headers = mock(HttpHeaders.class);
+    when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
+    ArgumentCaptor<AliasOnlyMessageDTO> captor = ArgumentCaptor.forClass(AliasOnlyMessageDTO.class);
+
+    this.messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(RC_GROUP_ID,
+        CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE, exceptionInformation);
+
+    verify(messageControllerApi, times(1)).saveAliasOnlyMessage(any(), captor.capture());
+    assertThat(captor.getValue().getMessageType(), is(MessageType.UPDATE_SESSION_DATA));
   }
 }

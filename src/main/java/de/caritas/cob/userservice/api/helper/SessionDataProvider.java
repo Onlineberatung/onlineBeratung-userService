@@ -98,7 +98,7 @@ public class SessionDataProvider {
         .filter(data -> data.getKey().equals(key))
         .findFirst()
         .orElse(obtainInitialSessionData(session, key, value));
-    sessionData.setValue(value);
+    sessionData.setValue(nonNull(value) ? value : sessionData.getValue());
 
     return sessionData;
   }
