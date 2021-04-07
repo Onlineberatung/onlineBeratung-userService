@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.exception.httpresponses.customheader;
 
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 * Custom http header with X-Reason header.
  */
 @RequiredArgsConstructor
-@Getter
 public class CustomHttpHeader {
 
   private final @NonNull HttpStatusExceptionReason httpStatusExceptionReason;
