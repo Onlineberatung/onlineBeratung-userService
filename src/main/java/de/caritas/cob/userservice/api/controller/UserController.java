@@ -85,7 +85,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
-public class UserController implements UsersApi {
+public class  UserController implements UsersApi {
 
   private static final int MIN_OFFSET = 0;
   private static final int MIN_COUNT = 1;

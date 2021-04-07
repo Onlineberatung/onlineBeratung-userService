@@ -43,6 +43,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -2212,4 +2214,33 @@ public class UserControllerIT {
     verifyNoMoreInteractions(accountProvider);
   }
 
+  @Test
+  public void updateSessionData_Should_ReturnBadRequest_When_BodyIsEmpty() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionDataService);
+  }
+
+  @Test
+  public void updateSessionData_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionDataService);
+  }
+
+  @Test
+  public void updateSessionData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
+        .content(new ObjectMapper().writeValueAsString(new SessionDTO()))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
 }

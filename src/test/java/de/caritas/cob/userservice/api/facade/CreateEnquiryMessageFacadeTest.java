@@ -909,7 +909,7 @@ public class CreateEnquiryMessageFacadeTest {
   }
 
   @Test
-  public void createEnquiryMessage_Should_PostFurtherStepsMessageAndWelcomeMessage_IfConfigured()
+  public void createEnquiryMessage_Should_PostAliasOnlyMessageAndWelcomeMessage()
       throws Exception {
 
     session.setUser(user);
