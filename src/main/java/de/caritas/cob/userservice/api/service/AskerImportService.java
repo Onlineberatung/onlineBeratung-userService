@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUserDTO;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -21,7 +22,6 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -92,9 +92,6 @@ public class AskerImportService {
   private final String NEWLINE_CHAR = "\r\n";
   private final String IMPORT_CHARSET = "UTF-8";
   private final String IMPORT_LOG_CHARSET = "UTF-8";
-  private final String REPLACE_START_TOKEN = "${";
-  private final String REPLACE_END_TOKEN = "}";
-  private final String REPLACE_KEY_USERNAME = "username";
   private final String DUMMY_POSTCODE = "00000";
 
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
@@ -559,12 +556,6 @@ public class AskerImportService {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  private SessionDataDTO fromUserDTO(UserDTO userDTO) {
-    return (SessionDataDTO) new SessionDataDTO()
-        .age(userDTO.getAge())
-        .state(userDTO.getState());
   }
 
   private void writeToImportLog(String message, String protocolFile) {

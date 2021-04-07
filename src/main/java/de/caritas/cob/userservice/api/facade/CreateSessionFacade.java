@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUserDTO;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -12,7 +13,6 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInforma
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -118,11 +118,5 @@ public class CreateSessionFacade {
           String.format("User %s is already registered to consulting type %s", user.getUserId(),
               consultingType.getValue()));
     }
-  }
-
-  private SessionDataDTO fromUserDTO(UserDTO userDTO) {
-    return (SessionDataDTO) new SessionDataDTO()
-        .age(userDTO.getAge())
-        .state(userDTO.getState());
   }
 }

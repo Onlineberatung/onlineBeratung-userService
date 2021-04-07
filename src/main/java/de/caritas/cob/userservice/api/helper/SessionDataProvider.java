@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * Helper class for {@link SessionData}.
+ * Provider for {@link SessionData}.
  */
 @Component
 @RequiredArgsConstructor
@@ -125,5 +126,17 @@ public class SessionDataProvider {
 
   private String getStateValue(SessionDataDTO sessionData) {
     return isEmpty(sessionData.getState()) ? null : sessionData.getState();
+  }
+
+  /**
+   * Returns the {@link SessionDataDTO} for the given {@link UserDTO}.
+   *
+   * @param userDTO {@link UserDTO}
+   * @return        {@link SessionDataDTO}
+   */
+  public static SessionDataDTO fromUserDTO(UserDTO userDTO) {
+    return (SessionDataDTO) new SessionDataDTO()
+        .age(userDTO.getAge())
+        .state(userDTO.getState());
   }
 }
