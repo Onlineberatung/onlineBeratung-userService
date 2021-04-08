@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;

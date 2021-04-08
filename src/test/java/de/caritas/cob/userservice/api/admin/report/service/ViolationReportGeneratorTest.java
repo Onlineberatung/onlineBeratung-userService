@@ -8,7 +8,11 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.admin.report.registry.ViolationRuleRegistry;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,6 +27,11 @@ public class ViolationReportGeneratorTest {
 
   @Mock
   private ViolationRuleRegistry violationRuleRegistry;
+
+  @After
+  public void cleanGeneratedFiles() throws IOException {
+    FileUtils.deleteDirectory(new File("report"));
+  }
 
   @Test
   public void generateReport_Should_returnEmptyList_When_noViolationExist() {
