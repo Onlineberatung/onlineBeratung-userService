@@ -34,16 +34,16 @@ jobs:
         run: mvn generate-sources
 
       - name: Push Admin API to documentation
-        uses: cpina/github-action-push-to-another-repository@master
+        uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
         with:
-          source-directory: 'target/generated-sources/markdown'
-          destination-github-username: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
-          destination-repository-username: 'CaritasDeutschland'
-          destination-repository-name: 'documentation'
-          user-email: github@beratung.caritas.de
-          target-branch: 'adminapi'
+          source_file: 'target/generated-sources/markdown'
+          destination_folder: 'docs/backend/admin'
+          destination_repo: 'CaritasDeutschland/documentation'
+          user_email: github@beratung.caritas.de
+          user_name: ${{ GH_PACKAGE_RELEASE_USER }}
+          destination_branch_create: 'adminapi'
           commit_message: 'docs: updated user service admin api description'
 
       - name: Maven Package
