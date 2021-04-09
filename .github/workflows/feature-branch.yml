@@ -23,12 +23,12 @@ jobs:
           architecture: x64
 
       - name: Caching maven dependencies
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-maven-dependencies
+        uses: actions/cache@v2
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
       - name: Maven generate sources
         run: mvn generate-sources
@@ -42,6 +42,7 @@ jobs:
           dst_owner: CaritasDeutschland
           dst_repo_name: documentation
           dst_branch: adminapi
+          clean: true
           commit_message: 'docs: updated user service admin api description'
 
       - name: Maven Package
