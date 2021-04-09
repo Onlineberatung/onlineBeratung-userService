@@ -39,8 +39,8 @@ jobs:
           personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
           src_path: readme.md
           dst_path: docs/backend/admin/userservice
-          dst_owner: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
-          dst_repo_name: CaritasDeutschland/documentation
+          dst_owner: CaritasDeutschland
+          dst_repo_name: documentation
           dst_branch: develop
           commit_message: 'docs: updated user service admin api description'
 
