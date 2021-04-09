@@ -31,25 +31,19 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
 
       - name: Maven generate sources
-        run: |
-          mvn generate-sources
-          echo $(ls)
-
-      - name: List files
-        run: |
-          echo $(ls)
-          cd ..
-          echo $(ls)
+        run: mvn generate-sources
 
       - name: Push Admin API to documentation
-        uses: andstor/copycat-action@v3
+        uses: cpina/github-action-push-to-another-repository@master
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
         with:
-          personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
-          src_path: ./target/generated-sources/markdown
-          dst_path: docs/backend/admin/userservice
-          dst_owner: CaritasDeutschland
-          dst_repo_name: documentation
-          dst_branch: adminapi
+          source-directory: 'target/generated-sources/markdown'
+          destination-github-username: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
+          destination-repository-username: 'CaritasDeutschland'
+          destination-repository-name: 'documentation'
+          user-email: github@beratung.caritas.de
+          target-branch: 'adminapi'
           commit_message: 'docs: updated user service admin api description'
 
       - name: Maven Package
