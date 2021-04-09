@@ -42,7 +42,7 @@ jobs:
           destination_folder: 'docs/backend/admin'
           destination_repo: 'CaritasDeutschland/documentation'
           user_email: github@beratung.caritas.de
-          user_name: ${{ GH_PACKAGE_RELEASE_USER }}
+          user_name: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
           destination_branch_create: 'adminapi'
           commit_message: 'docs: updated user service admin api description'
 
