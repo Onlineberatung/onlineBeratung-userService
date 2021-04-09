@@ -28,9 +28,14 @@ jobs:
           cache-name: cache-maven-dependencies
         with:
           path: ~/.m2/repository
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+
+      - name: Maven generate sources
+        run: |
+          mvn generate-sources
+          echo $(ls)
 
       - name: Push Admin API to documentation
-        run: mvn generate-sources
         uses: andstor/copycat-action@v3
         with:
           personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
