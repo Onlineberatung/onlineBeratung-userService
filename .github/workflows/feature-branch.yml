@@ -12,40 +12,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Setup JVM
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11.0.10
-        java-package: jdk
-        architecture: x64
+      - name: Setup JVM
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11.0.10
+          java-package: jdk
+          architecture: x64
 
-    - name: Caching maven dependencies
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-maven-dependencies
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+      - name: Caching maven dependencies
+        uses: actions/cache@v1
+        env:
+          cache-name: cache-maven-dependencies
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
 
-    - name: Maven generate sources
-      run: mvn generate-sources
+      - name: Maven generate sources
+        run: mvn generate-sources
 
-    - name: Push Admin API to documentation
-      uses: andstor/copycat-action@v3
-      with:
-        personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
-        src_path: readme.md
-        dst_path: docs/backend/admin/userservice
-        dst_owner: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
-        dst_repo_name: documentation
-        dst_branch: develop
-        commit_message: 'docs: updated user service admin api description'
+      - name: Push Admin API to documentation
+        uses: andstor/copycat-action@v3
+        with:
+          personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
+          src_path: readme.md
+          dst_path: docs/backend/admin/userservice
+          dst_owner: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
+          dst_repo_name: CaritasDeutschland/documentation
+          dst_branch: develop
+          commit_message: 'docs: updated user service admin api description'
 
-    - name: Maven Package
-      run: mvn -B -Pprod clean package -Dskip.unit-tests=true -Dskip.integration-tests=true
+      - name: Maven Package
+        run: mvn -B -Pprod clean package -Dskip.unit-tests=true -Dskip.integration-tests=true
 
-    - name: Maven Verify
-      run: mvn -B -Pprod clean verify
+      - name: Maven Verify
+        run: mvn -B -Pprod clean verify
