@@ -30,19 +30,22 @@ jobs:
         path: ~/.m2/repository
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
 
-    - name: Maven Package
-      run: mvn -B -Pprod clean package -Dskip.unit-tests=true -Dskip.integration-tests=true
+    - name: Maven generate sources
+      run: mvn generate-sources
 
     - name: Push Admin API to documentation
       uses: andstor/copycat-action@v3
       with:
         personal_token: ${{ secrets.GITHUB_TOKEN }}
-        src_path: target/generated-sources/markdown
+        src_path: generated-sources/markdown
         dst_path: docs/backend/userservice/admin
         dst_owner: CaritasDeutschland
         dst_repo_name: documentation
         dst_branch: develop
         commit_message: 'docs: updated user service admin api description'
+
+    - name: Maven Package
+      run: mvn -B -Pprod clean package -Dskip.unit-tests=true -Dskip.integration-tests=true
 
     - name: Maven Verify
       run: mvn -B -Pprod clean verify
