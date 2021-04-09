@@ -37,8 +37,8 @@ jobs:
       uses: andstor/copycat-action@v3
       with:
         personal_token: ${{ secrets.GITHUB_TOKEN }}
-        src_path: generated-sources/markdown
-        dst_path: docs/backend/userservice/admin
+        src_path: /home/runner/work/caritas-onlineBeratung-userService/caritas-onlineBeratung-userService/target/generated-sources/markdown/de/caritas/cob/userservice/useradminservice/markdown
+        dst_path: docs/backend/admin/userservice
         dst_owner: CaritasDeutschland
         dst_repo_name: documentation
         dst_branch: develop
