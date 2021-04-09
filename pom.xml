@@ -381,8 +381,8 @@
 							<output>target/generated-sources/markdown</output>
 							<generateApiTests>false</generateApiTests>
 							<generateModelTests>false</generateModelTests>
-							<apiPackage>${project.groupId}.${project.artifactId}.useradminservice.markdown.api</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.useradminservice.markdown.model</modelPackage>
+							<apiPackage>api</apiPackage>
+							<modelPackage>model</modelPackage>
 						</configuration>
 					</execution>
 					<!-- Generate client API for live service -->
