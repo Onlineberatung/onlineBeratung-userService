@@ -38,16 +38,14 @@ jobs:
       - name: List files
         run: |
           echo $(ls)
-          cd target
-          echo $(ls)
-          cd generated-sources
+          cd ..
           echo $(ls)
 
       - name: Push Admin API to documentation
         uses: andstor/copycat-action@v3
         with:
           personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
-          src_path: target/generated-sources/markdown
+          src_path: ./target/generated-sources/markdown
           dst_path: docs/backend/admin/userservice
           dst_owner: CaritasDeutschland
           dst_repo_name: documentation
