@@ -36,10 +36,10 @@ jobs:
     - name: Push Admin API to documentation
       uses: andstor/copycat-action@v3
       with:
-        personal_token: ${{ secrets.GITHUB_TOKEN }}
+        personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
         src_path: readme.md
         dst_path: docs/backend/admin/userservice
-        dst_owner: CaritasDeutschland
+        dst_owner: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
         dst_repo_name: documentation
         dst_branch: develop
         commit_message: 'docs: updated user service admin api description'
