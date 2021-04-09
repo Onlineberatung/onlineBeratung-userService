@@ -41,7 +41,7 @@ jobs:
           dst_path: docs/backend/admin/userservice
           dst_owner: CaritasDeutschland
           dst_repo_name: documentation
-          dst_branch: develop
+          dst_branch: adminapi
           commit_message: 'docs: updated user service admin api description'
 
       - name: Maven Package
