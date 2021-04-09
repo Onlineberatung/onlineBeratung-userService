@@ -367,6 +367,24 @@
 							</typeMappings>
 						</configuration>
 					</execution>
+					<!-- Generate admin API markdown files -->
+					<execution>
+						<id>user-admin-service-markdown</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+							</configOptions>
+							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
+							<generatorName>markdown</generatorName>
+							<output>target/generated-sources/markdown</output>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<apiPackage>${project.groupId}.${project.artifactId}.useradminservice.markdown.api</apiPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.useradminservice.markdown.model</modelPackage>
+						</configuration>
+					</execution>
 					<!-- Generate client API for live service -->
 					<execution>
 						<id>liveservice-client-model</id>
