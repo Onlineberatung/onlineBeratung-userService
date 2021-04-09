@@ -35,6 +35,14 @@ jobs:
           mvn generate-sources
           echo $(ls)
 
+      - name: List files
+        run: |
+          echo $(ls)
+          cd target
+          echo $(ls)
+          cd generated-sources
+          echo $(ls)
+
       - name: Push Admin API to documentation
         uses: andstor/copycat-action@v3
         with:
