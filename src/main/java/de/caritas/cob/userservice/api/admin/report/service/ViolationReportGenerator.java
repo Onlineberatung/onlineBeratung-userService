@@ -1,16 +1,27 @@
 package de.caritas.cob.userservice.api.admin.report.service;
 
 import static de.caritas.cob.userservice.config.CachingConfig.AGENCY_CACHE;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static java.time.format.DateTimeFormatter.ofPattern;
 
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.admin.report.registry.ViolationRuleRegistry;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.service.LogService;
+import io.swagger.util.Json;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +32,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ViolationReportGenerator {
 
+  private static final String VIOLATION_REPORT_BASE_PATH = "report/violation_report_";
+  private static final DateTimeFormatter DATE_TIME_FORMAT = ofPattern("yyyy-MM-dd--hh-mm");
+
   private final @NonNull ViolationRuleRegistry violationRuleRegistry;
 
   /**
@@ -28,12 +42,28 @@ public class ViolationReportGenerator {
    *
    * @return all found {@link ViolationDTO} objects
    */
+  @SneakyThrows
   public List<ViolationDTO> generateReport() {
     reevaluateAgencyCache();
-    return this.violationRuleRegistry.getViolationReportRules().stream()
+    List<ViolationDTO> violations = this.violationRuleRegistry.getViolationReportRules().stream()
         .map(ViolationReportRule::generateViolations)
         .flatMap(Collection::parallelStream)
         .collect(Collectors.toList());
+
+    String violationJson = Json.pretty().writeValueAsString(violations);
+    Files.write(buildFilePath(), violationJson.getBytes(StandardCharsets.UTF_8),
+        StandardOpenOption.CREATE);
+
+    return violations;
+  }
+
+  private Path buildFilePath() throws IOException {
+    String path =
+        VIOLATION_REPORT_BASE_PATH + nowInUtc().format(DATE_TIME_FORMAT) + ".json";
+    if (!Paths.get(path).getParent().toFile().exists()) {
+      Files.createDirectory(Paths.get(path).getParent());
+    }
+    return Paths.get(path);
   }
 
   /**

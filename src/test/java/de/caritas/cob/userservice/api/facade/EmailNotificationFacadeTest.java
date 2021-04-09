@@ -165,11 +165,11 @@ public class EmailNotificationFacadeTest {
       new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
           new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(false))));
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, null, true, null, false,
-          NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS, false, null, null);
+      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, false, null, true, null,
+          false, NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS, false, null, null);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, null, true, null, false,
-          NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
+      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, false, null, true, null,
+          false, NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
 
   @InjectMocks
   private EmailNotificationFacade emailNotificationFacade;

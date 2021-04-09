@@ -38,6 +38,7 @@ import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
+import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.ChatDTO;
@@ -59,6 +60,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
+import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
@@ -83,7 +85,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
-public class UserController implements UsersApi {
+public class  UserController implements UsersApi {
 
   private static final int MIN_OFFSET = 0;
   private static final int MIN_COUNT = 1;
@@ -114,6 +116,7 @@ public class UserController implements UsersApi {
   private final @NotNull CreateUserFacade createUserFacade;
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantService consultantService;
+  private final @NotNull SessionDataService sessionDataService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -755,6 +758,20 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> updateMobileToken(@Valid MobileTokenDTO mobileTokenDTO) {
     this.userAccountProvider.updateUserMobileToken(mobileTokenDTO.getToken());
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Updates the session data for the given session.
+   *
+   * @param sessionId       (required) session ID
+   * @param sessionDataDTO  (required) {@link SessionDataDTO}
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateSessionData(@PathVariable Long sessionId,
+      @Valid SessionDataDTO sessionDataDTO) {
+    this.sessionDataService.saveSessionData(sessionId, sessionDataDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

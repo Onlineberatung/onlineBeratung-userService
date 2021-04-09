@@ -117,6 +117,41 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/{sessionId}/data:
+    put:
+      tags:
+        - user-controller
+      summary: 'Update the (user) information of a session [Authorization: Role: user]'
+      operationId: updateSessionData
+      parameters:
+        - name: sessionId
+          in: path
+          description: session ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/SessionDataDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        404:
+          description: NOT FOUND - Session not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/new/{sessionId}:
     put:
       tags:
@@ -1049,6 +1084,8 @@ paths:
 components:
   schemas:
     UserDTO:
+      allOf:
+        - $ref: '#/components/schemas/MandatorySessionDataDTO'
       type: object
       required:
         - username
@@ -1074,6 +1111,18 @@ components:
           type: string
           format: password
           example: pass@w0rd
+        termsAccepted:
+          type: string
+          example: true
+        consultingType:
+          type: string
+          example: 3
+
+    SessionDataDTO:
+      allOf:
+        - $ref: '#/components/schemas/MandatorySessionDataDTO'
+      type: object
+      properties:
         addictiveDrugs:
           type: string
           example: 2,4
@@ -1081,21 +1130,21 @@ components:
         relation:
           type: string
           example: 2
-        age:
-          type: string
-          example: 17
         gender:
           type: string
           example: 0
+
+    MandatorySessionDataDTO:
+      type: object
+      properties:
+        age:
+          type: string
+          example: 17
+          description: mandatory depending on the consulting type
         state:
           type: string
           example: 8
-        termsAccepted:
-          type: string
-          example: true
-        consultingType:
-          type: string
-          example: 3
+          description: mandatory depending on the consulting type
 
     ConsultantSessionListResponseDTO:
       type: object
@@ -1270,6 +1319,7 @@ components:
       type: string
       enum:
         - "FURTHER_STEPS"
+        - "UPDATE_SESSION_DATA"
         - "FORWARD"
         - "VIDEOCALL"
 
