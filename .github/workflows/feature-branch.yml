@@ -37,7 +37,7 @@ jobs:
         src_path: /target/generated-sources/markdown
         dst_path: /docs/backend/userservice/admin
         dst_owner: CaritasDeutschland
-        dst_repo_name: CaritasDeutschland/documentation
+        dst_repo_name: documentation
         dst_branch: develop
         commit_message: 'docs: updated user service admin api description'
 
