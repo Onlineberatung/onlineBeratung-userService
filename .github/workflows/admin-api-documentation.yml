@@ -3,7 +3,7 @@ name: Push Admin API documentation
 on:
   push:
     paths:
-      - 'useradminservice.yaml'
+      - 'api/useradminservice.yaml'
     branches-ignore:
       - 'master'
       - 'develop'
