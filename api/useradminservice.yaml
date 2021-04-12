@@ -494,7 +494,7 @@ components:
           example: "1da238c6-cd46-4162-80f1-bff74eafe77f"
         username:
           type: string
-          example: "enc.OBSXEZTPOJWWC3TDMUWWC43LMVZ2NZS"
+          example: "enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS"
         email:
           type: string
           example: "email@beratungcaritas.de"

@@ -30,27 +30,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Get all changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v3.2
-
-      - name: Maven generate sources
-        if: contains(steps.changed-files.outputs.modified_files, 'useradminservice.yaml')
-        run: mvn generate-sources
-
-      - name: Push Admin API to documentation
-        if: contains(steps.changed-files.outputs.modified_files, 'useradminservice.yaml')
-        uses: andstor/copycat-action@v3
-        with:
-          personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
-          src_path: ../target/generated-sources/markdown/userservice
-          dst_path: docs/backend/admin/userservice
-          dst_owner: CaritasDeutschland
-          dst_repo_name: documentation
-          dst_branch: adminapi
-          clean: true
-          commit_message: 'docs: updated user service admin api description'
-
       - name: Maven Package
         run: mvn -B -Pprod clean package -Dskip.unit-tests=true -Dskip.integration-tests=true
 
