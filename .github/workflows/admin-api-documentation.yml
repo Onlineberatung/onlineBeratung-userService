@@ -10,7 +10,7 @@ on:
 
 jobs:
   documentation:
-    name: Pushes changes to the Admin API to the documentation repository
+    name: Pushes changes to Admin API
     runs-on: ubuntu-latest
     steps:
 
