@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.8.1...v2.9.0) (2021-04-12)
+
+
+### Features
+
+* adapt admin consultant agencies to match react admin requirements ([97ccb88](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/97ccb88cb94ecbc79c2d9758ce47cbc5f691dd9f))
+* adapt api endpoint to delete asker ([8f4b357](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8f4b357a4aa5809d1cced0a7b6616142548afc39))
+* adapt id in response model ([e8b23e8](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e8b23e899d24005683d308cd64a23207544be9df))
+* added new call to save session data ([4bb36e4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4bb36e4349cc82c0c0a058c21c5358a01a7a72aa))
+* added x-reason header when registering a new user ([219d803](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/219d8037eb9aeae403d47d7f6a36bda64ebb71db))
+* changed welcome message text for u25 ([f2e08a5](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f2e08a5354af9962b518729cdf3e5e51fef8a90f))
+* integrate deletion of asker ([a708983](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a70898320646f2255a5a13f891a208e112446f1d))
+* switched java version for docker build, github actions and maven build to 11 ([6f486b9](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6f486b9fba8a0299c46167026aa3d085abbbb3fb))
+* write violation reports to file ([ad22e51](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ad22e510c25f8a64bd776b24dad882d73abeaecc))
+
+
+### Bug Fixes
+
+* corrected check when sending mail notifications for team sessions ([5fb273c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5fb273c0fb237e9446e8103e6dd832b9a8c0c05e))
+
 ### [2.8.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.8.0...v2.8.1) (2021-03-22)
 
 ## [2.8.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.7.1...v2.8.0) (2021-03-22)
