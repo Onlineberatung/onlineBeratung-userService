@@ -3,7 +3,7 @@ name: Push Admin API documentation
 on:
   push:
     paths:
-      - '**.yaml'
+      - 'useradminservice.yaml'
     branches-ignore:
       - 'master'
       - 'develop'
@@ -24,6 +24,14 @@ jobs:
           java-package: jdk
           architecture: x64
 
+      - name: Caching maven dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Maven generate sources
         run: mvn generate-sources
 
@@ -38,3 +46,6 @@ jobs:
           dst_branch: adminapi
           clean: true
           commit_message: 'docs: updated user service admin api description'
+
+      - name: Maven clean
+        run: mvn -B -Pprod clean
