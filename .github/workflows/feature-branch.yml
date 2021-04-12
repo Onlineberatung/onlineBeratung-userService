@@ -38,10 +38,11 @@ jobs:
         with:
           personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
           src_path: ../target/generated-sources/markdown/userservice
-          dst_path: docs/backend/admin
+          dst_path: docs/backend/admin/userservice
           dst_owner: CaritasDeutschland
           dst_repo_name: documentation
           dst_branch: adminapi
+          exclude: '*/.openapi-generator/*'
           clean: true
           commit_message: 'docs: updated user service admin api description'
 
