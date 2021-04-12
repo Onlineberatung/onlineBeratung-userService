@@ -378,11 +378,11 @@
 							</configOptions>
 							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
 							<generatorName>markdown</generatorName>
-							<output>target/generated-sources/markdown</output>
+							<output>target/generated-sources/markdown/userservice</output>
 							<generateApiTests>false</generateApiTests>
 							<generateModelTests>false</generateModelTests>
-							<apiPackage>userservice</apiPackage>
-							<modelPackage>userservice/model</modelPackage>
+							<apiPackage>./</apiPackage>
+							<modelPackage>model</modelPackage>
 							<generateSupportingFiles>false</generateSupportingFiles>
 						</configuration>
 					</execution>
