@@ -42,6 +42,7 @@ jobs:
           dst_owner: CaritasDeutschland
           dst_repo_name: documentation
           dst_branch: adminapi
+          exclude: '*/.openapi-generator/*'
           clean: true
           commit_message: 'docs: updated user service admin api description'
 
