@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.SessionDataHelper;
+import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class AskerDataProvider {
 
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
-  private final @NonNull SessionDataHelper sessionDataHelper;
+  private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull AuthenticatedUser authenticatedUser;
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
@@ -91,7 +91,7 @@ public class AskerDataProvider {
     LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
     Optional<Session> consultingTypeSession = findSessionByConsultingType(consultingType, sessionList);
     Optional<Map<String, Object>> consultingTypeSessionData =
-        consultingTypeSession.map(sessionDataHelper::getSessionDataMapFromSession);
+        consultingTypeSession.map(sessionDataProvider::getSessionDataMapFromSession);
     Optional<AgencyDTO> agency = findAgencyByConsultingType(consultingType, agencyDTOs);
 
     consultingTypeData.put("sessionData", consultingTypeSessionData.orElse(null));

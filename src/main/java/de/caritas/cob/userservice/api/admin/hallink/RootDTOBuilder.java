@@ -29,7 +29,8 @@ public class RootDTOBuilder implements HalLinkBuilder {
             .sessions(buildSessionsLink())
             .consultants(buildConsultantsLink())
             .consultantAgencies(buildConsultantAgenciesLink())
-            .createConsultant(buildCreateConsultantLink()));
+            .createConsultant(buildCreateConsultantLink())
+            .deleteAsker(buildDeleteAskerLink()));
   }
 
   private HalLink buildSelfLink() {
@@ -54,6 +55,10 @@ public class RootDTOBuilder implements HalLinkBuilder {
 
   private HalLink buildCreateConsultantLink() {
     return buildHalLink(methodOn(UseradminApi.class).createConsultant(null), MethodEnum.POST);
+  }
+
+  private HalLink buildDeleteAskerLink() {
+    return buildHalLink(methodOn(UseradminApi.class).markAskerForDeletion(null), MethodEnum.DELETE);
   }
 
 }

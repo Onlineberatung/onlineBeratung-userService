@@ -76,4 +76,15 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
         is("/useradmin/consultants/1da238c6-cd46-4162-80f1-bff74eafeAAA/agencies"));
   }
 
+  @Test
+  public void build_Should_returnEmptyConsultantAgencyAdminResultDTOWithTotal_When_ParametersAreSet() {
+    ConsultantAgencyAdminResultDTO resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
+        .withConsultantId("1da238c6-cd46-4162-80f1-bff74eafeAAA")
+        .withResult(agencyList)
+        .build();
+
+    assertThat(resultDTO, notNullValue());
+    assertThat(resultDTO.getTotal(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
+  }
+
 }

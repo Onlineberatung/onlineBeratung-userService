@@ -2,6 +2,7 @@
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,
+  "sendSaveSessionDataMessage": false,
   "sessionDataInitializing": {
     "addictiveDrugs": false,
     "age": false,

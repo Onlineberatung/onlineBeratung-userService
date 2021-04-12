@@ -21,14 +21,12 @@ paths:
       responses:
         201:
           description: CREATED - user was created successfully
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/CreateUserResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         403:
           description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - invalid/unavailable username
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -115,6 +113,41 @@ paths:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
         409:
           description: CONFLICT - message already saved for enquiry
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/sessions/{sessionId}/data:
+    put:
+      tags:
+        - user-controller
+      summary: 'Update the (user) information of a session [Authorization: Role: user]'
+      operationId: updateSessionData
+      parameters:
+        - name: sessionId
+          in: path
+          description: session ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/SessionDataDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        404:
+          description: NOT FOUND - Session not found
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -279,7 +312,7 @@ paths:
         content:
           'application/json':
             schema:
-              type: string
+              $ref: '#/components/schemas/MobileTokenDTO'
         required: true
       responses:
         200:
@@ -1051,6 +1084,8 @@ paths:
 components:
   schemas:
     UserDTO:
+      allOf:
+        - $ref: '#/components/schemas/MandatorySessionDataDTO'
       type: object
       required:
         - username
@@ -1076,22 +1111,6 @@ components:
           type: string
           format: password
           example: pass@w0rd
-        addictiveDrugs:
-          type: string
-          example: 2,4
-          description: comma separated list of addictive drug IDs
-        relation:
-          type: string
-          example: 2
-        age:
-          type: string
-          example: 17
-        gender:
-          type: string
-          example: 0
-        state:
-          type: string
-          example: 8
         termsAccepted:
           type: string
           example: true
@@ -1099,18 +1118,33 @@ components:
           type: string
           example: 3
 
-    CreateUserResponseDTO:
+    SessionDataDTO:
+      allOf:
+        - $ref: '#/components/schemas/MandatorySessionDataDTO'
       type: object
-      required:
-        - usernameAvailable
-        - emailAvailable
       properties:
-        usernameAvailable:
-          type: integer
+        addictiveDrugs:
+          type: string
+          example: 2,4
+          description: comma separated list of addictive drug IDs
+        relation:
+          type: string
+          example: 2
+        gender:
+          type: string
           example: 0
-        emailAvailable:
-          type: integer
-          example: 1
+
+    MandatorySessionDataDTO:
+      type: object
+      properties:
+        age:
+          type: string
+          example: 17
+          description: mandatory depending on the consulting type
+        state:
+          type: string
+          example: 8
+          description: mandatory depending on the consulting type
 
     ConsultantSessionListResponseDTO:
       type: object
@@ -1285,6 +1319,7 @@ components:
       type: string
       enum:
         - "FURTHER_STEPS"
+        - "UPDATE_SESSION_DATA"
         - "FORWARD"
         - "VIDEOCALL"
 
@@ -1575,6 +1610,15 @@ components:
 
     ConsultingType:
       type: object
+
+    MobileTokenDTO:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: "8cc2058"
 
     MonitoringDTO:
       type: object
