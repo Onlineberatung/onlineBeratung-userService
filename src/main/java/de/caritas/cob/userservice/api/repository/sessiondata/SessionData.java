@@ -24,7 +24,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SessionData {
 
-  public SessionData(Session session, SessionDataType sessionDataType, String key, String value) {
+  public SessionData(@NonNull Session session, @NonNull SessionDataType sessionDataType,
+      @NonNull String key, String value) {
     this.session = session;
     this.sessionDataType = sessionDataType;
     this.key = key;
@@ -46,12 +47,11 @@ public class SessionData {
   @NonNull
   private SessionDataType sessionDataType;
 
-  @Column(name = "key_name", updatable = true, nullable = true)
+  @Column(name = "key_name")
   @NonNull
   private String key;
 
-  @Column(name = "value", updatable = true, nullable = true)
-  @NonNull
+  @Column(name = "value")
   @Size(max = 255)
   private String value;
 

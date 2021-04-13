@@ -43,6 +43,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -151,6 +153,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
@@ -177,6 +180,7 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
+import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -313,14 +317,10 @@ public class UserControllerIT {
           + "\", \"lastName\": \"" + LAST_NAME + "\"}]";
   private final String VALID_PASSWORT_REQUEST_BODY =
       "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
-  private final Optional<ResponseEntity<LoginResponseDTO>> LOGIN_RESPONSE_ENTITY_BAD_REQUEST =
-      Optional.of(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
   private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final LoginResponseDTO LOGIN_RESPONSE_DTO =
       new LoginResponseDTO(ACCESS_TOKEN, 0, 0, REFRESH_TOKEN, null, null, null);
-  private final Optional<ResponseEntity<LoginResponseDTO>> LOGIN_RESPONSE_ENTITY_OK =
-      Optional.of(new ResponseEntity<>(LOGIN_RESPONSE_DTO, HttpStatus.OK));
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
@@ -406,6 +406,8 @@ public class UserControllerIT {
   private ConsultantService consultantService;
   @MockBean
   private UserService userService;
+  @MockBean
+  private SessionDataService sessionDataService;
 
   @Mock
   private Logger logger;
@@ -2195,11 +2197,11 @@ public class UserControllerIT {
   public void updateMobileToken_Should_ReturnOk_When_RequestOk() throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
         .contentType(MediaType.APPLICATION_JSON)
-        .content("AksagAosagZZZ")
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token("token")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(accountProvider, times(1)).updateUserMobileToken("AksagAosagZZZ");
+    verify(accountProvider, times(1)).updateUserMobileToken("token");
   }
 
   @Test
@@ -2212,4 +2214,33 @@ public class UserControllerIT {
     verifyNoMoreInteractions(accountProvider);
   }
 
+  @Test
+  public void updateSessionData_Should_ReturnBadRequest_When_BodyIsEmpty() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionDataService);
+  }
+
+  @Test
+  public void updateSessionData_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionDataService);
+  }
+
+  @Test
+  public void updateSessionData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
+        .content(new ObjectMapper().writeValueAsString(new SessionDTO()))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
 }

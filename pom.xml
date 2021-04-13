@@ -23,7 +23,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
+		<java.version>11</java.version>
 		<skip.unit-tests>false</skip.unit-tests>
 		<skip.integration-tests>false</skip.integration-tests>
 	</properties>
@@ -365,6 +365,25 @@
 									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingtype.roles.Consultant
 								</typeMapping>
 							</typeMappings>
+						</configuration>
+					</execution>
+					<!-- Generate admin API markdown files -->
+					<execution>
+						<id>user-admin-service-markdown</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+							</configOptions>
+							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
+							<generatorName>markdown</generatorName>
+							<output>target/generated-sources/markdown/userservice</output>
+							<apiPackage>./</apiPackage>
+							<modelPackage>model</modelPackage>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateSupportingFiles>false</generateSupportingFiles>
 						</configuration>
 					</execution>
 					<!-- Generate client API for live service -->

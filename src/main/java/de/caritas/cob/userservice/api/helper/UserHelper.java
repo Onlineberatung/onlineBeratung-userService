@@ -28,10 +28,7 @@ public class UserHelper {
   public static final String VALID_POSTCODE_REGEX = "^[0-9]{5}$";
   public static final long AGENCY_ID_MIN = 0;
   public static final long AGENCY_ID_MAX = Long.MAX_VALUE;
-  public static final String ADDICTIVE_DRUGS_REGEXP = "(([0-9]+,)+[0-9]+)|[0-9]+|";
-  public static final String RELATION_REGEXP = "[0-9]+|";
   public static final String AGE_REGEXP = "[0-9]+|";
-  public static final String GENDER_REGEXP = "[0-9]+|";
   public static final String STATE_REGEXP = "[0-9]|1[0-6]";
   public static final String TERMS_ACCEPTED_REGEXP = "true|TRUE";
   public static final String CONSULTING_TYPE_REGEXP = "[0-9]+|";

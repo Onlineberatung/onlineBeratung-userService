@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.report.service;
+package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static de.caritas.cob.userservice.config.CachingConfig.AGENCY_CACHE;
 

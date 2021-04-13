@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUserDTO;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -79,7 +80,7 @@ public class CreateSessionFacade {
       Session session = sessionService
           .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
               consultingTypeSettings);
-      sessionDataService.saveSessionDataFromRegistration(session, userDTO);
+      sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 
       return session;
     } catch (Exception ex) {

@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.controller;
 
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -11,8 +9,6 @@ import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
@@ -35,13 +31,14 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
+import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
+import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.ChatDTO;
@@ -63,6 +60,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
+import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
@@ -73,7 +71,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.MapUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -88,7 +85,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
-public class UserController implements UsersApi {
+public class  UserController implements UsersApi {
 
   private static final int MIN_OFFSET = 0;
   private static final int MIN_COUNT = 1;
@@ -119,6 +116,7 @@ public class UserController implements UsersApi {
   private final @NotNull CreateUserFacade createUserFacade;
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantService consultantService;
+  private final @NotNull SessionDataService sessionDataService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -127,27 +125,11 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} with possible registration conflict information in header
    */
   @Override
-  public ResponseEntity<CreateUserResponseDTO> registerUser(@Valid @RequestBody UserDTO user) {
+  public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
     user.setNewUserAccount(true);
-    try {
-      createUserFacade.createUserAndInitializeAccount(user);
-    } catch (CustomValidationHttpStatusException exception) {
-      return new ResponseEntity<>(buildCreateUserResponseDTO(exception.getCustomHttpHeader()),
-          HttpStatus.CONFLICT);
-    }
+    createUserFacade.createUserAndInitializeAccount(user);
 
     return new ResponseEntity<>(HttpStatus.CREATED);
-  }
-
-  private CreateUserResponseDTO buildCreateUserResponseDTO(HttpHeaders header) {
-    List<String> reasonList = header.get("X-Reason");
-    if (isNull(reasonList)) {
-      throw new InternalServerErrorException(String.format("No X-Reason Header defined for "
-          + "header: %s", header));
-    }
-    return new CreateUserResponseDTO()
-          .usernameAvailable(reasonList.contains(USERNAME_NOT_AVAILABLE.toString()) ? 0 : 1)
-          .emailAvailable(reasonList.contains(EMAIL_NOT_AVAILABLE.toString()) ? 0 : 1);
   }
 
   /**
@@ -770,12 +752,26 @@ public class UserController implements UsersApi {
   /**
    * Updates or sets the mobile client token for the current authenticated user.
    *
-   * @param mobileToken the mobile devide identifier
+   * @param mobileTokenDTO (required) the mobile device identifier {@link MobileTokenDTO}
    * @return {@link ResponseEntity}
    */
   @Override
-  public ResponseEntity<Void> updateMobileToken(@Valid String mobileToken) {
-    this.userAccountProvider.updateUserMobileToken(mobileToken);
+  public ResponseEntity<Void> updateMobileToken(@Valid MobileTokenDTO mobileTokenDTO) {
+    this.userAccountProvider.updateUserMobileToken(mobileTokenDTO.getToken());
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Updates the session data for the given session.
+   *
+   * @param sessionId       (required) session ID
+   * @param sessionDataDTO  (required) {@link SessionDataDTO}
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateSessionData(@PathVariable Long sessionId,
+      @Valid SessionDataDTO sessionDataDTO) {
+    this.sessionDataService.saveSessionData(sessionId, sessionDataDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

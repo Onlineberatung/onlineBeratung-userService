@@ -35,6 +35,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyHelper;
+import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -112,8 +113,8 @@ public class CreateSessionFacadeTest {
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenThrow(new InternalServerErrorException(MESSAGE));
-    when(sessionDataService.saveSessionDataFromRegistration(any(), any()))
-        .thenThrow(INTERNAL_SERVER_ERROR_EXCEPTION);
+    doThrow(INTERNAL_SERVER_ERROR_EXCEPTION).when(sessionDataService)
+        .saveSessionData(any(Session.class), any());
 
     createSessionFacade
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
@@ -185,7 +186,7 @@ public class CreateSessionFacadeTest {
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
     assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
-    verify(sessionDataService, times(1)).saveSessionDataFromRegistration(any(),
+    verify(sessionDataService, times(1)).saveSessionData(any(Session.class),
         any());
   }
 
