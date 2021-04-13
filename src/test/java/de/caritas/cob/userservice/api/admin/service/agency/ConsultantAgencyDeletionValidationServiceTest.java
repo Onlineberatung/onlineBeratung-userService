@@ -20,7 +20,7 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +38,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
   private ConsultantAgencyRepository consultantAgencyRepository;
 
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
 
   @Mock
   private SessionRepository sessionRepository;
@@ -50,7 +50,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().offline(false));
+    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(false));
 
     try {
       this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
@@ -62,13 +62,12 @@ public class ConsultantAgencyDeletionValidationServiceTest {
   }
 
   @Test
-  public void validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyHasOpenEnquiries()
-      throws AgencyServiceHelperException {
+  public void validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyHasOpenEnquiries() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
+    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
     when(this.sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(any(), any()))
         .thenReturn(singletonList(mock(Session.class)));
 
@@ -82,26 +81,24 @@ public class ConsultantAgencyDeletionValidationServiceTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void validateForDeletion_Should_throwInternalServerErrorException_When_agencyCanNotBeFetched()
-      throws AgencyServiceHelperException {
+  public void validateForDeletion_Should_throwInternalServerErrorException_When_agencyCanNotBeFetched() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any()))
+    when(this.agencyService.getAgency(any()))
         .thenThrow(new AgencyServiceHelperException(new Exception()));
 
     this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
   }
 
   @Test
-  public void validateForDeletion_Should_notThrowAnyException_When_consultantAgencyIsValidForDeletion()
-      throws AgencyServiceHelperException {
+  public void validateForDeletion_Should_notThrowAnyException_When_consultantAgencyIsValidForDeletion() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
+    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
 
     assertDoesNotThrow(
         () -> this.agencyDeletionValidationService.validateForDeletion(consultantAgency));

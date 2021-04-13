@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 
 @RunWith(SpringRunner.class)
 public class AgencyHelperTest {
@@ -28,17 +28,16 @@ public class AgencyHelperTest {
   @InjectMocks
   private AgencyHelper agencyHelper;
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
 
   /**
    * Method: getVerifiedAgency
    */
 
   @Test
-  public void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails()
-      throws AgencyServiceHelperException {
+  public void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
 
-    when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID))
+    when(agencyService.getAgencyWithoutCaching(AGENCY_ID))
         .thenThrow(AGENCY_SERVICE_HELPER_EXCEPTION);
 
     try {
@@ -50,10 +49,9 @@ public class AgencyHelperTest {
   }
 
   @Test
-  public void getVerifiedAgency_Should_ThrowBadRequestException_When_AgencyIsNotAssignedToGivenConsultingType()
-      throws AgencyServiceHelperException {
+  public void getVerifiedAgency_Should_ThrowBadRequestException_When_AgencyIsNotAssignedToGivenConsultingType() {
 
-    when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
     try {
       agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_KREUZBUND);
@@ -64,10 +62,9 @@ public class AgencyHelperTest {
   }
 
   @Test
-  public void getVerifiedAgency_Should_ReturnCorrectAgency_When_AgencyIsFoundAndValid()
-      throws AgencyServiceHelperException {
+  public void getVerifiedAgency_Should_ReturnCorrectAgency_When_AgencyIsFoundAndValid() {
 
-    when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
     AgencyDTO agency = agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
 

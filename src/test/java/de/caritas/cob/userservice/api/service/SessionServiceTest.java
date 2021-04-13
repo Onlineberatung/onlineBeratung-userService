@@ -31,7 +31,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,7 +57,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -110,7 +108,7 @@ public class SessionServiceTest {
   @Mock
   private SessionRepository sessionRepository;
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
   @Mock
   private Logger logger;
   @Mock
@@ -215,8 +213,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError()
-      throws Exception {
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError() {
 
     AgencyServiceHelperException ex =
         new AgencyServiceHelperException(new Exception("AgencyService error"));
@@ -224,7 +221,7 @@ public class SessionServiceTest {
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(any())).thenThrow(ex);
+    when(agencyService.getAgencies(any())).thenThrow(ex);
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -235,14 +232,13 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId()
-      throws Exception {
+  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId() {
 
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(any())).thenReturn(AGENCY_DTO_LIST);
+    when(agencyService.getAgencies(any())).thenReturn(AGENCY_DTO_LIST);
 
     assertThat(sessionService.getSessionsForUserId(USER_ID),
         everyItem(instanceOf(UserSessionResponseDTO.class)));

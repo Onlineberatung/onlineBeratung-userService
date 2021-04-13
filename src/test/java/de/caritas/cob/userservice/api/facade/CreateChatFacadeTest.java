@@ -24,7 +24,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.helper.ChatHelper;
-import de.caritas.cob.userservice.api.helper.RocketChatHelper;
+import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
@@ -59,7 +59,7 @@ public class CreateChatFacadeTest {
   @Mock
   private RocketChatService rocketChatService;
   @Mock
-  private RocketChatHelper rocketChatHelper;
+  private RocketChatRoomNameGenerator rocketChatRoomNameGenerator;
   @Mock
   private Chat chat;
   @Mock
@@ -99,7 +99,7 @@ public class CreateChatFacadeTest {
       throws Exception {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(rocketChatHelper.generateGroupChatName(chat)).thenReturn(GROUP_CHAT_NAME);
+    when(rocketChatRoomNameGenerator.generateGroupChatName(chat)).thenReturn(GROUP_CHAT_NAME);
     when(rocketChatService.createPrivateGroupWithSystemUser(GROUP_CHAT_NAME))
         .thenReturn(Optional.of(groupResponseDTO));
     when(groupResponseDTO.getGroup()).thenReturn(groupDTO);
@@ -118,7 +118,7 @@ public class CreateChatFacadeTest {
       throws RocketChatCreateGroupException, SaveChatException {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(rocketChatHelper.generateGroupChatName(Mockito.any())).thenReturn(GROUP_CHAT_NAME);
+    when(rocketChatRoomNameGenerator.generateGroupChatName(Mockito.any())).thenReturn(GROUP_CHAT_NAME);
     when(rocketChatService.createPrivateGroupWithSystemUser(GROUP_CHAT_NAME))
         .thenReturn(Optional.of(groupResponseDTO));
     when(groupResponseDTO.getGroup()).thenReturn(groupDTO);
@@ -137,7 +137,7 @@ public class CreateChatFacadeTest {
       throws RocketChatCreateGroupException, SaveChatException {
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(rocketChatHelper.generateGroupChatName(chat)).thenReturn(GROUP_CHAT_NAME);
+    when(rocketChatRoomNameGenerator.generateGroupChatName(chat)).thenReturn(GROUP_CHAT_NAME);
     when(rocketChatService.createPrivateGroupWithSystemUser(GROUP_CHAT_NAME))
         .thenReturn(Optional.of(groupResponseDTO));
     when(groupResponseDTO.getGroup()).thenReturn(groupDTO);

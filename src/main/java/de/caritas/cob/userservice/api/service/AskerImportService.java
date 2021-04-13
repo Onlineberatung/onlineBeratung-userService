@@ -17,7 +17,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcome
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
-import de.caritas.cob.userservice.api.helper.RocketChatHelper;
+import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
@@ -33,7 +33,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
@@ -105,10 +104,10 @@ public class AskerImportService {
   private final @NonNull MessageServiceProvider messageServiceProvider;
   private final @NonNull MonitoringStructureProvider monitoringStructureProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserAgencyService userAgencyService;
-  private final @NonNull RocketChatHelper rocketChatHelper;
+  private final @NonNull RocketChatRoomNameGenerator rocketChatRoomNameGenerator;
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   /**
@@ -146,14 +145,8 @@ public class AskerImportService {
         }
 
         // Get the agency
-        AgencyDTO agencyDTO = null;
-        try {
-          agencyDTO =
-              agencyServiceHelper.getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
-        } catch (AgencyServiceHelperException agencyServiceHelperException) {
-          throw new ImportException(String
-              .format("Could not get consulting type (agency) for user %s", record.getUsername()));
-        }
+        AgencyDTO agencyDTO = agencyService
+            .getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
 
         if (agencyDTO == null) {
           throw new ImportException(String
@@ -308,14 +301,8 @@ public class AskerImportService {
         }
 
         // Get the agency for the consulting type
-        AgencyDTO agencyDTO = null;
-        try {
-          agencyDTO =
-              agencyServiceHelper.getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
-        } catch (AgencyServiceHelperException agencyServiceHelperException) {
-          throw new ImportException(String
-              .format("Could not get consulting type (agency) for user %s", record.getUsername()));
-        }
+        AgencyDTO agencyDTO = agencyService
+            .getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
 
         if (agencyDTO == null) {
           throw new ImportException(String
@@ -401,8 +388,9 @@ public class AskerImportService {
         RocketChatCredentials rocketChatUserCredentials = RocketChatCredentials.builder()
             .rocketChatToken(rcUserToken).rocketChatUserId(rcUserId).build();
         String rcGroupId =
-            rocketChatService.createPrivateGroup(rocketChatHelper.generateGroupName(session),
-                rocketChatUserCredentials).get().getGroup().getId();
+            rocketChatService
+                .createPrivateGroup(rocketChatRoomNameGenerator.generateGroupName(session),
+                    rocketChatUserCredentials).get().getGroup().getId();
         if (rcGroupId == null || rcGroupId.equals(StringUtils.EMPTY)) {
           throw new ImportException(String.format("Could not create Rocket.Chat group for user %s",
               record.getUsername()));
@@ -425,7 +413,8 @@ public class AskerImportService {
         // Create feedback group and add consultants if enabled for this agency/consulting type
         if (consultingTypeSettings.isFeedbackChat()) {
           String rcFeedbackGroupId = rocketChatService
-              .createPrivateGroupWithSystemUser(rocketChatHelper.generateFeedbackGroupName(session))
+              .createPrivateGroupWithSystemUser(
+                  rocketChatRoomNameGenerator.generateFeedbackGroupName(session))
               .get().getGroup().getId();
           if (rcFeedbackGroupId == null || rcFeedbackGroupId.equals(StringUtils.EMPTY)) {
             throw new ImportException(String.format(

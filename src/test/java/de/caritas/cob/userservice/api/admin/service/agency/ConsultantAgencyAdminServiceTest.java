@@ -23,7 +23,7 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +53,7 @@ public class ConsultantAgencyAdminServiceTest {
   private RemoveConsultantFromRocketChatService removeFromRocketChatService;
 
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
 
   @Mock
   private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
@@ -100,8 +100,7 @@ public class ConsultantAgencyAdminServiceTest {
   }
 
   @Test
-  public void removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultingFlag_When_theyAreNotInAnotherTeamAgency()
-      throws AgencyServiceHelperException {
+  public void removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultingFlag_When_theyAreNotInAnotherTeamAgency() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(true);
     List<Consultant> consultants = new EasyRandom()
@@ -115,7 +114,7 @@ public class ConsultantAgencyAdminServiceTest {
         .thenReturn(singletonList(session));
     when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(any()))
         .thenReturn(consultants);
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(agencyDTO);
+    when(this.agencyService.getAgency(any())).thenReturn(agencyDTO);
 
     this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);
 
@@ -123,8 +122,7 @@ public class ConsultantAgencyAdminServiceTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void removeConsultantsFromTeamSessionsByAgencyId_Should_throwInternalServerErrorException_When_agencyServiceFails()
-      throws AgencyServiceHelperException {
+  public void removeConsultantsFromTeamSessionsByAgencyId_Should_throwInternalServerErrorException_When_agencyServiceFails() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(true);
     List<Consultant> consultants = new EasyRandom()
@@ -135,7 +133,7 @@ public class ConsultantAgencyAdminServiceTest {
         .thenReturn(singletonList(session));
     when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(any()))
         .thenReturn(consultants);
-    when(this.agencyServiceHelper.getAgency(any()))
+    when(this.agencyService.getAgency(any()))
         .thenThrow(new AgencyServiceHelperException(new Exception()));
 
     this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);

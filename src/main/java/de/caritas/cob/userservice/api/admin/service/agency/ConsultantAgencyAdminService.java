@@ -6,10 +6,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -19,8 +17,7 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
@@ -38,7 +35,7 @@ public class ConsultantAgencyAdminService {
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull RemoveConsultantFromRocketChatService removeFromRocketChatService;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
   /**
@@ -120,11 +117,7 @@ public class ConsultantAgencyAdminService {
   }
 
   private AgencyDTO toAgencyDto(ConsultantAgency consultantAgency) {
-    try {
-      return this.agencyServiceHelper.getAgency(consultantAgency.getAgencyId());
-    } catch (AgencyServiceHelperException e) {
-      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
-    }
+    return this.agencyService.getAgency(consultantAgency.getAgencyId());
   }
 
   private void removeTeamConsultantFlag(Consultant consultant) {

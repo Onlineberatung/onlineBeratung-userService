@@ -26,7 +26,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class ConsultantAgencyAdminServiceIT {
   private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   @MockBean
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
 
   @MockBean
   private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
@@ -119,9 +119,8 @@ public class ConsultantAgencyAdminServiceIT {
   }
 
   @Test
-  public void removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultantFlagAndCallServices()
-      throws AgencyServiceHelperException {
-    when(this.agencyServiceHelper.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
+  public void removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultantFlagAndCallServices() {
+    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
 
     long teamCosnultantsBefore = this.consultantRepository
         .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(0L))

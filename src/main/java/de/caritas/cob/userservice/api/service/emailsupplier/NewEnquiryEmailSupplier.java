@@ -12,7 +12,7 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -28,7 +28,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private final Session session;
   private final ConsultantAgencyRepository consultantAgencyRepository;
-  private final AgencyServiceHelper agencyServiceHelper;
+  private final AgencyService agencyService;
   private final String applicationBaseUrl;
 
   /**
@@ -45,7 +45,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
     if (isEmpty(consultantAgencyList)) {
       return emptyList();
     }
-    AgencyDTO agency = agencyServiceHelper.getAgency(session.getAgencyId());
+    AgencyDTO agency = agencyService.getAgency(session.getAgencyId());
     return consultantAgencyList.stream()
         .filter(this::validConsultantAgency)
         .map(toEnquiryMailDTO(agency))

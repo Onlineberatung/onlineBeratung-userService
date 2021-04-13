@@ -18,7 +18,7 @@ import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
@@ -50,7 +50,7 @@ public class EmailNotificationFacade {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantService consultantService;
@@ -69,7 +69,7 @@ public class EmailNotificationFacade {
 
     try {
       EmailSupplier newEnquiryMail = new NewEnquiryEmailSupplier(session,
-          consultantAgencyRepository, agencyServiceHelper, applicationBaseUrl);
+          consultantAgencyRepository, agencyService, applicationBaseUrl);
       sendMailTasksToMailService(newEnquiryMail);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(

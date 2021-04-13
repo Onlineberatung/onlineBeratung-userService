@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSetti
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.io.FileReader;
@@ -54,7 +53,7 @@ public class ConsultantImportService {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull ConsultantCreatorService consultantCreatorService;
@@ -112,14 +111,8 @@ public class ConsultantImportService {
           }
           String[] agencyRoleArray = agencyRoleSet.split(AGENCY_ROLE_DELIMITER);
 
-          AgencyDTO agency;
-          try {
-            agency = agencyServiceHelper.getAgencyWithoutCaching(Long.valueOf(agencyRoleArray[0]));
-          } catch (AgencyServiceHelperException agencyServiceHelperException) {
-            throw new ImportException(
-                String.format("Consultant %s could not be imported: Invalid agency id %s",
-                    importRecord.getUsername(), agencyRoleArray[0]));
-          }
+          AgencyDTO agency = agencyService
+              .getAgencyWithoutCaching(Long.valueOf(agencyRoleArray[0]));
 
           if (agency == null) {
             throw new ImportException(

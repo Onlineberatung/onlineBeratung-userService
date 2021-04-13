@@ -14,7 +14,7 @@ import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   private ConsultantRepository consultantRepository;
 
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
 
   @Mock
   private KeycloakAdminClientService keycloakAdminClientService;
@@ -49,15 +49,14 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   private SessionRepository sessionRepository;
 
   @Test
-  public void createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned()
-      throws AgencyServiceHelperException {
+  public void createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned() {
     AgencyDTO agencyDTO = new AgencyDTO()
         .consultingType(ConsultingType.U25)
         .id(2L);
 
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))
         .thenReturn(Optional.of(new Consultant()));
-    when(agencyServiceHelper.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
+    when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()

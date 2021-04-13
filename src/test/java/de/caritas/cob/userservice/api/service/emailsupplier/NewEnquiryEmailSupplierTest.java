@@ -19,7 +19,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,12 +39,12 @@ public class NewEnquiryEmailSupplierTest {
   private ConsultantAgencyRepository consultantAgencyRepository;
 
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
 
   @Before
   public void setup() {
     this.newEnquiryEmailSupplier = new NewEnquiryEmailSupplier(session,
-        consultantAgencyRepository, agencyServiceHelper, "app base");
+        consultantAgencyRepository, agencyService, "app base");
   }
 
   @Test
@@ -81,7 +81,7 @@ public class NewEnquiryEmailSupplierTest {
             nowInUtc()),
         new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),
             nowInUtc())));
-    when(agencyServiceHelper.getAgency(any())).thenReturn(AGENCY_DTO_U25);
+    when(agencyService.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();

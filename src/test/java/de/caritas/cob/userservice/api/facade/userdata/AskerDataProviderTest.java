@@ -26,7 +26,7 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import org.junit.Before;
@@ -41,7 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class AskerDataProviderTest {
 
   @Mock
-  AgencyServiceHelper agencyServiceHelper;
+  AgencyService agencyService;
   @Mock
   AuthenticatedUser authenticatedUser;
   @Mock SessionDataProvider sessionDataProvider;
@@ -54,11 +54,10 @@ public class AskerDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession()
-      throws AgencyServiceHelperException {
+  public void retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession() {
 
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
-    when(agencyServiceHelper.getAgencies(Mockito.anyList()))
+    when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
 
     @SuppressWarnings("unchecked")
@@ -72,11 +71,10 @@ public class AskerDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencies()
-      throws AgencyServiceHelperException {
+  public void retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencies() {
 
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
-    when(agencyServiceHelper.getAgencies(Mockito.anyList()))
+    when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
 
     @SuppressWarnings("unchecked")
@@ -90,13 +88,12 @@ public class AskerDataProviderTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void retrieveData_GetConsultingTypes_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails()
-      throws Exception {
+  public void retrieveData_GetConsultingTypes_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
 
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     AgencyServiceHelperException agencyServiceHelperException =
         new AgencyServiceHelperException(new Exception());
-    when(agencyServiceHelper.getAgencies(Mockito.anyList()))
+    when(agencyService.getAgencies(Mockito.anyList()))
         .thenThrow(agencyServiceHelperException);
 
     askerDataProvider.retrieveData(USER);
@@ -127,7 +124,7 @@ public class AskerDataProviderTest {
   @Test
   public void retrieveData_Should_ReturnValidData() throws AgencyServiceHelperException {
 
-    when(agencyServiceHelper.getAgencies(any())).thenReturn(
+    when(agencyService.getAgencies(any())).thenReturn(
         Collections.singletonList(AGENCY_DTO_SUCHT));
     LinkedHashMap<String, Object> sessionData = new LinkedHashMap<>();
     sessionData.put("addictiveDrugs", "3");

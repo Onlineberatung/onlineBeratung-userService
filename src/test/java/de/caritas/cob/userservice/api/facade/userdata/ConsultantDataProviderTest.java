@@ -26,7 +26,7 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.List;
 import org.apache.commons.collections.SetUtils;
 import org.junit.Before;
@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 public class ConsultantDataProviderTest {
 
   @Mock
-  AgencyServiceHelper agencyServiceHelper;
+  AgencyService agencyService;
   @Mock
   AuthenticatedUser authenticatedUser;
   @Mock
@@ -64,11 +64,10 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant()
-      throws AgencyServiceHelperException {
+  public void retrieveData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant() {
 
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
-    when(agencyServiceHelper.getAgency(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgency(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
     List<AgencyDTO> result = consultantDataProvider.retrieveData(CONSULTANT_WITH_AGENCY)
         .getAgencies();
@@ -85,8 +84,8 @@ public class ConsultantDataProviderTest {
     when(consultant.getConsultantAgencies())
         .thenReturn(asSet(new ConsultantAgency[]{CONSULTANT_AGENCY_2, CONSULTANT_AGENCY_3}));
     AgencyServiceHelperException exception = new AgencyServiceHelperException(new Exception(ERROR));
-    when(agencyServiceHelper.getAgency(CONSULTANT_AGENCY_2.getId())).thenThrow(exception);
-    when(agencyServiceHelper.getAgency(CONSULTANT_AGENCY_3.getId())).thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgency(CONSULTANT_AGENCY_2.getId())).thenThrow(exception);
+    when(agencyService.getAgency(CONSULTANT_AGENCY_3.getId())).thenReturn(AGENCY_DTO_SUCHT);
 
     consultantDataProvider.retrieveData(consultant);
 
@@ -94,9 +93,9 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_ReturnValidData() throws AgencyServiceHelperException {
+  public void retrieveData_Should_ReturnValidData() {
 
-    when(agencyServiceHelper.getAgency(
+    when(agencyService.getAgency(
         CONSULTANT_WITH_AGENCY.getConsultantAgencies().stream().findFirst().get().getId()))
         .thenReturn(AGENCY_DTO_SUCHT);
 

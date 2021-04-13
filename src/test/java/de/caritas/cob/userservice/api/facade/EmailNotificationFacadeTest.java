@@ -65,7 +65,7 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
@@ -178,7 +178,7 @@ public class EmailNotificationFacadeTest {
   @Mock
   private MailService mailService;
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
   @Mock
   SessionService sessionService;
   @Mock
@@ -212,12 +212,11 @@ public class EmailNotificationFacadeTest {
    * Method: sendNewEnquiryEmailNotification
    */
   @Test
-  public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants()
-      throws AgencyServiceHelperException {
+  public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
+    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
@@ -226,12 +225,11 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser()
-      throws AgencyServiceHelperException {
+  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
+    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
@@ -239,16 +237,15 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper()
-      throws AgencyServiceHelperException {
+  public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
+    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(agencyServiceHelper, times(1)).getAgency(SESSION.getAgencyId());
+    verify(agencyService, times(1)).getAgency(SESSION.getAgencyId());
 
   }
 

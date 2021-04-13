@@ -1832,10 +1832,6 @@ public class UserControllerIT {
         .andExpect(status().isOk());
   }
 
-  /**
-   * Method: createChat (role: kreuzbund-consultant)
-   */
-
   @Test
   public void createChat_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
 
