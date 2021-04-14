@@ -1,0 +1,51 @@
+name: Push Admin API documentation
+
+on:
+  push:
+    paths:
+      - 'api/useradminservice.yaml'
+    branches-ignore:
+      - 'master'
+      - 'develop'
+
+jobs:
+  documentation:
+    name: Pushes changes to Admin API
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup JVM
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11.0.10
+          java-package: jdk
+          architecture: x64
+
+      - name: Caching maven dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Maven generate sources
+        run: mvn generate-sources
+
+      - name: Push Admin API to documentation
+        uses: andstor/copycat-action@v3
+        with:
+          personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
+          src_path: ../target/generated-sources/markdown/userservice
+          dst_path: docs/backend/admin/userservice
+          dst_owner: CaritasDeutschland
+          dst_repo_name: documentation
+          dst_branch: adminapi
+          clean: true
+          commit_message: 'docs: updated user service admin api description'
+
+      - name: Maven clean
+        run: mvn -B -Pprod clean
