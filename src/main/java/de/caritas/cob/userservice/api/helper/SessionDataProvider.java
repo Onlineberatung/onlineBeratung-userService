@@ -58,31 +58,31 @@ public class SessionDataProvider {
       SessionDataDTO sessionData) {
 
     List<SessionData> sessionDataList = new ArrayList<>();
-    if (getSessionDataInitializing(session.getConsultingType()).isAddictiveDrugs()) {
+    if (getSessionDataInitializing(session.getConsultingID()).isAddictiveDrugs()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),
           getAddictiveDrugsValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isAge()) {
+    if (getSessionDataInitializing(session.getConsultingID()).isAge()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.AGE.getValue(), getAgeValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isGender()) {
+    if (getSessionDataInitializing(session.getConsultingID()).isGender()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.GENDER.getValue(), getGenderValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isRelation()) {
+    if (getSessionDataInitializing(session.getConsultingID()).isRelation()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.RELATION.getValue(), getRelationValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isState()) {
+    if (getSessionDataInitializing(session.getConsultingID()).isState()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.STATE.getValue(), getStateValue(sessionData)));
     }
     return sessionDataList;
   }
 
-  private SessionDataInitializing getSessionDataInitializing(ConsultingType consultingType) {
+  private SessionDataInitializing getSessionDataInitializing(int consultingType) {
     return consultingTypeManager.getConsultingTypeSettings(consultingType)
         .getSessionDataInitializing();
   }

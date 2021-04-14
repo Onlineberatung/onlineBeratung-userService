@@ -1,14 +1,16 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
+import static de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManagerTest.countConsultingTypeSettings;
 import static de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManagerTest.loadConsultingTypeSettings;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -27,16 +29,15 @@ class ConsultingTypeManagerIT {
   private ConsultingTypeManager consultingTypeManager;
 
   @ParameterizedTest
-  @EnumSource(ConsultingType.class)
-  void init_Should_InitializeConsultingTypeSettingFromJsonFile(ConsultingType consultingType)
+  @MethodSource("generateConsultingIDs")
+  void init_Should_InitializeConsultingTypeSettingFromJsonFile(int consultingType)
       throws Exception {
     ConsultingTypeSettings consultingTypeSettings = loadConsultingTypeSettings(consultingType);
-    consultingTypeSettings.setConsultingType(consultingType);
 
     ConsultingTypeSettings result =
         consultingTypeManager.getConsultingTypeSettings(consultingType);
 
-    assertSameValue(result::getConsultingType, consultingTypeSettings::getConsultingType);
+    assertSameValue(result::getConsultingID, consultingTypeSettings::getConsultingID);
     assertSameValue(result::isSendWelcomeMessage, consultingTypeSettings::isSendWelcomeMessage);
     assertSameValue(result::getWelcomeMessage, consultingTypeSettings::getWelcomeMessage);
     assertSameValue(result.getSessionDataInitializing()::isAddictiveDrugs,
@@ -64,6 +65,10 @@ class ConsultingTypeManagerIT {
 
   private void assertSameValue(Supplier<Object> result, Supplier<Object> expected) {
     assertThat(result.get(), is(expected.get()));
+  }
+
+  static Stream<Integer> generateConsultingIDs() {
+    return IntStream.range(0, countConsultingTypeSettings()).boxed();
   }
 
 }

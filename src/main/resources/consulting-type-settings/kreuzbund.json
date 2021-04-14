@@ -1,4 +1,9 @@
 {
+  "id": 15,
+  "urlName": "kb-sucht-selbsthilfe",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": true,
+  "consultantBoundedToAgency": true,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

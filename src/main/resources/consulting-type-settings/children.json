@@ -1,4 +1,9 @@
 {
+  "id": 14,
+  "urlName": "kinder-jugendliche",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
 	"sendWelcomeMessage": false,
 	"welcomeMessage": null,
 	"sendFurtherStepsMessage": true,

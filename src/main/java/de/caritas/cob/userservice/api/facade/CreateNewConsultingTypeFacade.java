@@ -38,10 +38,8 @@ public class CreateNewConsultingTypeFacade {
   public Long initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
       RocketChatCredentials rocketChatCredentials) {
     try {
-      ConsultingType consultingType = ConsultingType
-          .fromConsultingType(userRegistrationDTO.getConsultingType());
       ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
-          .getConsultingTypeSettings(consultingType);
+          .getConsultingTypeSettings(userRegistrationDTO.getConsultingType());
 
       return createSessionOrChat(userRegistrationDTO, user,
           consultingTypeSettings, rocketChatCredentials);
@@ -69,7 +67,7 @@ public class CreateNewConsultingTypeFacade {
 
     Long sessionId = null;
 
-    if (consultingTypeSettings.getConsultingType().equals(ConsultingType.KREUZBUND)) {
+    if (consultingTypeSettings.isOnlyGroupChat()) {
       createUserChatRelationFacade
           .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
               rocketChatCredentials);

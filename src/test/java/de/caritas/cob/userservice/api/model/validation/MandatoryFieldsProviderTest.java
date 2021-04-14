@@ -31,7 +31,8 @@ public class MandatoryFieldsProviderTest {
     when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
     MandatoryFields result =
-        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Integer.toString(CONSULTING_TYPE_U25.getValue()));
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(
+            Integer.toString(CONSULTING_TYPE_U25.getValue()));
     assertEquals(CONSULTING_TYPE_SETTINGS_U25.getRegistration().getMandatoryFields(), result);
   }
 
@@ -40,7 +41,8 @@ public class MandatoryFieldsProviderTest {
     when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION);
     MandatoryFields result =
-        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Integer.toString(CONSULTING_TYPE_U25.getValue()));
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(
+            Integer.toString(CONSULTING_TYPE_U25.getValue()));
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -48,7 +50,8 @@ public class MandatoryFieldsProviderTest {
     when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL);
     MandatoryFields result =
-        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Integer.toString(CONSULTING_TYPE_U25.getValue()));
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(
+            Integer.toString(CONSULTING_TYPE_U25.getValue()));
   }
 
 }

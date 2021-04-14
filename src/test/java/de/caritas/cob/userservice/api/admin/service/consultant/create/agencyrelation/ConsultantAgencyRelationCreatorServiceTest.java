@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
@@ -52,7 +51,7 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   public void createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned()
       throws AgencyServiceHelperException {
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.U25)
+        .consultingType(1)
         .id(2L);
 
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))

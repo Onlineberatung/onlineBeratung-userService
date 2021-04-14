@@ -1,4 +1,9 @@
 {
+  "id": 6,
+  "urlName": "allgemeine-soziale-beratung",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

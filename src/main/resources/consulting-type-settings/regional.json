@@ -1,4 +1,9 @@
 {
+  "id": 19,
+  "urlName": "regionale-angebote",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

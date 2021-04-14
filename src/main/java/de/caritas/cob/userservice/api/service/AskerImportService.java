@@ -567,17 +567,17 @@ public class AskerImportService {
     }
   }
 
-  private UserDTO convertAskerToUserDTO(ImportRecordAsker record, ConsultingType consultingType) {
+  private UserDTO convertAskerToUserDTO(ImportRecordAsker record, int consultingType) {
     return new UserDTO(record.getUsernameEncoded(), record.getPostcode(), record.getAgencyId(),
         record.getPassword(), record.getEmail(), new Date().toString(),
-        Integer.toString(consultingType.getValue()));
+        Integer.toString(consultingType));
   }
 
   private UserDTO convertAskerWithoutSessionToUserDTO(ImportRecordAskerWithoutSession record,
-      ConsultingType consultingType) {
+      int consultingType) {
     return new UserDTO(record.getUsernameEncoded(), DUMMY_POSTCODE, record.getAgencyId(),
         record.getPassword(), record.getEmail(), new Date().toString(),
-        Integer.toString(consultingType.getValue()));
+        Integer.toString(consultingType));
   }
 
   /**

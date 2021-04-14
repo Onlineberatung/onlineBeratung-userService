@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,14 +26,15 @@ public class MandatoryFieldsProvider {
    * @return the {@link MandatoryFields} for the given consulting type
    */
   public MandatoryFields fetchMandatoryFieldsForConsultingType(String consultingType) {
-    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager.getConsultingTypeSettings(
-        ConsultingType.fromConsultingType(consultingType));
+    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
+        .getConsultingTypeSettings(consultingType);
     ensureConsultingTypeSettingsAreNotNull(consultingType, consultingTypeSettings);
     return consultingTypeSettings.getRegistration().getMandatoryFields();
 
   }
 
-  private void ensureConsultingTypeSettingsAreNotNull(String consultingType, ConsultingTypeSettings consultingTypeSettings) {
+  private void ensureConsultingTypeSettingsAreNotNull(String consultingType,
+      ConsultingTypeSettings consultingTypeSettings) {
     if (isNull(consultingTypeSettings.getRegistration())
         || isNull(consultingTypeSettings.getRegistration().getMandatoryFields())) {
       throw new InternalServerErrorException(String.format(

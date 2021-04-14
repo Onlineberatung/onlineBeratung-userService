@@ -1,4 +1,9 @@
 {
+  "id": 7,
+  "urlName": "leben-im-alter",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

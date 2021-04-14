@@ -1,4 +1,9 @@
 {
+  "id": 2,
+  "urlName": "schwangerschaftsberatung",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
 	"sendWelcomeMessage": false,
 	"welcomeMessage": null,
 	"sendFurtherStepsMessage": true,

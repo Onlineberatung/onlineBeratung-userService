@@ -1,37 +1,43 @@
 {
-	"sendWelcomeMessage" : false,
-	"welcomeMessage" : null,
-	"sessionDataInitializing": {
-		"addictiveDrugs": false,
-		"age": false,
-		"gender": false,
-		"relation": false,
-		"state": false
-	},
-	"monitoring": false,
-	"monitoringFile": null,
-	"feedbackChat": false,
-	"notifications": {
-		"newMessage": {
-			"teamSession": {
-				"toConsultant": {
-					"allTeamConsultants": true
-				}
-			}
-		}
-	},
-	"languageFormal": true,
-	"roles": {
-		"consultant": {
-			"default" :	[
-				"consultant"
-			]
-		}
-	},
-	"registration": {
-		"mandatoryFields": {
-			"age": false,
-			"state": false
-		}
-	}
+  "id": 5,
+  "urlName": "schuldnerberatung",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
+  "sendWelcomeMessage": false,
+  "welcomeMessage": null,
+  "sendFurtherStepsMessage": true,
+  "sessionDataInitializing": {
+    "addictiveDrugs": false,
+    "age": false,
+    "gender": false,
+    "relation": false,
+    "state": false
+  },
+  "monitoring": false,
+  "monitoringFile": null,
+  "feedbackChat": false,
+  "notifications": {
+    "newMessage": {
+      "teamSession": {
+        "toConsultant": {
+          "allTeamConsultants": true
+        }
+      }
+    }
+  },
+  "languageFormal": true,
+  "roles": {
+    "consultant": {
+      "default": [
+        "consultant"
+      ]
+    }
+  },
+  "registration": {
+    "mandatoryFields": {
+      "age": false,
+      "state": false
+    }
+  }
 }

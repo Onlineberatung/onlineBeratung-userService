@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSetti
 import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultingTypeResultDTO;
 import de.caritas.cob.userservice.api.model.PaginationLinks;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -47,8 +46,7 @@ public class ConsultingTypeAdminService {
 
   private List<ConsultingTypeResultDTO> fullSortedConsultingTypeResponseList() {
     return consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
-        Comparator.comparing(ConsultingTypeSettings::getConsultingType, Comparator.comparing(
-            ConsultingType::getUrlName)))
+        Comparator.comparing(ConsultingTypeSettings::getConsultingUrlName))
         .map(this::fromConsultingTypeSettings)
         .collect(Collectors.toList());
   }
@@ -60,8 +58,8 @@ public class ConsultingTypeAdminService {
 
   private ConsultingTypeResultDTO fromConsultingTypeSettings(ConsultingTypeSettings ctSettings) {
     return new ConsultingTypeResultDTO()
-        .id(ctSettings.getConsultingType().getValue())
-        .name(ctSettings.getConsultingType().getUrlName())
+        .id(ctSettings.getConsultingID())
+        .name(ctSettings.getConsultingUrlName())
         .languageFormal(ctSettings.isLanguageFormal())
         .roles(ctSettings.getRoles())
         .sendWelcomeMessage(ctSettings.isSendWelcomeMessage())

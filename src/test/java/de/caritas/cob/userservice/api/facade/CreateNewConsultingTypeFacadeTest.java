@@ -41,11 +41,11 @@ public class CreateNewConsultingTypeFacadeTest {
   public void initializeNewConsultingType_Should_RegisterNewSession_When_ProvidedWithSessionConsultingType_For_NewAccountRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
+    userDTO.setConsultingType(String.valueOf(0));
     User user = easyRandom.nextObject(User.class);
     ConsultingTypeSettings consultingTypeSettings = easyRandom
         .nextObject(ConsultingTypeSettings.class);
-    consultingTypeSettings.setConsultingType(CONSULTING_TYPE_SUCHT);
+    consultingTypeSettings.setConsultingID(0);
 
     createNewConsultingTypeFacade
         .initializeNewConsultingType(userDTO, user, consultingTypeSettings);
@@ -63,7 +63,7 @@ public class CreateNewConsultingTypeFacadeTest {
         .nextObject(RocketChatCredentials.class);
 
     when(createSessionFacade.createUserSession(any(), any(), any())).thenReturn(1L);
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(0))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     long sessionId = createNewConsultingTypeFacade
@@ -82,7 +82,7 @@ public class CreateNewConsultingTypeFacadeTest {
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_KREUZBUND))
+    when(consultingTypeManager.getConsultingTypeSettings(15))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
 
     Long sessionId = createNewConsultingTypeFacade

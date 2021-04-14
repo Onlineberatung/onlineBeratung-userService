@@ -213,7 +213,7 @@ public class MonitoringStructureProviderTest {
     when(this.consultingTypeManager.getConsultingTypeSettings(any())).thenReturn(settings);
 
     MonitoringDTO monitoringInitalList = this.monitoringStructureProvider
-        .getMonitoringInitialList(SUCHT);
+        .getMonitoringInitialList(0);
 
     assertThat(monitoringInitalList, notNullValue());
     assertThat(monitoringInitalList.getProperties().entrySet(), hasSize(2));
@@ -225,7 +225,7 @@ public class MonitoringStructureProviderTest {
     when(settings.getMonitoringFile()).thenReturn(null);
     when(this.consultingTypeManager.getConsultingTypeSettings(any())).thenReturn(settings);
 
-    this.monitoringStructureProvider.getMonitoringInitialList(SUCHT);
+    this.monitoringStructureProvider.getMonitoringInitialList(0);
   }
 
   @Test
@@ -243,7 +243,7 @@ public class MonitoringStructureProviderTest {
     unsortedMap.put(MonitoringType.ADDICTIVE_DRUGS.getKey(), unsortedAddictiveDrugsMap);
 
     Map<String, Object> sortedMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertEquals(sortedMap.get(SUCHT),
         SORTED_MONITORING_LIST.get(0).getMonitoringOptionList());
@@ -269,7 +269,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -299,7 +299,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -340,7 +340,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -380,7 +380,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -429,7 +429,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);

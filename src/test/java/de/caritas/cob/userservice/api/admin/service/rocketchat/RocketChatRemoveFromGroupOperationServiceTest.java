@@ -13,12 +13,13 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +46,17 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   @Mock
   private Consultant consultant;
 
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
+
   @Before
   public void setup() {
     Map<Session, List<Consultant>> sessionConsultants = new HashMap<>();
     sessionConsultants.put(session, singletonList(consultant));
     this.removeService =
         RocketChatRemoveFromGroupOperationService
-            .getInstance(this.rocketChatService, this.keycloakAdminClientService)
+            .getInstance(this.rocketChatService, this.keycloakAdminClientService,
+                consultingTypeManager)
             .onSessionConsultants(sessionConsultants);
   }
 

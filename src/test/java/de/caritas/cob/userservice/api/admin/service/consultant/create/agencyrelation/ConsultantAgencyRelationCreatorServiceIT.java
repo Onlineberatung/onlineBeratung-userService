@@ -26,7 +26,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -34,9 +33,9 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -102,7 +101,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(false);
-    agencyDTO.setConsultingType(ConsultingType.SUCHT);
+    agencyDTO.setConsultingType(0);
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -143,7 +142,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(true);
-    agencyDTO.setConsultingType(ConsultingType.SUCHT);
+    agencyDTO.setConsultingType(0);
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -167,7 +166,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
-    assertThat(this.consultantRepository.findByIdAndDeleteDateIsNull(consultant.getId()).get().isTeamConsultant(),
+    assertThat(this.consultantRepository.findByIdAndDeleteDateIsNull(consultant.getId()).get()
+            .isTeamConsultant(),
         is(true));
   }
 
@@ -254,10 +254,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
       throws AgencyServiceHelperException {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(ConsultingType.EMIGRATION);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.U25)
+        .consultingType(1)
         .id(2L);
 
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
@@ -278,10 +278,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
       throws AgencyServiceHelperException {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(ConsultingType.EMIGRATION);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.KREUZBUND)
+        .consultingType(15)
         .id(2L);
 
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
@@ -291,7 +291,6 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role")
         .agencyId(2L);
-
 
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency("0b3b1cc6-be98-4787-aa56-212259d811b9",

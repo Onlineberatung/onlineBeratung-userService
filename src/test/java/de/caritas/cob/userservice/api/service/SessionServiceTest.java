@@ -84,17 +84,17 @@ public class SessionServiceTest {
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
-  private final Session SESSION = new Session(ENQUIRY_ID, null, null, ConsultingType.SUCHT, "99999",
+  private final Session SESSION = new Session(ENQUIRY_ID, null, null, 0, "99999",
       1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
-  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, ConsultingType.SUCHT,
+  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, 0,
       "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      0, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      0, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
@@ -278,14 +278,28 @@ public class SessionServiceTest {
     sessions.add(SESSION);
     sessions.add(SESSION_2);
 
-    when(sessionRepository.findByUserAndConsultingType(USER, ConsultingType.SUCHT))
+    when(sessionRepository.findByUserAndConsultingID(USER, 0))
         .thenReturn(sessions);
 
     List<Session> result =
-        sessionService.getSessionsForUserByConsultingType(USER, ConsultingType.SUCHT);
+        sessionService.getSessionsForUserByConsultingType(USER, 0);
 
     assertEquals(sessions, result);
     assertThat(result.get(0), instanceOf(Session.class));
+  }
+
+  @Test
+  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
+
+    DataAccessException ex = new DataAccessException("Database error") {
+    };
+    when(sessionRepository.findByUserAndConsultingID(USER, 0)).thenThrow(ex);
+    try {
+      sessionService.getSessionsForUserByConsultingType(USER, 0);
+      fail("Expected exception: InternalServerErrorException");
+    } catch (InternalServerErrorException serviceException) {
+      assertTrue("Excepted InternalServerErrorException thrown", true);
+    }
   }
 
   /**
@@ -514,7 +528,7 @@ public class SessionServiceTest {
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
-    assertEquals(session.getConsultingType().getValue(), result.getConsultingType().intValue());
+    assertEquals(session.getConsultingID(), result.getConsultingType().intValue());
 
   }
 

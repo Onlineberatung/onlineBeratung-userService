@@ -1,4 +1,9 @@
 {
+  "id": 8,
+  "urlName": "behinderung-und-psychische-erkrankung",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

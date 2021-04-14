@@ -39,9 +39,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -58,10 +61,11 @@ public class ConsultingTypeManagerTest {
   private static final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH =
       "consultingTypesSettingsJsonPath";
   private static final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE =
-      "/consulting-type-settings";
+      "consulting-type-settings";
   private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP =
       new HashMap<Integer, ConsultingTypeSettings>() {
         private static final long serialVersionUID = 1L;
+
         {
           put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
           put(CONSULTING_TYPE_U25.getValue(), CONSULTING_TYPE_SETTINGS_U25);
@@ -83,6 +87,7 @@ public class ConsultingTypeManagerTest {
   private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25 =
       new HashMap<Integer, ConsultingTypeSettings>() {
         private static final long serialVersionUID = 1L;
+
         {
           put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
         }
@@ -112,10 +117,10 @@ public class ConsultingTypeManagerTest {
         CONSULTING_TYPE_SETTINGS_MAP);
 
     ConsultingTypeSettings result =
-        consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT);
+        consultingTypeManager.getConsultingTypeSettings(0);
     assertEquals(CONSULTING_TYPE_SETTINGS_SUCHT, result);
 
-    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
+    result = consultingTypeManager.getConsultingTypeSettings(1);
     assertEquals(CONSULTING_TYPE_SETTINGS_U25, result);
   }
 
@@ -129,7 +134,7 @@ public class ConsultingTypeManagerTest {
         CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25);
 
     try {
-      consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
+      consultingTypeManager.getConsultingTypeSettings(1);
       fail("Expected exception: MissingConsultingTypeException");
     } catch (MissingConsultingTypeException missingConsultingTypeException) {
       assertTrue("Excepted MissingConsultingTypeException thrown", true);
@@ -137,16 +142,43 @@ public class ConsultingTypeManagerTest {
 
   }
 
-  protected static ConsultingTypeSettings loadConsultingTypeSettings(ConsultingType consultingType)
-      throws IOException {
+  protected static ConsultingTypeSettings loadConsultingTypeSettings(int consultingType) {
     ObjectMapper mapper = new ObjectMapper();
     TypeReference<ConsultingTypeSettings> typeReference =
-        new TypeReference<ConsultingTypeSettings>() {};
-    InputStream inputStream =
-        TypeReference.class.getResourceAsStream(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE
-            + "/" + consultingType.name().toLowerCase() + ".json");
+        new TypeReference<ConsultingTypeSettings>() {
+        };
+    URL dirUrl = ConsultingType.class.getClassLoader()
+        .getResource(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE);
 
-    return mapper.readValue(inputStream, typeReference);
+    try {
+      for (String jsonFileName : new File(dirUrl.toURI()).list()) {
+        InputStream inputStream =
+            TypeReference.class.getResourceAsStream(
+                "/" + FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE + "/" + jsonFileName);
+        ConsultingTypeSettings consultingTypeSettings = mapper
+            .readValue(inputStream, typeReference);
+        if (consultingTypeSettings.getConsultingID() == consultingType) {
+          return consultingTypeSettings;
+        }
+      }
+    } catch (URISyntaxException | IOException e) {
+      e.printStackTrace();
+    }
+
+    return null;
   }
+
+  protected static int countConsultingTypeSettings() {
+    URL dirUrl = ConsultingType.class.getClassLoader()
+        .getResource(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE);
+
+    try {
+      return new File(dirUrl.toURI()).list().length;
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+    return 0;
+  }
+
 
 }

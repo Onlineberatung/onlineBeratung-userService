@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,10 +28,9 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
-    Integer type = sessionFilter.getConsultingType();
-    Optional<ConsultingType> consultingType = ConsultingType.valueOf(type);
-    if (consultingType.isPresent()) {
-      return this.sessionRepository.findByConsultingType(consultingType.get(), pageable);
+    Integer id = sessionFilter.getConsultingType();
+    if (id != null) {
+      return this.sessionRepository.findByConsultingID(id, pageable);
     }
     return Page.empty(pageable);
   }

@@ -1,5 +1,10 @@
 {
+  "id": 17,
+  "urlName": "rw-auswanderung",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
   "sendWelcomeMessage": false,
+  "consultantBoundedToAgency": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,
   "sendSaveSessionDataMessage": false,

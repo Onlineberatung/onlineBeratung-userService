@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
@@ -44,7 +43,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSession() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingType()).thenReturn(ConsultingType.KREUZBUND);
+    when(this.session.getConsultingID()).thenReturn(15);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
 
@@ -55,7 +54,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasAuthority() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingType()).thenReturn(ConsultingType.U25);
+    when(this.session.getConsultingID()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(true);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
@@ -67,7 +66,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasRole() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingType()).thenReturn(ConsultingType.U25);
+    when(this.session.getConsultingID()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
     when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
@@ -99,7 +98,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnFalse_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasNoAuthorityAndNoRole() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingType()).thenReturn(ConsultingType.U25);
+    when(this.session.getConsultingID()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
     when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(false);
 

@@ -1,14 +1,12 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static java.util.Objects.requireNonNull;
-
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
@@ -38,6 +36,7 @@ public class AskerDataProvider {
   private final @NonNull AgencyServiceHelper agencyServiceHelper;
   private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull AuthenticatedUser authenticatedUser;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
 
@@ -68,8 +67,8 @@ public class AskerDataProvider {
     List<Long> agencyIds = mergeAgencyIdsFromSessionAndUser(user, sessionList);
     List<AgencyDTO> agencyDTOs = fetchAgenciesViaAgencyService(user, agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
-    for (ConsultingType type : ConsultingType.values()) {
-      consultingTypes.put(Integer.toString(type.getValue()),
+    for (int type : consultingTypeManager.getAllConsultingIDs()) {
+      consultingTypes.put(Integer.toString(type),
           getConsultingTypeData(type, sessionList, agencyDTOs));
     }
 
@@ -85,11 +84,12 @@ public class AskerDataProvider {
     }
   }
 
-  private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType consultingType,
+  private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
 
     LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
-    Optional<Session> consultingTypeSession = findSessionByConsultingType(consultingType, sessionList);
+    Optional<Session> consultingTypeSession = findSessionByConsultingType(consultingType,
+        sessionList);
     Optional<Map<String, Object>> consultingTypeSessionData =
         consultingTypeSession.map(sessionDataProvider::getSessionDataMapFromSession);
     Optional<AgencyDTO> agency = findAgencyByConsultingType(consultingType, agencyDTOs);
@@ -101,17 +101,17 @@ public class AskerDataProvider {
     return consultingTypeData;
   }
 
-  private Optional<AgencyDTO> findAgencyByConsultingType(ConsultingType consultingType,
+  private Optional<AgencyDTO> findAgencyByConsultingType(int consultingType,
       List<AgencyDTO> agencyDTOs) {
     return agencyDTOs.stream()
         .filter(agencyDTO -> agencyDTO.getConsultingType() == consultingType)
         .findFirst();
   }
 
-  private Optional<Session> findSessionByConsultingType(ConsultingType consultingType,
+  private Optional<Session> findSessionByConsultingType(int consultingType,
       Set<Session> sessionList) {
     return sessionList.stream()
-        .filter(session -> session.getConsultingType() == consultingType)
+        .filter(session -> session.getConsultingID() == consultingType)
         .findFirst();
   }
 

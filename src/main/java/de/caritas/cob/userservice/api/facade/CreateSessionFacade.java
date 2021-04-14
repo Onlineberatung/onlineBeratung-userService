@@ -14,7 +14,6 @@ import de.caritas.cob.userservice.api.helper.AgencyHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -48,8 +47,8 @@ public class CreateSessionFacade {
   public Long createUserSession(UserDTO userDTO, User user,
       ConsultingTypeSettings consultingTypeSettings) {
 
-    checkIfAlreadyRegisteredToConsultingType(user, consultingTypeSettings.getConsultingType());
-    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, consultingTypeSettings.getConsultingType());
+    checkIfAlreadyRegisteredToConsultingType(user, consultingTypeSettings.getConsultingID());
+    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, consultingTypeSettings.getConsultingID());
     Session session = initializeSession(userDTO, user, consultingTypeSettings, agencyDTO);
     initializeMonitoring(userDTO, user, consultingTypeSettings, session);
 
@@ -96,27 +95,27 @@ public class CreateSessionFacade {
     }
   }
 
-  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, ConsultingType consultingType) {
+  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, int consultingType) {
     AgencyDTO agencyDTO =
         agencyHelper.getVerifiedAgency(userDTO.getAgencyId(), consultingType);
 
     if (isNull(agencyDTO)) {
       throw new BadRequestException(
-          String.format("Agency %s is not assigned to given consulting type %s",
-              userDTO.getAgencyId(), consultingType.getValue()));
+          String.format("Agency %s is not assigned to given consulting type %d",
+              userDTO.getAgencyId(), consultingType));
     }
 
     return agencyDTO;
   }
 
-  private void checkIfAlreadyRegisteredToConsultingType(User user, ConsultingType consultingType) {
+  private void checkIfAlreadyRegisteredToConsultingType(User user, int consultingType) {
     List<Session> sessions =
         sessionService.getSessionsForUserByConsultingType(user, consultingType);
 
     if (!sessions.isEmpty()) {
       throw new ConflictException(
-          String.format("User %s is already registered to consulting type %s", user.getUserId(),
-              consultingType.getValue()));
+          String.format("User %s is already registered to consulting type %d", user.getUserId(),
+              consultingType));
     }
   }
 }

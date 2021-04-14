@@ -265,7 +265,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingType(CONSULTING_TYPE_SUCHT);
+      .consultingType(0);
   public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)
@@ -274,7 +274,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingType(CONSULTING_TYPE_U25);
+      .consultingType(1);
   public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)
@@ -283,7 +283,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingType(CONSULTING_TYPE_KREUZBUND);
+      .consultingType(15);
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
   /*
    * Users / Consultants
@@ -453,35 +453,35 @@ public class TestConstants {
   public static final Long ENQUIRY_ID = 1L;
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
-      new Session(SESSION_ID, null, null, SUCHT, POSTCODE, null, IN_PROGRESS, null, null, null,
+      new Session(SESSION_ID, null, null, 0, POSTCODE, null, IN_PROGRESS, null, null, null,
           null, false,
           false, null, null);
   public static final Session SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, null, CONSULTANT_2, 0, POSTCODE, AGENCY_ID,
           IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session ENQUIRY_SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, null, CONSULTANT_2, 0, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
+      null, 1, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
       null, IS_TEAM_SESSION, IS_MONITORING, null, null);
 
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
+      USER_WITH_RC_ID, null, 1, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, U25, POSTCODE,
+      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, 1, POSTCODE,
           AGENCY_ID, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null,
           IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
-      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, SUCHT, POSTCODE,
+      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, 0, POSTCODE,
           AGENCY_ID, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITH_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      CONSULTANT_2, U25, POSTCODE, AGENCY_ID, IN_PROGRESS, nowInUtc(),
+      CONSULTANT_2, 1, POSTCODE, AGENCY_ID, IN_PROGRESS, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
+      USER_WITH_RC_ID, null, 1, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET = new HashSet<>(
@@ -935,10 +935,10 @@ public class TestConstants {
    */
 
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE =
-      new ConsultingTypeSettings(SUCHT, false, null, false, false, null, true, null, false, null,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null, false, null,
           true, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_KREUZBUND =
-      new ConsultingTypeSettings(ConsultingType.KREUZBUND, false, null, false, false, null, true,
+      new ConsultingTypeSettings(15, "kb-sucht-selbsthilfe", true, true, true, false, null, false, false, null, true,
           null, false, null, true, null, null);
   public static final MandatoryFields MANDATORY_FIELDS_WITH_AGE = new MandatoryFields(true, false);
   public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_AGE =
@@ -948,10 +948,10 @@ public class TestConstants {
   public static final Registration REGISTRATION_WITHOUT_MANDATORY_AGE =
       new Registration(MANDATORY_FIELDS_WITHOUT_AGE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false, null, true, null,
+      new ConsultingTypeSettings(1, "u25", false, true, true, false, null, false, false, null, true, null,
           false, null, false, null, REGISTRATION_WITH_MANDATORY_AGE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_AGE_MANDATORY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false, null, true, null,
+      new ConsultingTypeSettings(1, "u25", false, false, true, false, null, false, false, null, true, null,
           false, null, false, null, REGISTRATION_WITHOUT_MANDATORY_AGE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_STATE_FIELD =
       new ConsultingTypeSettings();
@@ -964,10 +964,10 @@ public class TestConstants {
   public static final Registration REGISTRATION_WITHOUT_MANDATORY_STATE =
       new Registration(MANDATORY_FIELDS_WITHOUT_STATE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false, null, true, null,
+      new ConsultingTypeSettings(1, "u25", false, false, true, false, null, false, false, null, true, null,
           false, null, false, null, REGISTRATION_WITH_MANDATORY_STATE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false, null, true, null,
+      new ConsultingTypeSettings(1, "u25", false, false, true, false, null, false, false, null, true, null,
           false, null, false, null, REGISTRATION_WITHOUT_MANDATORY_STATE);
   public static final MandatoryFields MANDATORY_FIELDS_FALSE = new MandatoryFields(false, false);
   public static final MandatoryFields MANDATORY_FIELDS_TRUE = new MandatoryFields(true, true);
@@ -980,106 +980,106 @@ public class TestConstants {
   public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_NULL =
       new Registration(null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS =
-      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, true, "Hallo", false, false,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING, true, null, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false, false,
+      new ConsultingTypeSettings(1, "u25", false, false, true, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING, true, null, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SUCHT =
-      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, false, false,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           true, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_U25 =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false, false,
+      new ConsultingTypeSettings(1, "u25", false, false, true, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false, false,
+      new ConsultingTypeSettings(1, "u25", false, false, true, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false,
+      new ConsultingTypeSettings(1, "u25", false, false, true, false, null, false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false,
+      new ConsultingTypeSettings(1, "u25", false, false, true, false, null, false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, true, false,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, true, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_SUCHT, false, null, false, true,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, true,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, true, "Hallo", false, false,
+      new ConsultingTypeSettings(1, "u25", false, false, true, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, REGISTRATION_WITH_MANDATORY_FIELDS_NULL);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PREGNANCY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_AIDS =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CHILDREN =
-      new ConsultingTypeSettings(CONSULTING_TYPE_CHILDREN, false, null, false, false,
+      new ConsultingTypeSettings(14, "kinder-jugendliche", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_CURE =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_DEBT =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_DISABILITY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_LAW =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_OFFENDER =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PARENTING =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PLANB =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_REHABILITATION =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SENIORITY =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SOCIAL =
-      new ConsultingTypeSettings(CONSULTING_TYPE_PREGNANCY, false, null, false, false,
+      new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WIT_MONITORING =
-      new ConsultingTypeSettings(CONSULTING_TYPE_U25, false, null, false, false, null, true, null,
+      new ConsultingTypeSettings(1, "u25", false, false, true, false, null, false, false, null, true, null,
           false, null, false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_MONITORING =
-      new ConsultingTypeSettings(SUCHT, false, null, false, false, null, IS_MONITORING, null,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false, null, IS_MONITORING, null,
           false, null, false, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING =
-      new ConsultingTypeSettings(SUCHT, false, null, false, false, null, IS_NOT_MONITORING, null,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false, null, IS_NOT_MONITORING, null,
           false, null, false, null, null);
   public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);
   public static AbsenceDTO ABSENCE_DTO_WITH_HTML_AND_JS = new AbsenceDTO()

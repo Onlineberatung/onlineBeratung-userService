@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.KREUZBUND;
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -10,12 +8,12 @@ import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGr
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -46,6 +44,7 @@ public class ConsultantAgencyRelationCreatorService {
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull SessionRepository sessionRepository;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Creates a new {@link ConsultantAgency} based on the {@link ImportRecord} and agency ids.
@@ -84,7 +83,7 @@ public class ConsultantAgencyRelationCreatorService {
 
     AgencyDTO agency = retrieveAgency(input.getAgencyId());
 
-    if (U25.equals(agency.getConsultingType()) || KREUZBUND.equals(agency.getConsultingType())) {
+    if (consultingTypeManager.isConsultantBoundedToAgency(agency.getConsultingType())) {
       this.verifyAllAssignedAgenciesHaveSameConsultingType(agency.getConsultingType(), consultant);
     }
 
@@ -127,18 +126,18 @@ public class ConsultantAgencyRelationCreatorService {
     }
   }
 
-  private void verifyAllAssignedAgenciesHaveSameConsultingType(ConsultingType consultingType,
+  private void verifyAllAssignedAgenciesHaveSameConsultingType(int consultingType,
       Consultant consultant) {
     if (nonNull(consultant.getConsultantAgencies())) {
       consultant.getConsultantAgencies().stream()
           .map(ConsultantAgency::getAgencyId)
           .map(this::retrieveAgency)
-          .filter(agency -> !agency.getConsultingType().equals(consultingType))
+          .filter(agency -> !(agency.getConsultingType() == consultingType))
           .findFirst()
           .ifPresent(agency -> {
             throw new BadRequestException(String
-                .format("ERROR: different consulting types found than %s for consultant with id %s",
-                    consultingType.getUrlName(), consultant.getId()));
+                .format("ERROR: different consulting types found than %d for consultant with id %s",
+                    consultingType, consultant.getId()));
           });
     }
   }
@@ -147,7 +146,8 @@ public class ConsultantAgencyRelationCreatorService {
       Consumer<String> logMethod) {
     List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod,
+            consultingTypeManager)
         .onSessions(relevantSessions)
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();

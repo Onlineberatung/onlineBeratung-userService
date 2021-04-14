@@ -32,3 +32,6 @@
 consultants.csv
 consultants-import.txt*
 *.tar
+
+### Mac files ###
+.DS_Store

@@ -2,15 +2,9 @@ package de.caritas.cob.userservice.api.service;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
@@ -18,8 +12,13 @@ import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
 import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for {@link Monitoring}
@@ -41,23 +40,24 @@ public class MonitoringService {
    * Creates and inserts the initial monitoring data for the given {@link Session} into the database
    * if monitoring is activated for the given {@link ConsultingTypeSettings}.
    *
-   * @param session {@link Session}
+   * @param session                {@link Session}
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
    * @throws CreateMonitoringException @link CreateMonitoringException}
    */
-  public void createMonitoringIfConfigured(Session session, ConsultingTypeSettings consultingTypeSettings)
+  public void createMonitoringIfConfigured(Session session,
+      ConsultingTypeSettings consultingTypeSettings)
       throws CreateMonitoringException {
 
     if (nonNull(session) && consultingTypeSettings.isMonitoring()) {
       try {
         updateMonitoring(session.getId(),
-            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingType()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingID()));
       } catch (Exception exception) {
         CreateEnquiryExceptionInformation exceptionInformation = CreateEnquiryExceptionInformation
             .builder().session(session).rcGroupId(session.getGroupId()).build();
         throw new CreateMonitoringException(
             String.format("Could not create monitoring for session %s with consultingType %s",
-                session.getId(), consultingTypeSettings.getConsultingType()),
+                session.getId(), consultingTypeSettings.getConsultingID()),
             exception, exceptionInformation);
       }
     }
@@ -73,7 +73,7 @@ public class MonitoringService {
 
     try {
       List<Monitoring> monitoring = monitoringRepository.findBySessionId(session.getId());
-      return new MonitoringDTO(convertToMonitoringMap(monitoring, session.getConsultingType()));
+      return new MonitoringDTO(convertToMonitoringMap(monitoring, session.getConsultingID()));
 
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while saving monitoring data.",
@@ -84,7 +84,7 @@ public class MonitoringService {
   /**
    * Updates the monitoring values of a {@link Session}.
    *
-   * @param sessionId the session id
+   * @param sessionId     the session id
    * @param monitoringDTO the {@link MonitoringDTO} of the {@link Session}
    */
   public void updateMonitoring(Long sessionId, MonitoringDTO monitoringDTO) {
@@ -104,7 +104,7 @@ public class MonitoringService {
   /**
    * Deletes the monitoring values of a {@link Session}.
    *
-   * @param sessionId the session id
+   * @param sessionId     the session id
    * @param monitoringDTO the {@link MonitoringDTO} of the {@link Session}
    */
   public void deleteMonitoring(Long sessionId, MonitoringDTO monitoringDTO) {
@@ -122,20 +122,20 @@ public class MonitoringService {
   }
 
   private Map<String, Object> convertToMonitoringMap(List<Monitoring> monitoringList,
-      ConsultingType consultingType) {
+      int consultingID) {
 
     Map<String, Object> map = new LinkedHashMap<>();
 
     if (nonNull(monitoringList)) {
       for (MonitoringType type : MonitoringType.values()) {
-        if (type.getConsultingType().equals(consultingType)) {
+        if (type.getConsultingID() == consultingID) {
           map.put(type.getKey(),
               convertToMonitoring(type, monitoringList));
         }
       }
     }
 
-    return monitoringStructureProvider.sortMonitoringMap(map, consultingType);
+    return monitoringStructureProvider.sortMonitoringMap(map, consultingID);
   }
 
   private LinkedHashMap<String, Object> convertToMonitoring(MonitoringType type,
@@ -178,7 +178,7 @@ public class MonitoringService {
     if (nonNull(session)) {
       try {
         deleteMonitoring(session.getId(),
-            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingType()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingID()));
 
       } catch (InternalServerErrorException ex) {
         LogService.logInternalServerError(String.format(

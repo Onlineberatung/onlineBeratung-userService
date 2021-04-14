@@ -1,37 +1,43 @@
 {
-	"sendWelcomeMessage" : false,
-	"welcomeMessage" : null,
-	"sessionDataInitializing": {
-		"addictiveDrugs": true,
-		"age": true,
-		"gender": true,
-		"relation": true,
-		"state": false
-	},
-	"monitoring": true,
-	"monitoringFile": "/monitoring/sucht.json",
-	"feedbackChat": false,
-	"notifications": {
-		"newMessage": {
-			"teamSession": {
-				"toConsultant": {
-					"allTeamConsultants": true
-				}
-			}
-		}
-	},
-	"languageFormal": true,
-	"roles": {
-		"consultant": {
-			"default" :	[
-				"consultant"
-			]
-		}
-	},
-	"registration": {
-		"mandatoryFields": {
-			"age": false,
-			"state": false
-		}
-	}
+  "id": 0,
+  "urlName": "suchtberatung",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "consultantBoundedToAgency": false,
+  "sendWelcomeMessage": false,
+  "welcomeMessage": null,
+  "sendFurtherStepsMessage": true,
+  "sessionDataInitializing": {
+    "addictiveDrugs": true,
+    "age": true,
+    "gender": true,
+    "relation": true,
+    "state": false
+  },
+  "monitoring": true,
+  "monitoringFile": "/monitoring/sucht.json",
+  "feedbackChat": false,
+  "notifications": {
+    "newMessage": {
+      "teamSession": {
+        "toConsultant": {
+          "allTeamConsultants": true
+        }
+      }
+    }
+  },
+  "languageFormal": true,
+  "roles": {
+    "consultant": {
+      "default": [
+        "consultant"
+      ]
+    }
+  },
+  "registration": {
+    "mandatoryFields": {
+      "age": false,
+      "state": false
+    }
+  }
 }

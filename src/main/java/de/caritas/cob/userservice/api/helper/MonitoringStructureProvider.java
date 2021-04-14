@@ -113,12 +113,12 @@ public class MonitoringStructureProvider {
    * structure (JSON) is being imported from the JSON file provided in the {@link
    * ConsultingTypeSettings}.
    *
-   * @param consultingType the {@link ConsultingType} to load the initial monitoring
+   * @param consultingID the consultingID to load the initial monitoring
    * @return the generated {@link MonitoringDTO}
    */
-  public MonitoringDTO getMonitoringInitialList(ConsultingType consultingType) {
+  public MonitoringDTO getMonitoringInitialList(int consultingID) {
     ObjectMapper mapper = new ObjectMapper();
-    InputStream inputStream = getMonitoringJSONStream(consultingType);
+    InputStream inputStream = getMonitoringJSONStream(consultingID);
     try {
       return mapper.readValue(inputStream, MonitoringDTO.class);
     } catch (IOException ex) {
@@ -126,8 +126,8 @@ public class MonitoringStructureProvider {
     }
   }
 
-  private InputStream getMonitoringJSONStream(ConsultingType consultingType) {
-    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingType)
+  private InputStream getMonitoringJSONStream(int consultingID) {
+    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingID)
         .getMonitoringFile();
     try {
       return TypeReference.class.getResourceAsStream(monitoringFilePath);
@@ -149,15 +149,15 @@ public class MonitoringStructureProvider {
    * Returns a sorted {@link Map} of monitoring items according to the order that is defined in the
    * monitoring JSON file.
    *
-   * @param unsortedMap    the {@link Map} before sorting
-   * @param consultingType the {@link ConsultingType} to use for sorting
+   * @param unsortedMap  the {@link Map} before sorting
+   * @param consultingID the consultingID to use for sorting
    * @return the sorted {@link Map}
    */
   public Map<String, Object> sortMonitoringMap(Map<String, Object> unsortedMap,
-      ConsultingType consultingType) {
+      int consultingID) {
 
     Map<String, Object> sortedMap =
-        getMonitoringInitialList(consultingType).getProperties();
+        getMonitoringInitialList(consultingID).getProperties();
     setValuesForSortedMonitoringMap(sortedMap, unsortedMap);
 
     return sortedMap;

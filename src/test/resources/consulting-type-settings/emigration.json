@@ -1,37 +1,43 @@
 {
-	"sendWelcomeMessage" : false,
-	"welcomeMessage" : null,
-	"sessionDataInitializing": {
-		"addictiveDrugs": false,
-		"age": false,
-		"gender": false,
-		"relation": false,
-		"state": false
-	},
-	"monitoring": false,
-	"monitoringFile": null,
-	"feedbackChat": false,
-	"notifications": {
-		"newMessage": {
-			"teamSession": {
-				"toConsultant": {
-					"allTeamConsultants": true
-				}
-			}
-		}
-	},
-	"languageFormal": true,
-	"roles": {
-		"consultant": {
-			"default" :	[
-				"consultant"
-			]
-		}
-	},
-	"registration": {
-		"mandatoryFields": {
-			"age": false,
-			"state": false
-		}
-	}
+  "id": 17,
+  "urlName": "rw-auswanderung",
+  "addAllConsultantToTeamConsultingSession": true,
+  "onlyGroupChat": false,
+  "sendWelcomeMessage": false,
+  "consultantBoundedToAgency": false,
+  "welcomeMessage": null,
+  "sendFurtherStepsMessage": true,
+  "sessionDataInitializing": {
+    "addictiveDrugs": false,
+    "age": false,
+    "gender": false,
+    "relation": false,
+    "state": false
+  },
+  "monitoring": false,
+  "monitoringFile": null,
+  "feedbackChat": false,
+  "notifications": {
+    "newMessage": {
+      "teamSession": {
+        "toConsultant": {
+          "allTeamConsultants": true
+        }
+      }
+    }
+  },
+  "languageFormal": true,
+  "roles": {
+    "consultant": {
+      "default": [
+        "consultant"
+      ]
+    }
+  },
+  "registration": {
+    "mandatoryFields": {
+      "age": false,
+      "state": false
+    }
+  }
 }

@@ -3,8 +3,6 @@ package de.caritas.cob.userservice.api.helper;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.AGENCY_SERVICE_HELPER_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -12,15 +10,15 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 
 @RunWith(SpringRunner.class)
 public class AgencyHelperTest {
@@ -42,7 +40,7 @@ public class AgencyHelperTest {
         .thenThrow(AGENCY_SERVICE_HELPER_EXCEPTION);
 
     try {
-      agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
+      agencyHelper.getVerifiedAgency(AGENCY_ID, 0);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
       assertTrue("Excepted InternalServerErrorException thrown", true);
@@ -56,7 +54,7 @@ public class AgencyHelperTest {
     when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
     try {
-      agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_KREUZBUND);
+      agencyHelper.getVerifiedAgency(AGENCY_ID, 15);
       fail("Expected exception: BadRequestException");
     } catch (BadRequestException badRequestException) {
       assertTrue("Excepted BadRequestException thrown", true);
@@ -69,7 +67,7 @@ public class AgencyHelperTest {
 
     when(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
-    AgencyDTO agency = agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
+    AgencyDTO agency = agencyHelper.getVerifiedAgency(AGENCY_ID, 0);
 
     assertEquals(AGENCY_ID, agency.getId());
   }
@@ -81,11 +79,11 @@ public class AgencyHelperTest {
   @Test
   public void doesConsultingTypeMatchToAgency_Should_ReturnTrue_When_AgencyIsAssignedToGivenConsultingType() {
 
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_SUCHT);
 
     boolean response =
-        agencyHelper.doesConsultingTypeMatchToAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
+        agencyHelper.doesConsultingTypeMatchToAgency(AGENCY_ID, 0);
 
     assertTrue(response);
   }
@@ -93,10 +91,10 @@ public class AgencyHelperTest {
   @Test
   public void doesConsultingTypeMatchToAgency_Should_ReturnFalse_When_AgencyIsNotAssignedToGivenConsultingType() {
 
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
+    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
 
     boolean response =
-        agencyHelper.doesConsultingTypeMatchToAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
+        agencyHelper.doesConsultingTypeMatchToAgency(AGENCY_ID, 0);
 
     assertFalse(response);
   }

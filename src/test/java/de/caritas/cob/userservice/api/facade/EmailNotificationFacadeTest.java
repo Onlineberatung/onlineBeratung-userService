@@ -57,7 +57,6 @@ import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -114,20 +113,20 @@ public class EmailNotificationFacadeTest {
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final Session SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID,
+      new Session(1L, USER, CONSULTANT, 0, "88045", AGENCY_ID,
           SessionStatus.INITIAL,
           nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(1L, USER, null, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.NEW,
+      new Session(1L, USER, null, 0, "88045", AGENCY_ID, SessionStatus.NEW,
           nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
-      ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
+      0, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
       null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
-      CONSULTANT_NO_EMAIL, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
+      CONSULTANT_NO_EMAIL, 0, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
       nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session TEAM_SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "12345", AGENCY_ID,
+      new Session(1L, USER, CONSULTANT, 0, "12345", AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO()
@@ -138,7 +137,7 @@ public class EmailNotificationFacadeTest {
       .description(DESCRIPTION)
       .teamAgency(IS_NO_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingType(ConsultingType.SUCHT);
+      .consultingType(0);
   private final String USER_ROLE = UserRole.USER.getValue();
   private final Set<String> USER_ROLES = new HashSet<>(Collections.singletonList(USER_ROLE));
   private final String CONSULTANT_ROLE = UserRole.CONSULTANT.getValue();
@@ -165,10 +164,10 @@ public class EmailNotificationFacadeTest {
       new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
           new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(false))));
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, false, null, true, null,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
           false, NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS, false, null, null);
   private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
-      new ConsultingTypeSettings(ConsultingType.SUCHT, false, null, false, false, null, true, null,
+      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
           false, NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
 
   @InjectMocks
@@ -296,7 +295,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingID()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -311,7 +310,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingID()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -326,7 +325,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(null);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingID()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -437,7 +436,7 @@ public class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingID()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
 
@@ -451,7 +450,7 @@ public class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingType()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingID()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
