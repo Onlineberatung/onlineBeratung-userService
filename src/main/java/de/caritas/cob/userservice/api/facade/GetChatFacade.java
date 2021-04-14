@@ -26,7 +26,6 @@ public class GetChatFacade {
    * Get chat info.
    *
    * @param chatId            chat ID
-   * @param authenticatedUser {@link AuthenticatedUser}
    * @return {@link ChatInfoResponseDTO}
    */
   public ChatInfoResponseDTO getChat(Long chatId) {

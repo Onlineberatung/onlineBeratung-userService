@@ -41,7 +41,6 @@ public class GetChatMembersFacade {
    * Get a filtered list of the members of a chat (without technical/system user).
    *
    * @param chatId            chat ID
-   * @param authenticatedUser {@link AuthenticatedUser}
    * @return {@link ChatMembersResponseDTO}
    */
   public ChatMembersResponseDTO getChatMembers(Long chatId) {
