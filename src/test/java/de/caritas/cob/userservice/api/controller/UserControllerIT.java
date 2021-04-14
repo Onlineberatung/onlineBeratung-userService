@@ -147,7 +147,7 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.helper.ChatHelper;
+import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -209,7 +209,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -383,7 +382,7 @@ public class UserControllerIT {
   @MockBean
   private RocketChatService rocketChatService;
   @MockBean
-  private ChatHelper chatHelper;
+  private ChatPermissionVerifier chatPermissionVerifier;
   @MockBean
   private StopChatFacade stopChatFacade;
   @MockBean
@@ -1893,7 +1892,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(startChatFacade);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1942,7 +1941,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(getChatFacade);
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(accountProvider);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1953,8 +1952,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(getChatFacade, times(1))
-        .getChat(Mockito.any(), Mockito.any());
+    verify(getChatFacade, times(1)).getChat(Mockito.any());
   }
 
   /**
@@ -1971,7 +1969,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(joinAndLeaveChatFacade);
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(accountProvider);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -2055,7 +2053,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(getChatMembersFacade);
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(accountProvider);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
     verifyNoMoreInteractions(rocketChatService);
   }
@@ -2068,7 +2066,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(getChatMembersFacade, times(1)).getChatMembers(Mockito.any(), Mockito.any());
+    verify(getChatMembersFacade, times(1)).getChatMembers(Mockito.any());
   }
 
   /**

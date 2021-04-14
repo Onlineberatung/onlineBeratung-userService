@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -44,8 +43,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
   private SessionRepository sessionRepository;
 
   @Test
-  public void validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyIsStillOnline()
-      throws AgencyServiceHelperException {
+  public void validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyIsStillOnline() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
@@ -86,8 +84,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgency(any()))
-        .thenThrow(new AgencyServiceHelperException(new Exception()));
+    when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
 
     this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
   }

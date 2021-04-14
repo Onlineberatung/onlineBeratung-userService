@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.AgencyDTO;

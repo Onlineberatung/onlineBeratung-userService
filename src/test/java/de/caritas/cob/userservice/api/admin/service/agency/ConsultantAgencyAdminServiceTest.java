@@ -13,7 +13,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -133,8 +132,7 @@ public class ConsultantAgencyAdminServiceTest {
         .thenReturn(singletonList(session));
     when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(any()))
         .thenReturn(consultants);
-    when(this.agencyService.getAgency(any()))
-        .thenThrow(new AgencyServiceHelperException(new Exception()));
+    when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
 
     this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);
   }

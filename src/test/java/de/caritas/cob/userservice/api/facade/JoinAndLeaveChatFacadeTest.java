@@ -3,11 +3,11 @@ package de.caritas.cob.userservice.api.facade;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ROLES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ROLES;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,7 +20,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.ChatHelper;
+import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -40,29 +40,33 @@ public class JoinAndLeaveChatFacadeTest {
 
   @InjectMocks
   private JoinAndLeaveChatFacade joinAndLeaveChatFacade;
+
   @Mock
   private ChatService chatService;
+
   @Mock
   private AuthenticatedUser authenticatedUser;
+
   @Mock
-  private ChatHelper chatHelper;
+  private ChatPermissionVerifier chatPermissionVerifier;
+
   @Mock
   private ConsultantService consultantService;
+
   @Mock
   private UserService userService;
+
   @Mock
   private User user;
+
   @Mock
   private Consultant consultant;
+
   @Mock
   private RocketChatService rocketChatService;
 
-  /**
-   * Method: joinChat
-   */
   @Test
   public void joinChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.empty());
 
     try {
@@ -73,13 +77,11 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-
   }
 
 
   @Test
   public void joinChat_Should_ThrowConflictException_WhenChatIsNotActive() {
-
     Chat inactiveChat = mock(Chat.class);
     when(inactiveChat.isActive()).thenReturn(false);
 
@@ -93,19 +95,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-
   }
 
 
   @Test
   public void joinChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
-    when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant))
-        .thenReturn(false);
-    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
-        .thenReturn(Optional.of(consultant));
+    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+        .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
@@ -115,19 +112,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant);
-    verify(consultantService, times(1)).getConsultantViaAuthenticatedUser(authenticatedUser);
-
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
   }
 
   @Test
   public void joinChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
-    when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(false);
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
+    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+        .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
@@ -137,19 +129,12 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainUserAgency(ACTIVE_CHAT, user);
-    verify(userService, times(1)).getUserViaAuthenticatedUser(authenticatedUser);
-
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
   }
 
   @Test
   public void joinChat_Should_ThrowInternalServerErrorException_WhenConsultantHasNoRocketChatId() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
-    when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant))
-        .thenReturn(true);
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(consultant));
     when(consultant.getRocketChatId()).thenReturn(null);
@@ -162,19 +147,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant);
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
     verify(consultantService, times(1)).getConsultantViaAuthenticatedUser(authenticatedUser);
     verify(consultant, times(1)).getRocketChatId();
-
   }
 
   @Test
   public void joinChat_Should_ThrowInternalServerErrorException_WhenUserHasNoRocketChatId() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
-    when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(true);
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(null);
 
@@ -186,20 +166,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainUserAgency(ACTIVE_CHAT, user);
-    verify(userService, times(1)).getUserViaAuthenticatedUser(authenticatedUser);
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
     verify(user, times(1)).getRcUserId();
-
   }
 
   @Test
   public void joinChat_Should_AddConsultantToRocketChatGroup()
       throws RocketChatAddUserToGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
-    when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
-        .thenReturn(true);
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(CONSULTANT));
 
@@ -213,25 +187,16 @@ public class JoinAndLeaveChatFacadeTest {
   @Test
   public void joinChat_Should_AddUserToRocketChatGroup() throws RocketChatAddUserToGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
-    when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(true);
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(RC_USER_ID);
 
     joinAndLeaveChatFacade.joinChat(ACTIVE_CHAT.getId(), authenticatedUser);
 
     verify(rocketChatService, times(1)).addUserToGroup(RC_USER_ID, ACTIVE_CHAT.getGroupId());
-
   }
 
-  /**
-   * 
-   * Method: leaveChat
-   * 
-   */
   @Test
   public void leaveChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.empty());
 
     try {
@@ -242,13 +207,11 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-
   }
 
 
   @Test
   public void leaveChat_Should_ThrowConflictException_WhenChatIsNotActive() {
-
     Chat inactiveChat = mock(Chat.class);
     when(inactiveChat.isActive()).thenReturn(false);
 
@@ -262,19 +225,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-
   }
 
 
   @Test
   public void leaveChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
-    when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant))
-        .thenReturn(false);
-    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
-        .thenReturn(Optional.of(consultant));
+    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+        .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
@@ -284,19 +242,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant);
-    verify(consultantService, times(1)).getConsultantViaAuthenticatedUser(authenticatedUser);
-
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
   }
 
   @Test
   public void leaveChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
-    when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(false);
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
+    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+        .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
@@ -306,19 +259,12 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainUserAgency(ACTIVE_CHAT, user);
-    verify(userService, times(1)).getUserViaAuthenticatedUser(authenticatedUser);
-
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
   }
 
   @Test
   public void leaveChat_Should_ThrowInternalServerErrorException_WhenConsultantHasNoRocketChatId() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
-    when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant))
-        .thenReturn(true);
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(consultant));
     when(consultant.getRocketChatId()).thenReturn(null);
@@ -331,19 +277,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, consultant);
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
     verify(consultantService, times(1)).getConsultantViaAuthenticatedUser(authenticatedUser);
     verify(consultant, times(1)).getRocketChatId();
-
   }
 
   @Test
   public void leaveChat_Should_ThrowInternalServerErrorException_WhenUserHasNoRocketChatId() {
-
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
-    when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(true);
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(null);
 
@@ -355,20 +296,14 @@ public class JoinAndLeaveChatFacadeTest {
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
-    verify(authenticatedUser, times(1)).getRoles();
-    verify(chatHelper, times(1)).isChatAgenciesContainUserAgency(ACTIVE_CHAT, user);
-    verify(userService, times(1)).getUserViaAuthenticatedUser(authenticatedUser);
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
     verify(user, times(1)).getRcUserId();
-
   }
 
   @Test
   public void leaveChat_Should_RemoveConsultantFromRocketChatGroup()
       throws RocketChatRemoveUserFromGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(CONSULTANT_ROLES);
-    when(chatHelper.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
-        .thenReturn(true);
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(CONSULTANT));
 
@@ -376,23 +311,30 @@ public class JoinAndLeaveChatFacadeTest {
 
     verify(rocketChatService, times(1)).removeUserFromGroup(CONSULTANT.getRocketChatId(),
         ACTIVE_CHAT.getGroupId());
-
   }
 
   @Test
   public void leaveChat_Should_RemoveUserFromRocketChatGroup()
       throws RocketChatRemoveUserFromGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(authenticatedUser.getRoles()).thenReturn(USER_ROLES);
-    when(chatHelper.isChatAgenciesContainUserAgency(ACTIVE_CHAT, user)).thenReturn(true);
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(RC_USER_ID);
 
     joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
 
     verify(rocketChatService, times(1)).removeUserFromGroup(RC_USER_ID, ACTIVE_CHAT.getGroupId());
-
   }
 
+  @Test(expected = InternalServerErrorException.class)
+  public void leaveChat_Should_throwInternalServerErrorException_When_rocketChatUserCanNotBeRemoved()
+      throws RocketChatRemoveUserFromGroupException {
+    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
+    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
+    when(user.getRcUserId()).thenReturn(RC_USER_ID);
+    doThrow(new RocketChatRemoveUserFromGroupException("")).when(rocketChatService)
+        .removeUserFromGroup(any(), any());
+
+    joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
+  }
 
 }

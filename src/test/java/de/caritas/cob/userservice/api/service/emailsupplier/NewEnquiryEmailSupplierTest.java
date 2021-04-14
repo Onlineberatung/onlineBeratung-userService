@@ -12,14 +12,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
-import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
-import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,16 +47,14 @@ public class NewEnquiryEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyList_When_NoParametersAreProvided()
-      throws AgencyServiceHelperException {
+  public void generateEmails_Should_ReturnEmptyList_When_NoParametersAreProvided() {
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyList_When_NoValidConsultantWasFound()
-      throws AgencyServiceHelperException {
+  public void generateEmails_Should_ReturnEmptyList_When_NoValidConsultantWasFound() {
     Consultant absentConsultant = new Consultant();
     absentConsultant.setAbsent(true);
     absentConsultant.setEmail("email");
@@ -74,8 +71,7 @@ public class NewEnquiryEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound()
-      throws AgencyServiceHelperException {
+  public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound() {
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(),
             nowInUtc()),

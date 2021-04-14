@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
@@ -40,13 +39,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AskerDataProviderTest {
 
-  @Mock
-  AgencyService agencyService;
-  @Mock
-  AuthenticatedUser authenticatedUser;
-  @Mock SessionDataProvider sessionDataProvider;
   @InjectMocks
   private AskerDataProvider askerDataProvider;
+
+  @Mock
+  AgencyService agencyService;
+
+  @Mock
+  AuthenticatedUser authenticatedUser;
+
+  @Mock
+  SessionDataProvider sessionDataProvider;
 
   @Before
   public void setup() {
@@ -55,7 +58,6 @@ public class AskerDataProviderTest {
 
   @Test
   public void retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession() {
-
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
@@ -72,7 +74,6 @@ public class AskerDataProviderTest {
 
   @Test
   public void retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencies() {
-
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
@@ -89,12 +90,9 @@ public class AskerDataProviderTest {
 
   @Test(expected = InternalServerErrorException.class)
   public void retrieveData_GetConsultingTypes_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
-
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
-    AgencyServiceHelperException agencyServiceHelperException =
-        new AgencyServiceHelperException(new Exception());
     when(agencyService.getAgencies(Mockito.anyList()))
-        .thenThrow(agencyServiceHelperException);
+        .thenThrow(new InternalServerErrorException(""));
 
     askerDataProvider.retrieveData(USER);
   }
@@ -122,8 +120,7 @@ public class AskerDataProviderTest {
 
 
   @Test
-  public void retrieveData_Should_ReturnValidData() throws AgencyServiceHelperException {
-
+  public void retrieveData_Should_ReturnValidData() {
     when(agencyService.getAgencies(any())).thenReturn(
         Collections.singletonList(AGENCY_DTO_SUCHT));
     LinkedHashMap<String, Object> sessionData = new LinkedHashMap<>();

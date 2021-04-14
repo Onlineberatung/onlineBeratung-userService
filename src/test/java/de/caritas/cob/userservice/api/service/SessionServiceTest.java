@@ -36,7 +36,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -214,14 +213,11 @@ public class SessionServiceTest {
 
   @Test
   public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError() {
-
-    AgencyServiceHelperException ex =
-        new AgencyServiceHelperException(new Exception("AgencyService error"));
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyService.getAgencies(any())).thenThrow(ex);
+    when(agencyService.getAgencies(any())).thenThrow(new InternalServerErrorException(""));
 
     try {
       sessionService.getSessionsForUserId(USER_ID);

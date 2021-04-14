@@ -7,7 +7,6 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
@@ -38,7 +37,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
    * @return a list of the generated {@link MailDTO}
    */
   @Override
-  public List<MailDTO> generateEmails() throws AgencyServiceHelperException {
+  public List<MailDTO> generateEmails() {
     List<ConsultantAgency> consultantAgencyList =
         consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(session.getAgencyId());
 

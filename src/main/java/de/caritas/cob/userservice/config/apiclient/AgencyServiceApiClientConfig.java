@@ -24,7 +24,7 @@ public class AgencyServiceApiClientConfig {
    * @return the AgencyService controller {@link AgencyControllerApi}
    */
   @Bean
-  public AgencyControllerApi adminAgencyControllerApi(ApiClient apiClient) {
+  public AgencyControllerApi agencyControllerApi(ApiClient apiClient) {
     return new AgencyControllerApi(apiClient);
   }
 
@@ -36,7 +36,7 @@ public class AgencyServiceApiClientConfig {
    */
   @Bean
   @Primary
-  public ApiClient adminAgencyApiClient(RestTemplate restTemplate) {
+  public ApiClient agencyApiClient(RestTemplate restTemplate) {
     return new ApiClient(restTemplate).setBasePath(this.agencyServiceApiUrl);
   }
 

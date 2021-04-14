@@ -7,7 +7,6 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -107,8 +106,8 @@ public class AskerImportService {
   private final @NonNull AgencyService agencyService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserAgencyService userAgencyService;
-  private final @NonNull RocketChatRoomNameGenerator rocketChatRoomNameGenerator;
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
+  private final RocketChatRoomNameGenerator rocketChatRoomNameGenerator = new RocketChatRoomNameGenerator();
 
   /**
    * Imports askers without session by a predefined import list (for the format see readme.md)
