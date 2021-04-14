@@ -103,7 +103,7 @@ public class GetChatFacadeTest {
   @Test
   public void getChat_Should_ReturnValidChatInfoResponseDTOForConsultant() {
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
         .thenReturn(true);
 
     ChatInfoResponseDTO result = getChatFacade.getChat(ACTIVE_CHAT.getId());

@@ -59,7 +59,7 @@ public class StopChatFacade {
   }
 
   private void checkConsultantChatPermission(Chat chat, Consultant consultant) {
-    if (!chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, consultant)) {
+    if (!chatPermissionVerifier.hasSameAgencyAssigned(chat, consultant)) {
       throw new ForbiddenException(
           String.format("Consultant with id %s has no permission to stop chat with id %s",
               consultant.getId(), chat.getId()));

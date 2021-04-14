@@ -76,7 +76,7 @@ public class ChatPermissionVerifierTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(consultantAgencySet);
 
-    assertTrue(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, consultant));
+    assertTrue(chatPermissionVerifier.hasSameAgencyAssigned(chat, consultant));
   }
 
   @Test
@@ -92,7 +92,7 @@ public class ChatPermissionVerifierTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(consultantAgencySet);
 
-    assertFalse(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, consultant));
+    assertFalse(chatPermissionVerifier.hasSameAgencyAssigned(chat, consultant));
   }
 
   @Test
@@ -103,7 +103,7 @@ public class ChatPermissionVerifierTest {
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
 
-    assertTrue(chatPermissionVerifier.isChatAgenciesContainUserAgency(chat, user));
+    assertTrue(chatPermissionVerifier.hasSameAgencyAssigned(chat, user));
   }
 
   @Test
@@ -114,7 +114,7 @@ public class ChatPermissionVerifierTest {
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
 
-    assertFalse(chatPermissionVerifier.isChatAgenciesContainUserAgency(chat, user));
+    assertFalse(chatPermissionVerifier.hasSameAgencyAssigned(chat, user));
   }
 
   @Test

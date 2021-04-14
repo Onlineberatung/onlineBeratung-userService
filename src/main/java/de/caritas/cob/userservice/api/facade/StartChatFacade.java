@@ -50,7 +50,7 @@ public class StartChatFacade {
   }
 
   private void checkConsultantsPermission(Chat chat, Consultant consultant) {
-    if (!chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, consultant)) {
+    if (!chatPermissionVerifier.hasSameAgencyAssigned(chat, consultant)) {
       throw new ForbiddenException(
           String.format("Consultant with id %s has no permission to start chat with id %s",
               consultant.getId(), chat.getId()));

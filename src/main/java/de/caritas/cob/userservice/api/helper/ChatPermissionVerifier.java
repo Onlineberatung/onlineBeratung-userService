@@ -54,7 +54,7 @@ public class ChatPermissionVerifier {
             .orElseThrow(() -> new NotFoundException(String.format("Consultant with id %s not "
                 + "found", authenticatedUser.getUserId())));
 
-    if (!isChatAgenciesContainConsultantAgency(chat, consultant)) {
+    if (!hasSameAgencyAssigned(chat, consultant)) {
       throw new ForbiddenException(
           String.format("Consultant with id %s has no permission for chat with id %s",
               consultant.getId(), chat.getId()));
@@ -68,11 +68,26 @@ public class ChatPermissionVerifier {
    * @param consultant the {@link Consultant}
    * @return true if agency of consultant is contained
    */
-  public boolean isChatAgenciesContainConsultantAgency(Chat chat, Consultant consultant) {
+  public boolean hasSameAgencyAssigned(Chat chat, Consultant consultant) {
     return chat.getChatAgencies().stream()
         .map(ChatAgency::getAgencyId)
         .anyMatch(consultant.getConsultantAgencies().stream()
             .map(ConsultantAgency::getAgencyId)
+            .collect(Collectors.toSet())::contains);
+  }
+
+  /**
+   * Checks if chat agencies contain user agency.
+   *
+   * @param chat the chat
+   * @param user the {@link User}
+   * @return true if agency of user is contained
+   */
+  public boolean hasSameAgencyAssigned(Chat chat, User user) {
+    return chat.getChatAgencies().stream()
+        .map(ChatAgency::getAgencyId)
+        .anyMatch(user.getUserAgencies().stream()
+            .map(UserAgency::getAgencyId)
             .collect(Collectors.toSet())::contains);
   }
 
@@ -86,26 +101,11 @@ public class ChatPermissionVerifier {
         .orElseThrow(() -> new NotFoundException(String.format("User with id %s not found",
             authenticatedUser.getUserId())));
 
-    if (!isChatAgenciesContainUserAgency(chat, user)) {
+    if (!hasSameAgencyAssigned(chat, user)) {
       throw new ForbiddenException(
           String.format("User with id %s has no permission for chat with id %s",
               user.getUserId(), chat.getId()));
     }
-  }
-
-  /**
-   * Checks if chat agencies contain user agency.
-   *
-   * @param chat the chat
-   * @param user the {@link User}
-   * @return true if agency of user is contained
-   */
-  public boolean isChatAgenciesContainUserAgency(Chat chat, User user) {
-    return chat.getChatAgencies().stream()
-        .map(ChatAgency::getAgencyId)
-        .anyMatch(user.getUserAgencies().stream()
-            .map(UserAgency::getAgencyId)
-            .collect(Collectors.toSet())::contains);
   }
 
 }

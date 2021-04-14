@@ -46,7 +46,7 @@ public class StartChatFacadeTest {
 
   @Test
   public void startChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
         .thenReturn(false);
 
     try {
@@ -59,7 +59,7 @@ public class StartChatFacadeTest {
 
   @Test
   public void startChat_Should_ThrowConflictException_WhenChatIsAlreadyStarted() {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
         .thenReturn(true);
 
     try {
@@ -75,7 +75,7 @@ public class StartChatFacadeTest {
     when(chat.isActive()).thenReturn(false);
     when(chat.getGroupId()).thenReturn(null);
 
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
 
     try {
@@ -89,7 +89,7 @@ public class StartChatFacadeTest {
   @Test
   public void startChat_Should_AddConsultantToRocketChatGroup()
       throws RocketChatAddUserToGroupException {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(INACTIVE_CHAT, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(INACTIVE_CHAT, CONSULTANT))
         .thenReturn(true);
 
     startChatFacade.startChat(INACTIVE_CHAT, CONSULTANT);
@@ -101,7 +101,7 @@ public class StartChatFacadeTest {
   @Test
   public void startChat_Should_SetChatActiveAndSaveChat() {
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
 
     startChatFacade.startChat(chat, CONSULTANT);
@@ -114,7 +114,7 @@ public class StartChatFacadeTest {
   public void startChat_Should_throwInternalServerErrorException_When_userCanNotBeAddedToGroupInRocketChat()
       throws RocketChatAddUserToGroupException {
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
     doThrow(new RocketChatAddUserToGroupException("")).when(rocketChatService)
         .addUserToGroup(any(), any());

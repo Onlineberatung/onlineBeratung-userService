@@ -56,7 +56,7 @@ public class StopChatFacadeTest {
 
   @Test
   public void stopChat_Should_ThrowRequestForbiddenException_When_ConsultantHasNoPermissionToStopChat() {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
         .thenReturn(false);
 
     try {
@@ -71,7 +71,7 @@ public class StopChatFacadeTest {
   public void stopChat_Should_ThrowConflictException_When_ChatIsAlreadyStopped() {
     Chat inactiveChat = Mockito.mock(Chat.class);
 
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(inactiveChat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(inactiveChat, CONSULTANT))
         .thenReturn(true);
     when(inactiveChat.isActive()).thenReturn(false);
 
@@ -85,7 +85,7 @@ public class StopChatFacadeTest {
 
   @Test
   public void stopChat_Should_ThrowInternalServerError_When_ChatHasNoGroupId() {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
     when(chat.isActive()).thenReturn(true);
     when(chat.getGroupId()).thenReturn(null);
@@ -101,7 +101,7 @@ public class StopChatFacadeTest {
   @Test
   public void stopChat_Should_ThrowInternalServerError_When_RemoveAllMessagesFails()
       throws RocketChatRemoveSystemMessagesException {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
         .thenReturn(true);
     doThrow(new RocketChatRemoveSystemMessagesException("error")).when(rocketChatService)
         .removeAllMessages(Mockito.any());
@@ -119,7 +119,7 @@ public class StopChatFacadeTest {
   @Test
   public void stopChat_Should_ThrowInternalServerError_When_DeleteRcGroupFails()
       throws RocketChatRemoveSystemMessagesException {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
     when(chat.isActive()).thenReturn(true);
     when(chat.isRepetitive()).thenReturn(false);
@@ -139,7 +139,7 @@ public class StopChatFacadeTest {
 
   @Test
   public void stopChat_Should_ThrowInternalServerError_When_ChatIntervallIsNullOnRepetitiveChats() {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
     when(chat.isActive()).thenReturn(true);
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
@@ -159,7 +159,7 @@ public class StopChatFacadeTest {
   @Test
   public void stopChat_Should_RemoveAllMessagesAndUsersAndSetStatusAndStartDateOfChat_When_ChatIsRepetitive()
       throws Exception {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
     when(chat.isActive()).thenReturn(true);
     when(chat.isRepetitive()).thenReturn(true);
@@ -183,7 +183,7 @@ public class StopChatFacadeTest {
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");
 
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chatWithDate, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chatWithDate, CONSULTANT))
         .thenReturn(true);
 
     stopChatFacade.stopChat(chatWithDate, CONSULTANT);
@@ -199,7 +199,7 @@ public class StopChatFacadeTest {
         1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chatWithDate, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chatWithDate, CONSULTANT))
         .thenReturn(true);
     doThrow(new RocketChatRemoveUserFromGroupException("")).when(rocketChatService)
         .removeAllStandardUsersFromGroup(any());
@@ -209,7 +209,7 @@ public class StopChatFacadeTest {
 
   @Test
   public void stopChat_Should_RemoveRocketChatGroupAndChatFromDb_When_ChatIsNotRepetitive() {
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(chat, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT))
         .thenReturn(true);
     when(chat.isActive()).thenReturn(true);
     when(chat.isRepetitive()).thenReturn(false);

@@ -140,7 +140,7 @@ public class GetChatMembersFacadeTest {
   public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForConsultant()
       throws Exception {
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(chatPermissionVerifier.isChatAgenciesContainConsultantAgency(ACTIVE_CHAT, CONSULTANT))
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
         .thenReturn(true);
     when(rocketChatService.getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId()))
         .thenReturn(GROUP_MEMBER_DTO_LIST);
