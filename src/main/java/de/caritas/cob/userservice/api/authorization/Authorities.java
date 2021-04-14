@@ -25,7 +25,7 @@ public enum Authorities {
       Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
       Authority.VIEW_AGENCY_CONSULTANTS)),
   TECHNICAL(UserRole.TECHNICAL, singletonList(Authority.TECHNICAL_DEFAULT)),
-  KREUZBUND_CONSULTANT(UserRole.KREUZBUND_CONSULTANT, asList(
+  GROUP_CHAT_CONSULTANT(UserRole.GROUP_CHAT_CONSULTANT, asList(
       Authority.CONSULTANT_DEFAULT, Authority.CREATE_NEW_CHAT,
       Authority.START_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT)),
   USER_ADMIN(UserRole.USER_ADMIN, singletonList(Authority.USER_ADMIN));

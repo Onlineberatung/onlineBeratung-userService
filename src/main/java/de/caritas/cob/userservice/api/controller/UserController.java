@@ -598,17 +598,14 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> startChat(@PathVariable Long chatId) {
 
-    Optional<Chat> chat = chatService.getChat(chatId);
-    if (!chat.isPresent()) {
-      throw new BadRequestException(
-          String.format("Chat with id %s not found for starting chat.", chatId));
-    }
+    Chat chat = chatService.getChat(chatId)
+        .orElseThrow(() -> new BadRequestException(
+            String.format("Chat with id %s not found for starting chat.", chatId)));
 
     Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
-    startChatFacade.startChat(chat.get(), callingConsultant);
+    startChatFacade.startChat(chat, callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
-
   }
 
   /**
@@ -620,7 +617,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<ChatInfoResponseDTO> getChat(@PathVariable Long chatId) {
 
-    ChatInfoResponseDTO response = getChatFacade.getChat(chatId, authenticatedUser);
+    ChatInfoResponseDTO response = getChatFacade.getChat(chatId);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
@@ -637,7 +634,6 @@ public class  UserController implements UsersApi {
     joinAndLeaveChatFacade.joinChat(chatId, authenticatedUser);
 
     return new ResponseEntity<>(HttpStatus.OK);
-
   }
 
   /**
@@ -650,14 +646,12 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> stopChat(@PathVariable Long chatId) {
 
-    Optional<Chat> chat = chatService.getChat(chatId);
-    if (!chat.isPresent()) {
-      throw new BadRequestException(
-          String.format("Chat with id %s not found while trying to stop the chat.", chatId));
-    }
+    Chat chat = chatService.getChat(chatId)
+        .orElseThrow(() -> new BadRequestException(
+            String.format("Chat with id %s not found while trying to stop the chat.", chatId)));
 
     Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
-    stopChatFacade.stopChat(chat.get(), callingConsultant);
+    stopChatFacade.stopChat(chat, callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -671,8 +665,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<ChatMembersResponseDTO> getChatMembers(@PathVariable Long chatId) {
 
-    ChatMembersResponseDTO chatMembersResponseDTO =
-        getChatMembersFacade.getChatMembers(chatId, authenticatedUser);
+    ChatMembersResponseDTO chatMembersResponseDTO = getChatMembersFacade.getChatMembers(chatId);
 
     return new ResponseEntity<>(chatMembersResponseDTO, HttpStatus.OK);
   }
@@ -689,7 +682,6 @@ public class  UserController implements UsersApi {
     joinAndLeaveChatFacade.leaveChat(chatId, authenticatedUser);
 
     return new ResponseEntity<>(HttpStatus.OK);
-
   }
 
   /**

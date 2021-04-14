@@ -39,8 +39,7 @@ public class ConsultingTypeManager {
 
   private void appendConsutingTypeSetting(ConsultingType consultingType) {
     ObjectMapper mapper = new ObjectMapper();
-    TypeReference<ConsultingTypeSettings> typeReference =
-        new TypeReference<ConsultingTypeSettings>() {};
+    TypeReference<ConsultingTypeSettings> typeReference = new TypeReference<>() {};
     InputStream inputStream =
         TypeReference.class.getResourceAsStream(getJsonFileNameWithPath(consultingType));
     try {

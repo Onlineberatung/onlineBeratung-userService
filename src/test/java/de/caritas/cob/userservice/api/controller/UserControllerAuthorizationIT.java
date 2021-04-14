@@ -53,7 +53,7 @@ import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.ChatHelper;
+import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
@@ -145,7 +145,7 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private RocketChatService rocketChatService;
   @MockBean
-  private ChatHelper chatHelper;
+  private ChatPermissionVerifier chatPermissionVerifier;
   @MockBean
   private StopChatFacade stopChatFacade;
   @MockBean
@@ -1138,7 +1138,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(startChatFacade);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1159,7 +1159,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(startChatFacade);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1172,7 +1172,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(startChatFacade);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1272,7 +1272,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(consultantService);
     verifyNoMoreInteractions(userService);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
 
   }
 
@@ -1294,7 +1294,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(consultantService);
     verifyNoMoreInteractions(userService);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1308,7 +1308,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(consultantService);
     verifyNoMoreInteractions(userService);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1402,7 +1402,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(consultantService);
     verifyNoMoreInteractions(userService);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
     verifyNoMoreInteractions(rocketChatService);
 
@@ -1426,7 +1426,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(consultantService);
     verifyNoMoreInteractions(userService);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
     verifyNoMoreInteractions(rocketChatService);
   }
@@ -1443,7 +1443,7 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(consultantService);
     verifyNoMoreInteractions(userService);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
     verifyNoMoreInteractions(rocketChatService);
   }

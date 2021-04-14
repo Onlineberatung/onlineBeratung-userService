@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -8,7 +7,7 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ import org.springframework.util.CollectionUtils;
 public class ConsultantDataProvider {
 
   private final @NonNull AuthenticatedUser authenticatedUser;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
 
   /**
    * Retrieve the user data of a consultant, e.g. agencies, absence-state, username, name, ...
@@ -65,8 +64,8 @@ public class ConsultantDataProvider {
 
   private AgencyDTO fetchAgencyViaAgencyService(ConsultantAgency consultantAgency) {
     try {
-      return this.agencyServiceHelper.getAgency(consultantAgency.getAgencyId());
-    } catch (AgencyServiceHelperException e) {
+      return this.agencyService.getAgency(consultantAgency.getAgencyId());
+    } catch (Exception e) {
       LogService.logAgencyServiceHelperException(String
           .format("Error while getting agencies of consultant with id %s",
               consultantAgency.getId()), e);

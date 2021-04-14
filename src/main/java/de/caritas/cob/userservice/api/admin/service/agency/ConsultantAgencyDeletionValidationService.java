@@ -7,15 +7,13 @@ import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NE
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.function.Predicate;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +24,7 @@ import org.springframework.stereotype.Service;
 public class ConsultantAgencyDeletionValidationService {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionRepository sessionRepository;
 
   /**
@@ -48,7 +46,8 @@ public class ConsultantAgencyDeletionValidationService {
   }
 
   private boolean isTheLastConsultantInAgency(ConsultantAgency consultantAgency) {
-    return this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(consultantAgency.getAgencyId())
+    return this.consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNull(consultantAgency.getAgencyId())
         .stream()
         .filter(relation -> isNull(relation.getDeleteDate()))
         .allMatch(sameConsultantAgencyRelation(consultantAgency));
@@ -60,12 +59,8 @@ public class ConsultantAgencyDeletionValidationService {
   }
 
   private boolean isAgencyStillActive(ConsultantAgency consultantAgency) {
-    try {
-      AgencyDTO agency = this.agencyServiceHelper.getAgency(consultantAgency.getAgencyId());
-      return isFalse(agency.getOffline());
-    } catch (AgencyServiceHelperException e) {
-      throw new InternalServerErrorException(e.getMessage());
-    }
+    AgencyDTO agency = this.agencyService.getAgency(consultantAgency.getAgencyId());
+    return isFalse(agency.getOffline());
   }
 
   private boolean hasOpenEnquiries(ConsultantAgency consultantAgency) {
