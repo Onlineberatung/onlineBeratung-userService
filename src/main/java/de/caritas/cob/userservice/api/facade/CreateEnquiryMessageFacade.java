@@ -84,7 +84,7 @@ public class CreateEnquiryMessageFacade {
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
       ConsultingTypeSettings consultingTypeSettings =
-          consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
+          consultingTypeManager.getConsultingTypeSettings(session.getConsultingID());
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 

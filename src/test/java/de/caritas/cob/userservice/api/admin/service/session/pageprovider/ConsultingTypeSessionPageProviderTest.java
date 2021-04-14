@@ -57,7 +57,7 @@ public class ConsultingTypeSessionPageProviderTest {
 
     this.consultingTypeSessionPageProvider.executeQuery(pageable);
 
-    verify(this.sessionRepository, atLeastOnce()).findByConsultingType(ConsultingType.U25, pageable);
+    verify(this.sessionRepository, atLeastOnce()).findByConsultingID(1, pageable);
   }
 
   @Test
