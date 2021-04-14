@@ -32,8 +32,6 @@ import org.springframework.http.HttpHeaders;
 @RunWith(MockitoJUnitRunner.class)
 public class AgencySecurityHeaderSupplierTest {
 
-  private final String FIELD_NAME_GET_AGENCY_API_URL = "agencyServiceApiGetAgenciesUrl";
-  private final String AGENCIES_API_URL = "http://caritas.local/service/agencies/";
   private final String GET_AGENCY_METHOD_NAME = "getAgency";
   private final String GET_AGENCIES_METHOD_NAME = "getAgencies";
   private final Class<?>[] GET_AGENCY_METHOD_PARAMS = new Class[]{Long.class};
@@ -55,7 +53,7 @@ public class AgencySecurityHeaderSupplierTest {
     this.agencyResponseDTOS = AGENCY_DTO_LIST.stream()
         .map(this::toAgencyResponseDTO)
         .collect(Collectors.toList());
-    when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(new HttpHeaders());
+    when(this.securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
   }
 
   @SneakyThrows
