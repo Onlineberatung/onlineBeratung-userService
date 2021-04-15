@@ -2,9 +2,8 @@ package de.caritas.cob.userservice.api.admin.report.rule;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
-import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
+import de.caritas.cob.userservice.api.admin.report.model.AgencyDependedViolationReportRule;
 import de.caritas.cob.userservice.api.admin.report.rule.analyzer.ConsultantAgencyAnalyzer;
-import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -22,12 +21,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
-    ViolationReportRule {
+public class ConsultantWithWrongTeamConsultantFlagViolationReportRule extends
+    AgencyDependedViolationReportRule {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull AgencyAdminService agencyAdminService;
 
   /**
    * Generates all violations for {@link Consultant} containing flag is_team_consultant with
@@ -42,7 +40,7 @@ public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
         .stream(consultantAgencyRepository.findAll().spliterator(), false)
         .collect(Collectors.toList());
 
-    List<AgencyAdminResponseDTO> allAgencies = this.agencyAdminService.retrieveAllAgencies()
+    List<AgencyAdminResponseDTO> allAgencies = super.getAllAgencies()
         .parallelStream()
         .collect(Collectors.toList());
 
@@ -58,7 +56,7 @@ public class ConsultantWithWrongTeamConsultantFlagViolationReportRule implements
 
   private ViolationDTO fromConsultant(Consultant consultant) {
     return ViolationByConsultantBuilder.getInstance(consultant)
-        .withReason("Consultant has flag is_team_consultant but has not team agency assigned")
+        .withReason("Consultant has flag is_team_consultant but has no team agency assigned")
         .build();
   }
 

@@ -4,9 +4,11 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.admin.report.registry.ViolationRuleRegistry;
+import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +30,9 @@ public class ViolationReportGeneratorTest {
   @Mock
   private ViolationRuleRegistry violationRuleRegistry;
 
+  @Mock
+  private AgencyAdminService agencyAdminService;
+
   @After
   public void cleanGeneratedFiles() throws IOException {
     FileUtils.deleteDirectory(new File("report"));
@@ -42,7 +47,7 @@ public class ViolationReportGeneratorTest {
 
   @Test
   public void generateReport_Should_returnFlattenedViolations_When_violationsAreFound() {
-    when(this.violationRuleRegistry.getViolationReportRules()).thenReturn(asList(
+    when(this.violationRuleRegistry.getViolationReportRules(any())).thenReturn(asList(
         () -> asList(identifiedViolation("first"), identifiedViolation("second")),
         () -> asList(identifiedViolation("third"), identifiedViolation("fourth")),
         () -> asList(identifiedViolation("fifth"), identifiedViolation("sixth"))));
