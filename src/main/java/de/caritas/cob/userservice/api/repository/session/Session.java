@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
+//@ToString
 public class Session {
 
   public Session(User user, int consultingTypeId, String postcode, Long agencyId,
