@@ -5,7 +5,9 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static java.time.format.DateTimeFormatter.ofPattern;
 
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
+import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.report.registry.ViolationRuleRegistry;
+import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import io.swagger.util.Json;
@@ -36,6 +38,7 @@ public class ViolationReportGenerator {
   private static final DateTimeFormatter DATE_TIME_FORMAT = ofPattern("yyyy-MM-dd--hh-mm");
 
   private final @NonNull ViolationRuleRegistry violationRuleRegistry;
+  private final @NonNull AgencyAdminService agencyAdminService;
 
   /**
    * Generates a list of all located known violations.
@@ -45,7 +48,9 @@ public class ViolationReportGenerator {
   @SneakyThrows
   public List<ViolationDTO> generateReport() {
     reevaluateAgencyCache();
-    List<ViolationDTO> violations = this.violationRuleRegistry.getViolationReportRules().stream()
+    List<AgencyAdminResponseDTO> allAgencies = this.agencyAdminService.retrieveAllAgencies();
+    List<ViolationDTO> violations = this.violationRuleRegistry.getViolationReportRules(allAgencies)
+        .stream()
         .map(ViolationReportRule::generateViolations)
         .flatMap(Collection::parallelStream)
         .collect(Collectors.toList());
