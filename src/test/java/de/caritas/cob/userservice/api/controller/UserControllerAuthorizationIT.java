@@ -1905,7 +1905,8 @@ public class UserControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(
-            new UpdateConsultantDTO().email("mail").firstname("firstname").lastname("lastname")))
+            new UpdateConsultantDTO().email("mail@mail.de").firstname("firstname").lastname(
+                "lastname")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
