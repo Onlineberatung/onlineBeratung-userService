@@ -94,15 +94,15 @@ public class ConsultantDataFacadeTest {
 
   @Test
   public void updateConsultantData_Should_updateExpectedConsultantData() {
-    UpdateConsultantDTO updateConsultantDTO = new UpdateConsultantDTO()
-        .email("email")
-        .firstname("firstname")
-        .lastname("lastname");
     Consultant consultant = mock(Consultant.class);
     when(consultant.isLanguageFormal()).thenReturn(true);
     when(consultant.isAbsent()).thenReturn(true);
     when(consultant.getAbsenceMessage()).thenReturn("absenceMessage");
     when(this.consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
+    UpdateConsultantDTO updateConsultantDTO = new UpdateConsultantDTO()
+        .email("email")
+        .firstname("firstname")
+        .lastname("lastname");
 
     this.consultantDataFacade.updateConsultantData(updateConsultantDTO);
 
