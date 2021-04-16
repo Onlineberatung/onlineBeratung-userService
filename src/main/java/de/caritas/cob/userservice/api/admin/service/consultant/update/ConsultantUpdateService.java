@@ -2,10 +2,10 @@ package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UpdateConsultantDTOAbsenceInputAdapter;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
@@ -36,7 +36,7 @@ public class ConsultantUpdateService {
    * @param updateConsultantDTO the update input data
    * @return the updated persisted {@link Consultant}
    */
-  public Consultant updateConsultant(String consultantId, UpdateConsultantDTO updateConsultantDTO) {
+  public Consultant updateConsultant(String consultantId, UpdateAdminConsultantDTO updateConsultantDTO) {
     this.userAccountInputValidator
         .validateAbsence(new UpdateConsultantDTOAbsenceInputAdapter(updateConsultantDTO));
 
@@ -55,7 +55,7 @@ public class ConsultantUpdateService {
     return updateDatabaseConsultant(updateConsultantDTO, consultant);
   }
 
-  private UserDTO buildValidatedUserDTO(UpdateConsultantDTO updateConsultantDTO,
+  private UserDTO buildValidatedUserDTO(UpdateAdminConsultantDTO updateConsultantDTO,
       Consultant consultant) {
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail(updateConsultantDTO.getEmail());
@@ -66,13 +66,13 @@ public class ConsultantUpdateService {
   }
 
   private UserUpdateRequestDTO buildUserUpdateRequestDTO(String rcUserId,
-      UpdateConsultantDTO updateConsultantDTO) {
+      UpdateAdminConsultantDTO updateConsultantDTO) {
     UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(updateConsultantDTO.getEmail(),
         updateConsultantDTO.getFirstname().concat(" ").concat(updateConsultantDTO.getLastname()));
     return new UserUpdateRequestDTO(rcUserId, userUpdateDataDTO);
   }
 
-  private Consultant updateDatabaseConsultant(UpdateConsultantDTO updateConsultantDTO,
+  private Consultant updateDatabaseConsultant(UpdateAdminConsultantDTO updateConsultantDTO,
       Consultant consultant) {
     consultant.setFirstName(updateConsultantDTO.getFirstname());
     consultant.setLastName(updateConsultantDTO.getLastname());

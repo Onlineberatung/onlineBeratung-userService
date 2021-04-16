@@ -24,7 +24,7 @@ import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMa
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -224,8 +224,8 @@ public class UserAdminControllerIT {
   @Test
   public void updateConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven()
       throws Exception {
-    UpdateConsultantDTO updateConsultantDTO =
-        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    UpdateAdminConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
 
     this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
         .contentType(MediaType.APPLICATION_JSON)

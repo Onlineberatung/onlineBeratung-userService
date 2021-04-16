@@ -56,26 +56,6 @@ public class ConsultantService {
   }
 
   /**
-   * Updates a {@link Consultant} with the absence data from a (@Link AbsenceDTO).
-   *
-   * @param absence {@link AbsenceDTO}
-   * @return The updated {@link Consultant}
-   */
-  public Consultant updateConsultantAbsent(Consultant consultant, AbsenceDTO absence) {
-    consultant.setAbsent(isTrue(absence.getAbsent()));
-
-    if (isNotBlank(absence.getMessage())) {
-      consultant.setAbsenceMessage(Helper.removeHTMLFromText(absence.getMessage()));
-    } else {
-      consultant.setAbsenceMessage(null);
-    }
-
-    saveConsultant(consultant);
-
-    return consultant;
-  }
-
-  /**
    * Returns a {@link Consultant} by the provided email address.
    *
    * @param email email address

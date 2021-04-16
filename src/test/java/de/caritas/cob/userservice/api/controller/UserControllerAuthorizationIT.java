@@ -35,6 +35,9 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,19 +55,20 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
-import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -119,7 +123,7 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private AuthenticatedUser authenticatedUser;
   @MockBean
-  private ConsultantService consultantService;
+  private ConsultantDataFacade consultantDataFacade;
   @MockBean
   private EmailNotificationFacade emailNotificationFacade;
   @MockBean
@@ -168,7 +172,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/askers/new
-   *
    */
 
   @Test
@@ -183,7 +186,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/askers/consultingType/new (role: asker)
-   *
    */
 
   @Test
@@ -228,7 +230,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/sessions/open (role: consultant)
-   *
    */
 
   @Test
@@ -247,7 +248,8 @@ public class UserControllerAuthorizationIT {
       Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
       Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
       Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
       Authority.USER_ADMIN})
   public void getOpenSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
@@ -273,7 +275,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/sessions/consultants/new (role: consultant)
-   *
    */
 
   @Test
@@ -320,7 +321,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/sessions/new/{sessionId} (role: consultant)
-   *
    */
   @Test
   public void acceptEnquiry_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -363,7 +363,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/sessions/askers/new (role: user)
-   *
    */
 
   @Test
@@ -411,7 +410,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/sessions/askers (role: user)
-   *
    */
 
   @Test
@@ -457,7 +455,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/consultants/absences (role: consultant)
-   *
    */
 
   @Test
@@ -468,7 +465,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(consultantService, logService);
+    verifyNoMoreInteractions(consultantDataFacade, logService);
   }
 
   @Test
@@ -485,7 +482,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantService, logService);
+    verifyNoMoreInteractions(consultantDataFacade, logService);
   }
 
   @Test
@@ -496,12 +493,11 @@ public class UserControllerAuthorizationIT {
     mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantService, logService);
+    verifyNoMoreInteractions(consultantDataFacade, logService);
   }
 
   /**
    * GET on /users/sessions/consultants (role: consultants)
-   *
    */
 
   @Test
@@ -546,7 +542,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/data (role: consultant/user)
-   *
    */
 
   @Test
@@ -557,7 +552,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(consultantService, logService);
+    verifyNoMoreInteractions(consultantDataFacade, logService);
   }
 
   @Test
@@ -574,7 +569,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantService, logService);
+    verifyNoMoreInteractions(consultantDataFacade, logService);
   }
 
   @Test
@@ -585,12 +580,11 @@ public class UserControllerAuthorizationIT {
     mvc.perform(get(PATH_GET_USER_DATA).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantService, logService);
+    verifyNoMoreInteractions(consultantDataFacade, logService);
   }
 
   /**
    * GET on /users/sessions/consultants (role: consultants)
-   *
    */
 
   @Test
@@ -635,7 +629,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/mails/messages/new (role: consultant/user)
-   *
    */
 
   @Test
@@ -681,7 +674,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/consultants/import (role: technical)
-   *
    */
 
   @Test
@@ -728,7 +720,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/sessions/{sessionId}/monitoring (role: consultant)
-   *
    */
   @Test
   public void getMonitoring_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -772,7 +763,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/sessions/monitoring/{sessionId} (role: consultant)
-   *
    */
   @Test
   public void updateMonitoring_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -816,7 +806,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/askers/import (role: technical)
-   *
    */
 
   @Test
@@ -861,7 +850,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/askersWithoutSession/import (role: technical)
-   *
    */
 
   @Test
@@ -908,7 +896,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/consultants (authority: VIEW_AGENCY_CONSULTANTS)
-   *
    */
 
   @Test
@@ -954,7 +941,6 @@ public class UserControllerAuthorizationIT {
   /**
    * PUT on /users/sessions/{sessionId}/consultant/{consultantId} (authority:
    * ASSIGN_CONSULTANT_TO_ENQUIRY and/or ASSIGN_CONSULTANT_TO_SESSION)
-   *
    */
   @Test
   public void assignSession_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -964,7 +950,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(consultantService, sessionService);
+    verifyNoMoreInteractions(consultantDataFacade, sessionService);
   }
 
   @Test
@@ -975,12 +961,11 @@ public class UserControllerAuthorizationIT {
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(consultantService, sessionService);
+    verifyNoMoreInteractions(consultantDataFacade, sessionService);
   }
 
   /**
    * PUT on /users/password/change (authorities: CONSULTANT_DEFAULT, USER_DEFAULT)
-   *
    */
   @Test
   public void updatePassword_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1024,7 +1009,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/messages/key
-   *
    */
 
   @Test
@@ -1068,7 +1052,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * POST on /users/chat/new
-   *
    */
 
   @Test
@@ -1080,7 +1063,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
   }
 
   @Test
@@ -1099,7 +1082,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
   }
 
   @Test
@@ -1111,7 +1094,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
   }
 
   @Test
@@ -1125,7 +1108,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/chat/{chatId}/start
-   *
    */
   @Test
   public void startChat_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1186,7 +1168,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/chat/{chatId}/join
-   *
    */
   @Test
   public void joinChat_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1197,7 +1178,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(joinChatFacade);
@@ -1218,7 +1199,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(joinChatFacade);
@@ -1232,7 +1213,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(joinChatFacade);
@@ -1258,7 +1239,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/chat/{chatId}
-   *
    */
   @Test
   public void getChat_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1270,7 +1250,7 @@ public class UserControllerAuthorizationIT {
 
     verifyNoMoreInteractions(getChatFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(chatPermissionVerifier);
 
@@ -1292,7 +1272,7 @@ public class UserControllerAuthorizationIT {
 
     verifyNoMoreInteractions(getChatFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(chatPermissionVerifier);
   }
@@ -1306,7 +1286,7 @@ public class UserControllerAuthorizationIT {
 
     verifyNoMoreInteractions(getChatFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(chatPermissionVerifier);
   }
@@ -1331,7 +1311,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/chat/{chatId}/stop
-   *
    */
   @Test
   public void stopChat_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1342,7 +1321,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(stopChatFacade);
   }
 
@@ -1362,7 +1341,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(stopChatFacade);
   }
 
@@ -1374,7 +1353,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(stopChatFacade);
   }
 
@@ -1389,7 +1368,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/chat/{chatId}/members
-   *
    */
   @Test
   public void getChatMembers_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1400,7 +1378,7 @@ public class UserControllerAuthorizationIT {
 
     verifyNoMoreInteractions(getChatMembersFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
@@ -1424,7 +1402,7 @@ public class UserControllerAuthorizationIT {
 
     verifyNoMoreInteractions(getChatMembersFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
@@ -1441,7 +1419,7 @@ public class UserControllerAuthorizationIT {
 
     verifyNoMoreInteractions(getChatMembersFacade);
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
@@ -1468,7 +1446,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/chat/{chatId}/leave
-   *
    */
   @Test
   public void leaveChat_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1479,7 +1456,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(joinChatFacade);
@@ -1500,7 +1477,7 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(joinChatFacade);
@@ -1514,7 +1491,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
-    verifyNoMoreInteractions(consultantService);
+    verifyNoMoreInteractions(consultantDataFacade);
     verifyNoMoreInteractions(userService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(joinChatFacade);
@@ -1540,7 +1517,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * PUT on /users/chat/{chatId}/update
-   *
    */
   @Test
   public void updateChat_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -1592,7 +1568,6 @@ public class UserControllerAuthorizationIT {
 
   /**
    * GET on /users/consultants/sessions (role: consultants)
-   *
    */
 
   @Test
@@ -1671,7 +1646,8 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {Authority.USER_DEFAULT})
-  public void updateEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken() throws Exception {
+  public void updateEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
+      throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
         .contentType(MediaType.APPLICATION_JSON)
@@ -1731,7 +1707,8 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {Authority.USER_DEFAULT})
-  public void deactivateAndFlagUserAccountForDeletion_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken() throws Exception {
+  public void deactivateAndFlagUserAccountForDeletion_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
+      throws Exception {
 
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
         .contentType(MediaType.APPLICATION_JSON)
@@ -1792,7 +1769,8 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {Authority.USER_DEFAULT})
-  public void updateMobileToken_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken() throws Exception {
+  public void updateMobileToken_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
+      throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
         .contentType(MediaType.APPLICATION_JSON)
@@ -1851,7 +1829,8 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {Authority.USER_DEFAULT})
-  public void updateSessionData_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken() throws Exception {
+  public void updateSessionData_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
@@ -1872,4 +1851,65 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
+
+  @Test
+  public void updateUserData_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
+      throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(consultantDataFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
+      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
+      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
+      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  public void updateUserData_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+      throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantDataFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  public void updateUserData_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantDataFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  public void updateUserData_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
+      throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new UpdateConsultantDTO().email("mail").firstname("firstname").lastname("lastname")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantDataFacade, times(1)).updateConsultantData(any());
+  }
+
 }

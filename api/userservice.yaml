@@ -272,6 +272,33 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+    put:
+      tags:
+        - user-controller
+      summary: 'Sets or updates the email, first and lastname of authorized consultant account
+      [Authorization:  Role: consultant]'
+      operationId: updateConsultantData
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UpdateConsultantDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        409:
+          description: CONFLICT - invalid/unavailable email
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/email:
     put:
       tags:
@@ -1573,6 +1600,28 @@ components:
             type: string
         consultingTypes:
           $ref: "#/components/schemas/ConsultingTypeMap"
+
+    UpdateConsultantDTO:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - email
+      properties:
+        firstname:
+          type: string
+          example: "Max"
+          minLength: 1
+          maxLength: 255
+        lastname:
+          type: string
+          example: "Mustermann"
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          example: "maxmuster@mann.com"
 
     ConsultingTypeMap:
       type: object

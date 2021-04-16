@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
@@ -40,6 +41,7 @@ import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.ChatDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
@@ -56,7 +58,6 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
-import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -115,7 +116,7 @@ public class  UserController implements UsersApi {
   private final @NotNull GetChatMembersFacade getChatMembersFacade;
   private final @NotNull CreateUserFacade createUserFacade;
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
-  private final @NotNull ConsultantService consultantService;
+  private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
 
   /**
@@ -241,7 +242,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> updateAbsence(@RequestBody AbsenceDTO absence) {
     Consultant consultant = userAccountProvider.retrieveValidatedConsultant();
-    this.consultantService.updateConsultantAbsent(consultant, absence);
+    this.consultantDataFacade.updateConsultantAbsent(consultant, absence);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -257,6 +258,18 @@ public class  UserController implements UsersApi {
     UserDataResponseDTO responseDTO = this.userDataFacade.buildUserDataByRole();
 
     return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+  }
+
+  /**
+   * Updates the data for the current logged in consultant.
+   *
+   * @param updateConsultantDTO  (required) the request {@link UpdateConsultantDTO}
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> updateConsultantData(UpdateConsultantDTO updateConsultantDTO) {
+    this.consultantDataFacade.updateConsultantData(updateConsultantDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
