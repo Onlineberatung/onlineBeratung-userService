@@ -67,7 +67,7 @@ public class AskerDataProvider {
     List<Long> agencyIds = mergeAgencyIdsFromSessionAndUser(user, sessionList);
     List<AgencyDTO> agencyDTOs = fetchAgenciesViaAgencyService(user, agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
-    for (int type : consultingTypeManager.getAllConsultingIDs()) {
+    for (int type : consultingTypeManager.getAllConsultingIds()) {
       consultingTypes.put(Integer.toString(type),
           getConsultingTypeData(type, sessionList, agencyDTOs));
     }

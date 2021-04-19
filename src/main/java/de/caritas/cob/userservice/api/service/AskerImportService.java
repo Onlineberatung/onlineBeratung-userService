@@ -47,7 +47,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -643,7 +642,7 @@ public class AskerImportService {
 
     Map<Integer, String> welcomeMessageMap = new HashMap();
 
-    for (int type : consultingTypeManager.getAllConsultingIDs()) {
+    for (int type : consultingTypeManager.getAllConsultingIds()) {
       String welcomeMessage = "";
       String fileName = welcomeMsgFilename.replace(welcomeMsgFilenameReplaceValue,
           Integer.toString(type));

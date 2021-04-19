@@ -29,7 +29,7 @@ class ConsultingTypeManagerIT {
   private ConsultingTypeManager consultingTypeManager;
 
   @ParameterizedTest
-  @MethodSource("generateConsultingIDs")
+  @MethodSource("generateConsultingIds")
   void init_Should_InitializeConsultingTypeSettingFromJsonFile(int consultingType)
       throws Exception {
     ConsultingTypeSettings consultingTypeSettings = loadConsultingTypeSettings(consultingType);
@@ -67,7 +67,7 @@ class ConsultingTypeManagerIT {
     assertThat(result.get(), is(expected.get()));
   }
 
-  static Stream<Integer> generateConsultingIDs() {
+  static Stream<Integer> generateConsultingIds() {
     return IntStream.range(0, countConsultingTypeSettings()).boxed();
   }
 

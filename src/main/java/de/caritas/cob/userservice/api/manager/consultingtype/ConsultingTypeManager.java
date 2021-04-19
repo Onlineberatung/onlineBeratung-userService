@@ -81,7 +81,7 @@ public class ConsultingTypeManager {
     return getConsultingTypeSettings(Integer.parseInt(consultingId));
   }
 
-  public Integer[] getAllConsultingIDs() {
+  public Integer[] getAllConsultingIds() {
     return consultingTypeSettingsMap.keySet().toArray(new Integer[0]);
   }
 
