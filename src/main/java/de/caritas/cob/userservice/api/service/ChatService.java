@@ -1,21 +1,17 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.exception.SaveChatAgencyException;
-import de.caritas.cob.userservice.api.exception.SaveChatException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.chat.ChatDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.chat.ChatDTO;
 import de.caritas.cob.userservice.api.model.chat.UserChatDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatInterval;
@@ -33,7 +29,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -55,27 +50,12 @@ public class ChatService {
    * @return list of chats as {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getChatsForConsultant(Consultant consultant) {
-
-    List<ConsultantSessionResponseDTO> sessionResponseDTOs = null;
-    List<Chat> chats;
-
-    try {
-      chats = chatRepository.findByAgencyIds(consultant.getConsultantAgencies().stream()
-          .map(ConsultantAgency::getAgencyId).collect(Collectors.toSet()));
-
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Database error while retrieving the chats for the consultant with id %s",
-              consultant.getId()), LogService::logDatabaseError);
-    }
-
-    if (isNotEmpty(chats)) {
-      sessionResponseDTOs =
-          chats.stream().map(this::convertChatToConsultantSessionResponseDTO)
-              .collect(Collectors.toList());
-    }
-
-    return sessionResponseDTOs;
+    Set<Long> agencyIds = consultant.getConsultantAgencies().stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toSet());
+    return chatRepository.findByAgencyIds(agencyIds).stream()
+        .map(this::convertChatToConsultantSessionResponseDTO)
+        .collect(Collectors.toList());
   }
 
   private ConsultantSessionResponseDTO convertChatToConsultantSessionResponseDTO(Chat chat) {
@@ -95,14 +75,9 @@ public class ChatService {
   }
 
   private String[] getChatModerators(Set<ChatAgency> chatAgencies) {
-
-    List<Consultant> consultantList = consultantService.findConsultantsByAgencyIds(chatAgencies);
-
-    if (isNotEmpty(consultantList)) {
-      return consultantList.stream().map(Consultant::getRocketChatId).toArray(String[]::new);
-    }
-
-    return new String[0];
+    return consultantService.findConsultantsByAgencyIds(chatAgencies).stream()
+        .map(Consultant::getRocketChatId)
+        .toArray(String[]::new);
   }
 
   /**
@@ -111,13 +86,8 @@ public class ChatService {
    * @param chat {@link Chat}
    * @return {@link Chat} (will never be null)
    */
-  public Chat saveChat(Chat chat) throws SaveChatException {
-    try {
-      return chatRepository.save(chat);
-    } catch (DataAccessException ex) {
-      throw new SaveChatException(String.format("Creation of chat failed for: %s", chat.toString()),
-          ex);
-    }
+  public Chat saveChat(Chat chat) {
+    return chatRepository.save(chat);
   }
 
   /**
@@ -126,14 +96,8 @@ public class ChatService {
    * @param chatAgency {@link ChatAgency}
    * @return {@link ChatAgency} (will never be null)
    */
-  public ChatAgency saveChatAgencyRelation(ChatAgency chatAgency) throws SaveChatAgencyException {
-    try {
-      return chatAgencyRepository.save(chatAgency);
-    } catch (DataAccessException ex) {
-      throw new SaveChatAgencyException(
-          String.format("Creation of chat - user relation failed for: %s", chatAgency.toString()),
-          ex);
-    }
+  public ChatAgency saveChatAgencyRelation(ChatAgency chatAgency) {
+    return chatAgencyRepository.save(chatAgency);
   }
 
   /**
@@ -143,17 +107,10 @@ public class ChatService {
    * @return list of user chats as {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getChatsForUserId(String userId) {
-
-    try {
-      List<Chat> chats = chatRepository.findByUserId(userId);
-      return chats.stream().map(this::convertChatToUserSessionResponseDTO)
-          .collect(Collectors.toList());
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(String
-          .format("Database error while retrieving the chats for the user with id %s", userId),
-          LogService::logDatabaseError);
-    }
-
+    List<Chat> chats = chatRepository.findByUserId(userId);
+    return chats.stream()
+        .map(this::convertChatToUserSessionResponseDTO)
+        .collect(Collectors.toList());
   }
 
   private UserSessionResponseDTO convertChatToUserSessionResponseDTO(Chat chat) {
@@ -174,17 +131,7 @@ public class ChatService {
    * @return {@link Optional} of {@link Chat}
    */
   public Optional<Chat> getChat(Long chatId) {
-    Optional<Chat> chat;
-
-    try {
-      chat = chatRepository.findById(chatId);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Database error while retrieving chat with id %s", chatId),
-          LogService::logDatabaseError);
-    }
-
-    return chat;
+    return chatRepository.findById(chatId);
   }
 
   /**
@@ -193,13 +140,7 @@ public class ChatService {
    * @param chat the {@link Chat}
    */
   public void deleteChat(Chat chat) {
-    try {
-      chatRepository.delete(chat);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException(
-          String.format("Deletion of chat with id %s failed", chat.getId()),
-          LogService::logDatabaseError);
-    }
+    chatRepository.delete(chat);
   }
 
   /**
@@ -213,37 +154,31 @@ public class ChatService {
   public UpdateChatResponseDTO updateChat(Long chatId, ChatDTO chatDTO,
       AuthenticatedUser authenticatedUser) {
 
-    Optional<Chat> chat = getChat(chatId);
+    Chat chat = getChat(chatId).orElseThrow(
+        () -> new BadRequestException(String.format("Chat with id %s does not exist", chatId)));
 
-    if (!chat.isPresent()) {
-      throw new BadRequestException(String.format("Chat with id %s does not exist", chatId));
-    }
-    if (!authenticatedUser.getUserId().equals(chat.get().getChatOwner().getId())) {
+    if (!authenticatedUser.getUserId().equals(chat.getChatOwner().getId())) {
       throw new ForbiddenException("Only the chat owner is allowed to change chat settings");
     }
-    if (isTrue(chat.get().isActive())) {
+    if (isTrue(chat.isActive())) {
       throw new ConflictException(String.format(
           "Chat with id %s is active. Therefore changing the chat settings is not supported.",
           chatId));
     }
 
     LocalDateTime startDate = LocalDateTime.of(chatDTO.getStartDate(), chatDTO.getStartTime());
-    chat.get().setTopic(chatDTO.getTopic());
-    chat.get().setDuration(chatDTO.getDuration());
-    chat.get().setRepetitive(isTrue(chatDTO.isRepetitive()));
-    chat.get().setChatInterval(isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null);
-    chat.get().setStartDate(startDate);
-    chat.get().setInitialStartDate(startDate);
+    chat.setTopic(chatDTO.getTopic());
+    chat.setDuration(chatDTO.getDuration());
+    chat.setRepetitive(isTrue(chatDTO.isRepetitive()));
+    chat.setChatInterval(isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null);
+    chat.setStartDate(startDate);
+    chat.setInitialStartDate(startDate);
 
-    try {
-      this.saveChat(chat.get());
-    } catch (SaveChatException e) {
-      throw new InternalServerErrorException(e.getMessage());
-    }
+    this.saveChat(chat);
 
     return new UpdateChatResponseDTO()
-        .groupId(chat.get().getGroupId())
-        .chatLink(userHelper.generateChatUrl(chat.get().getId(), chat.get().getConsultingId()));
+        .groupId(chat.getGroupId())
+        .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingId()));
   }
 
 }

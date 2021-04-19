@@ -1,6 +1,6 @@
 name: Push Admin API documentation
 
-on:
+#on:
   push:
     paths:
       - 'api/useradminservice.yaml'

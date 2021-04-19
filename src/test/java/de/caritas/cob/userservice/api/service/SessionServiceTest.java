@@ -36,7 +36,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -57,7 +56,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -109,7 +107,7 @@ public class SessionServiceTest {
   @Mock
   private SessionRepository sessionRepository;
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
   @Mock
   private Logger logger;
   @Mock
@@ -214,16 +212,12 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError()
-      throws Exception {
-
-    AgencyServiceHelperException ex =
-        new AgencyServiceHelperException(new Exception("AgencyService error"));
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError() {
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(any())).thenThrow(ex);
+    when(agencyService.getAgencies(any())).thenThrow(new InternalServerErrorException(""));
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -234,14 +228,13 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId()
-      throws Exception {
+  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId() {
 
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(any())).thenReturn(AGENCY_DTO_LIST);
+    when(agencyService.getAgencies(any())).thenReturn(AGENCY_DTO_LIST);
 
     assertThat(sessionService.getSessionsForUserId(USER_ID),
         everyItem(instanceOf(UserSessionResponseDTO.class)));

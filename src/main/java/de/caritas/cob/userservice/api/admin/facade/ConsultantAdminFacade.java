@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -79,7 +80,7 @@ public class ConsultantAdminFacade {
    * ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO updateConsultant(String consultantId,
-      UpdateConsultantDTO updateConsultantDTO) {
+      UpdateAdminConsultantDTO updateConsultantDTO) {
     return this.consultantAdminService.updateConsultant(consultantId, updateConsultantDTO);
   }
 

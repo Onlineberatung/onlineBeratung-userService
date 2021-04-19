@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
@@ -10,7 +9,7 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -33,7 +32,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AskerDataProvider {
 
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
@@ -65,7 +64,7 @@ public class AskerDataProvider {
 
     Set<Session> sessionList = SetUtils.emptyIfNull(user.getSessions());
     List<Long> agencyIds = mergeAgencyIdsFromSessionAndUser(user, sessionList);
-    List<AgencyDTO> agencyDTOs = fetchAgenciesViaAgencyService(user, agencyIds);
+    List<AgencyDTO> agencyDTOs = this.agencyService.getAgencies(agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
     for (int type : consultingTypeManager.getAllConsultingIds()) {
       consultingTypes.put(Integer.toString(type),
@@ -75,14 +74,7 @@ public class AskerDataProvider {
     return consultingTypes;
   }
 
-  private List<AgencyDTO> fetchAgenciesViaAgencyService(User user, List<Long> agencyIds) {
-    try {
-      return agencyServiceHelper.getAgencies(agencyIds);
-    } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      throw new InternalServerErrorException(
-          String.format("Invalid agencyIds: %s for user with id %s", agencyIds, user.getUserId()));
-    }
-  }
+
 
   private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {

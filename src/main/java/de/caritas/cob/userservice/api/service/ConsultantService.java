@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.service;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -57,26 +56,6 @@ public class ConsultantService {
   }
 
   /**
-   * Updates a {@link Consultant} with the absence data from a (@Link AbsenceDTO).
-   *
-   * @param absence {@link AbsenceDTO}
-   * @return The updated {@link Consultant}
-   */
-  public Consultant updateConsultantAbsent(Consultant consultant, AbsenceDTO absence) {
-    consultant.setAbsent(isTrue(absence.getAbsent()));
-
-    if (isNotBlank(absence.getMessage())) {
-      consultant.setAbsenceMessage(Helper.removeHTMLFromText(absence.getMessage()));
-    } else {
-      consultant.setAbsenceMessage(null);
-    }
-
-    saveConsultant(consultant);
-
-    return consultant;
-  }
-
-  /**
    * Returns a {@link Consultant} by the provided email address.
    *
    * @param email email address
@@ -100,7 +79,7 @@ public class ConsultantService {
    * Find a consultant by these steps: 1. username 2. encoded username 3. email.
    *
    * @param username username
-   * @param email email address
+   * @param email    email address
    * @return an optional with the consultant found or an empty optional
    */
   public Optional<Consultant> findConsultantByUsernameOrEmail(String username, String email) {
@@ -127,19 +106,10 @@ public class ConsultantService {
    *
    * @param authenticatedUser {@link AuthenticatedUser}
    * @return {@link Optional} of {@link Consultant}
-   * @throws InternalServerErrorException if consultant was not found
    */
   public Optional<Consultant> getConsultantViaAuthenticatedUser(
       AuthenticatedUser authenticatedUser) {
-
-    Optional<Consultant> consultantOptional = getConsultant(authenticatedUser.getUserId());
-
-    if (!consultantOptional.isPresent()) {
-      throw new InternalServerErrorException(
-          String.format("Calling consultant with id %s not found.", authenticatedUser.getUserId()));
-    }
-
-    return consultantOptional;
+    return getConsultant(authenticatedUser.getUserId());
   }
 
   /**

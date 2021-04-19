@@ -8,16 +8,16 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_NO_RC_USER_ID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import java.util.Optional;
@@ -34,12 +34,12 @@ public class UserServiceTest {
 
   @InjectMocks
   private UserService userService;
+
   @Mock
   private UserRepository userRepository;
 
   @Test
   public void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {
-
     when(userRepository.save(Mockito.any())).thenReturn(USER);
 
     User result = userService.createUser(USER_ID, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
@@ -60,24 +60,16 @@ public class UserServiceTest {
     assertEquals(USER, result.get());
   }
 
-  /**
-   * Method: getUserViaAuthenticatedUser
-   */
-
   @Test
-  public void getUserViaAuthenticatedUser_Should_InternalServerErrorException_When_UserWasNotFound() {
+  public void getUserViaAuthenticatedUser_Should_returnOptionalEmpty_When_UserWasNotFound() {
+    Optional<User> viaAuthenticatedUser = userService
+        .getUserViaAuthenticatedUser(AUTHENTICATED_USER);
 
-    try {
-      userService.getUserViaAuthenticatedUser(AUTHENTICATED_USER);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException intServerErrExc) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
+    assertThat(viaAuthenticatedUser, is(Optional.empty()));
   }
 
   @Test
   public void getUserViaAuthenticatedUser_Should_UserOptionalObject() {
-
     when(userRepository.findByUserIdAndDeleteDateIsNull(Mockito.any()))
         .thenReturn(Optional.of(USER));
 
@@ -89,7 +81,6 @@ public class UserServiceTest {
 
   @Test
   public void saveUser_Should_UserObject() {
-
     when(userRepository.save(Mockito.any())).thenReturn(USER);
 
     User result = userService.saveUser(USER);
@@ -100,7 +91,6 @@ public class UserServiceTest {
 
   @Test
   public void deleteUser_Should_CallDeleteUserRepository() {
-
     userService.deleteUser(USER);
 
     verify(userRepository, times(1)).delete(Mockito.any());
@@ -108,7 +98,6 @@ public class UserServiceTest {
 
   @Test
   public void findUserByRcUserId_Should_ReturnUser_WhenRepositoryCallIsSuccessful() {
-
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(Mockito.anyString()))
         .thenReturn(Optional.of(USER));
 

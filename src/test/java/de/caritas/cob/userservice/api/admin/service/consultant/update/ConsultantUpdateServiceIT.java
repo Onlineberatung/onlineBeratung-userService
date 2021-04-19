@@ -3,16 +3,16 @@ package de.caritas.cob.userservice.api.admin.service.consultant.update;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_VALID;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
 
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class ConsultantUpdateServiceIT {
 
   @Test
   public void updateConsultant_Should_returnUpdatedPersistedConsultant_When_inputDataIsValid() {
-    UpdateConsultantDTO updateConsultantDTO = new UpdateConsultantDTO();
+    UpdateAdminConsultantDTO updateConsultantDTO = new UpdateAdminConsultantDTO();
     updateConsultantDTO.setAbsent(true);
     updateConsultantDTO.setAbsenceMessage("I am absent!");
     updateConsultantDTO.setFirstname("new first name");
@@ -64,7 +64,7 @@ public class ConsultantUpdateServiceIT {
 
   @Test
   public void updateConsultant_Should_throwCustomResponseException_When_absenceIsInvalid() {
-    UpdateConsultantDTO updateConsultantDTO = new UpdateConsultantDTO();
+    UpdateAdminConsultantDTO updateConsultantDTO = new UpdateAdminConsultantDTO();
     updateConsultantDTO.setAbsent(true);
     updateConsultantDTO.setAbsenceMessage(null);
 
@@ -79,7 +79,7 @@ public class ConsultantUpdateServiceIT {
 
   @Test
   public void updateConsultant_Should_throwCustomResponseException_When_newEmailIsInvalid() {
-    UpdateConsultantDTO updateConsultantDTO = new UpdateConsultantDTO();
+    UpdateAdminConsultantDTO updateConsultantDTO = new UpdateAdminConsultantDTO();
     updateConsultantDTO.setEmail("invalid");
 
     try {

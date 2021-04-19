@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
-import de.caritas.cob.userservice.api.helper.AgencyHelper;
+import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -34,7 +34,7 @@ public class CreateUserFacade {
   private final @NonNull UserService userService;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull AgencyHelper agencyHelper;
+  private final @NonNull AgencyVerifier agencyVerifier;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 
   /**
@@ -58,10 +58,10 @@ public class CreateUserFacade {
         consultingTypeSettings.getConsultingId());
   }
 
-  private void checkIfConsultingTypeMatchesToAgency(UserDTO user, int consultingType) {
-    if (!agencyHelper.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingType)) {
+  private void checkIfConsultingTypeMatchesToAgency(UserDTO user, int consultingId) {
+    if (!agencyVerifier.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingId)) {
       throw new BadRequestException(String.format("Agency with id %s does not match to consulting"
-          + " type %d", user.getAgencyId(), consultingType));
+          + " type %d", user.getAgencyId(), consultingId));
     }
   }
 

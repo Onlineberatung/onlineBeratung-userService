@@ -31,7 +31,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
-import de.caritas.cob.userservice.api.helper.AgencyHelper;
+import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -53,7 +53,7 @@ public class CreateSessionFacadeTest {
   @Mock
   private SessionService sessionService;
   @Mock
-  private AgencyHelper agencyHelper;
+  private AgencyVerifier agencyVerifier;
   @Mock
   private MonitoringService monitoringService;
   @Mock
@@ -89,7 +89,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenThrow(new InternalServerErrorException(MESSAGE));
@@ -106,7 +106,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenThrow(new InternalServerErrorException(MESSAGE));
@@ -127,7 +127,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITH_CONSULTANT);
@@ -147,7 +147,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
 
     createSessionFacade
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
@@ -158,7 +158,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
@@ -174,7 +174,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(AGENCY_ID, 0))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
@@ -193,7 +193,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyHelper.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 2))
+    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 2))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
@@ -210,7 +210,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_SUCHT);
-    when(agencyHelper.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 14))
+    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 14))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);

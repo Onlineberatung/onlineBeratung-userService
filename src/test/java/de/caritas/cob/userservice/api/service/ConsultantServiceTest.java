@@ -13,35 +13,31 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -49,68 +45,23 @@ public class ConsultantServiceTest {
 
   @InjectMocks
   private ConsultantService consultantService;
+
   @Mock
   private ConsultantRepository consultantRepository;
+
   @Mock
   private UserHelper userHelper;
+
   @Mock
   private ValidatedUserAccountProvider validatedUserAccountProvider;
+
   @Mock
   private AuthenticatedUser authenticatedUser;
 
   @Test
-  public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() {
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
-    when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
-
-    Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO);
-
-    Assert.assertEquals(consultant.getAbsenceMessage(), ABSENCE_DTO.getMessage());
-    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO.getAbsent());
-  }
-
-  @Test
-  public void saveEnquiryMessageAndRocketChatGroupId_Should_RemoveHtmlCodeAndJsFromMessageForXssProtection() {
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
-    when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
-
-    Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT,
-        ABSENCE_DTO_WITH_HTML_AND_JS);
-
-    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO_WITH_HTML_AND_JS.getAbsent());
-    Assert
-        .assertNotEquals(consultant.getAbsenceMessage(), ABSENCE_DTO_WITH_HTML_AND_JS.getMessage());
-    Assert.assertEquals(MESSAGE, consultant.getAbsenceMessage());
-  }
-
-  @Test
-  public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsEmpty() {
-    Consultant consultant = Mockito.mock(Consultant.class);
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
-
-    consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_EMPTY_MESSAGE);
-
-    ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
-    verify(consultantRepository).save(captor.capture());
-    assertNull(captor.getValue().getAbsenceMessage());
-  }
-
-  @Test
-  public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsNull() {
-    Consultant consultant = Mockito.mock(Consultant.class);
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
-
-    consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_NULL_MESSAGE);
-
-    ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
-    verify(consultantRepository).save(captor.capture());
-    assertNull(captor.getValue().getAbsenceMessage());
-  }
-
-  @Test
   public void getConsultant_Should_ReturnConsultantWhenFound() {
-
-    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID))
+        .thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultant(CONSULTANT_ID);
 
@@ -121,8 +72,8 @@ public class ConsultantServiceTest {
 
   @Test
   public void getConsultantByRcUserId_Should_ReturnConsultantWhenFound() {
-
-    when(consultantRepository.findByRocketChatIdAndDeleteDateIsNull(RC_USER_ID)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByRocketChatIdAndDeleteDateIsNull(RC_USER_ID))
+        .thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultantByRcUserId(RC_USER_ID);
 
@@ -133,8 +84,8 @@ public class ConsultantServiceTest {
 
   @Test
   public void getConsultantByEmail_Should_ReturnConsultant_WhenFound() {
-
-    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL))
+        .thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultantByEmail(EMAIL);
 
@@ -145,8 +96,8 @@ public class ConsultantServiceTest {
 
   @Test
   public void getConsultantByUsername_Should_ReturnConsultant_WhenFound() {
-
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME))
+        .thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result = consultantService.getConsultantByUsername(USERNAME);
 
@@ -157,8 +108,8 @@ public class ConsultantServiceTest {
 
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnEmptyOptional_WhenConsultantIsNotFound() {
-
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
+        .thenReturn(Optional.empty());
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
@@ -171,8 +122,8 @@ public class ConsultantServiceTest {
 
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByDecodedUsername() {
-
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
+        .thenReturn(Optional.of(CONSULTANT));
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
@@ -187,9 +138,10 @@ public class ConsultantServiceTest {
 
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEncodedUsername() {
-
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.empty());
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
+        .thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
+        .thenReturn(Optional.of(CONSULTANT));
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
@@ -204,12 +156,14 @@ public class ConsultantServiceTest {
 
   @Test
   public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEmail() {
-
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED)).thenReturn(Optional.empty());
-    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED)).thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
+        .thenReturn(Optional.empty());
+    when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
+        .thenReturn(Optional.empty());
     when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
     when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
-    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL))
+        .thenReturn(Optional.of(CONSULTANT));
 
     Optional<Consultant> result =
         consultantService.findConsultantByUsernameOrEmail(USERNAME_ENCODED, EMAIL);
@@ -220,24 +174,21 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantViaAuthenticatedUser_Should_ThrowInternalServerError_WhenConsultantIsNotFound() {
-
-    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenReturn(Optional.empty());
+  public void getConsultantViaAuthenticatedUser_Should_returnEmptyOptional_When_ConsultantIsNotFound() {
+    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID))
+        .thenReturn(Optional.empty());
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
 
-    try {
-      consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
+    Optional<Consultant> viaAuthenticatedUser = consultantService
+        .getConsultantViaAuthenticatedUser(authenticatedUser);
 
+    assertThat(viaAuthenticatedUser, is(Optional.empty()));
   }
 
   @Test
   public void getConsultantViaAuthenticatedUser_Should_ReturnConsultantOptional() {
-
-    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
+    when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID))
+        .thenReturn(Optional.of(CONSULTANT));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
 
     Optional<Consultant> result =
@@ -248,14 +199,8 @@ public class ConsultantServiceTest {
 
   }
 
-  /**
-   * 
-   * Method: findConsultantsByAgencyIds
-   * 
-   */
   @Test
   public void findConsultantsByAgencyIds_Should_ReturnListOfConsultants() {
-
     when(consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(Mockito.any()))
         .thenReturn(Collections.singletonList(CONSULTANT));
 

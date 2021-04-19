@@ -6,7 +6,6 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -31,7 +30,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +48,7 @@ import org.springframework.stereotype.Service;
 public class SessionService {
 
   private final @NonNull SessionRepository sessionRepository;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull UserHelper userHelper;
   private final @NonNull ConsultantService consultantService;
@@ -131,22 +129,15 @@ public class SessionService {
    * @return {@link List} of {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getSessionsForUserId(String userId) {
-
-    try {
-      List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
-      List<Session> sessions = sessionRepository.findByUserUserId(userId);
-      if (isNotEmpty(sessions)) {
-        List<AgencyDTO> agencies =
-            agencyServiceHelper.getAgencies(
-                sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));
-        sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
-      }
-      return sessionResponseDTOs;
-    } catch (AgencyServiceHelperException helperEx) {
-      throw new InternalServerErrorException(String.format(
-          "AgencyService error while retrieving the agency for the session for user %s", userId),
-          LogService::logAgencyServiceHelperException);
+    List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
+    List<Session> sessions = sessionRepository.findByUserUserId(userId);
+    if (isNotEmpty(sessions)) {
+      List<AgencyDTO> agencies =
+          agencyService.getAgencies(
+              sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));
+      sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
     }
+    return sessionResponseDTOs;
   }
 
   /**

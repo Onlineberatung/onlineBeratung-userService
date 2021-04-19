@@ -42,9 +42,8 @@ public class ConsultingTypeManager {
 
   private void appendConsultingTypeSetting(String jsonFileName) {
     ObjectMapper mapper = new ObjectMapper();
-    TypeReference<ConsultingTypeSettings> typeReference =
-        new TypeReference<ConsultingTypeSettings>() {
-        };
+
+    TypeReference<ConsultingTypeSettings> typeReference = new TypeReference<>() {};
     InputStream inputStream =
         TypeReference.class.getResourceAsStream(getJsonFileNameWithPath(jsonFileName));
     try {
@@ -99,8 +98,8 @@ public class ConsultingTypeManager {
   }
 
   private String[] getAllJsonFiles() {
+    System.out.println(consultingTypesSettingsJsonPath);
     URL dirUrl = ConsultingTypeManager.class.getClassLoader().getResource(consultingTypesSettingsJsonPath);
-
     try {
       return new File(dirUrl.toURI()).list();
     } catch (URISyntaxException e) {

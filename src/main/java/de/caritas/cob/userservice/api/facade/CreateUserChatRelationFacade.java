@@ -163,7 +163,7 @@ public class CreateUserChatRelationFacade {
           .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
           .build());
       throw new InternalServerErrorException(
-          "Could not create user-agency relation for Kreuzbund registration",
+          "Could not create user-agency relation for group chat registration",
           LogService::logDatabaseError);
     }
   }
@@ -188,7 +188,7 @@ public class CreateUserChatRelationFacade {
       RocketChatLoginException exception, boolean deleteUser) {
     rollBackUserAccount(user, deleteUser);
     throw new InternalServerErrorException(String.format(
-        "Rocket.Chat login for Kreuzbund registration was not successful for user %s. %s",
+        "Rocket.Chat login for Group Chat registration was not successful for user %s. %s",
         user.getUsername(), isBlank(exception.getMessage()) ? "" : exception.getMessage()),
         LogService::logRocketChatError);
   }

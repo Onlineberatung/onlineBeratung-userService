@@ -1,6 +1,6 @@
 name: Feature Branch
 
-on:
+#on:
   push:
     branches-ignore:
       - 'master'

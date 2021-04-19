@@ -169,7 +169,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/UpdateConsultantDTO'
+              $ref: '#/components/schemas/UpdateAdminConsultantDTO'
         required: true
       parameters:
         - name: consultantId
@@ -651,7 +651,7 @@ components:
           minLength: 1
           maxLength: 10000
 
-    UpdateConsultantDTO:
+    UpdateAdminConsultantDTO:
       type: object
       required:
         - firstname

@@ -85,7 +85,7 @@ public class CreateNewConsultingTypeFacade {
       UserDTO userDTO = new UserDTO();
       userDTO.setAgencyId(userRegistrationDTO.getAgencyId());
       userDTO.setPostcode(userRegistrationDTO.getPostcode());
-      userDTO.setConsultingType(userRegistrationDTO.getConsultingId());
+      userDTO.setConsultingId(userRegistrationDTO.getConsultingId());
       return userDTO;
     }
 

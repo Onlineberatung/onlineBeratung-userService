@@ -75,7 +75,7 @@ public class AuthorityTest {
   @Test
   public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleKreuzbundConsultant() {
 
-    List<String> result = Authorities.getAuthoritiesByUserRole(UserRole.KREUZBUND_CONSULTANT);
+    List<String> result = Authorities.getAuthoritiesByUserRole(UserRole.GROUP_CHAT_CONSULTANT);
 
     assertNotNull(result);
     assertTrue(result.contains(Authority.CONSULTANT_DEFAULT));

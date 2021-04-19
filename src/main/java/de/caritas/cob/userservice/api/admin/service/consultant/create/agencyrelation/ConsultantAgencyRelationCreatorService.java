@@ -5,9 +5,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -17,10 +15,10 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
@@ -40,7 +38,7 @@ public class ConsultantAgencyRelationCreatorService {
 
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull SessionRepository sessionRepository;
@@ -114,16 +112,10 @@ public class ConsultantAgencyRelationCreatorService {
   }
 
   private AgencyDTO retrieveAgency(Long agencyId) {
-    try {
-      AgencyDTO agencyDto = this.agencyServiceHelper.getAgencyWithoutCaching(agencyId);
-      return Optional.ofNullable(agencyDto)
-          .orElseThrow(() -> new BadRequestException(
-              String.format("AgencyId %s is not a valid agency", agencyId)));
-    } catch (AgencyServiceHelperException e) {
-      throw new InternalServerErrorException(String.format(
-          "AgencyService error while retrieving the agency for the ConsultantAgency-creating for agency %s",
-          agencyId), e, LogService::logAgencyServiceHelperException);
-    }
+    AgencyDTO agencyDto = this.agencyService.getAgencyWithoutCaching(agencyId);
+    return Optional.ofNullable(agencyDto)
+        .orElseThrow(() -> new BadRequestException(
+            String.format("AgencyId %s is not a valid agency", agencyId)));
   }
 
   private void verifyAllAssignedAgenciesHaveSameConsultingType(int consultingId,

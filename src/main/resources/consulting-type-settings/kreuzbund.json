@@ -32,7 +32,7 @@
     "consultant": {
       "default": [
         "consultant",
-        "kreuzbund-consultant"
+        "group-chat-consultant"
       ]
     }
   },

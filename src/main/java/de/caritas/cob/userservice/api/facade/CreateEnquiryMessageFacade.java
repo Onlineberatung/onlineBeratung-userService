@@ -16,7 +16,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroup
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.RocketChatHelper;
+import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
@@ -29,10 +29,10 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Objects;
@@ -58,8 +58,8 @@ public class CreateEnquiryMessageFacade {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserHelper userHelper;
-  private final @NonNull RocketChatHelper rocketChatHelper;
   private final @NonNull UserService userService;
+  private final RocketChatRoomNameGenerator rocketChatRoomNameGenerator = new RocketChatRoomNameGenerator();
 
   @Value("${rocket.systemuser.id}")
   private String rocketChatSystemUserId;
@@ -178,7 +178,8 @@ public class CreateEnquiryMessageFacade {
     try {
 
       Optional<GroupResponseDTO> rcGroupDTO = rocketChatService
-          .createPrivateGroup(rocketChatHelper.generateGroupName(session), rocketChatCredentials);
+          .createPrivateGroup(rocketChatRoomNameGenerator.generateGroupName(session),
+              rocketChatCredentials);
       return retrieveRcGroupResponseDto(rcGroupDTO, session.getId(),
           rocketChatCredentials.getRocketChatUserId()).getGroup().getId();
 
@@ -269,7 +270,8 @@ public class CreateEnquiryMessageFacade {
       throws RocketChatCreateGroupException, CreateEnquiryException {
 
     Optional<GroupResponseDTO> rcFeedbackGroupDTO = rocketChatService
-        .createPrivateGroupWithSystemUser(rocketChatHelper.generateFeedbackGroupName(session));
+        .createPrivateGroupWithSystemUser(
+            rocketChatRoomNameGenerator.generateFeedbackGroupName(session));
 
     if (!rcFeedbackGroupDTO.isPresent() || Objects
         .isNull(rcFeedbackGroupDTO.get().getGroup().getId())) {
@@ -326,24 +328,18 @@ public class CreateEnquiryMessageFacade {
 
   private void doRollback(CreateEnquiryExceptionInformation createEnquiryExceptionInformation,
       RocketChatCredentials rocketChatCredentials) {
-
-    if (Objects.isNull(createEnquiryExceptionInformation)) {
-      return;
+    if (nonNull(createEnquiryExceptionInformation)) {
+      rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
+      rollbackCreateGroupAsSystemUser(createEnquiryExceptionInformation.getRcFeedbackGroupId());
+      monitoringService
+          .rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
     }
-
-    rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
-    rollbackCreateGroupAsSystemUser(createEnquiryExceptionInformation.getRcFeedbackGroupId());
-    monitoringService
-        .rollbackInitializeMonitoring(createEnquiryExceptionInformation.getSession());
-
   }
 
   private void rollbackCreateGroup(String rcGroupId,
       RocketChatCredentials rocketChatCredentials) {
-    if (Objects.isNull(rcGroupId) || Objects.isNull(rocketChatCredentials)) {
-      return;
-    }
-    if (!rocketChatService.rollbackGroup(rcGroupId, rocketChatCredentials)) {
+    if (nonNull(rcGroupId) && nonNull(rocketChatCredentials) && !rocketChatService
+        .rollbackGroup(rcGroupId, rocketChatCredentials)) {
       LogService.logInternalServerError(String.format(
           "Error during rollback of group while saving enquiry message. Group with id %s could not be deleted.",
           rcGroupId));

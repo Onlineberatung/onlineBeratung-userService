@@ -4,10 +4,8 @@
   "excludeNonMainConsultantsFromTeamSessions ": false,
   "isGroupChat": true,
   "consultantBoundedToConsultingType": true,
-  "sendWelcomeMessage": false,
-  "welcomeMessage": null,
-  "sendFurtherStepsMessage": true,
-  "sendSaveSessionDataMessage": false,
+  "sendWelcomeMessage" : false,
+  "welcomeMessage" : null,
   "sessionDataInitializing": {
     "addictiveDrugs": false,
     "age": false,
@@ -30,9 +28,9 @@
   "languageFormal": true,
   "roles": {
     "consultant": {
-      "default": [
+      "default" :	[
         "consultant",
-        "kreuzbund-consultant"
+        "group-chat-consultant"
       ]
     }
   },
