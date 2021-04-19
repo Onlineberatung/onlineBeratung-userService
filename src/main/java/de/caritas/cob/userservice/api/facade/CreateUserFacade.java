@@ -14,7 +14,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -40,7 +39,7 @@ public class CreateUserFacade {
 
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
-   * provided {@link ConsultingType}.
+   * provided consulting ID.
    *
    * @param userDTO {@link UserDTO}
    */
@@ -52,11 +51,11 @@ public class CreateUserFacade {
     }
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
-    checkIfConsultingTypeMatchesToAgency(userDTO, consultingTypeSettings.getConsultingID());
+        consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingId());
+    checkIfConsultingTypeMatchesToAgency(userDTO, consultingTypeSettings.getConsultingId());
     KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDTO);
     updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
-        consultingTypeSettings.getConsultingID());
+        consultingTypeSettings.getConsultingId());
   }
 
   private void checkIfConsultingTypeMatchesToAgency(UserDTO user, int consultingType) {

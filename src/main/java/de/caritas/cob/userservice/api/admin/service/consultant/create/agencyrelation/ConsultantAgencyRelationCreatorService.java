@@ -83,8 +83,8 @@ public class ConsultantAgencyRelationCreatorService {
 
     AgencyDTO agency = retrieveAgency(input.getAgencyId());
 
-    if (consultingTypeManager.isConsultantBoundedToAgency(agency.getConsultingType())) {
-      this.verifyAllAssignedAgenciesHaveSameConsultingType(agency.getConsultingType(), consultant);
+    if (consultingTypeManager.isConsultantBoundedToAgency(agency.getConsultingId())) {
+      this.verifyAllAssignedAgenciesHaveSameConsultingType(agency.getConsultingId(), consultant);
     }
 
     this.addConsultantToSessions(consultant, agency, logMethod);
@@ -126,18 +126,18 @@ public class ConsultantAgencyRelationCreatorService {
     }
   }
 
-  private void verifyAllAssignedAgenciesHaveSameConsultingType(int consultingType,
+  private void verifyAllAssignedAgenciesHaveSameConsultingType(int consultingId,
       Consultant consultant) {
     if (nonNull(consultant.getConsultantAgencies())) {
       consultant.getConsultantAgencies().stream()
           .map(ConsultantAgency::getAgencyId)
           .map(this::retrieveAgency)
-          .filter(agency -> !(agency.getConsultingType() == consultingType))
+          .filter(agency -> !(agency.getConsultingId() == consultingId))
           .findFirst()
           .ifPresent(agency -> {
             throw new BadRequestException(String
                 .format("ERROR: different consulting types found than %d for consultant with id %s",
-                    consultingType, consultant.getId()));
+                    consultingId, consultant.getId()));
           });
     }
   }

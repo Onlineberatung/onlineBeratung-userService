@@ -101,17 +101,17 @@ public class AskerDataProvider {
     return consultingTypeData;
   }
 
-  private Optional<AgencyDTO> findAgencyByConsultingType(int consultingType,
+  private Optional<AgencyDTO> findAgencyByConsultingType(int consultingId,
       List<AgencyDTO> agencyDTOs) {
     return agencyDTOs.stream()
-        .filter(agencyDTO -> agencyDTO.getConsultingType() == consultingType)
+        .filter(agencyDTO -> agencyDTO.getConsultingId() == consultingId)
         .findFirst();
   }
 
   private Optional<Session> findSessionByConsultingType(int consultingType,
       Set<Session> sessionList) {
     return sessionList.stream()
-        .filter(session -> session.getConsultingID() == consultingType)
+        .filter(session -> session.getConsultingId() == consultingType)
         .findFirst();
   }
 

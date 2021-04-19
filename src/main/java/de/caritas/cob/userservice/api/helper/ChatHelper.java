@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.repository.chat.ChatInterval;
 import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 
@@ -61,7 +60,7 @@ public class ChatHelper {
     LocalDateTime startDate = LocalDateTime.of(chatDTO.getStartDate(), chatDTO.getStartTime());
     // As of now only Kreuzbund is using the chat. Therefore insert consulting type "kreuzbund".
     // Also the repetition interval can only be weekly atm.
-    return new Chat(chatDTO.getTopic(), ConsultingType.KREUZBUND, startDate, startDate,
+    return new Chat(chatDTO.getTopic(), 15, startDate, startDate,
         chatDTO.getDuration(), isTrue(chatDTO.isRepetitive()),
         isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null, consultant);
   }

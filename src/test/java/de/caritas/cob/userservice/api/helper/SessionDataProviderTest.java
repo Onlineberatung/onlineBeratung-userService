@@ -107,7 +107,7 @@ public class SessionDataProviderTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems() {
     Session sessionWithInitializedItem = easyRandom.nextObject(Session.class);
-    sessionWithInitializedItem.setConsultingID(0);
+    sessionWithInitializedItem.setConsultingId(0);
     SessionData data = easyRandom.nextObject(SessionData.class);
     data.setKey("addictiveDrugs");
     data.setValue("updatedValue");

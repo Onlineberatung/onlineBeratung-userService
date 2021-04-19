@@ -77,7 +77,7 @@ public class UserHelperTest {
 
   @Test
   public void generateChatUrl_Should_ReturnChatLinkWithConsultingTypeUrlNameAndEncodedChatId() {
-    assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, CONSULTING_TYPE_SUCHT));
+    assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, 0));
   }
 
   @Test

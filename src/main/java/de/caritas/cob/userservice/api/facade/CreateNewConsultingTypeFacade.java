@@ -8,7 +8,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSetti
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.registration.UserRegistrationDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.LogService;
 import lombok.NonNull;
@@ -33,13 +32,13 @@ public class CreateNewConsultingTypeFacade {
    * @param userRegistrationDTO   {@link UserRegistrationDTO}
    * @param user                  {@link User}
    * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @return session ID of created session (if not consulting type {@link ConsultingType#KREUZBUND}
+   * @return session ID of created session (if not consulting id refers to a group only consulting type)
    */
   public Long initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
       RocketChatCredentials rocketChatCredentials) {
     try {
       ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
-          .getConsultingTypeSettings(userRegistrationDTO.getConsultingType());
+          .getConsultingTypeSettings(userRegistrationDTO.getConsultingId());
 
       return createSessionOrChat(userRegistrationDTO, user,
           consultingTypeSettings, rocketChatCredentials);
@@ -86,7 +85,7 @@ public class CreateNewConsultingTypeFacade {
       UserDTO userDTO = new UserDTO();
       userDTO.setAgencyId(userRegistrationDTO.getAgencyId());
       userDTO.setPostcode(userRegistrationDTO.getPostcode());
-      userDTO.setConsultingType(userRegistrationDTO.getConsultingType());
+      userDTO.setConsultingType(userRegistrationDTO.getConsultingId());
       return userDTO;
     }
 

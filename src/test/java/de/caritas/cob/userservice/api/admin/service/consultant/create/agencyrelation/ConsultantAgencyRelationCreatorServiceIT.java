@@ -101,7 +101,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(false);
-    agencyDTO.setConsultingType(0);
+    agencyDTO.setConsultingId(0);
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -142,7 +142,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(true);
-    agencyDTO.setConsultingType(0);
+    agencyDTO.setConsultingId(0);
     when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -254,10 +254,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
       throws AgencyServiceHelperException {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(17);
+        .consultingId(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(1)
+        .consultingId(1)
         .id(2L);
 
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
@@ -278,10 +278,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
       throws AgencyServiceHelperException {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(17);
+        .consultingId(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(15)
+        .consultingId(15)
         .id(2L);
 
     when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);

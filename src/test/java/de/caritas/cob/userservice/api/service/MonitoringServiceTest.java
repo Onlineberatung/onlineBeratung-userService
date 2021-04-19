@@ -138,7 +138,7 @@ public class MonitoringServiceTest {
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringStructureProvider, times(1))
-        .getMonitoringInitialList(SESSION.getConsultingID());
+        .getMonitoringInitialList(SESSION.getConsultingId());
 
   }
 
@@ -156,7 +156,7 @@ public class MonitoringServiceTest {
 
     verify(monitoringService, times(1)).deleteMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringStructureProvider, times(1))
-        .getMonitoringInitialList(SESSION.getConsultingID());
+        .getMonitoringInitialList(SESSION.getConsultingId());
 
   }
 }

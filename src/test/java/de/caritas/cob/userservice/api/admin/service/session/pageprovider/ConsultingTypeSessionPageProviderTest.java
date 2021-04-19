@@ -34,7 +34,7 @@ public class ConsultingTypeSessionPageProviderTest {
 
   @Test
   public void supports_Should_returnTrue_When_consultantTypeFilterIsSet() {
-    when(this.sessionFilter.getConsultingType()).thenReturn(1);
+    when(this.sessionFilter.getConsultingId()).thenReturn(1);
 
     boolean supports = this.consultingTypeSessionPageProvider.isSupported();
 
@@ -43,7 +43,7 @@ public class ConsultingTypeSessionPageProviderTest {
 
   @Test
   public void supports_Should_returnFalse_When_consultantTypeFilterIsNotSet() {
-    when(this.sessionFilter.getConsultingType()).thenReturn(null);
+    when(this.sessionFilter.getConsultingId()).thenReturn(null);
 
     boolean supports = this.consultingTypeSessionPageProvider.isSupported();
 
@@ -52,17 +52,17 @@ public class ConsultingTypeSessionPageProviderTest {
 
   @Test
   public void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
-    when(this.sessionFilter.getConsultingType()).thenReturn(1);
+    when(this.sessionFilter.getConsultingId()).thenReturn(1);
     PageRequest pageable = PageRequest.of(0, 1);
 
     this.consultingTypeSessionPageProvider.executeQuery(pageable);
 
-    verify(this.sessionRepository, atLeastOnce()).findByConsultingID(1, pageable);
+    verify(this.sessionRepository, atLeastOnce()).findByConsultingId(1, pageable);
   }
 
   @Test
   public void executeQuery_Should_notExecuteQueryOnRepositoryAndreturnEmptyPage_When_consultingTypeDoesNotExist() {
-    when(this.sessionFilter.getConsultingType()).thenReturn(99);
+    when(this.sessionFilter.getConsultingId()).thenReturn(99);
     PageRequest pageable = PageRequest.of(0, 1);
 
     Page<Session> sessions = this.consultingTypeSessionPageProvider.executeQuery(pageable);

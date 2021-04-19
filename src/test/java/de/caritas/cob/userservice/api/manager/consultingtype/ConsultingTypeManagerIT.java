@@ -37,7 +37,7 @@ class ConsultingTypeManagerIT {
     ConsultingTypeSettings result =
         consultingTypeManager.getConsultingTypeSettings(consultingType);
 
-    assertSameValue(result::getConsultingID, consultingTypeSettings::getConsultingID);
+    assertSameValue(result::getConsultingId, consultingTypeSettings::getConsultingId);
     assertSameValue(result::isSendWelcomeMessage, consultingTypeSettings::isSendWelcomeMessage);
     assertSameValue(result::getWelcomeMessage, consultingTypeSettings::getWelcomeMessage);
     assertSameValue(result.getSessionDataInitializing()::isAddictiveDrugs,

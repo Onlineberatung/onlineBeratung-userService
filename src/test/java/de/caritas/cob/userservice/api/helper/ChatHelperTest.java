@@ -127,7 +127,7 @@ public class ChatHelperTest {
     assertEquals(CHAT_DTO.getDuration(), result.getDuration());
     assertEquals(CHAT_DTO.getTopic(), result.getTopic());
     assertEquals(CONSULTANT, result.getChatOwner());
-    assertEquals(ConsultingType.KREUZBUND, result.getConsultingType());
+    assertEquals(ConsultingType.KREUZBUND, result.getConsultingId());
     assertEquals(CHAT_DTO.isRepetitive(), result.isRepetitive());
     LocalDateTime startDate = LocalDateTime.of(CHAT_DTO.getStartDate(), CHAT_DTO.getStartTime());
     assertEquals(startDate, result.getStartDate());

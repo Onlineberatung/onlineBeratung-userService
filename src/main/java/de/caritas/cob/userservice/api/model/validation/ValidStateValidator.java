@@ -31,12 +31,12 @@ public class ValidStateValidator implements ConstraintValidator<ValidState, User
   @Override
   public boolean isValid(UserDTO userDTO, ConstraintValidatorContext context) {
 
-    if (isNull(userDTO.getConsultingType())) {
+    if (isNull(userDTO.getConsultingId())) {
       return false;
     }
 
     MandatoryFields mandatoryFields =
-        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(userDTO.getConsultingType());
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(userDTO.getConsultingId());
 
     if (mandatoryFields.isState()) {
       return isStateValid(userDTO);

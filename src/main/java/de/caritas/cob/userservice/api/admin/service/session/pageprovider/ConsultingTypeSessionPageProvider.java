@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.model.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import lombok.NonNull;
@@ -12,7 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Page provider for {@link Session} filtered by {@link ConsultingType}.
+ * Page provider for {@link Session} filtered by the consulting ID.
  */
 @RequiredArgsConstructor
 public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
@@ -28,9 +27,9 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
-    Integer id = sessionFilter.getConsultingType();
+    Integer id = sessionFilter.getConsultingId();
     if (id != null) {
-      return this.sessionRepository.findByConsultingID(id, pageable);
+      return this.sessionRepository.findByConsultingId(id, pageable);
     }
     return Page.empty(pageable);
   }
@@ -42,6 +41,6 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public boolean isSupported() {
-    return nonNull(this.sessionFilter.getConsultingType());
+    return nonNull(this.sessionFilter.getConsultingId());
   }
 }

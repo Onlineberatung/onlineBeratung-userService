@@ -51,13 +51,13 @@ public class MonitoringService {
     if (nonNull(session) && consultingTypeSettings.isMonitoring()) {
       try {
         updateMonitoring(session.getId(),
-            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingID()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingId()));
       } catch (Exception exception) {
         CreateEnquiryExceptionInformation exceptionInformation = CreateEnquiryExceptionInformation
             .builder().session(session).rcGroupId(session.getGroupId()).build();
         throw new CreateMonitoringException(
             String.format("Could not create monitoring for session %s with consultingType %s",
-                session.getId(), consultingTypeSettings.getConsultingID()),
+                session.getId(), consultingTypeSettings.getConsultingId()),
             exception, exceptionInformation);
       }
     }
@@ -73,7 +73,7 @@ public class MonitoringService {
 
     try {
       List<Monitoring> monitoring = monitoringRepository.findBySessionId(session.getId());
-      return new MonitoringDTO(convertToMonitoringMap(monitoring, session.getConsultingID()));
+      return new MonitoringDTO(convertToMonitoringMap(monitoring, session.getConsultingId()));
 
     } catch (DataAccessException ex) {
       throw new InternalServerErrorException("Database error while saving monitoring data.",
@@ -122,20 +122,20 @@ public class MonitoringService {
   }
 
   private Map<String, Object> convertToMonitoringMap(List<Monitoring> monitoringList,
-      int consultingID) {
+      int consultingId) {
 
     Map<String, Object> map = new LinkedHashMap<>();
 
     if (nonNull(monitoringList)) {
       for (MonitoringType type : MonitoringType.values()) {
-        if (type.getConsultingID() == consultingID) {
+        if (type.getConsultingId() == consultingId) {
           map.put(type.getKey(),
               convertToMonitoring(type, monitoringList));
         }
       }
     }
 
-    return monitoringStructureProvider.sortMonitoringMap(map, consultingID);
+    return monitoringStructureProvider.sortMonitoringMap(map, consultingId);
   }
 
   private LinkedHashMap<String, Object> convertToMonitoring(MonitoringType type,
@@ -178,7 +178,7 @@ public class MonitoringService {
     if (nonNull(session)) {
       try {
         deleteMonitoring(session.getId(),
-            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingID()));
+            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingId()));
 
       } catch (InternalServerErrorException ex) {
         LogService.logInternalServerError(String.format(

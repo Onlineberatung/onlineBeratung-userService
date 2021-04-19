@@ -58,7 +58,7 @@ public class PageProviderFactoryTest {
 
   @Test
   public void retrieveFirstSupportedSessionPageProvider_Should_returnConsultingTypeSessionPageProvider_When_consultingTypeFilterIsSet() {
-    SessionFilter sessionFilter = new SessionFilter().consultingType(5);
+    SessionFilter sessionFilter = new SessionFilter().consultingId(5);
 
     SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
         .retrieveFirstSupportedSessionPageProvider();
@@ -72,7 +72,7 @@ public class PageProviderFactoryTest {
         .agency(10)
         .asker("asker")
         .consultant("consultant")
-        .consultingType(5);
+        .consultingId(5);
 
     SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
         .retrieveFirstSupportedSessionPageProvider();

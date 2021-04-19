@@ -82,7 +82,7 @@ public class SessionService {
    */
   public List<Session> getSessionsForUserByConsultingType(User user,
       int consultingType) {
-    return sessionRepository.findByUserAndConsultingID(user, consultingType);
+    return sessionRepository.findByUserAndConsultingId(user, consultingType);
   }
 
   /**
@@ -159,7 +159,7 @@ public class SessionService {
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
       ConsultingTypeSettings consultingTypeSettings) {
-    Session session = new Session(user, consultingTypeSettings.getConsultingID(),
+    Session session = new Session(user, consultingTypeSettings.getConsultingId(),
         userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
         isTeamSession, consultingTypeSettings.isMonitoring());
     session.setCreateDate(nowInUtc());
@@ -293,7 +293,7 @@ public class SessionService {
     return new SessionDTO()
         .id(session.getId())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingID())
+        .consultingId(session.getConsultingId())
         .status(session.getStatus().getValue())
         .postcode(session.getPostcode())
         .groupId(session.getGroupId())
@@ -429,7 +429,7 @@ public class SessionService {
     return new ConsultantSessionDTO()
         .isTeamSession(session.isTeamSession())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingID())
+        .consultingId(session.getConsultingId())
         .id(session.getId())
         .status(session.getStatus().getValue())
         .askerId(session.getUser().getUserId())

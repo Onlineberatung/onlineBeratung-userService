@@ -498,7 +498,7 @@ components:
         email:
           type: string
           example: "email@beratungcaritas.de"
-        consultingType:
+        consultingId:
           type: integer
           example: 1
         postcode:
@@ -769,7 +769,7 @@ components:
           type: string
         consultant:
           type: string
-        consultingType:
+        consultingId:
           type: integer
 
     ConsultantFilter:

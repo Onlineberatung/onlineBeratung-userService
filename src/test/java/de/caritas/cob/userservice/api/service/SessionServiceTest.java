@@ -31,7 +31,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -278,7 +277,7 @@ public class SessionServiceTest {
     sessions.add(SESSION);
     sessions.add(SESSION_2);
 
-    when(sessionRepository.findByUserAndConsultingID(USER, 0))
+    when(sessionRepository.findByUserAndConsultingId(USER, 0))
         .thenReturn(sessions);
 
     List<Session> result =
@@ -293,7 +292,7 @@ public class SessionServiceTest {
 
     DataAccessException ex = new DataAccessException("Database error") {
     };
-    when(sessionRepository.findByUserAndConsultingID(USER, 0)).thenThrow(ex);
+    when(sessionRepository.findByUserAndConsultingId(USER, 0)).thenThrow(ex);
     try {
       sessionService.getSessionsForUserByConsultingType(USER, 0);
       fail("Expected exception: InternalServerErrorException");
@@ -528,7 +527,7 @@ public class SessionServiceTest {
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
-    assertEquals(session.getConsultingID(), result.getConsultingType().intValue());
+    assertEquals(session.getConsultingId(), result.getConsultingId().intValue());
 
   }
 

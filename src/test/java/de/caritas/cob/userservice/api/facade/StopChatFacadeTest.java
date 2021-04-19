@@ -187,7 +187,7 @@ public class StopChatFacadeTest {
 
   @Test
   public void stopChat_Should_ReturnCorrectNextStartDate_When_ChatIsRepetitive() {
-    Chat chatWithDate = new Chat("topic", KREUZBUND, CHAT_START_DATETIME, CHAT_START_DATETIME,
+    Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
         1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");

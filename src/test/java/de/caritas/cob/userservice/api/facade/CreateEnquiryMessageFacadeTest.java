@@ -192,7 +192,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws Exception {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     session.setEnquiryMessageDate(null);
     session.setAgencyId(AGENCY_ID);
@@ -207,7 +207,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
 
     when(rocketChatService.createPrivateGroup(anyString(), any()))
@@ -264,7 +264,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws RocketChatCreateGroupException {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     session.setEnquiryMessageDate(null);
     rocketChatUserDTO.setUsername(USERNAME);
@@ -289,7 +289,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws Exception {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     session.setEnquiryMessageDate(null);
     rocketChatUserDTO.setUsername(USERNAME);
@@ -302,7 +302,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(userInfoResponseDTO);
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
@@ -321,7 +321,7 @@ public class CreateEnquiryMessageFacadeTest {
   public void createEnquiryMessage_Should_ThrowInternalServerErrorException_When_ConsultantsOfAgencyCanNotBeReadFromDB() {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     rocketChatUserDTO.setUsername(USERNAME);
     userInfoResponseDTO.setUser(rocketChatUserDTO);
@@ -342,7 +342,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws Exception {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     session.setEnquiryMessageDate(null);
     rocketChatUserDTO.setUsername(USERNAME);
@@ -374,7 +374,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NO_WELCOME_MESSAGE);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -435,7 +435,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws Exception {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     consultingTypeSettings.setFeedbackChat(true);
     rocketChatUserDTO.setUsername(USERNAME);
@@ -449,7 +449,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(spySession));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(userInfoResponseDTO);
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
@@ -476,7 +476,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws RocketChatCreateGroupException {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     consultingTypeSettings.setFeedbackChat(true);
     rocketChatUserDTO.setUsername(USERNAME);
@@ -489,7 +489,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(userInfoResponseDTO);
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
@@ -507,7 +507,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws RocketChatCreateGroupException {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     rocketChatUserDTO.setUsername(USERNAME);
     userInfoResponseDTO.setUser(rocketChatUserDTO);
@@ -519,7 +519,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(userInfoResponseDTO);
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
@@ -540,7 +540,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws RocketChatCreateGroupException {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     rocketChatUserDTO.setUsername(USERNAME);
     userInfoResponseDTO.setUser(rocketChatUserDTO);
@@ -554,7 +554,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(userInfoResponseDTO);
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
@@ -574,7 +574,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws RocketChatCreateGroupException {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     consultingTypeSettings.setFeedbackChat(true);
     rocketChatUserDTO.setUsername(USERNAME);
@@ -587,7 +587,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(userInfoResponseDTO);
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
@@ -608,7 +608,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -636,7 +636,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -665,7 +665,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -697,7 +697,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws Exception {
 
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT);
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
@@ -733,7 +733,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws RocketChatCreateGroupException, RocketChatAddUserToGroupException {
 
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT);
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
@@ -772,7 +772,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(spySession));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -802,7 +802,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT_AND_WELCOME_MESSAGE);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -842,7 +842,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -881,7 +881,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(consultingTypeManager
-        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingID()))
+        .getConsultingTypeSettings(SESSION_WITHOUT_CONSULTANT.getConsultingId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FEEDBACK_CHAT_AND_WELCOME_MESSAGE);
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -911,7 +911,7 @@ public class CreateEnquiryMessageFacadeTest {
       throws Exception {
 
     session.setUser(user);
-    session.setConsultingID(0);
+    session.setConsultingId(0);
     session.setConsultant(null);
     session.setEnquiryMessageDate(null);
     session.setAgencyId(AGENCY_ID);
@@ -927,7 +927,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(session));
     when(consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingID()))
+        .getConsultingTypeSettings(session.getConsultingId()))
         .thenReturn(consultingTypeSettings);
 
     when(rocketChatService.createPrivateGroup(anyString(), any()))

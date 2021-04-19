@@ -110,7 +110,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private boolean shouldInformAllConsultantsOfTeamSession() {
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(session.getConsultingID());
+        consultingTypeManager.getConsultingTypeSettings(session.getConsultingId());
     return session.isTeamSession() && isTrue(
         consultingTypeSettings.getNotifications().getNewMessage()
             .getTeamSession().getToConsultant().getAllTeamConsultants());

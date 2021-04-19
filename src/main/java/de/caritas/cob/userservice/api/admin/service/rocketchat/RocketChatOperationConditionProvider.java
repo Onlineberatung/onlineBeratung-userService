@@ -42,7 +42,7 @@ class RocketChatOperationConditionProvider {
   }
 
   private boolean canAddToTeamConsultingSession() {
-    return !consultingTypeManager.getConsultingTypeSettings(this.session.getConsultingID())
+    return !consultingTypeManager.getConsultingTypeSettings(this.session.getConsultingId())
         .isExcludeNonMainConsultantsFromTeamSessions() || isMainConsultant();
   }
 

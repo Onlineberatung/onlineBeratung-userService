@@ -45,7 +45,7 @@ public class CreateNewConsultingTypeFacadeTest {
     User user = easyRandom.nextObject(User.class);
     ConsultingTypeSettings consultingTypeSettings = easyRandom
         .nextObject(ConsultingTypeSettings.class);
-    consultingTypeSettings.setConsultingID(0);
+    consultingTypeSettings.setConsultingId(0);
 
     createNewConsultingTypeFacade
         .initializeNewConsultingType(userDTO, user, consultingTypeSettings);

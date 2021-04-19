@@ -78,7 +78,7 @@ public class CreateChatFacadeTest {
   @Before
   public void setup() {
     when(chat.getId()).thenReturn(CHAT_ID);
-    when(chat.getConsultingType()).thenReturn(ConsultingType.KREUZBUND);
+    when(chat.getConsultingId()).thenReturn(15);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 

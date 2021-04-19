@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 public class ConsultingTypeSettings {
 
-  private int consultingID;
+  private int consultingId;
   private String consultingUrlName;
   private boolean excludeNonMainConsultantsFromTeamSessions;
   private boolean isGroupChat;

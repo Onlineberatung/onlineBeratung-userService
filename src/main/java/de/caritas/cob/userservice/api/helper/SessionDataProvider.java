@@ -7,7 +7,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
@@ -58,24 +57,24 @@ public class SessionDataProvider {
       SessionDataDTO sessionData) {
 
     List<SessionData> sessionDataList = new ArrayList<>();
-    if (getSessionDataInitializing(session.getConsultingID()).isAddictiveDrugs()) {
+    if (getSessionDataInitializing(session.getConsultingId()).isAddictiveDrugs()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),
           getAddictiveDrugsValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingID()).isAge()) {
+    if (getSessionDataInitializing(session.getConsultingId()).isAge()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.AGE.getValue(), getAgeValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingID()).isGender()) {
+    if (getSessionDataInitializing(session.getConsultingId()).isGender()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.GENDER.getValue(), getGenderValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingID()).isRelation()) {
+    if (getSessionDataInitializing(session.getConsultingId()).isRelation()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.RELATION.getValue(), getRelationValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingID()).isState()) {
+    if (getSessionDataInitializing(session.getConsultingId()).isState()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.STATE.getValue(), getStateValue(sessionData)));
     }

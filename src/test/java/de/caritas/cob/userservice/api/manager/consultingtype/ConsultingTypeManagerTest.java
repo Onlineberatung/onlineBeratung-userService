@@ -157,7 +157,7 @@ public class ConsultingTypeManagerTest {
                 "/" + FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE + "/" + jsonFileName);
         ConsultingTypeSettings consultingTypeSettings = mapper
             .readValue(inputStream, typeReference);
-        if (consultingTypeSettings.getConsultingID() == consultingType) {
+        if (consultingTypeSettings.getConsultingId() == consultingType) {
           return consultingTypeSettings;
         }
       }

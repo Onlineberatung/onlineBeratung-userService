@@ -265,7 +265,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingType(0);
+      .consultingId(0);
   public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)
@@ -274,7 +274,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingType(1);
+      .consultingId(1);
   public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)
@@ -283,7 +283,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingType(15);
+      .consultingId(15);
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
   /*
    * Users / Consultants
@@ -492,7 +492,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(CONSULTING_TYPE_SUCHT.getValue())
+      .consultingId(CONSULTING_TYPE_SUCHT.getValue())
       .status(SESSION_STATUS_IN_PROGRESS)
       .postcode(POSTCODE)
       .groupId(RC_GROUP_ID)
@@ -504,7 +504,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_U25 = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(CONSULTING_TYPE_U25.getValue())
+      .consultingId(CONSULTING_TYPE_U25.getValue())
       .status(SESSION_STATUS_IN_PROGRESS)
       .postcode(POSTCODE)
       .groupId(RC_GROUP_ID)
@@ -531,7 +531,7 @@ public class TestConstants {
       new SessionDTO()
           .id(SESSION_ID)
           .agencyId(AGENCY_ID)
-          .consultingType(0)
+          .consultingId(0)
           .status(0)
           .groupId(RC_GROUP_ID)
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
@@ -542,7 +542,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_2 = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(0)
+      .consultingId(0)
       .status(0)
       .groupId(RC_GROUP_ID_2)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_2)
@@ -553,7 +553,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_3 = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(0)
+      .consultingId(0)
       .status(0)
       .groupId(RC_GROUP_ID_3)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
@@ -564,7 +564,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_WITH_FEEDBACK = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(0)
+      .consultingId(0)
       .status(0)
       .groupId(RC_GROUP_ID_3)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
@@ -576,7 +576,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(0)
+      .consultingId(0)
       .status(0)
       .groupId(RC_GROUP_ID_3)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
@@ -618,11 +618,11 @@ public class TestConstants {
       new ChatDTO(CHAT_TOPIC, CHAT_START_DATE, CHAT_START_TIME, CHAT_DURATION, CHAT_REPETITIVE);
   public static final CreateChatResponseDTO CREATE_CHAT_RESPONSE_DTO =
       new CreateChatResponseDTO().groupId(RC_GROUP_ID).chatLink(CHAT_LINK_SUCHT);
-  public static final Chat ACTIVE_CHAT = new Chat(CHAT_ID, CHAT_TOPIC, CONSULTING_TYPE_SUCHT,
+  public static final Chat ACTIVE_CHAT = new Chat(CHAT_ID, CHAT_TOPIC, 0,
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME),
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME), CHAT_DURATION_30, IS_REPETITIVE,
       CHAT_INTERVAL_WEEKLY, IS_ACTIVE, CHAT_MAX_PARTICIPANTS, RC_GROUP_ID, CONSULTANT, null);
-  public static final Chat INACTIVE_CHAT = new Chat(CHAT_ID_2, CHAT_TOPIC, CONSULTING_TYPE_SUCHT,
+  public static final Chat INACTIVE_CHAT = new Chat(CHAT_ID_2, CHAT_TOPIC, 0,
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME),
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME), CHAT_DURATION_30, IS_REPETITIVE,
       ChatInterval.WEEKLY, IS_NOT_ACTIVE, CHAT_MAX_PARTICIPANTS, RC_GROUP_ID, CONSULTANT, null);
@@ -873,7 +873,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK_CHAT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(0)
+      .consultingId(0)
       .status(0)
       .groupId(RC_GROUP_ID)
       .askerRcId(RC_USER_ID)

@@ -51,7 +51,7 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   public void createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned()
       throws AgencyServiceHelperException {
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(1)
+        .consultingId(1)
         .id(2L);
 
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))

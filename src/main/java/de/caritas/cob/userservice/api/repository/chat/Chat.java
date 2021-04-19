@@ -22,7 +22,6 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,7 +53,7 @@ public class Chat {
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
   @NonNull
-  private ConsultingType consultingType;
+  private int consultingId;
 
   @Column(name = "initial_start_date", updatable = true, nullable = false)
   @NonNull
@@ -93,11 +92,11 @@ public class Chat {
   @OneToMany(mappedBy = "chat", orphanRemoval = true)
   private Set<ChatAgency> chatAgencies;
 
-  public Chat(String topic, ConsultingType consultingType, LocalDateTime initialStartDate,
+  public Chat(String topic, int consultingId, LocalDateTime initialStartDate,
       LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
       Consultant chatOwner) {
     this.topic = topic;
-    this.consultingType = consultingType;
+    this.consultingId = consultingId;
     this.initialStartDate = initialStartDate;
     this.startDate = startDate;
     this.duration = duration;

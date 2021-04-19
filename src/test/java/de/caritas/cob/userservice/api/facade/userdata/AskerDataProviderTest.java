@@ -65,7 +65,7 @@ public class AskerDataProviderTest {
     LinkedHashMap<String, Object> consultingTypeData =
         (LinkedHashMap<String, Object>) askerDataProvider.retrieveData(USER)
             .getConsultingTypes()
-            .get(Integer.toString(AGENCY_DTO_SUCHT.getConsultingType()));
+            .get(Integer.toString(AGENCY_DTO_SUCHT.getConsultingId()));
     AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
 
     assertEquals(AGENCY_DTO_SUCHT, agency);
@@ -83,7 +83,7 @@ public class AskerDataProviderTest {
     LinkedHashMap<String, Object> consultingTypeData =
         (LinkedHashMap<String, Object>) askerDataProvider.retrieveData(USER)
             .getConsultingTypes()
-            .get(Integer.toString(AGENCY_DTO_KREUZBUND.getConsultingType()));
+            .get(Integer.toString(AGENCY_DTO_KREUZBUND.getConsultingId()));
     AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
 
     assertEquals(AGENCY_DTO_KREUZBUND, agency);

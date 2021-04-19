@@ -110,7 +110,7 @@ public class CreateChatFacade {
 
     return new CreateChatResponseDTO()
         .groupId(rcGroupId)
-        .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingType()));
+        .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingId()));
 
   }
 

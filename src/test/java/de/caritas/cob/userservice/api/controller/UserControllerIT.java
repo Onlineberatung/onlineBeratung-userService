@@ -241,7 +241,7 @@ public class UserControllerIT {
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingType(0)
+      .consultingId(0)
       .status(2)
       .postcode(POSTCODE)
       .groupId(RC_GROUP_ID)
@@ -257,7 +257,7 @@ public class UserControllerIT {
       .description(DESCRIPTION)
       .teamAgency(false)
       .offline(false)
-      .consultingType(0);
+      .consultingId(0);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
