@@ -14,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
@@ -34,9 +33,9 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -79,7 +78,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   private SessionRepository sessionRepository;
 
   @MockBean
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
 
   @MockBean
   private KeycloakAdminClientService keycloakAdminClientService;
@@ -89,7 +88,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
   @Test
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid()
-      throws AgencyServiceHelperException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
+      throws RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
@@ -103,7 +102,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(false);
     agencyDTO.setConsultingType(ConsultingType.SUCHT);
-    when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+    when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
         SessionStatus.NEW);
@@ -112,7 +111,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     verify(rocketChatService, times(1))
-        .addTechnicalUserToGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
+        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
     verify(rocketChatService, times(1))
         .addUserToGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));
@@ -120,7 +119,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .addUserToGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
     verify(rocketChatService, times(1))
-        .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
+        .removeTechnicalUserFromGroup(enquirySessionWithoutConsultant.getGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -130,7 +129,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
   @Test
   public void createNewConsultantAgency_Should_addConsultantToTeamSessionRocketChatGroups_When_ParamsAreValid()
-      throws AgencyServiceHelperException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
+      throws RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
@@ -144,7 +143,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(true);
     agencyDTO.setConsultingType(ConsultingType.SUCHT);
-    when(agencyServiceHelper.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+    when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
         SessionStatus.IN_PROGRESS);
@@ -153,7 +152,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     verify(rocketChatService, times(1))
-        .addTechnicalUserToGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
+        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
     verify(rocketChatService, times(1))
         .addUserToGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));
@@ -161,7 +160,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .addUserToGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
     verify(rocketChatService, times(1))
-        .removeTechnicalUserFromGroup(eq(enquirySessionWithoutConsultant.getGroupId()));
+        .removeTechnicalUserFromGroup(enquirySessionWithoutConsultant.getGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -221,37 +220,33 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   }
 
   @Test(expected = BadRequestException.class)
-  public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyServiceReturnesNullForAgency()
-      throws AgencyServiceHelperException {
+  public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyServiceReturnesNullForAgency() {
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role");
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
-    when(this.agencyServiceHelper.getAgencyWithoutCaching(any())).thenReturn(null);
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(null);
 
     this.consultantAgencyRelationCreatorService.createNewConsultantAgency(consultant.getId(),
         createConsultantAgencyDTO);
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void createNewConsultantAgency_Should_throwInternalServerErrorException_When_agencyServiceThrowsAgencyServiceHelperException()
-      throws AgencyServiceHelperException {
+  public void createNewConsultantAgency_Should_throwInternalServerErrorException_When_agencyServiceThrowsAgencyServiceHelperException() {
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role");
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
-    when(agencyServiceHelper.getAgencyWithoutCaching(any()))
-        .thenThrow(new AgencyServiceHelperException(new Exception()));
+    when(agencyService.getAgencyWithoutCaching(any())).thenThrow(new InternalServerErrorException(""));
 
     this.consultantAgencyRelationCreatorService.createNewConsultantAgency(consultant.getId(),
         createConsultantAgencyDTO);
   }
 
   @Test(expected = BadRequestException.class)
-  public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsU25AndConsultantHasAnotherConsultingTypeAssigned()
-      throws AgencyServiceHelperException {
+  public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsU25AndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
         .consultingType(ConsultingType.EMIGRATION);
@@ -260,8 +255,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .consultingType(ConsultingType.U25)
         .id(2L);
 
-    when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
-    when(agencyServiceHelper.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
+    when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
+    when(agencyService.getAgencyWithoutCaching(2L)).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
@@ -274,8 +269,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   }
 
   @Test(expected = BadRequestException.class)
-  public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsKreuzbundAndConsultantHasAnotherConsultingTypeAssigned()
-      throws AgencyServiceHelperException {
+  public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsKreuzbundAndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
         .consultingType(ConsultingType.EMIGRATION);
@@ -284,8 +278,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .consultingType(ConsultingType.KREUZBUND)
         .id(2L);
 
-    when(agencyServiceHelper.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
-    when(agencyServiceHelper.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
+    when(agencyService.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
+    when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()

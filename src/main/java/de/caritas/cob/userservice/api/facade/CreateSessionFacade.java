@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
-import de.caritas.cob.userservice.api.helper.AgencyHelper;
+import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 public class CreateSessionFacade {
 
   private final @NonNull SessionService sessionService;
-  private final @NonNull AgencyHelper agencyHelper;
+  private final @NonNull AgencyVerifier agencyVerifier;
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull SessionDataService sessionDataService;
   private final @NonNull RollbackFacade rollbackFacade;
@@ -98,7 +98,7 @@ public class CreateSessionFacade {
 
   private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, ConsultingType consultingType) {
     AgencyDTO agencyDTO =
-        agencyHelper.getVerifiedAgency(userDTO.getAgencyId(), consultingType);
+        agencyVerifier.getVerifiedAgency(userDTO.getAgencyId(), consultingType);
 
     if (isNull(agencyDTO)) {
       throw new BadRequestException(

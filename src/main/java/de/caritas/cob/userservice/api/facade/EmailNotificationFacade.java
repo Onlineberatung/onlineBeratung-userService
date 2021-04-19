@@ -2,13 +2,13 @@ package de.caritas.cob.userservice.api.facade;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -18,7 +18,6 @@ import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
@@ -50,7 +49,7 @@ public class EmailNotificationFacade {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
-  private final @NonNull AgencyServiceHelper agencyServiceHelper;
+  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantService consultantService;
@@ -69,7 +68,7 @@ public class EmailNotificationFacade {
 
     try {
       EmailSupplier newEnquiryMail = new NewEnquiryEmailSupplier(session,
-          consultantAgencyRepository, agencyServiceHelper, applicationBaseUrl);
+          consultantAgencyRepository, agencyService, applicationBaseUrl);
       sendMailTasksToMailService(newEnquiryMail);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
@@ -78,7 +77,7 @@ public class EmailNotificationFacade {
   }
 
   private void sendMailTasksToMailService(EmailSupplier mailsToSend)
-      throws RocketChatGetGroupMembersException, AgencyServiceHelperException {
+      throws RocketChatGetGroupMembersException {
     List<MailDTO> generatedMails = mailsToSend.generateEmails();
     if (isNotEmpty(generatedMails)) {
       MailsDTO mailsDTO = new MailsDTO()
@@ -92,8 +91,8 @@ public class EmailNotificationFacade {
    * message was written.
    *
    * @param rcGroupId the rocket chat group id
-   * @param roles roles to decide the regarding recipients
-   * @param userId the user id of initiating user
+   * @param roles     roles to decide the regarding recipients
+   * @param userId    the user id of initiating user
    */
   @Async
   @Transactional
@@ -120,7 +119,7 @@ public class EmailNotificationFacade {
    * message was written.
    *
    * @param rcFeedbackGroupId group id of feedback chat
-   * @param userId regarding user id
+   * @param userId            regarding user id
    */
   @Async
   public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, String userId) {
@@ -142,8 +141,8 @@ public class EmailNotificationFacade {
    * different consultant.
    *
    * @param receiverConsultant the target consultant
-   * @param senderUserId the id of initiating user
-   * @param askerUserName the name of the asker
+   * @param senderUserId       the id of initiating user
+   * @param askerUserName      the name of the asker
    */
   @Async
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,

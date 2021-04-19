@@ -81,16 +81,7 @@ public class UserService {
    * @return Optional of user
    */
   public Optional<User> getUserViaAuthenticatedUser(AuthenticatedUser authenticatedUser) {
-
-    Optional<User> userOptional = getUser(authenticatedUser.getUserId());
-
-    if (!userOptional.isPresent()) {
-      throw new InternalServerErrorException(
-          String.format("User with id %s not found.", authenticatedUser.getUserId()));
-    }
-
-    return userOptional;
-
+    return getUser(authenticatedUser.getUserId());
   }
 
   /**

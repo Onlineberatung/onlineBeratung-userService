@@ -33,7 +33,8 @@ public enum ConsultingType {
   EMIGRATION(17, "rw-auswanderung"),
   HOSPICE(18, "hospiz-palliativ"),
   REGIONAL(19, "regionale-angebote"),
-  MEN(20, "jungen-und-maenner");
+  MEN(20, "jungen-und-maenner"),
+  SUPPORTGROUPVECHTA(21, "selbsthilfe-vechta");
 
   private final int value;
   private final String urlName;
@@ -47,5 +48,9 @@ public enum ConsultingType {
         .filter(legNo -> legNo.value == Integer.parseInt(value))
         .findFirst()
         .orElseThrow(IllegalArgumentException::new);
+  }
+
+  public boolean isGroupChat() {
+    return this.value == KREUZBUND.value || this.value == SUPPORTGROUPVECHTA.value;
   }
 }
