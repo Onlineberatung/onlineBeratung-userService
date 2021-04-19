@@ -26,6 +26,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_USER_DATA;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
@@ -144,6 +145,7 @@ import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
@@ -155,6 +157,7 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
@@ -175,7 +178,6 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
-import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -402,7 +404,7 @@ public class UserControllerIT {
   @MockBean
   private MandatoryFieldsProvider mandatoryFieldsProvider;
   @MockBean
-  private ConsultantService consultantService;
+  private ConsultantDataFacade consultantDataFacade;
   @MockBean
   private UserService userService;
   @MockBean
@@ -2237,4 +2239,39 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
+
+  @Test
+  public void updateUserData_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(consultantDataFacade);
+  }
+
+  @Test
+  public void updateUserData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new UpdateConsultantDTO().email("mail@mail.de").firstname("firstname").lastname(
+                "lastname")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantDataFacade, times(1)).updateConsultantData(any());
+  }
+
+  @Test
+  public void updateUserData_Should_ReturnBadRequest_When_emailAddressIsNotValid() throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new UpdateConsultantDTO().email("invalid").firstname("firstname").lastname("lastname")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
 }

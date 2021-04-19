@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.validation;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UpdateConsultantDTOAbsenceInputAdapter implements AbsenceInputValidation {
 
-  private final @NonNull UpdateConsultantDTO updateConsultantDTO;
+  private final @NonNull UpdateAdminConsultantDTO updateConsultantDTO;
 
   /**
    * Returnes if absent is set to true.

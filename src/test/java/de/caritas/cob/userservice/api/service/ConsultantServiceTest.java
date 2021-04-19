@@ -59,55 +59,6 @@ public class ConsultantServiceTest {
   private AuthenticatedUser authenticatedUser;
 
   @Test
-  public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() {
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
-    when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
-
-    Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO);
-
-    Assert.assertEquals(consultant.getAbsenceMessage(), ABSENCE_DTO.getMessage());
-    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO.getAbsent());
-  }
-
-  @Test
-  public void saveEnquiryMessageAndRocketChatGroupId_Should_RemoveHtmlCodeAndJsFromMessageForXssProtection() {
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(CONSULTANT);
-    when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
-
-    Consultant consultant = consultantService.updateConsultantAbsent(CONSULTANT,
-        ABSENCE_DTO_WITH_HTML_AND_JS);
-
-    Assert.assertEquals(consultant.isAbsent(), ABSENCE_DTO_WITH_HTML_AND_JS.getAbsent());
-    Assert
-        .assertNotEquals(consultant.getAbsenceMessage(), ABSENCE_DTO_WITH_HTML_AND_JS.getMessage());
-    Assert.assertEquals(MESSAGE, consultant.getAbsenceMessage());
-  }
-
-  @Test
-  public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsEmpty() {
-    Consultant consultant = Mockito.mock(Consultant.class);
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
-
-    consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_EMPTY_MESSAGE);
-
-    ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
-    verify(consultantRepository).save(captor.capture());
-    assertNull(captor.getValue().getAbsenceMessage());
-  }
-
-  @Test
-  public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsNull() {
-    Consultant consultant = Mockito.mock(Consultant.class);
-    when(validatedUserAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
-
-    consultantService.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_NULL_MESSAGE);
-
-    ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
-    verify(consultantRepository).save(captor.capture());
-    assertNull(captor.getValue().getAbsenceMessage());
-  }
-
-  @Test
   public void getConsultant_Should_ReturnConsultantWhenFound() {
     when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID))
         .thenReturn(Optional.of(CONSULTANT));
