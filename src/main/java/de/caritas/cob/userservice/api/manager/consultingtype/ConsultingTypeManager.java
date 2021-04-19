@@ -89,7 +89,7 @@ public class ConsultingTypeManager {
   public boolean isConsultantBoundedToAgency(int consultingID) {
     return consultingTypeSettingsMap.entrySet().stream()
         .filter(entrySet -> entrySet.getKey() == consultingID).findFirst()
-        .map(entry -> entry.getValue().isConsultantBoundedToAgency())
+        .map(entry -> entry.getValue().isConsultantBoundedToConsultingType())
         .orElseThrow(
             () -> new NotFoundException(String.format("No Settings found for consultingID %d",
                 consultingID)));

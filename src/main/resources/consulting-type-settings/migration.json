@@ -1,9 +1,9 @@
 {
   "id": 16,
   "urlName": "migration",
-  "addAllConsultantToTeamConsultingSession": true,
-  "onlyGroupChat": false,
-  "consultantBoundedToAgency": false,
+  "excludeNonMainConsultantsFromTeamSessions ": false,
+  "isGroupChat": false,
+  "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

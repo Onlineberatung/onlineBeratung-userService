@@ -1,12 +1,13 @@
 {
   "id": 7,
   "urlName": "leben-im-alter",
-  "addAllConsultantToTeamConsultingSession": true,
-  "onlyGroupChat": false,
-  "consultantBoundedToAgency": false,
+  "excludeNonMainConsultantsFromTeamSessions ": false,
+  "isGroupChat": false,
+  "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,
+  "sendSaveSessionDataMessage": false,
   "sessionDataInitializing": {
     "addictiveDrugs": false,
     "age": false,

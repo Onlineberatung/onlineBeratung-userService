@@ -1,43 +1,44 @@
 {
   "id": 12,
   "urlName": "hiv-aids-beratung",
-  "addAllConsultantToTeamConsultingSession": true,
-  "onlyGroupChat": false,
-  "consultantBoundedToAgency": false,
-  "sendWelcomeMessage": false,
-  "welcomeMessage": null,
-  "sendFurtherStepsMessage": true,
-  "sessionDataInitializing": {
-    "addictiveDrugs": false,
-    "age": false,
-    "gender": false,
-    "relation": false,
-    "state": false
-  },
-  "monitoring": false,
-  "monitoringFile": null,
-  "feedbackChat": false,
-  "notifications": {
-    "newMessage": {
-      "teamSession": {
-        "toConsultant": {
-          "allTeamConsultants": true
-        }
-      }
-    }
-  },
-  "languageFormal": true,
-  "roles": {
-    "consultant": {
-      "default": [
-        "consultant"
-      ]
-    }
-  },
-  "registration": {
-    "mandatoryFields": {
-      "age": false,
-      "state": false
-    }
-  }
+  "excludeNonMainConsultantsFromTeamSessions ": false,
+  "isGroupChat": false,
+  "consultantBoundedToConsultingType": false,
+	"sendWelcomeMessage": false,
+	"welcomeMessage": null,
+	"sendFurtherStepsMessage": true,
+	"sendSaveSessionDataMessage": false,
+	"sessionDataInitializing": {
+		"addictiveDrugs": false,
+		"age": false,
+		"gender": false,
+		"relation": false,
+		"state": false
+	},
+	"monitoring": false,
+	"monitoringFile": null,
+	"feedbackChat": false,
+	"notifications": {
+		"newMessage": {
+			"teamSession": {
+				"toConsultant": {
+					"allTeamConsultants": true
+				}
+			}
+		}
+	},
+	"languageFormal": true,
+	"roles": {
+		"consultant": {
+			"default": [
+				"consultant"
+			]
+		}
+	},
+	"registration": {
+		"mandatoryFields": {
+			"age": false,
+			"state": false
+		}
+	}
 }

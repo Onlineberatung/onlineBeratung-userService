@@ -16,9 +16,9 @@ public class ConsultingTypeSettings {
 
   private int consultingID;
   private String consultingUrlName;
-  private boolean addAllConsultantToTeamConsultingSession;
-  private boolean onlyGroupChat;
-  private boolean consultantBoundedToAgency;
+  private boolean excludeNonMainConsultantsFromTeamSessions;
+  private boolean isGroupChat;
+  private boolean consultantBoundedToConsultingType;
   private boolean sendWelcomeMessage;
   private String welcomeMessage;
   private boolean sendFurtherStepsMessage;

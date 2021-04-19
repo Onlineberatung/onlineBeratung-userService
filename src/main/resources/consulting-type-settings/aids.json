@@ -1,9 +1,9 @@
 {
   "id": 12,
   "urlName": "hiv-aids-beratung",
-  "addAllConsultantToTeamConsultingSession": true,
-  "onlyGroupChat": false,
-  "consultantBoundedToAgency": false,
+  "excludeNonMainConsultantsFromTeamSessions ": false,
+  "isGroupChat": false,
+  "consultantBoundedToConsultingType": false,
 	"sendWelcomeMessage": false,
 	"welcomeMessage": null,
 	"sendFurtherStepsMessage": true,

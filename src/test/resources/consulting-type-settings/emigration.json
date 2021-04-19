@@ -1,12 +1,13 @@
 {
   "id": 17,
   "urlName": "rw-auswanderung",
-  "addAllConsultantToTeamConsultingSession": true,
-  "onlyGroupChat": false,
+  "excludeNonMainConsultantsFromTeamSessions ": false,
+  "isGroupChat": false,
+  "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
-  "consultantBoundedToAgency": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,
+  "sendSaveSessionDataMessage": false,
   "sessionDataInitializing": {
     "addictiveDrugs": false,
     "age": false,

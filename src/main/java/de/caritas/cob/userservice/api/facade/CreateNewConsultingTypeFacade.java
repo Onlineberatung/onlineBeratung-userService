@@ -67,7 +67,7 @@ public class CreateNewConsultingTypeFacade {
 
     Long sessionId = null;
 
-    if (consultingTypeSettings.isOnlyGroupChat()) {
+    if (consultingTypeSettings.isGroupChat()) {
       createUserChatRelationFacade
           .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
               rocketChatCredentials);
