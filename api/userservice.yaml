@@ -1120,7 +1120,7 @@ components:
         - agencyId
         - password
         - termsAccepted
-        - consultingId
+        - consultingType
       properties:
         username:
           type: string
@@ -1141,7 +1141,7 @@ components:
         termsAccepted:
           type: string
           example: true
-        consultingId:
+        consultingType:
           type: string
           example: 3
 
@@ -1221,7 +1221,7 @@ components:
       required:
         - id
         - agencyId
-        - consultingId
+        - consultingType
         - status
       properties:
         id:
@@ -1232,7 +1232,7 @@ components:
           type: integer
           format: int64
           example: 100
-        consultingId:
+        consultingType:
           type: integer
           example: 1
         status:
@@ -1361,7 +1361,7 @@ components:
           type: integer
           format: int64
           example: 100
-        consultingId:
+        consultingType:
           type: integer
           example: 1
         status:
@@ -1417,7 +1417,7 @@ components:
         - duration
         - repetitive
         - active
-        - consultingId
+        - consultingType
         - groupId
       properties:
         id:
@@ -1444,7 +1444,7 @@ components:
         active:
           type: boolean
           example: false
-        consultingId:
+        consultingType:
           type: integer
           example: 0
         lastMessage:
@@ -1654,7 +1654,7 @@ components:
         offline:
           type: boolean
           example: false
-        consultingId:
+        consultingType:
           type: integer
           example: 1
 
@@ -1803,7 +1803,7 @@ components:
       required:
         - postcode
         - agencyId
-        - consultingId
+        - consultingType
       properties:
         postcode:
           type: string
@@ -1814,7 +1814,7 @@ components:
           type: integer
           format: int64
           example: 232
-        consultingId:
+        consultingType:
           type: string
           example: 1
 
