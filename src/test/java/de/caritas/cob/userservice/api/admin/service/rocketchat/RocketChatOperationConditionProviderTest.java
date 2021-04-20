@@ -43,7 +43,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSession() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingId()).thenReturn(15);
+    when(this.session.getConsultingTypeId()).thenReturn(15);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
 
@@ -54,7 +54,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasAuthority() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingId()).thenReturn(1);
+    when(this.session.getConsultingTypeId()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(true);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
@@ -66,7 +66,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasRole() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingId()).thenReturn(1);
+    when(this.session.getConsultingTypeId()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
     when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
@@ -98,7 +98,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatGroup_Should_returnFalse_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasNoAuthorityAndNoRole() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
-    when(this.session.getConsultingId()).thenReturn(1);
+    when(this.session.getConsultingTypeId()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
     when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(false);
 

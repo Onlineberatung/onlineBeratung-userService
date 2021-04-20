@@ -51,17 +51,17 @@ public class CreateUserFacade {
     }
 
     ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingId());
-    checkIfConsultingTypeMatchesToAgency(userDTO, consultingTypeSettings.getConsultingId());
+        consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
+    checkIfConsultingTypeMatchesToAgency(userDTO, consultingTypeSettings.getConsultingTypeId());
     KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDTO);
     updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
-        consultingTypeSettings.getConsultingId());
+        consultingTypeSettings.getConsultingTypeId());
   }
 
-  private void checkIfConsultingTypeMatchesToAgency(UserDTO user, int consultingId) {
-    if (!agencyVerifier.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingId)) {
+  private void checkIfConsultingTypeMatchesToAgency(UserDTO user, int consultingTypeId) {
+    if (!agencyVerifier.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingTypeId)) {
       throw new BadRequestException(String.format("Agency with id %s does not match to consulting"
-          + " type %d", user.getAgencyId(), consultingId));
+          + " type %d", user.getAgencyId(), consultingTypeId));
     }
   }
 

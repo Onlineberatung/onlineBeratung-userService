@@ -95,7 +95,7 @@ public class UserDTO implements UserRegistrationDTO {
   @Pattern(regexp = CONSULTING_TYPE_REGEXP, message = "{user.consultingType.invalid}")
   @ApiModelProperty(required = true, example = "\"0\"", position = 11)
   @JsonProperty("consultingType")
-  private String consultingId;
+  private String consultingType;
 
   private boolean newUserAccount;
 
@@ -104,20 +104,20 @@ public class UserDTO implements UserRegistrationDTO {
   }
 
   public UserDTO(String username, String postcode, Long agencyId, String password, String email,
-      String termsAccepted, String consultingId) {
+      String termsAccepted, String consultingTypeId) {
     this.username = username;
     this.postcode = postcode;
     this.agencyId = agencyId;
     this.password = password;
     this.email = email;
     this.termsAccepted = termsAccepted;
-    this.consultingId = consultingId;
+    this.consultingType = consultingTypeId;
   }
 
   public UserDTO(String age, String state, String consultingType) {
     this.age = age;
     this.state = state;
-    this.consultingId = consultingType;
+    this.consultingType = consultingType;
   }
 
   @Override
@@ -129,7 +129,7 @@ public class UserDTO implements UserRegistrationDTO {
         + ", age='" + age + '\''
         + ", state='" + state + '\''
         + ", termsAccepted='" + termsAccepted + '\''
-        + ", consultingType='" + consultingId + '\''
+        + ", consultingType='" + consultingType + '\''
         + '}';
   }
 }

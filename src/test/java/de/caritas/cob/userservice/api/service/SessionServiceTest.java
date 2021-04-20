@@ -270,7 +270,7 @@ public class SessionServiceTest {
     sessions.add(SESSION);
     sessions.add(SESSION_2);
 
-    when(sessionRepository.findByUserAndConsultingId(USER, 0))
+    when(sessionRepository.findByUserAndConsultingTypeId(USER, 0))
         .thenReturn(sessions);
 
     List<Session> result =
@@ -285,7 +285,7 @@ public class SessionServiceTest {
 
     DataAccessException ex = new DataAccessException("Database error") {
     };
-    when(sessionRepository.findByUserAndConsultingId(USER, 0)).thenThrow(ex);
+    when(sessionRepository.findByUserAndConsultingTypeId(USER, 0)).thenThrow(ex);
     try {
       sessionService.getSessionsForUserByConsultingType(USER, 0);
       fail("Expected exception: InternalServerErrorException");
@@ -520,7 +520,7 @@ public class SessionServiceTest {
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
-    assertEquals(session.getConsultingId(), result.getConsultingId().intValue());
+    assertEquals(session.getConsultingTypeId(), result.getConsultingType().intValue());
 
   }
 

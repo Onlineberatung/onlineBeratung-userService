@@ -45,7 +45,7 @@ public class UserDTOBuilder {
       UserDTO userDTO = new UserDTO();
       userDTO.setAgencyId(this.newRegistrationDto.getAgencyId());
       userDTO.setPostcode(this.newRegistrationDto.getPostcode());
-      userDTO.setConsultingId(this.newRegistrationDto.getConsultingId());
+      userDTO.setConsultingType(this.newRegistrationDto.getConsultingType());
 
       return userDTO;
     }

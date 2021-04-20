@@ -73,7 +73,7 @@ public class SessionServiceIT {
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
-    assertEquals(session.getConsultingId(), result.getConsultingId().intValue());
+    assertEquals(session.getConsultingTypeId(), result.getConsultingType().intValue());
   }
 
   @Test

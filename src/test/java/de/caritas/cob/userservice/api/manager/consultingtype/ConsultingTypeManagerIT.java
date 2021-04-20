@@ -29,7 +29,7 @@ class ConsultingTypeManagerIT {
   private ConsultingTypeManager consultingTypeManager;
 
   @ParameterizedTest
-  @MethodSource("generateConsultingIds")
+  @MethodSource("generateConsultingTypeIds")
   void init_Should_InitializeConsultingTypeSettingFromJsonFile(int consultingType)
       throws Exception {
     ConsultingTypeSettings consultingTypeSettings = loadConsultingTypeSettings(consultingType);
@@ -37,7 +37,7 @@ class ConsultingTypeManagerIT {
     ConsultingTypeSettings result =
         consultingTypeManager.getConsultingTypeSettings(consultingType);
 
-    assertSameValue(result::getConsultingId, consultingTypeSettings::getConsultingId);
+    assertSameValue(result::getConsultingTypeId, consultingTypeSettings::getConsultingTypeId);
     assertSameValue(result::isSendWelcomeMessage, consultingTypeSettings::isSendWelcomeMessage);
     assertSameValue(result::getWelcomeMessage, consultingTypeSettings::getWelcomeMessage);
     assertSameValue(result.getSessionDataInitializing()::isAddictiveDrugs,
@@ -67,7 +67,7 @@ class ConsultingTypeManagerIT {
     assertThat(result.get(), is(expected.get()));
   }
 
-  static Stream<Integer> generateConsultingIds() {
+  static Stream<Integer> generateConsultingTypeIds() {
     return IntStream.range(0, countConsultingTypeSettings()).boxed();
   }
 

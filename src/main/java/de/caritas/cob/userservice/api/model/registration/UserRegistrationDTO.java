@@ -6,7 +6,7 @@ public interface UserRegistrationDTO {
 
   String getPostcode();
 
-  String getConsultingId();
+  String getConsultingType();
 
   boolean isNewUserAccount();
 }

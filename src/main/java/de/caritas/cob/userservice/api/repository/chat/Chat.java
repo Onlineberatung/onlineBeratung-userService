@@ -53,7 +53,7 @@ public class Chat {
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
   @NonNull
-  private int consultingId;
+  private int consultingTypeId;
 
   @Column(name = "initial_start_date", updatable = true, nullable = false)
   @NonNull
@@ -92,11 +92,11 @@ public class Chat {
   @OneToMany(mappedBy = "chat", orphanRemoval = true)
   private Set<ChatAgency> chatAgencies;
 
-  public Chat(String topic, int consultingId, LocalDateTime initialStartDate,
+  public Chat(String topic, int consultingTypeId, LocalDateTime initialStartDate,
       LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
       Consultant chatOwner) {
     this.topic = topic;
-    this.consultingId = consultingId;
+    this.consultingTypeId = consultingTypeId;
     this.initialStartDate = initialStartDate;
     this.startDate = startDate;
     this.duration = duration;

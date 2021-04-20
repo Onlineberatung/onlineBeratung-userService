@@ -158,7 +158,7 @@ public class CreateUserFacadeTest {
   public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakDummyEmailFails() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingId(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
     userDTO.setEmail(null);
 
     when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);

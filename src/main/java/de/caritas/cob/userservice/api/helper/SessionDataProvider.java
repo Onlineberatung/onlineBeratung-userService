@@ -57,24 +57,24 @@ public class SessionDataProvider {
       SessionDataDTO sessionData) {
 
     List<SessionData> sessionDataList = new ArrayList<>();
-    if (getSessionDataInitializing(session.getConsultingId()).isAddictiveDrugs()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isAddictiveDrugs()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),
           getAddictiveDrugsValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingId()).isAge()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isAge()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.AGE.getValue(), getAgeValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingId()).isGender()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isGender()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.GENDER.getValue(), getGenderValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingId()).isRelation()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isRelation()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.RELATION.getValue(), getRelationValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingId()).isState()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isState()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.STATE.getValue(), getStateValue(sessionData)));
     }

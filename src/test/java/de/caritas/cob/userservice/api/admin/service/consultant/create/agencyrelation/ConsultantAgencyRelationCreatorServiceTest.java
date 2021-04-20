@@ -49,7 +49,7 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   @Test
   public void createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned() {
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingId(1)
+        .consultingType(1)
         .id(2L);
 
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))

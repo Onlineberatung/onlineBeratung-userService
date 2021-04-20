@@ -22,24 +22,24 @@ public class MandatoryFieldsProvider {
   /**
    * Fetch the {@link MandatoryFields} for a consulting type.
    *
-   * @param consultingId (required)
+   * @param consultingTypeId (required)
    * @return the {@link MandatoryFields} for the given consulting type
    */
-  public MandatoryFields fetchMandatoryFieldsForConsultingType(String consultingId) {
+  public MandatoryFields fetchMandatoryFieldsForConsultingType(String consultingTypeId) {
     ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
-        .getConsultingTypeSettings(consultingId);
-    ensureConsultingTypeSettingsAreNotNull(consultingId, consultingTypeSettings);
+        .getConsultingTypeSettings(consultingTypeId);
+    ensureConsultingTypeSettingsAreNotNull(consultingTypeId, consultingTypeSettings);
     return consultingTypeSettings.getRegistration().getMandatoryFields();
 
   }
 
-  private void ensureConsultingTypeSettingsAreNotNull(String consultingId,
+  private void ensureConsultingTypeSettingsAreNotNull(String consultingTypeId,
       ConsultingTypeSettings consultingTypeSettings) {
     if (isNull(consultingTypeSettings.getRegistration())
         || isNull(consultingTypeSettings.getRegistration().getMandatoryFields())) {
       throw new InternalServerErrorException(String.format(
           "Could not get mandatory fields for consulting type %s. Please check configuration",
-          consultingId), LogService::logInternalServerError);
+          consultingTypeId), LogService::logInternalServerError);
     }
   }
 

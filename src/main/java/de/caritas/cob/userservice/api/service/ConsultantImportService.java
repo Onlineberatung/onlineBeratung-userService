@@ -117,7 +117,7 @@ public class ConsultantImportService {
           agencyIds.add(Long.valueOf(agencyRoleArray[0]));
 
           ConsultingTypeSettings consultingTypeSettings =
-              consultingTypeManager.getConsultingTypeSettings(agency.getConsultingId());
+              consultingTypeManager.getConsultingTypeSettings(agency.getConsultingType());
 
           if (!consultingTypeSettings.getRoles().getConsultant().getRoleNames()
               .containsKey(agencyRoleArray[1])) {

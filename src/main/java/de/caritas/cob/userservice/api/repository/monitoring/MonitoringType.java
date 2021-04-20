@@ -15,5 +15,5 @@ public enum MonitoringType {
       0), GENERAL_DATA("generalData",
       1), CONSULTING_DATA("consultingData", 1);
   private final String key;
-  private final int consultingId;
+  private final int consultingTypeId;
 }

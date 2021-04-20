@@ -41,11 +41,11 @@ public class CreateNewConsultingTypeFacadeTest {
   public void initializeNewConsultingType_Should_RegisterNewSession_When_ProvidedWithSessionConsultingType_For_NewAccountRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingId(String.valueOf(0));
+    userDTO.setConsultingType(String.valueOf(0));
     User user = easyRandom.nextObject(User.class);
     ConsultingTypeSettings consultingTypeSettings = easyRandom
         .nextObject(ConsultingTypeSettings.class);
-    consultingTypeSettings.setConsultingId(0);
+    consultingTypeSettings.setConsultingTypeId(0);
 
     createNewConsultingTypeFacade
         .initializeNewConsultingType(userDTO, user, consultingTypeSettings);
@@ -57,7 +57,7 @@ public class CreateNewConsultingTypeFacadeTest {
   public void initializeNewConsultingType_Should_RegisterNewSessionAndReturnSessionId_When_ProvidedWithSessionConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingId(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
     User user = easyRandom.nextObject(User.class);
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);
@@ -77,7 +77,7 @@ public class CreateNewConsultingTypeFacadeTest {
   public void initializeNewConsultingType_Should_RegisterNewUserChatRelationAndReturnNull_When_ProvidedWithGroupChatConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingId(String.valueOf(CONSULTING_TYPE_KREUZBUND.getValue()));
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_KREUZBUND.getValue()));
     User user = easyRandom.nextObject(User.class);
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);
@@ -97,7 +97,7 @@ public class CreateNewConsultingTypeFacadeTest {
   public void initializeNewConsultingType_Should_ThrowBadRequestException_When_ProvidedWithInvalidConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingId(INVALID_CONSULTING_TYPE);
+    userDTO.setConsultingType(INVALID_CONSULTING_TYPE);
     User user = easyRandom.nextObject(User.class);
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);
@@ -112,7 +112,7 @@ public class CreateNewConsultingTypeFacadeTest {
   public void initializeNewConsultingType_Should_ThrowBadRequestException_When_ProvidedWithUnknownConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingId(UNKNOWN_CONSULTING_TYPE);
+    userDTO.setConsultingType(UNKNOWN_CONSULTING_TYPE);
     User user = easyRandom.nextObject(User.class);
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);

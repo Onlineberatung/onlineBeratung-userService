@@ -159,7 +159,7 @@ public class AskerImportService {
         }
 
         UserDTO userDTO =
-            convertAskerWithoutSessionToUserDTO(record, agencyDTO.getConsultingId());
+            convertAskerWithoutSessionToUserDTO(record, agencyDTO.getConsultingType());
 
         // Create Keycloak user
         KeycloakCreateUserResponseDTO response =
@@ -179,7 +179,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingId());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -324,7 +324,7 @@ public class AskerImportService {
           continue;
         }
 
-        UserDTO userDTO = convertAskerToUserDTO(record, agencyDTO.getConsultingId());
+        UserDTO userDTO = convertAskerToUserDTO(record, agencyDTO.getConsultingType());
 
         // Check if decoded username is already taken
         if (!keycloakAdminClientService.isUsernameAvailable(record.getUsername())) {
@@ -352,7 +352,7 @@ public class AskerImportService {
 
         // Create user in MariaDB
         ConsultingTypeSettings consultingTypeSettings =
-            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingId());
+            consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
                 userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
@@ -502,7 +502,7 @@ public class AskerImportService {
         if (consultingTypeSettings.getMonitoringFile() != null
             && !consultingTypeSettings.getMonitoringFile().equals(StringUtils.EMPTY)) {
           MonitoringDTO monitoringDTO =
-              monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingId());
+              monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
           if (monitoringDTO != null) {
             monitoringService.updateMonitoring(session.getId(), monitoringDTO);
           } else {
@@ -630,7 +630,7 @@ public class AskerImportService {
 
     Map<Integer, String> welcomeMessageMap = new HashMap();
 
-    for (int type : consultingTypeManager.getAllConsultingIds()) {
+    for (int type : consultingTypeManager.getAllconsultingTypeIds()) {
       String welcomeMessage = "";
       String fileName = welcomeMsgFilename.replace(welcomeMsgFilenameReplaceValue,
           Integer.toString(type));

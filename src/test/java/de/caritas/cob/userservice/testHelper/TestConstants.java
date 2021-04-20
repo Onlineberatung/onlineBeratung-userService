@@ -265,7 +265,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingId(0);
+      .consultingType(0);
   public static final AgencyDTO AGENCY_DTO_U25 = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)
@@ -274,7 +274,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingId(1);
+      .consultingType(1);
   public static final AgencyDTO AGENCY_DTO_KREUZBUND = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)
@@ -283,7 +283,7 @@ public class TestConstants {
       .description(DESCRIPTION)
       .teamAgency(IS_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingId(15);
+      .consultingType(15);
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
   /*
    * Users / Consultants
@@ -492,7 +492,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingId(CONSULTING_TYPE_SUCHT.getValue())
+      .consultingType(CONSULTING_TYPE_SUCHT.getValue())
       .status(SESSION_STATUS_IN_PROGRESS)
       .postcode(POSTCODE)
       .groupId(RC_GROUP_ID)
@@ -504,7 +504,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_U25 = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingId(CONSULTING_TYPE_U25.getValue())
+      .consultingType(CONSULTING_TYPE_U25.getValue())
       .status(SESSION_STATUS_IN_PROGRESS)
       .postcode(POSTCODE)
       .groupId(RC_GROUP_ID)
@@ -531,7 +531,7 @@ public class TestConstants {
       new SessionDTO()
           .id(SESSION_ID)
           .agencyId(AGENCY_ID)
-          .consultingId(0)
+          .consultingType(0)
           .status(0)
           .groupId(RC_GROUP_ID)
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
@@ -542,7 +542,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_2 = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingId(0)
+      .consultingType(0)
       .status(0)
       .groupId(RC_GROUP_ID_2)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_2)
@@ -553,7 +553,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_3 = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingId(0)
+      .consultingType(0)
       .status(0)
       .groupId(RC_GROUP_ID_3)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
@@ -564,7 +564,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_WITH_FEEDBACK = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingId(0)
+      .consultingType(0)
       .status(0)
       .groupId(RC_GROUP_ID_3)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
@@ -576,7 +576,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingId(0)
+      .consultingType(0)
       .status(0)
       .groupId(RC_GROUP_ID_3)
       .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
@@ -873,7 +873,7 @@ public class TestConstants {
   public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK_CHAT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
-      .consultingId(0)
+      .consultingType(0)
       .status(0)
       .groupId(RC_GROUP_ID)
       .askerRcId(RC_USER_ID)

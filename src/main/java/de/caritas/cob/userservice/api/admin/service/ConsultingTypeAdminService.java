@@ -58,7 +58,7 @@ public class ConsultingTypeAdminService {
 
   private ConsultingTypeResultDTO fromConsultingTypeSettings(ConsultingTypeSettings ctSettings) {
     return new ConsultingTypeResultDTO()
-        .id(ctSettings.getConsultingId())
+        .id(ctSettings.getConsultingTypeId())
         .name(ctSettings.getConsultingUrlName())
         .languageFormal(ctSettings.isLanguageFormal())
         .roles(ctSettings.getRoles())

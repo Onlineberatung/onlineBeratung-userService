@@ -108,16 +108,16 @@ public class MonitoringStructureProvider {
   }
 
   /**
-   * Creates the initial monitoring data of a session for the given consulting ID. The
+   * Creates the initial monitoring data of a session for the given consultingType ID. The
    * structure (JSON) is being imported from the JSON file provided in the {@link
    * ConsultingTypeSettings}.
    *
-   * @param consultingId the consulting ID to load the initial monitoring
+   * @param consultingTypeId the consultingType ID to load the initial monitoring
    * @return the generated {@link MonitoringDTO}
    */
-  public MonitoringDTO getMonitoringInitialList(int consultingId) {
+  public MonitoringDTO getMonitoringInitialList(int consultingTypeId) {
     ObjectMapper mapper = new ObjectMapper();
-    InputStream inputStream = getMonitoringJSONStream(consultingId);
+    InputStream inputStream = getMonitoringJSONStream(consultingTypeId);
     try {
       return mapper.readValue(inputStream, MonitoringDTO.class);
     } catch (IOException ex) {
@@ -125,8 +125,8 @@ public class MonitoringStructureProvider {
     }
   }
 
-  private InputStream getMonitoringJSONStream(int consultingId) {
-    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingId)
+  private InputStream getMonitoringJSONStream(int consultingTypeId) {
+    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
         .getMonitoringFile();
     try {
       return TypeReference.class.getResourceAsStream(monitoringFilePath);
@@ -149,14 +149,14 @@ public class MonitoringStructureProvider {
    * monitoring JSON file.
    *
    * @param unsortedMap  the {@link Map} before sorting
-   * @param consultingId the consulting ID to use for sorting
+   * @param consultingTypeId the consultingType ID to use for sorting
    * @return the sorted {@link Map}
    */
   public Map<String, Object> sortMonitoringMap(Map<String, Object> unsortedMap,
-      int consultingId) {
+      int consultingTypeId) {
 
     Map<String, Object> sortedMap =
-        getMonitoringInitialList(consultingId).getProperties();
+        getMonitoringInitialList(consultingTypeId).getProperties();
     setValuesForSortedMonitoringMap(sortedMap, unsortedMap);
 
     return sortedMap;

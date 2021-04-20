@@ -24,16 +24,16 @@ public class AgencyVerifier {
    * and returns the corresponding agency as {@link AgencyDTO}.
    *
    * @param agencyId       {@link AgencyDTO#getId()}
-   * @param consultingId the consulting Id
+   * @param consultingTypeId the consulting Id
    * @return {@link AgencyDTO} or null if agency is not found
    */
-  public AgencyDTO getVerifiedAgency(Long agencyId, int consultingId) {
+  public AgencyDTO getVerifiedAgency(Long agencyId, int consultingTypeId) {
 
     AgencyDTO agencyDTO = agencyService.getAgencyWithoutCaching(agencyId);
-    if (nonNull(agencyDTO) && !agencyDTO.getConsultingId().equals(consultingId)) {
+    if (nonNull(agencyDTO) && !agencyDTO.getConsultingType().equals(consultingTypeId)) {
       throw new BadRequestException(String.format(
           "The provided agency with id %s is not assigned to the provided consulting type %s",
-          agencyId, consultingId));
+          agencyId, consultingTypeId));
     }
 
     return agencyDTO;
@@ -43,14 +43,14 @@ public class AgencyVerifier {
    * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided consulting ID
    *
    * @param agencyId       {@link AgencyDTO#getId()}
-   * @param consultingId the consulting ID
+   * @param consultingTypeId the consulting ID
    * @return <ul>
    *         <li>true if agency is assigned to the provided {@link ConsultingType}</li>
    *         <li>false if agency is not assigned to the provided {@link ConsultingType}</li>
    *         </ul>
    */
-  public boolean doesConsultingTypeMatchToAgency(Long agencyId, int consultingId) {
-    AgencyDTO agencyDTO = getVerifiedAgency(agencyId, consultingId);
+  public boolean doesConsultingTypeMatchToAgency(Long agencyId, int consultingTypeId) {
+    AgencyDTO agencyDTO = getVerifiedAgency(agencyId, consultingTypeId);
     return nonNull(agencyDTO);
   }
 }

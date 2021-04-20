@@ -48,9 +48,9 @@ public class ConsultingTypeManager {
         TypeReference.class.getResourceAsStream(getJsonFileNameWithPath(jsonFileName));
     try {
       ConsultingTypeSettings consultingTypeSettings = mapper.readValue(inputStream, typeReference);
-      System.out.println(consultingTypeSettings.getConsultingId());
+      System.out.println(consultingTypeSettings.getConsultingTypeId());
       this.consultingTypeSettingsMap
-          .put(consultingTypeSettings.getConsultingId(), consultingTypeSettings);
+          .put(consultingTypeSettings.getConsultingTypeId(), consultingTypeSettings);
     } catch (IOException e) {
       LogService.logWarn(String.format("Unable to provide settings for consulting file %s",
           jsonFileName));
@@ -60,37 +60,37 @@ public class ConsultingTypeManager {
   /**
    * Returns the {@link ConsultingTypeSettings} for the provided consulting ID.
    *
-   * @param consultingId The consulting ID for which the seetings are searched
+   * @param consultingTypeId The consulting ID for which the seetings are searched
    * @return {@link ConsultingTypeSettings} for the provided consulting ID
    * @throws MissingConsultingTypeException when no settings for provided consulting type where
    *                                        found
    */
-  public ConsultingTypeSettings getConsultingTypeSettings(int consultingId) {
+  public ConsultingTypeSettings getConsultingTypeSettings(int consultingTypeId) {
 
-    if (consultingTypeSettingsMap.containsKey(consultingId)
-        && nonNull(consultingTypeSettingsMap.get(consultingId))) {
-      return consultingTypeSettingsMap.get(consultingId);
+    if (consultingTypeSettingsMap.containsKey(consultingTypeId)
+        && nonNull(consultingTypeSettingsMap.get(consultingTypeId))) {
+      return consultingTypeSettingsMap.get(consultingTypeId);
     } else {
       throw new MissingConsultingTypeException(
-          String.format("No settings for consultingId %d found.", consultingId));
+          String.format("No settings for consultingTypeId %d found.", consultingTypeId));
     }
   }
 
-  public ConsultingTypeSettings getConsultingTypeSettings(String consultingId) {
-    return getConsultingTypeSettings(Integer.parseInt(consultingId));
+  public ConsultingTypeSettings getConsultingTypeSettings(String consultingTypeId) {
+    return getConsultingTypeSettings(Integer.parseInt(consultingTypeId));
   }
 
-  public Integer[] getAllConsultingIds() {
+  public Integer[] getAllconsultingTypeIds() {
     return consultingTypeSettingsMap.keySet().toArray(new Integer[0]);
   }
 
-  public boolean isConsultantBoundedToAgency(int consultingId) {
+  public boolean isConsultantBoundedToAgency(int consultingTypeId) {
     return consultingTypeSettingsMap.entrySet().stream()
-        .filter(entrySet -> entrySet.getKey() == consultingId).findFirst()
+        .filter(entrySet -> entrySet.getKey() == consultingTypeId).findFirst()
         .map(entry -> entry.getValue().isConsultantBoundedToConsultingType())
         .orElseThrow(
-            () -> new NotFoundException(String.format("No Settings found for consultingId %d",
-                consultingId)));
+            () -> new NotFoundException(String.format("No Settings found for consultingTypeId %d",
+                consultingTypeId)));
   }
 
   private String getJsonFileNameWithPath(String jsonFileName) {

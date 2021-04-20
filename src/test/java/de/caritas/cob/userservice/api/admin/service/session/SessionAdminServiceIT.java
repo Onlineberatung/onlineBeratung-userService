@@ -48,7 +48,7 @@ public class SessionAdminServiceIT {
     SessionAdminDTO sessionAdminDTO = sessions.getEmbedded().iterator().next();
     assertThat(sessionAdminDTO.getAgencyId(), notNullValue());
     assertThat(sessionAdminDTO.getConsultantId(), notNullValue());
-    assertThat(sessionAdminDTO.getConsultingId(), notNullValue());
+    assertThat(sessionAdminDTO.getConsultingType(), notNullValue());
     assertThat(sessionAdminDTO.getCreateDate(), notNullValue());
     assertThat(sessionAdminDTO.getEmail(), notNullValue());
     assertThat(sessionAdminDTO.getIsTeamSession(), notNullValue());
@@ -104,12 +104,12 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnSessionsFilteredByConsultingType_When_filterHasConsultingTypeSet() {
-    SessionFilter sessionFilter = new SessionFilter().consultingId(1);
+    SessionFilter sessionFilter = new SessionFilter().consultingType(1);
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
     sessions.getEmbedded().forEach(sessionAdminDTO ->
-        assertThat(sessionAdminDTO.getConsultingId(), is(1))
+        assertThat(sessionAdminDTO.getConsultingType(), is(1))
     );
   }
 
@@ -142,7 +142,7 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnEmptyResult_When_filterHasInvalidConsultingTypeSet() {
-    SessionFilter sessionFilter = new SessionFilter().consultingId(-20);
+    SessionFilter sessionFilter = new SessionFilter().consultingType(-20);
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 

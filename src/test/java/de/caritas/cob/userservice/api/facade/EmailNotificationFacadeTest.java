@@ -136,7 +136,7 @@ public class EmailNotificationFacadeTest {
       .description(DESCRIPTION)
       .teamAgency(IS_NO_TEAM_AGENCY)
       .offline(IS_NOT_OFFLINE)
-      .consultingId(0);
+      .consultingType(0);
   private final String USER_ROLE = UserRole.USER.getValue();
   private final Set<String> USER_ROLES = new HashSet<>(Collections.singletonList(USER_ROLE));
   private final String CONSULTANT_ROLE = UserRole.CONSULTANT.getValue();
@@ -291,7 +291,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingId()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingTypeId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -306,7 +306,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingId()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingTypeId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -321,7 +321,7 @@ public class EmailNotificationFacadeTest {
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(null);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingId()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingTypeId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
@@ -432,7 +432,7 @@ public class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingId()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingTypeId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS);
     when(consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID)).thenReturn(CONSULTANT_LIST);
 
@@ -446,7 +446,7 @@ public class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenReturn(TEAM_SESSION);
-    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingId()))
+    when(consultingTypeManager.getConsultingTypeSettings(TEAM_SESSION.getConsultingTypeId()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);

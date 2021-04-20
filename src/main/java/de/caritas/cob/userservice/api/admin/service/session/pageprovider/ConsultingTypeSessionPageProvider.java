@@ -27,9 +27,9 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
-    Integer id = sessionFilter.getConsultingId();
+    Integer id = sessionFilter.getConsultingType();
     if (id != null) {
-      return this.sessionRepository.findByConsultingId(id, pageable);
+      return this.sessionRepository.findByConsultingTypeId(id, pageable);
     }
     return Page.empty(pageable);
   }
@@ -41,6 +41,6 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public boolean isSupported() {
-    return nonNull(this.sessionFilter.getConsultingId());
+    return nonNull(this.sessionFilter.getConsultingType());
   }
 }

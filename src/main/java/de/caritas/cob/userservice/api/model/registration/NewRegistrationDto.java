@@ -50,7 +50,7 @@ public class NewRegistrationDto implements UserRegistrationDTO {
   @Pattern(regexp = CONSULTING_TYPE_REGEXP, message = "{user.consultingType.invalid}")
   @ApiModelProperty(required = true, example = "\"0\"", position = 2)
   @JsonProperty("consultingType")
-  private String consultingId;
+  private String consultingType;
 
   @ApiModelProperty(hidden = true)
   private boolean newUserAccount;

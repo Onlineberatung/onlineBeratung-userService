@@ -38,7 +38,7 @@ public class CreateNewConsultingTypeFacade {
       RocketChatCredentials rocketChatCredentials) {
     try {
       ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
-          .getConsultingTypeSettings(userRegistrationDTO.getConsultingId());
+          .getConsultingTypeSettings(userRegistrationDTO.getConsultingType());
 
       return createSessionOrChat(userRegistrationDTO, user,
           consultingTypeSettings, rocketChatCredentials);
@@ -85,7 +85,7 @@ public class CreateNewConsultingTypeFacade {
       UserDTO userDTO = new UserDTO();
       userDTO.setAgencyId(userRegistrationDTO.getAgencyId());
       userDTO.setPostcode(userRegistrationDTO.getPostcode());
-      userDTO.setConsultingId(userRegistrationDTO.getConsultingId());
+      userDTO.setConsultingType(userRegistrationDTO.getConsultingType());
       return userDTO;
     }
 

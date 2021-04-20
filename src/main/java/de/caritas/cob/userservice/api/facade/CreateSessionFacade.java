@@ -47,8 +47,8 @@ public class CreateSessionFacade {
   public Long createUserSession(UserDTO userDTO, User user,
       ConsultingTypeSettings consultingTypeSettings) {
 
-    checkIfAlreadyRegisteredToConsultingType(user, consultingTypeSettings.getConsultingId());
-    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, consultingTypeSettings.getConsultingId());
+    checkIfAlreadyRegisteredToConsultingType(user, consultingTypeSettings.getConsultingTypeId());
+    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, consultingTypeSettings.getConsultingTypeId());
     Session session = initializeSession(userDTO, user, consultingTypeSettings, agencyDTO);
     initializeMonitoring(userDTO, user, consultingTypeSettings, session);
 

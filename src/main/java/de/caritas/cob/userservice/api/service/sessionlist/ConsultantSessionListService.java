@@ -233,7 +233,7 @@ public class ConsultantSessionListService {
   private boolean getMonitoringProperty(SessionDTO session) {
 
     ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingId());
+        .getConsultingTypeSettings(session.getConsultingType());
 
     return consultingTypeSettings.isMonitoring();
   }

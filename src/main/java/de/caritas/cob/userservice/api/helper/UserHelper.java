@@ -176,14 +176,14 @@ public class UserHelper {
   }
 
   /**
-   * Generates the URL for a chat with the given {@link Chat} id and consulting ID.
+   * Generates the URL for a chat with the given {@link Chat} id and consultingType ID.
    *
    * @param chatId the {@link Chat}'s id
-   * @param consultingId the chat's consulting ID
+   * @param consultingTypeId the chat's consultingType ID
    * @return URL (String)
    */
-  public String generateChatUrl(Long chatId, int consultingId) {
-    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingId).getConsultingUrlName() + "/"
+  public String generateChatUrl(Long chatId, int consultingTypeId) {
+    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getConsultingUrlName() + "/"
         + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
             BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }

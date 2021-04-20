@@ -100,7 +100,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(false);
-    agencyDTO.setConsultingId(0);
+    agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -141,7 +141,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(true);
-    agencyDTO.setConsultingId(0);
+    agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -249,10 +249,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsU25AndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingId(17);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingId(1)
+        .consultingType(1)
         .id(2L);
 
     when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
@@ -272,10 +272,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsKreuzbundAndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingId(17);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingId(15)
+        .consultingType(15)
         .id(2L);
 
     when(agencyService.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);

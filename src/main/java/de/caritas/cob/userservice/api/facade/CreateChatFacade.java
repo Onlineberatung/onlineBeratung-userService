@@ -58,7 +58,7 @@ public class CreateChatFacade {
       chatService.saveChat(chat);
       return new CreateChatResponseDTO()
           .groupId(rcGroupId)
-          .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingId()));
+          .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId()));
     } catch (InternalServerErrorException e) {
       doRollback(chat, rcGroupId);
       throw e;
@@ -116,7 +116,7 @@ public class CreateChatFacade {
   private Chat convertChatDTOtoChat(ChatDTO chatDTO, Consultant consultant, AgencyDTO agencyDTO) {
     LocalDateTime startDate = LocalDateTime.of(chatDTO.getStartDate(), chatDTO.getStartTime());
     // The repetition interval can only be weekly atm.
-    return new Chat(chatDTO.getTopic(), agencyDTO.getConsultingId(), startDate, startDate,
+    return new Chat(chatDTO.getTopic(), agencyDTO.getConsultingType(), startDate, startDate,
         chatDTO.getDuration(), isTrue(chatDTO.isRepetitive()),
         isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null, consultant);
   }

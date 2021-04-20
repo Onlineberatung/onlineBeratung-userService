@@ -66,7 +66,7 @@ public class AskerDataProvider {
     List<Long> agencyIds = mergeAgencyIdsFromSessionAndUser(user, sessionList);
     List<AgencyDTO> agencyDTOs = this.agencyService.getAgencies(agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
-    for (int type : consultingTypeManager.getAllConsultingIds()) {
+    for (int type : consultingTypeManager.getAllconsultingTypeIds()) {
       consultingTypes.put(Integer.toString(type),
           getConsultingTypeData(type, sessionList, agencyDTOs));
     }
@@ -93,17 +93,17 @@ public class AskerDataProvider {
     return consultingTypeData;
   }
 
-  private Optional<AgencyDTO> findAgencyByConsultingType(int consultingId,
+  private Optional<AgencyDTO> findAgencyByConsultingType(int consultingTypeId,
       List<AgencyDTO> agencyDTOs) {
     return agencyDTOs.stream()
-        .filter(agencyDTO -> agencyDTO.getConsultingId() == consultingId)
+        .filter(agencyDTO -> agencyDTO.getConsultingType() == consultingTypeId)
         .findFirst();
   }
 
-  private Optional<Session> findSessionByConsultingType(int consultingType,
+  private Optional<Session> findSessionByConsultingType(int consultingTypeId,
       Set<Session> sessionList) {
     return sessionList.stream()
-        .filter(session -> session.getConsultingId() == consultingType)
+        .filter(session -> session.getConsultingTypeId() == consultingTypeId)
         .findFirst();
   }
 

@@ -47,7 +47,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
 
   List<Session> findByUser(User user);
 
-  List<Session> findByUserAndConsultingId(User user, int consultingId);
+  List<Session> findByUserAndConsultingTypeId(User user, int consultingTypeId);
 
   /**
    * Find all {@link Session}s by a user ID.
@@ -159,11 +159,11 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   /**
    * Find the {@link Session}s by consulting type and pageable.
    *
-   * @param consultingId the consulting ID to search for
+   * @param consultingTypeId the consulting ID to search for
    * @param pageable     the pagination object
    * @return the result {@link Page}
    */
-  Page<Session> findByConsultingId(int consultingId, Pageable pageable);
+  Page<Session> findByConsultingTypeId(int consultingTypeId, Pageable pageable);
 
   Page<Session> findAll(Pageable pageable);
 
