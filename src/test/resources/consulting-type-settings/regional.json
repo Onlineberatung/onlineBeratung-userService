@@ -1,8 +1,8 @@
 {
-  "id": 19,
-  "urlName": "regionale-angebote",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 19,
+  "consultingTypeUrlName": "regionale-angebote",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

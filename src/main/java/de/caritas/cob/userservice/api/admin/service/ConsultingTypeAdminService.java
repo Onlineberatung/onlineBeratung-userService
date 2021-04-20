@@ -46,7 +46,7 @@ public class ConsultingTypeAdminService {
 
   private List<ConsultingTypeResultDTO> fullSortedConsultingTypeResponseList() {
     return consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
-        Comparator.comparing(ConsultingTypeSettings::getConsultingUrlName))
+        Comparator.comparing(ConsultingTypeSettings::getConsultingTypeUrlName))
         .map(this::fromConsultingTypeSettings)
         .collect(Collectors.toList());
   }
@@ -59,7 +59,7 @@ public class ConsultingTypeAdminService {
   private ConsultingTypeResultDTO fromConsultingTypeSettings(ConsultingTypeSettings ctSettings) {
     return new ConsultingTypeResultDTO()
         .id(ctSettings.getConsultingTypeId())
-        .name(ctSettings.getConsultingUrlName())
+        .name(ctSettings.getConsultingTypeUrlName())
         .languageFormal(ctSettings.isLanguageFormal())
         .roles(ctSettings.getRoles())
         .sendWelcomeMessage(ctSettings.isSendWelcomeMessage())

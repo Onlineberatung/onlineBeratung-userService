@@ -1,8 +1,8 @@
 {
-  "id": 13,
-  "urlName": "kinder-reha",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 13,
+  "consultingTypeUrlName": "kinder-reha",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

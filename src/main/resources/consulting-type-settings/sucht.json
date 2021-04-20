@@ -1,8 +1,8 @@
 {
-  "id": 0,
-  "urlName": "suchtberatung",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 0,
+  "consultingTypeUrlName": "suchtberatung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

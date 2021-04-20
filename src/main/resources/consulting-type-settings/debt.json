@@ -1,8 +1,8 @@
 {
-  "id": 5,
-  "urlName": "schuldnerberatung",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 5,
+  "consultingTypeUrlName": "schuldnerberatung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

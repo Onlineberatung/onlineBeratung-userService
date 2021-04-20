@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import org.junit.Test;
@@ -16,11 +17,14 @@ public class PageProviderFactoryTest {
   @Mock
   private SessionRepository sessionRepository;
 
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
+
   @Test
   public void retrieveFirstSupportedSessionPageProvider_Should_returnAllSessionPageProvider_When_noFilterIsSet() {
     SessionFilter sessionFilter = new SessionFilter();
 
-    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
+    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter, consultingTypeManager)
         .retrieveFirstSupportedSessionPageProvider();
 
     assertThat(resultProvider, instanceOf(AllSessionPageProvider.class));
@@ -30,7 +34,7 @@ public class PageProviderFactoryTest {
   public void retrieveFirstSupportedSessionPageProvider_Should_returnAgencySessionPageProvider_When_agencyFilterIsSet() {
     SessionFilter sessionFilter = new SessionFilter().agency(5);
 
-    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
+    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter, consultingTypeManager)
         .retrieveFirstSupportedSessionPageProvider();
 
     assertThat(resultProvider, instanceOf(AgencySessionPageProvider.class));
@@ -40,7 +44,7 @@ public class PageProviderFactoryTest {
   public void retrieveFirstSupportedSessionPageProvider_Should_returnAskerSessionPageProvider_When_askerFilterIsSet() {
     SessionFilter sessionFilter = new SessionFilter().asker("asker");
 
-    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
+    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter, consultingTypeManager)
         .retrieveFirstSupportedSessionPageProvider();
 
     assertThat(resultProvider, instanceOf(AskerSessionPageProvider.class));
@@ -50,7 +54,7 @@ public class PageProviderFactoryTest {
   public void retrieveFirstSupportedSessionPageProvider_Should_returnConsultantSessionPageProvider_When_consultantFilterIsSet() {
     SessionFilter sessionFilter = new SessionFilter().consultant("consultant");
 
-    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
+    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter, consultingTypeManager)
         .retrieveFirstSupportedSessionPageProvider();
 
     assertThat(resultProvider, instanceOf(ConsultantSessionPageProvider.class));
@@ -60,7 +64,7 @@ public class PageProviderFactoryTest {
   public void retrieveFirstSupportedSessionPageProvider_Should_returnConsultingTypeSessionPageProvider_When_consultingTypeFilterIsSet() {
     SessionFilter sessionFilter = new SessionFilter().consultingType(5);
 
-    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
+    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter, consultingTypeManager)
         .retrieveFirstSupportedSessionPageProvider();
 
     assertThat(resultProvider, instanceOf(ConsultingTypeSessionPageProvider.class));
@@ -74,7 +78,7 @@ public class PageProviderFactoryTest {
         .consultant("consultant")
         .consultingType(5);
 
-    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter)
+    SessionPageProvider resultProvider = PageProviderFactory.getInstance(sessionRepository, sessionFilter, consultingTypeManager)
         .retrieveFirstSupportedSessionPageProvider();
 
     assertThat(resultProvider, instanceOf(AgencySessionPageProvider.class));

@@ -48,7 +48,6 @@ public class ConsultingTypeManager {
         TypeReference.class.getResourceAsStream(getJsonFileNameWithPath(jsonFileName));
     try {
       ConsultingTypeSettings consultingTypeSettings = mapper.readValue(inputStream, typeReference);
-      System.out.println(consultingTypeSettings.getConsultingTypeId());
       this.consultingTypeSettingsMap
           .put(consultingTypeSettings.getConsultingTypeId(), consultingTypeSettings);
     } catch (IOException e) {

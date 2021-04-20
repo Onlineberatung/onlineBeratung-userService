@@ -1,8 +1,8 @@
 {
-  "id": 14,
-  "urlName": "kinder-jugendliche",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 14,
+  "consultingTypeUrlName": "kinder-jugendliche",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
 	"sendWelcomeMessage": false,
 	"welcomeMessage": null,

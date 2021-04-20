@@ -1,8 +1,8 @@
 {
-  "id": 7,
-  "urlName": "leben-im-alter",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 7,
+  "consultingTypeUrlName": "leben-im-alter",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

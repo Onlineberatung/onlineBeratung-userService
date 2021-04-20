@@ -1,8 +1,8 @@
 {
-  "id": 11,
-  "urlName": "straffaelligkeit",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 11,
+  "consultingTypeUrlName": "straffaelligkeit",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

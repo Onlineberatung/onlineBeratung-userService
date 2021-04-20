@@ -124,7 +124,7 @@ public class ConsultantImportService {
             throw new ImportException(String.format(
                 "Consultant %s could not be imported: invalid role set %s for agency id %s and consulting type %s",
                 importRecord.getUsername(), agencyRoleArray[1], agencyRoleArray[0],
-                consultingTypeSettings.getConsultingUrlName()));
+                consultingTypeSettings.getConsultingTypeUrlName()));
           }
 
           for (Map.Entry<String, List<String>> roleSet : consultingTypeSettings.getRoles()

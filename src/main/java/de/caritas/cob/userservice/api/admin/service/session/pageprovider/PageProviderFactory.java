@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import java.util.List;
@@ -16,19 +17,19 @@ public class PageProviderFactory {
   private final List<SessionPageProvider> pageProviderRegistry;
   private final SessionPageProvider allSessionsPageProvider;
 
-  private PageProviderFactory(SessionRepository sessionRepository, SessionFilter sessionFilter) {
+  private PageProviderFactory(SessionRepository sessionRepository, SessionFilter sessionFilter, ConsultingTypeManager consultingTypeManager) {
     this.pageProviderRegistry = asList(
         new AgencySessionPageProvider(sessionRepository, sessionFilter),
         new AskerSessionPageProvider(sessionRepository, sessionFilter),
         new ConsultantSessionPageProvider(sessionRepository, sessionFilter),
-        new ConsultingTypeSessionPageProvider(sessionRepository, sessionFilter)
+        new ConsultingTypeSessionPageProvider(sessionRepository, sessionFilter, consultingTypeManager)
     );
     this.allSessionsPageProvider = new AllSessionPageProvider(sessionRepository);
   }
 
   public static PageProviderFactory getInstance(SessionRepository sessionRepository,
-      SessionFilter sessionFilter) {
-    return new PageProviderFactory(requireNonNull(sessionRepository), requireNonNull(sessionFilter));
+      SessionFilter sessionFilter, ConsultingTypeManager consultingTypeManager) {
+    return new PageProviderFactory(requireNonNull(sessionRepository), requireNonNull(sessionFilter), consultingTypeManager);
   }
 
   /**

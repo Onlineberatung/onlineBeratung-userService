@@ -1,8 +1,8 @@
 {
-  "id": 10,
-  "urlName": "rechtliche-betreuung",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 10,
+  "consultingTypeUrlName": "rechtliche-betreuung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

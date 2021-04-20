@@ -1,8 +1,8 @@
 {
-  "id": 20,
-  "urlName": "jungen-und-maenner",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 20,
+  "consultingTypeUrlName": "jungen-und-maenner",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

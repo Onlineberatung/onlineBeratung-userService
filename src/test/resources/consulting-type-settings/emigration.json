@@ -1,8 +1,8 @@
 {
-  "id": 17,
-  "urlName": "rw-auswanderung",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 17,
+  "consultingTypeUrlName": "rw-auswanderung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

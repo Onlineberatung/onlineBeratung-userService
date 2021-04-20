@@ -1,8 +1,8 @@
 {
-  "id": 9,
-  "urlName": "mein-planb",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 9,
+  "consultingTypeUrlName": "mein-planb",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,

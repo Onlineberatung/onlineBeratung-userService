@@ -1,8 +1,8 @@
 {
-  "id": 12,
-  "urlName": "hiv-aids-beratung",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": false,
+  "consultingTypeId": 12,
+  "consultingTypeUrlName": "hiv-aids-beratung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
   "consultantBoundedToConsultingType": false,
 	"sendWelcomeMessage": false,
 	"welcomeMessage": null,

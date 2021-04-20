@@ -1,11 +1,13 @@
 {
-  "id": 15,
-  "urlName": "kb-sucht-selbsthilfe",
-  "excludeNonMainConsultantsFromTeamSessions ": false,
-  "isGroupChat": true,
+  "consultingTypeId": 15,
+  "consultingTypeUrlName": "kb-sucht-selbsthilfe",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": true,
   "consultantBoundedToConsultingType": true,
-  "sendWelcomeMessage" : false,
-  "welcomeMessage" : null,
+  "sendWelcomeMessage": false,
+  "welcomeMessage": null,
+  "sendFurtherStepsMessage": true,
+  "sendSaveSessionDataMessage": false,
   "sessionDataInitializing": {
     "addictiveDrugs": false,
     "age": false,
@@ -28,7 +30,7 @@
   "languageFormal": true,
   "roles": {
     "consultant": {
-      "default" :	[
+      "default": [
         "consultant",
         "group-chat-consultant"
       ]
