@@ -938,7 +938,7 @@ public class TestConstants {
       new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null, false, null,
           true, null, null);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_KREUZBUND =
-      new ConsultingTypeSettings(15, "kb-sucht-selbsthilfe", true, true, true, false, null, false, false, null, true,
+      new ConsultingTypeSettings(15, "kb-sucht-selbsthilfe", false, true, true, false, null, false, false, null, true,
           null, false, null, true, null, null);
   public static final MandatoryFields MANDATORY_FIELDS_WITH_AGE = new MandatoryFields(true, false);
   public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_AGE =
@@ -993,7 +993,7 @@ public class TestConstants {
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           true, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_U25 =
-      new ConsultingTypeSettings(1, "u25", false, false, true, true, "Hallo", false, false,
+      new ConsultingTypeSettings(1, "u25", true, false, true, true, "Hallo", false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           false, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION =
@@ -1022,6 +1022,26 @@ public class TestConstants {
           false, null, REGISTRATION_WITH_MANDATORY_FIELDS_NULL);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_PREGNANCY =
       new ConsultingTypeSettings(2, "schwangerschaftsberatung", true, false, false, false, null, false, false,
+          SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
+          REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_EMIGRATION =
+      new ConsultingTypeSettings(17, "rw-auswanderung", false, false, false, false, null, false, false,
+          SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
+          REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_HOSPICE =
+      new ConsultingTypeSettings(18, "hospiz-palliativ", false, false, false, false, null, false, false,
+          SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
+          REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_REGIONAL =
+      new ConsultingTypeSettings(19, "regionale-angebote", false, false, false, false, null, false, false,
+          SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
+          REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_MEN=
+      new ConsultingTypeSettings(20, "jungen-und-maenner", false, false, false, false, null, false, false,
+          SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
+          REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+  public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_MIGRATION=
+      new ConsultingTypeSettings(16, "migration", false, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
           REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_AIDS =
@@ -1085,6 +1105,7 @@ public class TestConstants {
   public static AbsenceDTO ABSENCE_DTO_WITH_HTML_AND_JS = new AbsenceDTO()
       .absent(true)
       .message(TestConstants.MESSAGE_WITH_HTML_AND_JS);
+  public static List<ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_LIST = List.of(CONSULTING_TYPE_SETTINGS_AIDS,CONSULTING_TYPE_SETTINGS_CHILDREN,CONSULTING_TYPE_SETTINGS_CURE,CONSULTING_TYPE_SETTINGS_DEBT,CONSULTING_TYPE_SETTINGS_DISABILITY,CONSULTING_TYPE_SETTINGS_EMIGRATION,CONSULTING_TYPE_SETTINGS_HOSPICE,CONSULTING_TYPE_SETTINGS_KREUZBUND,CONSULTING_TYPE_SETTINGS_LAW,CONSULTING_TYPE_SETTINGS_MEN,CONSULTING_TYPE_SETTINGS_MIGRATION,CONSULTING_TYPE_SETTINGS_OFFENDER,CONSULTING_TYPE_SETTINGS_PARENTING,CONSULTING_TYPE_SETTINGS_PLANB,CONSULTING_TYPE_SETTINGS_PREGNANCY,CONSULTING_TYPE_SETTINGS_REGIONAL,CONSULTING_TYPE_SETTINGS_REHABILITATION,CONSULTING_TYPE_SETTINGS_SENIORITY,CONSULTING_TYPE_SETTINGS_SOCIAL,CONSULTING_TYPE_SETTINGS_SUCHT,CONSULTING_TYPE_SETTINGS_U25);
   /*
    * Parameter
    */

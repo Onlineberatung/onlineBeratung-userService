@@ -11,6 +11,7 @@ import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ public class UserHelper {
   @Value("${app.base.url}")
   private String hostBaseUrl;
 
+  @Autowired
   private ConsultingTypeManager consultingTypeManager;
 
   public static final int USERNAME_MIN_LENGTH = 5;

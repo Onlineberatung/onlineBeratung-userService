@@ -131,7 +131,7 @@ public class MonitoringServiceTest {
       throws CreateMonitoringException {
 
     doReturn(MONITORING_DTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(Mockito.anyInt());
 
     monitoringService
         .createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
@@ -150,7 +150,7 @@ public class MonitoringServiceTest {
   public void deleteInitialMonitoring_Should_DeleteMonitoring_WithInitialMonitoringListOfSessionsConsultingType() {
 
     doReturn(MONITORING_DTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(Mockito.anyInt());
 
     monitoringService.rollbackInitializeMonitoring(SESSION);
 

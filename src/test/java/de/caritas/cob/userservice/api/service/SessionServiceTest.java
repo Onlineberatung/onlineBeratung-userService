@@ -281,7 +281,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError() {
+  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError1() {
 
     DataAccessException ex = new DataAccessException("Database error") {
     };

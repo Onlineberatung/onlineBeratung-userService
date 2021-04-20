@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -28,6 +29,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.AgencyService;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +53,9 @@ public class AskerDataProviderTest {
   @Mock
   SessionDataProvider sessionDataProvider;
 
+  @Mock
+  ConsultingTypeManager consultingTypeManager;
+
   @Before
   public void setup() {
     setField(askerDataProvider, "emailDummySuffix", "@dummysuffix.de");
@@ -61,6 +66,7 @@ public class AskerDataProviderTest {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
+    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
 
     @SuppressWarnings("unchecked")
     LinkedHashMap<String, Object> consultingTypeData =
@@ -78,6 +84,7 @@ public class AskerDataProviderTest {
     when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
 
+    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
     @SuppressWarnings("unchecked")
     LinkedHashMap<String, Object> consultingTypeData =
         (LinkedHashMap<String, Object>) askerDataProvider.retrieveData(USER)
@@ -100,6 +107,7 @@ public class AskerDataProviderTest {
   @Test
   public void retrieveData_Should_ReturnUserDataResponseDTOWithValidEmail_When_ProvidedWithValidUser() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
+    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
 
     UserDataResponseDTO resultUser = askerDataProvider.retrieveData(USER);
 
@@ -112,6 +120,7 @@ public class AskerDataProviderTest {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     User user = mock(User.class);
     when(user.getEmail()).thenReturn("user@dummysuffix.de");
+    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
 
     UserDataResponseDTO resultUser = askerDataProvider.retrieveData(user);
 
@@ -130,7 +139,7 @@ public class AskerDataProviderTest {
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(asSet(GRANTED_AUTHORIZATION_USER));
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.toString()));
-
+    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
     UserDataResponseDTO result = askerDataProvider.retrieveData(USER_WITH_SESSIONS);
 
     assertEquals(USER_WITH_SESSIONS.getUserId(), result.getUserId());

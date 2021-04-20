@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultingTypeResultDTO;
 import de.caritas.cob.userservice.api.model.PaginationLinks;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -30,6 +31,7 @@ public class ConsultingTypeAdminServiceIT {
 
   @Autowired
   private ConsultingTypeAdminService consultingTypeAdminService;
+
 
   @Test
   public void findConsultingTypes_Should_returnOneResult_When_perPageIsSetToOneAndPageIsSetToOne() {

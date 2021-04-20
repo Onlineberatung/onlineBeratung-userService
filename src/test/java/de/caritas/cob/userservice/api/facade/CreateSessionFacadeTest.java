@@ -18,6 +18,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_R
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
@@ -75,9 +76,8 @@ public class CreateSessionFacadeTest {
   @Test(expected = ConflictException.class)
   public void createUserSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
 
-    when(sessionService.getSessionsForUserByConsultingType(any(), any()))
+    when(sessionService.getSessionsForUserByConsultingType(any(), anyInt()))
         .thenReturn(SESSION_LIST);
-
     createSessionFacade
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 

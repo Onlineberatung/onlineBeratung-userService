@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_C
 import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_KREUZBUND;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
@@ -61,8 +62,6 @@ public class CreateUserFacadeTest {
   @Mock
   private ConsultingTypeManager consultingTypeManager;
   @Mock
-  private UserHelper userHelper;
-  @Mock
   private AgencyVerifier agencyVerifier;
   @Mock
   private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
@@ -87,6 +86,7 @@ public class CreateUserFacadeTest {
     when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);
     when(agencyVerifier.doesConsultingTypeMatchToAgency(USER_DTO_SUCHT.getAgencyId(),
         0)).thenReturn(false);
+    when(consultingTypeManager.getConsultingTypeSettings("0")).thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
@@ -114,6 +114,7 @@ public class CreateUserFacadeTest {
         0)).thenReturn(true);
     when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID);
+    when(consultingTypeManager.getConsultingTypeSettings(anyString())).thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT);
   }
@@ -187,6 +188,7 @@ public class CreateUserFacadeTest {
         0)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE);
     when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
     doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
@@ -213,8 +215,6 @@ public class CreateUserFacadeTest {
     doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
     doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
         anyString());
-    when(userService.createUser(any(), any(), any(), anyBoolean()))
-        .thenThrow(new InternalServerErrorException(ERROR));
 
     createUserFacade.createUserAndInitializeAccount(USER_DTO_SUCHT_WITHOUT_EMAIL);
 
@@ -229,6 +229,7 @@ public class CreateUserFacadeTest {
         15)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
     doNothing().when(keycloakAdminClientService).updateUserRole(anyString());
@@ -248,6 +249,8 @@ public class CreateUserFacadeTest {
     when(agencyVerifier.doesConsultingTypeMatchToAgency(USER_DTO_KREUZBUND.getAgencyId(),
         15)).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
+    when(consultingTypeManager.getConsultingTypeSettings(15))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     when(keycloakAdminClientService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
