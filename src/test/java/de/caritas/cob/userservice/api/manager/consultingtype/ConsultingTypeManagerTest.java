@@ -145,7 +145,7 @@ public class ConsultingTypeManagerTest {
   protected static ConsultingTypeSettings loadConsultingTypeSettings(int consultingType) {
     ObjectMapper mapper = new ObjectMapper();
     TypeReference<ConsultingTypeSettings> typeReference =
-        new TypeReference<ConsultingTypeSettings>() {
+        new TypeReference<>() {
         };
     URL dirUrl = ConsultingType.class.getClassLoader()
         .getResource(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE);
@@ -162,7 +162,7 @@ public class ConsultingTypeManagerTest {
         }
       }
     } catch (URISyntaxException | IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException("File for consultingTypeSettings not found");
     }
 
     return null;

@@ -103,10 +103,8 @@ public class ConsultingTypeManager {
     try {
       return new File(dirUrl.toURI()).list();
     } catch (URISyntaxException e) {
-      e.printStackTrace();
+      throw new RuntimeException("File for consultingTypeSettings not found");
     }
-
-    return null;
   }
 
 }
