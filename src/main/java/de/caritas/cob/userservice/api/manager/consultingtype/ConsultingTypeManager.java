@@ -97,7 +97,6 @@ public class ConsultingTypeManager {
   }
 
   private String[] getAllJsonFiles() {
-    System.out.println(consultingTypesSettingsJsonPath);
     URL dirUrl = ConsultingTypeManager.class.getClassLoader().getResource(consultingTypesSettingsJsonPath);
     try {
       return new File(dirUrl.toURI()).list();

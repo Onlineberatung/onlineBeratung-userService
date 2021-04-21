@@ -1001,8 +1001,7 @@ public class TestConstants {
           REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_SUCHT =
-      new ConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false
-          , false, false, false, null, false, false,
+      new ConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
           true, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_U25 =
