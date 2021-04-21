@@ -7,7 +7,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INACTIVE_CHAT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;

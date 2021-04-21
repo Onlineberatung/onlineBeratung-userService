@@ -3,11 +3,10 @@ package de.caritas.cob.userservice.api.facade;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID;
 import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_KREUZBUND;
@@ -33,7 +32,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -159,7 +157,7 @@ public class CreateUserFacadeTest {
   public void createUserAndInitializeAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakDummyEmailFails() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_SUCHT));
     userDTO.setEmail(null);
 
     when(keycloakAdminClientService.isUsernameAvailable(anyString())).thenReturn(true);

@@ -1,17 +1,17 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_AIDS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CHILDREN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CURE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_DEBT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_DISABILITY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_LAW;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_OFFENDER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PARENTING;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PLANB;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PREGNANCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_REHABILITATION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SENIORITY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_CHILDREN;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_CURE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_DEBT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_DISABILITY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_LAW;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_OFFENDER;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_PARENTING;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_PLANB;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_PREGNANCY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_REHABILITATION;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SENIORITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_AIDS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CHILDREN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CURE;
@@ -27,9 +27,9 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYP
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SOCIAL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SOCIAL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SOCIAL;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -67,21 +67,21 @@ public class ConsultingTypeManagerTest {
         private static final long serialVersionUID = 1L;
 
         {
-          put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
-          put(CONSULTING_TYPE_U25.getValue(), CONSULTING_TYPE_SETTINGS_U25);
-          put(CONSULTING_TYPE_PREGNANCY.getValue(), CONSULTING_TYPE_SETTINGS_PREGNANCY);
-          put(CONSULTING_TYPE_AIDS.getValue(), CONSULTING_TYPE_SETTINGS_AIDS);
-          put(CONSULTING_TYPE_CHILDREN.getValue(), CONSULTING_TYPE_SETTINGS_CHILDREN);
-          put(CONSULTING_TYPE_CURE.getValue(), CONSULTING_TYPE_SETTINGS_CURE);
-          put(CONSULTING_TYPE_DEBT.getValue(), CONSULTING_TYPE_SETTINGS_DEBT);
-          put(CONSULTING_TYPE_DISABILITY.getValue(), CONSULTING_TYPE_SETTINGS_DISABILITY);
-          put(CONSULTING_TYPE_LAW.getValue(), CONSULTING_TYPE_SETTINGS_LAW);
-          put(CONSULTING_TYPE_OFFENDER.getValue(), CONSULTING_TYPE_SETTINGS_OFFENDER);
-          put(CONSULTING_TYPE_PARENTING.getValue(), CONSULTING_TYPE_SETTINGS_PARENTING);
-          put(CONSULTING_TYPE_PLANB.getValue(), CONSULTING_TYPE_SETTINGS_PLANB);
-          put(CONSULTING_TYPE_REHABILITATION.getValue(), CONSULTING_TYPE_SETTINGS_REHABILITATION);
-          put(CONSULTING_TYPE_SENIORITY.getValue(), CONSULTING_TYPE_SETTINGS_SENIORITY);
-          put(CONSULTING_TYPE_SOCIAL.getValue(), CONSULTING_TYPE_SETTINGS_SOCIAL);
+          put(CONSULTING_TYPE_ID_SUCHT, CONSULTING_TYPE_SETTINGS_SUCHT);
+          put(CONSULTING_TYPE_ID_U25, CONSULTING_TYPE_SETTINGS_U25);
+          put(CONSULTING_TYPE_ID_PREGNANCY, CONSULTING_TYPE_SETTINGS_PREGNANCY);
+          put(CONSULTING_TYPE_ID_AIDS, CONSULTING_TYPE_SETTINGS_AIDS);
+          put(CONSULTING_TYPE_ID_CHILDREN, CONSULTING_TYPE_SETTINGS_CHILDREN);
+          put(CONSULTING_TYPE_ID_CURE, CONSULTING_TYPE_SETTINGS_CURE);
+          put(CONSULTING_TYPE_ID_DEBT, CONSULTING_TYPE_SETTINGS_DEBT);
+          put(CONSULTING_TYPE_ID_DISABILITY, CONSULTING_TYPE_SETTINGS_DISABILITY);
+          put(CONSULTING_TYPE_ID_LAW, CONSULTING_TYPE_SETTINGS_LAW);
+          put(CONSULTING_TYPE_ID_OFFENDER, CONSULTING_TYPE_SETTINGS_OFFENDER);
+          put(CONSULTING_TYPE_ID_PARENTING, CONSULTING_TYPE_SETTINGS_PARENTING);
+          put(CONSULTING_TYPE_ID_PLANB, CONSULTING_TYPE_SETTINGS_PLANB);
+          put(CONSULTING_TYPE_ID_REHABILITATION, CONSULTING_TYPE_SETTINGS_REHABILITATION);
+          put(CONSULTING_TYPE_ID_SENIORITY, CONSULTING_TYPE_SETTINGS_SENIORITY);
+          put(CONSULTING_TYPE_ID_SOCIAL, CONSULTING_TYPE_SETTINGS_SOCIAL);
         }
       };
   private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25 =
@@ -89,7 +89,7 @@ public class ConsultingTypeManagerTest {
         private static final long serialVersionUID = 1L;
 
         {
-          put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
+          put(CONSULTING_TYPE_ID_SUCHT, CONSULTING_TYPE_SETTINGS_SUCHT);
         }
       };
 

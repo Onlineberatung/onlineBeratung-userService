@@ -6,7 +6,6 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_E
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_LINK_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.HOST_BASE_URL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
