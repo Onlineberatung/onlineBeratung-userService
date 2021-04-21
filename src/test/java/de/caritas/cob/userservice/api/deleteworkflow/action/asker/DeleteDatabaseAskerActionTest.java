@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.LAST;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,7 +47,7 @@ public class DeleteDatabaseAskerActionTest {
 
   @Test
   public void getOrder_Should_returnThird() {
-    assertThat(this.deleteDatabaseAskerAction.getOrder(), is(FOURTH.getOrder()));
+    assertThat(this.deleteDatabaseAskerAction.getOrder(), is(LAST.getOrder()));
   }
 
   @Test

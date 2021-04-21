@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.consultant;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.LAST;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.CONSULTANT;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
@@ -57,6 +57,6 @@ public class DeleteDatabaseConsultantAction implements DeleteConsultantAction {
    */
   @Override
   public int getOrder() {
-    return FOURTH.getOrder();
+    return LAST.getOrder();
   }
 }
