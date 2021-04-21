@@ -280,20 +280,6 @@ public class SessionServiceTest {
     assertThat(result.get(0), instanceOf(Session.class));
   }
 
-  @Test
-  public void getSessionsForUserByConsultingType_Should_ThrowInternalServerErrorExceptionOnDatabaseError1() {
-
-    DataAccessException ex = new DataAccessException("Database error") {
-    };
-    when(sessionRepository.findByUserAndConsultingTypeId(USER, 0)).thenThrow(ex);
-    try {
-      sessionService.getSessionsForUserByConsultingType(USER, 0);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-  }
-
   /**
    * method: getSessionsForConsultant
    */
