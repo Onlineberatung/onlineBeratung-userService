@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_CONSULTING_TYPE_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.UNKNOWN_CONSULTING_TYPE_ID;
 import static org.junit.Assert.assertEquals;
@@ -50,12 +50,11 @@ public class CreateNewConsultingTypeFacadeTest {
 
     createNewConsultingTypeFacade
         .initializeNewConsultingType(userDTO, user, consultingTypeSettings);
-    if(!consultingTypeSettings.isGroupChat())
-    {
+    if (!consultingTypeSettings.isGroupChat()) {
       verify(createSessionFacade, times(1)).createUserSession(any(), any(), any());
-    }
-    else {
-      verify(createUserChatRelationFacade, times(1)).initializeUserChatAgencyRelation(any(), any(), any());
+    } else {
+      verify(createUserChatRelationFacade, times(1))
+          .initializeUserChatAgencyRelation(any(), any(), any());
     }
 
   }
@@ -108,7 +107,8 @@ public class CreateNewConsultingTypeFacadeTest {
     User user = easyRandom.nextObject(User.class);
     RocketChatCredentials rocketChatCredentials = easyRandom
         .nextObject(RocketChatCredentials.class);
-    when(consultingTypeManager.getConsultingTypeSettings(INVALID_CONSULTING_TYPE_ID)).thenThrow(new NumberFormatException(""));
+    when(consultingTypeManager.getConsultingTypeSettings(INVALID_CONSULTING_TYPE_ID))
+        .thenThrow(new NumberFormatException(""));
     createNewConsultingTypeFacade.initializeNewConsultingType(userDTO, user, rocketChatCredentials);
 
     verify(createUserChatRelationFacade, times(0))
