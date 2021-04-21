@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIFTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.CONSULTANT;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.ROCKET_CHAT;
@@ -49,7 +49,7 @@ public class DeleteRocketChatUserActionTest {
 
   @Test
   public void getOrder_Should_returnFourth() {
-    assertThat(deleteRocketChatUserAction.getOrder(), is(FIFTH.getOrder()));
+    assertThat(deleteRocketChatUserAction.getOrder(), is(FOURTH.getOrder()));
   }
 
   @Test
