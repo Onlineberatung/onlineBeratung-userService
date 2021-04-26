@@ -48,7 +48,7 @@ public class ConsultantAgencyAnalyzer {
 
   private Predicate<AgencyAdminResponseDTO> byConsultantAgency(ConsultantAgency consultantAgency) {
     return agencyAdminResponseDTO -> consultantAgency.getAgencyId()
-        .equals(agencyAdminResponseDTO.getAgencyId());
+        .equals(agencyAdminResponseDTO.getId());
   }
 
 }
