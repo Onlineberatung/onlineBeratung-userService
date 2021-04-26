@@ -46,7 +46,7 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRuleTest {
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(violatedConsultantAgency));
     this.reportRule
-        .setAllAgencies(singletonList(new AgencyAdminResponseDTO().agencyId(1L).teamAgency(true)));
+        .setAllAgencies(singletonList(new AgencyAdminResponseDTO().id(1L).teamAgency(true)));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();
 
@@ -91,11 +91,11 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRuleTest {
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(5L))
         .thenReturn(singletonList(consultantAgencies.get(9)));
     this.reportRule.setAllAgencies(asList(
-        new AgencyAdminResponseDTO().agencyId(1L).teamAgency(true),
-        new AgencyAdminResponseDTO().agencyId(2L).teamAgency(true),
-        new AgencyAdminResponseDTO().agencyId(3L).teamAgency(true),
-        new AgencyAdminResponseDTO().agencyId(4L).teamAgency(true),
-        new AgencyAdminResponseDTO().agencyId(5L).teamAgency(true)
+        new AgencyAdminResponseDTO().id(1L).teamAgency(true),
+        new AgencyAdminResponseDTO().id(2L).teamAgency(true),
+        new AgencyAdminResponseDTO().id(3L).teamAgency(true),
+        new AgencyAdminResponseDTO().id(4L).teamAgency(true),
+        new AgencyAdminResponseDTO().id(5L).teamAgency(true)
     ));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();

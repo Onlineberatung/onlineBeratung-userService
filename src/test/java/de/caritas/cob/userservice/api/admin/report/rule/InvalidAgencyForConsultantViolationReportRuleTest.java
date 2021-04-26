@@ -44,7 +44,7 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
     violatedConsultantAgency.setAgencyId(1L);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(violatedConsultantAgency));
-    this.reportRule.setAllAgencies(singletonList(new AgencyAdminResponseDTO().agencyId(1L)));
+    this.reportRule.setAllAgencies(singletonList(new AgencyAdminResponseDTO().id(1L)));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();
 
@@ -83,11 +83,11 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(5L))
         .thenReturn(singletonList(consultantAgencies.get(9)));
     this.reportRule.setAllAgencies(asList(
-        new AgencyAdminResponseDTO().agencyId(1L),
-        new AgencyAdminResponseDTO().agencyId(2L),
-        new AgencyAdminResponseDTO().agencyId(3L),
-        new AgencyAdminResponseDTO().agencyId(4L),
-        new AgencyAdminResponseDTO().agencyId(5L)
+        new AgencyAdminResponseDTO().id(1L),
+        new AgencyAdminResponseDTO().id(2L),
+        new AgencyAdminResponseDTO().id(3L),
+        new AgencyAdminResponseDTO().id(4L),
+        new AgencyAdminResponseDTO().id(5L)
     ));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();

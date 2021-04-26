@@ -41,7 +41,7 @@ public class InvalidAgencyForConsultantViolationReportRule extends
   private List<Long> retrieveAllDeletedAgencies() {
     return super.getAllAgencies().stream()
         .filter(agencyAdminResponseDTO -> !"null".equals(agencyAdminResponseDTO.getDeleteDate()))
-        .map(AgencyAdminResponseDTO::getAgencyId)
+        .map(AgencyAdminResponseDTO::getId)
         .collect(Collectors.toList());
   }
 
