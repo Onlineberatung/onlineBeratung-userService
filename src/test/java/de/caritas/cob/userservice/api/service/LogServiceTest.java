@@ -10,6 +10,7 @@ import static de.caritas.cob.userservice.api.service.LogService.DB_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.DB_INCONSISTENCY_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.DECRYPTION_ERROR;
 import static de.caritas.cob.userservice.api.service.LogService.EMAIL_NOTIFICATION_ERROR_TEXT;
+import static de.caritas.cob.userservice.api.service.LogService.EMAIL_NOTIFICATION_WARNING_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.FORBIDDEN_WARNING_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.INTERNAL_SERVER_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.KEYCLOAK_ERROR_TEXT;
@@ -240,6 +241,16 @@ public class LogServiceTest {
     LogService.logEmailNotificationFacadeError(ERROR_MESSAGE);
     verify(logger, times(1))
         .error(anyString(), eq(EMAIL_NOTIFICATION_ERROR_TEXT), eq(ERROR_MESSAGE));
+  }
+
+  @Test
+  public void logEmailNotificationFacadeWarning_should_LogMessageAndException() {
+
+    LogService.logEmailNotificationFacadeWarning(ERROR_MESSAGE, EXCEPTION);
+    verify(logger, times(1))
+        .warn(anyString(), eq(EMAIL_NOTIFICATION_WARNING_TEXT), eq(ERROR_MESSAGE));
+    verify(logger, times(1))
+        .warn(anyString(), eq(EMAIL_NOTIFICATION_WARNING_TEXT), eq(getStackTrace(EXCEPTION)));
   }
 
   @Test
