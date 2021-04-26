@@ -50,6 +50,22 @@ public class DeleteRocketChatUserAction implements DeleteAskerAction, DeleteCons
     return emptyList();
   }
 
+  /**
+   * Deletes the given {@link Consultant} related Rocket.Chat account.
+   *
+   * @param consultant the {@link Consultant}
+   * @return a possible generated {@link DeletionWorkflowError}
+   */
+  @Override
+  public List<DeletionWorkflowError> execute(Consultant consultant) {
+    try {
+      deleteUserInRocketChat(consultant.getRocketChatId());
+    } catch (Exception e) {
+      return buildErrorsForSourceType(CONSULTANT, consultant.getRocketChatId(), e);
+    }
+    return emptyList();
+  }
+
   private void deleteUserInRocketChat(String rcUserId) throws RocketChatDeleteUserException {
     if (isNotBlank(rcUserId)) {
       this.rocketChatService.deleteUser(rcUserId);
@@ -68,22 +84,6 @@ public class DeleteRocketChatUserAction implements DeleteAskerAction, DeleteCons
             .timestamp(nowInUtc())
             .build()
     );
-  }
-
-  /**
-   * Deletes the given {@link Consultant} related Rocket.Chat account.
-   *
-   * @param consultant the {@link Consultant}
-   * @return a possible generated {@link DeletionWorkflowError}
-   */
-  @Override
-  public List<DeletionWorkflowError> execute(Consultant consultant) {
-    try {
-      deleteUserInRocketChat(consultant.getRocketChatId());
-    } catch (Exception e) {
-      return buildErrorsForSourceType(CONSULTANT, consultant.getRocketChatId(), e);
-    }
-    return emptyList();
   }
 
   /**
