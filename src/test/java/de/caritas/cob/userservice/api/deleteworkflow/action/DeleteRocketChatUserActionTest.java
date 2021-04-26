@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
@@ -53,13 +54,23 @@ public class DeleteRocketChatUserActionTest {
   }
 
   @Test
-  public void execute_Should_deleteRocketCHatUserAndReturnEmptyList_When_userDeletionIsSuccessful()
+  public void execute_Should_deleteRocketChatUserAndReturnEmptyList_When_userDeletionIsSuccessful()
       throws RocketChatDeleteUserException {
+    User user = new User();
+    user.setRcUserId("rcId");
+    List<DeletionWorkflowError> workflowErrors = this.deleteRocketChatUserAction.execute(user);
+
+    assertThat(workflowErrors, hasSize(0));
+    verify(this.rocketChatService, times(1)).deleteUser(any());
+  }
+
+  @Test
+  public void execute_Should_notDeleteRocketChatUserAndReturnEmptyList_When_userHasNoRcId() {
     List<DeletionWorkflowError> workflowErrors = this.deleteRocketChatUserAction
         .execute(new User());
 
     assertThat(workflowErrors, hasSize(0));
-    verify(this.rocketChatService, times(1)).deleteUser(any());
+    verifyNoInteractions(this.rocketChatService);
   }
 
   @Test
@@ -83,11 +94,22 @@ public class DeleteRocketChatUserActionTest {
   @Test
   public void execute_Should_deleteRocketChatUserAndReturnEmptyList_When_consultantDeletionIsSuccessful()
       throws RocketChatDeleteUserException {
+    Consultant consultant = new Consultant();
+    consultant.setRocketChatId("rcId");
+    List<DeletionWorkflowError> workflowErrors = this.deleteRocketChatUserAction
+        .execute(consultant);
+
+    assertThat(workflowErrors, hasSize(0));
+    verify(this.rocketChatService, times(1)).deleteUser(any());
+  }
+
+  @Test
+  public void execute_Should_notDeleteRocketChatUserAndReturnEmptyList_When_consultantHasNoRcId() {
     List<DeletionWorkflowError> workflowErrors = this.deleteRocketChatUserAction
         .execute(new Consultant());
 
     assertThat(workflowErrors, hasSize(0));
-    verify(this.rocketChatService, times(1)).deleteUser(any());
+    verifyNoInteractions(this.rocketChatService);
   }
 
   @Test
