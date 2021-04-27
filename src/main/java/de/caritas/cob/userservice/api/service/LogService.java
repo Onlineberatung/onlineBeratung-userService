@@ -28,6 +28,7 @@ public class LogService {
   public static final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
   public static final String ILLEGAL_ARGUMENT_ERROR_TEXT = "Illegal Argument: ";
   public static final String EMAIL_NOTIFICATION_ERROR_TEXT = "EmailNotificationFacade error: ";
+  public static final String EMAIL_NOTIFICATION_WARNING_TEXT = "EmailNotificationFacade warning: ";
   public static final String ACCEPT_ENQUIRY_ERROR_TEXT = "AcceptEnquiryFacade error: ";
   public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
   public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
@@ -325,6 +326,17 @@ public class LogService {
   }
 
   /**
+   * Warning from EmailNotificationFacade.
+   *
+   * @param message the message
+   * @param exception the caused {@link Exception}
+   */
+  public static void logEmailNotificationFacadeWarning(String message, Exception exception) {
+    LOGGER.warn("{}{}", EMAIL_NOTIFICATION_WARNING_TEXT, message);
+    LOGGER.warn("{}{}", EMAIL_NOTIFICATION_WARNING_TEXT, getStackTrace(exception));
+  }
+
+  /**
    * Error from AcceptEnquiryFacade.
    *
    * @param message the message
@@ -378,6 +390,15 @@ public class LogService {
    */
   public static void logInfo(String msg) {
     LOGGER.info(msg);
+  }
+
+  /**
+   * Logs an info exception.
+   *
+   * @param exception the exception
+   */
+  public static void logInfo(Exception exception) {
+    LOGGER.info(getStackTrace(exception));
   }
 
   /**

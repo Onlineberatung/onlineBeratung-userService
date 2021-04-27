@@ -2,6 +2,9 @@ package de.caritas.cob.userservice.api.facade;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -100,16 +103,27 @@ public class EmailNotificationFacade {
 
     try {
       Session session = sessionService.getSessionByGroupIdAndUser(rcGroupId, userId, roles);
-
-      EmailSupplier newMessageMails = new NewMessageEmailSupplier(session, rcGroupId, roles,
-          userId, consultantAgencyService, consultingTypeManager, applicationBaseUrl,
-          emailDummySuffix, userHelper);
-
+      EmailSupplier newMessageMails = NewMessageEmailSupplier
+          .builder()
+          .session(session)
+          .rcGroupId(rcGroupId)
+          .roles(roles)
+          .userId(userId)
+          .consultantAgencyService(consultantAgencyService)
+          .consultingTypeManager(consultingTypeManager)
+          .applicationBaseUrl(applicationBaseUrl)
+          .emailDummySuffix(emailDummySuffix)
+          .userHelper(userHelper)
+          .build();
       sendMailTasksToMailService(newMessageMails);
 
+    } catch (NotFoundException | ForbiddenException | BadRequestException getSessionException) {
+      LogService.logEmailNotificationFacadeWarning(String.format(
+          "Failed to get session for new message notification with Rocket.Chat group ID %s and user ID %s.",
+          rcGroupId, userId), getSessionException);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
-          "Failed to send new message notification with rocket chat group id %s and user id %s.",
+          "Failed to send new message notification with Rocket.Chat group ID %s and user ID %s.",
           rcGroupId, userId), ex);
     }
   }

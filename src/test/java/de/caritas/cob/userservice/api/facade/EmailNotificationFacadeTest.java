@@ -44,6 +44,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
@@ -65,6 +66,7 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
@@ -389,15 +391,30 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewMessageNotification_ShouldNot_SendEmailAndLogEmailNotificationFacadeError_WhenSessionIsNullOrEmpty_WithConsultantRole() {
+  public void sendNewMessageNotification_ShouldNot_SendEmailAndLogEmailNotificationFacadeWarning_When_GetSessionFails() {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
-        .thenReturn(null);
+        .thenThrow(new NotFoundException(ERROR_MSG));
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
 
-    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0))
+        .sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  public void sendNewMessageNotification_Should_LogEmailNotificationFacadeError_When_ErrorOccursDuringMailTransmission() {
+
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
+        .thenReturn(SESSION_IN_PROGRESS);
+    doThrow(new NullPointerException())
+        .when(mailService).sendEmailNotification(any());
+
+    emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
+        CONSULTANT_ID);
+
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
