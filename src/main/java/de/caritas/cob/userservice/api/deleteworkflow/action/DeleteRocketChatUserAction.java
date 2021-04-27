@@ -7,10 +7,13 @@ import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTarget
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteAskerAction;
 import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteConsultantAction;
+import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -40,18 +43,9 @@ public class DeleteRocketChatUserAction implements DeleteAskerAction, DeleteCons
   @Override
   public List<DeletionWorkflowError> execute(User user) {
     try {
-      this.rocketChatService.deleteUser(user.getRcUserId());
+      deleteUserInRocketChat(user.getRcUserId());
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
-      return singletonList(
-        DeletionWorkflowError.builder()
-            .deletionSourceType(ASKER)
-            .deletionTargetType(ROCKET_CHAT)
-            .identifier(user.getRcUserId())
-            .reason(ERROR_REASON)
-            .timestamp(nowInUtc())
-            .build()
-      );
+      return buildErrorsForSourceType(ASKER, user.getRcUserId(), e);
     }
     return emptyList();
   }
@@ -65,20 +59,31 @@ public class DeleteRocketChatUserAction implements DeleteAskerAction, DeleteCons
   @Override
   public List<DeletionWorkflowError> execute(Consultant consultant) {
     try {
-      this.rocketChatService.deleteUser(consultant.getRocketChatId());
+      deleteUserInRocketChat(consultant.getRocketChatId());
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
-      return singletonList(
-          DeletionWorkflowError.builder()
-              .deletionSourceType(CONSULTANT)
-              .deletionTargetType(ROCKET_CHAT)
-              .identifier(consultant.getRocketChatId())
-              .reason(ERROR_REASON)
-              .timestamp(nowInUtc())
-              .build()
-      );
+      return buildErrorsForSourceType(CONSULTANT, consultant.getRocketChatId(), e);
     }
     return emptyList();
+  }
+
+  private void deleteUserInRocketChat(String rcUserId) throws RocketChatDeleteUserException {
+    if (isNotBlank(rcUserId)) {
+      this.rocketChatService.deleteUser(rcUserId);
+    }
+  }
+
+  private List<DeletionWorkflowError> buildErrorsForSourceType(
+      DeletionSourceType deletionSourceType, String rcUserId, Exception e) {
+    LogService.logDeleteWorkflowError(e);
+    return singletonList(
+        DeletionWorkflowError.builder()
+            .deletionSourceType(deletionSourceType)
+            .deletionTargetType(ROCKET_CHAT)
+            .identifier(rcUserId)
+            .reason(ERROR_REASON)
+            .timestamp(nowInUtc())
+            .build()
+    );
   }
 
   /**
