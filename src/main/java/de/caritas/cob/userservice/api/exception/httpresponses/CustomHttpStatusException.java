@@ -11,7 +11,7 @@ public abstract class CustomHttpStatusException extends RuntimeException {
 
   CustomHttpStatusException() {
     super();
-    this.loggingMethod = LogService::logWarn;
+    this.loggingMethod = LogService::logInfo;
   }
 
   CustomHttpStatusException(String message, Consumer<Exception> loggingMethod) {

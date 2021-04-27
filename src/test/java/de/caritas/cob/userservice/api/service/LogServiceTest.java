@@ -324,6 +324,12 @@ public class LogServiceTest {
   }
 
   @Test
+  public void logInfo_Should_LogExceptionStackTrace() {
+    LogService.logInfo(exception);
+    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
+  }
+
+  @Test
   public void logDecryptionError_Should_LogExceptionStackTraceAndErrorMessage() {
 
     LogService.logDecryptionError(ERROR_MESSAGE, exception);

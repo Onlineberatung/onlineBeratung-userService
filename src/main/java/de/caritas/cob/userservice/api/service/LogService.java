@@ -393,6 +393,15 @@ public class LogService {
   }
 
   /**
+   * Logs an info exception.
+   *
+   * @param exception the exception
+   */
+  public static void logInfo(Exception exception) {
+    LOGGER.info(getStackTrace(exception));
+  }
+
+  /**
    * Logs a Encryption service error.
    *
    * @param exception the exception
