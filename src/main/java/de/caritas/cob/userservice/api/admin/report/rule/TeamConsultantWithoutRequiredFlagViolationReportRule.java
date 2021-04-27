@@ -45,7 +45,7 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRule extends
   private List<Long> retrieveAllTeamAgencies() {
     return super.getAllAgencies().stream()
         .filter(agencyAdminResponseDTO -> isTrue(agencyAdminResponseDTO.getTeamAgency()))
-        .map(AgencyAdminResponseDTO::getAgencyId)
+        .map(AgencyAdminResponseDTO::getId)
         .collect(Collectors.toList());
   }
 
