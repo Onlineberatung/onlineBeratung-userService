@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -45,7 +44,7 @@ public class AuthenticatedUserHelperTest {
           SessionStatus.NEW, nowInUtc(), null, null, null,
           false, false, null, null);
   private final Session TEAM_SESSION =
-      new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =

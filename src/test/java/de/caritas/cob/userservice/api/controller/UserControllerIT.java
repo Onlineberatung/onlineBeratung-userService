@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
@@ -169,7 +171,6 @@ import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -261,7 +262,7 @@ public class UserControllerIT {
       .description(DESCRIPTION)
       .teamAgency(false)
       .offline(false)
-      .consultingType(ConsultingType.SUCHT);
+      .consultingType(SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
@@ -269,7 +270,7 @@ public class UserControllerIT {
       .agency(AGENCY_DTO)
       .consultant(SESSION_CONSULTANT_DTO);
   private final List<AgencyDTO> AGENCY_LIST = new ArrayList<>();
-  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<String, Object>() {
+  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<>() {
     {
       put("age", "1");
       put("state", "4");
@@ -287,21 +288,21 @@ public class UserControllerIT {
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
-      ConsultingType.SUCHT, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
+      SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
       null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, null, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
