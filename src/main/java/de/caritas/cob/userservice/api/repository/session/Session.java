@@ -11,6 +11,8 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -53,6 +55,7 @@ public class Session {
     this.status = status;
     this.teamSession = teamSession;
     this.monitoring = monitoring;
+    this.registrationType = RegistrationType.REGISTERED;
   }
 
   @Id
@@ -73,6 +76,11 @@ public class Session {
   @Column(name = "consulting_type", updatable = false, nullable = false)
   @NonNull
   private ConsultingType consultingType;
+
+  @Column(name = "registration_type", updatable = false, nullable = false)
+  @Enumerated(EnumType.STRING)
+  @NonNull
+  private RegistrationType registrationType;
 
   @Column(name = "postcode", nullable = false)
   @Size(max = 5)

@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.testHelper;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 
@@ -453,35 +454,34 @@ public class TestConstants {
   public static final Long ENQUIRY_ID = 1L;
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
-      new Session(SESSION_ID, null, null, SUCHT, POSTCODE, null, IN_PROGRESS, null, null, null,
-          null, false,
-          false, null, null);
+      new Session(SESSION_ID, null, null, SUCHT, REGISTERED, POSTCODE, null,
+          IN_PROGRESS, null, null, null, null, false, false, null, null);
   public static final Session SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session ENQUIRY_SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, null, CONSULTANT_2, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
+      null, U25, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
       null, IS_TEAM_SESSION, IS_MONITORING, null, null);
 
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
+      USER_WITH_RC_ID, null, U25, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, U25, POSTCODE,
+      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, U25, REGISTERED, POSTCODE,
           AGENCY_ID, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null,
           IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
-      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, SUCHT, POSTCODE,
+      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITH_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      CONSULTANT_2, U25, POSTCODE, AGENCY_ID, IN_PROGRESS, nowInUtc(),
+      CONSULTANT_2, U25, REGISTERED, POSTCODE, AGENCY_ID, IN_PROGRESS, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, U25, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
+      USER_WITH_RC_ID, null, U25, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET = new HashSet<>(
@@ -678,22 +678,21 @@ public class TestConstants {
   public static final List<UserSessionResponseDTO> USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST =
       Arrays.asList(USER_SESSION_RESPONSE_DTO, USER_SESSION_RESPONSE_DTO_2,
           USER_SESSION_RESPONSE_DTO_3, USER_CHAT_RESPONSE_DTO, USER_CHAT_RESPONSE_DTO_2);
-  public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS =
-      new HashMap<String, Boolean>() {
-        {
-          put(RC_GROUP_ID, false);
-          put(RC_GROUP_ID_2, false);
-          put(RC_GROUP_ID_3, false);
-          put(RC_GROUP_ID_4, false);
-          put(RC_GROUP_ID_5, false);
-          put(RC_GROUP_ID_6, false);
-          put(RC_FEEDBACK_GROUP_ID, false);
-          put(RC_FEEDBACK_GROUP_ID_2, false);
-          put(RC_FEEDBACK_GROUP_ID_3, false);
-        }
-      };
+  public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS = new HashMap<>() {
+    {
+      put(RC_GROUP_ID, false);
+      put(RC_GROUP_ID_2, false);
+      put(RC_GROUP_ID_3, false);
+      put(RC_GROUP_ID_4, false);
+      put(RC_GROUP_ID_5, false);
+      put(RC_GROUP_ID_6, false);
+      put(RC_FEEDBACK_GROUP_ID, false);
+      put(RC_FEEDBACK_GROUP_ID_2, false);
+      put(RC_FEEDBACK_GROUP_ID_3, false);
+    }
+  };
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITHOUT_UNREADS =
-      new HashMap<String, Boolean>() {
+      new HashMap<>() {
         {
           put(RC_GROUP_ID, true);
           put(RC_GROUP_ID_2, true);
@@ -707,7 +706,7 @@ public class TestConstants {
         }
       };
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD =
-      new HashMap<String, Boolean>() {
+      new HashMap<>() {
         {
           put(RC_GROUP_ID, true);
           put(RC_GROUP_ID_2, true);
@@ -766,20 +765,19 @@ public class TestConstants {
           ROOMS_LAST_MESSAGE_DTO_5),
       new RoomsUpdateDTO(RC_GROUP_ID_6, "name6", "fname6", "P", USER_DTO_3, true, false, new Date(),
           ROOMS_LAST_MESSAGE_DTO_6));
-  public static final Map<String, RoomsLastMessageDTO> ROOMS_LAST_MESSAGE_DTO_MAP =
-      new HashMap<String, RoomsLastMessageDTO>() {
-        {
-          put(RC_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
-          put(RC_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
-          put(RC_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
-          put(RC_GROUP_ID_4, ROOMS_LAST_MESSAGE_DTO_4);
-          put(RC_GROUP_ID_5, ROOMS_LAST_MESSAGE_DTO_5);
-          put(RC_GROUP_ID_6, ROOMS_LAST_MESSAGE_DTO_6);
-          put(RC_FEEDBACK_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
-          put(RC_FEEDBACK_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
-          put(RC_FEEDBACK_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
-        }
-      };
+  public static final Map<String, RoomsLastMessageDTO> ROOMS_LAST_MESSAGE_DTO_MAP = new HashMap<>() {
+    {
+      put(RC_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
+      put(RC_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
+      put(RC_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
+      put(RC_GROUP_ID_4, ROOMS_LAST_MESSAGE_DTO_4);
+      put(RC_GROUP_ID_5, ROOMS_LAST_MESSAGE_DTO_5);
+      put(RC_GROUP_ID_6, ROOMS_LAST_MESSAGE_DTO_6);
+      put(RC_FEEDBACK_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
+      put(RC_FEEDBACK_GROUP_ID_2, ROOMS_LAST_MESSAGE_DTO_2);
+      put(RC_FEEDBACK_GROUP_ID_3, ROOMS_LAST_MESSAGE_DTO_3);
+    }
+  };
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
           MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
@@ -830,46 +828,42 @@ public class TestConstants {
       new ConsultantSessionResponseDTO()
           .session(SESSION_DTO_WITHOUT_FEEDBACK)
           .latestMessage(new Date(NOW.getTime() + 8640000));
-  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST =
-      new ArrayList<ConsultantSessionResponseDTO>() {
-        private static final long serialVersionUID = 1L;
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST = new ArrayList<>() {
+    private static final long serialVersionUID = 1L;
 
-        {
-          add(CONSULTANT_SESSION_RESPONSE_DTO);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_2);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_3);
-        }
-      };
-  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_2 =
-      new ArrayList<ConsultantSessionResponseDTO>() {
-        private static final long serialVersionUID = 1L;
+    {
+      add(CONSULTANT_SESSION_RESPONSE_DTO);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_2);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_3);
+    }
+  };
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_2 = new ArrayList<>() {
+    private static final long serialVersionUID = 1L;
 
-        {
-          add(CONSULTANT_SESSION_RESPONSE_DTO);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_2);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_3);
-        }
-      };
-  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ONE_FEEDBACK =
-      new ArrayList<ConsultantSessionResponseDTO>() {
-        private static final long serialVersionUID = 1L;
+    {
+      add(CONSULTANT_SESSION_RESPONSE_DTO);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_2);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_3);
+    }
+  };
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ONE_FEEDBACK = new ArrayList<>() {
+    private static final long serialVersionUID = 1L;
 
-        {
-          add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_FEEDBACK);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK);
-        }
-      };
-  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_CHAT_RESPONSE_DTO_LIST =
-      new ArrayList<ConsultantSessionResponseDTO>() {
-        private static final long serialVersionUID = 1L;
+    {
+      add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_FEEDBACK);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK);
+    }
+  };
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_CHAT_RESPONSE_DTO_LIST = new ArrayList<>() {
+    private static final long serialVersionUID = 1L;
 
-        {
-          add(CONSULTANT_SESSION_RESPONSE_DTO);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_2);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_3);
-          add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
-        }
-      };
+    {
+      add(CONSULTANT_SESSION_RESPONSE_DTO);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_2);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_3);
+      add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
+    }
+  };
   public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK_CHAT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
@@ -1101,14 +1095,13 @@ public class TestConstants {
       new ConsultantSessionResponseDTO()
           .chat(USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE)
           .latestMessage(new Date(NOW.getTime() + 8640000));
-  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE =
-      new ArrayList<ConsultantSessionResponseDTO>() {
-        private static final long serialVersionUID = 1L;
+  public static final List<ConsultantSessionResponseDTO> CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE = new ArrayList<>() {
+    private static final long serialVersionUID = 1L;
 
-        {
-          add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
-        }
-      };
+    {
+      add(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
+    }
+  };
 
   // Authorization
   public static final String GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT = "AUTHORIZATION_CONSULTANT_DEFAULT";

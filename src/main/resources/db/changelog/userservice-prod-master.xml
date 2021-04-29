@@ -15,4 +15,5 @@
 	<include file="db/changelog/changeset/0009_delete_timestamp_for_user_consultant/0009_changeSet.xml"/>
 	<include file="db/changelog/changeset/0010_delete_timestamp_for_consultant_agency/0010_changeSet.xml"/>
 	<include file="db/changelog/changeset/0011_add_mobile_token_for_user/0011_changeSet.xml"/>
+	<include file="db/changelog/changeset/0012_add_type_to_session/0012_changeSet.xml"/>
 </databaseChangeLog>
