@@ -55,6 +55,7 @@ public class Session {
     this.status = status;
     this.teamSession = teamSession;
     this.monitoring = monitoring;
+    this.registrationType = RegistrationType.REGISTERED;
   }
 
   @Id
