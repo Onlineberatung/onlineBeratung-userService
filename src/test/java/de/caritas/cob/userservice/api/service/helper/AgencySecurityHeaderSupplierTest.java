@@ -53,7 +53,7 @@ public class AgencySecurityHeaderSupplierTest {
     this.agencyResponseDTOS = AGENCY_DTO_LIST.stream()
         .map(this::toAgencyResponseDTO)
         .collect(Collectors.toList());
-    when(this.securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
+    when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(new HttpHeaders());
   }
 
   @SneakyThrows
