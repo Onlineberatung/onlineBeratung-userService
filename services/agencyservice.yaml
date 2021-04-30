@@ -80,8 +80,6 @@ paths:
           description: UNAUTHORIZED - no/invalid CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: []
 
 components:
   schemas:
