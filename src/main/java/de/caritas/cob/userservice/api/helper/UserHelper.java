@@ -185,7 +185,7 @@ public class UserHelper {
    * @return URL (String)
    */
   public String generateChatUrl(Long chatId, int consultingTypeId) {
-    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getConsultingTypeUrlName() + "/"
+    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getSlug() + "/"
         + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
             BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }

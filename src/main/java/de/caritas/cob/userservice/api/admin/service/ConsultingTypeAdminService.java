@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.admin.service;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.admin.hallink.ConsultingTypePaginationLinksBuilder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.ConsultingTypeAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultingTypeResultDTO;
 import de.caritas.cob.userservice.api.model.PaginationLinks;
@@ -46,7 +46,7 @@ public class ConsultingTypeAdminService {
 
   private List<ConsultingTypeResultDTO> fullSortedConsultingTypeResponseList() {
     return consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
-        Comparator.comparing(ConsultingTypeSettings::getConsultingTypeUrlName))
+        Comparator.comparing(ExtendedConsultingTypeResponseDTO::getConsultingTypeUrlName))
         .map(this::fromConsultingTypeSettings)
         .collect(Collectors.toList());
   }
@@ -56,16 +56,17 @@ public class ConsultingTypeAdminService {
     return Math.max(page < pagedListHolder.getPageCount() ? page - 1 : page, 0);
   }
 
-  private ConsultingTypeResultDTO fromConsultingTypeSettings(ConsultingTypeSettings ctSettings) {
+  private ConsultingTypeResultDTO fromConsultingTypeSettings(
+      ExtendedConsultingTypeResponseDTO ctSettings) {
     return new ConsultingTypeResultDTO()
-        .id(ctSettings.getConsultingTypeId())
-        .name(ctSettings.getConsultingTypeUrlName())
-        .languageFormal(ctSettings.isLanguageFormal())
+        .id(ctSettings.getId())
+        .name(ctSettings.getSlug())
+        .languageFormal(ctSettings.getLanguageFormal())
         .roles(ctSettings.getRoles())
-        .sendWelcomeMessage(ctSettings.isSendWelcomeMessage())
+        .sendWelcomeMessage(ctSettings.getWelcomeMessage().getSendWelcomeMessage())
         .welcomeMessage(ctSettings.getWelcomeMessage())
-        .monitoring(ctSettings.isMonitoring())
-        .feedbackChat(ctSettings.isFeedbackChat())
+        .monitoring(ctSettings.getMonitoring().getInitializeMonitoring())
+        .feedbackChat(ctSettings.getInitializeFeedbackChat().booleanValue())
         .notifications(ctSettings.getNotifications());
   }
 

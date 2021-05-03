@@ -124,7 +124,7 @@ public class ConsultantAgencyRelationCreatorService {
       consultant.getConsultantAgencies().stream()
           .map(ConsultantAgency::getAgencyId)
           .map(this::retrieveAgency)
-          .filter(agency -> !(agency.getConsultingType() == consultingTypeId))
+          .filter(agency -> (agency.getConsultingType() != consultingTypeId))
           .findFirst()
           .ifPresent(agency -> {
             throw new BadRequestException(String

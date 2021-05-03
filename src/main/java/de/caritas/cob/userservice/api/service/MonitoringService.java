@@ -2,11 +2,11 @@ package de.caritas.cob.userservice.api.service;
 
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
@@ -38,17 +38,17 @@ public class MonitoringService {
 
   /**
    * Creates and inserts the initial monitoring data for the given {@link Session} into the database
-   * if monitoring is activated for the given {@link ConsultingTypeSettings}.
+   * if monitoring is activated for the given {@link ExtendedConsultingTypeResponseDTO}.
    *
    * @param session                {@link Session}
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    * @throws CreateMonitoringException @link CreateMonitoringException}
    */
   public void createMonitoringIfConfigured(Session session,
-      ConsultingTypeSettings consultingTypeSettings)
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
       throws CreateMonitoringException {
 
-    if (nonNull(session) && consultingTypeSettings.isMonitoring()) {
+    if (nonNull(session) && extendedConsultingTypeResponseDTO.getMonitoring().getInitializeMonitoring()) {
       try {
         updateMonitoring(session.getId(),
             monitoringStructureProvider.getMonitoringInitialList(session.getConsultingTypeId()));
@@ -57,7 +57,7 @@ public class MonitoringService {
             .builder().session(session).rcGroupId(session.getGroupId()).build();
         throw new CreateMonitoringException(
             String.format("Could not create monitoring for session %s with consultingType %s",
-                session.getId(), consultingTypeSettings.getConsultingTypeId()),
+                session.getId(), extendedConsultingTypeResponseDTO.getId()),
             exception, exceptionInformation);
       }
     }

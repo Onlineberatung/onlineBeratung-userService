@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_LIST;
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -17,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
@@ -26,7 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -211,7 +208,7 @@ public class MonitoringStructureProviderTest {
 
   @Test
   public void getMonitoringInitialList_Should_returnExpectedMonitoring_When_consultingTypeHAsMonitoring() {
-    ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
+    ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
     when(settings.getMonitoringFile()).thenReturn("/monitoring/sucht.json");
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
 
@@ -224,7 +221,7 @@ public class MonitoringStructureProviderTest {
 
   @Test(expected = InternalServerErrorException.class)
   public void getMonitoringInitialList_Should_throwInternalServerErrorException_When_monitoringFilePathIsNull() {
-    ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
+    ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
     when(settings.getMonitoringFile()).thenReturn(null);
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
 

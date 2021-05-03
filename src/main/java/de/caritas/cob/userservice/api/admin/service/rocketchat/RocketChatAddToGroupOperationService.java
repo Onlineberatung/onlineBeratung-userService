@@ -17,7 +17,7 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
 
   private List<Session> sessions;
   private Consultant consultant;
-  private ConsultingTypeManager consultingTypeManager;
+  private final ConsultingTypeManager consultingTypeManager;
 
   private RocketChatAddToGroupOperationService(RocketChatService rocketChatService,
       KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod,

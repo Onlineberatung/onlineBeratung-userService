@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.report.service;
 
-import static de.caritas.cob.userservice.config.CachingConfig.AGENCY_CACHE;
+import static de.caritas.cob.userservice.config.AgencyCachingConfig.AGENCY_CACHE;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.time.format.DateTimeFormatter.ofPattern;
 

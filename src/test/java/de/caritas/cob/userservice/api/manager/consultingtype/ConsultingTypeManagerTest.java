@@ -62,8 +62,8 @@ public class ConsultingTypeManagerTest {
       "consultingTypesSettingsJsonPath";
   private static final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE =
       "consulting-type-settings";
-  private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP =
-      new HashMap<Integer, ConsultingTypeSettings>() {
+  private final Map<Integer, ExtendedConsultingTypeResponseDTO> CONSULTING_TYPE_SETTINGS_MAP =
+      new HashMap<Integer, ExtendedConsultingTypeResponseDTO>() {
         private static final long serialVersionUID = 1L;
 
         {
@@ -84,8 +84,8 @@ public class ConsultingTypeManagerTest {
           put(CONSULTING_TYPE_ID_SOCIAL, CONSULTING_TYPE_SETTINGS_SOCIAL);
         }
       };
-  private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25 =
-      new HashMap<Integer, ConsultingTypeSettings>() {
+  private final Map<Integer, ExtendedConsultingTypeResponseDTO> CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25 =
+      new HashMap<Integer, ExtendedConsultingTypeResponseDTO>() {
         private static final long serialVersionUID = 1L;
 
         {
@@ -116,7 +116,7 @@ public class ConsultingTypeManagerTest {
         consultingTypeManager.getClass().getDeclaredField(FIELD_NAME_CONSULTING_TYPE_SETTINGS_MAP),
         CONSULTING_TYPE_SETTINGS_MAP);
 
-    ConsultingTypeSettings result =
+    ExtendedConsultingTypeResponseDTO result =
         consultingTypeManager.getConsultingTypeSettings(0);
     assertEquals(CONSULTING_TYPE_SETTINGS_SUCHT, result);
 
@@ -142,9 +142,9 @@ public class ConsultingTypeManagerTest {
 
   }
 
-  protected static ConsultingTypeSettings loadConsultingTypeSettings(int consultingType) {
+  protected static ExtendedConsultingTypeResponseDTO loadConsultingTypeSettings(int consultingType) {
     ObjectMapper mapper = new ObjectMapper();
-    TypeReference<ConsultingTypeSettings> typeReference =
+    TypeReference<ExtendedConsultingTypeResponseDTO> typeReference =
         new TypeReference<>() {
         };
     URL dirUrl = ConsultingType.class.getClassLoader()
@@ -155,10 +155,10 @@ public class ConsultingTypeManagerTest {
         InputStream inputStream =
             TypeReference.class.getResourceAsStream(
                 "/" + FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE + "/" + jsonFileName);
-        ConsultingTypeSettings consultingTypeSettings = mapper
+        ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = mapper
             .readValue(inputStream, typeReference);
-        if (consultingTypeSettings.getConsultingTypeId() == consultingType) {
-          return consultingTypeSettings;
+        if (extendedConsultingTypeResponseDTO.getConsultingTypeId() == consultingType) {
+          return extendedConsultingTypeResponseDTO;
         }
       }
     } catch (URISyntaxException | IOException e) {

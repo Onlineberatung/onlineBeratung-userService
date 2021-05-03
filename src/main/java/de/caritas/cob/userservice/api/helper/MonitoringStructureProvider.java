@@ -5,12 +5,12 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.InitializeMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
@@ -110,16 +110,15 @@ public class MonitoringStructureProvider {
   /**
    * Creates the initial monitoring data of a session for the given consultingType ID. The
    * structure (JSON) is being imported from the JSON file provided in the {@link
-   * ConsultingTypeSettings}.
+   * ExtendedConsultingTypeResponseDTO}.
    *
    * @param consultingTypeId the consultingType ID to load the initial monitoring
    * @return the generated {@link MonitoringDTO}
    */
   public MonitoringDTO getMonitoringInitialList(int consultingTypeId) {
-    ObjectMapper mapper = new ObjectMapper();
     InputStream inputStream = getMonitoringJSONStream(consultingTypeId);
     try {
-      return mapper.readValue(inputStream, MonitoringDTO.class);
+      return new ObjectMapper().readValue(inputStream, MonitoringDTO.class);
     } catch (IOException ex) {
       throw new InitializeMonitoringException(ex);
     }
@@ -127,7 +126,7 @@ public class MonitoringStructureProvider {
 
   private InputStream getMonitoringJSONStream(int consultingTypeId) {
     String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
-        .getMonitoringFile();
+        .getMonitoring().getMonitoringTemplateFile();
     try {
       return TypeReference.class.getResourceAsStream(monitoringFilePath);
     } catch (NullPointerException e) {

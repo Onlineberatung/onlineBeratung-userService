@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.facade;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -11,7 +12,6 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -50,12 +50,12 @@ public class CreateUserFacade {
           HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
 
-    ConsultingTypeSettings consultingTypeSettings =
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
         consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
-    checkIfConsultingTypeMatchesToAgency(userDTO, consultingTypeSettings.getConsultingTypeId());
+    checkIfConsultingTypeMatchesToAgency(userDTO, extendedConsultingTypeResponseDTO.getId());
     KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDTO);
     updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
-        consultingTypeSettings.getConsultingTypeId());
+        extendedConsultingTypeResponseDTO.getId());
   }
 
   private void checkIfConsultingTypeMatchesToAgency(UserDTO user, int consultingTypeId) {
@@ -66,12 +66,12 @@ public class CreateUserFacade {
   }
 
   private void updateKeycloakAccountAndCreateDatabaseUserAccount(String userId, UserDTO userDTO,
-      int consultingType) {
+      int consultingTypeId) {
 
     checkIfUserIdNotNull(userId, userDTO);
 
-    ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(consultingType);
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        consultingTypeManager.getConsultingTypeSettings(consultingTypeId);
     User user;
 
     try {
@@ -82,7 +82,7 @@ public class CreateUserFacade {
 
       user = userService
           .createUser(userId, userDTO.getUsername(), returnDummyEmailIfNoneGiven(userDTO, userId),
-              consultingTypeSettings.isLanguageFormal());
+              extendedConsultingTypeResponseDTO.getLanguageFormal());
 
     } catch (Exception ex) {
       rollbackFacade
@@ -94,7 +94,7 @@ public class CreateUserFacade {
     }
 
     createNewConsultingTypeFacade
-        .initializeNewConsultingType(userDTO, user, consultingTypeSettings);
+        .initializeNewConsultingType(userDTO, user, extendedConsultingTypeResponseDTO);
   }
 
   private String returnDummyEmailIfNoneGiven(UserDTO userDTO, String userId) {

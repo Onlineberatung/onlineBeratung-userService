@@ -32,12 +32,12 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
     Optional<Integer> consultingTypeId = Arrays
-        .stream(consultingTypeManager.getAllconsultingTypeIds()).filter(id -> id
+        .stream(consultingTypeManager.getAllConsultingTypeIds()).filter(id -> id
             .equals(sessionFilter.getConsultingType())).findFirst();
 
     if (consultingTypeId.isPresent()) {
       return this.sessionRepository.findByConsultingTypeId(consultingTypeId.get(), pageable);
-    }
+    } //TODO will be deleted
     return Page.empty(pageable);
   }
 

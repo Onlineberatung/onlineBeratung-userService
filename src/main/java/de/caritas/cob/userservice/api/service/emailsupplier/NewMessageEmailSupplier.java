@@ -12,10 +12,10 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -109,11 +109,11 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   }
 
   private boolean shouldInformAllConsultantsOfTeamSession() {
-    ConsultingTypeSettings consultingTypeSettings =
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
         consultingTypeManager.getConsultingTypeSettings(session.getConsultingTypeId());
     return session.isTeamSession() && isTrue(
-        consultingTypeSettings.getNotifications().getNewMessage()
-            .getTeamSession().getToConsultant().getAllTeamConsultants());
+        extendedConsultingTypeResponseDTO.getNotifications().getTeamSessions()
+            .getNewMessage().getAllTeamConsultants());
   }
 
   private MailDTO toNewConsultantMessageMailDTO(ConsultantAgency agency) {

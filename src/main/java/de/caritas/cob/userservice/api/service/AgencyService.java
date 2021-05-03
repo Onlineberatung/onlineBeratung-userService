@@ -8,7 +8,7 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyRespon
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
-import de.caritas.cob.userservice.config.CachingConfig;
+import de.caritas.cob.userservice.config.AgencyCachingConfig;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +35,7 @@ public class AgencyService {
    * @param agencyId {@link AgencyDTO#getId()}
    * @return AgencyDTO {@link AgencyDTO}
    */
-  @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyId")
+  @Cacheable(value = AgencyCachingConfig.AGENCY_CACHE, key = "#agencyId")
   public AgencyDTO getAgency(Long agencyId) {
     return getAgenciesFromAgencyService(Collections.singletonList(agencyId))
         .iterator()
@@ -62,7 +62,7 @@ public class AgencyService {
    * @param agencyIds List of {@link AgencyDTO#getId()}
    * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
-  @Cacheable(value = CachingConfig.AGENCY_CACHE, key = "#agencyIds")
+  @Cacheable(value = AgencyCachingConfig.AGENCY_CACHE, key = "#agencyIds")
   public List<AgencyDTO> getAgencies(List<Long> agencyIds) {
     return getAgenciesFromAgencyService(agencyIds);
   }

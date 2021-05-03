@@ -66,7 +66,7 @@ public class AskerDataProviderTest {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_SUCHT));
-    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
+    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
 
     @SuppressWarnings("unchecked")
     LinkedHashMap<String, Object> consultingTypeData =
@@ -84,7 +84,7 @@ public class AskerDataProviderTest {
     when(agencyService.getAgencies(Mockito.anyList()))
         .thenReturn(Collections.singletonList(AGENCY_DTO_KREUZBUND));
 
-    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
+    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
     @SuppressWarnings("unchecked")
     LinkedHashMap<String, Object> consultingTypeData =
         (LinkedHashMap<String, Object>) askerDataProvider.retrieveData(USER)
@@ -107,7 +107,7 @@ public class AskerDataProviderTest {
   @Test
   public void retrieveData_Should_ReturnUserDataResponseDTOWithValidEmail_When_ProvidedWithValidUser() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
-    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
+    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
 
     UserDataResponseDTO resultUser = askerDataProvider.retrieveData(USER);
 
@@ -120,7 +120,7 @@ public class AskerDataProviderTest {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     User user = mock(User.class);
     when(user.getEmail()).thenReturn("user@dummysuffix.de");
-    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
+    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
 
     UserDataResponseDTO resultUser = askerDataProvider.retrieveData(user);
 
@@ -139,7 +139,7 @@ public class AskerDataProviderTest {
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(asSet(GRANTED_AUTHORIZATION_USER));
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.toString()));
-    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
+    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
     UserDataResponseDTO result = askerDataProvider.retrieveData(USER_WITH_SESSIONS);
 
     assertEquals(USER_WITH_SESSIONS.getUserId(), result.getUserId());

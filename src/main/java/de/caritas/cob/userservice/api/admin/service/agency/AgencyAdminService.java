@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
-import static de.caritas.cob.userservice.config.CachingConfig.AGENCY_CACHE;
+import static de.caritas.cob.userservice.config.AgencyCachingConfig.AGENCY_CACHE;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;

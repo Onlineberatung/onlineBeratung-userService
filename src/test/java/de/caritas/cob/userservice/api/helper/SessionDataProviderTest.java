@@ -27,7 +27,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -87,14 +86,14 @@ public class SessionDataProviderTest {
       new SessionDataDTO();
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
       new SessionDataInitializing(true, true, true, true, true);
-  private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
-      new ConsultingTypeSettings(0, "suchtberatung", true, false, false, false, null, false, false,
+  private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
+      new ExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false,
           SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS, true, null, false, null, false,
           null, null);
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS =
       new SessionDataInitializing(false, false, false, false, false);
-  private final ConsultingTypeSettings CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
-      new ConsultingTypeSettings(1, "u25", false, false, true, false, null, false, false,
+  private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
+      new ExtendedConsultingTypeResponseDTO(1, "u25", false, false, true, false, null, false, false,
           SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS, true, null, false, null, false,
           null, null);
 

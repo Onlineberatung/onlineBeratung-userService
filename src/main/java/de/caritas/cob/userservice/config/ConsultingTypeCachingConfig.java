@@ -10,26 +10,26 @@ import net.sf.ehcache.config.CacheConfiguration;
 
 @Configuration
 @EnableCaching
-public class CachingConfig {
+public class ConsultingTypeCachingConfig {
 
-  @Value("${cache.agencies.configuration.maxEntriesLocalHeap}")
+  @Value("${cache.consulting.type.configuration.maxEntriesLocalHeap}")
   private long maxEntriesLocalHeap;
 
-  @Value("${cache.agencies.configuration.eternal}")
+  @Value("${cache.consulting.type.configuration.eternal}")
   private boolean eternal;
 
-  @Value("${cache.agencies.configuration.timeToIdleSeconds}")
+  @Value("${cache.consulting.type.configuration.timeToIdleSeconds}")
   private long timeToIdleSeconds;
 
-  @Value("${cache.agencies.configuration.timeToLiveSeconds}")
+  @Value("${cache.consulting.type.configuration.timeToLiveSeconds}")
   private long timeToLiveSeconds;
 
-  public static final String AGENCY_CACHE = "agencyCache";
+  public static final String CONSULTING_TYPE_CACHE = "consultingTypeCache";
 
   @Bean(destroyMethod = "shutdown")
   public net.sf.ehcache.CacheManager ehCacheManager() {
     CacheConfiguration cacheConfiguration = new CacheConfiguration();
-    cacheConfiguration.setName(AGENCY_CACHE);
+    cacheConfiguration.setName(CONSULTING_TYPE_CACHE);
     cacheConfiguration.setMaxEntriesLocalHeap(maxEntriesLocalHeap);
     cacheConfiguration.setEternal(eternal);
     cacheConfiguration.setTimeToIdleSeconds(timeToIdleSeconds);

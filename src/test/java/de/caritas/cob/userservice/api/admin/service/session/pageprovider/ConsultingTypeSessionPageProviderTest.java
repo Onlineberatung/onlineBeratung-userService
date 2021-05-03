@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import java.util.stream.IntStream;
@@ -58,7 +57,7 @@ public class ConsultingTypeSessionPageProviderTest {
   @Test
   public void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
     when(this.sessionFilter.getConsultingType()).thenReturn(1);
-    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
+    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
     PageRequest pageable = PageRequest.of(0, 1);
 
     this.consultingTypeSessionPageProvider.executeQuery(pageable);
@@ -69,7 +68,7 @@ public class ConsultingTypeSessionPageProviderTest {
   @Test
   public void executeQuery_Should_notExecuteQueryOnRepositoryAndreturnEmptyPage_When_consultingTypeDoesNotExist() {
     when(this.sessionFilter.getConsultingType()).thenReturn(99);
-    when(consultingTypeManager.getAllconsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
+    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
     PageRequest pageable = PageRequest.of(0, 1);
 
     Page<Session> sessions = this.consultingTypeSessionPageProvider.executeQuery(pageable);

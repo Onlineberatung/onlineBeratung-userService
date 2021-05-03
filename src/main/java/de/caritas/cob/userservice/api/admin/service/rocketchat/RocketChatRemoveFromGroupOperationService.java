@@ -16,7 +16,7 @@ import java.util.Map;
 public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOperation {
 
   private Map<Session, List<Consultant>> consultantsToRemoveFromSessions;
-  private ConsultingTypeManager consultingTypeManager;
+  private final ConsultingTypeManager consultingTypeManager;
 
   private RocketChatRemoveFromGroupOperationService(RocketChatService rocketChatService,
       KeycloakAdminClientService keycloakAdminClientService,

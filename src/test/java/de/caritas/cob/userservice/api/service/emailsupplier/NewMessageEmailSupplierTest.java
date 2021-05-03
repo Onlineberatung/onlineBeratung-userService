@@ -21,7 +21,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.NewMessageDTO;
 import de.caritas.cob.userservice.api.model.NotificationDTO;
 import de.caritas.cob.userservice.api.model.TeamSessionDTO;
@@ -146,7 +145,7 @@ public class NewMessageEmailSupplierTest {
 
   @Test
   public void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
-    ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
+    ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
     ToConsultantDTO toConsultantDTO = new ToConsultantDTO().allTeamConsultants(true);
     TeamSessionDTO teamSessionDTO = new TeamSessionDTO().toConsultant(toConsultantDTO);
     NewMessageDTO newMessageDTO = new NewMessageDTO().teamSession(teamSessionDTO);

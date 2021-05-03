@@ -27,51 +27,6 @@ class ConsultingTypeManagerIT {
 
   @Autowired
   private ConsultingTypeManager consultingTypeManager;
-
-  @ParameterizedTest
-  @MethodSource("generateConsultingTypeIds")
-  void init_Should_InitializeConsultingTypeSettingFromJsonFile(int consultingType)
-      throws Exception {
-    ConsultingTypeSettings consultingTypeSettings = loadConsultingTypeSettings(consultingType);
-
-    ConsultingTypeSettings result =
-        consultingTypeManager.getConsultingTypeSettings(consultingType);
-
-    assertSameValue(result::getConsultingTypeId, consultingTypeSettings::getConsultingTypeId);
-    assertSameValue(result::isExcludeNonMainConsultantsFromTeamSessions, consultingTypeSettings::isExcludeNonMainConsultantsFromTeamSessions);
-    assertSameValue(result::isGroupChat, consultingTypeSettings::isGroupChat);
-    assertSameValue(result::isConsultantBoundedToConsultingType, consultingTypeSettings::isConsultantBoundedToConsultingType);
-    assertSameValue(result::isSendWelcomeMessage, consultingTypeSettings::isSendWelcomeMessage);
-    assertSameValue(result::getWelcomeMessage, consultingTypeSettings::getWelcomeMessage);
-    assertSameValue(result.getSessionDataInitializing()::isAddictiveDrugs,
-        consultingTypeSettings.getSessionDataInitializing()::isAddictiveDrugs);
-    assertSameValue(result.getSessionDataInitializing()::isAge,
-        consultingTypeSettings.getSessionDataInitializing()::isAge);
-    assertSameValue(result.getSessionDataInitializing()::isGender,
-        consultingTypeSettings.getSessionDataInitializing()::isGender);
-    assertSameValue(result.getSessionDataInitializing()::isRelation,
-        consultingTypeSettings.getSessionDataInitializing()::isRelation);
-    assertSameValue(result.getSessionDataInitializing()::isState,
-        consultingTypeSettings.getSessionDataInitializing()::isState);
-    assertSameValue(result::isMonitoring, consultingTypeSettings::isMonitoring);
-    assertSameValue(result::isFeedbackChat, consultingTypeSettings::isFeedbackChat);
-    assertSameValue(result.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant()::getAllTeamConsultants,
-        consultingTypeSettings.getNotifications().getNewMessage().getTeamSession()
-            .getToConsultant()::getAllTeamConsultants);
-    assertSameValue(result::isLanguageFormal, consultingTypeSettings::isLanguageFormal);
-    assertSameValue(result.getRegistration().getMandatoryFields()::isAge,
-        consultingTypeSettings.getRegistration().getMandatoryFields()::isAge);
-    assertSameValue(result.getRegistration().getMandatoryFields()::isState,
-        consultingTypeSettings.getRegistration().getMandatoryFields()::isState);
-  }
-
-  private void assertSameValue(Supplier<Object> result, Supplier<Object> expected) {
-    assertThat(result.get(), is(expected.get()));
-  }
-
-  static Stream<Integer> generateConsultingTypeIds() {
-    return IntStream.range(0, countConsultingTypeSettings()).boxed();
-  }
+  
 
 }
