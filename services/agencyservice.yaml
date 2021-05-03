@@ -1,0 +1,119 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+servers:
+  - url: /
+paths:
+  /agencies:
+    get:
+      tags:
+        - agency-controller
+      summary: 'Returns a randomly sorted list of agencies. If no agency is found the white spot
+        agency id is being returned. When no white spot agency is defined No Content
+        is being returned. [Authorization: none]'
+      operationId: getAgencies
+      parameters:
+        - name: postcode
+          in: query
+          required: true
+          description: The postcode the user entered
+          schema:
+            type: string
+            minLength: 5
+            maxLength: 5
+            example: "56789"
+        - name: consultingType
+          in: query
+          required: true
+          description: The consulting type of the registration form
+          schema:
+            type: integer
+            format: int32
+            example: 5
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgencyResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /agencies/{agencyIds}:
+    get:
+      tags:
+        - agency-controller
+      summary: 'Returns the information of provided agencies (Ids). [Authorization:
+        none]'
+      operationId: getAgenciesByIds
+      parameters:
+        - name: agencyIds
+          in: path
+          description: List of comma-seperated Agency IDs
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+              example: 20
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgencyResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+
+components:
+  schemas:
+    AgencyResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 684
+        name:
+          type: string
+          example: "Suchtberatung Freiburg"
+        postcode:
+          type: string
+          example: "79106"
+        city:
+          type: string
+          example: "Bonn"
+        description:
+          type: string
+          example: "Our agency provides help for the following topics: Lorem ipsum.."
+        teamAgency:
+          type: boolean
+          example: "false"
+        offline:
+          type: boolean
+          example: "false"
+        consultingType:
+          type: integer
+          example: 0
+
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header

@@ -6,90 +6,69 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_LIST
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
+import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AgencySecurityHeaderSupplierTest {
 
-  private final String FIELD_NAME_GET_AGENCY_API_URL = "agencyServiceApiGetAgenciesUrl";
-  private final String AGENCIES_API_URL = "http://caritas.local/service/agencies/";
   private final String GET_AGENCY_METHOD_NAME = "getAgency";
   private final String GET_AGENCIES_METHOD_NAME = "getAgencies";
   private final Class<?>[] GET_AGENCY_METHOD_PARAMS = new Class[]{Long.class};
   private final Class<?>[] GET_AGENCIES_METHOD_PARAMS = new Class[]{List.class};
 
+  @InjectMocks
+  private AgencyService agencyService;
+
   @Mock
-  private RestTemplate restTemplate;
+  private AgencyControllerApi agencyControllerApi;
+
   @Mock
   private SecurityHeaderSupplier securityHeaderSupplier;
-  @InjectMocks
-  private AgencyServiceHelper agencyServiceHelper;
+
+  private List<AgencyResponseDTO> agencyResponseDTOS;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    FieldSetter.setField(agencyServiceHelper,
-        agencyServiceHelper.getClass().getDeclaredField(FIELD_NAME_GET_AGENCY_API_URL),
-        AGENCIES_API_URL);
+    this.agencyResponseDTOS = AGENCY_DTO_LIST.stream()
+        .map(this::toAgencyResponseDTO)
+        .collect(Collectors.toList());
+    when(this.securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
   }
 
-  /**
-   * Method getAgencies
-   **/
-
-  @Test
-  public void getAgencies_Should_ReturnAgencyServiceHelperException_OnError() {
-
-    Exception exception = new RuntimeException(new Exception());
-
-    when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
-        ArgumentMatchers.any(),
-        ArgumentMatchers.<ParameterizedTypeReference<List<AgencyDTO>>>any()))
-        .thenThrow(exception);
-
-    try {
-      agencyServiceHelper.getAgencies(AGENCY_ID_LIST);
-      fail("Expected exception: AgencyServiceHelperException");
-    } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      assertTrue("Excepted AgencyServiceHelperException thrown", true);
-    }
-
+  @SneakyThrows
+  private AgencyResponseDTO toAgencyResponseDTO(AgencyDTO agencyDTO) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    return objectMapper.readValue(objectMapper.writeValueAsString(agencyDTO),
+        AgencyResponseDTO.class);
   }
 
   @Test
-  public void getAgencies_Should_ReturnAgencyDTOList_When_ProvidedWithValidAgencyIds()
-      throws Exception {
+  public void getAgencies_Should_ReturnAgencyDTOList_When_ProvidedWithValidAgencyIds() {
+    when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
+        .thenReturn(this.agencyResponseDTOS);
 
-    ResponseEntity<List<AgencyDTO>> response = new ResponseEntity<>(AGENCY_DTO_LIST,
-        HttpStatus.OK);
-
-    when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
-        ArgumentMatchers.any(),
-        ArgumentMatchers.<ParameterizedTypeReference<List<AgencyDTO>>>any()))
-        .thenReturn(response);
-
-    assertThat(agencyServiceHelper.getAgencies(AGENCY_ID_LIST).get(0), instanceOf(AgencyDTO.class));
+    assertThat(agencyService.getAgencies(AGENCY_ID_LIST).get(0), instanceOf(AgencyDTO.class));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -97,8 +76,9 @@ public class AgencySecurityHeaderSupplierTest {
   public void test_Should_Fail_When_MethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
-    AgencyServiceHelper agencyServiceHelper = new AgencyServiceHelper();
-    Class classToTest = agencyServiceHelper.getClass();
+    AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
+        mock(SecurityHeaderSupplier.class));
+    Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest
         .getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);
@@ -106,22 +86,12 @@ public class AgencySecurityHeaderSupplierTest {
     assertNotNull(annotation);
   }
 
-  /**
-   * Method getAgency
-   **/
-
   @Test
-  public void getAgency_Should_ReturnAgencyDTO_When_ProvidedWithValidAgencyId() throws Exception {
+  public void getAgency_Should_ReturnAgencyDTO_When_ProvidedWithValidAgencyId() {
+    when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
+        .thenReturn(this.agencyResponseDTOS);
 
-    ResponseEntity<List<AgencyDTO>> response = new ResponseEntity<>(AGENCY_DTO_LIST,
-        HttpStatus.OK);
-
-    when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
-        ArgumentMatchers.<HttpEntity<?>>any(),
-        ArgumentMatchers.<ParameterizedTypeReference<List<AgencyDTO>>>any()))
-        .thenReturn(response);
-
-    assertThat(agencyServiceHelper.getAgency(AGENCY_ID), instanceOf(AgencyDTO.class));
+    assertThat(agencyService.getAgency(AGENCY_ID), instanceOf(AgencyDTO.class));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -129,52 +99,21 @@ public class AgencySecurityHeaderSupplierTest {
   public void test_Should_Fail_When_MethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
-    AgencyServiceHelper agencyServiceHelper = new AgencyServiceHelper();
-    Class classToTest = agencyServiceHelper.getClass();
+    AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
+        mock(SecurityHeaderSupplier.class));
+    Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest.getMethod(GET_AGENCY_METHOD_NAME, GET_AGENCY_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);
 
     assertNotNull(annotation);
   }
 
-  /**
-   * 
-   * Method getAgencyWithoutCaching
-   * 
-   **/
-
   @Test
-  public void getAgencyWithoutCaching_Should_ReturnAgencyServiceHelperException_OnError() {
+  public void getAgencyWithoutCaching_Should_ReturnAgencyDTO_WhenProvidedWithValidAgencyId() {
+    when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
+        .thenReturn(this.agencyResponseDTOS);
 
-    Exception exception = new RuntimeException(new Exception());
-
-    when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
-        ArgumentMatchers.<HttpEntity<?>>any(),
-        ArgumentMatchers.<ParameterizedTypeReference<List<AgencyDTO>>>any()))
-        .thenThrow(exception);
-
-    try {
-      agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID);
-      fail("Expected exception: AgencyServiceHelperException");
-    } catch (AgencyServiceHelperException agencyServiceHelperException) {
-      assertTrue("Excepted AgencyServiceHelperException thrown", true);
-    }
-
-  }
-
-  @Test
-  public void getAgencyWithoutCaching_Should_ReturnAgencyDTO_WhenProvidedWithValidAgencyId()
-      throws Exception {
-
-    ResponseEntity<List<AgencyDTO>> response = new ResponseEntity<>(AGENCY_DTO_LIST,
-        HttpStatus.OK);
-
-    when(restTemplate.exchange(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
-        ArgumentMatchers.<HttpEntity<?>>any(),
-        ArgumentMatchers.<ParameterizedTypeReference<List<AgencyDTO>>>any()))
-        .thenReturn(response);
-
-    assertThat(agencyServiceHelper.getAgencyWithoutCaching(AGENCY_ID), instanceOf(AgencyDTO.class));
+    assertThat(agencyService.getAgencyWithoutCaching(AGENCY_ID), instanceOf(AgencyDTO.class));
   }
 
 }

@@ -17,7 +17,7 @@ import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.RootDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import io.swagger.annotations.Api;
@@ -156,7 +156,7 @@ public class UserAdminController implements UseradminApi {
    */
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> updateConsultant(
-      @PathVariable String consultantId, @Valid UpdateConsultantDTO updateConsultantDTO) {
+      @PathVariable String consultantId, @Valid UpdateAdminConsultantDTO updateConsultantDTO) {
     return ResponseEntity
         .ok(this.consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO));
   }

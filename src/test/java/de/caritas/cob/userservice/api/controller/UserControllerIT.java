@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
@@ -26,6 +28,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_USER_DATA;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
@@ -144,10 +147,11 @@ import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.helper.ChatHelper;
+import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -155,6 +159,7 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
@@ -166,7 +171,6 @@ import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -175,7 +179,6 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
-import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -209,7 +212,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -260,7 +262,7 @@ public class UserControllerIT {
       .description(DESCRIPTION)
       .teamAgency(false)
       .offline(false)
-      .consultingType(ConsultingType.SUCHT);
+      .consultingType(SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
@@ -268,7 +270,7 @@ public class UserControllerIT {
       .agency(AGENCY_DTO)
       .consultant(SESSION_CONSULTANT_DTO);
   private final List<AgencyDTO> AGENCY_LIST = new ArrayList<>();
-  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<String, Object>() {
+  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<>() {
     {
       put("age", "1");
       put("state", "4");
@@ -286,21 +288,21 @@ public class UserControllerIT {
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
-      ConsultingType.SUCHT, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
+      SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
       null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER, null, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, null, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
@@ -383,7 +385,7 @@ public class UserControllerIT {
   @MockBean
   private RocketChatService rocketChatService;
   @MockBean
-  private ChatHelper chatHelper;
+  private ChatPermissionVerifier chatPermissionVerifier;
   @MockBean
   private StopChatFacade stopChatFacade;
   @MockBean
@@ -403,7 +405,7 @@ public class UserControllerIT {
   @MockBean
   private MandatoryFieldsProvider mandatoryFieldsProvider;
   @MockBean
-  private ConsultantService consultantService;
+  private ConsultantDataFacade consultantDataFacade;
   @MockBean
   private UserService userService;
   @MockBean
@@ -1832,10 +1834,6 @@ public class UserControllerIT {
         .andExpect(status().isOk());
   }
 
-  /**
-   * Method: createChat (role: kreuzbund-consultant)
-   */
-
   @Test
   public void createChat_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
 
@@ -1897,7 +1895,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(rocketChatService);
     verifyNoMoreInteractions(startChatFacade);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1946,7 +1944,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(getChatFacade);
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(accountProvider);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -1957,8 +1955,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(getChatFacade, times(1))
-        .getChat(Mockito.any(), Mockito.any());
+    verify(getChatFacade, times(1)).getChat(Mockito.any());
   }
 
   /**
@@ -1975,7 +1972,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(joinAndLeaveChatFacade);
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(accountProvider);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
   }
 
   @Test
@@ -2059,7 +2056,7 @@ public class UserControllerIT {
     verifyNoMoreInteractions(getChatMembersFacade);
     verifyNoMoreInteractions(chatService);
     verifyNoMoreInteractions(accountProvider);
-    verifyNoMoreInteractions(chatHelper);
+    verifyNoMoreInteractions(chatPermissionVerifier);
     verifyNoMoreInteractions(userHelper);
     verifyNoMoreInteractions(rocketChatService);
   }
@@ -2072,7 +2069,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(getChatMembersFacade, times(1)).getChatMembers(Mockito.any(), Mockito.any());
+    verify(getChatMembersFacade, times(1)).getChatMembers(Mockito.any());
   }
 
   /**
@@ -2243,4 +2240,39 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
+
+  @Test
+  public void updateUserData_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(consultantDataFacade);
+  }
+
+  @Test
+  public void updateUserData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new UpdateConsultantDTO().email("mail@mail.de").firstname("firstname").lastname(
+                "lastname")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantDataFacade, times(1)).updateConsultantData(any());
+  }
+
+  @Test
+  public void updateUserData_Should_ReturnBadRequest_When_emailAddressIsNotValid() throws Exception {
+    mvc.perform(put(PATH_GET_USER_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new UpdateConsultantDTO().email("invalid").firstname("firstname").lastname("lastname")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
 }

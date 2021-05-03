@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_3;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
@@ -18,15 +17,13 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.List;
 import org.apache.commons.collections.SetUtils;
 import org.junit.Before;
@@ -41,14 +38,17 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantDataProviderTest {
 
-  @Mock
-  AgencyServiceHelper agencyServiceHelper;
-  @Mock
-  AuthenticatedUser authenticatedUser;
-  @Mock
-  private Logger logger;
   @InjectMocks
   private ConsultantDataProvider consultantDataProvider;
+
+  @Mock
+  AgencyService agencyService;
+
+  @Mock
+  AuthenticatedUser authenticatedUser;
+
+  @Mock
+  private Logger logger;
 
   @Before
   public void setup() {
@@ -64,11 +64,9 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant()
-      throws AgencyServiceHelperException {
-
+  public void retrieveData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
-    when(agencyServiceHelper.getAgency(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgency(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
     List<AgencyDTO> result = consultantDataProvider.retrieveData(CONSULTANT_WITH_AGENCY)
         .getAgencies();
@@ -78,15 +76,12 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_LogError_When_AgencyHelperCallFails()
-      throws AgencyServiceHelperException {
-
+  public void retrieveData_Should_LogError_When_AgencyHelperCallFails() {
     Consultant consultant = Mockito.mock(Consultant.class);
     when(consultant.getConsultantAgencies())
-        .thenReturn(asSet(new ConsultantAgency[]{CONSULTANT_AGENCY_2, CONSULTANT_AGENCY_3}));
-    AgencyServiceHelperException exception = new AgencyServiceHelperException(new Exception(ERROR));
-    when(agencyServiceHelper.getAgency(CONSULTANT_AGENCY_2.getId())).thenThrow(exception);
-    when(agencyServiceHelper.getAgency(CONSULTANT_AGENCY_3.getId())).thenReturn(AGENCY_DTO_SUCHT);
+        .thenReturn(asSet(CONSULTANT_AGENCY_2, CONSULTANT_AGENCY_3));
+    when(agencyService.getAgency(CONSULTANT_AGENCY_2.getId())).thenThrow(new RuntimeException());
+    when(agencyService.getAgency(CONSULTANT_AGENCY_3.getId())).thenReturn(AGENCY_DTO_SUCHT);
 
     consultantDataProvider.retrieveData(consultant);
 
@@ -94,9 +89,8 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_ReturnValidData() throws AgencyServiceHelperException {
-
-    when(agencyServiceHelper.getAgency(
+  public void retrieveData_Should_ReturnValidData() {
+    when(agencyService.getAgency(
         CONSULTANT_WITH_AGENCY.getConsultantAgencies().stream().findFirst().get().getId()))
         .thenReturn(AGENCY_DTO_SUCHT);
 
@@ -119,7 +113,6 @@ public class ConsultantDataProviderTest {
         result.getGrantedAuthorities().stream().findFirst().orElse(null));
     assertEquals(UserRole.CONSULTANT.toString(), result.getUserRoles().stream().findFirst().orElse(null));
     assertEquals(AGENCY_DTO_SUCHT, result.getAgencies().get(0));
-
   }
 
 }

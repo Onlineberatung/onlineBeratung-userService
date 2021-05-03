@@ -69,7 +69,7 @@ public class CreateNewConsultingTypeFacade {
 
     Long sessionId = null;
 
-    if (consultingTypeSettings.getConsultingType().equals(ConsultingType.KREUZBUND)) {
+    if (consultingTypeSettings.getConsultingType().isGroupChat()) {
       createUserChatRelationFacade
           .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
               rocketChatCredentials);

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
+import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminSearchResultDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
@@ -37,13 +38,14 @@ public class AgencyAdminServiceTest {
   public void retrieveAllAgencies_Should_useSerivcesCorrectly() {
     when(adminAgencyControllerApi.getApiClient()).thenReturn(apiClient);
     when(adminAgencyControllerApi.searchAgencies(any(), any(), any()))
-        .thenReturn(new AgencyAdminSearchResultDTO());
+        .thenReturn(new AgencyAdminSearchResultDTO()
+            .addEmbeddedItem(new AgencyAdminFullResponseDTO()));
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(new HttpHeaders());
 
     this.agencyAdminService.retrieveAllAgencies();
 
-    verify(this.adminAgencyControllerApi, times(1)).searchAgencies(eq(0), eq(Integer.MAX_VALUE),
-        eq(null));
+    verify(this.adminAgencyControllerApi, times(1))
+        .searchAgencies(0, Integer.MAX_VALUE, null);
   }
 
 }

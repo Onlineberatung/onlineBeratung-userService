@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.10.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.10.0...v2.10.1) (2021-05-03)
+
+## [2.10.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.9.1...v2.10.0) (2021-05-03)
+
+
+### Features
+
+* adapt agency admin service changes of api ([415b744](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/415b744987b6dfd3420a83f532c8f2aa4f9b2cbe))
+* add cors mapping for registration endpoint ([55a8feb](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/55a8febb8aed860221b8722707e4b5091c4bcbdc))
+* added conversation api ([eb0f324](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/eb0f3244fe74d91d8e27ff8f554711b102c4b831))
+* added registration type to session ([dbb98a0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/dbb98a03c3df1606e2d19313d42e8bb0ea17c99b))
+* generate user service admin api markdown files ([8247f16](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8247f168d410544fe60cd8cdd6dd28d5a5868d4a))
+* Include generated agency service api ([61e0f8f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/61e0f8fa5313795848e5a47ef4b52f96148b1506))
+* load agencies for report rules only once ([1adf8b6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1adf8b63052f55819509db6b2a58af864f65bab6))
+* optimized logging ([c152a5f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c152a5f3d33366cdc621ee6888eb7b0a90c122f1))
+* provide endpoint to update consultants data ([a81157f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a81157f50fe1e9ffdc4563e285a8c63a3f71b639))
+* provide new consulting type for support group vechta ([cca563e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/cca563ed11e9ef993566a496345c036e7e901bd3))
+* push generated admin api markdown to documentation repo ([c17ddad](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c17ddada18b23fea0ba93c88d6138f9ac9acfa05))
+
+
+### Bug Fixes
+
+* correct delete action order ([1dc3889](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1dc3889dac31ef9a050bf5947f4d7fea08ab9930))
+* npe in violation builder ([0d9e20e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0d9e20ee40704afd326b3f4cb8af51a3742ff06a))
+* prevent rocket chat user deletion when id is not available ([4f151c0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4f151c04f1dcfc3741ec866e7c3b169d12c8498c))
+
+### [2.9.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.9.0...v2.9.1) (2021-04-12)
+
 ## [2.9.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.8.1...v2.9.0) (2021-04-12)
 
 

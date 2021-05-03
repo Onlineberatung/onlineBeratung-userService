@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.LAST;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
@@ -57,7 +57,7 @@ public class DeleteDatabaseAskerAction implements DeleteAskerAction {
    */
   @Override
   public int getOrder() {
-    return FOURTH.getOrder();
+    return LAST.getOrder();
   }
 
 }

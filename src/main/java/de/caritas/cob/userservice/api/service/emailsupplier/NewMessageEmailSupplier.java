@@ -27,11 +27,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 /**
  * Supplier to provide mails to be sent when a new message has been written.
  */
 @AllArgsConstructor
+@Builder
 public class NewMessageEmailSupplier implements EmailSupplier {
 
   private final Session session;

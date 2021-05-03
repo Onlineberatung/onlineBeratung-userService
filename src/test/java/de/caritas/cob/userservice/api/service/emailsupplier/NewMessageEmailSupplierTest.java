@@ -67,9 +67,18 @@ public class NewMessageEmailSupplierTest {
 
   @Before
   public void setup() {
-    this.newMessageEmailSupplier = new NewMessageEmailSupplier(session, "feedbackGroupId",
-        roles, USER.getUserId(), consultantAgencyService, consultingTypeManager, "app baseurl",
-        "dummySuffix", userHelper);
+    this.newMessageEmailSupplier = NewMessageEmailSupplier
+        .builder()
+        .session(session)
+        .rcGroupId("feedbackGroupId")
+        .roles(roles)
+        .userId(USER.getUserId())
+        .consultantAgencyService(consultantAgencyService)
+        .consultingTypeManager(consultingTypeManager)
+        .applicationBaseUrl("app baseurl")
+        .emailDummySuffix("dummySuffix")
+        .userHelper(userHelper)
+        .build();
     setInternalState(LogService.class, "LOGGER", logger);
   }
 

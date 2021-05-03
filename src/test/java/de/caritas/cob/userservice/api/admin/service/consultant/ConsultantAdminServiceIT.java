@@ -17,7 +17,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -115,8 +115,8 @@ public class ConsultantAdminServiceIT {
 
   @Test
   public void updateConsultant_Should_useUpdateServiceAndBuildConsultantAdminResponseDTO() {
-    UpdateConsultantDTO updateConsultantDTO =
-        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    UpdateAdminConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
     when(this.consultantUpdateService.updateConsultant(any(), any()))
         .thenReturn(new EasyRandom().nextObject(Consultant.class));
 

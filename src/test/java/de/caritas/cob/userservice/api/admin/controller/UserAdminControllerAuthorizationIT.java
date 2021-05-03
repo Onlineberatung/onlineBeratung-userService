@@ -34,7 +34,7 @@ import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import javax.servlet.http.Cookie;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -420,8 +420,8 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(authorities = {Authority.USER_ADMIN})
   public void updateConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
       throws Exception {
-    UpdateConsultantDTO updateConsultantDTO =
-        new EasyRandom().nextObject(UpdateConsultantDTO.class);
+    UpdateAdminConsultantDTO updateConsultantDTO =
+        new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
 
     mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
         .cookie(CSRF_COOKIE)

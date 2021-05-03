@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
@@ -17,7 +16,6 @@ public interface EmailSupplier {
    *
    * @return the generated emails
    */
-  List<MailDTO> generateEmails()
-      throws RocketChatGetGroupMembersException, AgencyServiceHelperException;
+  List<MailDTO> generateEmails() throws RocketChatGetGroupMembersException;
 
 }

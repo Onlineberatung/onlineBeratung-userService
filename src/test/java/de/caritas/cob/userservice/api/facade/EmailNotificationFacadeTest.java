@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
@@ -42,9 +43,9 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
@@ -61,11 +62,11 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionService;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
@@ -114,20 +115,20 @@ public class EmailNotificationFacadeTest {
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final Session SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "88045", AGENCY_ID,
-          SessionStatus.INITIAL,
+      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, REGISTERED, "88045",
+          AGENCY_ID, SessionStatus.INITIAL,
           nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(1L, USER, null, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.NEW,
-          nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      new Session(1L, USER, null, ConsultingType.SUCHT, REGISTERED, "88045", AGENCY_ID,
+          SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
-      ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
-      null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      ConsultingType.SUCHT, REGISTERED, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(),
+      RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
-      CONSULTANT_NO_EMAIL, ConsultingType.SUCHT, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
-      nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      CONSULTANT_NO_EMAIL, ConsultingType.SUCHT, REGISTERED, "88045", AGENCY_ID,
+      SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session TEAM_SESSION =
-      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, "12345", AGENCY_ID,
+      new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, REGISTERED, "12345", AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO()
@@ -178,7 +179,7 @@ public class EmailNotificationFacadeTest {
   @Mock
   private MailService mailService;
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
   @Mock
   SessionService sessionService;
   @Mock
@@ -212,12 +213,11 @@ public class EmailNotificationFacadeTest {
    * Method: sendNewEnquiryEmailNotification
    */
   @Test
-  public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants()
-      throws AgencyServiceHelperException {
+  public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
+    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
@@ -226,12 +226,11 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser()
-      throws AgencyServiceHelperException {
+  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
+    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
@@ -239,16 +238,15 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper()
-      throws AgencyServiceHelperException {
+  public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
         .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyServiceHelper.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
+    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(agencyServiceHelper, times(1)).getAgency(SESSION.getAgencyId());
+    verify(agencyService, times(1)).getAgency(SESSION.getAgencyId());
 
   }
 
@@ -393,15 +391,30 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  public void sendNewMessageNotification_ShouldNot_SendEmailAndLogEmailNotificationFacadeError_WhenSessionIsNullOrEmpty_WithConsultantRole() {
+  public void sendNewMessageNotification_ShouldNot_SendEmailAndLogEmailNotificationFacadeWarning_When_GetSessionFails() {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
-        .thenReturn(null);
+        .thenThrow(new NotFoundException(ERROR_MSG));
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
 
-    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService, times(0))
+        .sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  public void sendNewMessageNotification_Should_LogEmailNotificationFacadeError_When_ErrorOccursDuringMailTransmission() {
+
+    when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
+        .thenReturn(SESSION_IN_PROGRESS);
+    doThrow(new NullPointerException())
+        .when(mailService).sendEmailNotification(any());
+
+    emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
+        CONSULTANT_ID);
+
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 

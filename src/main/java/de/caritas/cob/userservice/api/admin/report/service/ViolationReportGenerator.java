@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.admin.report.service;
 
-import static de.caritas.cob.userservice.config.CachingConfig.AGENCY_CACHE;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.time.format.DateTimeFormatter.ofPattern;
 
+import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.admin.report.registry.ViolationRuleRegistry;
+import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 import io.swagger.util.Json;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,6 +35,7 @@ public class ViolationReportGenerator {
   private static final DateTimeFormatter DATE_TIME_FORMAT = ofPattern("yyyy-MM-dd--hh-mm");
 
   private final @NonNull ViolationRuleRegistry violationRuleRegistry;
+  private final @NonNull AgencyAdminService agencyAdminService;
 
   /**
    * Generates a list of all located known violations.
@@ -44,8 +44,9 @@ public class ViolationReportGenerator {
    */
   @SneakyThrows
   public List<ViolationDTO> generateReport() {
-    reevaluateAgencyCache();
-    List<ViolationDTO> violations = this.violationRuleRegistry.getViolationReportRules().stream()
+    List<AgencyAdminResponseDTO> allAgencies = this.agencyAdminService.retrieveAllAgencies();
+    List<ViolationDTO> violations = this.violationRuleRegistry.getViolationReportRules(allAgencies)
+        .stream()
         .map(ViolationReportRule::generateViolations)
         .flatMap(Collection::parallelStream)
         .collect(Collectors.toList());
@@ -64,14 +65,6 @@ public class ViolationReportGenerator {
       Files.createDirectory(Paths.get(path).getParent());
     }
     return Paths.get(path);
-  }
-
-  /**
-   * Reevaluates the cache of agencies.
-   */
-  @CacheEvict(value = {AGENCY_CACHE}, allEntries = true)
-  public void reevaluateAgencyCache() {
-    LogService.logInfo("Agency cache has been purged");
   }
 
 }

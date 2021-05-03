@@ -7,11 +7,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
@@ -33,9 +31,6 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
   @Mock
   private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Mock
-  private AgencyAdminService agencyAdminService;
-
   @Test
   public void generateViolations_Should_returnEmptyList_When_noViolationExists() {
     List<ViolationDTO> violations = this.reportRule.generateViolations();
@@ -49,8 +44,7 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
     violatedConsultantAgency.setAgencyId(1L);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(violatedConsultantAgency));
-    when(this.agencyAdminService.retrieveAllAgencies())
-        .thenReturn(singletonList(new AgencyAdminResponseDTO().agencyId(1L)));
+    this.reportRule.setAllAgencies(singletonList(new AgencyAdminResponseDTO().id(1L)));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();
 
@@ -78,22 +72,22 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
     consultantAgencies.get(4).setAgencyId(3L);
     consultantAgencies.get(6).setAgencyId(4L);
     consultantAgencies.get(9).setAgencyId(5L);
-    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(1L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(1L))
         .thenReturn(singletonList(consultantAgencies.get(0)));
-    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(2L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(2L))
         .thenReturn(singletonList(consultantAgencies.get(2)));
-    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(3L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(3L))
         .thenReturn(singletonList(consultantAgencies.get(4)));
-    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(4L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(4L))
         .thenReturn(singletonList(consultantAgencies.get(6)));
-    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(eq(5L)))
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(5L))
         .thenReturn(singletonList(consultantAgencies.get(9)));
-    when(this.agencyAdminService.retrieveAllAgencies()).thenReturn(asList(
-        new AgencyAdminResponseDTO().agencyId(1L),
-        new AgencyAdminResponseDTO().agencyId(2L),
-        new AgencyAdminResponseDTO().agencyId(3L),
-        new AgencyAdminResponseDTO().agencyId(4L),
-        new AgencyAdminResponseDTO().agencyId(5L)
+    this.reportRule.setAllAgencies(asList(
+        new AgencyAdminResponseDTO().id(1L),
+        new AgencyAdminResponseDTO().id(2L),
+        new AgencyAdminResponseDTO().id(3L),
+        new AgencyAdminResponseDTO().id(4L),
+        new AgencyAdminResponseDTO().id(5L)
     ));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();

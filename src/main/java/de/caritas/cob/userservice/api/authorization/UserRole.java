@@ -14,7 +14,7 @@ public enum UserRole {
   TECHNICAL("technical"),
   U25_CONSULTANT("u25-consultant"),
   U25_MAIN_CONSULTANT("u25-main-consultant"),
-  KREUZBUND_CONSULTANT("kreuzbund-consultant"),
+  GROUP_CHAT_CONSULTANT("group-chat-consultant"),
   USER_ADMIN("user-admin");
 
   private final String value;

@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
@@ -31,13 +33,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.AgencyServiceHelperException;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -53,12 +53,10 @@ import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.AgencyServiceHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -84,17 +82,17 @@ public class SessionServiceTest {
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
-  private final Session SESSION = new Session(ENQUIRY_ID, null, null, ConsultingType.SUCHT, "99999",
+  private final Session SESSION = new Session(ENQUIRY_ID, null, null, SUCHT, REGISTERED, "99999",
       1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
-  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, ConsultingType.SUCHT,
+  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, SUCHT, REGISTERED,
       "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      ConsultingType.SUCHT, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
@@ -103,14 +101,14 @@ public class SessionServiceTest {
       .singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
-      null, null, ConsultingType.SUCHT.getValue() + "", true);
+      null, null, SUCHT.getValue() + "", true);
 
   @InjectMocks
   private SessionService sessionService;
   @Mock
   private SessionRepository sessionRepository;
   @Mock
-  private AgencyServiceHelper agencyServiceHelper;
+  private AgencyService agencyService;
   @Mock
   private Logger logger;
   @Mock
@@ -215,16 +213,12 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError()
-      throws Exception {
-
-    AgencyServiceHelperException ex =
-        new AgencyServiceHelperException(new Exception("AgencyService error"));
+  public void getSessionsForUserId_Should_ThrowInternalServerErrorException_OnAgencyServiceHelperError() {
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(any())).thenThrow(ex);
+    when(agencyService.getAgencies(any())).thenThrow(new InternalServerErrorException(""));
 
     try {
       sessionService.getSessionsForUserId(USER_ID);
@@ -235,14 +229,13 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId()
-      throws Exception {
+  public void getSessionsForUser_Should_ReturnListOfUserSessionResponseDTO_When_ProvidedWithValidUserId() {
 
     List<Session> sessions = new ArrayList<>();
     sessions.add(ACCEPTED_SESSION);
 
     when(sessionRepository.findByUserUserId(USER_ID)).thenReturn(sessions);
-    when(agencyServiceHelper.getAgencies(any())).thenReturn(AGENCY_DTO_LIST);
+    when(agencyService.getAgencies(any())).thenReturn(AGENCY_DTO_LIST);
 
     assertThat(sessionService.getSessionsForUserId(USER_ID),
         everyItem(instanceOf(UserSessionResponseDTO.class)));
@@ -278,11 +271,11 @@ public class SessionServiceTest {
     sessions.add(SESSION);
     sessions.add(SESSION_2);
 
-    when(sessionRepository.findByUserAndConsultingType(USER, ConsultingType.SUCHT))
+    when(sessionRepository.findByUserAndConsultingType(USER, SUCHT))
         .thenReturn(sessions);
 
     List<Session> result =
-        sessionService.getSessionsForUserByConsultingType(USER, ConsultingType.SUCHT);
+        sessionService.getSessionsForUserByConsultingType(USER, SUCHT);
 
     assertEquals(sessions, result);
     assertThat(result.get(0), instanceOf(Session.class));

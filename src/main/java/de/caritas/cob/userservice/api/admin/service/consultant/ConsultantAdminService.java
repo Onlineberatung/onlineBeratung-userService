@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -68,7 +69,7 @@ public class ConsultantAdminService {
    * ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO updateConsultant(String consultantId,
-      UpdateConsultantDTO updateConsultantDTO) {
+      UpdateAdminConsultantDTO updateConsultantDTO) {
     Consultant updatedConsultant = this.consultantUpdateService.updateConsultant(consultantId,
         updateConsultantDTO);
 
