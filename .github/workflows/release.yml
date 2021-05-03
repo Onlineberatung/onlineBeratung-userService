@@ -1,6 +1,6 @@
 name: Release action
 
-#on:
+on:
   push:
     branches:
       - release**
