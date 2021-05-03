@@ -37,7 +37,7 @@ paths:
         200:
           description: OK - successfull operation
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
       security:
@@ -73,7 +73,7 @@ paths:
         200:
           description: OK - successfull operation
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
       security:
