@@ -1,4 +1,9 @@
 {
+  "consultingTypeId": 3,
+  "consultingTypeUrlName": "eltern-familie",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
+  "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

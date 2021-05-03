@@ -1,6 +1,13 @@
 {
-	"sendWelcomeMessage" : false,
-	"welcomeMessage" : null,
+  "consultingTypeId": 2,
+  "consultingTypeUrlName": "schwangerschaftsberatung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
+  "consultantBoundedToConsultingType": false,
+	"sendWelcomeMessage": false,
+	"welcomeMessage": null,
+	"sendFurtherStepsMessage": true,
+	"sendSaveSessionDataMessage": false,
 	"sessionDataInitializing": {
 		"addictiveDrugs": false,
 		"age": false,
@@ -15,7 +22,7 @@
 		"newMessage": {
 			"teamSession": {
 				"toConsultant": {
-					"allTeamConsultants": true
+					"allTeamConsultants": false
 				}
 			}
 		}
@@ -23,7 +30,7 @@
 	"languageFormal": false,
 	"roles": {
 		"consultant": {
-			"default" :	[
+			"default": [
 				"consultant"
 			]
 		}

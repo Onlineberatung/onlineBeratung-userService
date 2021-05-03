@@ -26,7 +26,6 @@ import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -80,8 +79,8 @@ public class SessionService {
    * @return list of {@link Session}
    */
   public List<Session> getSessionsForUserByConsultingType(User user,
-      ConsultingType consultingType) {
-    return sessionRepository.findByUserAndConsultingType(user, consultingType);
+      int consultingTypeId) {
+    return sessionRepository.findByUserAndConsultingTypeId(user, consultingTypeId);
   }
 
   /**
@@ -151,7 +150,7 @@ public class SessionService {
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
       ConsultingTypeSettings consultingTypeSettings) {
-    Session session = new Session(user, consultingTypeSettings.getConsultingType(),
+    Session session = new Session(user, consultingTypeSettings.getConsultingTypeId(),
         userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
         isTeamSession, consultingTypeSettings.isMonitoring());
     session.setCreateDate(nowInUtc());
@@ -285,7 +284,7 @@ public class SessionService {
     return new SessionDTO()
         .id(session.getId())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .status(session.getStatus().getValue())
         .postcode(session.getPostcode())
         .groupId(session.getGroupId())
@@ -421,7 +420,7 @@ public class SessionService {
     return new ConsultantSessionDTO()
         .isTeamSession(session.isTeamSession())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .id(session.getId())
         .status(session.getStatus().getValue())
         .askerId(session.getUser().getUserId())

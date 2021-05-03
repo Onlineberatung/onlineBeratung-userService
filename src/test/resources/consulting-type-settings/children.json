@@ -1,6 +1,13 @@
 {
-	"sendWelcomeMessage" : false,
-	"welcomeMessage" : null,
+  "consultingTypeId": 14,
+  "consultingTypeUrlName": "kinder-jugendliche",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
+  "consultantBoundedToConsultingType": false,
+	"sendWelcomeMessage": false,
+	"welcomeMessage": null,
+	"sendFurtherStepsMessage": true,
+	"sendSaveSessionDataMessage": false,
 	"sessionDataInitializing": {
 		"addictiveDrugs": false,
 		"age": false,
@@ -23,7 +30,7 @@
 	"languageFormal": true,
 	"roles": {
 		"consultant": {
-			"default" :	[
+			"default": [
 				"consultant"
 			]
 		}

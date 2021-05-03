@@ -1,4 +1,9 @@
 {
+  "consultingTypeId": 9,
+  "consultingTypeUrlName": "mein-planb",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
+  "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

@@ -14,7 +14,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -40,7 +39,7 @@ public class CreateUserFacade {
 
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
-   * provided {@link ConsultingType}.
+   * provided consulting ID.
    *
    * @param userDTO {@link UserDTO}
    */
@@ -51,23 +50,23 @@ public class CreateUserFacade {
           HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
 
-    ConsultingType consultingType =
-        ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())];
-    checkIfConsultingTypeMatchesToAgency(userDTO, consultingType);
+    ConsultingTypeSettings consultingTypeSettings =
+        consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
+    checkIfConsultingTypeMatchesToAgency(userDTO, consultingTypeSettings.getConsultingTypeId());
     KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDTO);
     updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
-        consultingType);
+        consultingTypeSettings.getConsultingTypeId());
   }
 
-  private void checkIfConsultingTypeMatchesToAgency(UserDTO user, ConsultingType consultingType) {
-    if (!agencyVerifier.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingType)) {
+  private void checkIfConsultingTypeMatchesToAgency(UserDTO user, int consultingTypeId) {
+    if (!agencyVerifier.doesConsultingTypeMatchToAgency(user.getAgencyId(), consultingTypeId)) {
       throw new BadRequestException(String.format("Agency with id %s does not match to consulting"
-          + " type %s", user.getAgencyId(), consultingType.getValue()));
+          + " type %d", user.getAgencyId(), consultingTypeId));
     }
   }
 
   private void updateKeycloakAccountAndCreateDatabaseUserAccount(String userId, UserDTO userDTO,
-      ConsultingType consultingType) {
+      int consultingType) {
 
     checkIfUserIdNotNull(userId, userDTO);
 

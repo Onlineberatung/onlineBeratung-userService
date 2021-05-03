@@ -1,11 +1,12 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +16,13 @@ import java.util.Map;
 public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOperation {
 
   private Map<Session, List<Consultant>> consultantsToRemoveFromSessions;
+  private ConsultingTypeManager consultingTypeManager;
 
   private RocketChatRemoveFromGroupOperationService(RocketChatService rocketChatService,
-      KeycloakAdminClientService keycloakAdminClientService) {
+      KeycloakAdminClientService keycloakAdminClientService,
+      ConsultingTypeManager consultingTypeManager) {
     super(rocketChatService, keycloakAdminClientService);
+    this.consultingTypeManager = consultingTypeManager;
   }
 
   /**
@@ -28,9 +32,10 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
    * @return the {@link RocketChatRemoveFromGroupOperationService} instance
    */
   public static RocketChatRemoveFromGroupOperationService getInstance(
-      RocketChatService rocketChatService, KeycloakAdminClientService keycloakAdminClientService) {
+      RocketChatService rocketChatService, KeycloakAdminClientService keycloakAdminClientService,
+      ConsultingTypeManager consultingTypeManager) {
     return new RocketChatRemoveFromGroupOperationService(rocketChatService,
-        keycloakAdminClientService);
+        keycloakAdminClientService, consultingTypeManager);
   }
 
   /**
@@ -74,7 +79,7 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private void performRollback(Session session, Consultant consultant) {
     try {
-      addConsultantToGroupOfSession(session, consultant);
+      addConsultantToGroupOfSession(session, consultant, consultingTypeManager);
     } catch (Exception e) {
       throw new InternalServerErrorException(
           String.format("ERROR: Failed to rollback %s of group %s:",

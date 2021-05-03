@@ -6,11 +6,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -47,10 +47,13 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   @Mock
   private SessionRepository sessionRepository;
 
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
+
   @Test
   public void createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned() {
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.U25)
+        .consultingType(1)
         .id(2L);
 
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))

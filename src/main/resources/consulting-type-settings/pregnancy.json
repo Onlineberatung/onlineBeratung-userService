@@ -1,4 +1,9 @@
 {
+  "consultingTypeId": 2,
+  "consultingTypeUrlName": "schwangerschaftsberatung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
+  "consultantBoundedToConsultingType": false,
 	"sendWelcomeMessage": false,
 	"welcomeMessage": null,
 	"sendFurtherStepsMessage": true,

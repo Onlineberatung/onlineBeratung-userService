@@ -1,4 +1,6 @@
 {
+  "consultingTypeId": 21,
+  "consultingTypeUrlName": "selbsthilfe-vechta",
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

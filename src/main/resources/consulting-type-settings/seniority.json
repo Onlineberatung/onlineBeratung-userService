@@ -1,4 +1,9 @@
 {
+  "consultingTypeId": 7,
+  "consultingTypeUrlName": "leben-im-alter",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
+  "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

@@ -66,7 +66,7 @@ public class ChatService {
             LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
                 chat.getStartDate().getSecond()),
             chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
-            chat.getConsultingType().getValue(), null, null, false, chat.getGroupId(), null, false,
+            chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
             getChatModerators(chat.getChatAgencies()), chat.getStartDate()))
         .consultant(new SessionConsultantForConsultantDTO()
             .id(chat.getChatOwner().getId())
@@ -120,7 +120,7 @@ public class ChatService {
         LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
             chat.getStartDate().getSecond()),
         chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
-        chat.getConsultingType().getValue(), null, null, false, chat.getGroupId(), null, false,
+        chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
         getChatModerators(chat.getChatAgencies()), chat.getStartDate()));
   }
 
@@ -178,7 +178,7 @@ public class ChatService {
 
     return new UpdateChatResponseDTO()
         .groupId(chat.getGroupId())
-        .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingType()));
+        .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId()));
   }
 
 }

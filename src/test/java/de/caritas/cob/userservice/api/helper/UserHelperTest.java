@@ -5,7 +5,7 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_HO
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_LINK_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.HOST_BASE_URL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
@@ -17,12 +17,15 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,6 +33,9 @@ public class UserHelperTest {
 
   @InjectMocks
   private UserHelper userHelper;
+
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -77,7 +83,8 @@ public class UserHelperTest {
 
   @Test
   public void generateChatUrl_Should_ReturnChatLinkWithConsultingTypeUrlNameAndEncodedChatId() {
-    assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, CONSULTING_TYPE_SUCHT));
+    when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
+    assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, 0));
   }
 
   @Test

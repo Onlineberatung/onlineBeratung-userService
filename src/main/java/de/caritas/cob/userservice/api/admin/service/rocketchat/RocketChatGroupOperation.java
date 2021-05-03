@@ -6,12 +6,13 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGr
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +25,14 @@ abstract class RocketChatGroupOperation {
 
   protected Consumer<String> logMethod = LogService::logInfo;
 
-  void addConsultantToGroupOfSession(Session session, Consultant consultant)
+  void addConsultantToGroupOfSession(Session session, Consultant consultant,
+      ConsultingTypeManager consultingTypeManager)
       throws RocketChatAddUserToGroupException, RocketChatUserNotInitializedException {
     rocketChatService.addTechnicalUserToGroup(session.getGroupId());
 
     RocketChatOperationConditionProvider operationConditionProvider =
         new RocketChatOperationConditionProvider(this.keycloakAdminClientService, session,
-           consultant);
+            consultant, consultingTypeManager);
 
     if (operationConditionProvider.canAddToRocketChatGroup()) {
       rocketChatService.addUserToGroup(consultant.getRocketChatId(), session.getGroupId());

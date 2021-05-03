@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -37,19 +36,19 @@ public class AuthenticatedUserHelperTest {
   private final Consultant TEAM_CONSULTANT = new Consultant(TEAM_CONSULTANT_ID, ROCKETCHAT_ID,
       USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null,
       null);
-  private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT, ConsultingType.SUCHT,
+  private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT, 0,
       POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =
-      new Session(SESSION_ID, null, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, null, TEAM_CONSULTANT, 0, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), null, null, null,
           false, false, null, null);
   private final Session TEAM_SESSION =
-      new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, 0, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =
-      new Session(TEAM_SESSION_ID, null, CONSULTANT, ConsultingType.SUCHT, POSTCODE, AGENCY_ID,
+      new Session(TEAM_SESSION_ID, null, CONSULTANT, 0, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
 

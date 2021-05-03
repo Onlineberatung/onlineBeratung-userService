@@ -19,7 +19,6 @@ import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.chat.UserChatDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ChatService;
@@ -28,11 +27,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -49,10 +46,9 @@ public class ConsultantSessionListService {
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id and
    * status.
    *
-   * @param consultant {@link Consultant}
-   * @param rcAuthToken Rocket.Chat Token
-   * @param sessionListQueryParameter session list query parameters as {@link
-   * SessionListQueryParameter}
+   * @param consultant                {@link Consultant}
+   * @param rcAuthToken               Rocket.Chat Token
+   * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
    * @return the response dto
    */
   public List<ConsultantSessionResponseDTO> retrieveSessionsForAuthenticatedConsultant(
@@ -78,10 +74,9 @@ public class ConsultantSessionListService {
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id.
    *
-   * @param consultant the {@link Consultant}
-   * @param rcAuthToken the Rocket.Chat auth token
-   * @param sessionListQueryParameter session list query parameters as {@link
-   * SessionListQueryParameter}
+   * @param consultant                the {@link Consultant}
+   * @param rcAuthToken               the Rocket.Chat auth token
+   * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
    * @return a {@link ConsultantSessionListResponseDTO} with a {@link List} of {@link
    * ConsultantSessionResponseDTO}
    */
@@ -237,15 +232,8 @@ public class ConsultantSessionListService {
 
   private boolean getMonitoringProperty(SessionDTO session) {
 
-    Optional<ConsultingType> consultingType = ConsultingType.valueOf(session.getConsultingType());
-
-    if (!consultingType.isPresent()) {
-      throw new ServiceException(String
-          .format("Session with id %s does not have a valid consulting type.", session.getId()));
-    }
-
-    ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(consultingType.get());
+    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
+        .getConsultingTypeSettings(session.getConsultingType());
 
     return consultingTypeSettings.isMonitoring();
   }

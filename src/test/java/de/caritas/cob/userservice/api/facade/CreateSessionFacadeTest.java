@@ -4,12 +4,9 @@ import static de.caritas.cob.userservice.testHelper.ExceptionConstants.CREATE_MO
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CHILDREN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PREGNANCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CHILDREN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_PREGNANCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
@@ -21,6 +18,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_R
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
@@ -78,9 +76,8 @@ public class CreateSessionFacadeTest {
   @Test(expected = ConflictException.class)
   public void createUserSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
 
-    when(sessionService.getSessionsForUserByConsultingType(any(), any()))
+    when(sessionService.getSessionsForUserByConsultingType(any(), anyInt()))
         .thenReturn(SESSION_LIST);
-
     createSessionFacade
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
@@ -92,7 +89,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenThrow(new InternalServerErrorException(MESSAGE));
@@ -109,7 +106,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenThrow(new InternalServerErrorException(MESSAGE));
@@ -130,7 +127,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITH_CONSULTANT);
@@ -150,7 +147,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
 
     createSessionFacade
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
@@ -161,7 +158,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
@@ -177,7 +174,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
+    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
@@ -196,7 +193,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), CONSULTING_TYPE_PREGNANCY))
+    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 2))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
@@ -213,7 +210,7 @@ public class CreateSessionFacadeTest {
 
     when(sessionService.getSessionsForUserId(USER_ID))
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_SUCHT);
-    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), CONSULTING_TYPE_CHILDREN))
+    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 14))
         .thenReturn(AGENCY_DTO_U25);
     when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);

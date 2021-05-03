@@ -58,7 +58,7 @@ public class CreateChatFacade {
       chatService.saveChat(chat);
       return new CreateChatResponseDTO()
           .groupId(rcGroupId)
-          .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingType()));
+          .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId()));
     } catch (InternalServerErrorException e) {
       doRollback(chat, rcGroupId);
       throw e;

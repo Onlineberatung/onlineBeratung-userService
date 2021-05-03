@@ -1,17 +1,17 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_AIDS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CHILDREN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CURE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_DEBT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_DISABILITY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_LAW;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_OFFENDER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PARENTING;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PLANB;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PREGNANCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_REHABILITATION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SENIORITY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_CHILDREN;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_CURE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_DEBT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_DISABILITY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_LAW;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_OFFENDER;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_PARENTING;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_PLANB;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_PREGNANCY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_REHABILITATION;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SENIORITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_AIDS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CHILDREN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CURE;
@@ -27,9 +27,9 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYP
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SOCIAL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SOCIAL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SOCIAL;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -39,9 +39,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -58,33 +61,35 @@ public class ConsultingTypeManagerTest {
   private static final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH =
       "consultingTypesSettingsJsonPath";
   private static final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE =
-      "/consulting-type-settings";
+      "consulting-type-settings";
   private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP =
       new HashMap<Integer, ConsultingTypeSettings>() {
         private static final long serialVersionUID = 1L;
+
         {
-          put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
-          put(CONSULTING_TYPE_U25.getValue(), CONSULTING_TYPE_SETTINGS_U25);
-          put(CONSULTING_TYPE_PREGNANCY.getValue(), CONSULTING_TYPE_SETTINGS_PREGNANCY);
-          put(CONSULTING_TYPE_AIDS.getValue(), CONSULTING_TYPE_SETTINGS_AIDS);
-          put(CONSULTING_TYPE_CHILDREN.getValue(), CONSULTING_TYPE_SETTINGS_CHILDREN);
-          put(CONSULTING_TYPE_CURE.getValue(), CONSULTING_TYPE_SETTINGS_CURE);
-          put(CONSULTING_TYPE_DEBT.getValue(), CONSULTING_TYPE_SETTINGS_DEBT);
-          put(CONSULTING_TYPE_DISABILITY.getValue(), CONSULTING_TYPE_SETTINGS_DISABILITY);
-          put(CONSULTING_TYPE_LAW.getValue(), CONSULTING_TYPE_SETTINGS_LAW);
-          put(CONSULTING_TYPE_OFFENDER.getValue(), CONSULTING_TYPE_SETTINGS_OFFENDER);
-          put(CONSULTING_TYPE_PARENTING.getValue(), CONSULTING_TYPE_SETTINGS_PARENTING);
-          put(CONSULTING_TYPE_PLANB.getValue(), CONSULTING_TYPE_SETTINGS_PLANB);
-          put(CONSULTING_TYPE_REHABILITATION.getValue(), CONSULTING_TYPE_SETTINGS_REHABILITATION);
-          put(CONSULTING_TYPE_SENIORITY.getValue(), CONSULTING_TYPE_SETTINGS_SENIORITY);
-          put(CONSULTING_TYPE_SOCIAL.getValue(), CONSULTING_TYPE_SETTINGS_SOCIAL);
+          put(CONSULTING_TYPE_ID_SUCHT, CONSULTING_TYPE_SETTINGS_SUCHT);
+          put(CONSULTING_TYPE_ID_U25, CONSULTING_TYPE_SETTINGS_U25);
+          put(CONSULTING_TYPE_ID_PREGNANCY, CONSULTING_TYPE_SETTINGS_PREGNANCY);
+          put(CONSULTING_TYPE_ID_AIDS, CONSULTING_TYPE_SETTINGS_AIDS);
+          put(CONSULTING_TYPE_ID_CHILDREN, CONSULTING_TYPE_SETTINGS_CHILDREN);
+          put(CONSULTING_TYPE_ID_CURE, CONSULTING_TYPE_SETTINGS_CURE);
+          put(CONSULTING_TYPE_ID_DEBT, CONSULTING_TYPE_SETTINGS_DEBT);
+          put(CONSULTING_TYPE_ID_DISABILITY, CONSULTING_TYPE_SETTINGS_DISABILITY);
+          put(CONSULTING_TYPE_ID_LAW, CONSULTING_TYPE_SETTINGS_LAW);
+          put(CONSULTING_TYPE_ID_OFFENDER, CONSULTING_TYPE_SETTINGS_OFFENDER);
+          put(CONSULTING_TYPE_ID_PARENTING, CONSULTING_TYPE_SETTINGS_PARENTING);
+          put(CONSULTING_TYPE_ID_PLANB, CONSULTING_TYPE_SETTINGS_PLANB);
+          put(CONSULTING_TYPE_ID_REHABILITATION, CONSULTING_TYPE_SETTINGS_REHABILITATION);
+          put(CONSULTING_TYPE_ID_SENIORITY, CONSULTING_TYPE_SETTINGS_SENIORITY);
+          put(CONSULTING_TYPE_ID_SOCIAL, CONSULTING_TYPE_SETTINGS_SOCIAL);
         }
       };
   private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25 =
       new HashMap<Integer, ConsultingTypeSettings>() {
         private static final long serialVersionUID = 1L;
+
         {
-          put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
+          put(CONSULTING_TYPE_ID_SUCHT, CONSULTING_TYPE_SETTINGS_SUCHT);
         }
       };
 
@@ -112,10 +117,10 @@ public class ConsultingTypeManagerTest {
         CONSULTING_TYPE_SETTINGS_MAP);
 
     ConsultingTypeSettings result =
-        consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT);
+        consultingTypeManager.getConsultingTypeSettings(0);
     assertEquals(CONSULTING_TYPE_SETTINGS_SUCHT, result);
 
-    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
+    result = consultingTypeManager.getConsultingTypeSettings(1);
     assertEquals(CONSULTING_TYPE_SETTINGS_U25, result);
   }
 
@@ -129,7 +134,7 @@ public class ConsultingTypeManagerTest {
         CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25);
 
     try {
-      consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
+      consultingTypeManager.getConsultingTypeSettings(1);
       fail("Expected exception: MissingConsultingTypeException");
     } catch (MissingConsultingTypeException missingConsultingTypeException) {
       assertTrue("Excepted MissingConsultingTypeException thrown", true);
@@ -137,16 +142,43 @@ public class ConsultingTypeManagerTest {
 
   }
 
-  protected static ConsultingTypeSettings loadConsultingTypeSettings(ConsultingType consultingType)
-      throws IOException {
+  protected static ConsultingTypeSettings loadConsultingTypeSettings(int consultingType) {
     ObjectMapper mapper = new ObjectMapper();
     TypeReference<ConsultingTypeSettings> typeReference =
-        new TypeReference<ConsultingTypeSettings>() {};
-    InputStream inputStream =
-        TypeReference.class.getResourceAsStream(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE
-            + "/" + consultingType.name().toLowerCase() + ".json");
+        new TypeReference<>() {
+        };
+    URL dirUrl = ConsultingType.class.getClassLoader()
+        .getResource(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE);
 
-    return mapper.readValue(inputStream, typeReference);
+    try {
+      for (String jsonFileName : new File(dirUrl.toURI()).list()) {
+        InputStream inputStream =
+            TypeReference.class.getResourceAsStream(
+                "/" + FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE + "/" + jsonFileName);
+        ConsultingTypeSettings consultingTypeSettings = mapper
+            .readValue(inputStream, typeReference);
+        if (consultingTypeSettings.getConsultingTypeId() == consultingType) {
+          return consultingTypeSettings;
+        }
+      }
+    } catch (URISyntaxException | IOException e) {
+      throw new RuntimeException("File for consultingTypeSettings not found");
+    }
+
+    return null;
   }
+
+  protected static int countConsultingTypeSettings() {
+    URL dirUrl = ConsultingType.class.getClassLoader()
+        .getResource(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE);
+
+    try {
+      return new File(dirUrl.toURI()).list().length;
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+    return 0;
+  }
+
 
 }

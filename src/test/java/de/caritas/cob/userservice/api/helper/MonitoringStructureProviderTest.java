@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_LIST;
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -9,6 +10,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -210,10 +213,10 @@ public class MonitoringStructureProviderTest {
   public void getMonitoringInitialList_Should_returnExpectedMonitoring_When_consultingTypeHAsMonitoring() {
     ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
     when(settings.getMonitoringFile()).thenReturn("/monitoring/sucht.json");
-    when(this.consultingTypeManager.getConsultingTypeSettings(any())).thenReturn(settings);
+    when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
 
     MonitoringDTO monitoringInitalList = this.monitoringStructureProvider
-        .getMonitoringInitialList(SUCHT);
+        .getMonitoringInitialList(0);
 
     assertThat(monitoringInitalList, notNullValue());
     assertThat(monitoringInitalList.getProperties().entrySet(), hasSize(2));
@@ -223,16 +226,15 @@ public class MonitoringStructureProviderTest {
   public void getMonitoringInitialList_Should_throwInternalServerErrorException_When_monitoringFilePathIsNull() {
     ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
     when(settings.getMonitoringFile()).thenReturn(null);
-    when(this.consultingTypeManager.getConsultingTypeSettings(any())).thenReturn(settings);
+    when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
 
-    this.monitoringStructureProvider.getMonitoringInitialList(SUCHT);
+    this.monitoringStructureProvider.getMonitoringInitialList(0);
   }
 
   @Test
   public void sortMonitoringMap_Should_ReturnCorrectlySortedMap_WhenCalled() {
-
     doReturn(SORTED_MONITORING_DTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(anyInt());
 
     LinkedHashMap<String, Object> drugsMap = new LinkedHashMap<String, Object>();
     drugsMap.put(OTHERS, false);
@@ -243,7 +245,7 @@ public class MonitoringStructureProviderTest {
     unsortedMap.put(MonitoringType.ADDICTIVE_DRUGS.getKey(), unsortedAddictiveDrugsMap);
 
     Map<String, Object> sortedMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertEquals(sortedMap.get(SUCHT),
         SORTED_MONITORING_LIST.get(0).getMonitoringOptionList());
@@ -260,7 +262,7 @@ public class MonitoringStructureProviderTest {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
     doReturn(monitoringDTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(Mockito.anyInt());
     Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
         .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
             .addSubLevel(DRUGS, new LinkedHashMap<>())
@@ -269,7 +271,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -289,7 +291,7 @@ public class MonitoringStructureProviderTest {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
     doReturn(monitoringDTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(Mockito.anyInt());
     Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
         .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
             .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
@@ -299,7 +301,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -326,7 +328,7 @@ public class MonitoringStructureProviderTest {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
     doReturn(monitoringDTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(Mockito.anyInt());
     Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
         .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
             .addEntry(LEGAL_HIGHS, true)
@@ -340,7 +342,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -373,14 +375,14 @@ public class MonitoringStructureProviderTest {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
     doReturn(monitoringDTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(Mockito.anyInt());
     Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
         .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
             .getMonitoringStructure())
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -412,7 +414,7 @@ public class MonitoringStructureProviderTest {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
     doReturn(monitoringDTO).when(monitoringStructureProvider)
-        .getMonitoringInitialList(Mockito.any());
+        .getMonitoringInitialList(Mockito.anyInt());
     Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
         .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
             .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
@@ -429,7 +431,7 @@ public class MonitoringStructureProviderTest {
         .getMonitoringStructure();
 
     Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, SUCHT);
+        .sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);

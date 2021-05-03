@@ -1,4 +1,9 @@
 {
+  "consultingTypeId": 8,
+  "consultingTypeUrlName": "behinderung-und-psychische-erkrankung",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": false,
+  "consultantBoundedToConsultingType": false,
   "sendWelcomeMessage": false,
   "welcomeMessage": null,
   "sendFurtherStepsMessage": true,

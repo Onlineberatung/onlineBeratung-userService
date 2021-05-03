@@ -1,11 +1,12 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -16,11 +17,14 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
 
   private List<Session> sessions;
   private Consultant consultant;
+  private ConsultingTypeManager consultingTypeManager;
 
   private RocketChatAddToGroupOperationService(RocketChatService rocketChatService,
-      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod) {
+      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod,
+      ConsultingTypeManager consultingTypeManager) {
     super(rocketChatService, keycloakAdminClientService);
     this.logMethod = logMethod;
+    this.consultingTypeManager = consultingTypeManager;
   }
 
   /**
@@ -29,10 +33,12 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
    * @param rocketChatService the target service to perform operations
    * @return the {@link RocketChatAddToGroupOperationService} instance
    */
-  public static RocketChatAddToGroupOperationService getInstance(RocketChatService rocketChatService,
-      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod) {
+  public static RocketChatAddToGroupOperationService getInstance(
+      RocketChatService rocketChatService,
+      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod,
+      ConsultingTypeManager consultingTypeManager) {
     return new RocketChatAddToGroupOperationService(rocketChatService, keycloakAdminClientService,
-        logMethod);
+        logMethod, consultingTypeManager);
   }
 
   /**
@@ -66,7 +72,7 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
 
   private void addToSpecificSessionOrRollbackOnFailure(Session session) {
     try {
-      addConsultantToGroupOfSession(session, this.consultant);
+      addConsultantToGroupOfSession(session, this.consultant, this.consultingTypeManager);
     } catch (Exception e) {
       rollback();
       throw new InternalServerErrorException(

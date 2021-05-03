@@ -7,7 +7,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INACTIVE_CHAT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
@@ -89,7 +88,7 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertEquals(ACTIVE_CHAT.getConsultingType().getValue(),
+    assertEquals(ACTIVE_CHAT.getConsultingTypeId(),
         resultList.get(0).getChat().getConsultingType());
     assertEquals(
         LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
@@ -122,7 +121,7 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertEquals(ACTIVE_CHAT.getConsultingType().getValue(),
+    assertEquals(ACTIVE_CHAT.getConsultingTypeId(),
         resultList.get(0).getChat().getConsultingType());
     assertEquals(
         LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
@@ -216,14 +215,14 @@ public class ChatServiceTest {
     when(inactiveChat.isActive()).thenReturn(false);
     when(inactiveChat.getChatOwner()).thenReturn(CONSULTANT);
     when(inactiveChat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(inactiveChat.getConsultingType()).thenReturn(CONSULTING_TYPE_KREUZBUND);
+    when(inactiveChat.getConsultingTypeId()).thenReturn(15);
 
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(inactiveChat));
 
     UpdateChatResponseDTO result =
         chatService.updateChat(CHAT_ID, CHAT_DTO, AUTHENTICATED_USER_CONSULTANT);
     String chatLink =
-        userHelper.generateChatUrl(inactiveChat.getId(), inactiveChat.getConsultingType());
+        userHelper.generateChatUrl(inactiveChat.getId(), inactiveChat.getConsultingTypeId());
 
     assertEquals(result.getGroupId(), inactiveChat.getGroupId());
     assertEquals(result.getChatLink(), chatLink);

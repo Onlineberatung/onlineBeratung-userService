@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.session;
 
 import de.caritas.cob.userservice.api.admin.service.session.pageprovider.PageProviderFactory;
 import de.caritas.cob.userservice.api.admin.service.session.pageprovider.SessionPageProvider;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class SessionAdminService {
 
   private final @NonNull SessionRepository sessionRepository;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Finds existing sessions filtered by {@link SessionFilter} and retrieves all sessions if no filter
@@ -33,7 +35,7 @@ public class SessionAdminService {
     Pageable pageable = PageRequest.of(Math.max(page - 1, 0), Math.max(perPage, 1));
 
     SessionPageProvider sessionPageProvider =
-        PageProviderFactory.getInstance(this.sessionRepository, sessionFilter)
+        PageProviderFactory.getInstance(this.sessionRepository, sessionFilter, consultingTypeManager)
             .retrieveFirstSupportedSessionPageProvider();
 
     return SessionAdminResultDTOBuilder.getInstance()

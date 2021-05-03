@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.helper;
 
 import de.caritas.cob.userservice.api.exception.HelperException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.binary.Base32;
@@ -11,6 +11,7 @@ import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,9 @@ public class UserHelper {
 
   @Value("${app.base.url}")
   private String hostBaseUrl;
+
+  @Autowired
+  private ConsultingTypeManager consultingTypeManager;
 
   public static final int USERNAME_MIN_LENGTH = 5;
   public static final int USERNAME_MAX_LENGTH = 30;
@@ -174,14 +178,14 @@ public class UserHelper {
   }
 
   /**
-   * Generates the URL for a chat with the given {@link Chat} id and {@link ConsultingType}.
+   * Generates the URL for a chat with the given {@link Chat} id and consultingType ID.
    *
    * @param chatId the {@link Chat}'s id
-   * @param consultingType the chat's {@link ConsultingType}
+   * @param consultingTypeId the chat's consultingType ID
    * @return URL (String)
    */
-  public String generateChatUrl(Long chatId, ConsultingType consultingType) {
-    return hostBaseUrl + "/" + consultingType.getUrlName() + "/"
+  public String generateChatUrl(Long chatId, int consultingTypeId) {
+    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getConsultingTypeUrlName() + "/"
         + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
             BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }

@@ -4,13 +4,14 @@ import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveF
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class RemoveConsultantFromRocketChatService {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Removes the consultant who is not directly assigned to session from Rocket.Chat rooms.
@@ -42,7 +44,7 @@ public class RemoveConsultantFromRocketChatService {
         .collect(Collectors.toMap(session -> session, this::observeConsultantsToRemove));
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService)
+        .getInstance(this.rocketChatService, this.keycloakAdminClientService, this.consultingTypeManager)
         .onSessionConsultants(consultantsFromSession)
         .removeFromGroupsOrRollbackOnFailure();
   }

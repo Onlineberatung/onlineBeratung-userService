@@ -25,7 +25,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -101,7 +100,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(false);
-    agencyDTO.setConsultingType(ConsultingType.SUCHT);
+    agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -142,7 +141,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(true);
-    agencyDTO.setConsultingType(ConsultingType.SUCHT);
+    agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -166,7 +165,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
-    assertThat(this.consultantRepository.findByIdAndDeleteDateIsNull(consultant.getId()).get().isTeamConsultant(),
+    assertThat(this.consultantRepository.findByIdAndDeleteDateIsNull(consultant.getId()).get()
+            .isTeamConsultant(),
         is(true));
   }
 
@@ -249,10 +249,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsU25AndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(ConsultingType.EMIGRATION);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.U25)
+        .consultingType(1)
         .id(2L);
 
     when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
@@ -272,10 +272,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsKreuzbundAndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(ConsultingType.EMIGRATION);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.KREUZBUND)
+        .consultingType(15)
         .id(2L);
 
     when(agencyService.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
@@ -285,7 +285,6 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role")
         .agencyId(2L);
-
 
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency("0b3b1cc6-be98-4787-aa56-212259d811b9",

@@ -1,38 +1,45 @@
 {
-	"sendWelcomeMessage" : false,
-	"welcomeMessage" : null,
-	"sessionDataInitializing": {
-		"addictiveDrugs": false,
-		"age": false,
-		"gender": false,
-		"relation": false,
-		"state": false
-	},
-	"monitoring": false,
-	"monitoringFile": null,
-	"feedbackChat": false,
-	"notifications": {
-		"newMessage": {
-			"teamSession": {
-				"toConsultant": {
-					"allTeamConsultants": true
-				}
-			}
-		}
-	},
-	"languageFormal": true,
-	"roles": {
-		"consultant": {
-			"default" :	[
-				"consultant",
-				"group-chat-consultant"
-			]
-		}
-	},
-	"registration": {
-		"mandatoryFields": {
-			"age": false,
-			"state": false
-		}
-	}
+  "consultingTypeId": 15,
+  "consultingTypeUrlName": "kb-sucht-selbsthilfe",
+  "excludeNonMainConsultantsFromTeamSessions": false,
+  "groupChat": true,
+  "consultantBoundedToConsultingType": true,
+  "sendWelcomeMessage": false,
+  "welcomeMessage": null,
+  "sendFurtherStepsMessage": true,
+  "sendSaveSessionDataMessage": false,
+  "sessionDataInitializing": {
+    "addictiveDrugs": false,
+    "age": false,
+    "gender": false,
+    "relation": false,
+    "state": false
+  },
+  "monitoring": false,
+  "monitoringFile": null,
+  "feedbackChat": false,
+  "notifications": {
+    "newMessage": {
+      "teamSession": {
+        "toConsultant": {
+          "allTeamConsultants": true
+        }
+      }
+    }
+  },
+  "languageFormal": true,
+  "roles": {
+    "consultant": {
+      "default": [
+        "consultant",
+        "group-chat-consultant"
+      ]
+    }
+  },
+  "registration": {
+    "mandatoryFields": {
+      "age": false,
+      "state": false
+    }
+  }
 }

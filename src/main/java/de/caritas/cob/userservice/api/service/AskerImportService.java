@@ -27,7 +27,6 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -46,7 +45,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,7 +90,6 @@ public class AskerImportService {
   private final String IMPORT_CHARSET = "UTF-8";
   private final String IMPORT_LOG_CHARSET = "UTF-8";
   private final String DUMMY_POSTCODE = "00000";
-
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserService userService;
   private final @NonNull SessionService sessionService;
@@ -255,7 +253,7 @@ public class AskerImportService {
     Iterable<CSVRecord> records = null;
     String systemUserId;
     String systemUserToken;
-    Map<ConsultingType, String> welcomeMessageMap = null;
+    Map<Integer, String> welcomeMessageMap = null;
 
     // Read in asker import file, log in Rocket.Chat system message user to get the token and read
     // in welcome messages
@@ -555,17 +553,17 @@ public class AskerImportService {
     }
   }
 
-  private UserDTO convertAskerToUserDTO(ImportRecordAsker record, ConsultingType consultingType) {
+  private UserDTO convertAskerToUserDTO(ImportRecordAsker record, int consultingType) {
     return new UserDTO(record.getUsernameEncoded(), record.getPostcode(), record.getAgencyId(),
         record.getPassword(), record.getEmail(), new Date().toString(),
-        Integer.toString(consultingType.getValue()));
+        Integer.toString(consultingType));
   }
 
   private UserDTO convertAskerWithoutSessionToUserDTO(ImportRecordAskerWithoutSession record,
-      ConsultingType consultingType) {
+      int consultingType) {
     return new UserDTO(record.getUsernameEncoded(), DUMMY_POSTCODE, record.getAgencyId(),
         record.getPassword(), record.getEmail(), new Date().toString(),
-        Integer.toString(consultingType.getValue()));
+        Integer.toString(consultingType));
   }
 
   /**
@@ -628,14 +626,14 @@ public class AskerImportService {
    * Reads in all welcome message files (according to consulting type id) and returns the result as
    * a map.
    */
-  private Map<ConsultingType, String> getWelcomeMessageMap(String protocolFile) {
+  private Map<Integer, String> getWelcomeMessageMap(String protocolFile) {
 
-    Map<ConsultingType, String> welcomeMessageMap = new EnumMap<>(ConsultingType.class);
+    Map<Integer, String> welcomeMessageMap = new HashMap();
 
-    for (ConsultingType type : ConsultingType.values()) {
+    for (int type : consultingTypeManager.getAllconsultingTypeIds()) {
       String welcomeMessage = "";
       String fileName = welcomeMsgFilename.replace(welcomeMsgFilenameReplaceValue,
-          Integer.toString(type.getValue()));
+          Integer.toString(type));
 
       if (fileName != null && !fileName.equals(StringUtils.EMPTY)) {
         List<String> lines;

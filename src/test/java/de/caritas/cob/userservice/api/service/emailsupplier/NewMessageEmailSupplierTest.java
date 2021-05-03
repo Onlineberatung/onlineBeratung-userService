@@ -10,6 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -151,7 +152,7 @@ public class NewMessageEmailSupplierTest {
     NewMessageDTO newMessageDTO = new NewMessageDTO().teamSession(teamSessionDTO);
     NotificationDTO notificationDTO = new NotificationDTO().newMessage(newMessageDTO);
     when(settings.getNotifications()).thenReturn(notificationDTO);
-    when(consultingTypeManager.getConsultingTypeSettings(any())).thenReturn(settings);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.isTeamSession()).thenReturn(true);
     User user = mock(User.class);

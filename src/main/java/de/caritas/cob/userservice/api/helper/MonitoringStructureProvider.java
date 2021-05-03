@@ -15,7 +15,6 @@ import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
 import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.io.IOException;
@@ -109,16 +108,16 @@ public class MonitoringStructureProvider {
   }
 
   /**
-   * Creates the initial monitoring data of a session for the given {@link ConsultingType}. The
+   * Creates the initial monitoring data of a session for the given consultingType ID. The
    * structure (JSON) is being imported from the JSON file provided in the {@link
    * ConsultingTypeSettings}.
    *
-   * @param consultingType the {@link ConsultingType} to load the initial monitoring
+   * @param consultingTypeId the consultingType ID to load the initial monitoring
    * @return the generated {@link MonitoringDTO}
    */
-  public MonitoringDTO getMonitoringInitialList(ConsultingType consultingType) {
+  public MonitoringDTO getMonitoringInitialList(int consultingTypeId) {
     ObjectMapper mapper = new ObjectMapper();
-    InputStream inputStream = getMonitoringJSONStream(consultingType);
+    InputStream inputStream = getMonitoringJSONStream(consultingTypeId);
     try {
       return mapper.readValue(inputStream, MonitoringDTO.class);
     } catch (IOException ex) {
@@ -126,8 +125,8 @@ public class MonitoringStructureProvider {
     }
   }
 
-  private InputStream getMonitoringJSONStream(ConsultingType consultingType) {
-    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingType)
+  private InputStream getMonitoringJSONStream(int consultingTypeId) {
+    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
         .getMonitoringFile();
     try {
       return TypeReference.class.getResourceAsStream(monitoringFilePath);
@@ -149,15 +148,15 @@ public class MonitoringStructureProvider {
    * Returns a sorted {@link Map} of monitoring items according to the order that is defined in the
    * monitoring JSON file.
    *
-   * @param unsortedMap    the {@link Map} before sorting
-   * @param consultingType the {@link ConsultingType} to use for sorting
+   * @param unsortedMap  the {@link Map} before sorting
+   * @param consultingTypeId the consultingType ID to use for sorting
    * @return the sorted {@link Map}
    */
   public Map<String, Object> sortMonitoringMap(Map<String, Object> unsortedMap,
-      ConsultingType consultingType) {
+      int consultingTypeId) {
 
     Map<String, Object> sortedMap =
-        getMonitoringInitialList(consultingType).getProperties();
+        getMonitoringInitialList(consultingTypeId).getProperties();
     setValuesForSortedMonitoringMap(sortedMap, unsortedMap);
 
     return sortedMap;

@@ -20,38 +20,37 @@ public class AgencyVerifier {
   private final @NonNull AgencyService agencyService;
 
   /**
-   * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided {@link
-   * ConsultingType} and returns the corresponding agency as {@link AgencyDTO}.
+   * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided consulting ID
+   * and returns the corresponding agency as {@link AgencyDTO}.
    *
    * @param agencyId       {@link AgencyDTO#getId()}
-   * @param consultingType {@link ConsultingType}
+   * @param consultingTypeId the consulting Id
    * @return {@link AgencyDTO} or null if agency is not found
    */
-  public AgencyDTO getVerifiedAgency(Long agencyId, ConsultingType consultingType) {
+  public AgencyDTO getVerifiedAgency(Long agencyId, int consultingTypeId) {
 
     AgencyDTO agencyDTO = agencyService.getAgencyWithoutCaching(agencyId);
-    if (nonNull(agencyDTO) && !agencyDTO.getConsultingType().equals(consultingType)) {
+    if (nonNull(agencyDTO) && !agencyDTO.getConsultingType().equals(consultingTypeId)) {
       throw new BadRequestException(String.format(
           "The provided agency with id %s is not assigned to the provided consulting type %s",
-          agencyId, consultingType));
+          agencyId, consultingTypeId));
     }
 
     return agencyDTO;
   }
 
   /**
-   * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided {@link
-   * ConsultingType}.
+   * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided consulting ID
    *
    * @param agencyId       {@link AgencyDTO#getId()}
-   * @param consultingType {@link ConsultingType}
+   * @param consultingTypeId the consulting ID
    * @return <ul>
    *         <li>true if agency is assigned to the provided {@link ConsultingType}</li>
    *         <li>false if agency is not assigned to the provided {@link ConsultingType}</li>
    *         </ul>
    */
-  public boolean doesConsultingTypeMatchToAgency(Long agencyId, ConsultingType consultingType) {
-    AgencyDTO agencyDTO = getVerifiedAgency(agencyId, consultingType);
+  public boolean doesConsultingTypeMatchToAgency(Long agencyId, int consultingTypeId) {
+    AgencyDTO agencyDTO = getVerifiedAgency(agencyId, consultingTypeId);
     return nonNull(agencyDTO);
   }
 }

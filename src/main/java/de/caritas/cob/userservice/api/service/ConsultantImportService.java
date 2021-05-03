@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.io.FileReader;
 import java.io.IOException;
@@ -117,17 +116,15 @@ public class ConsultantImportService {
 
           agencyIds.add(Long.valueOf(agencyRoleArray[0]));
 
-          Optional<ConsultingType> consultingType = Optional.of(agency.getConsultingType());
-
           ConsultingTypeSettings consultingTypeSettings =
-              consultingTypeManager.getConsultingTypeSettings(consultingType.get());
+              consultingTypeManager.getConsultingTypeSettings(agency.getConsultingType());
 
           if (!consultingTypeSettings.getRoles().getConsultant().getRoleNames()
               .containsKey(agencyRoleArray[1])) {
             throw new ImportException(String.format(
                 "Consultant %s could not be imported: invalid role set %s for agency id %s and consulting type %s",
                 importRecord.getUsername(), agencyRoleArray[1], agencyRoleArray[0],
-                consultingType.get().getValue()));
+                consultingTypeSettings.getConsultingTypeUrlName()));
           }
 
           for (Map.Entry<String, List<String>> roleSet : consultingTypeSettings.getRoles()
