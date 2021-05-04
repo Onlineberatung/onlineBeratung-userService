@@ -49,10 +49,11 @@ public class ConsultingTypeAdminService {
 
   private List<ConsultingTypeResultDTO> fullSortedConsultingTypeResponseList() {
     return null;
-        /*consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
-        Comparator.comparing(ExtendedConsultingTypeResponseDTO::getConsultingTypeUrlName))
-        .map(this::fromConsultingTypeSettings)
-        .collect(Collectors.toList());*/
+    /*consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
+    Comparator.comparing(ExtendedConsultingTypeResponseDTO::getConsultingTypeUrlName))
+    .map(this::fromConsultingTypeSettings)
+    .collect(Collectors.toList());*/
+    //TODO
   }
 
   private Integer currentPage(Integer page,

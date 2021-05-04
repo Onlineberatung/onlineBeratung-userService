@@ -57,7 +57,6 @@ public class ConsultingTypeSessionPageProviderTest {
   @Test
   public void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
     when(this.sessionFilter.getConsultingType()).thenReturn(1);
-    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
     PageRequest pageable = PageRequest.of(0, 1);
 
     this.consultingTypeSessionPageProvider.executeQuery(pageable);

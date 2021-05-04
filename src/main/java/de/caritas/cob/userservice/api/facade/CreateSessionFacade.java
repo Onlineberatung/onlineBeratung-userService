@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUser
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -19,6 +18,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,15 +41,17 @@ public class CreateSessionFacade {
   /**
    * Creates a new session for the provided user.
    *
-   * @param userDTO                {@link UserDTO}
-   * @param user                   {@link User}
+   * @param userDTO                           {@link UserDTO}
+   * @param user                              {@link User}
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  public Long createUserSession(UserDTO userDTO, User user,ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+  public Long createUserSession(UserDTO userDTO, User user,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
     checkIfAlreadyRegisteredToConsultingType(user, extendedConsultingTypeResponseDTO.getId());
     AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO.getId());
-    Session session = initializeSession(userDTO, user, extendedConsultingTypeResponseDTO, agencyDTO);
+    Session session = initializeSession(userDTO, user, extendedConsultingTypeResponseDTO,
+        agencyDTO);
     initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
 
     return session.getId();
