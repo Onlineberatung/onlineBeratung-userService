@@ -14,11 +14,6 @@ paths:
         consultant. [Authorization: Role: consultant]'
       operationId: getRegisteredEnquiries
       parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
         - name: offset
           in: query
           description: Number of items where to start in the query (0 = first item)
@@ -50,11 +45,6 @@ paths:
         consultant. [Authorization: Role: consultant]'
       operationId: getAnonymousEnquiries
       parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
         - name: offset
           in: query
           description: Number of items where to start in the query (0 = first item)

@@ -20,17 +20,15 @@ public class ConversationListResolver {
   /**
    * Resolves the requested converation list by given {@link ConversationListType}.
    *
-   * @param rcToken the Rocket.Chat authentication token
    * @param offset the current offset
    * @param count the requested limit
    * @param conversationType the given {@link ConversationListType}
    * @return the relevant {@link ConsultantSessionListResponseDTO}
    */
-  public ConsultantSessionListResponseDTO resolveConversations(String rcToken, Integer offset,
+  public ConsultantSessionListResponseDTO resolveConversations(Integer offset,
       Integer count, ConversationListType conversationType) {
 
     PageableListRequest pageableListRequest = PageableListRequest.builder()
-        .rcToken(rcToken)
         .offset(offset)
         .count(count)
         .build();

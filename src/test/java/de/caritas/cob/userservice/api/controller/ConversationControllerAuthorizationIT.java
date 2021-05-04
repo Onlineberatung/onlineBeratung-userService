@@ -54,14 +54,13 @@ public class ConversationControllerAuthorizationIT {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .param("offset", "0")
         .param("count", "10")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.conversationListResolver, times(1))
-        .resolveConversations(RC_TOKEN, 0, 10, ANONYMOUS_ENQUIRY);
+        .resolveConversations(0, 10, ANONYMOUS_ENQUIRY);
   }
 
   @Test
@@ -115,14 +114,13 @@ public class ConversationControllerAuthorizationIT {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .param("offset", "0")
         .param("count", "10")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.conversationListResolver, times(1))
-        .resolveConversations(RC_TOKEN, 0, 10, REGISTERED_ENQUIRY);
+        .resolveConversations(0, 10, REGISTERED_ENQUIRY);
   }
 
   @Test

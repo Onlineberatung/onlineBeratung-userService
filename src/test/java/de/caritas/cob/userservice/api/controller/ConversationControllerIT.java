@@ -50,14 +50,6 @@ public class ConversationControllerIT {
   }
 
   @Test
-  public void getAnonymousEnquiries_Should_returnBadRequest_When_rcTokenIsMissing() throws Exception {
-    this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .param("offset", "0")
-        .param("count", "10"))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
   public void getAnonymousEnquiries_Should_returnBadRequest_When_offsetIsMissing() throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -107,14 +99,6 @@ public class ConversationControllerIT {
         .param("offset", "0")
         .param("count", "10"))
         .andExpect(status().isOk());
-  }
-
-  @Test
-  public void getRegisteredEnquiries_Should_returnBadRequest_When_rcTokenIsMissing() throws Exception {
-    this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .param("offset", "0")
-        .param("count", "10"))
-        .andExpect(status().isBadRequest());
   }
 
   @Test

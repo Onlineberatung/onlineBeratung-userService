@@ -15,7 +15,6 @@ import io.swagger.annotations.Api;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -31,20 +30,17 @@ public class ConversationController implements ConversationsApi {
   /**
    * Entry point to retrieve all anonymous enquiries for current authenticated consultant.
    *
-   * @param rcToken (required)
    * @param offset Number of items where to start in the query (0 &#x3D; first item) (required)
    * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getAnonymousEnquiries(
-      @RequestHeader String rcToken,
       @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
       @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count) {
 
     ConsultantSessionListResponseDTO anonymousEnquirySessions =
-        this.conversationListResolver.resolveConversations(rcToken, offset, count,
-            ANONYMOUS_ENQUIRY);
+        this.conversationListResolver.resolveConversations(offset, count, ANONYMOUS_ENQUIRY);
 
     return ResponseEntity.ok(anonymousEnquirySessions);
   }
@@ -52,20 +48,17 @@ public class ConversationController implements ConversationsApi {
   /**
    * Entry point to retrieve all registered enquiries for current authenticated consultant.
    *
-   * @param rcToken  (required)
    * @param offset Number of items where to start in the query (0 &#x3D; first item) (required)
    * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getRegisteredEnquiries(
-      @RequestHeader String rcToken,
       @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
       @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count) {
 
     ConsultantSessionListResponseDTO registeredEnquirySessions =
-        this.conversationListResolver.resolveConversations(rcToken, offset, count,
-            REGISTERED_ENQUIRY);
+        this.conversationListResolver.resolveConversations(offset, count, REGISTERED_ENQUIRY);
 
     return ResponseEntity.ok(registeredEnquirySessions);
   }

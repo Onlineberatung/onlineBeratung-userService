@@ -1,13 +1,12 @@
 package de.caritas.cob.userservice.api.conversation.model;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class PageableListRequest {
 
-  private final String rcToken;
   private final Integer offset;
   private final Integer count;
 
