@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
@@ -17,9 +17,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_INVALID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_IN_PROGRESS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_NEW;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ROLES;
@@ -42,7 +39,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -59,7 +55,9 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -76,7 +74,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
-import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionServiceTest {

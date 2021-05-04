@@ -61,7 +61,8 @@ public class SessionMapper {
             ? session.getUser().getRcUserId() : null)
         .messageDate(toUnixTime(session.getEnquiryMessageDate()))
         .isTeamSession(session.isTeamSession())
-        .monitoring(session.isMonitoring());
+        .monitoring(session.isMonitoring())
+        .registrationType(session.getRegistrationType().name());
   }
 
   private SessionUserDTO convertToSessionUserDTO(Session session) {

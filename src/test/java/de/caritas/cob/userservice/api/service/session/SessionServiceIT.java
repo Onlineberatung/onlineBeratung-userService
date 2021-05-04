@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static org.junit.Assert.assertEquals;
@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.service.session.SessionService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,8 @@ public class SessionServiceIT {
   @Test(expected = ForbiddenException.class)
   public void fetchSessionForConsultant_Should_Throw_ForbiddenException_When_ConsultantHasNoPermission() {
 
-    Consultant consultant = consultantRepository.findByIdAndDeleteDateIsNull("fb77d849-470f-4cec-89ca-6aa673bacb88")
+    Consultant consultant = consultantRepository
+        .findByIdAndDeleteDateIsNull("fb77d849-470f-4cec-89ca-6aa673bacb88")
         .get();
     sessionService.fetchSessionForConsultant(1L, consultant);
   }
@@ -53,7 +53,8 @@ public class SessionServiceIT {
   @Test
   public void fetchSessionForConsultant_Should_Return_ValidConsultantSessionDTO_When_ConsultantIsAssigned() {
 
-    Consultant consultant = consultantRepository.findByIdAndDeleteDateIsNull("473f7c4b-f011-4fc2-847c-ceb636a5b399")
+    Consultant consultant = consultantRepository
+        .findByIdAndDeleteDateIsNull("473f7c4b-f011-4fc2-847c-ceb636a5b399")
         .get();
     Session session = sessionRepository.findById(1L).get();
     ConsultantSessionDTO result = sessionService.fetchSessionForConsultant(1L, consultant);
@@ -79,7 +80,8 @@ public class SessionServiceIT {
   @Transactional
   public void fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_When_ConsultantIsToTeamSessionAgencyAssigned() {
 
-    Consultant consultant = consultantRepository.findByIdAndDeleteDateIsNull("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3")
+    Consultant consultant = consultantRepository
+        .findByIdAndDeleteDateIsNull("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3")
         .get();
     assertNotNull(sessionService.fetchSessionForConsultant(2L, consultant));
   }
