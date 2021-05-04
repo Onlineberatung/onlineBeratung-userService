@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.conversation.provider.AnonymousEnquiryConversationListProvider;
 import de.caritas.cob.userservice.api.conversation.provider.ConversationListProvider;
-import de.caritas.cob.userservice.api.conversation.provider.RegisteredEnquiryConversationsProvider;
+import de.caritas.cob.userservice.api.conversation.provider.RegisteredEnquiryConversationListProvider;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.junit.Before;
@@ -34,7 +34,7 @@ public class ConversationListProviderRegistryTest {
   public void setup() {
     ConversationListProvider anonymous = mock(AnonymousEnquiryConversationListProvider.class);
     when(anonymous.providedType()).thenReturn(ANONYMOUS_ENQUIRY);
-    ConversationListProvider registered = mock(RegisteredEnquiryConversationsProvider.class);
+    ConversationListProvider registered = mock(RegisteredEnquiryConversationListProvider.class);
     when(registered.providedType()).thenReturn(REGISTERED_ENQUIRY);
     when(this.applicationContext.getBeansOfType(any())).thenReturn(
         Map.of("anonymous", anonymous, "registered", registered));
@@ -64,7 +64,7 @@ public class ConversationListProviderRegistryTest {
         this.conversationListProviderRegistry.findByConversationType(REGISTERED_ENQUIRY);
 
     assertThat(resultProvider.providedType(), is(REGISTERED_ENQUIRY));
-    assertThat(resultProvider.getClass(), is(RegisteredEnquiryConversationsProvider.class));
+    assertThat(resultProvider.getClass(), is(RegisteredEnquiryConversationListProvider.class));
   }
 
   @Test(expected = NoSuchElementException.class)

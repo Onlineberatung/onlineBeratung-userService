@@ -5,7 +5,7 @@ import static java.util.Objects.nonNull;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.AliasMessageDTO;
 import de.caritas.cob.userservice.api.model.ForwardMessageDTO;
 import de.caritas.cob.userservice.api.model.VideoCallMessageDTO;
@@ -18,16 +18,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class AliasJsonDeserializer extends JsonDeserializer<AliasMessageDTO> {
 
-  private final UserHelper userHelper;
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
   private final AliasMessageConverter aliasMessageConverter = new AliasMessageConverter();
-
-  public AliasJsonDeserializer() {
-    this.userHelper = new UserHelper();
-  }
-
-  public AliasJsonDeserializer(UserHelper userHelper) {
-    this.userHelper = userHelper;
-  }
 
   /**
    * Deserializes the Rocket.Chat custom alias object. If the structure of the alias object is the
@@ -60,7 +52,8 @@ public class AliasJsonDeserializer extends JsonDeserializer<AliasMessageDTO> {
   }
 
   private AliasMessageDTO buildAliasMessageDTOByOldForwardDTO(ForwardMessageDTO forwardMessageDTO) {
-    forwardMessageDTO.setUsername(userHelper.decodeUsername(forwardMessageDTO.getUsername()));
+    forwardMessageDTO
+        .setUsername(usernameTranscoder.decodeUsername(forwardMessageDTO.getUsername()));
     return new AliasMessageDTO().forwardMessageDTO(forwardMessageDTO);
   }
 
@@ -77,14 +70,15 @@ public class AliasJsonDeserializer extends JsonDeserializer<AliasMessageDTO> {
   private void decodeUsernameOfForwardMessageDTOIfNonNull(AliasMessageDTO alias) {
     if (nonNull(alias.getForwardMessageDTO())) {
       alias.getForwardMessageDTO()
-          .setUsername(userHelper.decodeUsername(alias.getForwardMessageDTO().getUsername()));
+          .setUsername(
+              usernameTranscoder.decodeUsername(alias.getForwardMessageDTO().getUsername()));
     }
   }
 
   private void decodeUsernameOfVideoCallMessageDTOIfNonNull(AliasMessageDTO alias) {
     if (nonNull(alias.getVideoCallMessageDTO())) {
       alias.getVideoCallMessageDTO().setInitiatorUserName(
-          userHelper.decodeUsername(alias.getVideoCallMessageDTO().getInitiatorUserName()));
+          usernameTranscoder.decodeUsername(alias.getVideoCallMessageDTO().getInitiatorUserName()));
     }
   }
 

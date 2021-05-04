@@ -1,12 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.AbsenceDTO;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -23,7 +18,6 @@ import org.springframework.stereotype.Service;
 public class ConsultantService {
 
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull UserHelper userHelper;
 
   /**
    * Save a {@link Consultant} to the database.
@@ -86,13 +80,13 @@ public class ConsultantService {
 
     // Search for decoded username
     Optional<Consultant> consultantOptional =
-        getConsultantByUsername(userHelper.decodeUsername(username));
+        getConsultantByUsername(new UsernameTranscoder().decodeUsername(username));
     if (consultantOptional.isPresent()) {
       return consultantOptional;
     }
 
     // Search for encoded username
-    consultantOptional = getConsultantByUsername(userHelper.encodeUsername(username));
+    consultantOptional = getConsultantByUsername(new UsernameTranscoder().encodeUsername(username));
     if (consultantOptional.isPresent()) {
       return consultantOptional;
     }

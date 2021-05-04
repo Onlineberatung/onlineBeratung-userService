@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
@@ -13,7 +12,7 @@ import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.chat.UserChatDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;

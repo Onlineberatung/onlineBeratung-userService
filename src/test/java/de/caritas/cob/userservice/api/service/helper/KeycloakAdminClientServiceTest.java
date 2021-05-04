@@ -187,7 +187,6 @@ public class KeycloakAdminClientServiceTest {
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.search(any())).thenReturn(userRepresentations);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
-    when(this.userHelper.decodeUsername(any())).thenReturn(unique);
 
     boolean isAvailable = this.keycloakAdminClientService.isUsernameAvailable(unique);
 

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.AliasMessageDTO;
 import de.caritas.cob.userservice.api.model.ForwardMessageDTO;
 import de.caritas.cob.userservice.api.model.VideoCallMessageDTO;
@@ -32,7 +33,7 @@ public class AliasJsonDeserializerTest {
 
   private static final UserHelper USER_HELPER = new UserHelper();
   private static final String DECODED_USERNAME = "username";
-  private static final String ENCODE_USERNAME = USER_HELPER.encodeUsername(DECODED_USERNAME);
+  private static final String ENCODE_USERNAME = new UsernameTranscoder().encodeUsername(DECODED_USERNAME);
   private static final String MESSAGE_FORWARD_ALIAS_JSON_WITH_ENCODED_USERNAME =
       "{\"alias\":\"%7B%22timestamp%22%3A%221568128850636%22%2C%22username%22%3A%22"
           + ENCODE_USERNAME
@@ -43,7 +44,7 @@ public class AliasJsonDeserializerTest {
           + "%22%2C%22rcUserId%22%3A%22p5NdZSxc2Kh7GfXdB%22%7D\"";
 
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final AliasJsonDeserializer aliasJsonDeserializer = new AliasJsonDeserializer(USER_HELPER);
+  private final AliasJsonDeserializer aliasJsonDeserializer = new AliasJsonDeserializer();
 
   @Test
   public void aliasJsonDeserializer_Should_haveNoArgsConstructor() {
