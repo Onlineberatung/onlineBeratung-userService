@@ -30,7 +30,7 @@ public class ConversationController implements ConversationsApi {
   /**
    * Entry point to retrieve all anonymous enquiries for current authenticated consultant.
    *
-   * @param offset Number of items where to start in the query (0 &#x3D; first item) (required)
+   * @param offset Number of items where to start in the query (0 = first item) (required)
    * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */
@@ -48,7 +48,7 @@ public class ConversationController implements ConversationsApi {
   /**
    * Entry point to retrieve all registered enquiries for current authenticated consultant.
    *
-   * @param offset Number of items where to start in the query (0 &#x3D; first item) (required)
+   * @param offset Number of items where to start in the query (0 = first item) (required)
    * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */

@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.helper;
 
-import de.caritas.cob.userservice.api.exception.HelperException;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,13 +30,8 @@ public class UsernameTranscoder {
   }
 
   public String base32EncodeAndReplacePlaceholder(String value, String replaceString) {
-    try {
-      return base32.encodeAsString(value.getBytes())
-          .replace(BASE32_PLACEHOLDER, replaceString);
-    } catch (Exception exception) {
-      // Catch generic exception because of lack of base32 documentation
-      throw new HelperException(String.format("Could not encode value %s", value), exception);
-    }
+    return base32.encodeAsString(value.getBytes())
+        .replace(BASE32_PLACEHOLDER, replaceString);
   }
 
   /**
@@ -51,12 +45,8 @@ public class UsernameTranscoder {
   }
 
   private String base32DecodeUsername(String username) {
-    try {
-      return new String(base32.decode(username.replace(ENCODING_PREFIX, StringUtils.EMPTY)
-          .toUpperCase().replace(BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING, BASE32_PLACEHOLDER)));
-    } catch (Exception exception) {
-      throw new HelperException(String.format("Could not decode username %s", username), exception);
-    }
+    return new String(base32.decode(username.replace(ENCODING_PREFIX, StringUtils.EMPTY)
+        .toUpperCase().replace(BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING, BASE32_PLACEHOLDER)));
   }
 
 }

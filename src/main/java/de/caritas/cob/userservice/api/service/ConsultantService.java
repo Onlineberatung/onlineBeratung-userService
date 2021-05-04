@@ -79,14 +79,15 @@ public class ConsultantService {
   public Optional<Consultant> findConsultantByUsernameOrEmail(String username, String email) {
 
     // Search for decoded username
+    var usernameTranscoder = new UsernameTranscoder();
     Optional<Consultant> consultantOptional =
-        getConsultantByUsername(new UsernameTranscoder().decodeUsername(username));
+        getConsultantByUsername(usernameTranscoder.decodeUsername(username));
     if (consultantOptional.isPresent()) {
       return consultantOptional;
     }
 
     // Search for encoded username
-    consultantOptional = getConsultantByUsername(new UsernameTranscoder().encodeUsername(username));
+    consultantOptional = getConsultantByUsername(usernameTranscoder.encodeUsername(username));
     if (consultantOptional.isPresent()) {
       return consultantOptional;
     }

@@ -99,7 +99,7 @@ components:
         - consultingType
       properties:
         consultingType:
-          type: string
+          type: integer
           example: 3
           description: Consulting type ID
 

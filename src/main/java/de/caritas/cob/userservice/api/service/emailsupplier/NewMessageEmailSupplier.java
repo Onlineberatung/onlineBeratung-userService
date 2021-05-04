@@ -137,10 +137,11 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private List<MailDTO> buildMailForAsker() {
 
     if (isSessionActiveAndBelongToConsultant() && isNotADummyMail()) {
+      var usernameTranscoder = new UsernameTranscoder();
       return singletonList(
           buildMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
-              new UsernameTranscoder().decodeUsername(session.getConsultant().getUsername()),
-              new UsernameTranscoder().decodeUsername(session.getUser().getUsername())));
+              usernameTranscoder.decodeUsername(session.getConsultant().getUsername()),
+              usernameTranscoder.decodeUsername(session.getUser().getUsername())));
     }
     if (isNotADummyMail()) {
       LogService.logEmailNotificationFacadeError(String.format(

@@ -4,8 +4,6 @@ import static de.caritas.cob.userservice.api.controller.ConversationControllerIT
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -18,8 +16,6 @@ import javax.servlet.http.Cookie;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -33,7 +29,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = Replace.ANY)
 public class ConversationControllerAuthorizationIT {
 
   private final String CSRF_COOKIE = "csrfCookie";
