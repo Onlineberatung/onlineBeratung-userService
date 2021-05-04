@@ -64,17 +64,4 @@ public class ConsultingTypeSessionPageProviderTest {
 
     verify(this.sessionRepository, atLeastOnce()).findByConsultingTypeId(1, pageable);
   }
-
-  @Test
-  public void executeQuery_Should_notExecuteQueryOnRepositoryAndreturnEmptyPage_When_consultingTypeDoesNotExist() {
-    when(this.sessionFilter.getConsultingType()).thenReturn(99);
-    when(consultingTypeManager.getAllConsultingTypeIds()).thenReturn(IntStream.range(0, 22).boxed().toArray(Integer[]::new));
-    PageRequest pageable = PageRequest.of(0, 1);
-
-    Page<Session> sessions = this.consultingTypeSessionPageProvider.executeQuery(pageable);
-
-    assertThat(sessions.getContent(), hasSize(0));
-    verifyNoInteractions(this.sessionRepository);
-  }
-
 }

@@ -1,7 +1,10 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
+import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +25,12 @@ public class ConsultingTypeManager {
    * @throws MissingConsultingTypeException when no settings for provided consulting type where
    *                                        found
    */
-  public de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId) {
-
+  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId) {
+    LogService.logInfo("Bin im CTM");
     return consultingTypeService.getExtendedConsultingTypeResponseDTO(consultingTypeId);
   }
 
-  public de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(String consultingTypeId) {
+  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(String consultingTypeId) {
     return getConsultingTypeSettings(Integer.parseInt(consultingTypeId));
   }
 

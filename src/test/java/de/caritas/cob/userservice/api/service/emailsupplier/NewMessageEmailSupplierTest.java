@@ -18,13 +18,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.NewMessageDTO;
-import de.caritas.cob.userservice.api.model.NotificationDTO;
-import de.caritas.cob.userservice.api.model.TeamSessionDTO;
-import de.caritas.cob.userservice.api.model.ToConsultantDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -146,11 +146,10 @@ public class NewMessageEmailSupplierTest {
   @Test
   public void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
     ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
-    ToConsultantDTO toConsultantDTO = new ToConsultantDTO().allTeamConsultants(true);
-    TeamSessionDTO teamSessionDTO = new TeamSessionDTO().toConsultant(toConsultantDTO);
-    NewMessageDTO newMessageDTO = new NewMessageDTO().teamSession(teamSessionDTO);
-    NotificationDTO notificationDTO = new NotificationDTO().newMessage(newMessageDTO);
-    when(settings.getNotifications()).thenReturn(notificationDTO);
+    NewMessageDTO newMessageDTO = new NewMessageDTO().allTeamConsultants(true);
+    TeamSessionsDTO teamSessionsDTO = new TeamSessionsDTO().newMessage(newMessageDTO);
+    NotificationsDTO notificationsDTO = new NotificationsDTO().teamSessions(teamSessionsDTO);
+    when(settings.getNotifications()).thenReturn(notificationsDTO);
     when(consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.isTeamSession()).thenReturn(true);

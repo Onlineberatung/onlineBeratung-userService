@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.admin.service;
 
+import de.caritas.cob.userservice.api.model.NewMessageDTO;
+import de.caritas.cob.userservice.api.model.NotificationDTO;
+import de.caritas.cob.userservice.api.model.RoleDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.admin.hallink.ConsultingTypePaginationLinksBuilder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -45,10 +48,11 @@ public class ConsultingTypeAdminService {
   }
 
   private List<ConsultingTypeResultDTO> fullSortedConsultingTypeResponseList() {
-    return consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
+    return null;
+        /*consultingTypeManager.getConsultingTypeSettingsMap().values().stream().sorted(
         Comparator.comparing(ExtendedConsultingTypeResponseDTO::getConsultingTypeUrlName))
         .map(this::fromConsultingTypeSettings)
-        .collect(Collectors.toList());
+        .collect(Collectors.toList());*/
   }
 
   private Integer currentPage(Integer page,
@@ -62,12 +66,12 @@ public class ConsultingTypeAdminService {
         .id(ctSettings.getId())
         .name(ctSettings.getSlug())
         .languageFormal(ctSettings.getLanguageFormal())
-        .roles(ctSettings.getRoles())
+        .roles(null)
         .sendWelcomeMessage(ctSettings.getWelcomeMessage().getSendWelcomeMessage())
-        .welcomeMessage(ctSettings.getWelcomeMessage())
+        .welcomeMessage(ctSettings.getWelcomeMessage().getWelcomeMessageText())
         .monitoring(ctSettings.getMonitoring().getInitializeMonitoring())
         .feedbackChat(ctSettings.getInitializeFeedbackChat().booleanValue())
-        .notifications(ctSettings.getNotifications());
+        .notifications(null);
   }
 
   private PaginationLinks buildPaginationLinks(Integer page, Integer perPage,

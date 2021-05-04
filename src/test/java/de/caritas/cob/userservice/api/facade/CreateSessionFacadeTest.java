@@ -76,7 +76,7 @@ public class CreateSessionFacadeTest {
   @Test(expected = ConflictException.class)
   public void createUserSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
 
-    when(sessionService.getSessionsForUserByConsultingType(any(), anyInt()))
+    when(sessionService.getSessionsForUserByConsultingTypeId(any(), anyInt()))
         .thenReturn(SESSION_LIST);
     createSessionFacade
         .createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);

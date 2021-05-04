@@ -13,12 +13,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -85,6 +87,9 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   @MockBean
   private RocketChatService rocketChatService;
 
+  @MockBean
+  private ConsultingTypeManager consultingTypeManager;
+
   @Test
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid()
       throws RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
@@ -137,12 +142,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     createConsultantAgencyDTO.setRole("valid-role");
 
     when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
-
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setExcludeNonMainConsultantsFromTeamSessions(true);
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(true);
     agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+    when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(extendedConsultingTypeResponseDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
         SessionStatus.IN_PROGRESS);
@@ -258,6 +265,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
     when(agencyService.getAgencyWithoutCaching(2L)).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(consultingTypeManager.isConsultantBoundedToAgency(1)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role")
@@ -281,6 +289,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     when(agencyService.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
     when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(consultingTypeManager.isConsultantBoundedToAgency(15)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role")

@@ -11,6 +11,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITH_
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,7 +40,7 @@ public class ValidAgeValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_U25)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY.getRegistration().getMandatoryFields()));
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITH_INVALID_AGE, null);
     assertFalse(result);
@@ -49,7 +51,7 @@ public class ValidAgeValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_U25)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY.getRegistration().getMandatoryFields()));
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITH_AGE, null);
     assertTrue(result);
@@ -60,7 +62,7 @@ public class ValidAgeValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_SUCHT)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_AGE_MANDATORY.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITHOUT_AGE_MANDATORY.getRegistration().getMandatoryFields()));
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITHOUT_MANDATORY_AGE, null);
     assertTrue(result);
@@ -71,7 +73,7 @@ public class ValidAgeValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_SUCHT)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY.getRegistration().getMandatoryFields()));
 
     boolean result = validAgeValidator.isValid(USER_DTO_WITHOUT_MANDATORY_AGE, null);
     assertFalse(result);

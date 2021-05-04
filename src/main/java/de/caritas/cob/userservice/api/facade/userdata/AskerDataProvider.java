@@ -68,11 +68,10 @@ public class AskerDataProvider {
     for (int type : consultingTypeManager.getAllConsultingTypeIds()) {
       consultingTypes.put(Integer.toString(type),
           getConsultingTypeData(type, sessionList, agencyDTOs));
-    }//TODO
+    } //TODO
 
     return consultingTypes;
   }
-
 
 
   private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,

@@ -41,6 +41,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -66,6 +67,7 @@ import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
+import de.caritas.cob.userservice.testHelper.ExtendedConsultingTypeResponseDTOHelper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -162,10 +164,11 @@ public class EmailNotificationFacadeTest {
       new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
           new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(false))));
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS =
-      new ExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
+      ExtendedConsultingTypeResponseDTOHelper
+          .createExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
           false, NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS, false, null, null);
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
-      new ExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
+      ExtendedConsultingTypeResponseDTOHelper.createExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
           false, NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
 
   @InjectMocks

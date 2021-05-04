@@ -229,7 +229,7 @@ public class CreateEnquiryMessageFacade {
       List<ConsultantAgency> agencyList, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
       throws CreateEnquiryException {
 
-    if (!extendedConsultingTypeResponseDTO.getGroupChat().getIsGroupChat()) {
+    if (!extendedConsultingTypeResponseDTO.getInitializeFeedbackChat()) {
       return null;
     }
 

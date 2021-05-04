@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.ApiClient;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.config.ConsultingTypeCachingConfig;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
@@ -34,8 +35,7 @@ public class ConsultingTypeService {
   }
 
 
-  private void addDefaultHeaders(
-      de.caritas.cob.userservice.consultingtypeservice.generated.ApiClient apiClient) {
+  private void addDefaultHeaders(ApiClient apiClient) {
     HttpHeaders headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }

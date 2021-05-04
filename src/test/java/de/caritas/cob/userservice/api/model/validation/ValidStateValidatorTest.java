@@ -11,6 +11,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITH_
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,7 +39,7 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_U25)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_INVALID_STATE, null);
     assertFalse(result);
@@ -48,7 +50,7 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_U25)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_STATE, null);
     assertTrue(result);
@@ -59,7 +61,7 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_SUCHT)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE.getRegistration().getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
     assertTrue(result);
@@ -70,7 +72,7 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_SUCHT)))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
     assertFalse(result);

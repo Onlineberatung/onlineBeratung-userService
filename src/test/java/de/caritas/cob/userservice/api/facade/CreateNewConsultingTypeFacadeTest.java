@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -45,11 +46,11 @@ public class CreateNewConsultingTypeFacadeTest {
     User user = easyRandom.nextObject(User.class);
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = easyRandom
         .nextObject(ExtendedConsultingTypeResponseDTO.class);
-    extendedConsultingTypeResponseDTO.setConsultingTypeId(0);
+    extendedConsultingTypeResponseDTO.setId(0);
 
     createNewConsultingTypeFacade
         .initializeNewConsultingType(userDTO, user, extendedConsultingTypeResponseDTO);
-    if (!extendedConsultingTypeResponseDTO.isGroupChat()) {
+    if (!extendedConsultingTypeResponseDTO.getGroupChat().getIsGroupChat()) {
       verify(createSessionFacade, times(1)).createUserSession(any(), any(), any());
     } else {
       verify(createUserChatRelationFacade, times(1))

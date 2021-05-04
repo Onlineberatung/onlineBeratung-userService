@@ -18,9 +18,12 @@ public class SessionDataInitializing {
   private boolean relation;
   private boolean state;
 
-  public static SessionDataInitializing convertSessionDataInitializingDTOtoSessionDataInitializing(SessionDataInitializingDTO sessionDataInitializingDTO){
+  public static SessionDataInitializing convertSessionDataInitializingDTOtoSessionDataInitializing(
+      SessionDataInitializingDTO sessionDataInitializingDTO) {
 
-    return new SessionDataInitializing(sessionDataInitializingDTO.getAddictiveDrugs(),sessionDataInitializingDTO.getAge(),sessionDataInitializingDTO.getGender(),sessionDataInitializingDTO.getRelation(),
+    return new SessionDataInitializing(sessionDataInitializingDTO.getAddictiveDrugs(),
+        sessionDataInitializingDTO.getAge(), sessionDataInitializingDTO.getGender(),
+        sessionDataInitializingDTO.getRelation(),
         sessionDataInitializingDTO.getState());
   }
 

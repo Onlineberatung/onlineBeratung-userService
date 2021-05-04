@@ -431,6 +431,11 @@
 							<modelPackage>
 								${project.groupId}.${project.artifactId}.consultingtypeservice.generated.web.model
 							</modelPackage>
+							<typeMappings>
+								<typeMapping>
+									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingtype.roles.Consultant
+								</typeMapping>
+							</typeMappings>
 						</configuration>
 					</execution>
 					<!-- Generate client API for agency admin service -->

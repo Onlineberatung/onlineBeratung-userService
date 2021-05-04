@@ -180,7 +180,7 @@ public class MessageServiceProviderTest {
     verify(messageControllerApi, times(1))
         .createMessage(anyString(), anyString(), eq(RC_GROUP_ID), captor.capture());
     assertThat(captor.getValue().getMessage(),
-        is(CONSULTING_TYPE_SETTINGS_U25.getWelcomeMessage()));
+        is(CONSULTING_TYPE_SETTINGS_U25.getWelcomeMessage().getWelcomeMessageText()));
   }
 
   @Test

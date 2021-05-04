@@ -76,8 +76,7 @@ public class MessageServiceProvider {
    * @param exceptionInformation   {@link CreateEnquiryExceptionInformation}
    * @throws RocketChatPostWelcomeMessageException exception when posting the welcome message fails
    */
-  public void postWelcomeMessageIfConfigured(String rcGroupId, User user,
-      de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
+  public void postWelcomeMessageIfConfigured(String rcGroupId, User user,ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostWelcomeMessageException {
 
@@ -114,7 +113,7 @@ public class MessageServiceProvider {
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
-  public void   postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {
@@ -123,7 +122,7 @@ public class MessageServiceProvider {
       this.postAliasOnlyMessage(rcGroupId, MessageType.FURTHER_STEPS, exceptionInformation);
     }
 
-    if (extendedConsultingTypeResponseDTO.getSendFurtherStepsMessage()) {
+    if (extendedConsultingTypeResponseDTO.getSendSaveSessionDataMessage()) {
       this.postAliasOnlyMessage(rcGroupId, MessageType.UPDATE_SESSION_DATA, exceptionInformation);
     }
   }

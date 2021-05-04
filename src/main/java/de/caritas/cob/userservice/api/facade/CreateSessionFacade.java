@@ -45,8 +45,7 @@ public class CreateSessionFacade {
    * @param user                   {@link User}
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  public Long createUserSession(UserDTO userDTO, User user,
-      de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+  public Long createUserSession(UserDTO userDTO, User user,ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
     checkIfAlreadyRegisteredToConsultingType(user, extendedConsultingTypeResponseDTO.getId());
     AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO.getId());

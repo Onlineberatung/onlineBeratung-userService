@@ -274,7 +274,7 @@ public class SessionServiceTest {
         .thenReturn(sessions);
 
     List<Session> result =
-        sessionService.getSessionsForUserByConsultingType(USER, 0);
+        sessionService.getSessionsForUserByConsultingTypeId(USER, 0);
 
     assertEquals(sessions, result);
     assertThat(result.get(0), instanceOf(Session.class));
