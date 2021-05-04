@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -218,13 +219,27 @@ public class ValidatedUserAccountProviderTest {
     assertThat(captor.getValue().getMobileToken(), is("mobileToken"));
   }
 
-  @Test(expected = BadRequestException.class)
-  public void updateUserMobileToken_Should_throwBadRequestException_When_mobileTokenIsNull() {
+  @Test
+  public void updateUserMobileToken_Should_updateUsersMobileToken_When_mobileTokenIsNull() {
+    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+
     this.accountProvider.updateUserMobileToken(null);
+
+    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+    verify(this.userService, times(1)).saveUser(captor.capture());
+    assertThat(captor.getValue().getMobileToken(), nullValue());
   }
 
-  @Test(expected = BadRequestException.class)
-  public void updateUserMobileToken_Should_throwBadRequestException_When_mobileTokenIsEmptyString() {
+  @Test
+  public void updateUserMobileToken_Should_updateUsersMobileToken_When_mobileTokenIsEmptyString() {
+    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
+
     this.accountProvider.updateUserMobileToken("");
+
+    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+    verify(this.userService, times(1)).saveUser(captor.capture());
+    assertThat(captor.getValue().getMobileToken(), is(""));
   }
 }

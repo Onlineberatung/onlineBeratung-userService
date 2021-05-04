@@ -8,9 +8,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ChatMemberResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
@@ -35,12 +34,11 @@ public class GetChatMembersFacade {
   private final @NonNull ChatService chatService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ChatPermissionVerifier chatPermissionVerifier;
-  private final @NonNull UserHelper userHelper;
 
   /**
    * Get a filtered list of the members of a chat (without technical/system user).
    *
-   * @param chatId            chat ID
+   * @param chatId chat ID
    * @return {@link ChatMembersResponseDTO}
    */
   public ChatMembersResponseDTO getChatMembers(Long chatId) {
@@ -82,7 +80,7 @@ public class GetChatMembersFacade {
         .map(member -> new ChatMemberResponseDTO()
             .id(member.get_id())
             .status(member.getStatus())
-            .username(userHelper.decodeUsername(member.getUsername()))
+            .username(new UsernameTranscoder().decodeUsername(member.getUsername()))
             .name(member.getName())
             .utcOffset(member.getUtcOffset()))
         .collect(Collectors.toList()));

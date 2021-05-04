@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrela
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -184,12 +185,13 @@ public class ConsultantImportService {
               consultantService.getConsultant(importRecord.getConsultantId());
 
           if (currentConsultant.isPresent()) {
+            UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
             if (!importRecord.getUsername()
-                .equals(userHelper.decodeUsername(currentConsultant.get().getUsername()))) {
+                .equals(usernameTranscoder.decodeUsername(currentConsultant.get().getUsername()))) {
               writeToImportLog(String.format(
                   "Username of consultant with id %s has changed (From %s to %s). Name changing currently not implemented. Skipped entry.",
                   importRecord.getConsultantId(),
-                  userHelper.decodeUsername(currentConsultant.get().getUsername()),
+                  usernameTranscoder.decodeUsername(currentConsultant.get().getUsername()),
                   importRecord.getUsername()));
               continue;
             }
@@ -266,7 +268,7 @@ public class ConsultantImportService {
     importRecord.setIdOld(
         (record.get(1).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(1)));
     importRecord.setUsername(StringUtils.trim(record.get(2)));
-    importRecord.setUsernameEncoded(userHelper.encodeUsername(StringUtils.trim(record.get(2))));
+    importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(2))));
     importRecord.setFirstName(StringUtils.trim(record.get(3)));
     importRecord.setLastName(StringUtils.trim(record.get(4)));
     String email = StringUtils.deleteWhitespace(record.get(5));

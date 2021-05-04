@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
@@ -25,9 +25,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,9 +64,9 @@ import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.Arrays;
 import java.util.Collections;
@@ -120,13 +118,15 @@ public class EmailNotificationFacadeTest {
           nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(1L, USER, null, ConsultingType.SUCHT, REGISTERED, "88045", AGENCY_ID,
-          SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+          SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING,
+          null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
       ConsultingType.SUCHT, REGISTERED, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(),
       RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
       CONSULTANT_NO_EMAIL, ConsultingType.SUCHT, REGISTERED, "88045", AGENCY_ID,
-      SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
+      IS_MONITORING, null, null);
   private final Session TEAM_SESSION =
       new Session(1L, USER, CONSULTANT, ConsultingType.SUCHT, REGISTERED, "12345", AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
@@ -435,9 +435,6 @@ public class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
         .thenReturn(SESSION_IN_PROGRESS);
-    when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
-    when(userHelper.decodeUsername(USERNAME_CONSULTANT_ENCODED))
-        .thenReturn(USERNAME_CONSULTANT_DECODED);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
@@ -486,7 +483,6 @@ public class EmailNotificationFacadeTest {
         .thenReturn(Optional.of(CONSULTANT2));
     when(consultantService.getConsultantByRcUserId(GROUP_MEMBER_2_RC_ID))
         .thenReturn(Optional.of(CONSULTANT3));
-    when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID, CONSULTANT_ID);
 
@@ -499,7 +495,6 @@ public class EmailNotificationFacadeTest {
 
     when(consultantService.getConsultant(CONSULTANT_ID_2)).thenReturn(Optional.of(CONSULTANT2));
     when(sessionService.getSessionByFeedbackGroupId(RC_FEEDBACK_GROUP_ID)).thenReturn(SESSION);
-    when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID_2);
@@ -547,7 +542,6 @@ public class EmailNotificationFacadeTest {
   public void sendAssignEnquiryEmailNotification_Should_SendEmail_WhenAllParametersAreValid() {
 
     when(consultantService.getConsultant(CONSULTANT_ID_2)).thenReturn(Optional.of(CONSULTANT2));
-    when(userHelper.decodeUsername(Mockito.any())).thenReturn(USERNAME);
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME);

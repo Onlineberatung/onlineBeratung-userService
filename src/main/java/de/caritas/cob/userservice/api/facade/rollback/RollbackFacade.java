@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.facade.rollback;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;

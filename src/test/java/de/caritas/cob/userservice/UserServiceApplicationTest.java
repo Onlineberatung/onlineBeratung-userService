@@ -16,4 +16,5 @@ public class UserServiceApplicationTest {
   public void getAuthenticatedUser_Should_ReturnNullWhenNoUserSessionActive() {
     assertNull(userServiceApplication.getAuthenticatedUser());
   }
+
 }

@@ -15,7 +15,6 @@ import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
@@ -23,6 +22,7 @@ import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupp
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.List;
@@ -113,7 +113,6 @@ public class EmailNotificationFacade {
           .consultingTypeManager(consultingTypeManager)
           .applicationBaseUrl(applicationBaseUrl)
           .emailDummySuffix(emailDummySuffix)
-          .userHelper(userHelper)
           .build();
       sendMailTasksToMailService(newMessageMails);
 
@@ -141,8 +140,8 @@ public class EmailNotificationFacade {
     try {
       Session session = sessionService.getSessionByFeedbackGroupId(rcFeedbackGroupId);
       EmailSupplier newFeedbackMessages = new NewFeedbackEmailSupplier(session,
-          rcFeedbackGroupId, userId, applicationBaseUrl, userHelper, consultantService,
-          rocketChatService, rocketChatSystemUserId);
+          rcFeedbackGroupId, userId, applicationBaseUrl, consultantService, rocketChatService,
+          rocketChatSystemUserId);
       sendMailTasksToMailService(newFeedbackMessages);
     } catch (Exception e) {
       LogService.logEmailNotificationFacadeError(String.format(
@@ -163,7 +162,7 @@ public class EmailNotificationFacade {
       String askerUserName) {
 
     EmailSupplier assignEnquiryMails = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService, userHelper);
+        senderUserId, askerUserName, applicationBaseUrl, consultantService);
     try {
       sendMailTasksToMailService(assignEnquiryMails);
     } catch (Exception exception) {

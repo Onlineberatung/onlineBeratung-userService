@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
@@ -17,9 +17,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_INVALID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_IN_PROGRESS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_NEW;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ROLES;
@@ -27,12 +24,14 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_RC_I
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +39,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -57,6 +55,9 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -73,7 +74,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
-import org.springframework.dao.DataAccessException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionServiceTest {
@@ -130,14 +130,14 @@ public class SessionServiceTest {
     // Sorting for COBH-199 is done directly via the Spring CRUD repository using method notation.
     // The test becomes invalid if the method name has been changed.
     // Then you have to check if the sorting still exists.
-    Consultant consultant = Mockito.mock(Consultant.class);
+    Consultant consultant = mock(Consultant.class);
     Set<ConsultantAgency> agencySet = new HashSet<>();
     agencySet.add(CONSULTANT_AGENCY_1);
     List<Long> agencyIds = Collections.singletonList(CONSULTANT_AGENCY_1.getAgencyId());
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
-    sessionService.getSessionsForConsultant(consultant, SESSION_STATUS_NEW);
+    sessionService.getEnquiriesForConsultant(consultant);
 
     verify(sessionRepository, times(1))
         .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(agencyIds,
@@ -241,10 +241,6 @@ public class SessionServiceTest {
         everyItem(instanceOf(UserSessionResponseDTO.class)));
   }
 
-  /**
-   * method: getSessionsForUser
-   */
-
   @Test
   public void getSessionsForUser_Should_ReturnListOfSessionsForUser() {
 
@@ -259,10 +255,6 @@ public class SessionServiceTest {
     assertEquals(sessions, result);
 
   }
-
-  /**
-   * method: getSessionsForUserByConsultingType
-   */
 
   @Test
   public void getSessionsForUserByConsultingType_Should_ReturnListOfSessionsForUser() {
@@ -281,45 +273,16 @@ public class SessionServiceTest {
     assertThat(result.get(0), instanceOf(Session.class));
   }
 
-  /**
-   * method: getSessionsForConsultant
-   */
-
-  @Test
-  public void getSessionsForConsultant_Should_ReturnInternalServerErrorExceptionOnDatabaseError() {
-
-    DataAccessException ex = new DataAccessException("reason") {
-    };
-    Consultant consultant = Mockito.mock(Consultant.class);
-
-    when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(sessionRepository.findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-        any(), any())).thenThrow(ex);
-
-    try {
-      sessionService.getSessionsForConsultant(consultant, SESSION_STATUS_NEW);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void getSessionsForConsultant_Should_ThrowBadRequestException_WhenStatusParameterIsInvalid() {
-
-    sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_INVALID);
-  }
-
   @Test
   public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusNew() {
 
-    Consultant consultant = Mockito.mock(Consultant.class);
+    Consultant consultant = mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository.findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
         any(), any())).thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
-    assertThat(sessionService.getSessionsForConsultant(consultant, SESSION_STATUS_NEW),
+    assertThat(sessionService.getEnquiriesForConsultant(consultant),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
   }
 
@@ -329,13 +292,9 @@ public class SessionServiceTest {
     when(sessionRepository.findByConsultantAndStatus(any(), any()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
-    assertThat(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_IN_PROGRESS),
+    assertThat(sessionService.getActiveSessionsForConsultant(CONSULTANT),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
   }
-
-  /**
-   * Method: getSessionByGroupIdAndUser
-   */
 
   @Test
   public void getSessionByGroupIdAndUser_Should_ReturnSession_WhenAskerIsSessionOwner() {
@@ -422,7 +381,7 @@ public class SessionServiceTest {
   @Test
   public void getTeamSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultant() {
 
-    Consultant consultant = Mockito.mock(Consultant.class);
+    Consultant consultant = mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository
@@ -437,7 +396,7 @@ public class SessionServiceTest {
   @Test
   public void getTeamSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTOWithConsultant_WhenProvidedWithValidConsultant() {
 
-    Consultant consultant = Mockito.mock(Consultant.class);
+    Consultant consultant = mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository
@@ -461,7 +420,7 @@ public class SessionServiceTest {
     when(sessionService.saveSession(any())).thenThrow(ex);
 
     try {
-      sessionService.updateFeedbackGroupId(Optional.of(SESSION), RC_GROUP_ID);
+      sessionService.updateFeedbackGroupId(SESSION, RC_GROUP_ID);
       fail("Expected exception: UpdateFeedbackGroupIdException");
     } catch (UpdateFeedbackGroupIdException updateFeedbackGroupIdException) {
       assertTrue("Excepted UpdateFeedbackGroupIdException thrown", true);
@@ -472,7 +431,7 @@ public class SessionServiceTest {
   @Test
   public void updateFeedbackGroupId_Should_SaveSession() throws UpdateFeedbackGroupIdException {
 
-    sessionService.updateFeedbackGroupId(Optional.of(SESSION), RC_GROUP_ID);
+    sessionService.updateFeedbackGroupId(SESSION, RC_GROUP_ID);
     verify(sessionRepository, times(1)).save(SESSION);
   }
 
@@ -562,6 +521,16 @@ public class SessionServiceTest {
 
     assertNotNull(
         sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
+  }
+
+  @Test
+  public void getEnquiriesForConsultant_Should_returnEmptyList_When_consultantHasNoAgencyAssigned() {
+    Consultant consultant = mock(Consultant.class);
+
+    List<ConsultantSessionResponseDTO> enquiriesForConsultant = this.sessionService
+        .getEnquiriesForConsultant(consultant);
+
+    assertThat(enquiriesForConsultant, hasSize(0));
   }
 
 }

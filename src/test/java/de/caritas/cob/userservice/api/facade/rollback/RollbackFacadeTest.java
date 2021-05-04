@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;

@@ -19,7 +19,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

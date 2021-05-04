@@ -9,7 +9,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -34,7 +34,6 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
   private final String rcFeedbackGroupId;
   private final String userId;
   private final String applicationBaseUrl;
-  private final UserHelper userHelper;
   private final ConsultantService consultantService;
   private final RocketChatService rocketChatService;
   private final String rocketChatSystemUserId;
@@ -148,7 +147,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
       Consultant consultant) {
     String nameSender = sendingConsultant.getFullName();
     String nameRecipient = consultant.getFullName();
-    String nameUser = userHelper.decodeUsername(session.getUser().getUsername());
+    String nameUser = new UsernameTranscoder().decodeUsername(session.getUser().getUsername());
     String email = consultant.getEmail();
 
     return buildMailDtoForFeedbackMessageNotification(email, nameSender, nameRecipient, nameUser);

@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHt
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -108,9 +109,12 @@ public class KeycloakAdminClientService {
    * @return true if does not exist, else false
    */
   public boolean isUsernameAvailable(String username) {
-    List<UserRepresentation> keycloakUserList = findByUsername(userHelper.decodeUsername(username));
+    UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
+    List<UserRepresentation> keycloakUserList = findByUsername(
+        usernameTranscoder.decodeUsername(username));
     for (UserRepresentation userRep : keycloakUserList) {
-      if (userRep.getUsername().equalsIgnoreCase(userHelper.decodeUsername(username))) {
+      if (userRep.getUsername()
+          .equalsIgnoreCase(usernameTranscoder.decodeUsername(username))) {
         return false;
       }
     }

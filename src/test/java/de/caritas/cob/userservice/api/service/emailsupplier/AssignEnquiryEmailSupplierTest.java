@@ -11,12 +11,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
-import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -38,9 +37,6 @@ public class AssignEnquiryEmailSupplierTest {
   private ConsultantService consultantService;
 
   @Mock
-  private UserHelper userHelper;
-
-  @Mock
   private Logger logger;
 
   @Before
@@ -49,7 +45,7 @@ public class AssignEnquiryEmailSupplierTest {
     String askerUserName = "asker user name";
     String senderUserId = "sender user id";
     this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService, userHelper);
+        senderUserId, askerUserName, applicationBaseUrl, consultantService);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -80,7 +76,6 @@ public class AssignEnquiryEmailSupplierTest {
     validConsultant.setFirstName("Max");
     validConsultant.setLastName("Mustermann");
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(validConsultant));
-    when(userHelper.decodeUsername(any())).thenReturn("The asker");
 
     List<MailDTO> generatedMails = assignEnquiryEmailSupplier.generateEmails();
 
@@ -95,7 +90,7 @@ public class AssignEnquiryEmailSupplierTest {
     assertThat(templateData.get(1).getKey(), is("name_recipient"));
     assertThat(templateData.get(1).getValue(), is("Moritz Mustermann"));
     assertThat(templateData.get(2).getKey(), is("name_user"));
-    assertThat(templateData.get(2).getValue(), is("The asker"));
+    assertThat(templateData.get(2).getValue(), is("asker user name"));
     assertThat(templateData.get(3).getKey(), is("url"));
     assertThat(templateData.get(3).getValue(), is("application base url"));
   }

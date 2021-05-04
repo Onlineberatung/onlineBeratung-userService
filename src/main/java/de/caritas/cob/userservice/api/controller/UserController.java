@@ -62,7 +62,7 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
@@ -88,10 +88,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "user-controller")
 public class  UserController implements UsersApi {
 
-  private static final int MIN_OFFSET = 0;
-  private static final int MIN_COUNT = 1;
-  private static final String OFFSET_INVALID_MESSAGE = "offset must be a positive number";
-  private static final String COUNT_INVALID_MESSAGE = "count must be a positive number";
+  static final int MIN_OFFSET = 0;
+  static final int MIN_COUNT = 1;
+  static final String OFFSET_INVALID_MESSAGE = "offset must be a positive number";
+  static final String COUNT_INVALID_MESSAGE = "count must be a positive number";
 
   private final @NotNull ValidatedUserAccountProvider userAccountProvider;
   private final @NotNull SessionService sessionService;

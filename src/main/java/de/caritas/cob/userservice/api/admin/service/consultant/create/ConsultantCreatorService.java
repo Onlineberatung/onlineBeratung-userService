@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.validation.Create
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
@@ -47,7 +48,7 @@ public class ConsultantCreatorService {
     this.userAccountInputValidator.validateAbsence(
         new CreateConsultantDTOAbsenceInputAdapter(createConsultantDTO));
     ConsultantCreationInput consultantCreationInput =
-        new CreateConsultantDTOCreationInputAdapter(createConsultantDTO, this.userHelper);
+        new CreateConsultantDTOCreationInputAdapter(createConsultantDTO);
     return createNewConsultant(consultantCreationInput, asSet(CONSULTANT.getValue()));
   }
 
@@ -128,7 +129,7 @@ public class ConsultantCreatorService {
 
   private UserDTO buildUserDTO(String username, String email) {
     UserDTO userDto = new UserDTO();
-    userDto.setUsername(userHelper.encodeUsername(username));
+    userDto.setUsername(new UsernameTranscoder().encodeUsername(username));
     userDto.setEmail(email);
     return userDto;
   }

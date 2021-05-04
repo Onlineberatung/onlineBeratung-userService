@@ -34,7 +34,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;

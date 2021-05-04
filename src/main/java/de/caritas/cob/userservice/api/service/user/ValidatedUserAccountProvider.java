@@ -1,9 +1,7 @@
 package de.caritas.cob.userservice.api.service.user;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -142,8 +140,8 @@ public class ValidatedUserAccountProvider {
   }
 
   /**
-   * Deactivates the Keycloak account of the currently authenticated user and flags this account
-   * for deletion if the provided password is valid.
+   * Deactivates the Keycloak account of the currently authenticated user and flags this account for
+   * deletion if the provided password is valid.
    *
    * @param deleteUserAccountDTO {@link DeleteUserAccountDTO}
    */
@@ -162,9 +160,6 @@ public class ValidatedUserAccountProvider {
    * @param mobileToken the new mobile device identifier token
    */
   public void updateUserMobileToken(String mobileToken) {
-    if (isBlank(mobileToken)) {
-      throw new BadRequestException("Mobile token must not be empty");
-    }
     this.userService.getUser(this.authenticatedUser.getUserId())
         .ifPresent(user -> updateMobileToken(user, mobileToken));
   }
