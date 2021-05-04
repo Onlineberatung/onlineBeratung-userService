@@ -253,7 +253,6 @@ public class AskerImportService {
     Iterable<CSVRecord> records = null;
     String systemUserId;
     String systemUserToken;
-    Map<Integer, String> welcomeMessageMap = null;
 
     // Read in asker import file, log in Rocket.Chat system message user to get the token and read
     // in welcome messages
@@ -270,8 +269,6 @@ public class AskerImportService {
           || systemUserId == null || systemUserToken == null) {
         throw new ImportException("Could not log in Rocket.Chat system message user.");
       }
-
-      welcomeMessageMap = getWelcomeMessageMap(protocolFile);
 
     } catch (ImportException importExcetion) {
       writeToImportLog(importExcetion.getMessage(), protocolFile);
@@ -620,42 +617,6 @@ public class AskerImportService {
             : record.get(4));
 
     return importRecord;
-  }
-
-  /**
-   * Reads in all welcome message files (according to consulting type id) and returns the result as
-   * a map.
-   */
-  private Map<Integer, String> getWelcomeMessageMap(String protocolFile) {
-  //TODO
-    Map<Integer, String> welcomeMessageMap = new HashMap();
-
-    for (int type : consultingTypeManager.getAllConsultingTypeIds()) {
-      String welcomeMessage = "";
-      String fileName = welcomeMsgFilename.replace(welcomeMsgFilenameReplaceValue,
-          Integer.toString(type));
-
-      if (fileName != null && !fileName.equals(StringUtils.EMPTY)) {
-        List<String> lines;
-        try {
-          lines = FileUtils.readLines(new File(fileName), Charset.forName(IMPORT_CHARSET));
-          for (String line : lines) {
-            welcomeMessage += line + NEWLINE_CHAR;
-          }
-
-        } catch (IOException e) {
-          writeToImportLog(String.format(
-              "Error while reading message file or no welcome message file defined for consulting type %s",
-              type), protocolFile);
-        }
-      }
-
-      welcomeMessageMap.put(type,
-          welcomeMessage != null && !welcomeMessage.equals(StringUtils.EMPTY) ? welcomeMessage
-              : null);
-    }
-
-    return welcomeMessageMap;
   }
 
   private UserAgency getUserAgency(User user, Long agencyId) {
