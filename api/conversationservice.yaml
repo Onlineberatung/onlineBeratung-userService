@@ -94,7 +94,7 @@ paths:
         200:
           description: OK - successfull operation
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/CreateAnonymousEnquiryResponseDTO'
       security:
@@ -109,7 +109,7 @@ components:
         - consultingType
       properties:
         consultingType:
-          type: string
+          type: integer
           example: 3
           description: Consulting type ID
 

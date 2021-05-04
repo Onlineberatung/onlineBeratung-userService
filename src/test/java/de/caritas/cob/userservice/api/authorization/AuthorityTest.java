@@ -97,4 +97,12 @@ public class AuthorityTest {
     assertEquals(1, result.size());
   }
 
+  @Test
+  public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_When_KeycloakRoleIsAnonymous() {
+    List<String> result = Authorities.getAuthoritiesByUserRole(UserRole.ANONYMOUS);
+
+    assertNotNull(result);
+    assertTrue(result.contains(Authority.ANONYMOUS_DEFAULT));
+    assertEquals(1, result.size());
+  }
 }

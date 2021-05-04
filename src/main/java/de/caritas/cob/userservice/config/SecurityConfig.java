@@ -67,7 +67,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                 csrfWhitelistHeaderProperty), CsrfFilter.class)
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-        .antMatchers(WHITE_LIST).permitAll().antMatchers("/users/askers/new")
+        .antMatchers(WHITE_LIST).permitAll()
+        .antMatchers("/users/askers/new", "/conversations/askers/anonymous/new")
         .permitAll()
         .antMatchers("/users/data", "/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
