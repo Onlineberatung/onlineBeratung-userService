@@ -41,8 +41,8 @@ jobs:
           personal_token: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
           src_path: ../target/generated-sources/markdown/userservice
           dst_path: docs/backend/admin/userservice
-          dst_owner: CaritasDeutschland
-          dst_repo_name: documentation
+          dst_owner: ${{ github.repository_owner }}
+          dst_repo_name: ${{ secrets.DOCUMENTATION_REPO }}
           dst_branch: adminapi
           clean: true
           commit_message: 'docs: updated user service admin api description'
