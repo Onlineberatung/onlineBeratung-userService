@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.agency;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

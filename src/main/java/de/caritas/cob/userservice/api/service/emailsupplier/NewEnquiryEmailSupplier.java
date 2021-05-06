@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;

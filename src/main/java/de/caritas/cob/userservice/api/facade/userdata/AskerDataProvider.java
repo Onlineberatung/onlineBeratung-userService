@@ -8,7 +8,7 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;

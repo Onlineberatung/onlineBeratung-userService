@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

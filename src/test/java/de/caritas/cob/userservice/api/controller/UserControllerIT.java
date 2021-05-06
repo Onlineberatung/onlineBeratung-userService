@@ -145,6 +145,7 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
@@ -362,6 +363,8 @@ public class UserControllerIT {
   private ConsultantAgencyService consultantAgencyService;
   @MockBean
   private AssignSessionFacade assignSessionFacade;
+  @MockBean
+  private AssignEnquiryFacade assignEnquiryFacade;
   @MockBean
   private KeycloakService keycloakService;
   @MockBean
@@ -774,7 +777,7 @@ public class UserControllerIT {
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
-    doThrow(new ConflictException("")).when(assignSessionFacade)
+    doThrow(new ConflictException("")).when(assignEnquiryFacade)
         .assignEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
 
     mvc.perform(

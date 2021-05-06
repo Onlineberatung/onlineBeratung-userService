@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -102,4 +103,15 @@ public class SessionToConsultantConditionProvider {
         .noneMatch(agencyId -> agencyId.equals(this.session.getAgencyId()));
   }
 
+  /**
+   * Checks if the consulting type of the {@link Session} is available for the {@link Consultant}.
+   *
+   * @return true if consuling type is available for {@link Consultant}
+   */
+  public boolean isSessionsConsultingTypeNotAvailableForConsultant() {
+    return consultant.getConsultantAgencies().stream()
+        .map(ConsultantAgency::getAgency)
+        .map(AgencyDTO::getConsultingType)
+        .noneMatch(consultingType -> this.session.getConsultingType().equals(consultingType));
+  }
 }

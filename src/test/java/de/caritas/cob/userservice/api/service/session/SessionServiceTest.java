@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
-import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -55,9 +54,9 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -158,24 +157,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void updateConsultantAndStatusForSession_Should_ThrowUpdateSessionException_WhenSaveSessionFails() {
-
-    InternalServerErrorException ex = new InternalServerErrorException("service error") {
-    };
-    when(sessionService.saveSession(any())).thenThrow(ex);
-
-    try {
-      sessionService.updateConsultantAndStatusForSession(SESSION, CONSULTANT, SessionStatus.NEW);
-      fail("Expected exception: UpdateSessionException");
-    } catch (UpdateSessionException updateSessionException) {
-      assertTrue("Excepted UpdateSessionException thrown", true);
-    }
-
-  }
-
-  @Test
-  public void updateConsultantAndStatusForSession_Should_SaveSession()
-      throws UpdateSessionException {
+  public void updateConsultantAndStatusForSession_Should_SaveSession() {
 
     sessionService.updateConsultantAndStatusForSession(SESSION, CONSULTANT, SessionStatus.NEW);
     verify(sessionRepository, times(1)).save(SESSION);

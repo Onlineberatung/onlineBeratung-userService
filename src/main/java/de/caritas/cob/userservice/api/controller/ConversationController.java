@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.generated.api.conversation.controller.Conversa
 import io.swagger.annotations.Api;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,5 +62,16 @@ public class ConversationController implements ConversationsApi {
         this.conversationListResolver.resolveConversations(offset, count, REGISTERED_ENQUIRY);
 
     return ResponseEntity.ok(registeredEnquirySessions);
+  }
+
+  /**
+   * Entry point to accept an existing anonymous enquiry for current authenticated consultant.
+   *
+   * @param sessionId the identifier of the existing anonymous session (required)
+   * @return the {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> acceptAnonymousEnquiry(Long sessionId) {
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }
