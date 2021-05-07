@@ -23,8 +23,6 @@ abstract class RocketChatGroupOperation {
   protected Consumer<String> logMethod = LogService::logInfo;
 
   void addConsultantToGroupOfSession(Session session, Consultant consultant) {
-    rocketChatFacade.addTechnicalUserToGroup(session.getGroupId());
-
     var operationConditionProvider =
         new RocketChatOperationConditionProvider(this.keycloakAdminClientService, session,
             consultant);
@@ -41,8 +39,6 @@ abstract class RocketChatGroupOperation {
       logMethod.accept(String.format("Consultant added to rc feedback group %s (%s).",
           session.getFeedbackGroupId(), resolveTypeOfSession(session)));
     }
-
-    rocketChatFacade.removeTechnicalUserFromGroup(session.getGroupId());
   }
 
   String resolveTypeOfSession(Session session) {
@@ -53,8 +49,6 @@ abstract class RocketChatGroupOperation {
   }
 
   void removeConsultantFromSession(Session session, Consultant consultant) {
-    this.rocketChatFacade.addTechnicalUserToGroup(session.getGroupId());
-
     if (isUserInRocketChatGroup(session.getGroupId(), consultant)
         && !keycloakAdminClientService
         .userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS)) {
@@ -68,8 +62,6 @@ abstract class RocketChatGroupOperation {
       this.rocketChatFacade
           .removeUserFromGroup(consultant.getRocketChatId(), session.getFeedbackGroupId());
     }
-
-    this.rocketChatFacade.removeTechnicalUserFromGroup(session.getGroupId());
   }
 
   private boolean isUserInRocketChatGroup(String rcGroupId, Consultant consultant) {

@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -83,14 +84,17 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
     when(this.consultant.getRocketChatId()).thenReturn("rcId");
     GroupMemberDTO groupMemberDTO = new GroupMemberDTO();
     groupMemberDTO.set_id(this.consultant.getRocketChatId());
+    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString()))
+        .thenReturn(singletonList(groupMemberDTO));
     doThrow(new RuntimeException("")).when(this.rocketChatFacade)
-        .addTechnicalUserToGroup(any());
+        .removeUserFromGroup(anyString(), anyString());
+    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+        .addUserToRocketChatGroup(anyString(), anyString());
 
     try {
       this.removeService.removeFromGroupsOrRollbackOnFailure();
       fail("No Exception thrown");
     } catch (InternalServerErrorException e) {
-      verify(this.rocketChatFacade, times(0)).addUserToRocketChatGroup(any(), any());
       assertThat(e.getMessage(), containsString("ERROR: Failed to rollback"));
     }
   }

@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,13 +54,11 @@ public class RocketChatAddToGroupOperationServiceTest {
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();
 
-    verify(this.rocketChatFacade, times(1)).addTechnicalUserToGroup(session.getGroupId());
     verify(this.rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()), eq(session.getGroupId()));
     verify(this.rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(session.getFeedbackGroupId()));
-    verify(this.rocketChatFacade, times(1)).removeTechnicalUserFromGroup(eq(session.getGroupId()));
     verify(logMethod, times(2)).accept(anyString());
   }
 
@@ -98,7 +97,7 @@ public class RocketChatAddToGroupOperationServiceTest {
     session.setStatus(SessionStatus.NEW);
     Consultant consultant = easyRandom.nextObject(Consultant.class);
     doThrow(new RuntimeException("")).when(this.rocketChatFacade)
-        .removeTechnicalUserFromGroup(anyString());
+        .addUserToRocketChatGroup(anyString(), anyString());
 
     RocketChatAddToGroupOperationService
         .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
@@ -106,7 +105,7 @@ public class RocketChatAddToGroupOperationServiceTest {
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();
 
-    verify(logMethod, times(1)).accept(anyString());
+    verify(logMethod, atLeastOnce()).accept(anyString());
   }
 
   @Test

@@ -107,15 +107,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     verify(rocketChatFacade, times(1))
-        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));
     verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
-    verify(rocketChatFacade, times(1))
-        .removeTechnicalUserFromGroup(enquirySessionWithoutConsultant.getGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -147,15 +143,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     verify(rocketChatFacade, times(1))
-        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));
     verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
-    verify(rocketChatFacade, times(1))
-        .removeTechnicalUserFromGroup(enquirySessionWithoutConsultant.getGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
