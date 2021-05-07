@@ -102,7 +102,7 @@ public class KeycloakService {
    */
   public boolean logoutUser(final String refreshToken) {
 
-    HttpHeaders httpHeaders = getFormHttpHeaders();
+    var httpHeaders = getAuthorizedFormHttpHeaders();
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add(BODY_KEY_CLIENT_ID, keycloakClientId);
     map.add(BODY_KEY_GRANT_TYPE, KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN);
@@ -129,12 +129,17 @@ public class KeycloakService {
     return true;
   }
 
-  private HttpHeaders getFormHttpHeaders() {
-
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+  private HttpHeaders getAuthorizedFormHttpHeaders() {
+    var httpHeaders = getFormHttpHeaders();
     httpHeaders.add(HEADER_AUTHORIZATION_KEY,
         HEADER_BEARER_KEY + authenticatedUser.getAccessToken());
+
+    return httpHeaders;
+  }
+
+  private HttpHeaders getFormHttpHeaders() {
+    var httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
     return httpHeaders;
   }

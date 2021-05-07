@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -86,8 +88,8 @@ public class KeycloakAdminClientService {
       handleCreateKeycloakUserError(response);
     }
     throw new InternalServerErrorException(
-        String.format("Could not create Keycloak account for: %s %nKeycloak error: %s",
-            user.toString(), keycloakError));
+        String.format("Could not create Keycloak account for: %s %nKeycloak error: %s", user,
+            keycloakError));
   }
 
   private void handleCreateKeycloakUserError(Response response) {
@@ -101,21 +103,23 @@ public class KeycloakAdminClientService {
   }
 
   /**
-   * Returns true if the decoded username does not exist in Keycloak yet or false if it already
+   * Returns true if the given username does not exist in Keycloak yet or false if it already
    * exists.
    *
    * @param username (decoded or encoded)
    * @return true if does not exist, else false
    */
   public boolean isUsernameAvailable(String username) {
-    List<UserRepresentation> keycloakUserList = findByUsername(userHelper.decodeUsername(username));
-    for (UserRepresentation userRep : keycloakUserList) {
-      if (userRep.getUsername().equalsIgnoreCase(userHelper.decodeUsername(username))) {
-        return false;
-      }
-    }
+    List<UserRepresentation> keycloakDecodedUserList =
+        findByUsername(userHelper.decodeUsername(username));
+    List<UserRepresentation> keycloakEncodedUserList =
+        findByUsername(userHelper.encodeUsername(username));
 
-    return true;
+    return Stream.concat(keycloakDecodedUserList.stream(), keycloakEncodedUserList.stream())
+        .filter(user -> user.getUsername().equalsIgnoreCase(userHelper.decodeUsername(username))
+            || user.getUsername().equalsIgnoreCase(userHelper.encodeUsername(username)))
+        .collect(Collectors.toList())
+        .isEmpty();
   }
 
   @Synchronized
@@ -168,6 +172,16 @@ public class KeycloakAdminClientService {
    */
   public void updateUserRole(final String userId) {
     updateRole(userId, keycloakUserRole);
+  }
+
+  /**
+   * Assigns the given {@link UserRole} to the given user ID.
+   *
+   * @param userId  Keycloak user ID
+   * @param role    {@link UserRole}
+   */
+  public void updateRole(final String userId, final UserRole role) {
+    this.updateRole(userId, role.getValue());
   }
 
   /**

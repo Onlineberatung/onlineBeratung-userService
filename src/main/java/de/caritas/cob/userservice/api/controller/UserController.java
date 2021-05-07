@@ -128,7 +128,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
     user.setNewUserAccount(true);
-    createUserFacade.createUserAndInitializeAccount(user);
+    createUserFacade.createUserAccountWithInitializedConsultingType(user);
 
     return new ResponseEntity<>(HttpStatus.CREATED);
   }

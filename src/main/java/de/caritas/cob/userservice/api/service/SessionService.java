@@ -27,6 +27,7 @@ import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -142,6 +143,32 @@ public class SessionService {
   }
 
   /**
+   * TODO refactoren.
+   *
+   * @param user                   the user
+   * @param userDto                the dto of the user
+   * @param consultingTypeSettings flag to initialize monitoring
+   * @return the initialized session
+   */
+  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
+      ConsultingTypeSettings consultingTypeSettings, RegistrationType registrationType) {
+    Session session = Session.builder()
+        .user(user)
+        .consultingType(consultingTypeSettings.getConsultingType())
+        .registrationType(registrationType)
+        .postcode(userDto.getPostcode())
+        .agencyId(userDto.getAgencyId())
+        .status(SessionStatus.INITIAL)
+        .teamSession(isTeamSession)
+        .monitoring(consultingTypeSettings.isMonitoring())
+        .createDate(nowInUtc())
+        .updateDate(nowInUtc())
+        .build();
+
+    return saveSession(session);
+  }
+
+  /**
    * Initialize a {@link Session}.
    *
    * @param user                   the user
@@ -151,12 +178,8 @@ public class SessionService {
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
       ConsultingTypeSettings consultingTypeSettings) {
-    Session session = new Session(user, consultingTypeSettings.getConsultingType(),
-        userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-        isTeamSession, consultingTypeSettings.isMonitoring());
-    session.setCreateDate(nowInUtc());
-    session.setUpdateDate(nowInUtc());
-    return saveSession(session);
+    return initializeSession(user, userDto, isTeamSession, consultingTypeSettings,
+        RegistrationType.REGISTERED);
   }
 
   /**

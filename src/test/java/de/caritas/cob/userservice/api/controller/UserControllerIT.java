@@ -162,7 +162,6 @@ import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
@@ -535,7 +534,7 @@ public class UserControllerIT {
         .thenReturn(
             CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
     doThrow(new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT))
-        .when(createUserFacade).createUserAndInitializeAccount(Mockito.any());
+        .when(createUserFacade).createUserAccountWithInitializedConsultingType(Mockito.any());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_U25_USER_REQUEST_BODY)
@@ -1779,7 +1778,7 @@ public class UserControllerIT {
 
     ArgumentCaptor<UserDTO> argument = ArgumentCaptor.forClass(UserDTO.class);
     verify(createUserFacade, times(1))
-        .createUserAndInitializeAccount(argument.capture());
+        .createUserAccountWithInitializedConsultingType(argument.capture());
     assertEquals(DECODED_PASSWORD, argument.getValue().getPassword());
 
   }

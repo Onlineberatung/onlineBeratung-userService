@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.controller;
 import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryResponseDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.generated.api.conversation.controller.ConversationsApi;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;

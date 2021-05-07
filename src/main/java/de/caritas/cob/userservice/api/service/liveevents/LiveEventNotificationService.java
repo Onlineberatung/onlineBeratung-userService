@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.NEWANONYMOUSENQUIRY;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -10,6 +11,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.PushMessageService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
+import de.caritas.cob.userservice.liveservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,9 +33,12 @@ public class LiveEventNotificationService {
   private final @NonNull PushMessageService pushMessageService;
   private final @NonNull UserService userService;
 
+  private static final String RC_GROUP_ID_IDENTIFIER = "Rocket.Chat group ID: ";
+  private static final String NEW_ANONYMOUS_ENQUIRY_IDENTIFIER = "Anonymous Enquiry ID: ";
+
   /**
    * Collects all relevant user or consultant ids of chats and sessions and sends a new
-   * directmessage to the live service.
+   * direct message to the live service.
    *
    * @param rcGroupId the rocket chat group id used to observe relevant users
    */
@@ -43,21 +48,30 @@ public class LiveEventNotificationService {
           .collectUserIds(rcGroupId).stream()
           .filter(this::notInitiatingUser)
           .collect(Collectors.toList());
-      triggerLiveEvent(rcGroupId, userIds);
+      triggerLiveEvent(userIds, DIRECTMESSAGE, RC_GROUP_ID_IDENTIFIER + rcGroupId);
       triggerMobilePushNotification(userIds);
     }
   }
 
-  private void triggerLiveEvent(String rcGroupId, List<String> userIds) {
+  /**
+   * Sends a new anonymous enquiry live event to the provided user IDs.
+   *
+   * @param userIds list of consultant user IDs
+   * @param sessionId anonymous enquiry ID
+   */
+  public void sendLiveNewAnonymousEnquiryEventToUsers(List<String> userIds, Long sessionId) {
+    triggerLiveEvent(userIds, NEWANONYMOUSENQUIRY, NEW_ANONYMOUS_ENQUIRY_IDENTIFIER + sessionId);
+  }
+
+  private void triggerLiveEvent(List<String> userIds, EventType eventType, String identifier) {
     if (isNotEmpty(userIds)) {
       try {
-        LiveEventMessage liveEventMessage = new LiveEventMessage()
-            .eventType(DIRECTMESSAGE);
+        var liveEventMessage = new LiveEventMessage()
+            .eventType(eventType);
         this.liveControllerApi.sendLiveEvent(userIds, liveEventMessage);
       } catch (RestClientException e) {
         LogService.logInternalServerError(
-            String.format("Unable to trigger live event for rocket chat group id %s",
-                rcGroupId), e);
+            String.format("Unable to trigger %s live event for %s", eventType, identifier), e);
       }
     }
   }

@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
@@ -61,26 +60,5 @@ public class AgencyVerifierTest {
     AgencyDTO agency = agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
 
     assertEquals(AGENCY_ID, agency.getId());
-  }
-
-  @Test
-  public void doesConsultingTypeMatchToAgency_Should_ReturnTrue_When_AgencyIsAssignedToGivenConsultingType() {
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
-        .thenReturn(AGENCY_DTO_SUCHT);
-
-    boolean response =
-        agencyVerifier.doesConsultingTypeMatchToAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
-
-    assertTrue(response);
-  }
-
-  @Test
-  public void doesConsultingTypeMatchToAgency_Should_ReturnFalse_When_AgencyIsNotAssignedToGivenConsultingType() {
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
-
-    boolean response =
-        agencyVerifier.doesConsultingTypeMatchToAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
-
-    assertFalse(response);
   }
 }
