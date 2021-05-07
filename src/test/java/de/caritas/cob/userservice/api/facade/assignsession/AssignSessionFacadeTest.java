@@ -14,11 +14,16 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_SY
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITH_CONSULTANT;
+import static java.util.Arrays.asList;
+import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -26,11 +31,19 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.RegistrationType;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,6 +124,42 @@ public class AssignSessionFacadeTest {
     verify(logService, times(1)).logInternalServerError(anyString(), any());
     verify(rocketChatRollbackService, times(1))
         .rollbackRemoveUsersFromRocketChatGroup(anyString(), Mockito.any());
+  }
+
+  @Test
+  public void assignSession_Should_removeOtherMembers_When_sessionIsNotATeamSession() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    session.setTeamSession(false);
+    session.setStatus(SessionStatus.NEW);
+    session.setConsultant(null);
+    session.getUser().setRcUserId("userRcId");
+    session.setRegistrationType(RegistrationType.REGISTERED);
+    session.setAgencyId(1L);
+    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
+    consultantAgency.setAgencyId(1L);
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setConsultantAgencies(asSet(consultantAgency));
+    consultant.setRocketChatId("consultantRcId");
+    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString())).thenReturn(asList(
+        new GroupMemberDTO("userRcId", null, "name", null, null),
+        new GroupMemberDTO("consultantRcId", null, "name", null, null),
+        new GroupMemberDTO("otherRcId", null, "name", null, null)
+    ));
+    Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
+    consultantToRemove.setRocketChatId("otherRcId");
+    when(this.consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(consultantToRemove));
+    when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
+
+    this.assignSessionFacade.assignSession(session, consultant);
+
+    verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(eq(consultantToRemove.getRocketChatId()), eq(session.getGroupId()));
+    verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(eq(consultantToRemove.getRocketChatId()),
+            eq(session.getFeedbackGroupId()));
+    verify(this.emailNotificationFacade, times(1))
+        .sendAssignEnquiryEmailNotification(any(), any(), any());
   }
 
 }

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
 
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSENQUIRYACCEPTED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -193,6 +194,28 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("valid");
 
     verifyNoInteractions(this.pushMessageService);
+  }
+
+  @Test
+  public void sendAcceptAnonymousEnquiryEventToUser_Should_doNothing_When_userIdIsNull() {
+    this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser(null);
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendAcceptAnonymousEnquiryEventToUser_Should_doNothing_When_userIdIsEmpty() {
+    this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("");
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendAcceptAnonymousEnquiryEventToUser_Should_triggerLiveEvent_When_userIdIsValid() {
+    this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("userId");
+
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(singletonList("userId")),
+        eq(new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED)));
   }
 
 }

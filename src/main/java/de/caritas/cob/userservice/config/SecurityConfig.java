@@ -83,6 +83,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/consultants", "/users/sessions/teams",
             "/users/sessions/monitoring/{sessionId:[0-9]+}",
             "/users/sessions/{sessionId:[0-9]+}/monitoring",
+            "/conversations/askers/anonymous/{sessionId:[0-9]+}/accept",
             "/conversations/consultants/**")
         .hasAuthority(Authority.CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/consultant/{consultantId:[0-9A-Za-z-]+}")
@@ -132,7 +133,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Autowired
   public void configureGlobal(final AuthenticationManagerBuilder auth,
       RoleAuthorizationAuthorityMapper authorityMapper) {
-    KeycloakAuthenticationProvider keyCloakAuthProvider = keycloakAuthenticationProvider();
+    var keyCloakAuthProvider = keycloakAuthenticationProvider();
     keyCloakAuthProvider.setGrantedAuthoritiesMapper(authorityMapper);
     auth.authenticationProvider(keyCloakAuthProvider);
   }
@@ -151,7 +152,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Bean
   public FilterRegistrationBean keycloakAuthenticationProcessingFilterRegistrationBean(
       KeycloakAuthenticationProcessingFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }
@@ -163,7 +164,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Bean
   public FilterRegistrationBean keycloakPreAuthActionsFilterRegistrationBean(
       KeycloakPreAuthActionsFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }
@@ -175,7 +176,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Bean
   public FilterRegistrationBean keycloakAuthenticatedActionsFilterBean(
       KeycloakAuthenticatedActionsFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }
@@ -187,7 +188,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Bean
   public FilterRegistrationBean keycloakSecurityContextRequestFilterBean(
       KeycloakSecurityContextRequestFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }

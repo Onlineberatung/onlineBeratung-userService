@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSENQUIRYACCEPTED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -32,6 +34,29 @@ public class LiveEventNotificationService {
   private final @NonNull UserService userService;
 
   /**
+   * Sends a anonymous enquiry accepted event to the live service,
+   *
+   * @param userId the id of the user who should receive the event
+   */
+  public void sendAcceptAnonymousEnquiryEventToUser(String userId) {
+    if (isNotBlank(userId)) {
+      var liveMessage = new LiveEventMessage()
+          .eventType(ANONYMOUSENQUIRYACCEPTED);
+      sendLiveEventMessage(singletonList(userId), liveMessage);
+    }
+  }
+
+  private void sendLiveEventMessage(List<String> userIds, LiveEventMessage liveEventMessage) {
+    try {
+      this.liveControllerApi.sendLiveEvent(userIds, liveEventMessage);
+    } catch (RestClientException e) {
+      LogService.logInternalServerError(
+          String.format("Unable to trigger live event to users %s with message %s",
+              userIds, liveEventMessage), e);
+    }
+  }
+
+  /**
    * Collects all relevant user or consultant ids of chats and sessions and sends a new
    * directmessage to the live service.
    *
@@ -43,22 +68,16 @@ public class LiveEventNotificationService {
           .collectUserIds(rcGroupId).stream()
           .filter(this::notInitiatingUser)
           .collect(Collectors.toList());
-      triggerLiveEvent(rcGroupId, userIds);
+      triggerDirectMessageLiveEvent(userIds);
       triggerMobilePushNotification(userIds);
     }
   }
 
-  private void triggerLiveEvent(String rcGroupId, List<String> userIds) {
+  private void triggerDirectMessageLiveEvent(List<String> userIds) {
     if (isNotEmpty(userIds)) {
-      try {
-        LiveEventMessage liveEventMessage = new LiveEventMessage()
-            .eventType(DIRECTMESSAGE);
-        this.liveControllerApi.sendLiveEvent(userIds, liveEventMessage);
-      } catch (RestClientException e) {
-        LogService.logInternalServerError(
-            String.format("Unable to trigger live event for rocket chat group id %s",
-                rcGroupId), e);
-      }
+      var liveEventMessage = new LiveEventMessage()
+          .eventType(DIRECTMESSAGE);
+      sendLiveEventMessage(userIds, liveEventMessage);
     }
   }
 

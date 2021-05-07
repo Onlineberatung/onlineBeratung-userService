@@ -7,8 +7,10 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -230,6 +232,48 @@ public class SessionToConsultantConditionProviderTest {
     boolean result =
         new SessionToConsultantConditionProvider(session, consultant)
             .isSessionsAgencyNotAvailableInConsultantAgencies();
+
+    assertThat(result, is(false));
+  }
+
+  @Test
+  public void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnTrue_When_ConsultantHasNoAgencies() {
+    boolean result = new SessionToConsultantConditionProvider(session, consultant)
+            .isSessionsConsultingTypeNotAvailableForConsultant();
+
+    assertThat(result, is(true));
+  }
+
+  @Test
+  public void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionConsultingType() {
+    session.setConsultingType(ConsultingType.U25);
+    AgencyDTO differentAgencyDTO = new AgencyDTO().consultingType(ConsultingType.SUCHT);
+    AgencyDTO otherAgencyDTO = new AgencyDTO().consultingType(ConsultingType.DEBT);
+    ConsultantAgency differentConsultantAgency = mock(ConsultantAgency.class);
+    when(differentConsultantAgency.getAgency()).thenReturn(differentAgencyDTO);
+    ConsultantAgency otherConsultantAgency = mock(ConsultantAgency.class);
+    when(otherConsultantAgency.getAgency()).thenReturn(otherAgencyDTO);
+    consultant.setConsultantAgencies(asSet(differentConsultantAgency, otherConsultantAgency));
+    boolean result =
+        new SessionToConsultantConditionProvider(session, consultant)
+            .isSessionsConsultingTypeNotAvailableForConsultant();
+
+    assertThat(result, is(true));
+  }
+
+  @Test
+  public void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnFalse_When_ConsultantAgenciesContainSessionConsultingType() {
+    session.setConsultingType(ConsultingType.U25);
+    AgencyDTO u25AgencyDTO = new AgencyDTO().consultingType(ConsultingType.U25);
+    AgencyDTO otherAgencyDTO = new AgencyDTO().consultingType(ConsultingType.SUCHT);
+    ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
+    when(u25ConsultantAgency.getAgency()).thenReturn(u25AgencyDTO);
+    ConsultantAgency otherConsultantAgency = mock(ConsultantAgency.class);
+    when(otherConsultantAgency.getAgency()).thenReturn(otherAgencyDTO);
+    consultant.setConsultantAgencies(asSet(u25ConsultantAgency, otherConsultantAgency));
+    boolean result =
+        new SessionToConsultantConditionProvider(session, consultant)
+            .isSessionsConsultingTypeNotAvailableForConsultant();
 
     assertThat(result, is(false));
   }

@@ -109,6 +109,9 @@ public class SessionToConsultantConditionProvider {
    * @return true if consuling type is available for {@link Consultant}
    */
   public boolean isSessionsConsultingTypeNotAvailableForConsultant() {
+    if (isEmpty(this.consultant.getConsultantAgencies())) {
+      return true;
+    }
     return consultant.getConsultantAgencies().stream()
         .map(ConsultantAgency::getAgency)
         .map(AgencyDTO::getConsultingType)

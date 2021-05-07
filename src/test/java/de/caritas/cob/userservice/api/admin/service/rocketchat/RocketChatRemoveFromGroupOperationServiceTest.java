@@ -114,4 +114,21 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
     }
   }
 
+  @Test
+  public void removeFromGroupsOrRollbackOnFailure_Should_notExecuteRemove_When_consultantHasSpecialAuthorities() {
+    when(this.session.getGroupId()).thenReturn("group");
+    when(this.session.getFeedbackGroupId()).thenReturn("feedback");
+    when(this.consultant.getRocketChatId()).thenReturn("rcId");
+    GroupMemberDTO groupMemberDTO = new GroupMemberDTO();
+    groupMemberDTO.set_id(this.consultant.getRocketChatId());
+    when(this.rocketChatFacade.retrieveRocketChatMembers(any()))
+        .thenReturn(singletonList(groupMemberDTO));
+    when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(true);
+
+    this.removeService.removeFromGroupsOrRollbackOnFailure();
+
+    verify(this.rocketChatFacade, times(0)).removeUserFromGroup("rcId", "group");
+    verify(this.rocketChatFacade, times(0)).removeUserFromGroup("rcId", "feedback");
+  }
+
 }
