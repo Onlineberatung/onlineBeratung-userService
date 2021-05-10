@@ -4,11 +4,13 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 @Service
 @Getter
@@ -25,17 +27,27 @@ public class ConsultingTypeManager {
    * @throws MissingConsultingTypeException when no settings for provided consulting type where
    *                                        found
    */
-  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId) {
-    LogService.logInfo("Bin im CTM");
-    return consultingTypeService.getExtendedConsultingTypeResponseDTO(consultingTypeId);
+  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId) throws MissingConsultingTypeException {
+    try {
+      return consultingTypeService.getExtendedConsultingTypeResponseDTO(consultingTypeId);
+    }
+    catch(RestClientException ex) {
+      throw new MissingConsultingTypeException(
+          String.format("No settings for consulting type %s found.", consultingTypeId));
+    }
   }
 
   public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(String consultingTypeId) {
     return getConsultingTypeSettings(Integer.parseInt(consultingTypeId));
   }
 
-  public Integer[] getAllConsultingTypeIds() {
-    return null; //TODO
+  /**
+   * Returns the a list with all consulting type IDs
+   *
+   * @return {@link List} with all consulting type IDS
+   */
+  public List<Integer> getAllConsultingTypeIds() {
+    return consultingTypeService.getAllConsultingTypeIds();
   }
 
   public boolean isConsultantBoundedToAgency(int consultingTypeId) {
