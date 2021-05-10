@@ -6,10 +6,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,8 +35,9 @@ public class ConsultingTypeManagerIT {
   private ConsultingTypeService consultingTypeService;
 
   @Test
-  public void getConsultantTypeSettings_Should_Throw_MissingConsultingTypeException_When_RestClientException(){
-    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt())).thenThrow(new RestClientException(""));
+  public void getConsultantTypeSettings_Should_Throw_MissingConsultingTypeException_When_RestClientException() {
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenThrow(new RestClientException(""));
 
     assertThrows(MissingConsultingTypeException.class,
         () -> consultingTypeManager.getConsultingTypeSettings(anyInt()));
@@ -46,9 +47,11 @@ public class ConsultingTypeManagerIT {
   public void getConsultantTypeSettings_Should_Return_ExtendedConsultingTypeResponseDTO()
       throws MissingConsultingTypeException {
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
-    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt())).thenReturn(extendedConsultingTypeResponseDTO);
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
-    assertTrue(extendedConsultingTypeResponseDTO.equals(consultingTypeManager.getConsultingTypeSettings(anyInt())));
+    assertTrue(extendedConsultingTypeResponseDTO
+        .equals(consultingTypeManager.getConsultingTypeSettings(anyInt())));
 
   }
 
@@ -57,7 +60,8 @@ public class ConsultingTypeManagerIT {
       throws MissingConsultingTypeException {
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(true);
-    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt())).thenReturn(extendedConsultingTypeResponseDTO);
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
     assertTrue(consultingTypeManager.isConsultantBoundedToAgency(anyInt()));
   }
@@ -67,7 +71,8 @@ public class ConsultingTypeManagerIT {
       throws MissingConsultingTypeException {
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(false);
-    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt())).thenReturn(extendedConsultingTypeResponseDTO);
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
     assertFalse(consultingTypeManager.isConsultantBoundedToAgency(anyInt()));
   }
@@ -75,8 +80,8 @@ public class ConsultingTypeManagerIT {
   @Test
   public void getAllConsultingTypeIds_Should_Return_The_Same_List()
       throws MissingConsultingTypeException {
-    when(consultingTypeService.getAllConsultingTypeIds()).thenReturn(List.of(1,2,3,4));
+    when(consultingTypeService.getAllConsultingTypeIds()).thenReturn(List.of(1, 2, 3, 4));
 
-    assertTrue(consultingTypeManager.getAllConsultingTypeIds().equals(List.of(1,2,3,4)));
+    assertTrue(consultingTypeManager.getAllConsultingTypeIds().equals(List.of(1, 2, 3, 4)));
   }
 }

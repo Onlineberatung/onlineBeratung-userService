@@ -37,7 +37,7 @@ public class ConsultingTypeService {
     addDefaultHeaders(this.consultingTypeControllerApi.getApiClient());
     try {
       return this.consultingTypeControllerApi.getExtendedConsultingTypeById(consultingTypeId);
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       throw ex;
     }
   }

@@ -32,8 +32,10 @@ public class ConsultingTypeServiceTest {
   @Test
   public void setup() {
     int size = 15;
-    var  randomBasicConsultingTypeResponseDTOList= generateRandomExtendedConsultingTypeResponseDTOList(size);
-    when(consultingTypeControllerApi.getBasicConsultingTypeList()).thenReturn(randomBasicConsultingTypeResponseDTOList);
+    var randomBasicConsultingTypeResponseDTOList = generateRandomExtendedConsultingTypeResponseDTOList(
+        size);
+    when(consultingTypeControllerApi.getBasicConsultingTypeList())
+        .thenReturn(randomBasicConsultingTypeResponseDTOList);
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
     List<Integer> consultingTypeIds = consultingTypeService.getAllConsultingTypeIds();
     assertTrue(consultingTypeIds.size() == size);
