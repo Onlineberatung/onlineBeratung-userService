@@ -62,6 +62,8 @@ public class StatelessCsrfFilterTest {
     whitelist.setConfigUris(new String[]{});
     whitelist.setHeader(whitelistProperty);
 
+    when(csrfSecurityProperties.getHeader()).thenReturn(headerProperty);
+    when(csrfSecurityProperties.getCookie()).thenReturn(cookieProperty);
     when(csrfSecurityProperties.getWhitelist()).thenReturn(whitelist);
     csrfFilter = new StatelessCsrfFilter(csrfSecurityProperties);
 
