@@ -7,7 +7,7 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
