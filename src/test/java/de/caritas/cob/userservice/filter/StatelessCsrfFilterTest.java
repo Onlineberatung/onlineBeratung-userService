@@ -7,6 +7,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.config.CsrfSecurityProperties;
+import de.caritas.cob.userservice.config.CsrfSecurityProperties.ConfigProperty;
+import de.caritas.cob.userservice.config.CsrfSecurityProperties.Whitelist;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -26,9 +29,12 @@ public class StatelessCsrfFilterTest {
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_COOKIE = "csrfCookie";
   private static final String CSRF_WHITELIST_COOKIE = "csrfWhitelistHeader";
+  private static final String ADMIN_URI_ON_WHITE_LIST = "/useradmin";
 
-  private final StatelessCsrfFilter csrfFilter = new StatelessCsrfFilter(CSRF_COOKIE, CSRF_HEADER,
-      CSRF_WHITELIST_COOKIE);
+  private StatelessCsrfFilter csrfFilter;
+
+  @Mock
+  private CsrfSecurityProperties csrfSecurityProperties;
 
   @Mock
   private HttpServletRequest request;
@@ -44,6 +50,21 @@ public class StatelessCsrfFilterTest {
 
   @Before
   public void setup() {
+    ConfigProperty cookieProperty = new ConfigProperty();
+    cookieProperty.setProperty(CSRF_COOKIE);
+    ConfigProperty headerProperty = new ConfigProperty();
+    headerProperty.setProperty(CSRF_HEADER);
+    ConfigProperty whitelistProperty = new ConfigProperty();
+    whitelistProperty.setProperty(CSRF_WHITELIST_COOKIE);
+
+    Whitelist whitelist = new Whitelist();
+    whitelist.setAdminUris(new String[]{ADMIN_URI_ON_WHITE_LIST});
+    whitelist.setConfigUris(new String[]{});
+    whitelist.setHeader(whitelistProperty);
+
+    when(csrfSecurityProperties.getWhitelist()).thenReturn(whitelist);
+    csrfFilter = new StatelessCsrfFilter(csrfSecurityProperties);
+
     setField(csrfFilter, "accessDeniedHandler", accessDeniedHandler);
   }
 
@@ -59,9 +80,9 @@ public class StatelessCsrfFilterTest {
   }
 
   @Test
-  public void doFilterInternal_Should_executeFilterChain_When_requestUriIsWhitlisted()
+  public void doFilterInternal_Should_executeFilterChain_When_requestUriIsInWhiteList()
       throws IOException, ServletException {
-    when(request.getRequestURI()).thenReturn("/useradmin");
+    when(request.getRequestURI()).thenReturn(ADMIN_URI_ON_WHITE_LIST);
 
     this.csrfFilter.doFilterInternal(request, response, filterChain);
 
