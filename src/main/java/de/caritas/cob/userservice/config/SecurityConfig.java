@@ -14,7 +14,6 @@ import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcess
 import org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter;
 import org.keycloak.adapters.springsecurity.filter.KeycloakSecurityContextRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -30,28 +29,18 @@ import org.springframework.security.web.csrf.CsrfFilter;
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
-  public static final String[] WHITE_LIST =
-      new String[]{"/users/docs", "/users/docs/**", "/v2/api-docs", "/configuration/ui",
-          "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**"};
-
   @SuppressWarnings("unused")
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
-
-  @Value("${csrf.cookie.property}")
-  private String csrfCookieProperty;
-
-  @Value("${csrf.header.property}")
-  private String csrfHeaderProperty;
-
-  @Value("${csrf.whitelist.header.property}")
-  private String csrfWhitelistHeaderProperty;
+  private final CsrfSecurityProperties csrfSecurityProperties;
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
    * (Keycloak) principal (authorization header).
    */
-  public SecurityConfig(KeycloakClientRequestFactory keycloakClientRequestFactory) {
+  public SecurityConfig(KeycloakClientRequestFactory keycloakClientRequestFactory,
+      CsrfSecurityProperties csrfSecurityProperties) {
     this.keycloakClientRequestFactory = keycloakClientRequestFactory;
+    this.csrfSecurityProperties = csrfSecurityProperties;
   }
 
   /**
@@ -63,11 +52,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     super.configure(http);
     http.csrf().disable()
-        .addFilterBefore(new StatelessCsrfFilter(csrfCookieProperty, csrfHeaderProperty,
-                csrfWhitelistHeaderProperty), CsrfFilter.class)
+        .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class)
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-        .antMatchers(WHITE_LIST).permitAll().antMatchers("/users/askers/new")
+        .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris()).permitAll().antMatchers("/users/askers/new")
         .permitAll()
         .antMatchers("/users/data", "/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
