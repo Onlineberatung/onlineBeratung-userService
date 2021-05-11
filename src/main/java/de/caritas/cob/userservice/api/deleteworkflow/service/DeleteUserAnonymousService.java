@@ -62,7 +62,7 @@ public class DeleteUserAnonymousService {
     return session -> {
       Set<Session> userSessions = session.getUser().getSessions();
       return allSessionsAreDone(userSessions)
-          && allSessionsArePastDeletionTime(deletionTime, userSessions);
+          && allSessionsAreBeforeDeletionTime(deletionTime, userSessions);
     };
   }
 
@@ -70,7 +70,7 @@ public class DeleteUserAnonymousService {
     return sessions.stream().map(Session::getStatus).allMatch(SessionStatus.DONE::equals);
   }
 
-  private boolean allSessionsArePastDeletionTime(LocalDateTime deletionTime, Set<Session> sessions) {
+  private boolean allSessionsAreBeforeDeletionTime(LocalDateTime deletionTime, Set<Session> sessions) {
     return sessions.stream()
         .map(Session::getUpdateDate)
         .allMatch(updateDate -> updateDate.isBefore(deletionTime));

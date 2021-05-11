@@ -26,16 +26,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class DeleteUserAnonymousServiceTest {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(DeleteUserAnonymousServiceTest.class);
 
   private static final int DELETION_PERIOD_MINUTES = 1200;
 
