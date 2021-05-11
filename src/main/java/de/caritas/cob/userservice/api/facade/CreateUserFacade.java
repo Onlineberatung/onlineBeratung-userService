@@ -68,9 +68,9 @@ public class CreateUserFacade {
     try {
       updateKeycloakRoleAndPassword(userId, userDTO, role);
 
-      user = userService
-          .createUser(userId, userDTO.getUsername(), returnDummyEmailIfNoneGiven(userDTO, userId),
-              obtainConsultingTypeSettings(userDTO).isLanguageFormal());
+      user = userService.createUser(userId, userDTO.getUsername(),
+          returnDummyEmailIfNoneGiven(userDTO, userId),
+          obtainConsultingTypeSettings(userDTO).isLanguageFormal());
 
     } catch (Exception ex) {
       rollBackAccountInitialization(userId, userDTO);

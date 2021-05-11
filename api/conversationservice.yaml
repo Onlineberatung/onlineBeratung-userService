@@ -127,7 +127,13 @@ components:
       required:
         - userName
         - sessionId
+        - accessToken
+        - expiresIn
+        - refreshToken
+        - refreshExpiresIn
+        - rcUserId
         - rcToken
+        - rcGroupId
       properties:
         userName:
           type: string
@@ -140,10 +146,18 @@ components:
           type: string
           example: eyJhbGciOiJSUzI1NiIs(...)
           description: The Keycloak access token for this user
+        expiresIn:
+          type: integer
+          example: 300
+          description: Number of seconds the access token is valid
         refreshToken:
           type: string
           example: eyJhbGciOiJSUzI1NiIs(...)
           description: The Keycloak refresh token for this user
+        refreshExpiresIn:
+          type: integer
+          example: 6000
+          description: Number of seconds the refresh token is valid
         rcUserId:
           type: string
           example: piYG2BAE9ng(...)

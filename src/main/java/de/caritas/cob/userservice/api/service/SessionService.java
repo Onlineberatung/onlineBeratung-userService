@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
@@ -54,6 +55,7 @@ public class SessionService {
   private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull UserHelper userHelper;
   private final @NonNull ConsultantService consultantService;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Returns the sessions for a user
@@ -143,22 +145,25 @@ public class SessionService {
   }
 
   /**
-   * TODO refactoren.
+   * Initialize a {@link Session}.
    *
-   * @param user                   the user
-   * @param userDto                the dto of the user
-   * @param consultingTypeSettings flag to initialize monitoring
-   * @return the initialized session
+   * @param user                   {@link User}
+   * @param userDto                {@link UserDTO}
+   * @param isTeamSession          is team session flag
+   * @param registrationType       {@link RegistrationType}
+   * @param sessionStatus          {@link SessionStatus}
+   * @return the initialized {@link Session}
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
-      ConsultingTypeSettings consultingTypeSettings, RegistrationType registrationType) {
-    Session session = Session.builder()
+      RegistrationType registrationType, SessionStatus sessionStatus) {
+    var consultingTypeSettings = obtainConsultingTypeSettings(userDto);
+    var session = Session.builder()
         .user(user)
         .consultingType(consultingTypeSettings.getConsultingType())
         .registrationType(registrationType)
         .postcode(userDto.getPostcode())
         .agencyId(userDto.getAgencyId())
-        .status(SessionStatus.INITIAL)
+        .status(sessionStatus)
         .teamSession(isTeamSession)
         .monitoring(consultingTypeSettings.isMonitoring())
         .createDate(nowInUtc())
@@ -168,18 +173,21 @@ public class SessionService {
     return saveSession(session);
   }
 
+  private ConsultingTypeSettings obtainConsultingTypeSettings(UserDTO userDTO) {
+    return consultingTypeManager.getConsultingTypeSettings(
+        ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())]);
+  }
+
   /**
-   * Initialize a {@link Session}.
+   * Initialize a {@link Session} as initial registered enquiry.
    *
    * @param user                   the user
    * @param userDto                the dto of the user
-   * @param consultingTypeSettings flag to initialize monitoring
    * @return the initialized session
    */
-  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
-      ConsultingTypeSettings consultingTypeSettings) {
-    return initializeSession(user, userDto, isTeamSession, consultingTypeSettings,
-        RegistrationType.REGISTERED);
+  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession) {
+    return initializeSession(user, userDto, isTeamSession, RegistrationType.REGISTERED,
+        SessionStatus.INITIAL);
   }
 
   /**
@@ -340,7 +348,7 @@ public class SessionService {
   private SessionUserDTO convertToSessionUserDTO(Session session) {
 
     if (nonNull(session.getUser()) && nonNull(session.getSessionData())) {
-      SessionUserDTO sessionUserDto = new SessionUserDTO();
+      var sessionUserDto = new SessionUserDTO();
       sessionUserDto.setUsername(userHelper.decodeUsername(session.getUser().getUsername()));
       sessionUserDto.setSessionData(sessionDataProvider.getSessionDataMapFromSession(session));
       return sessionUserDto;
@@ -368,7 +376,7 @@ public class SessionService {
    * @return {@link Session}
    */
   public Session getSessionByGroupIdAndUser(String rcGroupId, String userId, Set<String> roles) {
-    Session session = getSessionByGroupId(rcGroupId);
+    var session = getSessionByGroupId(rcGroupId);
     checkUserPermissionForSession(session, userId, roles);
 
     return session;
@@ -405,7 +413,7 @@ public class SessionService {
   private void checkIfConsultantAndNotAssignedToSessionOrAgency(Session session, String userId,
       Set<String> roles) {
     if (roles.contains(UserRole.CONSULTANT.getValue())) {
-      Consultant consultant = this.consultantService.getConsultant(userId)
+      var consultant = this.consultantService.getConsultant(userId)
           .orElseThrow(() -> new BadRequestException(String
               .format("Consultant with id %s does not exist", userId)));
       checkPermissionForConsultantSession(session, consultant);
@@ -432,7 +440,7 @@ public class SessionService {
   public ConsultantSessionDTO fetchSessionForConsultant(@NonNull Long sessionId,
       @NonNull Consultant consultant) {
 
-    Session session = getSession(sessionId)
+    var session = getSession(sessionId)
         .orElseThrow(
             () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
     checkPermissionForConsultantSession(session, consultant);

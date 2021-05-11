@@ -9,7 +9,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ROLES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSION;
@@ -196,7 +195,7 @@ public class SessionServiceTest {
     when(sessionRepository.save(any())).thenReturn(SESSION);
 
     Session expectedSession = sessionService
-        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
     Assert.assertEquals(expectedSession, SESSION);
 
   }
@@ -207,7 +206,7 @@ public class SessionServiceTest {
     when(sessionRepository.save(any())).thenReturn(SESSION);
 
     Session expectedSession = sessionService
-        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
     Assert.assertEquals(expectedSession, SESSION);
 
   }

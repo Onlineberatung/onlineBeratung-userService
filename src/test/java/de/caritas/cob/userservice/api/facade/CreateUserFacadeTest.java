@@ -30,7 +30,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
@@ -59,8 +58,6 @@ public class CreateUserFacadeTest {
   private RollbackFacade rollbackFacade;
   @Mock
   private ConsultingTypeManager consultingTypeManager;
-  @Mock
-  private UserHelper userHelper;
   @Mock
   private AgencyVerifier agencyVerifier;
   @Mock

@@ -1,13 +1,15 @@
 package de.caritas.cob.userservice.api.service.user.anonymous;
 
+import static java.lang.Integer.parseInt;
+import static java.util.Collections.sort;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.util.concurrent.atomic.AtomicLong;
+import de.caritas.cob.userservice.api.service.user.UserService;
+import java.util.LinkedList;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,13 +19,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AnonymousUsernameRegistry {
 
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull UserService userService;
   private final @NonNull UserHelper userHelper;
 
   @Value("${anonymous.username.prefix}")
   private String usernamePrefix;
 
-  private static final AtomicLong usernameIdCounter = new AtomicLong();
+  private static final LinkedList<Integer> idRegistry = new LinkedList<>();
 
   /**
    * Generates an unique anonymous username.
@@ -32,28 +34,42 @@ public class AnonymousUsernameRegistry {
    */
   public synchronized String generateUniqueUsername() {
 
-    long usernameId;
+    String username;
     do {
-      usernameId = usernameIdCounter.incrementAndGet();
-    } while (isUsernameIdOccupied(usernameId));
+      username = generateUsername();
+      idRegistry.add(obtainUsernameId(username));
+    } while (isUsernameOccupied(username));
 
-    return userHelper.encodeUsername(generateUsername(usernameId));
+
+    return userHelper.encodeUsername(username);
   }
 
-  private boolean isUsernameIdOccupied(long usernameId) {
-    return !keycloakAdminClientService.isUsernameAvailable(generateUsername(usernameId));
+  private String generateUsername() {
+    return usernamePrefix + obtainSmallestPossibleId();
   }
 
-  private String generateUsername(long usernameId) {
-    return usernamePrefix + usernameId;
+  private int obtainSmallestPossibleId() {
+
+    var smallestId = 1;
+    sort(idRegistry);
+
+    for (int i : idRegistry) {
+      if (smallestId < i) {
+        return smallestId;
+      }
+      smallestId = i + 1;
+    }
+
+    return smallestId;
   }
 
-  /**
-   * Resets the anonymous username ID registry.
-   */
-  @Scheduled(cron = "${anonymous.username.reset.cron}")
-  public synchronized void cleanUpAnonymousUsernameRegistry() {
-    usernameIdCounter.set(1L);
-    LogService.logInfo("Anonymous username Ids have been reset!");
+  private boolean isUsernameOccupied(String username) {
+    return userService.findUserByUsername(username)
+        .stream()
+        .count() > 0;
+  }
+
+  private int obtainUsernameId(String username) {
+    return parseInt(substringAfter(username, usernamePrefix));
   }
 }

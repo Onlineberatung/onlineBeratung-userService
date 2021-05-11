@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.service;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -68,13 +68,13 @@ public class KeycloakService {
   }
 
   /**
-   * Performs a Keycloak login and returns the Keycloak {@link LoginResponseDTO} on success.
+   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on success.
    *
    * @param userName the username
    * @param password the password
-   * @return {@link LoginResponseDTO}
+   * @return {@link KeycloakLoginResponseDTO}
    */
-  public LoginResponseDTO loginUser(final String userName, final String password) {
+  public KeycloakLoginResponseDTO loginUser(final String userName, final String password) {
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add(BODY_KEY_USERNAME, userName);
@@ -85,7 +85,7 @@ public class KeycloakService {
 
     try {
       return restTemplate
-          .postForEntity(keycloakLoginUrl, request, LoginResponseDTO.class).getBody();
+          .postForEntity(keycloakLoginUrl, request, KeycloakLoginResponseDTO.class).getBody();
 
     } catch (RestClientResponseException exception) {
       throw new BadRequestException(String.format("Could not log in user %s into Keycloak: %s",

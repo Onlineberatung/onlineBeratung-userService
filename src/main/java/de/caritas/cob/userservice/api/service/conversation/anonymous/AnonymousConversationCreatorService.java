@@ -1,63 +1,100 @@
 package de.caritas.cob.userservice.api.service.conversation.anonymous;
 
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/** TODO */
+/**
+ * Service to create anonymous user conversations (sessions).
+ */
 @Service
 @RequiredArgsConstructor
 public class AnonymousConversationCreatorService {
 
   private final @NonNull UserService userService;
   private final @NonNull SessionService sessionService;
-  private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
+  private final @NonNull AgencyService agencyService;
+  private final @NonNull ConsultantAgencyService consultantAgencyService;
+  private final @NonNull LiveEventNotificationService liveEventNotificationService;
 
-  public Session createAnonymousConversation(String userId, UserDTO userDTO,
-      RocketChatCredentials rocketChatCredentials, ConsultingType consultingType) {
+  public Session createAnonymousConversation(UserDTO userDTO,
+      AnonymousUserCredentials credentials) {
 
-    var user = userService.getUser(userId)
-        .orElseThrow(() -> new InternalServerErrorException(
-            "User not found for creating a new anonymous conversation."));
-    var consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(consultingType);
+    var user = obtainAnonymousUser(credentials);
+    List<ConsultantAgency> consultantAgencies;
+    Session session;
 
     try {
-      Session session =
-          sessionService.initializeSession(user, userDTO, false, consultingTypeSettings,
-              RegistrationType.ANONYMOUS);
-
-      String rcGroupId = createEnquiryMessageFacade.createAndRetrieveRcGroupIdForAnonymousEnquiry(
-          session, rocketChatCredentials);
+      session = sessionService.initializeSession(user, userDTO, false,
+          RegistrationType.ANONYMOUS, SessionStatus.NEW);
+      consultantAgencies = obtainConsultants(session.getConsultingType());
+      String rcGroupId = createEnquiryMessageFacade.createRocketChatRoom(session, consultantAgencies,
+          credentials.getRocketChatCredentials());
       session.setGroupId(rcGroupId);
       sessionService.saveSession(session);
 
-      return session;
     } catch (Exception ex) {
-      rollbackFacade.rollBackUserAccount(
-          RollbackUserAccountInformation.builder()
-              .userId(user.getUserId())
-              .user(user)
-              .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
-              .build());
-
+      rollBackAnonymousConversation(userDTO, user);
       throw new InternalServerErrorException(
           String.format(
               "Could not create session for user %s. %s", user.getUsername(), ex.getMessage()));
     }
+
+    sendNewAnonymousEnquiryLiveEvent(consultantAgencies, session);
+
+    return session;
+  }
+
+  private User obtainAnonymousUser(AnonymousUserCredentials credentials) {
+    return userService.getUser(credentials.getUserId())
+        .orElseThrow(() -> new InternalServerErrorException(String.format(
+            "Could not get user %s to create a new anonymous conversation.",
+            credentials.getUserId())));
+  }
+
+  private List<ConsultantAgency> obtainConsultants(ConsultingType consultingType){
+    List<Long> agencyList = agencyService.getAgenciesByConsultingType(consultingType).stream()
+        .map(AgencyDTO::getId)
+        .collect(Collectors.toList());
+
+    return consultantAgencyService.getConsultantsOfAgencies(agencyList);
+  }
+
+  private void rollBackAnonymousConversation(UserDTO userDTO, User user) {
+    rollbackFacade.rollBackUserAccount(
+        RollbackUserAccountInformation.builder()
+            .userId(user.getUserId())
+            .user(user)
+            .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
+            .build());
+  }
+
+  private void sendNewAnonymousEnquiryLiveEvent(List<ConsultantAgency> consultantAgencies,
+      Session session) {
+    liveEventNotificationService.sendLiveNewAnonymousEnquiryEventToUsers(consultantAgencies
+            .stream().map(agency -> agency.getConsultant().getId()).collect(Collectors.toList()),
+        session.getId());
   }
 }
