@@ -178,4 +178,9 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    */
   Page<Session> findByConsultingTypeInAndRegistrationTypeOrderByEnquiryMessageDateAsc(
       Set<ConsultingType> consultingTypes, RegistrationType registrationType, Pageable pageable);
+
+  /**
+   * Find all sessions by a given {@link SessionStatus}.
+   */
+  List<Session> findByStatus(SessionStatus status);
 }
