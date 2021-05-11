@@ -63,43 +63,4 @@ public class ConsultingTypePaginationLinksBuilder implements HalLinkBuilder {
     this.pagedListHolder = pagedListHolder;
     return this;
   }
-
-  /**
-   * Creates the {@link PaginationLinks}.
-   *
-   * @return the generated {@link PaginationLinks}
-   */
-  public PaginationLinks buildPaginationLinks() {
-    ensureNonNullPaginationParams();
-    return new PaginationLinks()
-        .self(buildSelfLink())
-        .next(buildNextLink())
-        .previous(buildPreviousLink());
-  }
-
-  private void ensureNonNullPaginationParams() {
-    this.page = nonNull(this.page) ? this.page : DEFAULT_PAGE;
-    this.perPage = nonNull(this.perPage) ? this.perPage : DEFAULT_PER_PAGE;
-    this.pagedListHolder =
-        nonNull(this.pagedListHolder) ? this.pagedListHolder : new PagedListHolder<>();
-  }
-
-  private HalLink buildSelfLink() {
-    return buildHalLinkForParams(this.page, this.perPage);
-  }
-
-  private HalLink buildHalLinkForParams(Integer page, Integer perPage) {
-    return buildHalLink(methodOn(UseradminApi.class).getConsultingTypes(page, perPage),
-        MethodEnum.GET);
-  }
-
-  private HalLink buildNextLink() {
-    return this.pagedListHolder.isLastPage() ? null
-        : buildHalLinkForParams(this.page + 1, this.perPage);
-  }
-
-  private HalLink buildPreviousLink() {
-    return this.pagedListHolder.isFirstPage() ? null
-        : buildHalLinkForParams(this.page - 1, this.perPage);
-  }
 }
