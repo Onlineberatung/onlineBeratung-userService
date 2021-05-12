@@ -39,6 +39,13 @@ public class AnonymousConversationCreatorService {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull LiveEventNotificationService liveEventNotificationService;
 
+  /**
+   * Creates a new anonymous conversation session with the corresponding Rocket.Chat room.
+   *
+   * @param userDTO     {@link UserDTO}
+   * @param credentials {@link AnonymousUserCredentials}
+   * @return {@link Session}
+   */
   public Session createAnonymousConversation(UserDTO userDTO,
       AnonymousUserCredentials credentials) {
 

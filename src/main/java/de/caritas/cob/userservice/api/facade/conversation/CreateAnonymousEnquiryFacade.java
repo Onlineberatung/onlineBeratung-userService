@@ -29,6 +29,13 @@ public class CreateAnonymousEnquiryFacade {
 
   private static final String DEFAULT_ANONYMOUS_POSTCODE = "00000";
 
+  /**
+   * Creates an anonymous user account and its corresponding anonymous conversation rep. session
+   * and returns all needed user credentials.
+   *
+   * @param createAnonymousEnquiryDTO {@link CreateAnonymousEnquiryDTO}
+   * @return {@link CreateAnonymousEnquiryResponseDTO}
+   */
   public CreateAnonymousEnquiryResponseDTO createAnonymousEnquiry(
       CreateAnonymousEnquiryDTO createAnonymousEnquiryDTO) {
 

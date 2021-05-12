@@ -228,7 +228,6 @@ public class KeycloakAdminClientServiceTest {
 
   @Test(expected = KeycloakException.class)
   public void updateRole_Should_throwKeycloakException_When_roleCouldNotBeUpdated() {
-    String validRole = "role";
     UserResource userResource = mock(UserResource.class);
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.get(anyString())).thenReturn(userResource);
@@ -248,7 +247,7 @@ public class KeycloakAdminClientServiceTest {
     when(realmResource.roles()).thenReturn(rolesResource);
     when(this.keycloakAdminClientAccessor.getRealmResource()).thenReturn(realmResource);
 
-    this.keycloakAdminClientService.updateRole("user", validRole);
+    this.keycloakAdminClientService.updateRole("user", "role");
   }
 
   @Test
