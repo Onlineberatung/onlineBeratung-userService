@@ -210,28 +210,39 @@ public class SessionService {
   public List<ConsultantSessionResponseDTO> getEnquiriesForConsultant(Consultant consultant,
       RegistrationType registrationType) {
     Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
-    if (nonNull(consultantAgencies)) {
-      List<Long> consultantAgencyIds = consultantAgencies.stream()
-          .map(ConsultantAgency::getAgencyId)
-          .collect(Collectors.toList());
-
-      if (registrationType != null) {
-        return this.sessionRepository
-            .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
-                consultantAgencyIds, SessionStatus.NEW, registrationType)
-            .stream()
-            .map(session -> new SessionMapper().toConsultantSessionDto(session))
-            .collect(Collectors.toList());
-      }
-
-      return this.sessionRepository
-          .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-              consultantAgencyIds, SessionStatus.NEW)
-          .stream()
-          .map(session -> new SessionMapper().toConsultantSessionDto(session))
-          .collect(Collectors.toList());
+    if (isNotEmpty(consultantAgencies)) {
+      return retrieveEnquiriesForConsultantAgencies(consultantAgencies, registrationType);
     }
     return emptyList();
+  }
+
+  private List<ConsultantSessionResponseDTO> retrieveEnquiriesForConsultantAgencies(
+      Set<ConsultantAgency> consultantAgencies, RegistrationType registrationType) {
+    List<Long> consultantAgencyIds = consultantAgencies.stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+
+    final List<Session> sessions = retrieveSessionsByRegistrationType(
+        registrationType, consultantAgencyIds);
+
+    return sessions.stream()
+        .map(session -> new SessionMapper().toConsultantSessionDto(session))
+        .collect(Collectors.toList());
+  }
+
+  private List<Session> retrieveSessionsByRegistrationType(RegistrationType registrationType,
+      List<Long> consultantAgencyIds) {
+    final List<Session> sessions;
+    if (registrationType != null) {
+      sessions = this.sessionRepository
+          .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+              consultantAgencyIds, SessionStatus.NEW, registrationType);
+    } else {
+      sessions = this.sessionRepository
+          .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
+              consultantAgencyIds, SessionStatus.NEW);
+    }
+    return sessions;
   }
 
   /**
