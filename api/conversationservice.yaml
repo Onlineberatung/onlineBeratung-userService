@@ -14,11 +14,6 @@ paths:
         consultant. [Authorization: Role: consultant]'
       operationId: getRegisteredEnquiries
       parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
         - name: offset
           in: query
           description: Number of items where to start in the query (0 = first item)
@@ -37,7 +32,7 @@ paths:
         200:
           description: OK - successfull operation
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
       security:
@@ -50,11 +45,6 @@ paths:
         consultant. [Authorization: Role: consultant]'
       operationId: getAnonymousEnquiries
       parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
         - name: offset
           in: query
           description: Number of items where to start in the query (0 = first item)
@@ -73,7 +63,7 @@ paths:
         200:
           description: OK - successfull operation
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
       security:
@@ -91,8 +81,8 @@ paths:
               $ref: '#/components/schemas/CreateAnonymousEnquiryDTO'
         required: true
       responses:
-        200:
-          description: OK - successfull operation
+        201:
+          description: CREATED - Anonymous user and enquiry successfully created.
           content:
             application/json:
               schema:

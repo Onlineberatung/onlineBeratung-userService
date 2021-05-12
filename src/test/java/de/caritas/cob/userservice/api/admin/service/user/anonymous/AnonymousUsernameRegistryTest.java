@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.internal.WhiteboxImpl.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUsernameRegistry;
 import java.util.LinkedList;
@@ -32,7 +32,7 @@ public class AnonymousUsernameRegistryTest {
   @Mock
   private UserService userService;
   @Mock
-  private UserHelper userHelper;
+  private UsernameTranscoder usernameTranscoder;
 
   @Before
   public void setUp() {
@@ -41,20 +41,20 @@ public class AnonymousUsernameRegistryTest {
 
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithMissingIdOfList_When_MissingUserIdNotExistingInDb() {
-    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1,2,4,5));
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
     setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
     when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
 
     anonymousUsernameRegistry.generateUniqueUsername();
 
     ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(userHelper, times(1)).encodeUsername(argumentCaptor.capture());
+    verify(usernameTranscoder, times(1)).encodeUsername(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 3"));
   }
 
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithSecondMissingIdOfList_When_FirstMissingUserIdIsExistingInDb() {
-    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1,2,4,6));
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
     setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
     when(userService.findUserByUsername("Ratsuchende_r 3")).thenReturn(Optional.of(USER));
     when(userService.findUserByUsername("Ratsuchende_r 5")).thenReturn(Optional.empty());
@@ -62,7 +62,7 @@ public class AnonymousUsernameRegistryTest {
     anonymousUsernameRegistry.generateUniqueUsername();
 
     ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(userHelper, times(1)).encodeUsername(argumentCaptor.capture());
+    verify(usernameTranscoder, times(1)).encodeUsername(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 5"));
   }
 
@@ -75,26 +75,26 @@ public class AnonymousUsernameRegistryTest {
     anonymousUsernameRegistry.generateUniqueUsername();
 
     ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(userHelper, times(1)).encodeUsername(argumentCaptor.capture());
+    verify(usernameTranscoder, times(1)).encodeUsername(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 1"));
   }
 
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_ListContainsContiguousIdsAndUserNotExistingInDb() {
-    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1,2,3,4,5));
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 3, 4, 5));
     setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
     when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
 
     anonymousUsernameRegistry.generateUniqueUsername();
 
     ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(userHelper, times(1)).encodeUsername(argumentCaptor.capture());
+    verify(usernameTranscoder, times(1)).encodeUsername(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 6"));
   }
 
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_MissingIdsOfListHaveExistingUsersInDb() {
-    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1,2,4,6));
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
     setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
     when(userService.findUserByUsername("Ratsuchende_r 3")).thenReturn(Optional.of(USER));
     when(userService.findUserByUsername("Ratsuchende_r 5")).thenReturn(Optional.of(USER));
@@ -103,7 +103,7 @@ public class AnonymousUsernameRegistryTest {
     anonymousUsernameRegistry.generateUniqueUsername();
 
     ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(userHelper, times(1)).encodeUsername(argumentCaptor.capture());
+    verify(usernameTranscoder, times(1)).encodeUsername(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 7"));
   }
 }

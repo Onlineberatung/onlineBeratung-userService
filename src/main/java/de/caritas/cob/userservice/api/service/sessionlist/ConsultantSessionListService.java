@@ -1,13 +1,15 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
@@ -23,7 +25,8 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -59,8 +62,8 @@ public class ConsultantSessionListService {
       Consultant consultant, String rcAuthToken,
       SessionListQueryParameter sessionListQueryParameter) {
 
-    List<ConsultantSessionResponseDTO> sessions = sessionService
-        .getSessionsForConsultant(consultant, sessionListQueryParameter.getSessionStatus());
+    List<ConsultantSessionResponseDTO> sessions = retrieveSessionsForStatus(consultant,
+        sessionListQueryParameter.getSessionStatus());
     List<ConsultantSessionResponseDTO> chats = new ArrayList<>();
 
     if (SessionStatus.isStatusValueInProgress(sessionListQueryParameter.getSessionStatus())) {
@@ -73,6 +76,25 @@ public class ConsultantSessionListService {
         .build();
 
     return mergeConsultantSessionsAndChats(consultant, sessions, chats, rocketChatCredentials);
+  }
+
+  private List<ConsultantSessionResponseDTO> retrieveSessionsForStatus(Consultant consultant,
+      Integer status) {
+    SessionStatus sessionStatus = getVerifiedSessionStatus(status);
+
+    if (sessionStatus.equals(SessionStatus.NEW)) {
+      return this.sessionService.getEnquiriesForConsultant(consultant);
+    }
+    if (sessionStatus.equals(SessionStatus.IN_PROGRESS)) {
+      return this.sessionService.getActiveSessionsForConsultant(consultant);
+    }
+    return emptyList();
+  }
+
+  private SessionStatus getVerifiedSessionStatus(Integer status) {
+    return SessionStatus.valueOf(status)
+        .orElseThrow(() -> new BadRequestException(String.format(
+            "Invalid session status %s ", status), LogService::logBadRequestException));
   }
 
   /**

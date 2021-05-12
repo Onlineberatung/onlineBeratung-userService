@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;

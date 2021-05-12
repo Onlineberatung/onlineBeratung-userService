@@ -10,15 +10,15 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import lombok.NonNull;
@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 public class CreateUserChatRelationFacade {
 
   private final @NonNull RocketChatService rocketChatService;
-  private final @NonNull UserHelper userHelper;
   private final @NonNull UserService userService;
   private final @NonNull UserAgencyService userAgencyService;
   private final @NonNull RollbackFacade rollbackFacade;
@@ -78,7 +77,7 @@ public class CreateUserChatRelationFacade {
   private DataDTO obtainRocketChatloginData(UserDTO userDTO, User user) {
     try {
       ResponseEntity<LoginResponseDTO> rcUserResponse = rocketChatService
-          .loginUserFirstTime(userHelper.encodeUsername(userDTO.getUsername()),
+          .loginUserFirstTime(new UsernameTranscoder().encodeUsername(userDTO.getUsername()),
               userDTO.getPassword());
 
       checkIfRocketLoginSucceeded(userDTO, user, rcUserResponse);

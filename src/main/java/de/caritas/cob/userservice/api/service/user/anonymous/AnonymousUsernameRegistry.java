@@ -4,7 +4,7 @@ import static java.lang.Integer.parseInt;
 import static java.util.Collections.sort;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.LinkedList;
 import lombok.NonNull;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class AnonymousUsernameRegistry {
 
   private final @NonNull UserService userService;
-  private final @NonNull UserHelper userHelper;
+  private final @NonNull UsernameTranscoder usernameTranscoder;
 
   @Value("${anonymous.username.prefix}")
   private String usernamePrefix;
@@ -41,7 +41,7 @@ public class AnonymousUsernameRegistry {
     } while (isUsernameOccupied(username));
 
 
-    return userHelper.encodeUsername(username);
+    return usernameTranscoder.encodeUsername(username);
   }
 
   private String generateUsername() {

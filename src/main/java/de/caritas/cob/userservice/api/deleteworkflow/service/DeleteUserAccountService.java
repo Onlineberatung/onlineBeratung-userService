@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.service;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.deleteworkflow.action.registry.DeleteActionsRegistry;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;

@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
@@ -46,6 +47,9 @@ public class ConsultantAdminServiceIT {
 
   @MockBean
   private ConsultantUpdateService consultantUpdateService;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultant_When_consultantIdExists() {

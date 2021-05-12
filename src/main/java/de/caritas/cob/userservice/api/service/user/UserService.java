@@ -4,7 +4,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import java.util.List;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final @NonNull UserRepository userRepository;
-  private final @NonNull UserHelper userHelper;
+  private final @NonNull UsernameTranscoder usernameTranscoder;
 
   /**
    * Deletes an user.
@@ -104,7 +104,8 @@ public class UserService {
    */
   public Optional<User> findUserByUsername(String username) {
     return userRepository.findByUsernameInAndDeleteDateIsNull(
-        List.of(userHelper.encodeUsername(username), userHelper.decodeUsername(username)));
+        List.of(usernameTranscoder.encodeUsername(username),
+            usernameTranscoder.decodeUsername(username)));
   }
 
   /**

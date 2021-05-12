@@ -15,8 +15,8 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
-import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,7 +74,7 @@ public class AnonymousConversationCreatorService {
             credentials.getUserId())));
   }
 
-  private List<ConsultantAgency> obtainConsultants(ConsultingType consultingType){
+  private List<ConsultantAgency> obtainConsultants(ConsultingType consultingType) {
     List<Long> agencyList = agencyService.getAgenciesByConsultingType(consultingType).stream()
         .map(AgencyDTO::getId)
         .collect(Collectors.toList());

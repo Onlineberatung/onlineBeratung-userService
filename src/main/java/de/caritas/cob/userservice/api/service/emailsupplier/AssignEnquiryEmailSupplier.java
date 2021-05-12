@@ -7,7 +7,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -28,7 +28,6 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
   private final String askerUserName;
   private final String applicationBaseUrl;
   private final ConsultantService consultantService;
-  private final UserHelper userHelper;
 
   /**
    * Generates the enquiry notification mail sent to regarding consultant.
@@ -58,7 +57,7 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
           receiverConsultant.getEmail(),
           senderConsultant.get().getFullName(),
           receiverConsultant.getFullName(),
-          userHelper.decodeUsername(askerUserName)));
+          new UsernameTranscoder().decodeUsername(askerUserName)));
     }
     LogService.logEmailNotificationFacadeError(String.format(
         "Error while sending assign message notification: Sender consultant with id %s could not be found in database.",
