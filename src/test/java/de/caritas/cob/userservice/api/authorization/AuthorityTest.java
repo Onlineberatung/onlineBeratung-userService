@@ -36,6 +36,15 @@ public class AuthorityTest {
   }
 
   @Test
+  public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleAnonymous() {
+    List<String> result = Authorities.getAuthoritiesByUserRole(UserRole.ANONYMOUS);
+
+    assertNotNull(result);
+    assertTrue(result.contains(Authority.ANONYMOUS_DEFAULT));
+    assertEquals(1, result.size());
+  }
+
+  @Test
   public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleU25Consultant() {
 
     List<String> result = Authorities.getAuthoritiesByUserRole(UserRole.U25_CONSULTANT);

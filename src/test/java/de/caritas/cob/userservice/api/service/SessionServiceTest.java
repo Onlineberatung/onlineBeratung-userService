@@ -9,6 +9,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ROLES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY_2;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSION;
@@ -45,6 +46,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
@@ -116,6 +118,8 @@ public class SessionServiceTest {
   private UserHelper userHelper;
   @Mock
   private ConsultantService consultantService;
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
 
   @Before
   public void setUp() {
@@ -191,24 +195,26 @@ public class SessionServiceTest {
 
   @Test
   public void initializeSession_Should_ReturnSession() {
-
     when(sessionRepository.save(any())).thenReturn(SESSION);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
-    Assert.assertEquals(expectedSession, SESSION);
 
+    Assert.assertEquals(expectedSession, SESSION);
   }
 
   @Test
   public void initializeSession_TeamSession_Should_ReturnSession() {
-
     when(sessionRepository.save(any())).thenReturn(SESSION);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
-    Assert.assertEquals(expectedSession, SESSION);
 
+    Assert.assertEquals(expectedSession, SESSION);
   }
 
   @Test

@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import java.util.Optional;
@@ -34,9 +35,10 @@ public class UserServiceTest {
 
   @InjectMocks
   private UserService userService;
-
   @Mock
   private UserRepository userRepository;
+  @Mock
+  private UserHelper userHelper;
 
   @Test
   public void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {
