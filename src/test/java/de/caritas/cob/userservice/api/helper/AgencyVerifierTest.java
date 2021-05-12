@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,8 +14,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import org.jeasy.random.EasyRandom;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -32,7 +31,7 @@ public class AgencyVerifierTest {
   @Mock
   private AgencyService agencyService;
 
-  private EasyRandom easyRandom = new EasyRandom();
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
@@ -84,26 +83,5 @@ public class AgencyVerifierTest {
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
     agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
-  }
-
-  @Test
-  public void doesConsultingTypeMatchToAgency_Should_ReturnTrue_When_AgencyIsAssignedToGivenConsultingType() {
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT))
-        .thenReturn(AGENCY_DTO_SUCHT);
-
-    boolean response =
-        agencyVerifier.doesConsultingTypeMatchToAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
-
-    assertTrue(response);
-  }
-
-  @Test
-  public void doesConsultingTypeMatchToAgency_Should_ReturnFalse_When_AgencyIsNotAssignedToGivenConsultingType() {
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT)).thenReturn(null);
-
-    boolean response =
-        agencyVerifier.doesConsultingTypeMatchToAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
-
-    assertFalse(response);
   }
 }

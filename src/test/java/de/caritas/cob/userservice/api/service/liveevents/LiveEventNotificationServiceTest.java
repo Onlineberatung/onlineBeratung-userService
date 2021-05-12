@@ -207,6 +207,7 @@ public class LiveEventNotificationServiceTest {
     verify(liveControllerApi, times(1)).sendLiveEvent(any(), captor.capture());
     assertEquals(EventType.NEWANONYMOUSENQUIRY, captor.getValue().getEventType());
   }
+
   @Test
   public void sendAcceptAnonymousEnquiryEventToUser_Should_doNothing_When_userIdIsNull() {
     this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser(null);
@@ -225,8 +226,7 @@ public class LiveEventNotificationServiceTest {
   public void sendAcceptAnonymousEnquiryEventToUser_Should_triggerLiveEvent_When_userIdIsValid() {
     this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("userId");
 
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(eq(singletonList("userId")),
-        eq(new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED)));
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(singletonList("userId"),
+        new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED));
   }
-
 }

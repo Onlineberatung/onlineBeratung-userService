@@ -11,8 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,13 +54,13 @@ public class ConversationControllerAuthorizationIT {
   private ConversationListResolver conversationListResolver;
 
   @MockBean
+  private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
+
+  @MockBean
   private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
 
   @MockBean
   private UsernameTranscoder usernameTranscoder;
-
-  @MockBean
-  private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
 
   @Test
   @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
