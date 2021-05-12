@@ -107,6 +107,7 @@ public class SessionAdminServiceIT {
     SessionFilter sessionFilter = new SessionFilter().consultingType(1);
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
+
     sessions.getEmbedded().forEach(sessionAdminDTO ->
         assertThat(sessionAdminDTO.getConsultingType(), is(1))
     );
@@ -144,6 +145,7 @@ public class SessionAdminServiceIT {
     SessionFilter sessionFilter = new SessionFilter().consultingType(-20);
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
+
     assertThat(sessions.getEmbedded(), hasSize(0));
   }
 
