@@ -44,6 +44,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    */
   List<Session> findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
       List<Long> agencyIds, SessionStatus sessionStatus, RegistrationType registrationType);
+
   /**
    * Find a {@link Session} by agency ids with status and teamberatung where consultant is not the
    * given consultant ordery by creation date ascending.
