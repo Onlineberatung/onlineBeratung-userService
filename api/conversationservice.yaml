@@ -36,7 +36,13 @@ paths:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
         204:
-          description: No content available but the request was ok.
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/consultants/enquiries/anonymous:
@@ -69,7 +75,13 @@ paths:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
         204:
-          description: No content available but the request was ok.
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/askers/anonymous/new:
