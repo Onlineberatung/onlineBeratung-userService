@@ -8,11 +8,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import org.jeasy.random.EasyRandom;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +31,8 @@ public class AgencyVerifierTest {
 
   @Mock
   private AgencyService agencyService;
+
+  private EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
@@ -61,6 +66,24 @@ public class AgencyVerifierTest {
     AgencyDTO agency = agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
 
     assertEquals(AGENCY_ID, agency.getId());
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void checkIfConsultingTypeMatchesToAgency_Should_ThrowBadRequestException_When_ConsultingTypeDoesNotMatchToAgency() {
+    when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
+
+    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_KREUZBUND.getValue()));
+    agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
+  }
+
+  @Test
+  public void checkIfConsultingTypeMatchesToAgency_ShouldNot_ThrowException_When_ConsultingTypeMatchesToAgency() {
+    when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
+
+    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
+    agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
   }
 
   @Test

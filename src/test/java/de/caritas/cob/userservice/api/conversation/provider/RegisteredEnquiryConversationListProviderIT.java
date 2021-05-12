@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -57,6 +58,9 @@ public class RegisteredEnquiryConversationListProviderIT {
 
   @MockBean
   private ValidatedUserAccountProvider userAccountProvider;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
 
   @Before
   public void setup() {

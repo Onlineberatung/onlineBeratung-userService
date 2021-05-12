@@ -24,6 +24,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -38,6 +39,7 @@ import org.springframework.lang.Nullable;
  * Represents a session of a user
  */
 @Entity
+@Builder
 @Table(name = "session")
 @AllArgsConstructor
 @NoArgsConstructor

@@ -17,8 +17,9 @@ import lombok.Getter;
 @Getter
 public enum Authorities {
 
-  CONSULTANT(UserRole.CONSULTANT, singletonList(Authority.CONSULTANT_DEFAULT)),
+  ANONYMOUS(UserRole.ANONYMOUS, singletonList(Authority.ANONYMOUS_DEFAULT)),
   USER(UserRole.USER, singletonList(Authority.USER_DEFAULT)),
+  CONSULTANT(UserRole.CONSULTANT, singletonList(Authority.CONSULTANT_DEFAULT)),
   U25_CONSULTANT(UserRole.U25_CONSULTANT, singletonList(Authority.USE_FEEDBACK)),
   U25_MAIN_CONSULTANT(UserRole.U25_MAIN_CONSULTANT, asList(
       Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.VIEW_ALL_PEER_SESSIONS,
@@ -48,8 +49,9 @@ public enum Authorities {
     }
 
     public static final String PREFIX = "AUTHORIZATION_";
-    public static final String CONSULTANT_DEFAULT = PREFIX + "CONSULTANT_DEFAULT";
+    public static final String ANONYMOUS_DEFAULT = PREFIX + "ANONYMOUS_DEFAULT";
     public static final String USER_DEFAULT = PREFIX + "USER_DEFAULT";
+    public static final String CONSULTANT_DEFAULT = PREFIX + "CONSULTANT_DEFAULT";
     public static final String USE_FEEDBACK = PREFIX + "USE_FEEDBACK";
     public static final String VIEW_ALL_FEEDBACK_SESSIONS = PREFIX + "VIEW_ALL_FEEDBACK_SESSIONS";
     public static final String VIEW_ALL_PEER_SESSIONS = PREFIX + "VIEW_ALL_PEER_SESSIONS";

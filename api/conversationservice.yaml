@@ -81,12 +81,21 @@ paths:
               $ref: '#/components/schemas/CreateAnonymousEnquiryDTO'
         required: true
       responses:
-        200:
-          description: OK - successfull operation
+        201:
+          description: CREATED - Anonymous user and enquiry successfully created.
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/CreateAnonymousEnquiryResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object or consulting type
+            doesn't provide anonymous conversations
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/askers/anonymous/{sessionId}/accept:
@@ -139,7 +148,13 @@ components:
       required:
         - userName
         - sessionId
+        - accessToken
+        - expiresIn
+        - refreshToken
+        - refreshExpiresIn
+        - rcUserId
         - rcToken
+        - rcGroupId
       properties:
         userName:
           type: string
@@ -148,10 +163,22 @@ components:
         sessionId:
           type: integer
           format: int64
-        bearerToken:
+        accessToken:
           type: string
           example: eyJhbGciOiJSUzI1NiIs(...)
-          description: The Keycloak bearer token for this user
+          description: The Keycloak access token for this user
+        expiresIn:
+          type: integer
+          example: 300
+          description: Number of seconds the access token is valid
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIs(...)
+          description: The Keycloak refresh token for this user
+        refreshExpiresIn:
+          type: integer
+          example: 6000
+          description: Number of seconds the refresh token is valid
         rcUserId:
           type: string
           example: piYG2BAE9ng(...)

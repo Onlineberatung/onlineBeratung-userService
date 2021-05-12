@@ -43,6 +43,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
@@ -116,6 +117,8 @@ public class SessionServiceTest {
   private UserHelper userHelper;
   @Mock
   private ConsultantService consultantService;
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
 
   @Before
   public void setUp() {
@@ -124,7 +127,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_SessionsSorted() {
+  public void getEnquiriesForConsultant_Should_SessionsSorted() {
 
     // Sorting for COBH-199 is done directly via the Spring CRUD repository using method notation.
     // The test becomes invalid if the method name has been changed.
@@ -174,24 +177,26 @@ public class SessionServiceTest {
 
   @Test
   public void initializeSession_Should_ReturnSession() {
-
     when(sessionRepository.save(any())).thenReturn(SESSION);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     Session expectedSession = sessionService
-        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
-    Assert.assertEquals(expectedSession, SESSION);
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
 
+    Assert.assertEquals(expectedSession, SESSION);
   }
 
   @Test
   public void initializeSession_TeamSession_Should_ReturnSession() {
-
     when(sessionRepository.save(any())).thenReturn(SESSION);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     Session expectedSession = sessionService
-        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
-    Assert.assertEquals(expectedSession, SESSION);
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
 
+    Assert.assertEquals(expectedSession, SESSION);
   }
 
   @Test
@@ -256,7 +261,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusNew() {
+  public void getEnquiriesForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusNew() {
 
     Consultant consultant = mock(Consultant.class);
 
@@ -269,7 +274,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusInProgress() {
+  public void getEnquiriesForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusInProgress() {
 
     when(sessionRepository.findByConsultantAndStatus(any(), any()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);

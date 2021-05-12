@@ -16,6 +16,10 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -33,6 +37,7 @@ import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -81,10 +86,17 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   private KeycloakAdminClientService keycloakAdminClientService;
 
   @MockBean
+  private RocketChatService rocketChatService;
+
+  @MockBean
   private RocketChatFacade rocketChatFacade;
 
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
+
   @Test
-  public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid() {
+  public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid()
+      throws RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
@@ -106,6 +118,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
+    verify(rocketChatService, times(1))
+        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
+    verify(rocketChatService, times(1))
+        .addUserToGroup(eq(consultant.getRocketChatId()),
+            eq(enquirySessionWithoutConsultant.getGroupId()));
+    verify(rocketChatService, times(1))
+        .addUserToGroup(eq(consultant.getRocketChatId()),
+            eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
     verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));
@@ -120,7 +140,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   }
 
   @Test
-  public void createNewConsultantAgency_Should_addConsultantToTeamSessionRocketChatGroups_When_ParamsAreValid() {
+  public void createNewConsultantAgency_Should_addConsultantToTeamSessionRocketChatGroups_When_ParamsAreValid()
+      throws RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
@@ -142,6 +163,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
+    verify(rocketChatService, times(1))
+        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
+    verify(rocketChatService, times(1))
+        .addUserToGroup(eq(consultant.getRocketChatId()),
+            eq(enquirySessionWithoutConsultant.getGroupId()));
+    verify(rocketChatService, times(1))
+        .addUserToGroup(eq(consultant.getRocketChatId()),
+            eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
     verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));

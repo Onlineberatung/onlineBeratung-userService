@@ -19,7 +19,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -65,9 +65,9 @@ public class KeycloakServiceTest {
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
     setField(keycloakService, "keycloakLoginUrl",
-        "http://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token");
+        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token");
     setField(keycloakService, "keycloakLogoutUrl",
-        "http://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout");
+        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout");
     setField(keycloakService, "keycloakClientId", "app");
     setInternalState(LogService.class, "LOGGER", logger);
   }
@@ -87,22 +87,23 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void loginUser_Should_ReturnLoginResponseDTO_When_KeycloakLoginWasSuccessful() {
-    LoginResponseDTO loginResponseDTO = new EasyRandom().nextObject(LoginResponseDTO.class);
+  public void loginUser_Should_ReturnKeycloakLoginResponseDTO_When_KeycloakLoginWasSuccessful() {
+    KeycloakLoginResponseDTO loginResponseDTO = new EasyRandom()
+        .nextObject(KeycloakLoginResponseDTO.class);
     when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
-        ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+        ArgumentMatchers.<Class<KeycloakLoginResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(loginResponseDTO, HttpStatus.OK));
 
-    LoginResponseDTO response = keycloakService.loginUser(USER_ID, OLD_PW);
+    KeycloakLoginResponseDTO response = keycloakService.loginUser(USER_ID, OLD_PW);
 
-    assertThat(response, instanceOf(LoginResponseDTO.class));
+    assertThat(response, instanceOf(KeycloakLoginResponseDTO.class));
   }
 
   @Test
   public void loginUser_Should_ReturnBadRequest_When_KeycloakLoginFails() {
     RestClientResponseException exception = mock(RestClientResponseException.class);
     when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
-        ArgumentMatchers.<Class<LoginResponseDTO>>any())).thenThrow(exception);
+        ArgumentMatchers.<Class<KeycloakLoginResponseDTO>>any())).thenThrow(exception);
 
     try {
       keycloakService.loginUser(USER_ID, OLD_PW);

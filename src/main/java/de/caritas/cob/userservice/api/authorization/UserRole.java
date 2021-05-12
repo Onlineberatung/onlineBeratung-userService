@@ -9,6 +9,7 @@ import lombok.Getter;
 @Getter
 public enum UserRole {
 
+  ANONYMOUS("anonymous"),
   USER("user"),
   CONSULTANT("consultant"),
   TECHNICAL("technical"),

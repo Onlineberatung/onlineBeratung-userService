@@ -80,21 +80,23 @@ public class CreateEnquiryMessageFacade {
 
       checkIfKeycloakAndRocketChatUsernamesMatch(rocketChatCredentials.getRocketChatUserId(), user);
 
-      Session session = fetchSessionForEnquiryMessage(sessionId, user);
+      var session = fetchSessionForEnquiryMessage(sessionId, user);
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
-      ConsultingTypeSettings consultingTypeSettings =
+      var consultingTypeSettings =
           consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
-      String rcGroupId = retrieveRcGroupId(session, agencyList, rocketChatCredentials);
+      String rcGroupId = createRocketChatRoom(session, agencyList, rocketChatCredentials);
       String rcFeedbackGroupId = retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(session,
           rcGroupId, agencyList, consultingTypeSettings);
 
-      CreateEnquiryExceptionInformation createEnquiryExceptionInformation =
-          CreateEnquiryExceptionInformation.builder().session(session)
-              .rcGroupId(rcGroupId).rcFeedbackGroupId(rcFeedbackGroupId).build();
+      var createEnquiryExceptionInformation = CreateEnquiryExceptionInformation.builder()
+          .session(session)
+          .rcGroupId(rcGroupId)
+          .rcFeedbackGroupId(rcFeedbackGroupId)
+          .build();
 
       saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
 
@@ -148,7 +150,17 @@ public class CreateEnquiryMessageFacade {
     }
   }
 
-  private String retrieveRcGroupId(Session session, List<ConsultantAgency> agencyList,
+  /**
+   * Creates a new room in Rocket.Chat for the given {@link Session} and adds the consultants from
+   * the provided {@link ConsultantAgency} list to the created room.
+   *
+   * @param session               {@link Session}
+   * @param agencyList            list of {{@link ConsultantAgency} to add to the room
+   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @return Rocket.Chat group ID
+   * @throws CreateEnquiryException when error occurs during creation
+   */
+  public String createRocketChatRoom(Session session, List<ConsultantAgency> agencyList,
       RocketChatCredentials rocketChatCredentials) throws CreateEnquiryException {
 
     String rcGroupId = createRocketChatGroupForSession(session, rocketChatCredentials);
@@ -161,7 +173,7 @@ public class CreateEnquiryMessageFacade {
 
     } catch (RocketChatAddSystemUserException | RocketChatAddUserToGroupException
         | RocketChatRemoveSystemMessagesException | RocketChatUserNotInitializedException exception) {
-      CreateEnquiryExceptionInformation createEnquiryExceptionInformation =
+      var createEnquiryExceptionInformation =
           CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
       throw new CreateEnquiryException(
           String.format("Could not initialize chat for session %s", session.getId()),
@@ -240,8 +252,10 @@ public class CreateEnquiryMessageFacade {
       List<ConsultantAgency> agencyList) throws CreateEnquiryException {
 
     String rcFeedbackGroupId = null;
-    CreateEnquiryExceptionInformation createEnquiryExceptionInformation =
-        CreateEnquiryExceptionInformation.builder().session(session).rcGroupId(rcGroupId).build();
+    var createEnquiryExceptionInformation = CreateEnquiryExceptionInformation.builder()
+        .session(session)
+        .rcGroupId(rcGroupId)
+        .build();
 
     try {
 
@@ -273,7 +287,7 @@ public class CreateEnquiryMessageFacade {
         .createPrivateGroupWithSystemUser(
             rocketChatRoomNameGenerator.generateFeedbackGroupName(session));
 
-    if (!rcFeedbackGroupDTO.isPresent() || Objects
+    if (rcFeedbackGroupDTO.isEmpty() || Objects
         .isNull(rcFeedbackGroupDTO.get().getGroup().getId())) {
       throw new CreateEnquiryException(
           String.format("Could not create rc feedback group for session %s", session.getId()),
