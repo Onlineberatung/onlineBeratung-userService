@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.consultantagency;
 
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 
@@ -17,5 +18,5 @@ public interface ConsultantAgencyRepository extends CrudRepository<ConsultantAge
 
   List<ConsultantAgency> findByConsultantId(String consultantId);
 
-  List<ConsultantAgency> findByAgencyIdInAndDeleteDateIsNull(List<Long> agencyIds);
+  List<ConsultantAgency> findByAgencyIdInAndDeleteDateIsNull(Collection<Long> agencyIds);
 }

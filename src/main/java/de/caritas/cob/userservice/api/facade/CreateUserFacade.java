@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Facade to encapsulate the steps to initialize an user account.
+ * Facade to encapsulate the steps to initialize a user account.
  */
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class CreateUserFacade {
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 
   /**
-   * Creates an user in Keycloak and MariaDB. Then creates a session or chat account depending on
+   * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on
    * the provided {@link ConsultingType}.
    *
    * @param userDTO {@link UserDTO}
@@ -55,7 +55,7 @@ public class CreateUserFacade {
   }
 
   /**
-   * Updates Keycloak role and password and creates an user account in MariaDB.
+   * Updates Keycloak role and password and creates a user account in MariaDB.
    *
    * @param userId Keycloak user ID
    * @param userDTO {@link UserDTO}
@@ -81,7 +81,7 @@ public class CreateUserFacade {
 
   private ConsultingTypeSettings obtainConsultingTypeSettings(UserDTO userDTO) {
     return consultingTypeManager.getConsultingTypeSettings(
-            ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())]);
+            ConsultingType.fromConsultingType(userDTO.getConsultingType()));
   }
 
   private void updateKeycloakRoleAndPassword(String userId, UserDTO userDTO, UserRole role) {

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.config;
 
-import java.util.Arrays;
+import java.util.List;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
   private String docuPath;
 
   @Value("${cors.allowed.paths}")
-  private String allowedPaths;
+  private List<String> allowedPaths;
 
   @Value("${cors.allowed.origins}")
   private String[] allowedOrigins;
@@ -28,8 +28,7 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
 
   @Override
   public void addCorsMappings(@NonNull CorsRegistry registry) {
-    Arrays.stream(allowedPaths.split(","))
-        .forEach(path -> addCorsMapping(registry, path));
+    allowedPaths.forEach(path -> addCorsMapping(registry, path));
   }
 
   private void addCorsMapping(CorsRegistry registry, String path) {

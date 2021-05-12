@@ -42,7 +42,7 @@ public class AnonymousUsernameRegistryTest {
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithMissingIdOfList_When_MissingUserIdNotExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
-    setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
+    setIdRegistryField(idRegistryListWithoutThree);
     when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
 
     anonymousUsernameRegistry.generateUniqueUsername();
@@ -52,10 +52,15 @@ public class AnonymousUsernameRegistryTest {
     assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 3"));
   }
 
+  private void setIdRegistryField(LinkedList<Integer> idRegistryListWithoutThree) {
+    setInternalState(AnonymousUsernameRegistry.class, "ID_REGISTRY",
+        idRegistryListWithoutThree);
+  }
+
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithSecondMissingIdOfList_When_FirstMissingUserIdIsExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
-    setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
+    setIdRegistryField(idRegistryListWithoutThree);
     when(userService.findUserByUsername("Ratsuchende_r 3")).thenReturn(Optional.of(USER));
     when(userService.findUserByUsername("Ratsuchende_r 5")).thenReturn(Optional.empty());
 
@@ -69,7 +74,7 @@ public class AnonymousUsernameRegistryTest {
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithIdOne_When_ListIsEmptyAndUserNotExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>();
-    setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
+    setIdRegistryField(idRegistryListWithoutThree);
     when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
 
     anonymousUsernameRegistry.generateUniqueUsername();
@@ -82,7 +87,7 @@ public class AnonymousUsernameRegistryTest {
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_ListContainsContiguousIdsAndUserNotExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 3, 4, 5));
-    setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
+    setIdRegistryField(idRegistryListWithoutThree);
     when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
 
     anonymousUsernameRegistry.generateUniqueUsername();
@@ -95,7 +100,7 @@ public class AnonymousUsernameRegistryTest {
   @Test
   public void generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_MissingIdsOfListHaveExistingUsersInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
-    setInternalState(AnonymousUsernameRegistry.class, "idRegistry", idRegistryListWithoutThree);
+    setIdRegistryField(idRegistryListWithoutThree);
     when(userService.findUserByUsername("Ratsuchende_r 3")).thenReturn(Optional.of(USER));
     when(userService.findUserByUsername("Ratsuchende_r 5")).thenReturn(Optional.of(USER));
     when(userService.findUserByUsername("Ratsuchende_r 7")).thenReturn(Optional.empty());

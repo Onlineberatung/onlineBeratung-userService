@@ -128,7 +128,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_SessionsSorted() {
+  public void getEnquiriesForConsultant_Should_SessionsSorted() {
 
     // Sorting for COBH-199 is done directly via the Spring CRUD repository using method notation.
     // The test becomes invalid if the method name has been changed.
@@ -279,7 +279,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusNew() {
+  public void getEnquiriesForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusNew() {
 
     Consultant consultant = mock(Consultant.class);
 
@@ -292,7 +292,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void getSessionsForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusInProgress() {
+  public void getEnquiriesForConsultant_Should_ReturnListOfConsultantSessionResponseDTO_WhenProvidedWithValidConsultantAndStatusInProgress() {
 
     when(sessionRepository.findByConsultantAndStatus(any(), any()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);

@@ -182,7 +182,7 @@ public class SessionService {
 
   private ConsultingTypeSettings obtainConsultingTypeSettings(UserDTO userDTO) {
     return consultingTypeManager.getConsultingTypeSettings(
-        ConsultingType.values()[Integer.parseInt(userDTO.getConsultingType())]);
+        ConsultingType.fromConsultingType(userDTO.getConsultingType()));
   }
 
   /**

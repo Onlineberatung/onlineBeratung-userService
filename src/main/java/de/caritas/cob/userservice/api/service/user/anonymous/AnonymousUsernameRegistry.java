@@ -25,7 +25,7 @@ public class AnonymousUsernameRegistry {
   @Value("${anonymous.username.prefix}")
   private String usernamePrefix;
 
-  private static final LinkedList<Integer> idRegistry = new LinkedList<>();
+  private static final LinkedList<Integer> ID_REGISTRY = new LinkedList<>();
 
   /**
    * Generates an unique anonymous username.
@@ -37,7 +37,7 @@ public class AnonymousUsernameRegistry {
     String username;
     do {
       username = generateUsername();
-      idRegistry.add(obtainUsernameId(username));
+      ID_REGISTRY.add(obtainUsernameId(username));
     } while (isUsernameOccupied(username));
 
 
@@ -51,9 +51,9 @@ public class AnonymousUsernameRegistry {
   private int obtainSmallestPossibleId() {
 
     var smallestId = 1;
-    sort(idRegistry);
+    sort(ID_REGISTRY);
 
-    for (int i : idRegistry) {
+    for (int i : ID_REGISTRY) {
       if (smallestId < i) {
         return smallestId;
       }

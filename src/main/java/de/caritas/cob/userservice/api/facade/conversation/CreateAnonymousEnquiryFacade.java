@@ -30,7 +30,7 @@ public class CreateAnonymousEnquiryFacade {
   private static final String DEFAULT_ANONYMOUS_POSTCODE = "00000";
 
   /**
-   * Creates an anonymous user account and its corresponding anonymous conversation rep. session
+   * Creates an anonymous user account and its corresponding anonymous conversation resp. session
    * and returns all needed user credentials.
    *
    * @param createAnonymousEnquiryDTO {@link CreateAnonymousEnquiryDTO}
@@ -58,8 +58,8 @@ public class CreateAnonymousEnquiryFacade {
 
   private void checkIfConsultingTypeHasAnonymousConsulting(
       CreateAnonymousEnquiryDTO createAnonymousEnquiryDTO) {
-    var consultingType =
-        ConsultingType.values()[createAnonymousEnquiryDTO.getConsultingType()];
+    var consultingTypeValue = createAnonymousEnquiryDTO.getConsultingType().toString();
+    var consultingType = ConsultingType.fromConsultingType(consultingTypeValue);
     List<ConsultingType> blockedConsultingTypes = List.of(ConsultingType.U25,
         ConsultingType.REGIONAL, ConsultingType.KREUZBUND, ConsultingType.SUPPORTGROUPVECHTA);
 
