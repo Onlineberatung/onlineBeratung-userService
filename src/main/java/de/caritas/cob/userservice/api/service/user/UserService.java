@@ -3,10 +3,11 @@ package de.caritas.cob.userservice.api.service.user;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final @NonNull UserRepository userRepository;
+  private final @NonNull UsernameTranscoder usernameTranscoder;
 
   /**
    * Deletes an user.
@@ -92,6 +94,18 @@ public class UserService {
    */
   public Optional<User> findUserByRcUserId(String rcUserId) {
     return userRepository.findByRcUserIdAndDeleteDateIsNull(rcUserId);
+  }
+
+  /**
+   * Finds an user by the given username (searches for encoded and decoded version of it).
+   *
+   * @param username the username to search for
+   * @return {@link Optional} of {@link User}
+   */
+  public Optional<User> findUserByUsername(String username) {
+    return userRepository.findByUsernameInAndDeleteDateIsNull(
+        List.of(usernameTranscoder.encodeUsername(username),
+            usernameTranscoder.decodeUsername(username)));
   }
 
   /**

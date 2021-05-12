@@ -1,23 +1,24 @@
 package de.caritas.cob.userservice.api.service;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ConsultantAgencyService {
 
-  @Autowired
-  ConsultantAgencyRepository consultantAgencyRepository;
+  private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
 
   /**
    * Save a {@link ConsultantAgency} to the database.
@@ -26,12 +27,7 @@ public class ConsultantAgencyService {
    * @return the {@link ConsultantAgency}
    */
   public ConsultantAgency saveConsultantAgency(ConsultantAgency consultantAgency) {
-    try {
-      return consultantAgencyRepository.save(consultantAgency);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while saving consultant agency",
-          LogService::logDatabaseError);
-    }
+    return consultantAgencyRepository.save(consultantAgency);
   }
 
   /**
@@ -41,32 +37,32 @@ public class ConsultantAgencyService {
    * @return {@link List} of {@link ConsultantAgency}
    */
   public List<ConsultantAgency> findConsultantsByAgencyId(Long agencyId) {
-    try {
-      return consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while loading consultants by agency",
-          LogService::logDatabaseError);
-    }
+    return consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId);
   }
 
   /**
    * Checks if provided consultant is assigned to provided agency.
    *
    * @param consultantId consultant ID
-   * @param agencyId     agency ID
+   * @param agencyId agency ID
    * @return true if provided consultant is assigned to provided agency
    */
   public boolean isConsultantInAgency(String consultantId, Long agencyId) {
-    try {
+    List<ConsultantAgency> agencyList =
+        consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(
+            consultantId, agencyId);
 
-      List<ConsultantAgency> agencyList =
-          consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, agencyId);
+    return isNotEmpty(agencyList);
+  }
 
-      return isNotEmpty(agencyList);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while getting agency id data set for"
-          + " consultant", LogService::logDatabaseError);
-    }
+  /**
+   * Returns a {@link List} of {@link ConsultantAgency} for the provided agency IDs.
+   *
+   * @param agencyIds list of agency Ids
+   * @return {@link List} of {@link ConsultantAgency}
+   */
+  public List<ConsultantAgency> getConsultantsOfAgencies(List<Long> agencyIds) {
+    return consultantAgencyRepository.findByAgencyIdInAndDeleteDateIsNull(agencyIds);
   }
 
   /**
@@ -78,38 +74,22 @@ public class ConsultantAgencyService {
    */
   public List<ConsultantResponseDTO> getConsultantsOfAgency(Long agencyId) {
 
-    List<ConsultantAgency> agencyList;
-    List<ConsultantResponseDTO> responseList = null;
+    List<ConsultantAgency> agencyList =
+        consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(
+            agencyId);
 
-    try {
-      agencyList = consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(agencyId);
-    } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while loading consultant list",
-          LogService::logDatabaseError);
-    }
-
-    if (agencyList != null) {
-      responseList = agencyList.stream().map(this::convertToConsultantResponseDTO)
+    if (isNotEmpty(agencyList)) {
+      return agencyList.stream()
+          .map(this::convertToConsultantResponseDTO)
           .collect(Collectors.toList());
     }
 
-    return responseList;
+    return emptyList();
   }
 
   private ConsultantResponseDTO convertToConsultantResponseDTO(ConsultantAgency agency) {
 
-    String error;
-
-    if (agency == null) {
-      error = "Database inconsistency: agency is null";
-      throw new InternalServerErrorException(error, LogService::logDatabaseError);
-    }
-    if (agency.getConsultant() == null) {
-      error = String.format(
-          "Database inconsistency: could not get assigned consultant for agency with id %s",
-          agency.getAgencyId());
-      throw new InternalServerErrorException(error, LogService::logDatabaseError);
-    }
+    checkForInconsistencies(agency);
 
     return new ConsultantResponseDTO()
         .consultantId(agency.getConsultant().getId())
@@ -117,4 +97,25 @@ public class ConsultantAgencyService {
         .lastName(agency.getConsultant().getLastName());
   }
 
+  private void checkForInconsistencies(ConsultantAgency agency) {
+    checkForMissingAgency(agency);
+    checkForMissingConsultant(agency);
+  }
+
+  private void checkForMissingAgency(ConsultantAgency agency) {
+    if (isNull(agency)) {
+      throw new InternalServerErrorException(
+          "Database inconsistency: agency is null", LogService::logDatabaseError);
+    }
+  }
+
+  private void checkForMissingConsultant(ConsultantAgency agency) {
+    if (isNull(agency.getConsultant())) {
+      throw new InternalServerErrorException(
+          String.format(
+              "Database inconsistency: could not get assigned consultant for agency with id %s",
+              agency.getAgencyId()),
+          LogService::logDatabaseError);
+    }
+  }
 }

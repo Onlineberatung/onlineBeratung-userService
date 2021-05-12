@@ -49,8 +49,8 @@ public class CreateSessionFacade {
       ConsultingTypeSettings consultingTypeSettings) {
 
     checkIfAlreadyRegisteredToConsultingType(user, consultingTypeSettings.getConsultingType());
-    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, consultingTypeSettings.getConsultingType());
-    Session session = initializeSession(userDTO, user, consultingTypeSettings, agencyDTO);
+    var agencyDTO = obtainVerifiedAgency(userDTO, consultingTypeSettings.getConsultingType());
+    var session = initializeSession(userDTO, user, agencyDTO);
     initializeMonitoring(userDTO, user, consultingTypeSettings, session);
 
     return session.getId();
@@ -73,13 +73,11 @@ public class CreateSessionFacade {
     }
   }
 
-  private Session initializeSession(UserDTO userDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings, AgencyDTO agencyDTO) {
+  private Session initializeSession(UserDTO userDTO, User user, AgencyDTO agencyDTO) {
 
     try {
-      Session session = sessionService
-          .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
-              consultingTypeSettings);
+      var session = sessionService
+          .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()));
       sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 
       return session;
@@ -97,7 +95,7 @@ public class CreateSessionFacade {
   }
 
   private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, ConsultingType consultingType) {
-    AgencyDTO agencyDTO =
+    var agencyDTO =
         agencyVerifier.getVerifiedAgency(userDTO.getAgencyId(), consultingType);
 
     if (isNull(agencyDTO)) {

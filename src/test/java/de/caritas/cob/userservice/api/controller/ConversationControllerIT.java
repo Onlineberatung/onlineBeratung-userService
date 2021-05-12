@@ -1,12 +1,18 @@
 package de.caritas.cob.userservice.api.controller;
 
+import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.INVALID_USER_REQUEST_BODY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
+import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,9 +31,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 public class ConversationControllerIT {
 
-  private static final String ENQUIREIES_BASE_PATH = "/conversations/consultants/enquiries/";
-  static final String GET_ANONYMOUS_ENQUIRIES_PATH = ENQUIREIES_BASE_PATH + "anonymous";
-  static final String GET_REGISTERED_ENQUIRIES_PATH = ENQUIREIES_BASE_PATH + "registered";
+  private static final String ENQUIRIES_BASE_PATH = "/conversations/consultants/enquiries/";
+  static final String GET_ANONYMOUS_ENQUIRIES_PATH = ENQUIRIES_BASE_PATH + "anonymous";
+  static final String GET_REGISTERED_ENQUIRIES_PATH = ENQUIRIES_BASE_PATH + "registered";
+  static final String POST_CREATE_ANONYMOUS_ENQUIRY_PATH = "/conversations/askers/anonymous/new";
 
   @Autowired
   private MockMvc mvc;
@@ -36,6 +44,9 @@ public class ConversationControllerIT {
 
   @MockBean
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
+
+  @MockBean
+  private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
 
   @MockBean
   private LinkDiscoverers linkDiscoverers;
@@ -144,4 +155,24 @@ public class ConversationControllerIT {
         .andExpect(status().isBadRequest());
   }
 
+  @Test
+  public void createAnonymousEnquiry_Should_ReturnCreated_WhenProvidedWithValidRequestBody()
+      throws Exception {
+    this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
+        .content(new ObjectMapper().writeValueAsString(new EasyRandom().nextObject(
+            CreateAnonymousEnquiryDTO.class)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated());
+  }
+
+  @Test
+  public void createAnonymousEnquiry_Should_ReturnBadRequest_WhenProvidedWithInvalidRequestBody()
+      throws Exception {
+    this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
+        .content(INVALID_USER_REQUEST_BODY)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
 }
