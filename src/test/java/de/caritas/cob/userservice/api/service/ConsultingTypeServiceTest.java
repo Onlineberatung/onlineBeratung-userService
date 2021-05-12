@@ -30,7 +30,7 @@ public class ConsultingTypeServiceTest {
   private SecurityHeaderSupplier securityHeaderSupplier;
 
   @Test
-  public void setup() {
+  public void ConsultingTypeService_Should_Return_A_IdList_From_BasicConsultingTypeResponseDTO() {
     int size = 15;
     var randomBasicConsultingTypeResponseDTOList = generateRandomExtendedConsultingTypeResponseDTOList(
         size);
@@ -38,8 +38,9 @@ public class ConsultingTypeServiceTest {
         .thenReturn(randomBasicConsultingTypeResponseDTOList);
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
     List<Integer> consultingTypeIds = consultingTypeService.getAllConsultingTypeIds();
-    assertTrue(consultingTypeIds.size() == size);
-    assertEquals(randomBasicConsultingTypeResponseDTOList.stream().map(e -> e.getId())
+    assertEquals(consultingTypeIds.size(), size);
+    assertEquals(randomBasicConsultingTypeResponseDTOList.stream().map(
+        BasicConsultingTypeResponseDTO::getId)
         .collect(Collectors.toList()), consultingTypeIds);
   }
 
