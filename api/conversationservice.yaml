@@ -65,7 +65,7 @@ paths:
         200:
           description: OK - successfull operation
           content:
-            application/json:              schema:
+            application/json:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
         204:
           description: No content available but the request was ok.
