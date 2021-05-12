@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
@@ -23,6 +22,7 @@ import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -48,7 +48,6 @@ public class SessionService {
 
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AgencyService agencyService;
-  private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull ConsultantService consultantService;
 
   /**
@@ -205,11 +204,25 @@ public class SessionService {
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
   public List<ConsultantSessionResponseDTO> getEnquiriesForConsultant(Consultant consultant) {
+    return getEnquiriesForConsultant(consultant, null);
+  }
+
+  public List<ConsultantSessionResponseDTO> getEnquiriesForConsultant(Consultant consultant,
+      RegistrationType registrationType) {
     Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
     if (nonNull(consultantAgencies)) {
       List<Long> consultantAgencyIds = consultantAgencies.stream()
           .map(ConsultantAgency::getAgencyId)
           .collect(Collectors.toList());
+
+      if (registrationType != null) {
+        return this.sessionRepository
+            .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+                consultantAgencyIds, SessionStatus.NEW, registrationType)
+            .stream()
+            .map(session -> new SessionMapper().toConsultantSessionDto(session))
+            .collect(Collectors.toList());
+      }
 
       return this.sessionRepository
           .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
