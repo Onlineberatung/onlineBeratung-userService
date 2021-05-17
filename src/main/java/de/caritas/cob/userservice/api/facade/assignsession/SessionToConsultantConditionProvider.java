@@ -13,11 +13,13 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 /**
  * Provides several conditions used to validate {@link Session} and {@link Consultant} to be
  * updated.
  */
+@Service
 @RequiredArgsConstructor
 public class SessionToConsultantConditionProvider {
 
