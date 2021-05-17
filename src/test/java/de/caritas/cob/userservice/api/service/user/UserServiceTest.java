@@ -18,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -135,6 +136,7 @@ public class UserServiceTest {
 
   @Test
   public void findUserByUsername_Should_SearchForEncodedAndDecodedUsername() {
+    setField(userService, "usernameTranscoder", usernameTranscoder);
     when(usernameTranscoder.decodeUsername(any())).thenReturn(USERNAME);
     when(usernameTranscoder.encodeUsername(any())).thenReturn(USERNAME);
 

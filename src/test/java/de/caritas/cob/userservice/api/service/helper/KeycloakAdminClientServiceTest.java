@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.authorization.UserRole;
@@ -71,6 +72,7 @@ public class KeycloakAdminClientServiceTest {
 
   @Before
   public void setup() {
+    setField(keycloakAdminClientService, "usernameTranscoder", usernameTranscoder);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
