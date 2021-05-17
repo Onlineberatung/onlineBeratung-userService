@@ -7,6 +7,8 @@ import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.List;
@@ -38,7 +40,8 @@ public class RegisteredEnquiryConversationListProvider implements ConversationLi
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
     PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(
-        this.sessionService.getEnquiriesForConsultant(consultant));
+        this.sessionService.getEnquiriesForConsultant(consultant, RegistrationType.REGISTERED));
+
     enquiriesForConsultant.setPage(pageableListRequest.getOffset());
     enquiriesForConsultant.setPageSize(pageableListRequest.getCount());
 

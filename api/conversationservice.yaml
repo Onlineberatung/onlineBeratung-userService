@@ -40,6 +40,14 @@ paths:
             application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/consultants/enquiries/anonymous:
@@ -76,6 +84,14 @@ paths:
             application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/askers/anonymous/new:
@@ -104,6 +120,37 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /conversations/askers/anonymous/{sessionId}/accept:
+    put:
+      tags:
+        - conversation-controller
+      summary: 'Accept an anonymous enquiry and assign it to the currently authenticated consultant
+            [Authorization: Role: consultant]'
+      operationId: acceptAnonymousEnquiry
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - enquiry already accepted by another consultant or
+            consulting type of session is not assigned to consultant
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

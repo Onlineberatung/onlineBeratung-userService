@@ -3,19 +3,26 @@ package de.caritas.cob.userservice.api.conversation.service;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.conversation.provider.ConversationListProvider;
 import de.caritas.cob.userservice.api.conversation.registry.ConversationListProviderRegistry;
+import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ConversationListResolverTest {
 
   @InjectMocks
@@ -32,15 +39,30 @@ public class ConversationListResolverTest {
 
   @Test
   public void resolveConversations_Should_returnExpectedResponse_When_paramsAreValid() {
-    when(this.conversationListProvider.buildConversations(any()))
-        .thenReturn(this.consultantSessionListResponseDTO);
-    when(this.conversationListProviderRegistry.findByConversationType(ANONYMOUS_ENQUIRY))
-        .thenReturn(this.conversationListProvider);
+    whenConversationListProviderReturnsAnonymousResponseSessions(
+        List.of(mock(ConsultantSessionResponseDTO.class)));
 
-    ConsultantSessionListResponseDTO responseDTO = this.conversationListResolver
-        .resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
+    var responseDTO = this.conversationListResolver.resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
 
     assertThat(responseDTO, is(consultantSessionListResponseDTO));
   }
 
+  private void whenConversationListProviderReturnsAnonymousResponseSessions(List<ConsultantSessionResponseDTO> responseSessions) {
+    when(this.conversationListProvider.buildConversations(any()))
+        .thenReturn(this.consultantSessionListResponseDTO);
+    when(this.conversationListProviderRegistry.findByConversationType(ANONYMOUS_ENQUIRY))
+        .thenReturn(this.conversationListProvider);
+    when(this.consultantSessionListResponseDTO.getSessions())
+        .thenReturn(responseSessions);
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  public void resolveConversations_Should_throwException_When_noSessionsAreFound(List<ConsultantSessionResponseDTO> emptySessions) {
+    whenConversationListProviderReturnsAnonymousResponseSessions(emptySessions);
+
+    assertThrows(NoContentException.class, () -> {
+      this.conversationListResolver.resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
+    });
+  }
 }

@@ -7,7 +7,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
-import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -28,7 +27,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
@@ -90,15 +89,10 @@ public class SessionService {
    * @param status     the status of the session
    */
   public void updateConsultantAndStatusForSession(Session session, Consultant consultant,
-      SessionStatus status) throws UpdateSessionException {
-
-    try {
-      session.setConsultant(consultant);
-      session.setStatus(status);
-      saveSession(session);
-    } catch (InternalServerErrorException serviceException) {
-      throw new UpdateSessionException(serviceException);
-    }
+      SessionStatus status) {
+    session.setConsultant(consultant);
+    session.setStatus(status);
+    saveSession(session);
   }
 
   /**
@@ -234,20 +228,45 @@ public class SessionService {
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
   public List<ConsultantSessionResponseDTO> getEnquiriesForConsultant(Consultant consultant) {
-    Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
-    if (nonNull(consultantAgencies)) {
-      List<Long> consultantAgencyIds = consultantAgencies.stream()
-          .map(ConsultantAgency::getAgencyId)
-          .collect(Collectors.toList());
+    return getEnquiriesForConsultant(consultant, null);
+  }
 
-      return this.sessionRepository
-          .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-              consultantAgencyIds, SessionStatus.NEW)
-          .stream()
-          .map(session -> new SessionMapper().toConsultantSessionDto(session))
-          .collect(Collectors.toList());
+  public List<ConsultantSessionResponseDTO> getEnquiriesForConsultant(Consultant consultant,
+      RegistrationType registrationType) {
+    Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
+    if (isNotEmpty(consultantAgencies)) {
+      return retrieveEnquiriesForConsultantAgencies(consultantAgencies, registrationType);
     }
     return emptyList();
+  }
+
+  private List<ConsultantSessionResponseDTO> retrieveEnquiriesForConsultantAgencies(
+      Set<ConsultantAgency> consultantAgencies, RegistrationType registrationType) {
+    List<Long> consultantAgencyIds = consultantAgencies.stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+
+    final List<Session> sessions = retrieveSessionsByRegistrationType(
+        registrationType, consultantAgencyIds);
+
+    return sessions.stream()
+        .map(session -> new SessionMapper().toConsultantSessionDto(session))
+        .collect(Collectors.toList());
+  }
+
+  private List<Session> retrieveSessionsByRegistrationType(RegistrationType registrationType,
+      List<Long> consultantAgencyIds) {
+    final List<Session> sessions;
+    if (registrationType != null) {
+      sessions = this.sessionRepository
+          .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+              consultantAgencyIds, SessionStatus.NEW, registrationType);
+    } else {
+      sessions = this.sessionRepository
+          .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
+              consultantAgencyIds, SessionStatus.NEW);
+    }
+    return sessions;
   }
 
   /**

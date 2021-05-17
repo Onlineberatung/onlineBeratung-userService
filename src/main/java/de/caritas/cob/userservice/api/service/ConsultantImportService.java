@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSetti
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.io.FileReader;
 import java.io.IOException;

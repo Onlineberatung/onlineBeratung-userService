@@ -3,9 +3,11 @@ package de.caritas.cob.userservice.api.conversation.service;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.conversation.registry.ConversationListProviderRegistry;
+import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,8 +36,15 @@ public class ConversationListResolver {
         .rcToken(rcToken)
         .build();
 
-    return this.conversationListProviderRegistry.findByConversationType(conversationType)
-        .buildConversations(pageableListRequest);
+    var responseDto = this.conversationListProviderRegistry
+        .findByConversationType(conversationType).buildConversations(pageableListRequest);
+    if (CollectionUtils.isNotEmpty(responseDto.getSessions())) {
+      return responseDto;
+    }
+
+    var exceptionMessage = String
+        .format("No sessions found for parameters offset=%s, count=%s", offset, count);
+    throw new NoContentException(exceptionMessage);
   }
 
 }

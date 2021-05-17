@@ -7,6 +7,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -16,12 +17,11 @@ import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,7 +41,7 @@ public class ConsultantAgencyRelationCreatorService {
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull AgencyService agencyService;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
-  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull RocketChatFacade rocketChatFacade;
   private final @NonNull SessionRepository sessionRepository;
 
   /**
@@ -138,7 +138,7 @@ public class ConsultantAgencyRelationCreatorService {
       Consumer<String> logMethod) {
     List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
         .onSessions(relevantSessions)
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();
