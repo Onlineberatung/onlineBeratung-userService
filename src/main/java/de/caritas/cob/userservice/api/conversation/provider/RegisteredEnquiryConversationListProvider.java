@@ -4,7 +4,7 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
-import de.caritas.cob.userservice.api.conversation.service.ConsultantEnquiryUpdater;
+import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -24,7 +24,7 @@ public class RegisteredEnquiryConversationListProvider implements ConversationLi
 
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
   private final @NonNull SessionService sessionService;
-  private final @NonNull ConsultantEnquiryUpdater consultantEnquiryUpdater;
+  private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
 
   /**
    * Builds the {@link ConsultantSessionListResponseDTO}.
@@ -43,7 +43,7 @@ public class RegisteredEnquiryConversationListProvider implements ConversationLi
     enquiriesForConsultant.setPageSize(pageableListRequest.getCount());
 
     List<ConsultantSessionResponseDTO> pageList = enquiriesForConsultant.getPageList();
-    pageList.forEach(sessionResponse -> this.consultantEnquiryUpdater
+    pageList.forEach(sessionResponse -> this.consultantSessionEnricher
         .updateRequiredConsultantSessionValues(sessionResponse,
             pageableListRequest.getRcToken(), consultant));
 

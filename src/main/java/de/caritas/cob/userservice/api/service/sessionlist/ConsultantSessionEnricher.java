@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.conversation.service;
+package de.caritas.cob.userservice.api.service.sessionlist;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
@@ -17,14 +17,27 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class to enrich a session of an consultant with required Rocket.Chat data.
+ */
 @Service
 @RequiredArgsConstructor
-public class ConsultantEnquiryUpdater {
+public class ConsultantSessionEnricher {
 
   private final @NonNull SessionListAnalyser sessionListAnalyser;
   private final @NonNull RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
 
+  /**
+   * Enriches the given session with the following information from Rocket.Chat. "last message",
+   * "last message date", and "messages read".
+   *
+   * @param consultantSessionResponseDTO the session to be enriched
+   * @param rcToken                      the Rocket.Chat authentiaction token of the current
+   *                                     consultant
+   * @param consultant                   the {@link Consultant}
+   * @return the enriched {@link ConsultantSessionResponseDTO}
+   */
   public ConsultantSessionResponseDTO updateRequiredConsultantSessionValues(
       ConsultantSessionResponseDTO consultantSessionResponseDTO, String rcToken,
       Consultant consultant) {
@@ -62,6 +75,7 @@ public class ConsultantEnquiryUpdater {
       session.setFeedbackRead(!rocketChatRoomInformation.getLastMessagesRoom()
           .containsKey(session.getFeedbackGroupId()));
     }
+
     return consultantSessionResponseDTO;
   }
 

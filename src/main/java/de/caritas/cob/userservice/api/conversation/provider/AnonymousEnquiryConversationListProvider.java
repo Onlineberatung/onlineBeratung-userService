@@ -5,7 +5,7 @@ import static de.caritas.cob.userservice.api.repository.session.RegistrationType
 
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
-import de.caritas.cob.userservice.api.conversation.service.ConsultantEnquiryUpdater;
+import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -37,7 +37,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AgencyService agencyService;
-  private final @NonNull ConsultantEnquiryUpdater consultantEnquiryUpdater;
+  private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
 
   /**
    * Builds the {@link ConsultantSessionListResponseDTO}.
@@ -58,7 +58,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
 
-    sessions.forEach(session -> this.consultantEnquiryUpdater
+    sessions.forEach(session -> this.consultantSessionEnricher
         .updateRequiredConsultantSessionValues(session, pageableListRequest.getRcToken(),
             consultant));
 
