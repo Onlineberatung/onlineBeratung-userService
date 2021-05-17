@@ -25,10 +25,11 @@ import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -65,17 +66,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.jeasy.random.EasyRandom;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SessionServiceTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
@@ -120,7 +122,7 @@ public class SessionServiceTest {
   @Mock
   private ConsultingTypeManager consultingTypeManager;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     CONSULTANT_AGENCY_SET.add(CONSULTANT_AGENCY_1);
     setInternalState(LogService.class, "LOGGER", logger);
@@ -184,7 +186,7 @@ public class SessionServiceTest {
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
 
-    Assert.assertEquals(expectedSession, SESSION);
+    assertEquals(expectedSession, SESSION);
   }
 
   @Test
@@ -196,7 +198,7 @@ public class SessionServiceTest {
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
 
-    Assert.assertEquals(expectedSession, SESSION);
+    assertEquals(expectedSession, SESSION);
   }
 
   @Test
@@ -211,7 +213,7 @@ public class SessionServiceTest {
       sessionService.getSessionsForUserId(USER_ID);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      // As expected
     }
   }
 
@@ -240,7 +242,6 @@ public class SessionServiceTest {
     List<Session> result = sessionService.getSessionsForUser(USER);
 
     assertEquals(sessions, result);
-
   }
 
   @Test
@@ -324,22 +325,24 @@ public class SessionServiceTest {
     assertThat(result, instanceOf(Session.class));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void getSessionByGroupIdAndUser_Should_ThrowNotFoundException_When_SessionDoesNotExist() {
     when(sessionRepository.findByGroupId(any())).thenReturn(Optional.empty());
 
-    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
+    assertThrows(NotFoundException.class,
+        () -> sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void getSessionByGroupIdAndUser_Should_ThrowForbiddenException_When_AskerIsNotOwnerOfSession() {
     Session session = new EasyRandom().nextObject(Session.class);
     when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
 
-    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES);
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void getSessionByGroupIdAndUser_Should_ThrowForbiddenException_When_ConsultantIsNotAssignedToSessionOrToSessionsAgency() {
     EasyRandom easyRandom = new EasyRandom();
     Session session = easyRandom.nextObject(Session.class);
@@ -349,16 +352,18 @@ public class SessionServiceTest {
     when(consultantService.getConsultant(anyString()))
         .thenReturn(Optional.of(consultant));
 
-    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES);
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, CONSULTANT_ROLES));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void getSessionByGroupIdAndUser_Should_ThrowForbiddenException_When_NotAskerOrConsultantRole() {
     Session session = new EasyRandom().nextObject(Session.class);
     when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
 
-    sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, new HashSet<>(
-        Collections.singletonList("no-role")));
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID,
+            new HashSet<>(Collections.singletonList("no-role"))));
   }
 
   /**
@@ -410,7 +415,7 @@ public class SessionServiceTest {
       sessionService.updateFeedbackGroupId(SESSION, RC_GROUP_ID);
       fail("Expected exception: UpdateFeedbackGroupIdException");
     } catch (UpdateFeedbackGroupIdException updateFeedbackGroupIdException) {
-      assertTrue("Excepted UpdateFeedbackGroupIdException thrown", true);
+      // As expected
     }
 
   }
@@ -422,11 +427,13 @@ public class SessionServiceTest {
     verify(sessionRepository, times(1)).save(SESSION);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
 
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
-    sessionService.fetchSessionForConsultant(SESSION_ID, CONSULTANT);
+
+    assertThrows(NotFoundException.class,
+        () -> sessionService.fetchSessionForConsultant(SESSION_ID, CONSULTANT));
   }
 
   @Test
@@ -457,7 +464,7 @@ public class SessionServiceTest {
 
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void fetchSessionForConsultant_Should_ThrowForbiddenException_When_NoPermission() {
 
     EasyRandom easyRandom = new EasyRandom();
@@ -471,7 +478,8 @@ public class SessionServiceTest {
         .getAgencyId());
     when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
 
-    sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
   }
 
   @Test
@@ -510,9 +518,12 @@ public class SessionServiceTest {
         sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
   }
 
-  @Test
-  public void getEnquiriesForConsultant_Should_returnEmptyList_When_consultantHasNoAgencyAssigned() {
+  @ParameterizedTest
+  @NullAndEmptySource
+  public void getEnquiriesForConsultant_Should_returnEmptyList_When_consultantHasNoAgencyAssigned(
+      Set<ConsultantAgency> emptyConsultantAgencies) {
     Consultant consultant = mock(Consultant.class);
+    when(consultant.getConsultantAgencies()).thenReturn(emptyConsultantAgencies);
 
     List<ConsultantSessionResponseDTO> enquiriesForConsultant = this.sessionService
         .getEnquiriesForConsultant(consultant);
@@ -520,4 +531,35 @@ public class SessionServiceTest {
     assertThat(enquiriesForConsultant, hasSize(0));
   }
 
+  @Test
+  public void getEnquiriesForConsultant_Should_use_registryTypeAwareRepositoryMethod_When_RegistryTypeNotNull() {
+    Consultant consultant = mock(Consultant.class);
+    Set<ConsultantAgency> agencySet = new HashSet<>();
+    agencySet.add(CONSULTANT_AGENCY_1);
+    List<Long> agencyIds = Collections.singletonList(CONSULTANT_AGENCY_1.getAgencyId());
+
+    when(consultant.getConsultantAgencies()).thenReturn(agencySet);
+
+    sessionService.getEnquiriesForConsultant(consultant, REGISTERED);
+
+    verify(sessionRepository, times(1))
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.NEW, REGISTERED);
+  }
+
+  @Test
+  public void getEnquiriesForConsultant_Should_use_registryTypeUnawareRepositoryMethod_When_RegistryTypeIsNull() {
+    Consultant consultant = mock(Consultant.class);
+    Set<ConsultantAgency> agencySet = new HashSet<>();
+    agencySet.add(CONSULTANT_AGENCY_1);
+    List<Long> agencyIds = Collections.singletonList(CONSULTANT_AGENCY_1.getAgencyId());
+
+    when(consultant.getConsultantAgencies()).thenReturn(agencySet);
+
+    sessionService.getEnquiriesForConsultant(consultant, null);
+
+    verify(sessionRepository, times(1))
+        .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.NEW);
+  }
 }
