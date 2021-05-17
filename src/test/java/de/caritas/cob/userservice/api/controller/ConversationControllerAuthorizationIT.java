@@ -1,18 +1,29 @@
 package de.caritas.cob.userservice.api.controller;
 
+import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.ACCEPT_ANONYMOUS_ENQUIRY_PATH;
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH;
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH;
+import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.POST_CREATE_ANONYMOUS_ENQUIRY_PATH;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
+import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import javax.servlet.http.Cookie;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +52,15 @@ public class ConversationControllerAuthorizationIT {
 
   @MockBean
   private ConversationListResolver conversationListResolver;
+
+  @MockBean
+  private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
+
+  @MockBean
+  private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
 
   @Test
   @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
@@ -162,4 +182,78 @@ public class ConversationControllerAuthorizationIT {
     verifyNoMoreInteractions(conversationListResolver);
   }
 
+  @Test
+  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  public void acceptAnonymousEnquirys_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
+      throws Exception {
+    this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isOk());
+
+    verify(this.acceptAnonymousEnquiryFacade, times(1)).acceptAnonymousEnquiry(1L);
+  }
+
+  @Test
+  public void acceptAnonymousEnquiry_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
+      throws Exception {
+    this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(this.acceptAnonymousEnquiryFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
+      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
+      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
+      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  public void acceptAnonymousEnquiry_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
+      throws Exception {
+    this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(this.acceptAnonymousEnquiryFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  public void acceptAnonymousEnquiry_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(this.acceptAnonymousEnquiryFacade);
+  }
+
+  @Test
+  public void createAnonymousEnquiry_Should_ReturnCreated_When_CsrfTokensMatch() throws Exception {
+    this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .content(new ObjectMapper().writeValueAsString(new EasyRandom().nextObject(
+            CreateAnonymousEnquiryDTO.class)))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated());
+
+    verify(this.createAnonymousEnquiryFacade, times(1))
+        .createAnonymousEnquiry(any());
+  }
+
+  @Test
+  public void createAnonymousEnquiry_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(createAnonymousEnquiryFacade);
+  }
 }

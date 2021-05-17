@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,11 +27,14 @@ public class LiveEventNotificationServiceApiClientConfigIT {
   @Autowired
   private LiveControllerApi liveControllerApi;
 
-  @Value("${live.service.api.url}")
-  private String liveServiceApiUrl;
-
   @MockBean
   private LinkDiscoverers linkDiscoverers;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
+
+  @Value("${live.service.api.url}")
+  private String liveServiceApiUrl;
 
   @Test
   public void configureLiveControllerApi_Should_setCorrectApiUrl() {

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -27,7 +28,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,6 +66,9 @@ public class AnonymousEnquiryConversationListProviderIT {
 
   @MockBean
   private ValidatedUserAccountProvider userAccountProvider;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
 
   @Before
   public void setup() {

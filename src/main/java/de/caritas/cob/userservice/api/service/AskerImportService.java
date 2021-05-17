@@ -33,6 +33,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
@@ -367,8 +368,7 @@ public class AskerImportService {
 
         // Initialize Session (need session id for Rocket.Chat group name)
         Session session = sessionService
-            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()),
-                consultingTypeSettings);
+            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()));
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));

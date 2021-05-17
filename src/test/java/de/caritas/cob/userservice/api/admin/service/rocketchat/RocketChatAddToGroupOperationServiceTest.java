@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,11 +14,11 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.function.Consumer;
 import org.jeasy.random.EasyRandom;
@@ -32,7 +33,7 @@ public class RocketChatAddToGroupOperationServiceTest {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Mock
-  private RocketChatService rocketChatService;
+  private RocketChatFacade rocketChatFacade;
 
   @Mock
   private KeycloakAdminClientService keycloakAdminClientService;
@@ -41,31 +42,28 @@ public class RocketChatAddToGroupOperationServiceTest {
   private Consumer<String> logMethod;
 
   @Test
-  public void addToGroupsOrRollbackOnFailure_Should_performRocketChatGroupActions_When_paramsAreValid()
-      throws Exception {
+  public void addToGroupsOrRollbackOnFailure_Should_performRocketChatGroupActions_When_paramsAreValid() {
 
     Session session = easyRandom.nextObject(Session.class);
     session.setStatus(SessionStatus.NEW);
     Consultant consultant = easyRandom.nextObject(Consultant.class);
 
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();
 
-    verify(this.rocketChatService, times(1)).addTechnicalUserToGroup(eq(session.getGroupId()));
-    verify(this.rocketChatService, times(1)).addUserToGroup(eq(consultant.getRocketChatId()),
-        eq(session.getGroupId()));
-    verify(this.rocketChatService, times(1)).addUserToGroup(eq(consultant.getRocketChatId()),
-        eq(session.getFeedbackGroupId()));
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup(eq(session.getGroupId()));
+    verify(this.rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()), eq(session.getGroupId()));
+    verify(this.rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
+            eq(session.getFeedbackGroupId()));
     verify(logMethod, times(2)).accept(anyString());
   }
 
   @Test
-  public void addToGroupsOrRollbackOnFailure_Should_throwInternalErrorAndPerformRollback_When_addUserToRocketChatGroupFails()
-      throws Exception {
+  public void addToGroupsOrRollbackOnFailure_Should_throwInternalErrorAndPerformRollback_When_addUserToRocketChatGroupFails() {
 
     Session session = easyRandom.nextObject(Session.class);
     session.setStatus(SessionStatus.NEW);
@@ -73,11 +71,11 @@ public class RocketChatAddToGroupOperationServiceTest {
     doThrow(new RuntimeException("")).when(this.logMethod).accept(anyString());
     GroupMemberDTO memberOfGroup = new GroupMemberDTO();
     memberOfGroup.set_id(consultant.getRocketChatId());
-    when(this.rocketChatService.getMembersOfGroup(anyString())).thenReturn(singletonList(
+    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString())).thenReturn(singletonList(
         memberOfGroup));
 
     RocketChatAddToGroupOperationService operationService = RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
         .withConsultant(consultant);
 
@@ -85,37 +83,33 @@ public class RocketChatAddToGroupOperationServiceTest {
       operationService.addToGroupsOrRollbackOnFailure();
       fail("Internal Server Error was not thrown");
     } catch (InternalServerErrorException e) {
-      verify(this.rocketChatService, times(1))
+      verify(this.rocketChatFacade, times(1))
           .removeUserFromGroup(eq(consultant.getRocketChatId()), eq(session.getGroupId()));
-      verify(this.rocketChatService, times(1)).removeUserFromGroup(eq(consultant.getRocketChatId()),
+      verify(this.rocketChatFacade, times(1)).removeUserFromGroup(eq(consultant.getRocketChatId()),
           eq(session.getFeedbackGroupId()));
     }
   }
 
-  @Test
-  public void addToGroupsOrRollbackOnFailure_Should_logErrorMessage_When_removeOfTechnicalUserFailes()
-      throws Exception {
+  @Test(expected = InternalServerErrorException.class)
+  public void addToGroupsOrRollbackOnFailure_Should_logErrorMessage_When_removeOfTechnicalUserFailes() {
 
     Session session = easyRandom.nextObject(Session.class);
     session.setStatus(SessionStatus.NEW);
     Consultant consultant = easyRandom.nextObject(Consultant.class);
-    doThrow(new RocketChatRemoveUserFromGroupException("")).when(this.rocketChatService)
-        .removeTechnicalUserFromGroup(anyString());
+    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+        .addUserToRocketChatGroup(anyString(), anyString());
 
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();
 
-    verify(logMethod, times(1)).accept(
-        eq("ERROR: Technical user could not be removed from rc group " + session.getGroupId()
-            + " (enquiry)."));
+    verify(logMethod, atLeastOnce()).accept(anyString());
   }
 
   @Test
-  public void addToGroupsOrRollbackOnFailure_Should_throwInternalError_When_rollbackFails()
-      throws Exception {
+  public void addToGroupsOrRollbackOnFailure_Should_throwInternalError_When_rollbackFails() {
 
     Session session = easyRandom.nextObject(Session.class);
     session.setStatus(SessionStatus.NEW);
@@ -123,13 +117,13 @@ public class RocketChatAddToGroupOperationServiceTest {
     doThrow(new RuntimeException("")).when(this.logMethod).accept(anyString());
     GroupMemberDTO memberOfGroup = new GroupMemberDTO();
     memberOfGroup.set_id(consultant.getRocketChatId());
-    when(this.rocketChatService.getMembersOfGroup(anyString())).thenReturn(singletonList(
+    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString())).thenReturn(singletonList(
         memberOfGroup));
-    doThrow(new RocketChatRemoveUserFromGroupException("")).when(this.rocketChatService)
+    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
         .removeUserFromGroup(anyString(), anyString());
 
     RocketChatAddToGroupOperationService operationService = RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
         .onSessions(singletonList(session))
         .withConsultant(consultant);
     try {

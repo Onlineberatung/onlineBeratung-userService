@@ -7,11 +7,11 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
-import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
@@ -27,7 +27,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
@@ -49,6 +49,7 @@ public class SessionService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AgencyService agencyService;
   private final @NonNull ConsultantService consultantService;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Returns the sessions for a user
@@ -88,15 +89,10 @@ public class SessionService {
    * @param status     the status of the session
    */
   public void updateConsultantAndStatusForSession(Session session, Consultant consultant,
-      SessionStatus status) throws UpdateSessionException {
-
-    try {
-      session.setConsultant(consultant);
-      session.setStatus(status);
-      saveSession(session);
-    } catch (InternalServerErrorException serviceException) {
-      throw new UpdateSessionException(serviceException);
-    }
+      SessionStatus status) {
+    session.setConsultant(consultant);
+    session.setStatus(status);
+    saveSession(session);
   }
 
   /**
@@ -138,21 +134,49 @@ public class SessionService {
   }
 
   /**
-   * Initialize a {@link Session}.
+   * Initialize a {@link Session} as initial registered enquiry.
    *
    * @param user                   the user
    * @param userDto                the dto of the user
-   * @param consultingTypeSettings flag to initialize monitoring
    * @return the initialized session
    */
+  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession) {
+    return initializeSession(user, userDto, isTeamSession, RegistrationType.REGISTERED,
+        SessionStatus.INITIAL);
+  }
+
+  /**
+   * Initialize a {@link Session}.
+   *
+   * @param user                   {@link User}
+   * @param userDto                {@link UserDTO}
+   * @param isTeamSession          is team session flag
+   * @param registrationType       {@link RegistrationType}
+   * @param sessionStatus          {@link SessionStatus}
+   * @return the initialized {@link Session}
+   */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
-      ConsultingTypeSettings consultingTypeSettings) {
-    Session session = new Session(user, consultingTypeSettings.getConsultingType(),
-        userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-        isTeamSession, consultingTypeSettings.isMonitoring());
-    session.setCreateDate(nowInUtc());
-    session.setUpdateDate(nowInUtc());
+      RegistrationType registrationType, SessionStatus sessionStatus) {
+    var consultingTypeSettings = obtainConsultingTypeSettings(userDto);
+    var session = Session.builder()
+        .user(user)
+        .consultingType(consultingTypeSettings.getConsultingType())
+        .registrationType(registrationType)
+        .postcode(userDto.getPostcode())
+        .agencyId(userDto.getAgencyId())
+        .status(sessionStatus)
+        .teamSession(isTeamSession)
+        .monitoring(consultingTypeSettings.isMonitoring())
+        .createDate(nowInUtc())
+        .updateDate(nowInUtc())
+        .build();
+
     return saveSession(session);
+  }
+
+  private ConsultingTypeSettings obtainConsultingTypeSettings(UserDTO userDTO) {
+    return consultingTypeManager.getConsultingTypeSettings(
+        ConsultingType.fromConsultingType(userDTO.getConsultingType()));
   }
 
   /**
@@ -300,7 +324,7 @@ public class SessionService {
    * @return {@link Session}
    */
   public Session getSessionByGroupIdAndUser(String rcGroupId, String userId, Set<String> roles) {
-    Session session = getSessionByGroupId(rcGroupId);
+    var session = getSessionByGroupId(rcGroupId);
     checkUserPermissionForSession(session, userId, roles);
 
     return session;
@@ -337,7 +361,7 @@ public class SessionService {
   private void checkIfConsultantAndNotAssignedToSessionOrAgency(Session session, String userId,
       Set<String> roles) {
     if (roles.contains(UserRole.CONSULTANT.getValue())) {
-      Consultant consultant = this.consultantService.getConsultant(userId)
+      var consultant = this.consultantService.getConsultant(userId)
           .orElseThrow(() -> new BadRequestException(String
               .format("Consultant with id %s does not exist", userId)));
       checkPermissionForConsultantSession(session, consultant);
@@ -364,7 +388,7 @@ public class SessionService {
   public ConsultantSessionDTO fetchSessionForConsultant(@NonNull Long sessionId,
       @NonNull Consultant consultant) {
 
-    Session session = getSession(sessionId)
+    var session = getSession(sessionId)
         .orElseThrow(
             () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
     checkPermissionForConsultantSession(session, consultant);

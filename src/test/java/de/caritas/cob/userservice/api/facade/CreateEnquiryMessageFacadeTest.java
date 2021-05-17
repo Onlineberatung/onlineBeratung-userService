@@ -73,10 +73,12 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Collections;
 import java.util.List;
@@ -169,6 +171,12 @@ public class CreateEnquiryMessageFacadeTest {
 
   @Mock
   private UserService userService;
+
+  @Mock
+  private AgencyService agencyService;
+
+  @Mock
+  private LiveEventNotificationService liveEventNotificationService;
 
   private Session session;
   private User user;

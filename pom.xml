@@ -414,9 +414,6 @@
 									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
 								</importMapping>
 								<importMapping>Date=java.util.Date</importMapping>
-								<importMapping>
-									ConsultingType=${project.groupId}.${project.artifactId}.api.repository.session.ConsultingType
-								</importMapping>
 							</importMappings>
 							<typeMappings>
 								<typeMapping>

@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionMapper;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.List;
@@ -45,7 +45,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
   @Override
   public ConsultantSessionListResponseDTO buildConversations(
       PageableListRequest pageableListRequest) {
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var consultant = this.userAccountProvider.retrieveValidatedConsultant();
     Set<ConsultingType> relatedConsultingTypes = retrieveRelatedConsultingTypes(consultant);
 
     Page<Session> anonymousSessionsOfConsultant = queryForRelevantSessions(

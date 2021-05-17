@@ -39,12 +39,12 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
-import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
@@ -56,9 +56,9 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -119,6 +119,8 @@ public class SessionServiceTest {
   private UserHelper userHelper;
   @Mock
   private ConsultantService consultantService;
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
 
   @BeforeEach
   public void setUp() {
@@ -160,24 +162,7 @@ public class SessionServiceTest {
   }
 
   @Test
-  public void updateConsultantAndStatusForSession_Should_ThrowUpdateSessionException_WhenSaveSessionFails() {
-
-    InternalServerErrorException ex = new InternalServerErrorException("service error") {
-    };
-    when(sessionService.saveSession(any())).thenThrow(ex);
-
-    try {
-      sessionService.updateConsultantAndStatusForSession(SESSION, CONSULTANT, SessionStatus.NEW);
-      fail("Expected exception: UpdateSessionException");
-    } catch (UpdateSessionException updateSessionException) {
-      assertTrue(true, "Excepted UpdateSessionException thrown");
-    }
-
-  }
-
-  @Test
-  public void updateConsultantAndStatusForSession_Should_SaveSession()
-      throws UpdateSessionException {
+  public void updateConsultantAndStatusForSession_Should_SaveSession() {
 
     sessionService.updateConsultantAndStatusForSession(SESSION, CONSULTANT, SessionStatus.NEW);
     verify(sessionRepository, times(1)).save(SESSION);
@@ -194,22 +179,26 @@ public class SessionServiceTest {
 
   @Test
   public void initializeSession_Should_ReturnSession() {
-
     when(sessionRepository.save(any())).thenReturn(SESSION);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     Session expectedSession = sessionService
-        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
-    assertEquals(expectedSession, SESSION);
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
+
+    Assert.assertEquals(expectedSession, SESSION);
   }
 
   @Test
   public void initializeSession_TeamSession_Should_ReturnSession() {
-
     when(sessionRepository.save(any())).thenReturn(SESSION);
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
     Session expectedSession = sessionService
-        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION, CONSULTING_TYPE_SETTINGS_SUCHT);
-    assertEquals(expectedSession, SESSION);
+        .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
+
+    Assert.assertEquals(expectedSession, SESSION);
   }
 
   @Test

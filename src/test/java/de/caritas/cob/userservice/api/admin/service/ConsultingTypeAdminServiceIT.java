@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ConsultingTypeResultDTO;
 import de.caritas.cob.userservice.api.model.PaginationLinks;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -30,6 +32,9 @@ public class ConsultingTypeAdminServiceIT {
 
   @Autowired
   private ConsultingTypeAdminService consultingTypeAdminService;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
 
   @Test
   public void findConsultingTypes_Should_returnOneResult_When_perPageIsSetToOneAndPageIsSetToOne() {
