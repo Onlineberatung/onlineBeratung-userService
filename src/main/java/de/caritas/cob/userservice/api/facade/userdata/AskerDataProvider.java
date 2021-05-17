@@ -46,7 +46,7 @@ public class AskerDataProvider {
    */
   public UserDataResponseDTO retrieveData(User user) {
     String email = observeUserEmailAddress(user);
-    UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
+    var responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
         null, null, email, false, user.isLanguageFormal(), null, false, null,
         authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
 
@@ -68,7 +68,7 @@ public class AskerDataProvider {
     for (int type : consultingTypeManager.getAllConsultingTypeIds()) {
       consultingTypes.put(Integer.toString(type),
           getConsultingTypeData(type, sessionList, agencyDTOs));
-    } //TODO
+    }
 
     return consultingTypes;
   }
