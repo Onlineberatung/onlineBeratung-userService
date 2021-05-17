@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.testHelper;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.Registration;
 import de.caritas.cob.userservice.api.model.NotificationDTO;
@@ -37,7 +39,7 @@ public class ExtendedConsultingTypeResponseDTOHelper {
     welcomeMessageDTO.setWelcomeMessageText(welcomeMessage);
 
     SessionDataInitializingDTO sessionDataInitializingDTO = null;
-    if (sessionDataInitializing != null) {
+    if (nonNull(sessionDataInitializing)) {
       sessionDataInitializingDTO = new SessionDataInitializingDTO();
       sessionDataInitializingDTO.setAge(sessionDataInitializing.isAge());
       sessionDataInitializingDTO.setState(sessionDataInitializing.isState());
@@ -51,7 +53,7 @@ public class ExtendedConsultingTypeResponseDTOHelper {
     monitoringDTO.setMonitoringTemplateFile(monitoringFile);
 
     NotificationsDTO notificationsDTO = null;
-    if (notifications != null && notifications.getNewMessage() != null) {
+    if (nonNull(notifications) && nonNull(notifications.getNewMessage())) {
       notificationsDTO = new NotificationsDTO();
       var teamSessionsDTO = new TeamSessionsDTO();
       var newMessageDTO = new NewMessageDTO();
@@ -62,16 +64,16 @@ public class ExtendedConsultingTypeResponseDTOHelper {
     }
 
     RolesDTO rolesDTO = null;
-    if (roles != null) {
+    if (nonNull(roles)) {
       rolesDTO = new RolesDTO();
       rolesDTO.setConsultant(roles.getConsultant());
     }
 
     RegistrationDTO registrationDTO = null;
-    if (registration != null) {
+    if (nonNull(registration)) {
       registrationDTO = new RegistrationDTO();
       RegistrationMandatoryFieldsDTO registrationMandatoryFieldsDTO = null;
-      if (registration.getMandatoryFields() != null) {
+      if (nonNull(registration.getMandatoryFields())) {
         registrationMandatoryFieldsDTO = new RegistrationMandatoryFieldsDTO();
         registrationMandatoryFieldsDTO.setAge(registration.getMandatoryFields().isAge());
         registrationMandatoryFieldsDTO.setState(registration.getMandatoryFields().isState());
