@@ -252,7 +252,10 @@ public class SessionToConsultantConditionProviderTest {
     AgencyDTO u25AgencyDTO = new AgencyDTO().consultingType(ConsultingType.U25);
     ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
     whenAgencyServiceReturnsDTOForId(u25ConsultantAgency, 1L, u25AgencyDTO);
-    consultant.setConsultantAgencies(asSet(u25ConsultantAgency, mock(ConsultantAgency.class)));
+    AgencyDTO otherAgencyDTO = new AgencyDTO().consultingType(ConsultingType.SUCHT);
+    ConsultantAgency otherConsultantAgency = mock(ConsultantAgency.class);
+    whenAgencyServiceReturnsDTOForId(otherConsultantAgency, 2L, otherAgencyDTO);
+    consultant.setConsultantAgencies(asSet(u25ConsultantAgency, otherConsultantAgency));
 
     boolean result = sessionToConsultantConditionProvider
         .isSessionsConsultingTypeNotAvailableForConsultant(consultant, session);
