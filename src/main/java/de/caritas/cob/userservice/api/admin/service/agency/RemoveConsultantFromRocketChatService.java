@@ -1,17 +1,13 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +25,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RemoveConsultantFromRocketChatService {
 
-  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull RocketChatFacade rocketChatFacade;
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
@@ -44,22 +40,13 @@ public class RemoveConsultantFromRocketChatService {
         .collect(Collectors.toMap(session -> session, this::observeConsultantsToRemove));
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatService, this.keycloakAdminClientService, this.consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, this.consultingTypeManager)
         .onSessionConsultants(consultantsFromSession)
         .removeFromGroupsOrRollbackOnFailure();
   }
 
   private List<Consultant> observeConsultantsToRemove(Session session) {
-    try {
-      return observeFromSession(session);
-    } catch (RocketChatGetGroupMembersException | RocketChatUserNotInitializedException e) {
-      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
-    }
-  }
-
-  private List<Consultant> observeFromSession(Session session)
-      throws RocketChatGetGroupMembersException, RocketChatUserNotInitializedException {
-    return this.rocketChatService.getStandardMembersOfGroup(session.getGroupId())
+    return this.rocketChatFacade.getStandardMembersOfGroup(session.getGroupId())
         .stream()
         .filter(notUserAndNotDirectlyAssignedConsultant(session))
         .map(GroupMemberDTO::get_id)

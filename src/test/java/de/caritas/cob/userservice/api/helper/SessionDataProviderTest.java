@@ -1,10 +1,13 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ADDICTIVE_DRUGS_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGE_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GENDER_VALUE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
@@ -26,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
@@ -37,6 +39,7 @@ import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
 import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.testHelper.ExtendedConsultingTypeResponseDTOHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,10 +64,12 @@ public class SessionDataProviderTest {
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);
   private final Session INITIALIZED_SESSION_SUCHT = new Session(1L, USER, CONSULTANT,
-      0, "99999", 0L, SessionStatus.INITIAL, null, null, null, null, false,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 0L, SessionStatus.INITIAL, null, null, null,
+      null, false,
       false, null, null);
   private final Session INITIALIZED_SESSION_U25 = new Session(1L, USER, CONSULTANT,
-      1, "99999", 0L, SessionStatus.INITIAL, null, null, null, null, false,
+      CONSULTING_TYPE_ID_U25, REGISTERED, "99999", 0L, SessionStatus.INITIAL, null, null, null,
+      null, false,
       false, null, null);
   private final SessionData SESSION_DATA_ADDICTIVE_DRUGS = new SessionData(new Session(),
       SessionDataType.REGISTRATION, SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(), "1");
@@ -75,30 +80,34 @@ public class SessionDataProviderTest {
   private final List<SessionData> SESSION_DATA =
       Arrays.asList(SESSION_DATA_ADDICTIVE_DRUGS, SESSION_DATA_AGE, SESSION_DATA_GENDER);
   private final Session INITIALIZED_SESSION_WITH_SESSION_DATA = new Session(1L, USER, CONSULTANT,
-      0, "99999", 1L, SessionStatus.IN_PROGRESS, nowInUtc(), null,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.IN_PROGRESS, nowInUtc(),
+      null,
       null, SESSION_DATA, IS_TEAM_SESSION, IS_MONITORING, null, null);
   private final SessionDataDTO SESSION_DATA_DTO = (SessionDataDTO) new SessionDataDTO()
       .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
       .age(AGE_VALUE).state(STATE_VALUE);
   private final SessionDataDTO SESSION_DATA_DTO_WITH_NO_AGE_VALUE =
       (SessionDataDTO) new SessionDataDTO()
-      .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
-      .state(STATE_VALUE);
+          .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
+          .state(STATE_VALUE);
   private final SessionDataDTO EMPTY_SESSION_DATA_DTO =
       new SessionDataDTO();
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
       new SessionDataInitializing(true, true, true, true, true);
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
-      ExtendedConsultingTypeResponseDTOHelper.createExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false,
-          SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS, true, null, false, null, false,
-          null, null);
+      ExtendedConsultingTypeResponseDTOHelper
+          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, null, false, false,
+              false, false, null, false, false,
+              SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS, true, null, false, null, false,
+              null, null);
   private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS =
       new SessionDataInitializing(false, false, false, false, false);
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
       ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(1, "u25", false, false, true, false, null, false, false,
-          SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS, true, null, false, null, false,
-          null, null);
+          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, null, false, false,
+              false, false, null, false, false,
+              SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS, true, null, false, null, false,
+              null, null);
 
   @Before
   public void setup() {
@@ -109,7 +118,7 @@ public class SessionDataProviderTest {
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems() {
     Session sessionWithInitializedItem = easyRandom.nextObject(Session.class);
-    sessionWithInitializedItem.setConsultingTypeId(0);
+    sessionWithInitializedItem.setConsultingTypeId(CONSULTING_TYPE_ID_SUCHT);
     SessionData data = easyRandom.nextObject(SessionData.class);
     data.setKey("addictiveDrugs");
     data.setValue("updatedValue");
@@ -120,7 +129,7 @@ public class SessionDataProviderTest {
     sessionDataList.add(data);
     sessionDataList.add(dataAge);
     sessionWithInitializedItem.setSessionData(sessionDataList);
-    when(consultingTypeManager.getConsultingTypeSettings(0))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider
@@ -161,7 +170,7 @@ public class SessionDataProviderTest {
   @Test
   public void createSessionDataList_Should_ReturnEmptyListOfSessionDataItems() {
 
-    when(consultingTypeManager.getConsultingTypeSettings(1))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider
@@ -173,7 +182,7 @@ public class SessionDataProviderTest {
 
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreNull() {
-    when(consultingTypeManager.getConsultingTypeSettings(0))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider
@@ -187,7 +196,7 @@ public class SessionDataProviderTest {
 
   @Test
   public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreEmpty() {
-    when(consultingTypeManager.getConsultingTypeSettings(0))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> result = sessionDataProvider.createSessionDataList(
@@ -202,7 +211,7 @@ public class SessionDataProviderTest {
   @Test
   public void getValueOfKey_Should_ReturnCorrectValueToGivenKey() {
 
-    when(consultingTypeManager.getConsultingTypeSettings(0))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataProvider
@@ -214,7 +223,7 @@ public class SessionDataProviderTest {
   @Test
   public void getValueOfKey_Should_ReturnNullWhenSessionDataValueIsNull() {
 
-    when(consultingTypeManager.getConsultingTypeSettings(0))
+    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
     List<SessionData> dataList = sessionDataProvider

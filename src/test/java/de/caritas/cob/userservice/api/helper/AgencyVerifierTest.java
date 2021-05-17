@@ -2,10 +2,12 @@ package de.caritas.cob.userservice.api.helper;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -13,7 +15,9 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,6 +32,8 @@ public class AgencyVerifierTest {
 
   @Mock
   private AgencyService agencyService;
+
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
@@ -62,26 +68,21 @@ public class AgencyVerifierTest {
     assertEquals(AGENCY_ID, agency.getId());
   }
 
-  @Test
-  public void doesConsultingTypeMatchToAgency_Should_ReturnTrue_When_AgencyIsAssignedToGivenConsultingType() {
+  @Test(expected = BadRequestException.class)
+  public void checkIfConsultingTypeMatchesToAgency_Should_ThrowBadRequestException_When_ConsultingTypeDoesNotMatchToAgency() {
+    when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
-        .thenReturn(AGENCY_DTO_SUCHT);
-
-    boolean response =
-        agencyVerifier.doesConsultingTypeMatchToAgency(AGENCY_ID, 0);
-
-    assertTrue(response);
+    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_KREUZBUND));
+    agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
   }
 
   @Test
-  public void doesConsultingTypeMatchToAgency_Should_ReturnFalse_When_AgencyIsNotAssignedToGivenConsultingType() {
+  public void checkIfConsultingTypeMatchesToAgency_ShouldNot_ThrowException_When_ConsultingTypeMatchesToAgency() {
+    when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
-
-    boolean response =
-        agencyVerifier.doesConsultingTypeMatchToAgency(AGENCY_ID, 0);
-
-    assertFalse(response);
+    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_SUCHT));
+    agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
   }
 }

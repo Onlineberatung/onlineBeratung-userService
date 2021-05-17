@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHt
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -19,11 +20,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
-import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -56,6 +57,7 @@ public class KeycloakAdminClientService {
 
   private final @NonNull UserHelper userHelper;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private final @NonNull UsernameTranscoder usernameTranscoder;
 
   /**
    * Creates a user in Keycloak and returns its Keycloak user ID.
@@ -77,8 +79,8 @@ public class KeycloakAdminClientService {
    */
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
       final String firstName, final String lastName) {
-    UserRepresentation kcUser = getUserRepresentation(user, firstName, lastName);
-    try (Response response = this.keycloakAdminClientAccessor.getUsersResource().create(kcUser)) {
+    var kcUser = getUserRepresentation(user, firstName, lastName);
+    try (var response = this.keycloakAdminClientAccessor.getUsersResource().create(kcUser)) {
 
       if (response.getStatus() == HttpStatus.CREATED.value()) {
         return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));
@@ -86,8 +88,8 @@ public class KeycloakAdminClientService {
       handleCreateKeycloakUserError(response);
     }
     throw new InternalServerErrorException(
-        String.format("Could not create Keycloak account for: %s %nKeycloak error: %s",
-            user.toString(), keycloakError));
+        String.format("Could not create Keycloak account for: %s %nKeycloak error: %s", user,
+            keycloakError));
   }
 
   private void handleCreateKeycloakUserError(Response response) {
@@ -101,21 +103,25 @@ public class KeycloakAdminClientService {
   }
 
   /**
-   * Returns true if the decoded username does not exist in Keycloak yet or false if it already
+   * Returns true if the given username does not exist in Keycloak yet or false if it already
    * exists.
    *
    * @param username (decoded or encoded)
    * @return true if does not exist, else false
    */
   public boolean isUsernameAvailable(String username) {
-    List<UserRepresentation> keycloakUserList = findByUsername(userHelper.decodeUsername(username));
-    for (UserRepresentation userRep : keycloakUserList) {
-      if (userRep.getUsername().equalsIgnoreCase(userHelper.decodeUsername(username))) {
-        return false;
-      }
-    }
+    List<UserRepresentation> keycloakDecodedUserList =
+        findByUsername(usernameTranscoder.decodeUsername(username));
+    List<UserRepresentation> keycloakEncodedUserList =
+        findByUsername(usernameTranscoder.encodeUsername(username));
 
-    return true;
+    return Stream.concat(keycloakDecodedUserList.stream(), keycloakEncodedUserList.stream())
+        .noneMatch(user -> doesUsernameMatch(username, user));
+  }
+
+  private boolean doesUsernameMatch(String username, UserRepresentation user) {
+    return user.getUsername().equalsIgnoreCase(usernameTranscoder.decodeUsername(username))
+        || user.getUsername().equalsIgnoreCase(usernameTranscoder.encodeUsername(username));
   }
 
   @Synchronized
@@ -127,7 +133,7 @@ public class KeycloakAdminClientService {
   }
 
   private CredentialRepresentation getCredentialRepresentation(final String password) {
-    CredentialRepresentation credentials = new CredentialRepresentation();
+    var credentials = new CredentialRepresentation();
     credentials.setType(CredentialRepresentation.PASSWORD);
     credentials.setValue(password);
     credentials.setTemporary(false);
@@ -137,7 +143,7 @@ public class KeycloakAdminClientService {
 
   private UserRepresentation getUserRepresentation(final UserDTO user, final String firstName,
       final String lastName) {
-    UserRepresentation kcUser = new UserRepresentation();
+    var kcUser = new UserRepresentation();
     kcUser.setUsername(user.getUsername());
     kcUser.setEmail(user.getEmail());
     kcUser.setEmailVerified(true);
@@ -171,6 +177,16 @@ public class KeycloakAdminClientService {
   }
 
   /**
+   * Assigns the given {@link UserRole} to the given user ID.
+   *
+   * @param userId Keycloak user ID
+   * @param role   {@link UserRole}
+   */
+  public void updateRole(final String userId, final UserRole role) {
+    this.updateRole(userId, role.getValue());
+  }
+
+  /**
    * Assigns the role with the given name to the given user ID.
    *
    * @param userId   Keycloak user ID
@@ -178,13 +194,13 @@ public class KeycloakAdminClientService {
    */
   public void updateRole(final String userId, final String roleName) {
     // Get realm and user resources
-    RealmResource realmResource = this.keycloakAdminClientAccessor.getRealmResource();
+    var realmResource = this.keycloakAdminClientAccessor.getRealmResource();
     UsersResource userRessource = realmResource.users();
     UserResource user = userRessource.get(userId);
-    boolean isRoleUpdated = false;
+    var isRoleUpdated = false;
 
     // Assign role
-    RoleRepresentation roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
+    var roleRepresentation = realmResource.roles().get(roleName).toRepresentation();
     if (isNull(roleRepresentation.getAttributes())) {
       roleRepresentation.setAttributes(new LinkedHashMap<>());
     }
@@ -212,8 +228,8 @@ public class KeycloakAdminClientService {
    * @param password user password
    */
   public void updatePassword(final String userId, final String password) {
-    CredentialRepresentation newCredentials = getCredentialRepresentation(password);
-    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+    var newCredentials = getCredentialRepresentation(password);
+    var userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
 
     userResource.resetPassword(newCredentials);
@@ -231,7 +247,7 @@ public class KeycloakAdminClientService {
   public String updateDummyEmail(final String userId, UserDTO user) {
     String dummyEmail = userHelper.getDummyEmail(userId);
     user.setEmail(dummyEmail);
-    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+    var userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
 
     userResource.update(getUserRepresentation(user, null, null));
@@ -250,7 +266,7 @@ public class KeycloakAdminClientService {
    */
   public void updateUserData(final String userId, UserDTO userDTO,
       String firstName, String lastName) {
-    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+    var userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
     verifyEmail(userResource, userDTO.getEmail());
     userResource.update(getUserRepresentation(userDTO, firstName, lastName));
@@ -273,7 +289,7 @@ public class KeycloakAdminClientService {
    * @param emailAddress the email address to set
    */
   public void updateEmail(String userId, String emailAddress) {
-    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+    var userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
     verifyEmail(userResource, emailAddress);
     UserRepresentation representation = userResource.toRepresentation();
@@ -323,7 +339,7 @@ public class KeycloakAdminClientService {
           .map(Authorities::getAuthoritiesByUserRole)
           .anyMatch(currentAuthority -> currentAuthority.contains(authority));
     } catch (Exception ex) {
-      String error = String.format("Could not get roles for user id %s", userId);
+      var error = String.format("Could not get roles for user id %s", userId);
       LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
@@ -345,7 +361,7 @@ public class KeycloakAdminClientService {
           .map(UserRole::getValue)
           .anyMatch(userRole::equals);
     } catch (Exception ex) {
-      String error = String.format("Could not get roles for user id %s", userId);
+      var error = String.format("Could not get roles for user id %s", userId);
       LogService.logKeycloakError(error, ex);
       throw new KeycloakException(error);
     }
@@ -391,9 +407,9 @@ public class KeycloakAdminClientService {
    * @param userId the user id to be deactivated
    */
   public void deactivateUser(String userId) {
-    UserResource userResource = this.keycloakAdminClientAccessor.getUsersResource()
+    var userResource = this.keycloakAdminClientAccessor.getUsersResource()
         .get(userId);
-    UserRepresentation userRepresentation = userResource.toRepresentation();
+    var userRepresentation = userResource.toRepresentation();
     userRepresentation.setEnabled(false);
     userResource.update(userRepresentation);
   }

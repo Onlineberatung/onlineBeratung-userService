@@ -37,6 +37,7 @@ public class CustomValidationHttpStatusException extends CustomHttpStatusExcepti
    */
   public CustomValidationHttpStatusException(HttpStatusExceptionReason reason,
       HttpStatus httpStatus) {
+    super();
     this.customHttpHeader = new CustomHttpHeader(reason)
         .buildHeader();
     this.httpStatus = httpStatus;

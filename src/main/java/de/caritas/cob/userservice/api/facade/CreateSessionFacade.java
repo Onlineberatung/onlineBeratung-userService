@@ -17,8 +17,8 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +49,8 @@ public class CreateSessionFacade {
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
     checkIfAlreadyRegisteredToConsultingType(user, extendedConsultingTypeResponseDTO.getId());
-    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO.getId());
-    Session session = initializeSession(userDTO, user, extendedConsultingTypeResponseDTO,
-        agencyDTO);
+    var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
+    var session = initializeSession(userDTO, user, agencyDTO);
     initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
 
     return session.getId();
@@ -74,13 +73,11 @@ public class CreateSessionFacade {
     }
   }
 
-  private Session initializeSession(UserDTO userDTO, User user,
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, AgencyDTO agencyDTO) {
+  private Session initializeSession(UserDTO userDTO, User user, AgencyDTO agencyDTO) {
 
     try {
-      Session session = sessionService
-          .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
-              extendedConsultingTypeResponseDTO);
+      var session = sessionService
+          .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()));
       sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 
       return session;
@@ -97,14 +94,14 @@ public class CreateSessionFacade {
     }
   }
 
-  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, int consultingType) {
-    AgencyDTO agencyDTO =
-        agencyVerifier.getVerifiedAgency(userDTO.getAgencyId(), consultingType);
+  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    var agencyDTO =
+        agencyVerifier.getVerifiedAgency(userDTO.getAgencyId(), extendedConsultingTypeResponseDTO.getId());
 
     if (isNull(agencyDTO)) {
       throw new BadRequestException(
           String.format("Agency %s is not assigned to given consulting type %d",
-              userDTO.getAgencyId(), consultingType));
+              userDTO.getAgencyId(), extendedConsultingTypeResponseDTO.getId()));
     }
 
     return agencyDTO;

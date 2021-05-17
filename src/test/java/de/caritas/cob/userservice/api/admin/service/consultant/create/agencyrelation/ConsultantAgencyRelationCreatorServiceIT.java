@@ -17,10 +17,9 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -34,9 +33,8 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -85,14 +83,16 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   private KeycloakAdminClientService keycloakAdminClientService;
 
   @MockBean
-  private RocketChatService rocketChatService;
+  private RocketChatFacade rocketChatFacade;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
 
   @MockBean
   private ConsultingTypeManager consultingTypeManager;
 
   @Test
-  public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid()
-      throws RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
+  public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid() {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
@@ -114,16 +114,12 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    verify(rocketChatService, times(1))
-        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatService, times(1))
-        .addUserToGroup(eq(consultant.getRocketChatId()),
+    verify(rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));
-    verify(rocketChatService, times(1))
-        .addUserToGroup(eq(consultant.getRocketChatId()),
+    verify(rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
-    verify(rocketChatService, times(1))
-        .removeTechnicalUserFromGroup(enquirySessionWithoutConsultant.getGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -132,8 +128,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   }
 
   @Test
-  public void createNewConsultantAgency_Should_addConsultantToTeamSessionRocketChatGroups_When_ParamsAreValid()
-      throws RocketChatUserNotInitializedException, RocketChatAddUserToGroupException, RocketChatRemoveUserFromGroupException {
+  public void createNewConsultantAgency_Should_addConsultantToTeamSessionRocketChatGroups_When_ParamsAreValid() {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
@@ -157,16 +152,12 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    verify(rocketChatService, times(1))
-        .addTechnicalUserToGroup(enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatService, times(1))
-        .addUserToGroup(eq(consultant.getRocketChatId()),
+    verify(rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getGroupId()));
-    verify(rocketChatService, times(1))
-        .addUserToGroup(eq(consultant.getRocketChatId()),
+    verify(rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
             eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
-    verify(rocketChatService, times(1))
-        .removeTechnicalUserFromGroup(enquirySessionWithoutConsultant.getGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -246,7 +237,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role");
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
-    when(agencyService.getAgencyWithoutCaching(any())).thenThrow(new InternalServerErrorException(""));
+    when(agencyService.getAgencyWithoutCaching(any()))
+        .thenThrow(new InternalServerErrorException(""));
 
     this.consultantAgencyRelationCreatorService.createNewConsultantAgency(consultant.getId(),
         createConsultantAgencyDTO);

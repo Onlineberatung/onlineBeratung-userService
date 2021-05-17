@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.registry;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIFTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.LAST;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIRST;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.SECOND;
@@ -81,7 +81,7 @@ public class DeleteActionsRegistryTest {
     assertThat(resultActions.get(1).getOrder(), is(SECOND.getOrder()));
     assertThat(resultActions.get(2).getOrder(), is(THIRD.getOrder()));
     assertThat(resultActions.get(3).getOrder(), is(FOURTH.getOrder()));
-    assertThat(resultActions.get(4).getOrder(), is(FIFTH.getOrder()));
+    assertThat(resultActions.get(4).getOrder(), is(LAST.getOrder()));
   }
 
   @Test
@@ -105,7 +105,7 @@ public class DeleteActionsRegistryTest {
     assertThat(resultActions.get(1).getOrder(), is(SECOND.getOrder()));
     assertThat(resultActions.get(2).getOrder(), is(THIRD.getOrder()));
     assertThat(resultActions.get(3).getOrder(), is(FOURTH.getOrder()));
-    assertThat(resultActions.get(4).getOrder(), is(FIFTH.getOrder()));
+    assertThat(resultActions.get(4).getOrder(), is(LAST.getOrder()));
   }
 
 }

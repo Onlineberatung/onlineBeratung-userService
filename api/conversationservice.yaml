@@ -1,0 +1,199 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+servers:
+  - url: /
+paths:
+  /conversations/consultants/enquiries/registered:
+    get:
+      tags:
+        - conversation-controller
+      summary: 'Returns all open enquiries of registered users for the currently authenticated
+        consultant. [Authorization: Role: consultant]'
+      operationId: getRegisteredEnquiries
+      parameters:
+        - name: offset
+          in: query
+          description: Number of items where to start in the query (0 = first item)
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+        - name: count
+          in: query
+          description: Number of items which are being returned
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/json:
+              schema:
+                $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+      security:
+        - Bearer: [ ]
+  /conversations/consultants/enquiries/anonymous:
+    get:
+      tags:
+        - conversation-controller
+      summary: 'Returns all open enquiries of anonymous users for the currently authenticated
+        consultant. [Authorization: Role: consultant]'
+      operationId: getAnonymousEnquiries
+      parameters:
+        - name: offset
+          in: query
+          description: Number of items where to start in the query (0 = first item)
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+        - name: count
+          in: query
+          description: Number of items which are being returned
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/json:
+              schema:
+                $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+      security:
+        - Bearer: [ ]
+  /conversations/askers/anonymous/new:
+    post:
+      tags:
+        - conversation-controller
+      summary: 'Creates an anonymous conversation enquiry. [Authorization: none]'
+      operationId: createAnonymousEnquiry
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateAnonymousEnquiryDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - Anonymous user and enquiry successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAnonymousEnquiryResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object or consulting type
+            doesn't provide anonymous conversations
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /conversations/askers/anonymous/{sessionId}/accept:
+    put:
+      tags:
+        - conversation-controller
+      summary: 'Accept an anonymous enquiry and assign it to the currently authenticated consultant
+            [Authorization: Role: consultant]'
+      operationId: acceptAnonymousEnquiry
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - enquiry already accepted by another consultant or
+            consulting type of session is not assigned to consultant
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
+components:
+  schemas:
+
+    CreateAnonymousEnquiryDTO:
+      type: object
+      required:
+        - consultingType
+      properties:
+        consultingType:
+          type: integer
+          example: 3
+          description: Consulting type ID
+
+    CreateAnonymousEnquiryResponseDTO:
+      type: object
+      required:
+        - userName
+        - sessionId
+        - accessToken
+        - expiresIn
+        - refreshToken
+        - refreshExpiresIn
+        - rcUserId
+        - rcToken
+        - rcGroupId
+      properties:
+        userName:
+          type: string
+          example: User1008
+          description: The generated anonymous user name
+        sessionId:
+          type: integer
+          format: int64
+        accessToken:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIs(...)
+          description: The Keycloak access token for this user
+        expiresIn:
+          type: integer
+          example: 300
+          description: Number of seconds the access token is valid
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIs(...)
+          description: The Keycloak refresh token for this user
+        refreshExpiresIn:
+          type: integer
+          example: 6000
+          description: Number of seconds the refresh token is valid
+        rcUserId:
+          type: string
+          example: piYG2BAE9ng(...)
+          description: The Rocket.Chat X-User-Id for this user
+        rcToken:
+          type: string
+          example: hkmSBR_fHpjIx6amQ(...)
+          description: The Rocket.Chat X-Auth-Token for this user
+        rcGroupId:
+          type: string
+          example: 7shdJkasdj3(...)
+          description: The Rocket.Chat group ID for this anonymous conversation
+
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header

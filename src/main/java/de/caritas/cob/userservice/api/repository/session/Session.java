@@ -11,6 +11,8 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +24,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -36,6 +39,7 @@ import org.springframework.lang.Nullable;
  * Represents a session of a user
  */
 @Entity
+@Builder
 @Table(name = "session")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -53,6 +57,7 @@ public class Session {
     this.status = status;
     this.teamSession = teamSession;
     this.monitoring = monitoring;
+    this.registrationType = RegistrationType.REGISTERED;
   }
 
   @Id
@@ -72,6 +77,11 @@ public class Session {
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
   private int consultingTypeId;
+
+  @Column(name = "registration_type", updatable = false, nullable = false)
+  @Enumerated(EnumType.STRING)
+  @NonNull
+  private RegistrationType registrationType;
 
   @Column(name = "postcode", nullable = false)
   @Size(max = 5)

@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.controller;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -19,6 +19,7 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
@@ -62,7 +63,7 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
@@ -88,10 +89,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "user-controller")
 public class  UserController implements UsersApi {
 
-  private static final int MIN_OFFSET = 0;
-  private static final int MIN_COUNT = 1;
-  private static final String OFFSET_INVALID_MESSAGE = "offset must be a positive number";
-  private static final String COUNT_INVALID_MESSAGE = "count must be a positive number";
+  static final int MIN_OFFSET = 0;
+  static final int MIN_COUNT = 1;
+  static final String OFFSET_INVALID_MESSAGE = "offset must be a positive number";
+  static final String COUNT_INVALID_MESSAGE = "count must be a positive number";
 
   private final @NotNull ValidatedUserAccountProvider userAccountProvider;
   private final @NotNull SessionService sessionService;
@@ -105,6 +106,7 @@ public class  UserController implements UsersApi {
   private final @NotNull SessionListFacade sessionListFacade;
   private final @NotNull ConsultantAgencyService consultantAgencyService;
   private final @NotNull AssignSessionFacade assignSessionFacade;
+  private final @NotNull AssignEnquiryFacade assignEnquiryFacade;
   private final @NotNull DecryptionService decryptionService;
   private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
   private final @NotNull ChatService chatService;
@@ -128,7 +130,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
     user.setNewUserAccount(true);
-    createUserFacade.createUserAndInitializeAccount(user);
+    createUserFacade.createUserAccountWithInitializedConsultingType(user);
 
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
@@ -171,7 +173,7 @@ public class  UserController implements UsersApi {
 
     Optional<Session> session = sessionService.getSession(sessionId);
 
-    if (!session.isPresent() || isNull(session.get().getGroupId())) {
+    if (session.isEmpty() || isNull(session.get().getGroupId())) {
       LogService.logInternalServerError(String.format(
           "Session id %s is invalid, session not found or has no Rocket.Chat groupId assigned.",
           sessionId));
@@ -179,8 +181,8 @@ public class  UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
-    assignSessionFacade.assignEnquiry(session.get(), consultant);
+    var consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    this.assignEnquiryFacade.assignEnquiry(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -551,7 +553,7 @@ public class  UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
+    var consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
     assignSessionFacade.assignSession(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);

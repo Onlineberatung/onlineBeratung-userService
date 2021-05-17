@@ -4,18 +4,15 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
-
-  <include file="db/changelog/changeset/0002_monitoringKeys_feedbackChatClumn/0002_changeSet.xml"/>
-  <include file="db/changelog/changeset/0003_user_attribute_languageFormal/0003_changeSet.xml"/>
-  <include
-    file="db/changelog/changeset/0004_consultant_attribute_languageFormal/0004_changeSet.xml"/>
-  <include file="db/changelog/changeset/0005_session_attribute_isMonitoring/0005_changeSet.xml"/>
-  <include file="db/changelog/changeset/0006_chat/0006_changeSet.xml"/>
-  <include file="db/changelog/changeset/0007_user_agency_relation/0007_changeSet.xml"/>
-  <include file="db/changelog/changeset/0008_chat_extension/0008_changeSet.xml"/>
-  <include
-    file="db/changelog/changeset/0009_delete_timestamp_for_user_consultant/0009_changeSet.xml"/>
-  <include
-    file="db/changelog/changeset/0010_delete_timestamp_for_consultant_agency/0010_changeSet.xml"/>
-  <include file="db/changelog/changeset/0011_add_mobile_token_for_user/0011_changeSet.xml"/>
+	<include file="db/changelog/changeset/0002_monitoringKeys_feedbackChatClumn/0002_changeSet.xml"/>
+	<include file="db/changelog/changeset/0003_user_attribute_languageFormal/0003_changeSet.xml"/>
+	<include file="db/changelog/changeset/0004_consultant_attribute_languageFormal/0004_changeSet.xml"/>
+	<include file="db/changelog/changeset/0005_session_attribute_isMonitoring/0005_changeSet.xml"/>
+	<include file="db/changelog/changeset/0006_chat/0006_changeSet.xml"/>
+	<include file="db/changelog/changeset/0007_user_agency_relation/0007_changeSet.xml"/>
+	<include file="db/changelog/changeset/0008_chat_extension/0008_changeSet.xml"/>
+	<include file="db/changelog/changeset/0009_delete_timestamp_for_user_consultant/0009_changeSet.xml"/>
+	<include file="db/changelog/changeset/0010_delete_timestamp_for_consultant_agency/0010_changeSet.xml"/>
+	<include file="db/changelog/changeset/0011_add_mobile_token_for_user/0011_changeSet.xml"/>
+	<include file="db/changelog/changeset/0012_add_type_to_session/0012_changeSet.xml"/>
 </databaseChangeLog>

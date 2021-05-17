@@ -1,18 +1,20 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.SessionService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
@@ -20,6 +22,7 @@ import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupp
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.List;
@@ -100,16 +103,26 @@ public class EmailNotificationFacade {
 
     try {
       Session session = sessionService.getSessionByGroupIdAndUser(rcGroupId, userId, roles);
-
-      EmailSupplier newMessageMails = new NewMessageEmailSupplier(session, rcGroupId, roles,
-          userId, consultantAgencyService, consultingTypeManager, applicationBaseUrl,
-          emailDummySuffix, userHelper);
-
+      EmailSupplier newMessageMails = NewMessageEmailSupplier
+          .builder()
+          .session(session)
+          .rcGroupId(rcGroupId)
+          .roles(roles)
+          .userId(userId)
+          .consultantAgencyService(consultantAgencyService)
+          .consultingTypeManager(consultingTypeManager)
+          .applicationBaseUrl(applicationBaseUrl)
+          .emailDummySuffix(emailDummySuffix)
+          .build();
       sendMailTasksToMailService(newMessageMails);
 
+    } catch (NotFoundException | ForbiddenException | BadRequestException getSessionException) {
+      LogService.logEmailNotificationFacadeWarning(String.format(
+          "Failed to get session for new message notification with Rocket.Chat group ID %s and user ID %s.",
+          rcGroupId, userId), getSessionException);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
-          "Failed to send new message notification with rocket chat group id %s and user id %s.",
+          "Failed to send new message notification with Rocket.Chat group ID %s and user ID %s.",
           rcGroupId, userId), ex);
     }
   }
@@ -127,8 +140,8 @@ public class EmailNotificationFacade {
     try {
       Session session = sessionService.getSessionByFeedbackGroupId(rcFeedbackGroupId);
       EmailSupplier newFeedbackMessages = new NewFeedbackEmailSupplier(session,
-          rcFeedbackGroupId, userId, applicationBaseUrl, userHelper, consultantService,
-          rocketChatService, rocketChatSystemUserId);
+          rcFeedbackGroupId, userId, applicationBaseUrl, consultantService, rocketChatService,
+          rocketChatSystemUserId);
       sendMailTasksToMailService(newFeedbackMessages);
     } catch (Exception e) {
       LogService.logEmailNotificationFacadeError(String.format(
@@ -149,7 +162,7 @@ public class EmailNotificationFacade {
       String askerUserName) {
 
     EmailSupplier assignEnquiryMails = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService, userHelper);
+        senderUserId, askerUserName, applicationBaseUrl, consultantService);
     try {
       sendMailTasksToMailService(assignEnquiryMails);
     } catch (Exception exception) {

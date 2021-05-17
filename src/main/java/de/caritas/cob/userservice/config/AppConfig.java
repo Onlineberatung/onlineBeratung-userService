@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantReindex
 import javax.persistence.EntityManagerFactory;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

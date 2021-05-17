@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

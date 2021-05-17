@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreationInput {
 
   private final @NonNull CreateConsultantDTO createConsultantDTO;
-  private final @NonNull UserHelper userHelper;
 
   /**
    * Provides the old id.
@@ -44,7 +43,7 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
    */
   @Override
   public String getEncodedUsername() {
-    return this.userHelper.encodeUsername(createConsultantDTO.getUsername());
+    return new UsernameTranscoder().encodeUsername(createConsultantDTO.getUsername());
   }
 
   /**

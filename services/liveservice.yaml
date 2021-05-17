@@ -51,7 +51,9 @@ components:
     EventType:
       type: string
       enum:
+        - "anonymousEnquiryAccepted"
         - "directMessage"
+        - "newAnonymousEnquiry"
         - "videoCallRequest"
         - "videoCallDeny"
 
@@ -65,21 +67,22 @@ components:
       type: object
       required:
         - videoCallUrl
-        - username
-        - rcRoomId
+        - initiatorUsername
+        - initiatorRcUserId
+        - rcGroupId
       properties:
         videoCallUrl:
           type: string
           example: video.domain.com/44c7644a-5977-11eb-ae93-0242ac130002
           description: The url of the video server
-        username:
+        initiatorUsername:
           type: string
           example: consultant
           description: The username of the calling user
-        rcUserId:
+        initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
-          description: The Rocket.Chat user id of calling user
+          description: The Rocket.Chat user id of the calling user
         rcGroupId:
           type: string
           example: "xGklslk2JJKK"

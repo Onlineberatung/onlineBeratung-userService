@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice;
 
+import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.config.CsrfSecurityProperties;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -11,6 +14,7 @@ import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -22,12 +26,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling
+@EnableConfigurationProperties({CsrfSecurityProperties.class})
 public class UserServiceApplication {
 
   @Value("${thread.executor.corePoolSize}")

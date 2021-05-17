@@ -48,7 +48,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
@@ -81,7 +81,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnValidSessionListWithMessagesReadTrue_WhenThereAreNoUnreadMessages() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -111,7 +111,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnValidSessionListWithMessagesReadFalse_WhenThereAreUnreadMessages() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -147,7 +147,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_SetCorrectMessageDate() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -179,7 +179,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnFalseAsAttachmentReceivedStatus_WhenCallingConsultantIsSenderOfTheAttachment() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -211,7 +211,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnTrueAsAttachmentReceivedStatus_WhenCallingConsultantIsNotSenderOfTheAttachment() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -243,7 +243,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_SetSubscribedFlagToTrue_WhenConsultantIsAttendeeOfAChat() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
         .thenReturn(Collections.emptyList());
     when(chatService.getChatsForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
@@ -274,7 +274,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_SetSubscribedFlagToFalse_WhenConsultantIsNotAttendeeOfAChat() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
         .thenReturn(Collections.emptyList());
     when(chatService.getChatsForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
@@ -305,7 +305,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnOnlySessions_WhenQueryParameterSessionStatusIsNew() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -342,7 +342,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_ShouldNot_SendChatsInEnquiryList() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -369,7 +369,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_ShouldNot_SetIsFeedbackReadToFalse_WhenNoMessageWasPostedInTheFeedbackRoom() {
 
-    when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_NEW))
+    when(sessionService.getEnquiriesForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_2);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -450,7 +450,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnCorrectFileTypeAndImagePreviewForSession() {
 
-    when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_NEW))
+    when(sessionService.getEnquiriesForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -485,7 +485,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnCorrectFileTypeAndImagePreviewForChat() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any())).thenReturn(Collections.emptyList());
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any())).thenReturn(Collections.emptyList());
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     RocketChatRoomInformation rocketChatRoomInformation =
@@ -521,7 +521,7 @@ public class ConsultantSessionListServiceTest {
 
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -581,7 +581,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithMessagesReadFalse_WhenThereAreUnreadMessages() {
 
-    when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_NEW))
+    when(sessionService.getEnquiriesForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -611,7 +611,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithFeedbackReadTrue_WhenThereAreNoUnreadFeedbackMessages() {
 
-    when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_NEW))
+    when(sessionService.getEnquiriesForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -642,7 +642,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages() {
 
-    when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_NEW))
+    when(sessionService.getEnquiriesForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -670,7 +670,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithFeedbackReadTrue_WhenFeedbackGroupIdIsNull() {
 
-    when(sessionService.getSessionsForConsultant(CONSULTANT, SESSION_STATUS_NEW))
+    when(sessionService.getEnquiriesForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITHOUT_FEEDBACK_CHAT);
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
@@ -700,7 +700,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithChatMessagesReadFalse_WhenThereAreUnreadChatMessages() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
         .thenReturn(Collections.emptyList());
     when(chatService.getChatsForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
@@ -727,7 +727,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithChatMessagesReadTrue_WhenThereAreNoUnreadChatMessages() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
         .thenReturn(Collections.emptyList());
     when(chatService.getChatsForConsultant(CONSULTANT))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
@@ -754,7 +754,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithChatMessagesReadFalse_WhenThereAreUnreadSessionMessages() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     when(chatService.getChatsForConsultant(CONSULTANT))
         .thenReturn(Collections.emptyList());
@@ -784,7 +784,7 @@ public class ConsultantSessionListServiceTest {
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnSessionListWithChatMessagesReadTrue_WhenThereAreNoUnreadSessionMessages() {
 
-    when(sessionService.getSessionsForConsultant(Mockito.any(), Mockito.any()))
+    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     when(chatService.getChatsForConsultant(CONSULTANT))
         .thenReturn(Collections.emptyList());

@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
+import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
@@ -71,6 +73,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_MESSAG
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS;
@@ -141,6 +144,7 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
@@ -159,7 +163,6 @@ import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
@@ -181,7 +184,7 @@ import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
@@ -259,7 +262,7 @@ public class UserControllerIT {
       .description(DESCRIPTION)
       .teamAgency(false)
       .offline(false)
-      .consultingType(0);
+      .consultingType(CONSULTING_TYPE_ID_SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
@@ -267,7 +270,7 @@ public class UserControllerIT {
       .agency(AGENCY_DTO)
       .consultant(SESSION_CONSULTANT_DTO);
   private final List<AgencyDTO> AGENCY_LIST = new ArrayList<>();
-  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<String, Object>() {
+  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<>() {
     {
       put("age", "1");
       put("state", "4");
@@ -285,21 +288,21 @@ public class UserControllerIT {
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
-      0, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
       null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER, null, 0, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, 0, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, 0, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
@@ -318,8 +321,6 @@ public class UserControllerIT {
       "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
   private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
-  private final LoginResponseDTO LOGIN_RESPONSE_DTO =
-      new LoginResponseDTO(ACCESS_TOKEN, 0, 0, REFRESH_TOKEN, null, null, null);
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
@@ -359,6 +360,8 @@ public class UserControllerIT {
   private ConsultantAgencyService consultantAgencyService;
   @MockBean
   private AssignSessionFacade assignSessionFacade;
+  @MockBean
+  private AssignEnquiryFacade assignEnquiryFacade;
   @MockBean
   private KeycloakService keycloakService;
   @MockBean
@@ -497,7 +500,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnCreated_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsSuccessfull()
+  public void registerUser_Should_ReturnCreated_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsSuccessful()
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
@@ -512,7 +515,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnCreated_WhenProvidedWithValidU25RequestBodyAndKeycloakResponseIsSuccessfull()
+  public void registerUser_Should_ReturnCreated_WhenProvidedWithValidU25RequestBodyAndKeycloakResponseIsSuccessful()
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
@@ -534,7 +537,7 @@ public class UserControllerIT {
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields()));
     doThrow(new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT))
-        .when(createUserFacade).createUserAndInitializeAccount(Mockito.any());
+        .when(createUserFacade).createUserAccountWithInitializedConsultingType(Mockito.any());
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_U25_USER_REQUEST_BODY)
@@ -771,7 +774,7 @@ public class UserControllerIT {
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
-    doThrow(new ConflictException("")).when(assignSessionFacade)
+    doThrow(new ConflictException("")).when(assignEnquiryFacade)
         .assignEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
 
     mvc.perform(
@@ -1778,7 +1781,7 @@ public class UserControllerIT {
 
     ArgumentCaptor<UserDTO> argument = ArgumentCaptor.forClass(UserDTO.class);
     verify(createUserFacade, times(1))
-        .createUserAndInitializeAccount(argument.capture());
+        .createUserAccountWithInitializedConsultingType(argument.capture());
     assertEquals(DECODED_PASSWORD, argument.getValue().getPassword());
 
   }

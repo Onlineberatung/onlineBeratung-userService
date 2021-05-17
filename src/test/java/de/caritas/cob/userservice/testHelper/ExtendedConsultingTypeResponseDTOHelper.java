@@ -6,6 +6,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitiali
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.Registration;
 import de.caritas.cob.userservice.api.model.NotificationDTO;
 import de.caritas.cob.userservice.api.model.RoleDTO;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
@@ -106,5 +107,4 @@ public class ExtendedConsultingTypeResponseDTOHelper {
   public static ExtendedConsultingTypeResponseDTO createExtendedConsultingTypeResponseDTO() {
     return new ExtendedConsultingTypeResponseDTO();
   }
-
 }

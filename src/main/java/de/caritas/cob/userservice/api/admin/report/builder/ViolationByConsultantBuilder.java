@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.report.builder;
 
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.model.AdditionalInformationDTO;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
@@ -16,7 +16,7 @@ public class ViolationByConsultantBuilder {
   private String reason;
 
   private ViolationByConsultantBuilder(Consultant consultant) {
-    this.consultant = requireNonNull(consultant);
+    this.consultant = nonNull(consultant) ? consultant : new Consultant();
   }
 
   /**
