@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.filter.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
-import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.client.KeycloakClientRequestFactory;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticatedActionsFilter;
@@ -55,7 +54,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class)
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-        .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris()).permitAll().antMatchers("/users/askers/new")
+        .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris())
+        .permitAll()
+        .antMatchers("/users/askers/new", "/conversations/askers/anonymous/new")
         .permitAll()
         .antMatchers("/users/data", "/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
@@ -71,6 +72,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/consultants", "/users/sessions/teams",
             "/users/sessions/monitoring/{sessionId:[0-9]+}",
             "/users/sessions/{sessionId:[0-9]+}/monitoring",
+            "/conversations/askers/anonymous/{sessionId:[0-9]+}/accept",
             "/conversations/consultants/**")
         .hasAuthority(Authority.CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/consultant/{consultantId:[0-9A-Za-z-]+}")
@@ -120,26 +122,27 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Autowired
   public void configureGlobal(final AuthenticationManagerBuilder auth,
       RoleAuthorizationAuthorityMapper authorityMapper) {
-    KeycloakAuthenticationProvider keyCloakAuthProvider = keycloakAuthenticationProvider();
+    var keyCloakAuthProvider = keycloakAuthenticationProvider();
     keyCloakAuthProvider.setGrantedAuthoritiesMapper(authorityMapper);
     auth.authenticationProvider(keyCloakAuthProvider);
   }
 
   /**
-   * From the Keycloag documentation: "Spring Boot attempts to eagerly register filter beans with
+   * From the Keycloak documentation: "Spring Boot attempts to eagerly register filter beans with
    * the web application context. Therefore, when running the Keycloak Spring Security adapter in a
    * Spring Boot environment, it may be necessary to add FilterRegistrationBeans to your security
    * configuration to prevent the Keycloak filters from being registered twice."
    *
    * https://github.com/keycloak/keycloak-documentation/blob/master/securing_apps/topics/oidc/java/spring-security-adapter.adoc
    *
-   * {@link package.class#member label}
+   * @param filter {@link KeycloakAuthenticationProcessingFilter}
+   * @return {@link FilterRegistrationBean}
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
   public FilterRegistrationBean keycloakAuthenticationProcessingFilterRegistrationBean(
       KeycloakAuthenticationProcessingFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }
@@ -151,7 +154,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Bean
   public FilterRegistrationBean keycloakPreAuthActionsFilterRegistrationBean(
       KeycloakPreAuthActionsFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }
@@ -163,7 +166,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Bean
   public FilterRegistrationBean keycloakAuthenticatedActionsFilterBean(
       KeycloakAuthenticatedActionsFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }
@@ -175,7 +178,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Bean
   public FilterRegistrationBean keycloakSecurityContextRequestFilterBean(
       KeycloakSecurityContextRequestFilter filter) {
-    FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+    var registrationBean = new FilterRegistrationBean(filter);
     registrationBean.setEnabled(false);
     return registrationBean;
   }

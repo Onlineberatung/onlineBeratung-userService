@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.agency;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.config.CachingConfig;
 import java.util.Collections;
@@ -76,6 +77,20 @@ public class AgencyService {
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
     addDefaultHeaders(this.agencyControllerApi.getApiClient());
     return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
+        .map(this::fromOriginalAgency)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns a list of {@link AgencyDTO} for the provided consulting type.
+   *
+   * @param consultingType {@link ConsultingType}
+   * @return List of {@link AgencyDTO}
+   */
+  public List<AgencyDTO> getAgenciesByConsultingType(ConsultingType consultingType) {
+    addDefaultHeaders(this.agencyControllerApi.getApiClient());
+    return this.agencyControllerApi.getAgenciesByConsultingType(consultingType.getValue())
+        .stream()
         .map(this::fromOriginalAgency)
         .collect(Collectors.toList());
   }

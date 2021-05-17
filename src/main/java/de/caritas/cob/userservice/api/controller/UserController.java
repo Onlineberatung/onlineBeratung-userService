@@ -19,6 +19,7 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
@@ -105,6 +106,7 @@ public class  UserController implements UsersApi {
   private final @NotNull SessionListFacade sessionListFacade;
   private final @NotNull ConsultantAgencyService consultantAgencyService;
   private final @NotNull AssignSessionFacade assignSessionFacade;
+  private final @NotNull AssignEnquiryFacade assignEnquiryFacade;
   private final @NotNull DecryptionService decryptionService;
   private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
   private final @NotNull ChatService chatService;
@@ -128,7 +130,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
     user.setNewUserAccount(true);
-    createUserFacade.createUserAndInitializeAccount(user);
+    createUserFacade.createUserAccountWithInitializedConsultingType(user);
 
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
@@ -171,7 +173,7 @@ public class  UserController implements UsersApi {
 
     Optional<Session> session = sessionService.getSession(sessionId);
 
-    if (!session.isPresent() || isNull(session.get().getGroupId())) {
+    if (session.isEmpty() || isNull(session.get().getGroupId())) {
       LogService.logInternalServerError(String.format(
           "Session id %s is invalid, session not found or has no Rocket.Chat groupId assigned.",
           sessionId));
@@ -179,8 +181,8 @@ public class  UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
-    assignSessionFacade.assignEnquiry(session.get(), consultant);
+    var consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    this.assignEnquiryFacade.assignEnquiry(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -551,7 +553,7 @@ public class  UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
+    var consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
     assignSessionFacade.assignSession(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);

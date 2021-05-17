@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.repository.session.RegistrationType
 
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
+import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -13,7 +14,8 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionMapper;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.List;
@@ -35,6 +37,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AgencyService agencyService;
+  private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
 
   /**
    * Builds the {@link ConsultantSessionListResponseDTO}.
@@ -45,7 +48,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
   @Override
   public ConsultantSessionListResponseDTO buildConversations(
       PageableListRequest pageableListRequest) {
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var consultant = this.userAccountProvider.retrieveValidatedConsultant();
     Set<ConsultingType> relatedConsultingTypes = retrieveRelatedConsultingTypes(consultant);
 
     Page<Session> anonymousSessionsOfConsultant = queryForRelevantSessions(
@@ -54,6 +57,10 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
     List<ConsultantSessionResponseDTO> sessions = anonymousSessionsOfConsultant.stream()
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
+
+    sessions.forEach(session -> this.consultantSessionEnricher
+        .updateRequiredConsultantSessionValues(session, pageableListRequest.getRcToken(),
+            consultant));
 
     return new ConsultantSessionListResponseDTO()
         .sessions(sessions)
@@ -73,11 +80,12 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
 
   private Page<Session> queryForRelevantSessions(PageableListRequest pageableListRequest,
       Set<ConsultingType> relatedConsultingTypes) {
-    PageRequest pageable = PageRequest.of(pageableListRequest.getOffset(),
+    var pageable = PageRequest.of(pageableListRequest.getOffset(),
         pageableListRequest.getCount());
 
     return this.sessionRepository
-        .findByConsultingTypeInAndRegistrationTypeOrderByEnquiryMessageDateAsc(relatedConsultingTypes, ANONYMOUS, pageable);
+        .findByConsultingTypeInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(
+            relatedConsultingTypes, ANONYMOUS, SessionStatus.NEW, pageable);
   }
 
   /**
