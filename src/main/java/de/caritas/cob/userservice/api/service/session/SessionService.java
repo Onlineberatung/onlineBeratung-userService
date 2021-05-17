@@ -7,7 +7,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
-import de.caritas.cob.userservice.api.exception.UpdateSessionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -28,7 +27,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
@@ -90,15 +89,10 @@ public class SessionService {
    * @param status     the status of the session
    */
   public void updateConsultantAndStatusForSession(Session session, Consultant consultant,
-      SessionStatus status) throws UpdateSessionException {
-
-    try {
-      session.setConsultant(consultant);
-      session.setStatus(status);
-      saveSession(session);
-    } catch (InternalServerErrorException serviceException) {
-      throw new UpdateSessionException(serviceException);
-    }
+      SessionStatus status) {
+    session.setConsultant(consultant);
+    session.setStatus(status);
+    saveSession(session);
   }
 
   /**

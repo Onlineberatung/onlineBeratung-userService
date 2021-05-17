@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
 
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSENQUIRYACCEPTED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -205,5 +206,27 @@ public class LiveEventNotificationServiceTest {
     ArgumentCaptor<LiveEventMessage> captor = ArgumentCaptor.forClass(LiveEventMessage.class);
     verify(liveControllerApi, times(1)).sendLiveEvent(any(), captor.capture());
     assertEquals(EventType.NEWANONYMOUSENQUIRY, captor.getValue().getEventType());
+  }
+
+  @Test
+  public void sendAcceptAnonymousEnquiryEventToUser_Should_doNothing_When_userIdIsNull() {
+    this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser(null);
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendAcceptAnonymousEnquiryEventToUser_Should_doNothing_When_userIdIsEmpty() {
+    this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("");
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendAcceptAnonymousEnquiryEventToUser_Should_triggerLiveEvent_When_userIdIsValid() {
+    this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("userId");
+
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(singletonList("userId"),
+        new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED));
   }
 }
