@@ -81,7 +81,7 @@ public class ConversationController implements ConversationsApi {
   @Override
   public ResponseEntity<Void> acceptAnonymousEnquiry(Long sessionId) {
     this.acceptAnonymousEnquiryFacade.acceptAnonymousEnquiry(sessionId);
-    return new ResponseEntity<>(HttpStatus.OK);
+    return ResponseEntity.ok().build();
   }
 
   /**

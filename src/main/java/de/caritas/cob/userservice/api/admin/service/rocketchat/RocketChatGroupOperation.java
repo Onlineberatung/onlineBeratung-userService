@@ -50,15 +50,13 @@ abstract class RocketChatGroupOperation {
 
   void removeConsultantFromSession(Session session, Consultant consultant) {
     if (isUserInRocketChatGroup(session.getGroupId(), consultant)
-        && !keycloakAdminClientService
-        .userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS)) {
+        && consultantHasNoAuthorityTo(VIEW_ALL_PEER_SESSIONS, consultant)) {
       this.rocketChatFacade
           .removeUserFromGroup(consultant.getRocketChatId(), session.getGroupId());
     }
 
     if (isUserInRocketChatGroup(session.getFeedbackGroupId(), consultant)
-        && !keycloakAdminClientService
-        .userHasAuthority(consultant.getId(), VIEW_ALL_FEEDBACK_SESSIONS)) {
+        && consultantHasNoAuthorityTo(VIEW_ALL_FEEDBACK_SESSIONS, consultant)) {
       this.rocketChatFacade
           .removeUserFromGroup(consultant.getRocketChatId(), session.getFeedbackGroupId());
     }
@@ -70,6 +68,10 @@ abstract class RocketChatGroupOperation {
     }
     return this.rocketChatFacade.retrieveRocketChatMembers(rcGroupId).stream()
         .anyMatch(groupMember -> groupMember.get_id().equals(consultant.getRocketChatId()));
+  }
+
+  private boolean consultantHasNoAuthorityTo(String authorityValue, Consultant consultant) {
+    return !keycloakAdminClientService.userHasAuthority(consultant.getId(), authorityValue);
   }
 
 }
