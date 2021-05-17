@@ -186,7 +186,7 @@ public class SessionServiceTest {
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
 
-    Assert.assertEquals(expectedSession, SESSION);
+    assertEquals(expectedSession, SESSION);
   }
 
   @Test
@@ -198,7 +198,7 @@ public class SessionServiceTest {
     Session expectedSession = sessionService
         .initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
 
-    Assert.assertEquals(expectedSession, SESSION);
+    assertEquals(expectedSession, SESSION);
   }
 
   @Test
@@ -213,7 +213,7 @@ public class SessionServiceTest {
       sessionService.getSessionsForUserId(USER_ID);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      // As expected
     }
   }
 
@@ -415,7 +415,7 @@ public class SessionServiceTest {
       sessionService.updateFeedbackGroupId(SESSION, RC_GROUP_ID);
       fail("Expected exception: UpdateFeedbackGroupIdException");
     } catch (UpdateFeedbackGroupIdException updateFeedbackGroupIdException) {
-      assertTrue(true, "Excepted UpdateFeedbackGroupIdException thrown");
+      // As expected
     }
 
   }
