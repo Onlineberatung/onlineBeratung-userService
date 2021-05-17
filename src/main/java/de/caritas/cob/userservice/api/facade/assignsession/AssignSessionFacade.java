@@ -42,6 +42,7 @@ public class AssignSessionFacade {
   private final @NonNull RocketChatRollbackService rocketChatRollbackService;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
+  private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -49,9 +50,11 @@ public class AssignSessionFacade {
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
    */
   public void assignSession(Session session, Consultant consultant) {
-
-    var sessionToConsultantVerifier = new SessionToConsultantVerifier(session, consultant);
-    sessionToConsultantVerifier.verifyPreconditionsForAssignment();
+    var consultantSessionDTO = ConsultantSessionDTO.builder()
+        .consultant(consultant)
+        .session(session)
+        .build();
+    sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     var initialConsultant = session.getConsultant();
     SessionStatus initialStatus = session.getStatus();

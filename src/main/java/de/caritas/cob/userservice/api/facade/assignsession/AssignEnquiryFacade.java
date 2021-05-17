@@ -41,6 +41,7 @@ public class AssignEnquiryFacade {
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatRollbackService rocketChatRollbackService;
+  private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -48,9 +49,12 @@ public class AssignEnquiryFacade {
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
    */
   public void assignEnquiry(Session session, Consultant consultant) {
-    var sessionToConsultantVerifier = new SessionToConsultantVerifier(session, consultant);
-    sessionToConsultantVerifier.verifySessionIsNotInProgress();
-    sessionToConsultantVerifier.verifyPreconditionsForAssignment();
+    ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
+        .consultant(consultant)
+        .session(session)
+        .build();
+    sessionToConsultantVerifier.verifySessionIsNotInProgress(consultantSessionDTO);
+    sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
     updateRocketChatRooms(session, consultant);

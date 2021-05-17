@@ -1,8 +1,6 @@
 package de.caritas.cob.userservice.api.repository.consultantagency;
 
-import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.service.agency.AgencyLoader;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -59,10 +57,6 @@ public class ConsultantAgency {
 
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
-
-  public AgencyDTO getAgency() {
-    return AgencyLoader.getAgency(this.agencyId);
-  }
 
   @Override
   public boolean equals(Object o) {
