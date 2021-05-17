@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.helper;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -81,9 +83,10 @@ public class SessionDataProvider {
     return sessionDataList;
   }
 
-  private SessionDataInitializing getSessionDataInitializing(int consultingType) {
-    return consultingTypeManager.getConsultingTypeSettings(consultingType)
-        .getSessionDataInitializing();
+  private SessionDataInitializing getSessionDataInitializing(int consultingTypeId) {
+    return SessionDataInitializing.convertSessionDataInitializingDTOtoSessionDataInitializing(
+        Objects.requireNonNull(consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
+            .getSessionDataInitializing()));
   }
 
   private SessionData obtainSessionData(Session session, String key, String value) {

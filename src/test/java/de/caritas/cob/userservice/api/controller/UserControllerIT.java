@@ -150,6 +150,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
@@ -458,7 +459,7 @@ public class UserControllerIT {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
         .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+            MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(INVALID_U25_USER_REQUEST_BODY_STATE)
@@ -500,8 +501,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
-            .getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
+            .getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY)
@@ -516,7 +517,7 @@ public class UserControllerIT {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
         .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+            MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_U25_USER_REQUEST_BODY)
@@ -531,7 +532,7 @@ public class UserControllerIT {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
         .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+            MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields()));
     doThrow(new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT))
         .when(createUserFacade).createUserAndInitializeAccount(Mockito.any());
 
@@ -547,7 +548,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields()));
 
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -562,7 +563,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields()));
 
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -1766,8 +1767,8 @@ public class UserControllerIT {
   public void registerUser_Should_DecodePassword() throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
-            .getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
+            .getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)

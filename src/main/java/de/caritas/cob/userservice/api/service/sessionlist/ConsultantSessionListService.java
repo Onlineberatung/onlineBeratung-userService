@@ -5,6 +5,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -12,7 +13,6 @@ import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformati
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
@@ -232,10 +232,10 @@ public class ConsultantSessionListService {
 
   private boolean getMonitoringProperty(SessionDTO session) {
 
-    ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = consultingTypeManager
         .getConsultingTypeSettings(session.getConsultingType());
 
-    return consultingTypeSettings.isMonitoring();
+    return extendedConsultingTypeResponseDTO.getMonitoring().getInitializeMonitoring();
   }
 
   private boolean isFeedbackFlagAvailable(RocketChatRoomInformation rocketChatRoomInformation,

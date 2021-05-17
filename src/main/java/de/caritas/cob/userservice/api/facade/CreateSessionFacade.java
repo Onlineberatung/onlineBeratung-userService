@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -19,9 +18,11 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,25 +41,26 @@ public class CreateSessionFacade {
   /**
    * Creates a new session for the provided user.
    *
-   * @param userDTO                {@link UserDTO}
-   * @param user                   {@link User}
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
+   * @param userDTO                           {@link UserDTO}
+   * @param user                              {@link User}
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
   public Long createUserSession(UserDTO userDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings) {
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
-    checkIfAlreadyRegisteredToConsultingType(user, consultingTypeSettings.getConsultingTypeId());
-    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, consultingTypeSettings.getConsultingTypeId());
-    Session session = initializeSession(userDTO, user, consultingTypeSettings, agencyDTO);
-    initializeMonitoring(userDTO, user, consultingTypeSettings, session);
+    checkIfAlreadyRegisteredToConsultingType(user, extendedConsultingTypeResponseDTO.getId());
+    AgencyDTO agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO.getId());
+    Session session = initializeSession(userDTO, user, extendedConsultingTypeResponseDTO,
+        agencyDTO);
+    initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
 
     return session.getId();
   }
 
   private void initializeMonitoring(UserDTO userDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings, Session session) {
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, Session session) {
     try {
-      monitoringService.createMonitoringIfConfigured(session, consultingTypeSettings);
+      monitoringService.createMonitoringIfConfigured(session, extendedConsultingTypeResponseDTO);
     } catch (CreateMonitoringException exception) {
       rollbackFacade.rollBackUserAccount(RollbackUserAccountInformation.builder()
           .userId(user.getUserId())
@@ -73,12 +75,12 @@ public class CreateSessionFacade {
   }
 
   private Session initializeSession(UserDTO userDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings, AgencyDTO agencyDTO) {
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, AgencyDTO agencyDTO) {
 
     try {
       Session session = sessionService
           .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()),
-              consultingTypeSettings);
+              extendedConsultingTypeResponseDTO);
       sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 
       return session;
@@ -108,14 +110,14 @@ public class CreateSessionFacade {
     return agencyDTO;
   }
 
-  private void checkIfAlreadyRegisteredToConsultingType(User user, int consultingType) {
+  private void checkIfAlreadyRegisteredToConsultingType(User user, int consultingTypeId) {
     List<Session> sessions =
-        sessionService.getSessionsForUserByConsultingType(user, consultingType);
+        sessionService.getSessionsForUserByConsultingTypeId(user, consultingTypeId);
 
-    if (!sessions.isEmpty()) {
+    if (CollectionUtils.isNotEmpty(sessions)) {
       throw new ConflictException(
           String.format("User %s is already registered to consulting type %d", user.getUserId(),
-              consultingType));
+              consultingTypeId));
     }
   }
 }

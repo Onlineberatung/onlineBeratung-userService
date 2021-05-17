@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -67,9 +66,6 @@ public class UserAdminControllerAuthorizationIT {
 
   @MockBean
   private SessionAdminService sessionAdminService;
-
-  @MockBean
-  private ConsultingTypeAdminService consultingTypeAdminService;
 
   @MockBean
   private ViolationReportGenerator violationReportGenerator;
@@ -122,50 +118,6 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(sessionAdminService, times(1)).findSessions(any(), anyInt(), any());
-  }
-
-  @Test
-  public void getConsultingTypes_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-
-    mvc.perform(get(CONSULTING_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
-        .andExpect(status().isUnauthorized());
-
-    verifyNoMoreInteractions(consultingTypeAdminService);
-  }
-
-  @Test
-  @WithMockUser(
-      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
-          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
-          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT})
-  public void getConsultingTypes_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
-      throws Exception {
-
-    mvc.perform(get(CONSULTING_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultingTypeAdminService);
-  }
-
-  @Test
-  @WithMockUser(authorities = {Authority.USER_ADMIN})
-  public void getConsultingTypes_Should_ReturnOkAndCallSessionAdminService_When_userAdminAuthority()
-      throws Exception {
-
-    mvc.perform(get(CONSULTING_TYPE_PATH)
-        .param(PAGE_PARAM, "0")
-        .param(PER_PAGE_PARAM, "1")
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
-        .andExpect(status().isOk());
-
-    verify(consultingTypeAdminService, times(1)).findConsultingTypes(any(), any());
   }
 
   @Test

@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -47,7 +46,7 @@ public class AskerDataProvider {
    */
   public UserDataResponseDTO retrieveData(User user) {
     String email = observeUserEmailAddress(user);
-    UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
+    var responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
         null, null, email, false, user.isLanguageFormal(), null, false, null,
         authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
 
@@ -66,14 +65,13 @@ public class AskerDataProvider {
     List<Long> agencyIds = mergeAgencyIdsFromSessionAndUser(user, sessionList);
     List<AgencyDTO> agencyDTOs = this.agencyService.getAgencies(agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
-    for (int type : consultingTypeManager.getAllconsultingTypeIds()) {
+    for (int type : consultingTypeManager.getAllConsultingTypeIds()) {
       consultingTypes.put(Integer.toString(type),
           getConsultingTypeData(type, sessionList, agencyDTOs));
     }
 
     return consultingTypes;
   }
-
 
 
   private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,

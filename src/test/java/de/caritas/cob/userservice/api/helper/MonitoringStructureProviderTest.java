@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_LIST;
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -9,15 +8,14 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
@@ -26,7 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -211,8 +208,10 @@ public class MonitoringStructureProviderTest {
 
   @Test
   public void getMonitoringInitialList_Should_returnExpectedMonitoring_When_consultingTypeHAsMonitoring() {
-    ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
-    when(settings.getMonitoringFile()).thenReturn("/monitoring/sucht.json");
+    ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
+    var monitoringDTO  = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
+    monitoringDTO.setMonitoringTemplateFile("/monitoring/sucht.json");
+    when(settings.getMonitoring()).thenReturn(monitoringDTO);
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
 
     MonitoringDTO monitoringInitalList = this.monitoringStructureProvider
@@ -224,8 +223,10 @@ public class MonitoringStructureProviderTest {
 
   @Test(expected = InternalServerErrorException.class)
   public void getMonitoringInitialList_Should_throwInternalServerErrorException_When_monitoringFilePathIsNull() {
-    ConsultingTypeSettings settings = mock(ConsultingTypeSettings.class);
-    when(settings.getMonitoringFile()).thenReturn(null);
+    ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
+    var monitoringDTO = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
+    monitoringDTO.setMonitoringTemplateFile(null);
+    when(settings.getMonitoring()).thenReturn(monitoringDTO);
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
 
     this.monitoringStructureProvider.getMonitoringInitialList(0);

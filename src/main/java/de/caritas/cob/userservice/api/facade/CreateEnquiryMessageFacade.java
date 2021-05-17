@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.facade;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -19,7 +20,6 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -83,14 +83,14 @@ public class CreateEnquiryMessageFacade {
       Session session = fetchSessionForEnquiryMessage(sessionId, user);
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
-      ConsultingTypeSettings consultingTypeSettings =
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
           consultingTypeManager.getConsultingTypeSettings(session.getConsultingTypeId());
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
       String rcGroupId = retrieveRcGroupId(session, agencyList, rocketChatCredentials);
       String rcFeedbackGroupId = retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(session,
-          rcGroupId, agencyList, consultingTypeSettings);
+          rcGroupId, agencyList, extendedConsultingTypeResponseDTO);
 
       CreateEnquiryExceptionInformation createEnquiryExceptionInformation =
           CreateEnquiryExceptionInformation.builder().session(session)
@@ -101,9 +101,9 @@ public class CreateEnquiryMessageFacade {
       messageServiceProvider.postEnquiryMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);
       messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, user,
-          consultingTypeSettings, createEnquiryExceptionInformation);
+          extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
       messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(rcGroupId,
-          consultingTypeSettings, createEnquiryExceptionInformation);
+          extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
 
       updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
 
@@ -226,10 +226,10 @@ public class CreateEnquiryMessageFacade {
 
   private String retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(Session session,
       String rcGroupId,
-      List<ConsultantAgency> agencyList, ConsultingTypeSettings consultingTypeSettings)
+      List<ConsultantAgency> agencyList, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
       throws CreateEnquiryException {
 
-    if (!consultingTypeSettings.isFeedbackChat()) {
+    if (!extendedConsultingTypeResponseDTO.getInitializeFeedbackChat()) {
       return null;
     }
 

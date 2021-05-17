@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.facade;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.registration.UserRegistrationDTO;
@@ -37,11 +37,11 @@ public class CreateNewConsultingTypeFacade {
   public Long initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
       RocketChatCredentials rocketChatCredentials) {
     try {
-      ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = consultingTypeManager
           .getConsultingTypeSettings(userRegistrationDTO.getConsultingType());
 
       return createSessionOrChat(userRegistrationDTO, user,
-          consultingTypeSettings, rocketChatCredentials);
+          extendedConsultingTypeResponseDTO, rocketChatCredentials);
     } catch (MissingConsultingTypeException | IllegalArgumentException e) {
       throw new BadRequestException(e.getMessage(), LogService::logInternalServerError);
     }
@@ -53,20 +53,20 @@ public class CreateNewConsultingTypeFacade {
    *
    * @param userRegistrationDTO    {@link UserRegistrationDTO}
    * @param user                   {@link User}
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
   public void initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings) {
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
-    createSessionOrChat(userRegistrationDTO, user, consultingTypeSettings, null);
+    createSessionOrChat(userRegistrationDTO, user, extendedConsultingTypeResponseDTO, null);
   }
 
   private Long createSessionOrChat(UserRegistrationDTO userRegistrationDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings, RocketChatCredentials rocketChatCredentials) {
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, RocketChatCredentials rocketChatCredentials) {
 
     Long sessionId = null;
 
-    if (consultingTypeSettings.isGroupChat()) {
+    if (extendedConsultingTypeResponseDTO.getGroupChat().getIsGroupChat()) {
       createUserChatRelationFacade
           .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
               rocketChatCredentials);
@@ -74,7 +74,7 @@ public class CreateNewConsultingTypeFacade {
     } else {
       sessionId = createSessionFacade
           .createUserSession(fromUserRegistrationDTO(userRegistrationDTO), user,
-              consultingTypeSettings);
+              extendedConsultingTypeResponseDTO);
     }
 
     return sessionId;

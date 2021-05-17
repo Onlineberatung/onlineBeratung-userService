@@ -12,11 +12,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import org.jeasy.random.EasyRandom;
@@ -44,13 +44,13 @@ public class CreateNewConsultingTypeFacadeTest {
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(String.valueOf(0));
     User user = easyRandom.nextObject(User.class);
-    ConsultingTypeSettings consultingTypeSettings = easyRandom
-        .nextObject(ConsultingTypeSettings.class);
-    consultingTypeSettings.setConsultingTypeId(0);
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = easyRandom
+        .nextObject(ExtendedConsultingTypeResponseDTO.class);
+    extendedConsultingTypeResponseDTO.setId(0);
 
     createNewConsultingTypeFacade
-        .initializeNewConsultingType(userDTO, user, consultingTypeSettings);
-    if (!consultingTypeSettings.isGroupChat()) {
+        .initializeNewConsultingType(userDTO, user, extendedConsultingTypeResponseDTO);
+    if (!extendedConsultingTypeResponseDTO.getGroupChat().getIsGroupChat()) {
       verify(createSessionFacade, times(1)).createUserSession(any(), any(), any());
     } else {
       verify(createUserChatRelationFacade, times(1))

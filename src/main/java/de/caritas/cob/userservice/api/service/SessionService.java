@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toUni
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.UpdateSessionException;
@@ -14,7 +15,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -78,7 +78,7 @@ public class SessionService {
    * @param user {@link User}
    * @return list of {@link Session}
    */
-  public List<Session> getSessionsForUserByConsultingType(User user,
+  public List<Session> getSessionsForUserByConsultingTypeId(User user,
       int consultingTypeId) {
     return sessionRepository.findByUserAndConsultingTypeId(user, consultingTypeId);
   }
@@ -145,14 +145,14 @@ public class SessionService {
    *
    * @param user                   the user
    * @param userDto                the dto of the user
-   * @param consultingTypeSettings flag to initialize monitoring
+   * @param extendedConsultingTypeResponseDTO flag to initialize monitoring
    * @return the initialized session
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
-      ConsultingTypeSettings consultingTypeSettings) {
-    Session session = new Session(user, consultingTypeSettings.getConsultingTypeId(),
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    Session session = new Session(user, extendedConsultingTypeResponseDTO.getId(),
         userDto.getPostcode(), userDto.getAgencyId(), SessionStatus.INITIAL,
-        isTeamSession, consultingTypeSettings.isMonitoring());
+        isTeamSession, extendedConsultingTypeResponseDTO.getMonitoring().getInitializeMonitoring());
     session.setCreateDate(nowInUtc());
     session.setUpdateDate(nowInUtc());
     return saveSession(session);

@@ -8,15 +8,15 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcome
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.MessageHelper;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
-import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
-import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
+import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -68,25 +68,26 @@ public class MessageServiceProvider {
 
   /**
    * Posts a welcome message as system user to the given Rocket.Chat group if configured in the
-   * provided {@link ConsultingTypeSettings}.
+   * provided {@link ExtendedConsultingTypeResponseDTO}.
    *
-   * @param rcGroupId              Rocket.Chat group ID
-   * @param user                   {@link User} who receives the message
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
-   * @param exceptionInformation   {@link CreateEnquiryExceptionInformation}
+   * @param rcGroupId                         Rocket.Chat group ID
+   * @param user                              {@link User} who receives the message
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
+   * @param exceptionInformation              {@link CreateEnquiryExceptionInformation}
    * @throws RocketChatPostWelcomeMessageException exception when posting the welcome message fails
    */
   public void postWelcomeMessageIfConfigured(String rcGroupId, User user,
-      ConsultingTypeSettings consultingTypeSettings,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostWelcomeMessageException {
 
-    if (!consultingTypeSettings.isSendWelcomeMessage()) {
+    if (!extendedConsultingTypeResponseDTO.getWelcomeMessage().getSendWelcomeMessage()) {
       return;
     }
 
     String welcomeMessage =
-        MessageHelper.replaceUsernameInMessage(consultingTypeSettings.getWelcomeMessage(),
+        MessageHelper.replaceUsernameInMessage(
+            extendedConsultingTypeResponseDTO.getWelcomeMessage().getWelcomeMessageText(),
             userHelper.decodeUsername(user.getUsername()));
 
     try {
@@ -110,20 +111,20 @@ public class MessageServiceProvider {
    * Posts an alias only message and/or save session data message as system user in the provided
    * Rocket.Chat group ID.
    *
-   * @param rcGroupId Rocket.Chat group ID
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
-   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
+   * @param rcGroupId                         Rocket.Chat group ID
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
+   * @param exceptionInformation              {@link CreateEnquiryExceptionInformation}
    */
-  public void   postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
-      ConsultingTypeSettings consultingTypeSettings,
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {
 
-    if (consultingTypeSettings.isSendFurtherStepsMessage()) {
+    if (extendedConsultingTypeResponseDTO.getSendFurtherStepsMessage()) {
       this.postAliasOnlyMessage(rcGroupId, MessageType.FURTHER_STEPS, exceptionInformation);
     }
 
-    if (consultingTypeSettings.isSendSaveSessionDataMessage()) {
+    if (extendedConsultingTypeResponseDTO.getSendSaveSessionDataMessage()) {
       this.postAliasOnlyMessage(rcGroupId, MessageType.UPDATE_SESSION_DATA, exceptionInformation);
     }
   }

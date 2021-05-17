@@ -246,42 +246,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /useradmin/consultingtypes:
-    get:
-      tags:
-        - admin-user-controller
-      summary: 'Returns the full list of consulting types [Authorization: Role: agency-admin]'
-      operationId: getConsultingTypes
-      parameters:
-        - name: page
-          in: query
-          description: Number of page where to start in the query (1 = first page)
-          required: true
-          schema:
-            type: integer
-            example: 1
-        - name: perPage
-          in: query
-          description: Number of items which are being returned per page
-          required: true
-          schema:
-            type: integer
-            example: 20
-      responses:
-        200:
-          description: OK - successfull operation
-          content:
-            'application/hal+json':
-              schema:
-                $ref: '#/components/schemas/ConsultingTypeAdminResultDTO'
-        400:
-          description: BAD REQUEST - invalid/incomplete request or body object
-        401:
-          description: UNAUTHORIZED - no/invalid role/authorization
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
   /useradmin/report:
     get:
       tags:
