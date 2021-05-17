@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.T
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -25,14 +26,14 @@ import de.caritas.cob.userservice.api.model.NewMessageDTO;
 import de.caritas.cob.userservice.api.model.NotificationDTO;
 import de.caritas.cob.userservice.api.model.TeamSessionDTO;
 import de.caritas.cob.userservice.api.model.ToConsultantDTO;
-import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
-import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
@@ -77,7 +78,6 @@ public class NewMessageEmailSupplierTest {
         .consultingTypeManager(consultingTypeManager)
         .applicationBaseUrl("app baseurl")
         .emailDummySuffix("dummySuffix")
-        .userHelper(userHelper)
         .build();
     setInternalState(LogService.class, "LOGGER", logger);
   }
@@ -221,9 +221,9 @@ public class NewMessageEmailSupplierTest {
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     Consultant consultant = mock(Consultant.class);
     when(consultant.getId()).thenReturn(USER.getUserId());
+    when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
     when(session.getConsultant()).thenReturn(consultant);
     when(session.getUser()).thenReturn(USER);
-    when(userHelper.decodeUsername(any())).thenReturn("decoded user name");
 
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
@@ -234,9 +234,9 @@ public class NewMessageEmailSupplierTest {
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("consultantName"));
-    assertThat(templateData.get(0).getValue(), is("decoded user name"));
+    assertThat(templateData.get(0).getValue(), is("Username!#123"));
     assertThat(templateData.get(1).getKey(), is("askerName"));
-    assertThat(templateData.get(1).getValue(), is("decoded user name"));
+    assertThat(templateData.get(1).getValue(), is("username"));
     assertThat(templateData.get(2).getKey(), is("url"));
     assertThat(templateData.get(2).getValue(), is("app baseurl"));
   }

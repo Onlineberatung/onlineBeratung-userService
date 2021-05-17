@@ -7,16 +7,16 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessage
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.MessageHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
-import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
-import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
+import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +32,6 @@ public class MessageServiceProvider {
 
   private final @NonNull MessageControllerApi messageControllerApi;
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
-  private final @NonNull UserHelper userHelper;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
 
   /**
@@ -87,7 +86,7 @@ public class MessageServiceProvider {
 
     String welcomeMessage =
         MessageHelper.replaceUsernameInMessage(consultingTypeSettings.getWelcomeMessage(),
-            userHelper.decodeUsername(user.getUsername()));
+            new UsernameTranscoder().decodeUsername(user.getUsername()));
 
     try {
       this.postMessageAsSystemUser(welcomeMessage, rcGroupId);
@@ -110,11 +109,11 @@ public class MessageServiceProvider {
    * Posts an alias only message and/or save session data message as system user in the provided
    * Rocket.Chat group ID.
    *
-   * @param rcGroupId Rocket.Chat group ID
+   * @param rcGroupId              Rocket.Chat group ID
    * @param consultingTypeSettings {@link ConsultingTypeSettings}
-   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation   {@link CreateEnquiryExceptionInformation}
    */
-  public void   postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
       ConsultingTypeSettings consultingTypeSettings,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {

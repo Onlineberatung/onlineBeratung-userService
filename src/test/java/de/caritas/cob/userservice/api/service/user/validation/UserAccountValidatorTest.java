@@ -1,15 +1,15 @@
 package de.caritas.cob.userservice.api.service.user.validation;
 
+import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.PASSWORD;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.model.keycloak.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -36,7 +36,8 @@ public class UserAccountValidatorTest {
 
   @Test
   public void checkPasswordValidity_Should_LogOutUser_When_LoginWasSuccessful() {
-    LoginResponseDTO loginResponseDTO = new EasyRandom().nextObject(LoginResponseDTO.class);
+    KeycloakLoginResponseDTO loginResponseDTO = new EasyRandom()
+        .nextObject(KeycloakLoginResponseDTO.class);
     when(keycloakService.loginUser(anyString(), anyString())).thenReturn(loginResponseDTO);
 
     this.userAccountValidator.checkPasswordValidity(USERNAME, PASSWORD);

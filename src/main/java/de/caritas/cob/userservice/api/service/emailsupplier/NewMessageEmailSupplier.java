@@ -8,12 +8,12 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -44,7 +44,6 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private final ConsultingTypeManager consultingTypeManager;
   private final String applicationBaseUrl;
   private final String emailDummySuffix;
-  private final UserHelper userHelper;
 
   /**
    * Generates new message notification mails sent to regarding consultants when a user has written
@@ -138,10 +137,11 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private List<MailDTO> buildMailForAsker() {
 
     if (isSessionActiveAndBelongToConsultant() && isNotADummyMail()) {
+      var usernameTranscoder = new UsernameTranscoder();
       return singletonList(
           buildMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
-              userHelper.decodeUsername(session.getConsultant().getUsername()),
-              userHelper.decodeUsername(session.getUser().getUsername())));
+              usernameTranscoder.decodeUsername(session.getConsultant().getUsername()),
+              usernameTranscoder.decodeUsername(session.getUser().getUsername())));
     }
     if (isNotADummyMail()) {
       LogService.logEmailNotificationFacadeError(String.format(

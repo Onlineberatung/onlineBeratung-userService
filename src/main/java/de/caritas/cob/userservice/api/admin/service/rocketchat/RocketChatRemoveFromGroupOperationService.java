@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.List;
 import java.util.Map;
@@ -16,20 +16,20 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private Map<Session, List<Consultant>> consultantsToRemoveFromSessions;
 
-  private RocketChatRemoveFromGroupOperationService(RocketChatService rocketChatService,
+  private RocketChatRemoveFromGroupOperationService(RocketChatFacade rocketChatFacade,
       KeycloakAdminClientService keycloakAdminClientService) {
-    super(rocketChatService, keycloakAdminClientService);
+    super(rocketChatFacade, keycloakAdminClientService);
   }
 
   /**
    * Creates the {@link RocketChatRemoveFromGroupOperationService} instance.
    *
-   * @param rocketChatService the target service to perform operations
+   * @param rocketChatFacade the target service to perform operations
    * @return the {@link RocketChatRemoveFromGroupOperationService} instance
    */
   public static RocketChatRemoveFromGroupOperationService getInstance(
-      RocketChatService rocketChatService, KeycloakAdminClientService keycloakAdminClientService) {
-    return new RocketChatRemoveFromGroupOperationService(rocketChatService,
+      RocketChatFacade rocketChatFacade, KeycloakAdminClientService keycloakAdminClientService) {
+    return new RocketChatRemoveFromGroupOperationService(rocketChatFacade,
         keycloakAdminClientService);
   }
 

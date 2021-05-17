@@ -14,11 +14,6 @@ paths:
         consultant. [Authorization: Role: consultant]'
       operationId: getRegisteredEnquiries
       parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
         - name: offset
           in: query
           description: Number of items where to start in the query (0 = first item)
@@ -33,13 +28,26 @@ paths:
           schema:
             minimum: 1
             type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK - successfull operation
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/consultants/enquiries/anonymous:
@@ -50,11 +58,6 @@ paths:
         consultant. [Authorization: Role: consultant]'
       operationId: getAnonymousEnquiries
       parameters:
-        - name: RCToken
-          in: header
-          required: true
-          schema:
-            type: string
         - name: offset
           in: query
           description: Number of items where to start in the query (0 = first item)
@@ -69,13 +72,26 @@ paths:
           schema:
             minimum: 1
             type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK - successfull operation
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/askers/anonymous/new:
@@ -91,12 +107,52 @@ paths:
               $ref: '#/components/schemas/CreateAnonymousEnquiryDTO'
         required: true
       responses:
-        200:
-          description: OK - successfull operation
+        201:
+          description: CREATED - Anonymous user and enquiry successfully created.
           content:
-            application/hal+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/CreateAnonymousEnquiryResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object or consulting type
+            doesn't provide anonymous conversations
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /conversations/askers/anonymous/{sessionId}/accept:
+    put:
+      tags:
+        - conversation-controller
+      summary: 'Accept an anonymous enquiry and assign it to the currently authenticated consultant
+            [Authorization: Role: consultant]'
+      operationId: acceptAnonymousEnquiry
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - enquiry already accepted by another consultant or
+            consulting type of session is not assigned to consultant
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
 
@@ -109,7 +165,7 @@ components:
         - consultingType
       properties:
         consultingType:
-          type: string
+          type: integer
           example: 3
           description: Consulting type ID
 
@@ -118,7 +174,13 @@ components:
       required:
         - userName
         - sessionId
+        - accessToken
+        - expiresIn
+        - refreshToken
+        - refreshExpiresIn
+        - rcUserId
         - rcToken
+        - rcGroupId
       properties:
         userName:
           type: string
@@ -127,10 +189,22 @@ components:
         sessionId:
           type: integer
           format: int64
-        bearerToken:
+        accessToken:
           type: string
           example: eyJhbGciOiJSUzI1NiIs(...)
-          description: The Keycloak bearer token for this user
+          description: The Keycloak access token for this user
+        expiresIn:
+          type: integer
+          example: 300
+          description: Number of seconds the access token is valid
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIs(...)
+          description: The Keycloak refresh token for this user
+        refreshExpiresIn:
+          type: integer
+          example: 6000
+          description: Number of seconds the refresh token is valid
         rcUserId:
           type: string
           example: piYG2BAE9ng(...)

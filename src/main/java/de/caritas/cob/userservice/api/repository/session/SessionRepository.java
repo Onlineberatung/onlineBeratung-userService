@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
@@ -30,6 +31,19 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    */
   List<Session> findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
       List<Long> agencyIds, SessionStatus sessionStatus);
+
+  /**
+   * Find a {@link Session} with unassigned consultant by agency ids and status ordery by creation
+   * date ascending.
+   *
+   * @param agencyIds     ids of agencies to search for
+   * @param sessionStatus {@link SessionStatus} to search for
+   * @param registrationType {@link RegistrationType} to search for
+   * @return A list of {@link Session}s for the specific agency ids and status orderd by creation
+   * date ascending
+   */
+  List<Session> findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+      List<Long> agencyIds, SessionStatus sessionStatus, RegistrationType registrationType);
 
   /**
    * Find a {@link Session} by agency ids with status and teamberatung where consultant is not the
@@ -167,4 +181,15 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
 
   Page<Session> findAll(Pageable pageable);
 
+  /**
+   * Find the {@link Session}s by consulting type, registration type and pageable.
+   *
+   * @param consultingTypes the {@link ConsultingType}s to search for
+   * @param registrationType the {@link RegistrationType} to seach for
+   * @param pageable       the pagination object
+   * @return the result {@link Page}
+   */
+  Page<Session> findByConsultingTypeInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(
+      Set<ConsultingType> consultingTypes, RegistrationType registrationType,
+      SessionStatus sessionStatus, Pageable pageable);
 }

@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +31,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -126,7 +124,6 @@ public class GetChatMembersFacadeTest {
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
     when(rocketChatService.getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId()))
         .thenReturn(GROUP_MEMBER_DTO_LIST);
-    when(userHelper.decodeUsername(Mockito.anyString())).thenReturn(USERNAME);
 
     assertThat(getChatMembersFacade.getChatMembers(ACTIVE_CHAT.getId()),
         instanceOf(ChatMembersResponseDTO.class));
@@ -144,7 +141,6 @@ public class GetChatMembersFacadeTest {
         .thenReturn(true);
     when(rocketChatService.getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId()))
         .thenReturn(GROUP_MEMBER_DTO_LIST);
-    when(userHelper.decodeUsername(Mockito.anyString())).thenReturn(USERNAME);
 
     assertThat(getChatMembersFacade.getChatMembers(ACTIVE_CHAT.getId()),
         instanceOf(ChatMembersResponseDTO.class));
@@ -160,7 +156,6 @@ public class GetChatMembersFacadeTest {
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
     when(rocketChatService.getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId()))
         .thenThrow(new RocketChatGetGroupMembersException(""));
-    when(userHelper.decodeUsername(Mockito.anyString())).thenReturn(USERNAME);
 
     getChatMembersFacade.getChatMembers(ACTIVE_CHAT.getId());
   }

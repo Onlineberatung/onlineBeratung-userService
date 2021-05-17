@@ -13,11 +13,14 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import java.util.Optional;
@@ -34,9 +37,10 @@ public class UserServiceTest {
 
   @InjectMocks
   private UserService userService;
-
   @Mock
   private UserRepository userRepository;
+  @Mock
+  private UsernameTranscoder usernameTranscoder;
 
   @Test
   public void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {
@@ -128,5 +132,17 @@ public class UserServiceTest {
     userService.updateRocketChatIdInDatabase(USER_NO_RC_USER_ID, "");
 
     verifyNoInteractions(userRepository);
+  }
+
+  @Test
+  public void findUserByUsername_Should_SearchForEncodedAndDecodedUsername() {
+    setField(userService, "usernameTranscoder", usernameTranscoder);
+    when(usernameTranscoder.decodeUsername(any())).thenReturn(USERNAME);
+    when(usernameTranscoder.encodeUsername(any())).thenReturn(USERNAME);
+
+    userService.findUserByUsername(USERNAME);
+
+    verify(usernameTranscoder, times(1)).encodeUsername(USERNAME);
+    verify(usernameTranscoder, times(1)).decodeUsername(USERNAME);
   }
 }

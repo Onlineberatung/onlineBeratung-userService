@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
@@ -25,7 +26,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,9 @@ public class ConsultantAgencyAdminServiceIT {
 
   @MockBean
   private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
+
+  @MockBean
+  private UsernameTranscoder usernameTranscoder;
 
   @Test
   public void findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {

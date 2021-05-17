@@ -1223,6 +1223,7 @@ components:
         - agencyId
         - consultingType
         - status
+        - registrationType
       properties:
         id:
           type: integer
@@ -1274,6 +1275,9 @@ components:
         monitoring:
           type: boolean
           example: true
+        registrationType:
+          type: string
+          example: ANONYMOUS
         attachment:
           $ref: '#/components/schemas/SessionAttachmentDTO'
         videoCallMessageDTO:
@@ -1662,8 +1666,6 @@ components:
 
     MobileTokenDTO:
       type: object
-      required:
-        - token
       properties:
         token:
           type: string

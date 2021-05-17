@@ -20,7 +20,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
@@ -44,8 +44,6 @@ public class CreateUserChatRelationFacadeTest {
   private CreateUserChatRelationFacade createUserChatRelationFacade;
   @Mock
   private RocketChatService rocketChatService;
-  @Mock
-  private UserHelper userHelper;
   @Mock
   private UserService userService;
   @Mock
@@ -94,7 +92,6 @@ public class CreateUserChatRelationFacadeTest {
 
     when(rocketChatService.loginUserFirstTime(any(), any())).thenReturn(LOGIN_RESPONSE_ENTITY_OK);
     when(userService.saveUser(any())).thenReturn(USER_WITH_RC_ID);
-    when(userHelper.encodeUsername(userDTO.getUsername())).thenReturn(userDTO.getUsername());
 
     createUserChatRelationFacade
         .initializeUserChatAgencyRelation(userDTO, user, null);
@@ -102,7 +99,8 @@ public class CreateUserChatRelationFacadeTest {
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(userService).saveUser(captor.capture());
     verify(rocketChatService, times(1))
-        .loginUserFirstTime(userDTO.getUsername(), userDTO.getPassword());
+        .loginUserFirstTime(new UsernameTranscoder().encodeUsername(userDTO.getUsername()),
+            userDTO.getPassword());
     assertEquals(LOGIN_RESPONSE_ENTITY_OK.getBody().getData().getUserId(),
         captor.getValue().getRcUserId());
   }

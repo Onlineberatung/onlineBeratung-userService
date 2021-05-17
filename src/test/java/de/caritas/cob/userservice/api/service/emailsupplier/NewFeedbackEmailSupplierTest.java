@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -19,12 +18,12 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
-import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -57,7 +56,7 @@ public class NewFeedbackEmailSupplierTest {
   @Before
   public void setup() {
     this.newFeedbackEmailSupplier = new NewFeedbackEmailSupplier(session, "feedbackGroupId",
-        "userId", "applicationBaseUrl", userHelper, consultantService, rocketChatService,
+        "userId", "applicationBaseUrl", consultantService, rocketChatService,
         "rocketChatSystemUserId");
     setInternalState(LogService.class, "LOGGER", logger);
   }
@@ -66,7 +65,7 @@ public class NewFeedbackEmailSupplierTest {
   public void generateEmails_Should_ReturnEmptyListAndLogError_When_SessionIsNull()
       throws RocketChatGetGroupMembersException {
     List<MailDTO> generatedMails = new NewFeedbackEmailSupplier(null, "feedbackGroupId",
-        "userId", "applicationBaseUrl", userHelper, consultantService, rocketChatService,
+        "userId", "applicationBaseUrl", consultantService, rocketChatService,
         "rocketChatSystemUserId").generateEmails();
 
     assertThat(generatedMails, hasSize(0));
@@ -131,7 +130,6 @@ public class NewFeedbackEmailSupplierTest {
     when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
     when(consultantService.getConsultantByRcUserId(anyString()))
         .thenReturn(Optional.of(CONSULTANT_2));
-    when(userHelper.decodeUsername(anyString())).thenReturn(USERNAME_DECODED);
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
@@ -146,7 +144,7 @@ public class NewFeedbackEmailSupplierTest {
     assertThat(templateData.get(1).getKey(), is("name_recipient"));
     assertThat(templateData.get(1).getValue(), is("first name last name"));
     assertThat(templateData.get(2).getKey(), is("name_user"));
-    assertThat(templateData.get(2).getValue(), is("Username!#123"));
+    assertThat(templateData.get(2).getValue(), is("username"));
     assertThat(templateData.get(3).getKey(), is("url"));
     assertThat(templateData.get(3).getValue(), is("applicationBaseUrl"));
   }
@@ -170,7 +168,6 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(CONSULTANT_2);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT_2));
-    when(userHelper.decodeUsername(anyString())).thenReturn(USERNAME_DECODED);
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
@@ -185,7 +182,7 @@ public class NewFeedbackEmailSupplierTest {
     assertThat(templateData.get(1).getKey(), is("name_recipient"));
     assertThat(templateData.get(1).getValue(), is("first name last name"));
     assertThat(templateData.get(2).getKey(), is("name_user"));
-    assertThat(templateData.get(2).getValue(), is("Username!#123"));
+    assertThat(templateData.get(2).getValue(), is("username"));
     assertThat(templateData.get(3).getKey(), is("url"));
     assertThat(templateData.get(3).getValue(), is("applicationBaseUrl"));
   }
