@@ -30,7 +30,7 @@ public class AvailableLastMessageUpdater {
    * @param session the session to be updated
    * @param groupId the Rocket.Chat group id
    */
-  void updateSessionWithAvailableLastMessage(
+  public void updateSessionWithAvailableLastMessage(
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
       Consumer<Date> latestMessageSetter, SessionDTO session, String groupId) {
     RoomsLastMessageDTO roomsLastMessage =

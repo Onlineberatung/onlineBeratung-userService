@@ -38,7 +38,7 @@ public class ConversationListResolverTest {
         .thenReturn(this.conversationListProvider);
 
     ConsultantSessionListResponseDTO responseDTO = this.conversationListResolver
-        .resolveConversations(0, 1, ANONYMOUS_ENQUIRY);
+        .resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
 
     assertThat(responseDTO, is(consultantSessionListResponseDTO));
   }

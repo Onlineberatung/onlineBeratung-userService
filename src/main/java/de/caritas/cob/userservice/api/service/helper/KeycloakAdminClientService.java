@@ -55,7 +55,8 @@ public class KeycloakAdminClientService {
   @Value("${keycloakApi.error.email}")
   private String keycloakErrorEmail;
 
-  private final @NonNull UsernameTranscoder usernameTranscoder;
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
+
   private final @NonNull UserHelper userHelper;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
 

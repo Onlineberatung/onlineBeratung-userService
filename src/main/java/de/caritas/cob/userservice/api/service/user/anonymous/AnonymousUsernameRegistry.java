@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class AnonymousUsernameRegistry {
 
   private final @NonNull UserService userService;
-  private final @NonNull UsernameTranscoder usernameTranscoder;
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   @Value("${anonymous.username.prefix}")
   private String usernamePrefix;

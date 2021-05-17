@@ -5,6 +5,8 @@ import static de.caritas.cob.userservice.api.controller.ConversationControllerIT
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.POST_CREATE_ANONYMOUS_ENQUIRY_PATH;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -63,13 +65,14 @@ public class ConversationControllerAuthorizationIT {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .param("offset", "0")
         .param("count", "10")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.conversationListResolver, times(1))
-        .resolveConversations(0, 10, ANONYMOUS_ENQUIRY);
+        .resolveConversations(0, 10, ANONYMOUS_ENQUIRY, RC_TOKEN);
   }
 
   @Test
@@ -123,13 +126,14 @@ public class ConversationControllerAuthorizationIT {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .param("offset", "0")
         .param("count", "10")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.conversationListResolver, times(1))
-        .resolveConversations(0, 10, REGISTERED_ENQUIRY);
+        .resolveConversations(0, 10, REGISTERED_ENQUIRY, RC_TOKEN);
   }
 
   @Test

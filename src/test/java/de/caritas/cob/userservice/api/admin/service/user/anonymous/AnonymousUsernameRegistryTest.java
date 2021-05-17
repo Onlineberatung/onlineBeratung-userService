@@ -36,6 +36,7 @@ public class AnonymousUsernameRegistryTest {
 
   @Before
   public void setUp() {
+    setField(anonymousUsernameRegistry, "usernameTranscoder", usernameTranscoder);
     setField(anonymousUsernameRegistry, "usernamePrefix", "Ratsuchende_r ");
   }
 

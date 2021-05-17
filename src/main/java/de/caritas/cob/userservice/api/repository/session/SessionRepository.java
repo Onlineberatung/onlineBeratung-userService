@@ -176,6 +176,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * @param pageable       the pagination object
    * @return the result {@link Page}
    */
-  Page<Session> findByConsultingTypeInAndRegistrationTypeOrderByEnquiryMessageDateAsc(
-      Set<ConsultingType> consultingTypes, RegistrationType registrationType, Pageable pageable);
+  Page<Session> findByConsultingTypeInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(
+      Set<ConsultingType> consultingTypes, RegistrationType registrationType,
+      SessionStatus sessionStatus, Pageable pageable);
 }

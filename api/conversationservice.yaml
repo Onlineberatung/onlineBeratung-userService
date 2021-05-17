@@ -28,6 +28,11 @@ paths:
           schema:
             minimum: 1
             type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK - successfull operation
@@ -59,6 +64,11 @@ paths:
           schema:
             minimum: 1
             type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK - successfull operation
