@@ -492,6 +492,45 @@ components:
         previous:
           $ref: '#/components/schemas/HalLink'
 
+    RoleDTO:
+      type: object
+      properties:
+        consultant:
+          $ref: '#/components/schemas/RoleConsultantDTO'
+
+    RoleConsultantDTO:
+      type: object
+      properties:
+        roleNames:
+          type: array
+          items:
+            type: string
+
+    NotificationDTO:
+      type: object
+      properties:
+        newMessage:
+          $ref: '#/components/schemas/NewMessageDTO'
+
+    NewMessageDTO:
+      type: object
+      properties:
+        teamSession:
+          $ref: '#/components/schemas/TeamSessionDTO'
+
+    TeamSessionDTO:
+      type: object
+      properties:
+        toConsultant:
+          $ref: '#/components/schemas/ToConsultantDTO'
+
+    ToConsultantDTO:
+      type: object
+      properties:
+        allTeamConsultants:
+          type: boolean
+          example: true
+
     CreateConsultantDTO:
       type: object
       required:
