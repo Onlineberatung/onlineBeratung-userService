@@ -157,7 +157,6 @@ public class RegisteredEnquiryConversationListProviderIT {
       session.setStatus(SessionStatus.NEW);
       session.setConsultingTypeId(random.nextInt(127));
     });
-    sessions.forEach(s -> System.out.println(s.getConsultingTypeId()));
     this.sessionRepository.saveAll(sessions);
   }
 
