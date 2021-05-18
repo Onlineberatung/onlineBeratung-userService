@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -246,24 +247,24 @@ public class SessionToConsultantConditionProviderTest {
     assertThat(result, is(true));
   }
 
+  private void whenAgencyServiceReturnsDTOForId(ConsultantAgency consultantAgency,
+      long agencyId, AgencyDTO agencyDTO) {
+    when(consultantAgency.getAgencyId()).thenReturn(agencyId);
+    when(agencyService.getAgency(agencyId)).thenReturn(agencyDTO);
+  }
+
   @Test
   public void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnFalse_When_ConsultantAgenciesContainSessionConsultingType() {
     session.setConsultingType(ConsultingType.U25);
     AgencyDTO u25AgencyDTO = new AgencyDTO().consultingType(ConsultingType.U25);
     ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
-    whenAgencyServiceReturnsDTOForId(u25ConsultantAgency, 1L, u25AgencyDTO);
-    consultant.setConsultantAgencies(asSet(u25ConsultantAgency, mock(ConsultantAgency.class)));
+    when(agencyService.getAgency(any())).thenReturn(u25AgencyDTO);
+    consultant.setConsultantAgencies(asSet(u25ConsultantAgency));
 
     boolean result = sessionToConsultantConditionProvider
         .isSessionsConsultingTypeNotAvailableForConsultant(consultant, session);
 
     assertThat(result, is(false));
-  }
-
-  private void whenAgencyServiceReturnsDTOForId(ConsultantAgency consultantAgency,
-      long agencyId, AgencyDTO agencyDTO) {
-    when(consultantAgency.getAgencyId()).thenReturn(agencyId);
-    when(agencyService.getAgency(agencyId)).thenReturn(agencyDTO);
   }
 
 }
