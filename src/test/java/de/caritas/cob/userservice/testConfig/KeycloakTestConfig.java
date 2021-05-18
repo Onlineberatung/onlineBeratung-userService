@@ -39,11 +39,11 @@ public class KeycloakTestConfig {
       }
 
       @Override
-      public void updateRole(String userId, UserRole role) {
+      public void updateUserRole(String userId) {
       }
 
       @Override
-      public void updateUserRole(String userId) {
+      public void updateRole(String userId, UserRole role) {
       }
 
       @Override
