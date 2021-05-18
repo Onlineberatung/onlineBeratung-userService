@@ -17,6 +17,7 @@ import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ public class AnonymousUserCreatorService {
   private final @NonNull KeycloakService keycloakService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull RollbackFacade rollbackFacade;
+  private final @NonNull UserService userService;
 
   /**
    * Creates an anonymous user account in Keycloak, MariaDB and Rocket.Chat.
@@ -58,7 +60,7 @@ public class AnonymousUserCreatorService {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }
 
-    return AnonymousUserCredentials.builder()
+    var anonymousUserCredentials = AnonymousUserCredentials.builder()
         .userId(response.getUserId())
         .accessToken(kcLoginResponseDTO.getAccessToken())
         .expiresIn(kcLoginResponseDTO.getExpiresIn())
@@ -66,6 +68,10 @@ public class AnonymousUserCreatorService {
         .refreshExpiresIn(kcLoginResponseDTO.getExpiresIn())
         .rocketChatCredentials(obtainRocketChatCredentials(rcLoginResponseDto))
         .build();
+
+    updateRocketChatUserIdInDatabase(anonymousUserCredentials);
+
+    return anonymousUserCredentials;
   }
 
   private void rollBackAnonymousUserAccount(String userId) {
@@ -81,5 +87,14 @@ public class AnonymousUserCreatorService {
         .rocketChatUserId(response.getBody().getData().getUserId())
         .rocketChatToken(response.getBody().getData().getAuthToken())
         .build();
+  }
+
+  private void updateRocketChatUserIdInDatabase(AnonymousUserCredentials anonymousUserCredentials) {
+    var user = userService.getUser(anonymousUserCredentials.getUserId())
+        .orElseThrow(() -> new InternalServerErrorException(String.format(
+            "Could not get user %s to update the rocket chat user id.",
+            anonymousUserCredentials.getUserId())));
+    userService.updateRocketChatIdInDatabase(user,
+        anonymousUserCredentials.getRocketChatCredentials().getRocketChatUserId());
   }
 }
