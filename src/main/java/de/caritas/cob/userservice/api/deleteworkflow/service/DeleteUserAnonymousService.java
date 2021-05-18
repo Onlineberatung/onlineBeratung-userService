@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ public class DeleteUserAnonymousService {
   /**
    * Deletes all anonymous users with special constraints.
    */
+  @Transactional
   public void deleteInactiveAnonymousUsers() {
     List<DeletionWorkflowError> workflowErrors = deleteAnonymousUsersWithOverdueSessions();
 
@@ -61,8 +64,9 @@ public class DeleteUserAnonymousService {
       LocalDateTime deletionTime) {
     return session -> {
       Set<Session> userSessions = session.getUser().getSessions();
-      return allSessionsAreDone(userSessions)
-          && allSessionsAreBeforeDeletionTime(deletionTime, userSessions);
+      return CollectionUtils.isEmpty(userSessions)
+          || (allSessionsAreDone(userSessions)
+            && allSessionsAreBeforeDeletionTime(deletionTime, userSessions));
     };
   }
 
@@ -70,7 +74,8 @@ public class DeleteUserAnonymousService {
     return sessions.stream().map(Session::getStatus).allMatch(SessionStatus.DONE::equals);
   }
 
-  private boolean allSessionsAreBeforeDeletionTime(LocalDateTime deletionTime, Set<Session> sessions) {
+  private boolean allSessionsAreBeforeDeletionTime(LocalDateTime deletionTime,
+      Set<Session> sessions) {
     return sessions.stream()
         .map(Session::getUpdateDate)
         .allMatch(updateDate -> updateDate.isBefore(deletionTime));
