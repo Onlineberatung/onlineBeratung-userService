@@ -72,4 +72,41 @@ public class AnonymousUsernameRegistry {
   private int obtainUsernameId(String username) {
     return parseInt(substringAfter(username, usernamePrefix));
   }
+
+  /**
+   * Removes a name from the registry.
+   *
+   * @param encodedUsername the encoded username to remove from the registry
+   */
+  public synchronized void removeRegistryIdByUsername(String encodedUsername) {
+    var usernameParsed = false;
+    var usernameId = -1;
+    try {
+      var decodedUsername = usernameTranscoder.decodeUsername(encodedUsername);
+      usernameId = obtainUsernameId(decodedUsername);
+      usernameParsed = true;
+    } catch (Exception ex) {
+      // do nothing
+    }
+
+    if (usernameParsed) {
+      removeRegistryIdIfFound(usernameId);
+    }
+  }
+
+  private void removeRegistryIdIfFound(int registryId) {
+    var valueIndex = findIndexByRegistryId(registryId);
+    if (valueIndex >= 0 && valueIndex < ID_REGISTRY.size()) {
+      ID_REGISTRY.remove(valueIndex);
+    }
+  }
+
+  private int findIndexByRegistryId(int registryId) {
+    for (var valueIndex = 0; valueIndex < ID_REGISTRY.size(); valueIndex++) {
+      if (ID_REGISTRY.get(valueIndex) == registryId) {
+        return valueIndex;
+      }
+    }
+    return -1;
+  }
 }
