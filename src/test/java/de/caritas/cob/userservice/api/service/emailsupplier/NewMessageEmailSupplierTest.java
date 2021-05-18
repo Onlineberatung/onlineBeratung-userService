@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.T
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -67,9 +68,17 @@ public class NewMessageEmailSupplierTest {
 
   @Before
   public void setup() {
-    this.newMessageEmailSupplier = new NewMessageEmailSupplier(session, "feedbackGroupId",
-        roles, USER.getUserId(), consultantAgencyService, consultingTypeManager, "app baseurl",
-        "dummySuffix", userHelper);
+    this.newMessageEmailSupplier = NewMessageEmailSupplier
+        .builder()
+        .session(session)
+        .rcGroupId("feedbackGroupId")
+        .roles(roles)
+        .userId(USER.getUserId())
+        .consultantAgencyService(consultantAgencyService)
+        .consultingTypeManager(consultingTypeManager)
+        .applicationBaseUrl("app baseurl")
+        .emailDummySuffix("dummySuffix")
+        .build();
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -211,9 +220,9 @@ public class NewMessageEmailSupplierTest {
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     Consultant consultant = mock(Consultant.class);
     when(consultant.getId()).thenReturn(USER.getUserId());
+    when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
     when(session.getConsultant()).thenReturn(consultant);
     when(session.getUser()).thenReturn(USER);
-    when(userHelper.decodeUsername(any())).thenReturn("decoded user name");
 
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
@@ -224,9 +233,9 @@ public class NewMessageEmailSupplierTest {
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("consultantName"));
-    assertThat(templateData.get(0).getValue(), is("decoded user name"));
+    assertThat(templateData.get(0).getValue(), is("Username!#123"));
     assertThat(templateData.get(1).getKey(), is("askerName"));
-    assertThat(templateData.get(1).getValue(), is("decoded user name"));
+    assertThat(templateData.get(1).getValue(), is("username"));
     assertThat(templateData.get(2).getKey(), is("url"));
     assertThat(templateData.get(2).getValue(), is("app baseurl"));
   }

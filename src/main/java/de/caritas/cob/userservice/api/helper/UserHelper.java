@@ -1,11 +1,9 @@
 package de.caritas.cob.userservice.api.helper;
 
-import de.caritas.cob.userservice.api.exception.HelperException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
 import org.passay.CharacterData;
 import org.passay.CharacterRule;
@@ -40,12 +38,9 @@ public class UserHelper {
   public static final int CHAT_MAX_DURATION = 180;
   public static final int CHAT_TOPIC_MIN_LENGTH = 3;
   public static final int CHAT_TOPIC_MAX_LENGTH = 50;
-  private static final String ENCODING_PREFIX = "enc.";
-  private static final String BASE32_PLACEHOLDER = "=";
-  private static final String BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING = ".";
   private static final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
 
-  private final Base32 base32 = new Base32();
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   /**
    * Generates a random password which complies with the Keycloak policy.
@@ -94,87 +89,20 @@ public class UserHelper {
    * @return true if username is valid
    */
   public boolean isUsernameValid(String username) {
-    username = decodeUsername(username);
+    username = this.usernameTranscoder.decodeUsername(username);
     return username.length() >= USERNAME_MIN_LENGTH && username.length() <= USERNAME_MAX_LENGTH;
-  }
-
-  /**
-   * Returns the Base32 encoded username. The padding char "=" of the Base32 String will be replaced
-   * by a dot "." to support Rocket.Chat special chars.
-   *
-   * @param username the username to encode
-   * @return encoded username
-   */
-  private String base32EncodeUsername(String username) {
-    return ENCODING_PREFIX + base32EncodeAndReplacePlaceholder(username, BASE32_PLACEHOLDER,
-        BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING);
-  }
-
-  /**
-   * Returns the Base32 decoded username. Placeholder dot "." (to support Rocket.Chat special chars)
-   * will be replaced by the Base32 padding symbol "=".
-   *
-   * @param username the username to decode
-   * @return the decoded username
-   */
-  private String base32DecodeUsername(String username) {
-    try {
-      return new String(base32.decode(username.replace(ENCODING_PREFIX, StringUtils.EMPTY)
-          .toUpperCase().replace(BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING, BASE32_PLACEHOLDER)));
-
-    } catch (Exception exception) {
-      // Catch generic exception because of lack of base32 documentation
-      throw new HelperException(String.format("Could not decode username %s", username), exception);
-    }
-  }
-
-  /**
-   * Encodes the given username if it isn't already encoded.
-   *
-   * @param username the username to encode
-   * @return encoded username
-   */
-  public String encodeUsername(String username) {
-    return username.startsWith(ENCODING_PREFIX) ? username : base32EncodeUsername(username);
-  }
-
-  /**
-   * Decodes the given username if it isn't already decoded.
-   *
-   * @param username the username to decode
-   * @return the decoded username
-   */
-  public String decodeUsername(String username) {
-    return username.startsWith(ENCODING_PREFIX) ? base32DecodeUsername(username) : username;
   }
 
   /**
    * Returns true if the given usernames match.
    *
-   * @param firstUsername encoded or decoded first username to compare
+   * @param firstUsername  encoded or decoded first username to compare
    * @param secondUsername encoded or decoded second username to compare
    * @return true if usernames matches
    */
   public boolean doUsernamesMatch(String firstUsername, String secondUsername) {
-    return StringUtils.equals(encodeUsername(firstUsername).toLowerCase(),
-        encodeUsername(secondUsername).toLowerCase());
-  }
-
-  /**
-   * Base32 encodes a given String.
-   *
-   * @param value String to be encoded
-   * @return encoded String
-   */
-  private String base32EncodeAndReplacePlaceholder(String value, String placeholder,
-      String replaceString) {
-    try {
-      return base32.encodeAsString(value.getBytes()).replace(placeholder, replaceString);
-
-    } catch (Exception exception) {
-      // Catch generic exception because of lack of base32 documentation
-      throw new HelperException(String.format("Could not encode value %s", value), exception);
-    }
+    return StringUtils.equals(this.usernameTranscoder.encodeUsername(firstUsername).toLowerCase(),
+        this.usernameTranscoder.encodeUsername(secondUsername).toLowerCase());
   }
 
   /**
@@ -186,7 +114,7 @@ public class UserHelper {
    */
   public String generateChatUrl(Long chatId, int consultingTypeId) {
     return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getSlug() + "/"
-        + base32EncodeAndReplacePlaceholder(Long.toString(chatId), BASE32_PLACEHOLDER,
-            BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
+        + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(Long.toString(chatId),
+        BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }
 }

@@ -17,10 +17,12 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -57,10 +59,15 @@ public class KeycloakAdminClientServiceTest {
   private UserHelper userHelper;
 
   @Mock
+  private UsernameTranscoder usernameTranscoder;
+
+  @Mock
   private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
 
   @Mock
   private Logger logger;
+
+  EasyRandom easyRandom = new EasyRandom();
 
   @Before
   public void setup() {
@@ -178,18 +185,43 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void isUsernameAvailable_Should_returnFalse_When_usernameIsNotAvailable() {
-    UserRepresentation userMock = mock(UserRepresentation.class);
-    String unique = "Unique";
-    when(userMock.getUsername()).thenReturn(unique);
-    List<UserRepresentation> userRepresentations =
+  public void isUsernameAvailable_Should_returnFalse_When_DecodedUsernameIsNotAvailable() {
+    String notUnique = "NotUnique";
+    UserRepresentation userMock = easyRandom.nextObject(UserRepresentation.class);
+    userMock.setUsername(notUnique);
+    List<UserRepresentation> decodedUserRepresentations =
+        singletonList(userMock);
+    List<UserRepresentation> encodedUserRepresentations =
+        singletonList(easyRandom.nextObject(UserRepresentation.class));
+    UsersResource usersResource = mock(UsersResource.class);
+    when(usersResource.search(any()))
+        .thenReturn(decodedUserRepresentations)
+        .thenReturn(encodedUserRepresentations);
+    when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    when(usernameTranscoder.decodeUsername(any())).thenReturn(notUnique);
+
+    boolean isAvailable = this.keycloakAdminClientService.isUsernameAvailable(notUnique);
+
+    assertThat(isAvailable, is(false));
+  }
+
+  @Test
+  public void isUsernameAvailable_Should_returnFalse_When_EncodedUsernameIsNotAvailable() {
+    String notUnique = "enc.KVXGS4LVMU......";
+    UserRepresentation userMock = easyRandom.nextObject(UserRepresentation.class);
+    userMock.setUsername(notUnique);
+    List<UserRepresentation> decodedUserRepresentations =
+        singletonList(easyRandom.nextObject(UserRepresentation.class));
+    List<UserRepresentation> encodedUserRepresentations =
         singletonList(userMock);
     UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.search(any())).thenReturn(userRepresentations);
+    when(usersResource.search(any()))
+        .thenReturn(decodedUserRepresentations)
+        .thenReturn(encodedUserRepresentations);
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
-    when(this.userHelper.decodeUsername(any())).thenReturn(unique);
+    when(usernameTranscoder.encodeUsername(any())).thenReturn(notUnique);
 
-    boolean isAvailable = this.keycloakAdminClientService.isUsernameAvailable(unique);
+    boolean isAvailable = this.keycloakAdminClientService.isUsernameAvailable(notUnique);
 
     assertThat(isAvailable, is(false));
   }
@@ -215,7 +247,7 @@ public class KeycloakAdminClientServiceTest {
     when(realmResource.roles()).thenReturn(rolesResource);
     when(this.keycloakAdminClientAccessor.getRealmResource()).thenReturn(realmResource);
 
-    this.keycloakAdminClientService.updateUserRole("user");
+    this.keycloakAdminClientService.updateRole("user", "role");
   }
 
   @Test
@@ -247,6 +279,38 @@ public class KeycloakAdminClientServiceTest {
     this.keycloakAdminClientService.updateRole("user", validRole);
 
     verify(roleScopeResource, times(1)).add(any());
+  }
+
+  @Test
+  public void updateRole_Should_updateUserWithProvidedRole() {
+    UserRole validRole = UserRole.USER;
+
+    UserResource userResource = mock(UserResource.class);
+    UsersResource usersResource = mock(UsersResource.class);
+    when(usersResource.get(anyString())).thenReturn(userResource);
+    RoleScopeResource roleScopeResource = mock(RoleScopeResource.class);
+    RoleRepresentation keycloakRoleMock = mock(RoleRepresentation.class);
+    when(keycloakRoleMock.toString()).thenReturn(validRole.getValue());
+    when(roleScopeResource.listAll()).thenReturn(singletonList(keycloakRoleMock));
+    RoleMappingResource roleMappingResource = mock(RoleMappingResource.class);
+    when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
+    when(userResource.roles()).thenReturn(roleMappingResource);
+
+    RoleRepresentation roleRepresentation = new EasyRandom().nextObject(RoleRepresentation.class);
+    RoleResource roleResource = mock(RoleResource.class);
+    when(roleResource.toRepresentation()).thenReturn(roleRepresentation);
+    RolesResource rolesResource = mock(RolesResource.class);
+    when(rolesResource.get(any())).thenReturn(roleResource);
+
+    RealmResource realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(realmResource.roles()).thenReturn(rolesResource);
+    when(this.keycloakAdminClientAccessor.getRealmResource()).thenReturn(realmResource);
+
+    this.keycloakAdminClientService.updateRole("user", validRole);
+
+    verify(roleScopeResource, times(1)).add(any());
+    verify(rolesResource, times(1)).get(validRole.getValue());
   }
 
   @Test

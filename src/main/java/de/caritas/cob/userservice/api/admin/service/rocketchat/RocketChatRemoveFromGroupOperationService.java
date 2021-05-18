@@ -2,11 +2,11 @@ package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.Map;
 
@@ -18,23 +18,22 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
   private Map<Session, List<Consultant>> consultantsToRemoveFromSessions;
   private final ConsultingTypeManager consultingTypeManager;
 
-  private RocketChatRemoveFromGroupOperationService(RocketChatService rocketChatService,
+  private RocketChatRemoveFromGroupOperationService(RocketChatFacade rocketChatFacade,
       KeycloakAdminClientService keycloakAdminClientService,
-      ConsultingTypeManager consultingTypeManager) {
-    super(rocketChatService, keycloakAdminClientService);
+        ConsultingTypeManager consultingTypeManager) {
+    super(rocketChatFacade, keycloakAdminClientService);
     this.consultingTypeManager = consultingTypeManager;
   }
 
   /**
    * Creates the {@link RocketChatRemoveFromGroupOperationService} instance.
    *
-   * @param rocketChatService the target service to perform operations
+   * @param rocketChatFacade the target service to perform operations
    * @return the {@link RocketChatRemoveFromGroupOperationService} instance
    */
   public static RocketChatRemoveFromGroupOperationService getInstance(
-      RocketChatService rocketChatService, KeycloakAdminClientService keycloakAdminClientService,
-      ConsultingTypeManager consultingTypeManager) {
-    return new RocketChatRemoveFromGroupOperationService(rocketChatService,
+      RocketChatFacade rocketChatFacade, KeycloakAdminClientService keycloakAdminClientService, ConsultingTypeManager consultingTypeManager) {
+    return new RocketChatRemoveFromGroupOperationService(rocketChatFacade,
         keycloakAdminClientService, consultingTypeManager);
   }
 

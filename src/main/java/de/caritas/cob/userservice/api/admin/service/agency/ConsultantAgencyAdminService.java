@@ -4,7 +4,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -17,7 +17,7 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;

@@ -62,26 +62,6 @@ public class UserHelperTest {
   }
 
   @Test
-  public void encodeUsername_Should_ReturnEncodedUsernameWithReplacedPaddingAndAddedPrefix_WhenDecodedUsernameIsGiven() {
-    assertEquals(USERNAME_ENCODED, userHelper.encodeUsername(USERNAME_DECODED));
-  }
-
-  @Test
-  public void encodeUsername_Should_ReturnEncodedUsername_WhenEncodedUsernameIsGiven() {
-    assertEquals(USERNAME_ENCODED, userHelper.encodeUsername(USERNAME_ENCODED));
-  }
-
-  @Test
-  public void decodeUsername_Should_ReturnDecodedUsername_WhenEncodedUsernameIsGiven() {
-    assertEquals(USERNAME_DECODED, userHelper.decodeUsername(USERNAME_ENCODED));
-  }
-
-  @Test
-  public void decodeUsername_Should_ReturnDecodedUsername_WhenDecodedUsernameIsGiven() {
-    assertEquals(USERNAME_DECODED, userHelper.decodeUsername(USERNAME_DECODED));
-  }
-
-  @Test
   public void generateChatUrl_Should_ReturnChatLinkWithConsultingTypeUrlNameAndEncodedChatId() {
     when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
     assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, 0));

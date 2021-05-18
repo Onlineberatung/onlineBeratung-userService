@@ -1,11 +1,13 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.AgencyService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -39,18 +41,11 @@ public class AgencyVerifier {
     return agencyDTO;
   }
 
-  /**
-   * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided consulting ID
-   *
-   * @param agencyId       {@link AgencyDTO#getId()}
-   * @param consultingTypeId the consulting ID
-   * @return <ul>
-   *         <li>true if agency is assigned to the provided {@link ConsultingType}</li>
-   *         <li>false if agency is not assigned to the provided {@link ConsultingType}</li>
-   *         </ul>
-   */
-  public boolean doesConsultingTypeMatchToAgency(Long agencyId, int consultingTypeId) {
-    AgencyDTO agencyDTO = getVerifiedAgency(agencyId, consultingTypeId);
-    return nonNull(agencyDTO);
+  public void checkIfConsultingTypeMatchesToAgency(UserDTO userDTO) {
+
+    if (isNull(getVerifiedAgency(userDTO.getAgencyId(), Integer.parseInt(userDTO.getConsultingType())))) {
+      throw new BadRequestException(String.format("Agency with id %s does not match to consulting"
+          + " type %s", userDTO.getAgencyId(), userDTO.getConsultingType()));
+    }
   }
 }

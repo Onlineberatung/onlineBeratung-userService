@@ -21,10 +21,7 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.bridge.builtin.LongBridge;
 
-/**
- * Represents a the relation between consultant and agency
- *
- */
+/** Represents a the relation between consultant and agency */
 @Entity
 @Table(name = "consultant_agency")
 @AllArgsConstructor
@@ -35,7 +32,9 @@ import org.hibernate.search.bridge.builtin.LongBridge;
 public class ConsultantAgency {
 
   @Id
-  @SequenceGenerator(name = "id_seq", allocationSize = 1,
+  @SequenceGenerator(
+      name = "id_seq",
+      allocationSize = 1,
       sequenceName = "sequence_consultant_agency")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_seq")
   @Column(name = "id", updatable = false, nullable = false)
@@ -45,7 +44,7 @@ public class ConsultantAgency {
   @JoinColumn(name = "consultant_id", nullable = false)
   private Consultant consultant;
 
-  @Column(name = "agency_id", updatable = true, nullable = true)
+  @Column(name = "agency_id")
   @Field
   @FieldBridge(impl = LongBridge.class)
   private Long agencyId;

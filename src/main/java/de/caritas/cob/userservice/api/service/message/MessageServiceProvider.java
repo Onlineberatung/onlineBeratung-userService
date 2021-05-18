@@ -7,11 +7,11 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessage
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.MessageHelper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
@@ -32,7 +32,6 @@ public class MessageServiceProvider {
 
   private final @NonNull MessageControllerApi messageControllerApi;
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
-  private final @NonNull UserHelper userHelper;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
 
   /**
@@ -86,9 +85,8 @@ public class MessageServiceProvider {
     }
 
     String welcomeMessage =
-        MessageHelper.replaceUsernameInMessage(
-            extendedConsultingTypeResponseDTO.getWelcomeMessage().getWelcomeMessageText(),
-            userHelper.decodeUsername(user.getUsername()));
+        MessageHelper.replaceUsernameInMessage(extendedConsultingTypeResponseDTO.getWelcomeMessage().getWelcomeMessageText(),
+            new UsernameTranscoder().decodeUsername(user.getUsername()));
 
     try {
       this.postMessageAsSystemUser(welcomeMessage, rcGroupId);
@@ -111,9 +109,9 @@ public class MessageServiceProvider {
    * Posts an alias only message and/or save session data message as system user in the provided
    * Rocket.Chat group ID.
    *
-   * @param rcGroupId                         Rocket.Chat group ID
+   * @param rcGroupId              Rocket.Chat group ID
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
-   * @param exceptionInformation              {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation   {@link CreateEnquiryExceptionInformation}
    */
   public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,

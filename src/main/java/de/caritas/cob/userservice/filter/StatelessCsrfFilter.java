@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.filter;
 
-import static de.caritas.cob.userservice.config.SecurityConfig.WHITE_LIST;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.config.CsrfSecurityProperties;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,14 +30,11 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
 
   private final RequestMatcher requireCsrfProtectionMatcher;
   private final AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandlerImpl();
-  private final String csrfCookieProperty;
-  private final String csrfHeaderProperty;
+  private final CsrfSecurityProperties csrfSecurityProperties;
 
-  public StatelessCsrfFilter(String cookieProperty, String headerProperty,
-      String csrfWhitelistHeaderProperty) {
-    this.csrfCookieProperty = cookieProperty;
-    this.csrfHeaderProperty = headerProperty;
-    this.requireCsrfProtectionMatcher = new DefaultRequiresCsrfMatcher(csrfWhitelistHeaderProperty);
+  public StatelessCsrfFilter(CsrfSecurityProperties csrfSecurityProperties) {
+    this.csrfSecurityProperties = csrfSecurityProperties;
+    this.requireCsrfProtectionMatcher = new DefaultRequiresCsrfMatcher(this.csrfSecurityProperties);
   }
 
   @Override
@@ -45,7 +42,8 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
 
     if (requireCsrfProtectionMatcher.matches(request)) {
-      final String csrfTokenValue = request.getHeader(this.csrfHeaderProperty);
+      final String csrfTokenValue =
+          request.getHeader(this.csrfSecurityProperties.getHeader().getProperty());
       String csrfCookieValue = retrieveCsrfCookieValue(request);
 
       if (isNull(csrfTokenValue) || !csrfTokenValue.equals(csrfCookieValue)) {
@@ -60,7 +58,8 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
   private String retrieveCsrfCookieValue(HttpServletRequest request) {
     final Cookie[] cookies = request.getCookies();
     return isNull(cookies) ? null : Stream.of(cookies)
-        .filter(cookie -> cookie.getName().equals(this.csrfCookieProperty))
+        .filter(cookie -> cookie.getName()
+            .equals(this.csrfSecurityProperties.getCookie().getProperty()))
         .map(Cookie::getValue)
         .findFirst()
         .orElse(null);
@@ -69,25 +68,27 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
   @RequiredArgsConstructor
   private static final class DefaultRequiresCsrfMatcher implements RequestMatcher {
     private final Pattern allowedMethods = Pattern.compile("^(HEAD|TRACE|OPTIONS)$");
-    private final @NonNull String csrfWhitelistHeaderProperty;
+    private final @NonNull CsrfSecurityProperties csrfSecurityProperties;
 
     @Override
     public boolean matches(HttpServletRequest request) {
-      return !(isWhiteListUrl(request) || isWhiteListHeader(request) || isAllowedMehod(request));
+      return !(isWhiteListUrl(request) || isWhiteListHeader(request) || isAllowedMethod(request));
     }
 
     private boolean isWhiteListUrl(HttpServletRequest request) {
-      List<String> csrfWhitelist = new ArrayList<>(Arrays.asList(WHITE_LIST));
-      csrfWhitelist.add("/useradmin");
+      List<String> csrfWhitelist = new ArrayList<>(
+          Arrays.asList(csrfSecurityProperties.getWhitelist().getConfigUris()));
+      csrfWhitelist.addAll(Arrays.asList(csrfSecurityProperties.getWhitelist().getAdminUris()));
       return csrfWhitelist.parallelStream()
           .anyMatch(request.getRequestURI().toLowerCase()::contains);
     }
 
     private boolean isWhiteListHeader(HttpServletRequest request) {
-      return isNotBlank(request.getHeader(this.csrfWhitelistHeaderProperty));
+      return isNotBlank(
+          request.getHeader(this.csrfSecurityProperties.getWhitelist().getHeader().getProperty()));
     }
 
-    private boolean isAllowedMehod(HttpServletRequest request) {
+    private boolean isAllowedMethod(HttpServletRequest request) {
       return allowedMethods.matcher(request.getMethod()).matches();
     }
 

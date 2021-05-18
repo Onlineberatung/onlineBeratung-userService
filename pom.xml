@@ -263,6 +263,28 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
+			<!--
+              Add generated sources as source directory
+      -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.9.1</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- OpenAPI codegen maven plugin: generates api stubs -->
 			<plugin>
 				<groupId>org.openapitools</groupId>
@@ -363,6 +385,42 @@
 							<typeMappings>
 								<typeMapping>
 									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingtype.roles.Consultant
+								</typeMapping>
+							</typeMappings>
+						</configuration>
+					</execution>
+					<!-- Generate conversations API -->
+					<execution>
+						<id>conversation-service</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<sourceFolder>/</sourceFolder>
+							</configOptions>
+							<inputSpec>${project.basedir}/api/conversationservice.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.conversation.controller</apiPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<output>target/generated-sources</output>
+							<importMappings>
+								<importMapping>
+									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
+								</importMapping>
+								<importMapping>
+									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
+								</importMapping>
+								<importMapping>Date=java.util.Date</importMapping>
+							</importMappings>
+							<typeMappings>
+								<typeMapping>
+									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
+								</typeMapping>
+								<typeMapping>
+									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
 								</typeMapping>
 							</typeMappings>
 						</configuration>

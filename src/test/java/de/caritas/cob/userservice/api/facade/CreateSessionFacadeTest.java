@@ -37,7 +37,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.api.service.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,7 +91,7 @@ public class CreateSessionFacadeTest {
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
         .thenThrow(new InternalServerErrorException(MESSAGE));
 
     createSessionFacade
@@ -108,7 +108,7 @@ public class CreateSessionFacadeTest {
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
         .thenThrow(new InternalServerErrorException(MESSAGE));
     doThrow(INTERNAL_SERVER_ERROR_EXCEPTION).when(sessionDataService)
         .saveSessionData(any(Session.class), any());
@@ -129,7 +129,7 @@ public class CreateSessionFacadeTest {
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
         .thenReturn(SESSION_WITH_CONSULTANT);
     doThrow(CREATE_MONITORING_EXCEPTION).when(monitoringService).createMonitoringIfConfigured(any(),
         any());
@@ -160,7 +160,7 @@ public class CreateSessionFacadeTest {
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade
@@ -176,7 +176,7 @@ public class CreateSessionFacadeTest {
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade
@@ -195,7 +195,7 @@ public class CreateSessionFacadeTest {
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
     when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 2))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade
@@ -212,7 +212,7 @@ public class CreateSessionFacadeTest {
         .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_SUCHT);
     when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 14))
         .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class), any()))
+    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
         .thenReturn(SESSION_WITHOUT_CONSULTANT);
 
     Long result = createSessionFacade

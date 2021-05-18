@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;

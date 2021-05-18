@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static org.junit.Assert.assertTrue;
@@ -46,15 +48,15 @@ public class MonitoringServiceTest {
   private final String ERROR = "error";
   private final Long SESSION_ID = 123L;
   private final Session SESSION =
-      new Session(SESSION_ID, null, null, 0, POSTCODE, null, IN_PROGRESS, null, null, null,
-          null, false, false, null, null);
+      new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null, IN_PROGRESS, null, null,
+          null, null, false, false, null, null);
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
   @Before
   public void setUp() {
-    HashMap<String, Object> drugsMap = new HashMap<String, Object>();
+    HashMap<String, Object> drugsMap = new HashMap<>();
     drugsMap.put("others", false);
-    HashMap<String, Object> addictiveDrugsMap = new HashMap<String, Object>();
+    HashMap<String, Object> addictiveDrugsMap = new HashMap<>();
     addictiveDrugsMap.put("drugs", drugsMap);
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
     setInternalState(LogService.class, "LOGGER", logger);
@@ -65,10 +67,8 @@ public class MonitoringServiceTest {
    */
 
   @Test
-  public void updateMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError()
-      throws Exception {
+  public void updateMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError() {
 
-    @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {
     };
 
@@ -96,10 +96,8 @@ public class MonitoringServiceTest {
    */
 
   @Test
-  public void deleteMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError()
-      throws Exception {
+  public void deleteMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError() {
 
-    @SuppressWarnings("serial")
     DataAccessException ex = new DataAccessException(ERROR) {
     };
 

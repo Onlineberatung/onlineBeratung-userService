@@ -20,17 +20,17 @@ state DeleteUserAccountService #lightblue {
 
   state DeleteAskerActions {
     DeleteKeycloakUserActionU --> DeleteAskerRoomsAndSessionsAction
-    DeleteAskerRoomsAndSessionsAction --> DeleteDatabaseAskerAction
-    DeleteDatabaseAskerAction --> DeleteRocketChatUserActionU
-    DeleteRocketChatUserActionU --> WorkflowErrors : collect all errors
+    DeleteAskerRoomsAndSessionsAction --> DeleteRocketChatUserActionU
+    DeleteRocketChatUserActionU --> DeleteDatabaseAskerAction
+    DeleteDatabaseAskerAction --> WorkflowErrors : collect all errors
   }
 
   state DeleteConsultantActions {
       DeleteKeycloakUserActionC --> DeleteDatabaseConsultantAgencyAction
       DeleteDatabaseConsultantAgencyAction --> DeleteChatAction
-      DeleteChatAction --> DeleteDatabaseConsultantAction
-      DeleteDatabaseConsultantAction --> DeleteRocketChatUserActionC
-      DeleteRocketChatUserActionC --> WorkflowErrors : collect all errors
+      DeleteChatAction --> DeleteRocketChatUserActionC
+      DeleteRocketChatUserActionC --> DeleteDatabaseConsultantAction
+      DeleteDatabaseConsultantAction  --> WorkflowErrors : collect all errors
   }
 }
 

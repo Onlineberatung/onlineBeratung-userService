@@ -26,7 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
-import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -71,43 +70,9 @@ public class ConsultantAgencyServiceTest {
 
   }
 
-  @Test
-  public void saveConsultantAgencyt_Should_LogAndThrowInternalServerErrorException_WhenSaveConsultantAgencyFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException dataAccessException = new DataAccessException(ERROR) {
-    };
-    when(consultantAgencyRepository.save(Mockito.any())).thenThrow(dataAccessException);
-
-    try {
-      consultantAgencyService.saveConsultantAgency(CONSULTANT_AGENCY);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-  }
-
   /**
    * Method: isConsultantInAgency
    */
-
-  @Test
-  public void isConsultantInAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
-    when(consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(CONSULTANT_ID, AGENCY_ID))
-        .thenThrow(ex);
-
-    try {
-      consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
-  }
 
   @Test
   public void isConsultantInAgency_Should_ReturnTrue_WhenConsultantFound() {
@@ -132,23 +97,6 @@ public class ConsultantAgencyServiceTest {
    */
 
   @Test
-  public void findConsultantsByAgencyId_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID)).thenThrow(ex);
-
-    try {
-      consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
-  }
-
-  @Test
   public void findConsultantsByAgencyId_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.anyLong()))
@@ -161,24 +109,6 @@ public class ConsultantAgencyServiceTest {
   /**
    * Method: getConsultantsOfAgency
    */
-
-  @Test
-  public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseFails() {
-
-    @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(AGENCY_ID))
-        .thenThrow(ex);
-
-    try {
-      consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
-    }
-
-  }
 
   @Test
   public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyIsNull() {

@@ -69,6 +69,7 @@ CREATE TABLE SESSION
     USER_ID              varchar(36) NOT NULL,
     CONSULTANT_ID        varchar(36),
     CONSULTING_TYPE      tinyint(4) NOT NULL,
+    REGISTRATION_TYPE    varchar(255) NOT NULL DEFAULT 'REGISTERED',
     MESSAGE_DATE         datetime DEFAULT NULL,
     POSTCODE             varchar(5)  NOT NULL,
     AGENCY_ID            bigint(21) DEFAULT NULL,

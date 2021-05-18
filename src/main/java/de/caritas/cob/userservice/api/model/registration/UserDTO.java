@@ -25,6 +25,7 @@ import de.caritas.cob.userservice.api.model.validation.ValidState;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,6 +41,7 @@ import lombok.Setter;
 @ApiModel(value = "User")
 @ValidAge
 @ValidState
+@Builder
 public class UserDTO implements UserRegistrationDTO {
 
   @NotBlank(message = "{user.username.notBlank}")

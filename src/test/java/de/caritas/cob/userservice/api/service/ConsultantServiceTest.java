@@ -1,14 +1,9 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO_WITH_EMPTY_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO_WITH_HTML_AND_JS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO_WITH_NULL_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_AGENCIES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
@@ -18,23 +13,18 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -48,9 +38,6 @@ public class ConsultantServiceTest {
 
   @Mock
   private ConsultantRepository consultantRepository;
-
-  @Mock
-  private UserHelper userHelper;
 
   @Mock
   private ValidatedUserAccountProvider validatedUserAccountProvider;
@@ -110,7 +97,6 @@ public class ConsultantServiceTest {
   public void findConsultantByUsernameOrEmail_Should_ReturnEmptyOptional_WhenConsultantIsNotFound() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.empty());
-    when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
     Optional<Consultant> result =
@@ -124,8 +110,6 @@ public class ConsultantServiceTest {
   public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByDecodedUsername() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.of(CONSULTANT));
-    when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
-    when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
     Optional<Consultant> result =
@@ -142,8 +126,6 @@ public class ConsultantServiceTest {
         .thenReturn(Optional.empty());
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
         .thenReturn(Optional.of(CONSULTANT));
-    when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
-    when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
     Optional<Consultant> result =
@@ -160,8 +142,6 @@ public class ConsultantServiceTest {
         .thenReturn(Optional.empty());
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
         .thenReturn(Optional.empty());
-    when(userHelper.decodeUsername(USERNAME_ENCODED)).thenReturn(USERNAME_DECODED);
-    when(userHelper.encodeUsername(USERNAME_DECODED)).thenReturn(USERNAME_ENCODED);
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL))
         .thenReturn(Optional.of(CONSULTANT));
 

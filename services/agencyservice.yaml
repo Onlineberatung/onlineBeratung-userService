@@ -43,14 +43,15 @@ paths:
                   $ref: '#/components/schemas/AgencyResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /agencies/{agencyIds}:
     get:
       tags:
         - agency-controller
-      summary: 'Returns the information of provided agencies (Ids). [Authorization:
-        none]'
+      summary: 'Returns the information of provided agencies (Ids). [Authorization: none]'
       operationId: getAgenciesByIds
       parameters:
         - name: agencyIds
@@ -76,13 +77,38 @@ paths:
                   $ref: '#/components/schemas/AgencyResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
-        401:
-          description: UNAUTHORIZED - no/invalid CSRF token
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: []
-
+  /agencies/consultingtype/{consultingTypeId}:
+    get:
+      tags:
+        - agency-controller
+      summary: 'Returns all agencies for provided consulting type. [Authorization: none]'
+      operationId: getAgenciesByConsultingType
+      parameters:
+        - name: consultingTypeId
+          in: path
+          description: the consulting type id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgencyResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
 components:
   schemas:
     AgencyResponseDTO:
@@ -113,7 +139,6 @@ components:
         consultingType:
           type: integer
           example: 0
-
   securitySchemes:
     Bearer:
       type: apiKey

@@ -19,6 +19,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
@@ -31,10 +32,12 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.io.File;
 import java.io.FileReader;
@@ -360,8 +363,7 @@ public class AskerImportService {
 
         // Initialize Session (need session id for Rocket.Chat group name)
         Session session = sessionService
-            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()),
-                extendedConsultingTypeResponseDTO);
+            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()));
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));
@@ -437,7 +439,7 @@ public class AskerImportService {
           }
 
           // Update the session's feedback group id
-          sessionService.updateFeedbackGroupId(Optional.of(session), rcFeedbackGroupId);
+          sessionService.updateFeedbackGroupId(session, rcFeedbackGroupId);
         }
 
         // Update session data by Rocket.Chat group id and consultant id
@@ -572,7 +574,7 @@ public class AskerImportService {
     importRecord.setIdOld(
         (record.get(0).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(0)));
     importRecord.setUsername(StringUtils.trim(record.get(1)));
-    importRecord.setUsernameEncoded(userHelper.encodeUsername(StringUtils.trim(record.get(1))));
+    importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
     String email = StringUtils.deleteWhitespace(
         record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
     if (!email.equals(StringUtils.EMPTY)
@@ -601,7 +603,7 @@ public class AskerImportService {
     importRecord.setIdOld(
         (record.get(0).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(0)));
     importRecord.setUsername(StringUtils.trim(record.get(1)));
-    importRecord.setUsernameEncoded(userHelper.encodeUsername(StringUtils.trim(record.get(1))));
+    importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
     String email = StringUtils.deleteWhitespace(
         record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
     if (!email.equals(StringUtils.EMPTY)
