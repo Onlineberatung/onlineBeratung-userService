@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 @JsonFormat(shape = JsonFormat.Shape.NUMBER)
 public enum SessionStatus {
-  INITIAL(0), NEW(1), IN_PROGRESS(2);
+  INITIAL(0), NEW(1), IN_PROGRESS(2), DONE(3);
   private final int value;
 
   /**
