@@ -40,7 +40,6 @@ public class AnonymousUsernameRegistry {
       ID_REGISTRY.add(obtainUsernameId(username));
     } while (isUsernameOccupied(username));
 
-
     return usernameTranscoder.encodeUsername(username);
   }
 
@@ -79,34 +78,13 @@ public class AnonymousUsernameRegistry {
    * @param encodedUsername the encoded username to remove from the registry
    */
   public synchronized void removeRegistryIdByUsername(String encodedUsername) {
-    var usernameParsed = false;
-    var usernameId = -1;
     try {
       var decodedUsername = usernameTranscoder.decodeUsername(encodedUsername);
-      usernameId = obtainUsernameId(decodedUsername);
-      usernameParsed = true;
+      Integer usernameId = obtainUsernameId(decodedUsername);
+      ID_REGISTRY.remove(usernameId);
     } catch (Exception ex) {
       // do nothing
     }
-
-    if (usernameParsed) {
-      removeRegistryIdIfFound(usernameId);
-    }
   }
 
-  private void removeRegistryIdIfFound(int registryId) {
-    var valueIndex = findIndexByRegistryId(registryId);
-    if (valueIndex >= 0 && valueIndex < ID_REGISTRY.size()) {
-      ID_REGISTRY.remove(valueIndex);
-    }
-  }
-
-  private int findIndexByRegistryId(int registryId) {
-    for (var valueIndex = 0; valueIndex < ID_REGISTRY.size(); valueIndex++) {
-      if (ID_REGISTRY.get(valueIndex) == registryId) {
-        return valueIndex;
-      }
-    }
-    return -1;
-  }
 }

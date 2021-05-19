@@ -29,8 +29,9 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-@Import({ KeycloakTestConfig.class, RocketChatTestConfig.class, ApiControllerTestConfig.class })
-public class DeleteUserAnonymousSchedulerIT {
+@Import({KeycloakTestConfig.class, RocketChatTestConfig.class, ApiControllerTestConfig.class})
+class DeleteUserAnonymousSchedulerIT {
+
   @Autowired
   private DeleteUserAnonymousScheduler deleteUserAnonymousScheduler;
 
@@ -68,7 +69,7 @@ public class DeleteUserAnonymousSchedulerIT {
   }
 
   @Test
-  public void performDeletionWorkflow_Should_notDeleteUser_When_SessionIsNotDone() {
+  void performDeletionWorkflow_Should_notDeleteUser_When_SessionIsNotDone() {
     deleteUserAnonymousScheduler.performDeletionWorkflow();
 
     assertSessionAndUserArePresent(currentSession.getId());
@@ -83,7 +84,7 @@ public class DeleteUserAnonymousSchedulerIT {
   }
 
   @Test
-  public void performDeletionWorkflow_Should_notDeleteUser_When_SessionAreDoneWithinDeletionPeriod() {
+  void performDeletionWorkflow_Should_notDeleteUser_When_SessionAreDoneWithinDeletionPeriod() {
     currentSession.setStatus(SessionStatus.DONE);
     var oneMinuteBeforeDeletionPeriodIsOver = LocalDateTime
         .now()
@@ -98,7 +99,7 @@ public class DeleteUserAnonymousSchedulerIT {
   }
 
   @Test
-  public void performDeletionWorkflow_Should_deleteUser_When_UserSessionIsDoneAndOutsideOfDeletionPeriod() {
+  void performDeletionWorkflow_Should_deleteUser_When_UserSessionIsDoneAndOutsideOfDeletionPeriod() {
     prepareCurrentSessionForDeletion();
 
     deleteUserAnonymousScheduler.performDeletionWorkflow();
@@ -125,7 +126,7 @@ public class DeleteUserAnonymousSchedulerIT {
   }
 
   @Test
-  public void performDeletionWorkflow_Should_deleteUser_When_UserSessionsAreNull() {
+  void performDeletionWorkflow_Should_deleteUser_When_UserSessionsAreNull() {
     currentSession.getUser().setSessions(null);
     userRepository.save(currentSession.getUser());
     prepareCurrentSessionForDeletion();

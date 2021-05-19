@@ -49,10 +49,10 @@ public class DeleteUserAnonymousService {
     List<Session> doneSessions = this.sessionRepository.findByStatus(SessionStatus.DONE);
     LocalDateTime deletionTime = LocalDateTime.now().minusMinutes(deletionPeriodMinutes);
 
-    List<User> usersWithoutOpenSessions = doneSessions.stream()
+    Set<User> usersWithoutOpenSessions = doneSessions.stream()
         .filter(sessionUsersHavingAllSessionsDoneAndOverdue(deletionTime))
         .map(Session::getUser)
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
 
     return usersWithoutOpenSessions.stream()
         .map(deleteUserAccountService::performUserDeletion)
@@ -71,7 +71,9 @@ public class DeleteUserAnonymousService {
   }
 
   private boolean allSessionsAreDone(Set<Session> sessions) {
-    return sessions.stream().map(Session::getStatus).allMatch(SessionStatus.DONE::equals);
+    return sessions.stream()
+        .map(Session::getStatus)
+        .allMatch(SessionStatus.DONE::equals);
   }
 
   private boolean allSessionsAreBeforeDeletionTime(LocalDateTime deletionTime,

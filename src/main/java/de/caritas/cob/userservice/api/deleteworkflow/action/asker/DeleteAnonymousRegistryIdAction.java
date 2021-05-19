@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.deleteworkflow.action;
+package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIFTH;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
@@ -7,10 +7,8 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteAskerAction;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUsernameRegistry;
 import java.util.List;
@@ -19,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * Deletes a {@link UserAgency} in database.
+ * Deletes a registry id by username.
  */
 @Component
 @RequiredArgsConstructor

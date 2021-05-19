@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class DeleteUserAnonymousServiceTest {
+class DeleteUserAnonymousServiceTest {
 
   private static final int DELETION_PERIOD_MINUTES = 1200;
 
@@ -53,7 +53,7 @@ public class DeleteUserAnonymousServiceTest {
   }
 
   @Test
-  public void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_noSessionIsAvailable() {
+  void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_noSessionIsAvailable() {
     this.deleteUserAnonymousService.deleteInactiveAnonymousUsers();
 
     verifyNoMoreInteractions(this.workflowErrorMailService);
@@ -61,7 +61,7 @@ public class DeleteUserAnonymousServiceTest {
   }
 
   @Test
-  public void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_noSessionIsDone() {
+  void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_noSessionIsDone() {
     whenSessionRepositoryFindByStatus_ThenReturnUserSessionsWithStatus(
         getAnyStatusWhichIsNotDone());
 
@@ -107,7 +107,7 @@ public class DeleteUserAnonymousServiceTest {
   }
 
   @Test
-  public void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_notAllSessionsAreDone() {
+  void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_notAllSessionsAreDone() {
     whenSessionRepositoryFindByStatus_ThenReturnUserSessionsWithStatus(
         SessionStatus.IN_PROGRESS, SessionStatus.DONE);
 
@@ -119,7 +119,7 @@ public class DeleteUserAnonymousServiceTest {
 
   @ParameterizedTest
   @MethodSource("createUpdateDatesWithinDeletionPeriod")
-  public void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_sessionsAreDoneWithinDeletionPeriod(LocalDateTime updateDate) {
+  void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_sessionsAreDoneWithinDeletionPeriod(LocalDateTime updateDate) {
     User user = new User();
     Set<Session> userSessions = Set.of(createSessionForUser(user, updateDate, SessionStatus.DONE));
     user.setSessions(userSessions);
@@ -144,7 +144,7 @@ public class DeleteUserAnonymousServiceTest {
 
   @ParameterizedTest
   @MethodSource("createOverdueUpdateDates")
-  public void deleteInactiveAnonymousUsers_Should_performAskerDeletion_When_userSessionsAreDoneAndOverdue(LocalDateTime overdueUpdateDate) {
+  void deleteInactiveAnonymousUsers_Should_performAskerDeletion_When_userSessionsAreDoneAndOverdue(LocalDateTime overdueUpdateDate) {
     User user = new User();
     Set<Session> userSessions = Set.of(createSessionForUser(user, overdueUpdateDate,
         SessionStatus.DONE));
@@ -168,7 +168,7 @@ public class DeleteUserAnonymousServiceTest {
   }
 
   @Test
-  public void deleteInactiveAnonymousUsers_Should_sendErrorMails_When_someActionsFail() {
+  void deleteInactiveAnonymousUsers_Should_sendErrorMails_When_someActionsFail() {
     User user = new User();
     Set<Session> userSessions = Set.of(
         createSessionForUser(user, createOverdueUpdateDates().get(0), SessionStatus.DONE));
