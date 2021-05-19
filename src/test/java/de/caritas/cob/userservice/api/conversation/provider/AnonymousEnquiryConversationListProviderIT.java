@@ -107,14 +107,14 @@ public class AnonymousEnquiryConversationListProviderIT {
     saveAnonymousSessions(10);
     PageableListRequest request = PageableListRequest.builder()
         .count(3)
-        .offset(3)
+        .offset(9)
         .build();
 
     ConsultantSessionListResponseDTO responseDTO = this.anonymousEnquiryConversationListProvider
         .buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(1));
-    assertThat(responseDTO.getOffset(), is(3));
+    assertThat(responseDTO.getOffset(), is(9));
     assertThat(responseDTO.getTotal(), is(10));
     assertThat(responseDTO.getSessions(), hasSize(1));
   }
