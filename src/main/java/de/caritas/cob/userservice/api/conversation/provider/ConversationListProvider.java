@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.conversation.provider;
 
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 
 /**
@@ -25,6 +26,9 @@ public interface ConversationListProvider {
   ConversationListType providedType();
 
   default int obtainPageByOffsetAndCount(PageableListRequest pageableListRequest) {
+    if (pageableListRequest.getCount() < 1) {
+      throw new InternalServerErrorException("Pageable count attribute must be greater than zero");
+    }
     return pageableListRequest.getOffset() / pageableListRequest.getCount();
   }
 
