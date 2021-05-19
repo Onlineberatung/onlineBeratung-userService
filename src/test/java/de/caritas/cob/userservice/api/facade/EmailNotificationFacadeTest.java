@@ -41,7 +41,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -49,10 +48,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.NewMessageDTO;
-import de.caritas.cob.userservice.api.model.NotificationDTO;
-import de.caritas.cob.userservice.api.model.TeamSessionDTO;
-import de.caritas.cob.userservice.api.model.ToConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -60,15 +55,21 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
-import de.caritas.cob.userservice.testHelper.ExtendedConsultingTypeResponseDTOHelper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -122,7 +123,8 @@ public class EmailNotificationFacadeTest {
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(),
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
+      nowInUtc(),
       RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
       CONSULTANT_NO_EMAIL, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID,
@@ -160,19 +162,28 @@ public class EmailNotificationFacadeTest {
   private final GroupMemberDTO GROUP_MEMBER_2 =
       new GroupMemberDTO(GROUP_MEMBER_2_RC_ID, "status2", "username2", "name2", "");
   private final List<GroupMemberDTO> GROUP_MEMBERS = Arrays.asList(GROUP_MEMBER_1, GROUP_MEMBER_2);
-  private final NotificationDTO NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS =
-      new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
-          new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(true))));
-  private final NotificationDTO NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY =
-      new NotificationDTO().newMessage(new NewMessageDTO().teamSession(
-          new TeamSessionDTO().toConsultant(new ToConsultantDTO().allTeamConsultants(false))));
+  private final NotificationsDTO NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS =
+      new NotificationsDTO().teamSessions(
+          new TeamSessionsDTO().newMessage(new NewMessageDTO().allTeamConsultants(true)));
+  private final NotificationsDTO NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY =
+      new NotificationsDTO().teamSessions(
+          new TeamSessionsDTO().newMessage(new NewMessageDTO().allTeamConsultants(false)));
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
-          false, NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS, false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(0).slug("suchtberatung").excludeNonMainConsultantsFromTeamSessions(true)
+      .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+      .welcomeMessage(new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+      .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+      .sessionDataInitializing(null).monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+      .initializeFeedbackChat(false).notifications(NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS)
+      .languageFormal(false).roles(null).registration(null);
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
-      ExtendedConsultingTypeResponseDTOHelper.createExtendedConsultingTypeResponseDTO(0, "suchtberatung", true, false, false, false, null, false, false, null, true, null,
-          false, NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY, false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(0).slug("suchtberatung").excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null).monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY)
+          .languageFormal(false).roles(null).registration(null);
 
   @InjectMocks
   private EmailNotificationFacade emailNotificationFacade;

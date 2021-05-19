@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.testHelper;
 
 import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
@@ -9,9 +8,6 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
-import de.caritas.cob.userservice.api.manager.consultingtype.registration.Registration;
-import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -44,6 +40,12 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RegistrationDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RegistrationMandatoryFieldsDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -462,31 +464,39 @@ public class TestConstants {
       new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
           IN_PROGRESS, null, null, null, null, false, false, null, null);
   public static final Session SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
+          AGENCY_ID,
           IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session ENQUIRY_SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
+          AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, false, false, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, null, RC_GROUP_ID, null,
+      null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, null,
+      RC_GROUP_ID, null,
       null, IS_TEAM_SESSION, IS_MONITORING, null, null);
 
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
+      USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID,
+      SessionStatus.NEW, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE,
+      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_U25, REGISTERED,
+          POSTCODE,
           AGENCY_ID, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null,
           IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
-      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
+      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
+          POSTCODE,
           AGENCY_ID, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITH_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      CONSULTANT_2, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, IN_PROGRESS, nowInUtc(),
+      CONSULTANT_2, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, IN_PROGRESS,
+      nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
+      USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID,
+      SessionStatus.NEW, nowInUtc(),
       RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION, IS_MONITORING, null, null);
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET = new HashSet<>(
@@ -934,282 +944,451 @@ public class TestConstants {
    */
 
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_FORMAL_LANGUAGE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", true,
-              false, false,
-              false, null, false, false, null, true, null, false, null,
-              true, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_KREUZBUND =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_KREUZBUND,
-              "kb-sucht-selbsthilfe", false, true,
-              true, false, null, false, false, null, true,
-              null, false, null, true, null, null);
-  public static final MandatoryFields MANDATORY_FIELDS_WITH_AGE = new MandatoryFields(true, false);
-  public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_AGE =
-      new MandatoryFields(false, false);
-  public static final Registration REGISTRATION_WITH_MANDATORY_AGE =
-      new Registration(MANDATORY_FIELDS_WITH_AGE);
-  public static final Registration REGISTRATION_WITHOUT_MANDATORY_AGE =
-      new Registration(MANDATORY_FIELDS_WITHOUT_AGE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_KREUZBUND)
+          .slug("kb-sucht-selbsthilfe").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(true)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(null);
+  public static final RegistrationMandatoryFieldsDTO MANDATORY_FIELDS_WITH_AGE =
+      new RegistrationMandatoryFieldsDTO().age(true).state(false);
+  public static final RegistrationMandatoryFieldsDTO MANDATORY_FIELDS_WITHOUT_AGE =
+      new RegistrationMandatoryFieldsDTO().age(false).state(false);
+  public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_AGE =
+      new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_WITH_AGE);
+  public static final RegistrationDTO REGISTRATION_WITHOUT_MANDATORY_AGE =
+      new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_WITHOUT_AGE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_AGE_MANDATORY =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", false, true, true,
-              false, null,
-              false, false, null, true, null,
-              false, null, false, null, REGISTRATION_WITH_MANDATORY_AGE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(true)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_AGE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_AGE_MANDATORY =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", false, false,
-              true, false, null,
-              false, false, null, true, null,
-              false, null, false, null, REGISTRATION_WITHOUT_MANDATORY_AGE);
-  public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_STATE_FIELD =
-      ExtendedConsultingTypeResponseDTOHelper.createExtendedConsultingTypeResponseDTO();
-  public static final MandatoryFields MANDATORY_FIELDS_WITH_STATE =
-      new MandatoryFields(false, true);
-  public static final MandatoryFields MANDATORY_FIELDS_WITHOUT_STATE =
-      new MandatoryFields(false, false);
-  public static final Registration REGISTRATION_WITH_MANDATORY_STATE =
-      new Registration(MANDATORY_FIELDS_WITH_STATE);
-  public static final Registration REGISTRATION_WITHOUT_MANDATORY_STATE =
-      new Registration(MANDATORY_FIELDS_WITHOUT_STATE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITHOUT_MANDATORY_AGE);
+  public static final RegistrationMandatoryFieldsDTO MANDATORY_FIELDS_WITH_STATE =
+      new RegistrationMandatoryFieldsDTO().age(false).state(true);
+  public static final RegistrationMandatoryFieldsDTO MANDATORY_FIELDS_WITHOUT_STATE =
+      new RegistrationMandatoryFieldsDTO().age(false).state(false);
+  public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_STATE =
+      new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_WITH_STATE);
+  public static final RegistrationDTO REGISTRATION_WITHOUT_MANDATORY_STATE =
+      new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_WITHOUT_STATE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", false, false,
-              true, false, null,
-              false, false, null, true, null,
-              false, null, false, null, REGISTRATION_WITH_MANDATORY_STATE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_STATE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", false, false,
-              true, false, null,
-              false, false, null, true, null,
-              false, null, false, null, REGISTRATION_WITHOUT_MANDATORY_STATE);
-  public static final MandatoryFields MANDATORY_FIELDS_FALSE = new MandatoryFields(false, false);
-  public static final MandatoryFields MANDATORY_FIELDS_TRUE = new MandatoryFields(true, true);
-  public static final SessionDataInitializing SESSION_DATA_INITIALIZING =
-      new SessionDataInitializing(true, true, true, true, true);
-  public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_TRUE =
-      new Registration(MANDATORY_FIELDS_TRUE);
-  public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_FALSE =
-      new Registration(MANDATORY_FIELDS_FALSE);
-  public static final Registration REGISTRATION_WITH_MANDATORY_FIELDS_NULL =
-      new Registration(null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITHOUT_MANDATORY_STATE);
+  public static final RegistrationMandatoryFieldsDTO MANDATORY_FIELDS_FALSE = new RegistrationMandatoryFieldsDTO()
+      .age(false).state(false);
+  public static final RegistrationMandatoryFieldsDTO MANDATORY_FIELDS_TRUE = new RegistrationMandatoryFieldsDTO()
+      .age(true).state(true);
+  public static final SessionDataInitializingDTO SESSION_DATA_INITIALIZING =
+      new SessionDataInitializingDTO().addictiveDrugs(true).age(true).gender(true).relation(true)
+          .relation(true).state(true);
+  public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_FIELDS_TRUE =
+      new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_TRUE);
+  public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_FIELDS_FALSE =
+      new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_FALSE);
+  public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_FIELDS_NULL =
+      new RegistrationDTO().mandatoryFields(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false,
-              false, false,
-              true, "Hallo", false, false,
-              SESSION_DATA_INITIALIZING, true, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", true, false, true,
-              true, "Hallo",
-              false, false,
-              SESSION_DATA_INITIALIZING, true, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_SUCHT =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false,
-              false, false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              true, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_U25 =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", true, false, true,
-              true, "Hallo",
-              false, false,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              false, null, REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", true, false, true,
-              true, "Hallo",
-              false, false,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", true, false, true,
-              false, null,
-              false, false,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", true, false, true,
-              false, null,
-              false, false,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false,
-              false, false,
-              false, null, true, false,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(true).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false,
-              false, false,
-              false, null, false, true,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(true)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", true, false, true,
-              true, "Hallo",
-              false, false,
-              SESSION_DATA_INITIALIZING, true, CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH, false, null,
-              false, null, REGISTRATION_WITH_MANDATORY_FIELDS_NULL);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
+          new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_NULL);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_PREGNANCY =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_PREGNANCY,
-              "schwangerschaftsberatung", false,
-              false, false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_PREGNANCY)
+          .slug("schwangerschaftsberatung").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_EMIGRATION =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_EMIGRATION, "rw-auswanderung",
-              false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_EMIGRATION)
+          .slug("rw-auswanderung").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_HOSPICE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_HOSPICE, "hospiz-palliativ",
-              false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_HOSPICE)
+          .slug("hospiz-palliativ").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_REGIONAL =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_REGIONAL,
-              "regionale-angebote", false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_REGIONAL)
+          .slug("regionale-angebote").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_MEN =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_MEN, "jungen-und-maenner",
-              false, false, false,
-              false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_MEN).slug("jungen-und-maenner")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_MIGRATION =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_MIGRATION, "migration", false,
-              false, false,
-              false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_MIGRATION).slug("migration")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_AIDS =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_AIDS, "hiv-aids-beratung",
-              false, false, false,
-              false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_AIDS).slug("hiv-aids-beratung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_CHILDREN =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_CHILDREN,
-              "kinder-jugendliche", false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_CHILDREN)
+          .slug("kinder-jugendliche").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_CURE =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_PREGNANCY,
-              "schwangerschaftsberatung", false,
-              false, false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_PREGNANCY)
+          .slug("schwangerschaftsberatung").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_DEBT =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_DEBT, "schuldnerberatung",
-              false, false, false,
-              false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_DEBT).slug("schuldnerberatung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_DISABILITY =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_DISABILITY,
-              "behinderung-und-psychische-erkrankung", false, false, false, false, null, false,
-              false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_DISABILITY)
+          .slug("behinderung-und-psychische-erkrankung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_LAW =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_LAW, "rechtliche-betreuung",
-              false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_LAW)
+          .slug("rechtliche-betreuung").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_OFFENDER =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_OFFENDER, "straffaelligkeit",
-              false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_OFFENDER)
+          .slug("straffaelligkeit").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_PARENTING =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_PARENTING, "eltern-familie",
-              false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_PARENTING)
+          .slug("eltern-familie").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_PLANB =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_PLANB, "mein-planb", false,
-              false, false, false,
-              null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, false, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_PLANB).slug("mein-planb")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_REHABILITATION =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_REHABILITATION, "kinder-reha",
-              false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_REHABILITATION)
+          .slug("kinder-reha").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_SENIORITY =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SENIORITY, "leben-im-alter",
-              false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SENIORITY)
+          .slug("leben-im-alter").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_SOCIAL =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SOCIAL,
-              "allgemeine-soziale-beratung", false,
-              false, false, false, null, false, false,
-              SESSION_DATA_INITIALIZING, false, null, false, null, true, null,
-              REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SOCIAL)
+          .slug("allgemeine-soziale-beratung").excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING)
+          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(true).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WIT_MONITORING =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, "u25", true, false, true,
-              false, null,
-              false, false, null, true, null,
-              false, null, false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug("u25")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(true)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_MONITORING =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false,
-              false, false,
-              false, null, false, false, null, IS_MONITORING, null,
-              false, null, false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null).monitoring(
+          new MonitoringDTO().initializeMonitoring(IS_MONITORING).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, "suchtberatung", false,
-              false, false,
-              false, null, false, false, null, IS_NOT_MONITORING, null,
-              false, null, false, null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null).monitoring(
+          new MonitoringDTO().initializeMonitoring(IS_NOT_MONITORING).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
   public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);
   public static AbsenceDTO ABSENCE_DTO_WITH_HTML_AND_JS = new AbsenceDTO()
       .absent(true)
