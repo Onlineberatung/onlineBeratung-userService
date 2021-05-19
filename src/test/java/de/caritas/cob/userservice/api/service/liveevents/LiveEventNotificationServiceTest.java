@@ -82,7 +82,7 @@ public class LiveEventNotificationServiceTest {
 
     verify(userIdsProviderFactory, times(1)).byRocketChatGroup("valid");
     verify(liveControllerApi, times(1))
-        .sendLiveEvent(asList("1", "2"), MESSAGE);
+        .sendLiveEvent(MESSAGE.userIds(asList("1", "2")));
   }
 
   @Test
@@ -106,8 +106,7 @@ public class LiveEventNotificationServiceTest {
   public void sendLiveDirectMessageEventToUsers_Should_logError_When_apiCallFails() {
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
     when(this.bySessionProvider.collectUserIds(any())).thenReturn(singletonList("test"));
-    doThrow(new RestClientException("")).when(this.liveControllerApi)
-        .sendLiveEvent(any(), any());
+    doThrow(new RestClientException("")).when(this.liveControllerApi).sendLiveEvent(any());
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
@@ -124,8 +123,7 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
     List<String> expectedIds = asList("id1", "id3", "id4");
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(expectedIds,
-        MESSAGE);
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(MESSAGE.userIds(expectedIds));
   }
 
   @Test
@@ -146,7 +144,7 @@ public class LiveEventNotificationServiceTest {
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(userIds, MESSAGE);
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(MESSAGE.userIds(userIds));
   }
 
   @Test
@@ -204,7 +202,7 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveNewAnonymousEnquiryEventToUsers(userIds, 1L);
 
     ArgumentCaptor<LiveEventMessage> captor = ArgumentCaptor.forClass(LiveEventMessage.class);
-    verify(liveControllerApi, times(1)).sendLiveEvent(any(), captor.capture());
+    verify(liveControllerApi, times(1)).sendLiveEvent(captor.capture());
     assertEquals(EventType.NEWANONYMOUSENQUIRY, captor.getValue().getEventType());
   }
 
@@ -226,7 +224,8 @@ public class LiveEventNotificationServiceTest {
   public void sendAcceptAnonymousEnquiryEventToUser_Should_triggerLiveEvent_When_userIdIsValid() {
     this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("userId");
 
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(singletonList("userId"),
-        new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED));
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(
+        new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED)
+            .userIds(singletonList("userId")));
   }
 }
