@@ -80,8 +80,8 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
 
   private Page<Session> queryForRelevantSessions(PageableListRequest pageableListRequest,
       Set<ConsultingType> relatedConsultingTypes) {
-    var pageable = PageRequest.of(pageableListRequest.getOffset(),
-        pageableListRequest.getCount());
+    var requestedPage = obtainPageByOffsetAndCount(pageableListRequest);
+    var pageable = PageRequest.of(requestedPage, pageableListRequest.getCount());
 
     return this.sessionRepository
         .findByConsultingTypeInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(

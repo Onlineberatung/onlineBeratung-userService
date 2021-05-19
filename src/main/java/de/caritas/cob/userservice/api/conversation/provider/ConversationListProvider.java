@@ -24,4 +24,8 @@ public interface ConversationListProvider {
    */
   ConversationListType providedType();
 
+  default int obtainPageByOffsetAndCount(PageableListRequest pageableListRequest) {
+    return pageableListRequest.getOffset() / pageableListRequest.getCount();
+  }
+
 }
