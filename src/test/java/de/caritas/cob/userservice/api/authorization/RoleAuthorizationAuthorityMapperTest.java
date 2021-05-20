@@ -21,7 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RoleAuthorizationAuthoritiesMapperTest {
+public class RoleAuthorizationAuthorityMapperTest {
 
   private final KeycloakAuthenticationProvider provider = new KeycloakAuthenticationProvider();
   private final Set<String> roles = Stream.of(UserRole.values())
@@ -46,7 +46,7 @@ public class RoleAuthorizationAuthoritiesMapperTest {
 
     Set<SimpleGrantedAuthority> expectedGrantendAuthorities = new HashSet<>();
     roles.forEach(roleName -> {
-      expectedGrantendAuthorities.addAll(Authorities
+      expectedGrantendAuthorities.addAll(Authority
           .getAuthoritiesByUserRole(UserRole.getRoleByValue(roleName).get()).stream()
           .map(SimpleGrantedAuthority::new).collect(Collectors.toSet()));
     });

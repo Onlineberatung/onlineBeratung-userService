@@ -32,6 +32,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -125,9 +126,13 @@ public class SessionService {
     List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
     List<Session> sessions = sessionRepository.findByUserUserId(userId);
     if (isNotEmpty(sessions)) {
+      List<Long> agencyIds = sessions.stream()
+          .map(Session::getAgencyId)
+          .filter(Objects::nonNull)
+          .collect(Collectors.toList());
       List<AgencyDTO> agencies =
           agencyService.getAgencies(
-              sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));
+              agencyIds);
       sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
     }
     return sessionResponseDTOs;
@@ -295,7 +300,7 @@ public class SessionService {
         .agency(agencies.stream()
             .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
             .findAny()
-            .orElseThrow())
+            .orElse(null))
         .consultant(nonNull(session.getConsultant()) ? convertToSessionConsultantForUserDTO(
             session.getConsultant()) : null);
   }

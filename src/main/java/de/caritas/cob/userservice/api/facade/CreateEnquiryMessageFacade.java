@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.facade;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
@@ -301,7 +301,7 @@ public class CreateEnquiryMessageFacade {
 
     for (ConsultantAgency agency : agencyList) {
       if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-          Authority.VIEW_ALL_FEEDBACK_SESSIONS)) {
+          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)) {
         rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
             rcFeedbackGroupId);
       }
