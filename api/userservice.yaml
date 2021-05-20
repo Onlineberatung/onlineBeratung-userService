@@ -1239,6 +1239,7 @@ components:
         status:
           type: integer
           example: 0
+          description: "0 = INITIAL, 1 = NEW, 2 = IN PROGRESS, 3 = DONE"
         postcode:
           type: string
           minLength: 1
