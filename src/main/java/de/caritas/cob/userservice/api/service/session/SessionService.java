@@ -130,9 +130,7 @@ public class SessionService {
           .map(Session::getAgencyId)
           .filter(Objects::nonNull)
           .collect(Collectors.toList());
-      List<AgencyDTO> agencies =
-          agencyService.getAgencies(
-              agencyIds);
+      List<AgencyDTO> agencies = agencyService.getAgencies(agencyIds);
       sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
     }
     return sessionResponseDTOs;
