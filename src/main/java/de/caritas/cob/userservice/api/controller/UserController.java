@@ -4,7 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
@@ -535,7 +535,7 @@ public class  UserController implements UsersApi {
     // Check if the calling consultant has the correct right to assign this session to a new
     // consultant
     if (session.get().getStatus().equals(SessionStatus.IN_PROGRESS) && !authenticatedUser
-        .getGrantedAuthorities().contains(Authority.ASSIGN_CONSULTANT_TO_SESSION)) {
+        .getGrantedAuthorities().contains(AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)) {
       LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign a session to a another consultant.",
           authenticatedUser.getUserId()));
@@ -545,7 +545,7 @@ public class  UserController implements UsersApi {
 
     // Check if the calling consultant has the correct right to assign the enquiry to a consultant
     if (session.get().getStatus().equals(SessionStatus.NEW) && !authenticatedUser
-        .getGrantedAuthorities().contains(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY)) {
+        .getGrantedAuthorities().contains(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY)) {
       LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign the enquiry to a consultant.",
           authenticatedUser.getUserId()));

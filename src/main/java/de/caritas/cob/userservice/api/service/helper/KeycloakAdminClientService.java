@@ -5,7 +5,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.authorization.Authorities;
+import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -337,7 +337,7 @@ public class KeycloakAdminClientService {
           .map(role -> UserRole.getRoleByValue(role.getName()))
           .filter(Optional::isPresent)
           .map(Optional::get)
-          .map(Authorities::getAuthoritiesByUserRole)
+          .map(Authority::getAuthoritiesByUserRole)
           .anyMatch(currentAuthority -> currentAuthority.contains(authority));
     } catch (Exception ex) {
       var error = String.format("Could not get roles for user id %s", userId);

@@ -195,7 +195,7 @@ paths:
         - user-controller
       summary: 'Returns a list of open session(s) for the currently authenticated
         user. Note: Either a session or a chat object is provided. [Authorization:
-        Role: user]'
+        Role: user, anonymous]'
       operationId: getSessionsForAuthenticatedUser
       parameters:
         - name: RCToken
@@ -253,7 +253,7 @@ paths:
       tags:
         - user-controller
       summary: 'Returns user (meta)data for the currently authenticated user [Authorization:
-        Role: user/consultant]'
+        Role: user, anonymous, consultant]'
       operationId: getUserData
       responses:
         200:

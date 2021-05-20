@@ -24,10 +24,13 @@ import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
+import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Set;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -153,6 +156,22 @@ public class AskerDataProviderTest {
         assertFalse((boolean) consultingTypeEntry.get("isRegistered"));
       }
     }
+  }
+
+  @Test
+  public void retrieveData_Should_ReturnUserDataWithoutAgency_When_userHasNotAgencyInSession() {
+    User user = new EasyRandom().nextObject(User.class);
+    user.setUserAgencies(null);
+    user.setSessions(Set.of(mock(Session.class)));
+
+    @SuppressWarnings("unchecked")
+    LinkedHashMap<String, Object> consultingTypeData =
+        (LinkedHashMap<String, Object>) askerDataProvider.retrieveData(USER)
+            .getConsultingTypes()
+            .get(Integer.toString(AGENCY_DTO_SUCHT.getConsultingType().getValue()));
+    AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
+
+    assertNull(agency);
   }
 
 }

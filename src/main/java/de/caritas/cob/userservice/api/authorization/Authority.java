@@ -15,27 +15,27 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum Authorities {
+public enum Authority {
 
-  ANONYMOUS(UserRole.ANONYMOUS, singletonList(Authority.ANONYMOUS_DEFAULT)),
-  USER(UserRole.USER, singletonList(Authority.USER_DEFAULT)),
-  CONSULTANT(UserRole.CONSULTANT, singletonList(Authority.CONSULTANT_DEFAULT)),
-  U25_CONSULTANT(UserRole.U25_CONSULTANT, singletonList(Authority.USE_FEEDBACK)),
+  ANONYMOUS(UserRole.ANONYMOUS, singletonList(AuthorityValue.ANONYMOUS_DEFAULT)),
+  USER(UserRole.USER, singletonList(AuthorityValue.USER_DEFAULT)),
+  CONSULTANT(UserRole.CONSULTANT, singletonList(AuthorityValue.CONSULTANT_DEFAULT)),
+  U25_CONSULTANT(UserRole.U25_CONSULTANT, singletonList(AuthorityValue.USE_FEEDBACK)),
   U25_MAIN_CONSULTANT(UserRole.U25_MAIN_CONSULTANT, asList(
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      Authority.VIEW_AGENCY_CONSULTANTS)),
-  TECHNICAL(UserRole.TECHNICAL, singletonList(Authority.TECHNICAL_DEFAULT)),
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS)),
+  TECHNICAL(UserRole.TECHNICAL, singletonList(AuthorityValue.TECHNICAL_DEFAULT)),
   GROUP_CHAT_CONSULTANT(UserRole.GROUP_CHAT_CONSULTANT, asList(
-      Authority.CONSULTANT_DEFAULT, Authority.CREATE_NEW_CHAT,
-      Authority.START_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT)),
-  USER_ADMIN(UserRole.USER_ADMIN, singletonList(Authority.USER_ADMIN));
+      AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT)),
+  USER_ADMIN(UserRole.USER_ADMIN, singletonList(AuthorityValue.USER_ADMIN));
 
   private final UserRole userRole;
   private final List<String> grantedAuthorities;
 
   public static List<String> getAuthoritiesByUserRole(UserRole userRole) {
-    Optional<Authorities> authorityByUserRole = Stream.of(values())
+    Optional<Authority> authorityByUserRole = Stream.of(values())
         .filter(authority -> authority.userRole.equals(userRole))
         .findFirst();
 
@@ -43,9 +43,9 @@ public enum Authorities {
         : emptyList();
   }
 
-  public static class Authority {
+  public static class AuthorityValue {
 
-    private Authority() {
+    private AuthorityValue() {
     }
 
     public static final String PREFIX = "AUTHORIZATION_";
