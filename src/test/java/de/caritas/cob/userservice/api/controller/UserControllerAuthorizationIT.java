@@ -2013,7 +2013,7 @@ public class UserControllerAuthorizationIT {
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME ,RC_TOKEN)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
