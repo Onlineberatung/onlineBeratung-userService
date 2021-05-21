@@ -32,7 +32,7 @@ public class DeactivateAnonymousUserService {
 
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull DeactivateActionsRegistry deactivateActionsRegistry;
-  private final @NonNull WorkflowErrorMailService workflowErrorMailService;
+  private final @NonNull DeactivateWorkflowErrorMailService workflowErrorMailService;
   @Value("${user.anonymous.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodMinutes;
 

@@ -46,7 +46,7 @@ class DeactivateAnonymousUserServiceTest {
   private SessionRepository sessionRepository;
 
   @Mock
-  private WorkflowErrorMailService workflowErrorMailService;
+  private DeactivateWorkflowErrorMailService workflowErrorMailService;
 
   @Mock
   private DeactivateActionsRegistry deactivateActionsRegistry;

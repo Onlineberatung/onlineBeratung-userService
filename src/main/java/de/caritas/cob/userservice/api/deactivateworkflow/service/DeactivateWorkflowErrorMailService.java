@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class WorkflowErrorMailService {
+public class DeactivateWorkflowErrorMailService {
 
   private final @NonNull MailService mailService;
 

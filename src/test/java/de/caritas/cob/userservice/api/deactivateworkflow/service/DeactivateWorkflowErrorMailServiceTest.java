@@ -23,10 +23,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class WorkflowErrorMailServiceTest {
+public class DeactivateWorkflowErrorMailServiceTest {
 
   @InjectMocks
-  private WorkflowErrorMailService workflowErrorMailService;
+  private DeactivateWorkflowErrorMailService workflowErrorMailService;
 
   @Mock
   private MailService mailService;
