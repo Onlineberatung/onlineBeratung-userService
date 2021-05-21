@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.config;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,7 @@ public class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguratio
 
   @Bean
   public GrantedAuthorityDefaults grantedAuthorityDefaults() {
-    return new GrantedAuthorityDefaults(Authority.PREFIX);
+    return new GrantedAuthorityDefaults(AuthorityValue.PREFIX);
   }
 
 }

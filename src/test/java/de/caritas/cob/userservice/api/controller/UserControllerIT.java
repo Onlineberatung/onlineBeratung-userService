@@ -125,8 +125,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.Authorities;
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -238,10 +238,10 @@ public class UserControllerIT {
       new HashSet<>(Arrays.asList(DUMMY_ROLE_A, UserRole.CONSULTANT.getValue(), DUMMY_ROLE_B));
   private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\""
       + UserRole.USER.getValue() + "\",\"" + DUMMY_ROLE_B + "\"],\"grantedAuthorities\": [\""
-      + Authority.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
+      + AuthorityValue.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
   private final String VALID_CONSULTANT_ROLE_RESULT =
       "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\"" + UserRole.CONSULTANT.getValue() + "\",\""
-          + DUMMY_ROLE_B + "\"], \"grantedAuthorities\": [ \"" + Authority.CONSULTANT_DEFAULT
+          + DUMMY_ROLE_B + "\"], \"grantedAuthorities\": [ \"" + AuthorityValue.CONSULTANT_DEFAULT
           + "\" ], \"inTeamAgency\":true}";
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
@@ -322,11 +322,11 @@ public class UserControllerIT {
   private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
-      .asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.ASSIGN_CONSULTANT_TO_SESSION));
+      .asList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
-      new HashSet<>(Collections.singletonList(Authority.ASSIGN_CONSULTANT_TO_SESSION));
+      new HashSet<>(Collections.singletonList(AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_ENQUIRY =
-      new HashSet<>(Collections.singletonList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY));
+      new HashSet<>(Collections.singletonList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY));
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
   private final String VALID_MONITORING_RESPONSE_JSON =
       "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
@@ -1148,7 +1148,7 @@ public class UserControllerIT {
     UserDataResponseDTO responseDto = USER_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_USER);
     responseDto.setGrantedAuthorities(
-        new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
+        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
 
@@ -1166,7 +1166,7 @@ public class UserControllerIT {
     when(authenticatedUser.getRoles())
         .thenReturn(ROLES_WITH_USER);
     when(authenticatedUser.getGrantedAuthorities())
-        .thenReturn(new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
+        .thenReturn(new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(authenticatedUser.getUserId())
         .thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser())
@@ -1199,7 +1199,7 @@ public class UserControllerIT {
     UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
     responseDto.setGrantedAuthorities(
-        new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
+        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
 
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
