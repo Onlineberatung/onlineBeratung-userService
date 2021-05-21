@@ -83,7 +83,7 @@ public class AssignEnquiryFacadeTest {
 
   @Test
   public void assignEnquiry_Should_ReturnOKAndNotRemoveSystemUser() {
-    assignEnquiryFacade.assignEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(FEEDBACKSESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -106,7 +106,7 @@ public class AssignEnquiryFacadeTest {
   public void assignEnquiry_Should_ReturnOKAndRemoveSystemMessagesFromGroup() {
     when(rocketChatFacade.retrieveRocketChatMembers(anyString())).thenReturn(LIST_GROUP_MEMBER_DTO);
 
-    assignEnquiryFacade.assignEnquiry(SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -117,7 +117,7 @@ public class AssignEnquiryFacadeTest {
 
   @Test
   public void assignEnquiry_Should_ReturnOKAndRemoveSystemMessagesFromFeedbackGroup_WhenSessionIsFeedbackSession() {
-    assignEnquiryFacade.assignEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID,
         RC_GROUP_ID);
@@ -129,7 +129,7 @@ public class AssignEnquiryFacadeTest {
     doThrow(new InternalServerErrorException("")).when(sessionService)
         .updateConsultantAndStatusForSession(Mockito.any(), Mockito.any(), Mockito.any());
 
-    assignEnquiryFacade.assignEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(FEEDBACKSESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -141,7 +141,7 @@ public class AssignEnquiryFacadeTest {
     doThrow(new InternalServerErrorException("")).when(rocketChatFacade)
         .removeSystemMessagesFromRocketChatGroup(anyString());
 
-    assignEnquiryFacade.assignEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -157,7 +157,7 @@ public class AssignEnquiryFacadeTest {
     doThrow(new InternalServerErrorException("")).when(sessionService)
         .updateConsultantAndStatusForSession(any(), any(), any());
 
-    assignEnquiryFacade.assignEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(FEEDBACKSESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -173,7 +173,7 @@ public class AssignEnquiryFacadeTest {
         .addUserToRocketChatGroup(ROCKETCHAT_ID,
             RC_FEEDBACK_GROUP_ID);
 
-    assignEnquiryFacade.assignEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -191,7 +191,7 @@ public class AssignEnquiryFacadeTest {
     doThrow(new InternalServerErrorException("error")).when(rocketChatFacade)
         .removeSystemMessagesFromRocketChatGroup(Mockito.any());
 
-    assignEnquiryFacade.assignEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -208,7 +208,7 @@ public class AssignEnquiryFacadeTest {
     doThrow(new InternalServerErrorException("error")).when(rocketChatFacade)
         .removeSystemMessagesFromRocketChatGroup(Mockito.any());
 
-    assignEnquiryFacade.assignEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -222,7 +222,7 @@ public class AssignEnquiryFacadeTest {
 
   @Test
   public void assignEnquiry_Should_AddPeerConsultantToFeedbackGroup_WhenSessionHasFeedbackIsTrue() {
-    assignEnquiryFacade.assignEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assignEnquiryFacade.assignRegisteredEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
@@ -254,7 +254,7 @@ public class AssignEnquiryFacadeTest {
     when(this.consultantService.getConsultantByRcUserId(anyString()))
         .thenReturn(Optional.of(consultantToRemove));
 
-    this.assignEnquiryFacade.assignEnquiry(session, consultant);
+    this.assignEnquiryFacade.assignRegisteredEnquiry(session, consultant);
 
     verifyConsultantAndSessionHaveBeenChecked(session, consultant);
     verify(this.rocketChatFacade, times(1))

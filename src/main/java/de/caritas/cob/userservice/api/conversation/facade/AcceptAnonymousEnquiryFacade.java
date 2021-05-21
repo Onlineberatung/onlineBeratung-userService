@@ -32,7 +32,7 @@ public class AcceptAnonymousEnquiryFacade {
         .orElseThrow(() -> new NotFoundException(
             String.format("Session with id %s does not exist", sessionId)));
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
-    this.assignEnquiryFacade.assignEnquiry(session, consultant);
+    this.assignEnquiryFacade.assignAnonymousEnquiry(session, consultant);
     this.liveEventNotificationService
         .sendAcceptAnonymousEnquiryEventToUser(session.getUser().getUserId());
   }

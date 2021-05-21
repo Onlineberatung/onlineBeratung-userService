@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -47,9 +48,35 @@ public class AssignEnquiryFacade {
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
    * consultants from the Rocket.Chat group which don't have the right to view this session anymore.
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
+   *
+   * @param session    the session to assign the consultant
+   * @param consultant the consultant to assign
    */
-  public void assignEnquiry(Session session, Consultant consultant) {
-    ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
+  public void assignRegisteredEnquiry(Session session, Consultant consultant) {
+    assignEnquiry(session, consultant);
+    updateRocketChatRooms(session, consultant);
+  }
+
+  /**
+   * Assigns the given {@link Session} session to the given {@link Consultant}. Add the given {@link
+   * Consultant} to the Rocket.Chat group.
+   *
+   * @param session    the session to assign the consultant
+   * @param consultant the consultant to assign
+   */
+  public void assignAnonymousEnquiry(Session session, Consultant consultant) {
+    assignEnquiry(session, consultant);
+    try {
+      this.rocketChatFacade
+          .addUserToRocketChatGroup(consultant.getRocketChatId(), session.getGroupId());
+    } catch (Exception e) {
+      LogService.logInternalServerError(e);
+      rollbackSessionUpdate(session);
+    }
+  }
+
+  private void assignEnquiry(Session session, Consultant consultant) {
+    var consultantSessionDTO = ConsultantSessionDTO.builder()
         .consultant(consultant)
         .session(session)
         .build();
@@ -57,7 +84,6 @@ public class AssignEnquiryFacade {
     sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
-    updateRocketChatRooms(session, consultant);
   }
 
   private void updateRocketChatRooms(Session session, Consultant consultant) {
