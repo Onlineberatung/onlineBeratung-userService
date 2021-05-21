@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class DeactivateWorkflowErrorMailServiceTest {
+class DeactivateWorkflowErrorMailServiceTest {
 
   @InjectMocks
   private DeactivateWorkflowErrorMailService workflowErrorMailService;
@@ -37,21 +37,21 @@ public class DeactivateWorkflowErrorMailServiceTest {
   }
 
   @Test
-  public void buildAndSendErrorMail_Should_sendNoErrorMail_When_workflowErrorsAreNull() {
+  void buildAndSendErrorMail_Should_sendNoErrorMail_When_workflowErrorsAreNull() {
     this.workflowErrorMailService.buildAndSendErrorMail(null);
 
     verifyNoMoreInteractions(this.mailService);
   }
 
   @Test
-  public void buildAndSendErrorMail_Should_sendNoErrorMail_When_workflowErrorsAreEmpty() {
+  void buildAndSendErrorMail_Should_sendNoErrorMail_When_workflowErrorsAreEmpty() {
     this.workflowErrorMailService.buildAndSendErrorMail(emptyList());
 
     verifyNoMoreInteractions(this.mailService);
   }
 
   @Test
-  public void buildAndSendErrorMail_Should_buildAndSendExpectedErrorMail_When_workflowErrorsExists() {
+  void buildAndSendErrorMail_Should_buildAndSendExpectedErrorMail_When_workflowErrorsExists() {
     List<DeactivateWorkflowError> workflowErrors = asList(
         DeactivateWorkflowError.builder()
             .sourceType(DeactivateSourceType.ASKER)

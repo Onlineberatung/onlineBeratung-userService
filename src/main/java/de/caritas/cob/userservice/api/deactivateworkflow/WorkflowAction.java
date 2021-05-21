@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.deactivateworkflow;
 
 import java.util.List;
 
-public interface WorkflowAction<TargetT, ErrorT> {
+public interface WorkflowAction<T, E> {
 
-  List<ErrorT> execute(TargetT workflowTarget);
+  List<E> execute(T workflowTarget);
 }

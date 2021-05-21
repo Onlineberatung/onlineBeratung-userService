@@ -12,8 +12,8 @@ import lombok.RequiredArgsConstructor;
  * Abstract class for deactivate workflow actions.
  */
 @RequiredArgsConstructor
-public abstract class AbstractDeactivateAction<TargetT> implements
-    WorkflowAction<TargetT, DeactivateWorkflowError> {
+public abstract class AbstractDeactivateAction<T> implements
+    WorkflowAction<T, DeactivateWorkflowError> {
 
   protected DeactivateWorkflowError handleException(DeactivateTargetType deactivateTargetType,
       String identifier,

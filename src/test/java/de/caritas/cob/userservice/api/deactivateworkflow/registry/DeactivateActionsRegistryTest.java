@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
 @ExtendWith(MockitoExtension.class)
-public class DeactivateActionsRegistryTest {
+class DeactivateActionsRegistryTest {
 
   @InjectMocks
   private DeactivateActionsRegistry deactivateActionsRegistry;

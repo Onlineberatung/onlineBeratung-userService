@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class DeactivateAnonymousUserSchedulerTest {
+class DeactivateAnonymousUserSchedulerTest {
 
   @InjectMocks
   private DeactivateAnonymousUserScheduler deactivateAnonymousUserScheduler;
@@ -20,7 +20,7 @@ public class DeactivateAnonymousUserSchedulerTest {
   private DeactivateAnonymousUserService deactivateAnonymousUserService;
 
   @Test
-  public void performDeactivationWorkflow_Should_useService() {
+  void performDeactivationWorkflow_Should_useService() {
     this.deactivateAnonymousUserScheduler.performDeactivationWorkflow();
 
     verify(this.deactivateAnonymousUserService, times(1)).deactivateStaleAnonymousUsers();

@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
-public class DeactivateSessionActionTest {
+class DeactivateSessionActionTest {
 
   @InjectMocks
   private DeactivateSessionAction deactivateSessionAction;
@@ -47,7 +47,7 @@ public class DeactivateSessionActionTest {
   }
 
   @Test
-  public void execute_Should_returnEmptyList_When_deactivationOfSessionIsSuccessful() {
+  void execute_Should_returnEmptyList_When_deactivationOfSessionIsSuccessful() {
     Session mockedSession = mock(Session.class);
 
     var workflowErrors = this.deactivateSessionAction.execute(mockedSession);
@@ -59,7 +59,7 @@ public class DeactivateSessionActionTest {
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deactivationFails() {
+  void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deactivationFails() {
     doThrow(new RuntimeException()).when(this.sessionService).saveSession(any());
 
     Session mockedSession = mock(Session.class);

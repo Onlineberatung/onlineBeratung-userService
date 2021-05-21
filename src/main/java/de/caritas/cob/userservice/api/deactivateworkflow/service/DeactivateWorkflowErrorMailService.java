@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.ErrorMailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +36,7 @@ public class DeactivateWorkflowErrorMailService {
    */
   public void buildAndSendErrorMail(List<? extends WorkflowError<?, ?>> workflowErrors) {
     if (isNotEmpty(workflowErrors)) {
-      ErrorMailDTO errorMailDTO = new ErrorMailDTO()
+      var errorMailDTO = new ErrorMailDTO()
           .template(TEMPLATE_FREE_TEXT)
           .templateData(asList(
               new TemplateDataDTO().key("subject").value("Deletion workflow errors"),
@@ -47,28 +48,22 @@ public class DeactivateWorkflowErrorMailService {
   }
 
   private String convertErrorsToHtmlText(List<? extends WorkflowError<?, ?>> workflowErrors) {
-    StringBuilder stringBuilder = new StringBuilder()
-        .append("<h2>")
-        .append("(")
-        .append(workflowErrors.size())
-        .append(") ")
-        .append("Errors during deletion workflow:</h2>");
+    var title = String.format(
+        "<h2>(%s) Errors during deactivate workflow:</h2>", workflowErrors.size());
 
-    workflowErrors.forEach(workflowError ->
-        stringBuilder.append("<li>")
-            .append("SourceType = ")
-            .append(workflowError.getSourceType())
-            .append("</li><li>TargetType = ")
-            .append(workflowError.getTargetType())
-            .append("</li><li>Identifier = ")
-            .append(workflowError.getIdentifier())
-            .append("</li><li>Reason = ")
-            .append(workflowError.getReason())
-            .append("</li><li>Timestamp = ")
-            .append(workflowError.getTimestamp())
-            .append("</li><hr>"));
+    var body = workflowErrors.stream()
+        .map(workflowError ->
+            buildItemOutput("SourceType", workflowError.getSourceType())
+                + buildItemOutput("TargetType", workflowError.getTargetType())
+                + buildItemOutput("Identifier", workflowError.getIdentifier())
+                + buildItemOutput("Reason", workflowError.getReason())
+                + buildItemOutput("Timestamp", workflowError.getTimestamp())
+        ).collect(Collectors.joining("<hr>"));
 
-    return stringBuilder.toString();
+    return title + body;
   }
 
+  private String buildItemOutput(String itemName, Object itemValue) {
+    return String.format("<li>%s = %s</li>", itemName, itemValue);
+  }
 }
