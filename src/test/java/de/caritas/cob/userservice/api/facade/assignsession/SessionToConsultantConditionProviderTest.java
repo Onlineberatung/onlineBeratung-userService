@@ -260,7 +260,7 @@ public class SessionToConsultantConditionProviderTest {
     ConsultantAgency otherConsultantAgency = mock(ConsultantAgency.class);
     whenAgencyServiceReturnsDTOForId(otherConsultantAgency, 2L, otherAgencyDTO);
 
-    consultant.setConsultantAgencies(asSet(u25ConsultantAgency, otherConsultantAgency));
+    consultant.setConsultantAgencies(asSet(otherConsultantAgency, u25ConsultantAgency));
 
     boolean result = sessionToConsultantConditionProvider
         .isSessionsConsultingTypeNotAvailableForConsultant(consultant, session);
