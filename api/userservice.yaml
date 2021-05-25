@@ -1278,6 +1278,9 @@ components:
         registrationType:
           type: string
           example: ANONYMOUS
+        createDate:
+          type: string
+          example: 2021-05-11T15:29:37
         attachment:
           $ref: '#/components/schemas/SessionAttachmentDTO'
         videoCallMessageDTO:
@@ -1747,7 +1750,7 @@ components:
           example: WCET6GWir78pNMyyD
         chatLink:
           type: string
-          example: http://{baseUrl}}/{consultingTypeName}/GEYDA
+          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     ChatInfoResponseDTO:
       type: object
@@ -1800,7 +1803,7 @@ components:
           example: WCET6GWir78pNMyyD
         chatLink:
           type: string
-          example: http://{baseUrl}}/{consultingTypeName}/GEYDA
+          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     NewRegistrationDto:
       type: object
