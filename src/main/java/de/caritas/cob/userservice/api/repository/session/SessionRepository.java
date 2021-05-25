@@ -197,4 +197,11 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * Find all sessions by a given {@link SessionStatus}.
    */
   List<Session> findByStatus(SessionStatus status);
+
+  /**
+   * Find all sessions by a given {@link SessionStatus} and {@link RegistrationType}.
+   */
+  List<Session> findByStatusAndRegistrationType(
+      SessionStatus status,
+      RegistrationType registrationType);
 }
