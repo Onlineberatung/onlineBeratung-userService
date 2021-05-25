@@ -13,6 +13,8 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -63,6 +65,9 @@ public class MissingRocketChatRoomForConsultantViolationReportRule implements Vi
           .build();
     }
     List<UserRoomDTO> rooms = userInfoWithRooms.getUser().getRooms();
+    if (rooms == null) {
+      rooms = new ArrayList<UserRoomDTO>(0);
+    }
     List<String> rocketChatRoomsOfUser = rooms.stream()
         .map(UserRoomDTO::getRoomId)
         .collect(Collectors.toList());
