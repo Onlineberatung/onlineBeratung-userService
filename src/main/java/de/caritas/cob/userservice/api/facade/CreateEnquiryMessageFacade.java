@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 
@@ -29,10 +30,10 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Objects;
@@ -167,7 +168,9 @@ public class CreateEnquiryMessageFacade {
 
     try {
       addSystemUserToGroup(rcGroupId);
-      addConsultantsToGroup(rcGroupId, agencyList);
+      if (!ANONYMOUS.equals(session.getRegistrationType())) {
+        addConsultantsToGroup(rcGroupId, agencyList);
+      }
       rocketChatService.removeSystemMessages(rcGroupId,
           nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
 

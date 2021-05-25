@@ -54,7 +54,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -148,8 +147,8 @@ public class  UserController implements UsersApi {
       @RequestHeader String rcToken, @RequestHeader String rcUserId,
       @Valid @RequestBody NewRegistrationDto newRegistrationDto) {
 
-    User user = this.userAccountProvider.retrieveValidatedUser();
-    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+    var user = this.userAccountProvider.retrieveValidatedUser();
+    var rocketChatCredentials = RocketChatCredentials.builder()
         .rocketChatToken(rcToken)
         .rocketChatUserId(rcUserId)
         .build();
@@ -182,7 +181,7 @@ public class  UserController implements UsersApi {
     }
 
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
-    this.assignEnquiryFacade.assignEnquiry(session.get(), consultant);
+    this.assignEnquiryFacade.assignRegisteredEnquiry(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -199,8 +198,8 @@ public class  UserController implements UsersApi {
       @RequestHeader String rcToken, @RequestHeader String rcUserId,
       @RequestBody EnquiryMessageDTO enquiryMessage) {
 
-    User user = this.userAccountProvider.retrieveValidatedUser();
-    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+    var user = this.userAccountProvider.retrieveValidatedUser();
+    var rocketChatCredentials = RocketChatCredentials.builder()
         .rocketChatToken(rcToken)
         .rocketChatUserId(rcUserId)
         .build();
@@ -221,8 +220,8 @@ public class  UserController implements UsersApi {
   public ResponseEntity<UserSessionListResponseDTO> getSessionsForAuthenticatedUser(
       @RequestHeader String rcToken) {
 
-    User user = this.userAccountProvider.retrieveValidatedUser();
-    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+    var user = this.userAccountProvider.retrieveValidatedUser();
+    var rocketChatCredentials = RocketChatCredentials.builder()
         .rocketChatUserId(user.getRcUserId())
         .rocketChatToken(rcToken)
         .build();
@@ -243,7 +242,7 @@ public class  UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateAbsence(@RequestBody AbsenceDTO absence) {
-    Consultant consultant = userAccountProvider.retrieveValidatedConsultant();
+    var consultant = userAccountProvider.retrieveValidatedConsultant();
     this.consultantDataFacade.updateConsultantAbsent(consultant, absence);
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -293,13 +292,13 @@ public class  UserController implements UsersApi {
       @RequestParam String filter,
       @RequestParam Integer status) {
 
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
     ConsultantSessionListResponseDTO consultantSessionListResponseDTO = null;
     Optional<SessionFilter> optionalSessionFilter = SessionFilter.getByValue(filter);
     if (optionalSessionFilter.isPresent()) {
 
-      SessionListQueryParameter sessionListQueryParameter = SessionListQueryParameter.builder()
+      var sessionListQueryParameter = SessionListQueryParameter.builder()
           .sessionStatus(status).count(count).offset(offset)
           .sessionFilter(optionalSessionFilter.get())
           .build();
@@ -331,13 +330,13 @@ public class  UserController implements UsersApi {
       @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
       @RequestParam String filter) {
 
-    Consultant consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
+    var consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
 
     ConsultantSessionListResponseDTO teamSessionListDTO = null;
     Optional<SessionFilter> optionalSessionFilter = SessionFilter.getByValue(filter);
     if (optionalSessionFilter.isPresent()) {
 
-      SessionListQueryParameter sessionListQueryParameter = SessionListQueryParameter.builder()
+      var sessionListQueryParameter = SessionListQueryParameter.builder()
           .count(count).offset(offset).sessionFilter(optionalSessionFilter.get())
           .build();
 
@@ -437,7 +436,7 @@ public class  UserController implements UsersApi {
 
     // Check if session exists
     Optional<Session> session = sessionService.getSession(sessionId);
-    if (!session.isPresent()) {
+    if (session.isEmpty()) {
       LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -527,7 +526,7 @@ public class  UserController implements UsersApi {
 
     Optional<Session> session = sessionService.getSession(sessionId);
 
-    if (!session.isPresent()) {
+    if (session.isEmpty()) {
       LogService.logInternalServerError(String.format("Session with id %s not found.", sessionId));
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -597,7 +596,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<CreateChatResponseDTO> createChat(@RequestBody ChatDTO chatDTO) {
 
-    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
     // Create chat and return chat link
     CreateChatResponseDTO response = createChatFacade.createChat(chatDTO, callingConsultant);
 
@@ -613,11 +612,11 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> startChat(@PathVariable Long chatId) {
 
-    Chat chat = chatService.getChat(chatId)
+    var chat = chatService.getChat(chatId)
         .orElseThrow(() -> new BadRequestException(
             String.format("Chat with id %s not found for starting chat.", chatId)));
 
-    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
     startChatFacade.startChat(chat, callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -661,11 +660,11 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> stopChat(@PathVariable Long chatId) {
 
-    Chat chat = chatService.getChat(chatId)
+    var chat = chatService.getChat(chatId)
         .orElseThrow(() -> new BadRequestException(
             String.format("Chat with id %s not found while trying to stop the chat.", chatId)));
 
-    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
     stopChatFacade.stopChat(chat, callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -680,7 +679,7 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<ChatMembersResponseDTO> getChatMembers(@PathVariable Long chatId) {
 
-    ChatMembersResponseDTO chatMembersResponseDTO = getChatMembersFacade.getChatMembers(chatId);
+    var chatMembersResponseDTO = getChatMembersFacade.getChatMembers(chatId);
 
     return new ResponseEntity<>(chatMembersResponseDTO, HttpStatus.OK);
   }
@@ -710,7 +709,7 @@ public class  UserController implements UsersApi {
   public ResponseEntity<UpdateChatResponseDTO> updateChat(@PathVariable Long chatId,
       @RequestBody ChatDTO chatDTO) {
 
-    UpdateChatResponseDTO updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
+    var updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
         authenticatedUser);
     return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
   }
@@ -725,8 +724,8 @@ public class  UserController implements UsersApi {
   public ResponseEntity<ConsultantSessionDTO> fetchSessionForConsultant(
       @PathVariable Long sessionId) {
 
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
-    ConsultantSessionDTO consultantSessionDTO = sessionService
+    var consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var consultantSessionDTO = sessionService
         .fetchSessionForConsultant(sessionId, consultant);
     return new ResponseEntity<>(consultantSessionDTO, HttpStatus.OK);
   }

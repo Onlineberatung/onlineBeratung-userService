@@ -775,7 +775,7 @@ public class UserControllerIT {
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
     doThrow(new ConflictException("")).when(assignEnquiryFacade)
-        .assignEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
+        .assignRegisteredEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
