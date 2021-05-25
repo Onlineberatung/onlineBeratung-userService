@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSCONVERSATIONFINISHED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSENQUIRYACCEPTED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.NEWANONYMOUSENQUIRY;
@@ -142,4 +143,20 @@ public class LiveEventNotificationService {
       });
     }
   }
+
+  /**
+   * Sends a anonymous conversation finished live event to the provided user IDs.
+   *
+   * @param userIds   list of consultant user IDs
+   */
+  public void sendLiveFinishedAnonymousConversationToUsers(List<String> userIds) {
+    if (isNotEmpty(userIds)) {
+      var liveEventMessage = new LiveEventMessage()
+          .eventType(ANONYMOUSCONVERSATIONFINISHED)
+          .userIds(userIds);
+
+      sendLiveEventMessage(liveEventMessage);
+    }
+  }
+
 }

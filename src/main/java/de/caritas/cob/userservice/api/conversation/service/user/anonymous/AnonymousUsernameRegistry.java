@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service.user.anonymous;
+package de.caritas.cob.userservice.api.conversation.service.user.anonymous;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.sort;

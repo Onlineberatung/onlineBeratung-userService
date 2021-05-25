@@ -10,7 +10,7 @@ import static java.util.Collections.singletonList;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUsernameRegistry;
+import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

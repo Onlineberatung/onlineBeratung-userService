@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service.user.anonymous;
+package de.caritas.cob.userservice.api.conversation.service.user.anonymous;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;

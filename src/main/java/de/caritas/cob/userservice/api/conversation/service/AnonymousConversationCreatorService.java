@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service.conversation.anonymous;
+package de.caritas.cob.userservice.api.conversation.service;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;

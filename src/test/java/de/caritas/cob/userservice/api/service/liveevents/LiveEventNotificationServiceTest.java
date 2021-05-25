@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
 
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSCONVERSATIONFINISHED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSENQUIRYACCEPTED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static java.util.Arrays.asList;
@@ -226,6 +227,30 @@ public class LiveEventNotificationServiceTest {
 
     verify(this.liveControllerApi, times(1)).sendLiveEvent(
         new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED)
+            .userIds(singletonList("userId")));
+  }
+
+  @Test
+  public void sendLiveFinishedAnonymousConversationToUsers_Should_doNothing_When_userIdIsNull() {
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(null);
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendLiveFinishedAnonymousConversationToUsers_Should_doNothing_When_userIdIsEmpty() {
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(emptyList());
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendLiveFinishedAnonymousConversationToUsers_Should_triggerLiveEvent_When_userIdIsValid() {
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(singletonList(
+        "userId"));
+
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(
+        new LiveEventMessage().eventType(ANONYMOUSCONVERSATIONFINISHED)
             .userIds(singletonList("userId")));
   }
 }

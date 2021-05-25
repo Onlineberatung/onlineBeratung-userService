@@ -14,7 +14,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.service.user.UserService;
-import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUsernameRegistry;
+import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;

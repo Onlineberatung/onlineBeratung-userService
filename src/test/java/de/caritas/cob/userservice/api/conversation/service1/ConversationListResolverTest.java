@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.conversation.service;
+package de.caritas.cob.userservice.api.conversation.service1;
 
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.conversation.provider.ConversationListProvider;
 import de.caritas.cob.userservice.api.conversation.registry.ConversationListProviderRegistry;
+import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -23,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ConversationListResolverTest {
+class ConversationListResolverTest {
 
   @InjectMocks
   private ConversationListResolver conversationListResolver;
@@ -38,7 +39,7 @@ public class ConversationListResolverTest {
   private ConversationListProvider conversationListProvider;
 
   @Test
-  public void resolveConversations_Should_returnExpectedResponse_When_paramsAreValid() {
+  void resolveConversations_Should_returnExpectedResponse_When_paramsAreValid() {
     whenConversationListProviderReturnsAnonymousResponseSessions(
         List.of(mock(ConsultantSessionResponseDTO.class)));
 
@@ -58,7 +59,7 @@ public class ConversationListResolverTest {
 
   @ParameterizedTest
   @NullAndEmptySource
-  public void resolveConversations_Should_throwException_When_noSessionsAreFound(List<ConsultantSessionResponseDTO> emptySessions) {
+  void resolveConversations_Should_throwException_When_noSessionsAreFound(List<ConsultantSessionResponseDTO> emptySessions) {
     whenConversationListProviderReturnsAnonymousResponseSessions(emptySessions);
 
     assertThrows(NoContentException.class, () -> {

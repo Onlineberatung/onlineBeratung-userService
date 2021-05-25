@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.facade.conversation;
+package de.caritas.cob.userservice.api.conversation.facade;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -7,9 +7,9 @@ import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.conversation.anonymous.AnonymousConversationCreatorService;
-import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUserCreatorService;
-import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUsernameRegistry;
+import de.caritas.cob.userservice.api.conversation.service.AnonymousConversationCreatorService;
+import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUserCreatorService;
+import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
