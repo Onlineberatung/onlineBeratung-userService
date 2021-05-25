@@ -40,7 +40,10 @@ import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegis
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
-import de.caritas.cob.userservice.testHelper.ExtendedConsultingTypeResponseDTOHelper;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -92,22 +95,36 @@ public class SessionDataProviderTest {
           .state(STATE_VALUE);
   private final SessionDataDTO EMPTY_SESSION_DATA_DTO =
       new SessionDataDTO();
-  private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
-      new SessionDataInitializing(true, true, true, true, true);
+  private final SessionDataInitializingDTO SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
+      new SessionDataInitializingDTO().addictiveDrugs(true).age(true).gender(true).relation(true)
+          .relation(true).state(true);
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_SUCHT, null, false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS, true, null, false, null, false,
-              null, null);
-  private final SessionDataInitializing SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS =
-      new SessionDataInitializing(false, false, false, false, false);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug(null)
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
+  private final SessionDataInitializingDTO SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS =
+      new SessionDataInitializingDTO().addictiveDrugs(false).age(false).gender(false).relation(false)
+          .relation(false).state(false);
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
-      ExtendedConsultingTypeResponseDTOHelper
-          .createExtendedConsultingTypeResponseDTO(CONSULTING_TYPE_ID_U25, null, false, false,
-              false, false, null, false, false,
-              SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS, true, null, false, null, false,
-              null, null);
+      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug(null)
+          .excludeNonMainConsultantsFromTeamSessions(false)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true)
+              .monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(null)
+          .languageFormal(false).roles(null).registration(null);
 
   @Before
   public void setup() {
