@@ -178,7 +178,8 @@ class DeactivateAnonymousUserServiceTest {
     var deactivateSessionAction = mock(DeactivateSessionActionCommand.class);
     var setRocketChatRoomReadOnlyAction = mock(SetRocketChatRoomReadOnlyActionCommand.class);
     when(this.actionsRegistry.buildContainerForType(Session.class))
-        .thenReturn(new ActionContainer<>(Set.of(deactivateSessionAction, setRocketChatRoomReadOnlyAction)));
+        .thenReturn(new ActionContainer<>(
+            Set.of(deactivateSessionAction, setRocketChatRoomReadOnlyAction)));
 
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
@@ -188,8 +189,8 @@ class DeactivateAnonymousUserServiceTest {
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verify(deactivateUserAction, times(1)).execute(user);
     user.getSessions().forEach(session -> {
-        verify(deactivateSessionAction, times(1)).execute(session);
-        verify(setRocketChatRoomReadOnlyAction, times(1)).execute(session);
+      verify(deactivateSessionAction, times(1)).execute(session);
+      verify(setRocketChatRoomReadOnlyAction, times(1)).execute(session);
     });
   }
 

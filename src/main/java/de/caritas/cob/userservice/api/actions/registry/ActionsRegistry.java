@@ -38,10 +38,10 @@ public class ActionsRegistry {
             .collect(Collectors.toUnmodifiableList()));
   }
 
-  private <T> boolean byClassType(ActionCommand<T> actionCommand, Class<T> tClass) {
+  private <T> boolean byClassType(ActionCommand<T> actionCommand, Class<T> type) {
     return Arrays.stream(actionCommand.getClass().getGenericInterfaces())
         .map(Type::getTypeName)
-        .anyMatch(type -> type.contains(tClass.getTypeName()));
+        .anyMatch(typeName -> typeName.contains(type.getTypeName()));
   }
 
 }
