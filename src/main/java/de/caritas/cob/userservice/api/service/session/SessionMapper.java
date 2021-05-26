@@ -62,12 +62,13 @@ public class SessionMapper {
         .messageDate(toUnixTime(session.getEnquiryMessageDate()))
         .isTeamSession(session.isTeamSession())
         .monitoring(session.isMonitoring())
-        .registrationType(session.getRegistrationType().name());
+        .registrationType(session.getRegistrationType().name())
+        .createDate(String.valueOf(session.getCreateDate()));
   }
 
   private SessionUserDTO convertToSessionUserDTO(Session session) {
     if (nonNull(session.getUser()) && nonNull(session.getSessionData())) {
-      SessionUserDTO sessionUserDto = new SessionUserDTO();
+      var sessionUserDto = new SessionUserDTO();
       sessionUserDto
           .setUsername(new UsernameTranscoder().decodeUsername(session.getUser().getUsername()));
       sessionUserDto.setSessionData(buildSessionDataMapFromSession(session));

@@ -35,10 +35,13 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -46,7 +49,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
@@ -65,6 +69,7 @@ import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
@@ -79,7 +84,9 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import java.util.Set;
 import javax.servlet.http.Cookie;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -204,12 +211,15 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
-          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
-          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-          Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-          Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
+          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void registerNewConsultingType_Should_ReturnForbiddenAndCallNoMethods_WhenNoAskerDefaultAuthority()
       throws Exception {
 
@@ -221,7 +231,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void registerNewConsultingType_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -247,13 +257,16 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.USER_ADMIN})
   public void getOpenSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -265,7 +278,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getOpenSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -294,12 +307,15 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getEnquiriesForAgency_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -312,7 +328,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getEnquiriesForAgency_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -337,12 +353,15 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void acceptEnquiry_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -354,7 +373,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void acceptEnquiry_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -382,12 +401,15 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
-          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
-          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-          Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-          Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
+          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void createEnquiryMessage_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserDefaultAuthority()
       throws Exception {
 
@@ -400,7 +422,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void createEnquiryMessage_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -428,12 +450,15 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT, Authority.CONSULTANT_DEFAULT,
-          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
-          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-          Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-          Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
+          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getSessionsForAuthenticatedUser_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserDefaultAuthority()
       throws Exception {
 
@@ -445,7 +470,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getSessionsForAuthenticatedUser_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -472,12 +497,15 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateAbsence_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -489,7 +517,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateAbsence_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -515,12 +543,15 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -532,7 +563,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -542,10 +573,6 @@ public class UserControllerAuthorizationIT {
 
     verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
-
-  /**
-   * GET on /users/data (role: consultant/user)
-   */
 
   @Test
   public void getUserData_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
@@ -559,12 +586,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
-      Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getUserData_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserDefaultAuthorityOrConsultantDefaultAuthority()
       throws Exception {
 
@@ -576,7 +605,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT, Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.USER_DEFAULT})
   public void getUserData_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -602,12 +631,15 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getTeamSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -619,7 +651,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getTeamSessionsForAuthenticatedConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -647,12 +679,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
-      Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void sendNewMessageNotification_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserDefaultAuthorityOrConsultantDefaultAuthority()
       throws Exception {
 
@@ -665,7 +699,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void sendNewMessageNotification_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -692,13 +726,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CONSULTANT_DEFAULT, Authority.USER_DEFAULT, Authority.START_CHAT,
-      Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.USER_DEFAULT, AuthorityValue.START_CHAT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void importConsultants_Should_ReturnForbiddenAndCallNoMethods_WhenNoTechnicalDefaultAuthority()
       throws Exception {
 
@@ -711,7 +745,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.TECHNICAL_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.TECHNICAL_DEFAULT})
   public void importConsultants_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -736,13 +770,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.TECHNICAL_DEFAULT, Authority.USER_DEFAULT, Authority.START_CHAT,
-      Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.USER_DEFAULT, AuthorityValue.START_CHAT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -754,7 +788,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -779,13 +813,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.TECHNICAL_DEFAULT, Authority.USER_DEFAULT, Authority.START_CHAT,
-      Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.USER_DEFAULT, AuthorityValue.START_CHAT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -797,7 +831,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -823,13 +857,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CONSULTANT_DEFAULT, Authority.USER_DEFAULT, Authority.START_CHAT,
-      Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.USER_DEFAULT, AuthorityValue.START_CHAT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void importAskers_Should_ReturnForbiddenAndCallNoMethods_WhenNoTechnicalDefaultAuthority()
       throws Exception {
 
@@ -841,7 +875,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.TECHNICAL_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.TECHNICAL_DEFAULT})
   public void importAskers_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -867,13 +901,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CONSULTANT_DEFAULT, Authority.CONSULTANT_DEFAULT, Authority.START_CHAT,
-      Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void importAskersWithoutSession_Should_ReturnForbiddenAndCallNoMethods_WhenNoTechnicalDefaultAuthority()
       throws Exception {
 
@@ -885,7 +920,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.TECHNICAL_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.TECHNICAL_DEFAULT})
   public void importAskersWithoutSession_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -914,12 +949,15 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getConsultants_Should_ReturnForbiddenAndCallNoMethods_WhenNoViewAgencyConsultantsAuthority()
       throws Exception {
 
@@ -931,7 +969,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.VIEW_AGENCY_CONSULTANTS})
+  @WithMockUser(authorities = {AuthorityValue.VIEW_AGENCY_CONSULTANTS})
   public void getConsultants_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -957,7 +995,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_ENQUIRY})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY})
   public void assignSession_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -982,12 +1020,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.USE_FEEDBACK,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.TECHNICAL_DEFAULT, Authority.START_CHAT, Authority.CREATE_NEW_CHAT,
-      Authority.STOP_CHAT, Authority.UPDATE_CHAT, Authority.VIEW_ALL_FEEDBACK_SESSIONS,
-      Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.USER_ADMIN})
   public void updatePassword_Should_ReturnForbiddenAndCallNoMethods_WhenNoDefaultConsultantOrDefaultUserAuthority()
       throws Exception {
 
@@ -999,8 +1039,8 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT})
   public void updatePassword_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -1027,12 +1067,15 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          Authority.USE_FEEDBACK, Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT,
-          Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS, Authority.START_CHAT,
-          Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-          Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-          Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.USER_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
+          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateKey_Should_ReturnForbiddenAndCallNoMethods_WhenNoTechnicalDefaultAuthority()
       throws Exception {
 
@@ -1044,7 +1087,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.TECHNICAL_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.TECHNICAL_DEFAULT})
   public void updateKey_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
 
     mvc.perform(post(PATH_UPDATE_KEY).contentType(MediaType.APPLICATION_JSON)
@@ -1070,13 +1113,16 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.USER_DEFAULT,
-      Authority.TECHNICAL_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS,
-      Authority.VIEW_ALL_PEER_SESSIONS, Authority.CONSULTANT_DEFAULT, Authority.START_CHAT,
-      Authority.STOP_CHAT, Authority.UPDATE_CHAT, Authority.VIEW_ALL_FEEDBACK_SESSIONS,
-      Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.CONSULTANT_DEFAULT,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.USER_ADMIN})
   public void createChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCreateNewChatAuthority()
       throws Exception {
 
@@ -1089,7 +1135,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CREATE_NEW_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.CREATE_NEW_CHAT})
   public void createChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -1101,7 +1147,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CREATE_NEW_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.CREATE_NEW_CHAT})
   public void createChat_Should_ReturnBadRequest_WhenProperlyAuthorized() throws Exception {
 
     mvc.perform(post(PATH_POST_CHAT_NEW).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1127,13 +1173,16 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.USER_DEFAULT,
-      Authority.TECHNICAL_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS,
-      Authority.VIEW_ALL_PEER_SESSIONS, Authority.CONSULTANT_DEFAULT, Authority.CREATE_NEW_CHAT,
-      Authority.STOP_CHAT, Authority.UPDATE_CHAT, Authority.VIEW_ALL_FEEDBACK_SESSIONS,
-      Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.CONSULTANT_DEFAULT,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.USER_ADMIN})
   public void startChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoStartChatAuthority()
       throws Exception {
 
@@ -1148,7 +1197,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.START_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.START_CHAT})
   public void startChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_START).contentType(MediaType.APPLICATION_JSON)
@@ -1161,7 +1210,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.START_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.START_CHAT})
   public void startChat_Should_ReturnBadRequest_WhenProperlyAuthorized() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_START).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1188,12 +1237,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void joinChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
@@ -1209,7 +1260,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void joinChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
 
     mvc.perform(put(PATH_PUT_JOIN_CHAT).contentType(MediaType.APPLICATION_JSON)
@@ -1223,7 +1274,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void joinChat_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(put(PATH_PUT_JOIN_CHAT).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1232,7 +1283,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void joinChat_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(put(PATH_PUT_JOIN_CHAT).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1260,12 +1311,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
@@ -1281,7 +1334,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT).contentType(MediaType.APPLICATION_JSON)
@@ -1295,7 +1348,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getChat_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1304,7 +1357,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getChat_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1329,13 +1382,16 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.USER_DEFAULT,
-      Authority.TECHNICAL_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS,
-      Authority.VIEW_ALL_PEER_SESSIONS, Authority.CONSULTANT_DEFAULT, Authority.CREATE_NEW_CHAT,
-      Authority.START_CHAT, Authority.UPDATE_CHAT, Authority.VIEW_ALL_FEEDBACK_SESSIONS,
-      Authority.ASSIGN_CONSULTANT_TO_SESSION, Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.CONSULTANT_DEFAULT,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.START_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.USER_ADMIN})
   public void stopChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoStopChatAuthority()
       throws Exception {
 
@@ -1349,7 +1405,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.STOP_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.STOP_CHAT})
   public void stopChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).contentType(MediaType.APPLICATION_JSON)
@@ -1361,7 +1417,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.STOP_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.STOP_CHAT})
   public void stopChat_Should_ReturnBadRequest_WhenProperlyAuthorized() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1390,12 +1446,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getChatMembers_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
@@ -1413,7 +1471,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getChatMembers_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -1430,7 +1488,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getChatMembers_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT_MEMBERS).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1439,7 +1497,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getChatMembers_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT_MEMBERS).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1466,12 +1524,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void leaveChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
@@ -1487,7 +1547,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void leaveChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
 
     mvc.perform(put(PATH_PUT_LEAVE_CHAT).contentType(MediaType.APPLICATION_JSON)
@@ -1501,7 +1561,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void leaveChat_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(put(PATH_PUT_LEAVE_CHAT).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1510,7 +1570,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void leaveChat_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(put(PATH_PUT_LEAVE_CHAT).cookie(csrfCookie).header(CSRF_HEADER, CSRF_VALUE)
@@ -1533,12 +1593,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
@@ -1550,7 +1611,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.UPDATE_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.UPDATE_CHAT})
   public void updateChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken() throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_CHAT).contentType(MediaType.APPLICATION_JSON)
@@ -1560,7 +1621,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.UPDATE_CHAT})
+  @WithMockUser(authorities = {AuthorityValue.UPDATE_CHAT})
   public void updateChat_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
       throws Exception {
 
@@ -1585,12 +1646,15 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.USER_DEFAULT, Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.START_CHAT, Authority.CREATE_NEW_CHAT, Authority.STOP_CHAT, Authority.UPDATE_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void fetchSessionForConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
       throws Exception {
 
@@ -1602,7 +1666,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void fetchSessionForConsultant_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
       throws Exception {
 
@@ -1628,12 +1692,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
@@ -1648,7 +1713,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void updateEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
       throws Exception {
 
@@ -1661,7 +1726,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void updateEmailAddress_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
       throws Exception {
 
@@ -1689,12 +1754,14 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN, Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN,
+      AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivateAndFlagUserAccountForDeletion_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserAuthority()
       throws Exception {
 
@@ -1709,7 +1776,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void deactivateAndFlagUserAccountForDeletion_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
       throws Exception {
 
@@ -1722,7 +1789,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void deactivateAndFlagUserAccountForDeletion_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
       throws Exception {
 
@@ -1751,12 +1818,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateMobileToken_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
@@ -1771,7 +1839,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void updateMobileToken_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
       throws Exception {
 
@@ -1784,7 +1852,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void updateMobileToken_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
       throws Exception {
 
@@ -1812,12 +1880,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateSessionData_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
@@ -1831,7 +1900,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void updateSessionData_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
@@ -1843,7 +1912,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void updateSessionData_Should_ReturnOK_When_ProperlyAuthorizedWithUserAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
@@ -1869,12 +1938,13 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void updateUserData_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_GET_USER_DATA)
@@ -1888,7 +1958,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void updateUserData_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(put(PATH_GET_USER_DATA)
@@ -1900,7 +1970,7 @@ public class UserControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateUserData_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_GET_USER_DATA)
@@ -1914,6 +1984,39 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(this.consultantDataFacade, times(1)).updateConsultantData(any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ANONYMOUS_DEFAULT})
+  public void getUserData_Should_ReturnOK_When_AnonymousAuthority() throws Exception {
+
+    when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
+    when(this.validatedUserAccountProvider.retrieveValidatedUser())
+        .thenReturn(new EasyRandom().nextObject(User.class));
+
+    mvc.perform(get(PATH_GET_USER_DATA)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ANONYMOUS_DEFAULT})
+  public void getAskerSessions_Should_ReturnNoContent_When_AnonymousAuthority() throws Exception {
+
+    when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
+    when(this.validatedUserAccountProvider.retrieveValidatedUser())
+        .thenReturn(new EasyRandom().nextObject(User.class));
+
+    mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
   }
 
 }

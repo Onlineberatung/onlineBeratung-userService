@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
@@ -70,7 +70,7 @@ public class ConversationControllerAuthorizationIT {
   private UsernameTranscoder usernameTranscoder;
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getAnonymousEnquiries_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
@@ -100,12 +100,12 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getAnonymousEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
@@ -119,7 +119,7 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getAnonymousEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
@@ -131,7 +131,7 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getRegisteredEnquiries_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
@@ -161,12 +161,12 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void getRegisteredEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
@@ -180,7 +180,7 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getRegisteredEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
@@ -192,7 +192,7 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.CONSULTANT_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void acceptAnonymousEnquirys_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
@@ -215,12 +215,12 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
-      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
-      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
-      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
-      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void acceptAnonymousEnquiry_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
@@ -232,7 +232,7 @@ public class ConversationControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {Authority.USER_DEFAULT})
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void acceptAnonymousEnquiry_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH))

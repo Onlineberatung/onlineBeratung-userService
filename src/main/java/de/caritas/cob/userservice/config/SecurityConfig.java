@@ -1,6 +1,10 @@
 package de.caritas.cob.userservice.config;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.CONSULTANT_DEFAULT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.USER_DEFAULT;
+
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.filter.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
@@ -58,15 +62,19 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers("/users/askers/new", "/conversations/askers/anonymous/new")
         .permitAll()
-        .antMatchers("/users/data", "/users/email", "/users/mails/messages/new",
+        .antMatchers("/users/data")
+        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers("/users/sessions/askers")
+        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT)
+        .antMatchers("/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
             "/users/chat/{chatId:[0-9]+}/join", "/users/chat/{chatId:[0-9]+}/members",
             "/users/chat/{chatId:[0-9]+}/leave")
-        .hasAnyAuthority(Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT)
-        .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new", "/users/sessions/askers",
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
+        .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
             "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken",
             "/users/sessions/{sessionId:[0-9]+}/data")
-        .hasAuthority(Authority.USER_DEFAULT)
+        .hasAuthority(AuthorityValue.USER_DEFAULT)
         .antMatchers("/users/sessions/open", "/users/sessions/consultants/new",
             "/users/sessions/new/{sessionId:[0-9]+}", "/users/consultants/absences",
             "/users/sessions/consultants", "/users/sessions/teams",
@@ -74,28 +82,29 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/{sessionId:[0-9]+}/monitoring",
             "/conversations/askers/anonymous/{sessionId:[0-9]+}/accept",
             "/conversations/consultants/**")
-        .hasAuthority(Authority.CONSULTANT_DEFAULT)
+        .hasAuthority(AuthorityValue.CONSULTANT_DEFAULT)
         .antMatchers("/conversations/anonymous/{sessionId:[0-9]+}/finish")
         .hasAnyAuthority(Authority.CONSULTANT_DEFAULT, Authority.ANONYMOUS_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/consultant/{consultantId:[0-9A-Za-z-]+}")
-        .hasAnyAuthority(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY,
-            Authority.ASSIGN_CONSULTANT_TO_SESSION)
-        .antMatchers("/users/consultants").hasAuthority(Authority.VIEW_AGENCY_CONSULTANTS)
+        .hasAnyAuthority(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+            AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+        .antMatchers("/users/consultants").hasAuthority(AuthorityValue.VIEW_AGENCY_CONSULTANTS)
         .antMatchers("/users/consultants/import", "/users/askers/import",
             "/users/askersWithoutSession/import")
-        .hasAuthority(Authority.TECHNICAL_DEFAULT)
+        .hasAuthority(AuthorityValue.TECHNICAL_DEFAULT)
         .antMatchers("/liveproxy/send")
-        .hasAnyAuthority(Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT)
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
+            ANONYMOUS_DEFAULT)
         .antMatchers("/users/mails/messages/feedback/new")
-        .hasAuthority(Authority.USE_FEEDBACK).antMatchers("/users/messages/key")
-        .hasAuthority(Authority.TECHNICAL_DEFAULT).antMatchers("/users/chat/new")
-        .hasAuthority(Authority.CREATE_NEW_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/start")
-        .hasAuthority(Authority.START_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/stop")
-        .hasAuthority(Authority.STOP_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/update")
-        .hasAuthority(Authority.UPDATE_CHAT).antMatchers("/useradmin", "/useradmin/**")
-        .hasAuthority(Authority.USER_ADMIN)
+        .hasAuthority(AuthorityValue.USE_FEEDBACK).antMatchers("/users/messages/key")
+        .hasAuthority(AuthorityValue.TECHNICAL_DEFAULT).antMatchers("/users/chat/new")
+        .hasAuthority(AuthorityValue.CREATE_NEW_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/start")
+        .hasAuthority(AuthorityValue.START_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/stop")
+        .hasAuthority(AuthorityValue.STOP_CHAT).antMatchers("/users/chat/{chatId:[0-9]+}/update")
+        .hasAuthority(AuthorityValue.UPDATE_CHAT).antMatchers("/useradmin", "/useradmin/**")
+        .hasAuthority(AuthorityValue.USER_ADMIN)
         .antMatchers("/users/consultants/sessions/{sessionId:[0-9]+}")
-        .hasAuthority(Authority.CONSULTANT_DEFAULT).anyRequest().denyAll();
+        .hasAuthority(AuthorityValue.CONSULTANT_DEFAULT).anyRequest().denyAll();
   }
 
   /**

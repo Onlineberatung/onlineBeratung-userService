@@ -4,7 +4,7 @@ import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUser
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.ImportException;
@@ -426,7 +426,7 @@ public class AskerImportService {
           // group that have the right to view all feedback sessions
           for (ConsultantAgency agency : agencyList) {
             if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-                Authority.VIEW_ALL_FEEDBACK_SESSIONS)
+                AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
                 || agency.getConsultant().getId().equals(record.getConsultantId())) {
               rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
                   rcFeedbackGroupId);
@@ -468,7 +468,7 @@ public class AskerImportService {
               // it is a "normal" team session add all consultants.
               if (consultingTypeSettings.isFeedbackChat()) {
                 if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-                    Authority.VIEW_ALL_FEEDBACK_SESSIONS)
+                    AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
                     || agency.getConsultant().getId().equals(record.getConsultantId())) {
                   rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
                       rcGroupId);
