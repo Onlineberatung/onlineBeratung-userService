@@ -15,15 +15,12 @@ DeactivateUserAnonymousScheduler --> DeactivateUserAnonymousService : executes
 state DeactivateUserAnonymousService #lightblue {
   [*] --> CollectStaleAnonymousSessions
   CollectStaleAnonymousSessions --> DeactivateUserActions : executes
-  WorkflowErrors --> WorkflowErrorMailService
 
   state DeactivateUserActions {
-    DeactivateAnonymousUserAction --> WorkflowErrors : collect all errors
+    DeactivateKeycloakUserAction --> DeactivateSessionAction
+    DeactivateSessionAction --> SetRocketChatRoomsToReadOnlyAction
+    SetRocketChatRoomsToReadOnlyAction:
   }
-}
-
-state WorkflowErrorMailService {
-  BuildOneMailContainingAllErrors --> sendToMailService
 }
 
 @enduml
