@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import java.time.LocalDateTime;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 
@@ -20,6 +21,17 @@ public class SessionMapperTest {
     SessionDTO sessionDTO = new SessionMapper().convertToSessionDTO(session);
 
     assertThat(sessionDTO.getRegistrationType(), is("ANONYMOUS"));
+  }
+
+  @Test
+  public void convertToSessionDTO_Should_returnSessionDTOWithCreateDate_When_registrationTypeIsAnonymous() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    LocalDateTime createDate = new EasyRandom().nextObject(LocalDateTime.class);
+    session.setCreateDate(createDate);
+
+    SessionDTO sessionDTO = new SessionMapper().convertToSessionDTO(session);
+
+    assertThat(sessionDTO.getCreateDate(), is(String.valueOf(createDate)));
   }
 
   @Test

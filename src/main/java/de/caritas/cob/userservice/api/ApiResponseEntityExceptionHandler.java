@@ -223,8 +223,6 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({NoContentException.class})
   public ResponseEntity<Object> handleInternal(final NoContentException ex,
       final WebRequest request) {
-    ex.executeLogging();
-
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.NO_CONTENT,
         request);
   }
