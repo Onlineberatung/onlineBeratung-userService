@@ -8,10 +8,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.deactivateworkflow.model.DeactivateWorkflowError;
-import de.caritas.cob.userservice.api.deactivateworkflow.registry.DeactivateActionsRegistry;
-import de.caritas.cob.userservice.api.deactivateworkflow.session.DeactivateSessionAction;
-import de.caritas.cob.userservice.api.deactivateworkflow.user.DeactivateKeycloakUserAction;
+import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
+import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
+import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -46,10 +47,7 @@ class DeactivateAnonymousUserServiceTest {
   private SessionRepository sessionRepository;
 
   @Mock
-  private DeactivateWorkflowErrorMailService workflowErrorMailService;
-
-  @Mock
-  private DeactivateActionsRegistry deactivateActionsRegistry;
+  private ActionsRegistry actionsRegistry;
 
   @BeforeEach
   public void setUp() {
@@ -60,31 +58,29 @@ class DeactivateAnonymousUserServiceTest {
   @Test
   void deactivateStaleAnonymousUsers_Should_notUseServices_When_noSessionIsAvailable() {
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
-    var deactivateUserAction = mock(DeactivateKeycloakUserAction.class);
 
-    verifyNoMoreInteractions(this.workflowErrorMailService);
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getUserDeactivateActions();
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getSessionDeactivateActions();
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
   }
 
   @Test
   void deactivateStaleAnonymousUsers_Should_notPerformAnyDeactivation_When_noSessionIsInProgress() {
     whenSessionRepositoryFindByStatus_ThenReturnUserSessionsWithStatus(
         getAnyStatusWhichIsNotInProgress());
-    var deactivateUserAction = mock(DeactivateKeycloakUserAction.class);
-    when(this.deactivateActionsRegistry.getUserDeactivateActions())
-        .thenReturn(List.of(deactivateUserAction));
-    var deactivateSessionAction = mock(DeactivateSessionAction.class);
-    when(this.deactivateActionsRegistry.getSessionDeactivateActions())
-        .thenReturn(List.of(deactivateSessionAction));
+    var deactivateUserAction = mock(DeactivateKeycloakUserActionCommand.class);
+
+    when(this.actionsRegistry.buildContainerForType(User.class))
+        .thenReturn(new ActionContainer<>(Set.of(deactivateUserAction)));
+    var deactivateSessionAction = mock(DeactivateSessionActionCommand.class);
+    when(this.actionsRegistry.buildContainerForType(Session.class))
+        .thenReturn(new ActionContainer<>(Set.of(deactivateSessionAction)));
 
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
         .findByStatusAndRegistrationType(SessionStatus.IN_PROGRESS, RegistrationType.ANONYMOUS);
-    verifyNoMoreInteractions(this.workflowErrorMailService);
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getUserDeactivateActions();
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getSessionDeactivateActions();
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verifyNoMoreInteractions(deactivateUserAction, deactivateSessionAction);
   }
 
@@ -133,20 +129,19 @@ class DeactivateAnonymousUserServiceTest {
     var user = createUserWithSingleSession(updateDate);
     when(this.sessionRepository.findByStatusAndRegistrationType(any(), any()))
         .thenReturn(new ArrayList<>(user.getSessions()));
-    var deactivateUserAction = mock(DeactivateKeycloakUserAction.class);
-    when(this.deactivateActionsRegistry.getUserDeactivateActions())
-        .thenReturn(List.of(deactivateUserAction));
-    var deactivateSessionAction = mock(DeactivateSessionAction.class);
-    when(this.deactivateActionsRegistry.getSessionDeactivateActions())
-        .thenReturn(List.of(deactivateSessionAction));
+    var deactivateUserAction = mock(DeactivateKeycloakUserActionCommand.class);
+    when(this.actionsRegistry.buildContainerForType(User.class))
+        .thenReturn(new ActionContainer<>(Set.of(deactivateUserAction)));
+    var deactivateSessionAction = mock(DeactivateSessionActionCommand.class);
+    when(this.actionsRegistry.buildContainerForType(Session.class))
+        .thenReturn(new ActionContainer<>(Set.of(deactivateSessionAction)));
 
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
         .findByStatusAndRegistrationType(SessionStatus.IN_PROGRESS, RegistrationType.ANONYMOUS);
-    verifyNoMoreInteractions(this.workflowErrorMailService);
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getUserDeactivateActions();
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getSessionDeactivateActions();
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verifyNoMoreInteractions(deactivateUserAction, deactivateSessionAction);
   }
 
@@ -162,6 +157,7 @@ class DeactivateAnonymousUserServiceTest {
 
   private User createUserWithSingleSession(LocalDateTime updateDate) {
     var user = new User();
+    user.setUserId("user id");
     var userSessions = Set.of(createSessionForUser(user, updateDate, SessionStatus.IN_PROGRESS));
     user.setSessions(userSessions);
     return user;
@@ -176,23 +172,25 @@ class DeactivateAnonymousUserServiceTest {
     when(this.sessionRepository.findByStatusAndRegistrationType(any(), any()))
         .thenReturn(new ArrayList<>(user.getSessions()));
 
-    var deactivateUserAction = mock(DeactivateKeycloakUserAction.class);
-    when(this.deactivateActionsRegistry.getUserDeactivateActions())
-        .thenReturn(List.of(deactivateUserAction));
-    var deactivateSessionAction = mock(DeactivateSessionAction.class);
-    when(this.deactivateActionsRegistry.getSessionDeactivateActions())
-        .thenReturn(List.of(deactivateSessionAction));
+    var deactivateUserAction = mock(DeactivateKeycloakUserActionCommand.class);
+    when(this.actionsRegistry.buildContainerForType(User.class))
+        .thenReturn(new ActionContainer<>(Set.of(deactivateUserAction)));
+    var deactivateSessionAction = mock(DeactivateSessionActionCommand.class);
+    var setRocketChatRoomReadOnlyAction = mock(SetRocketChatRoomReadOnlyActionCommand.class);
+    when(this.actionsRegistry.buildContainerForType(Session.class))
+        .thenReturn(new ActionContainer<>(Set.of(deactivateSessionAction, setRocketChatRoomReadOnlyAction)));
 
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
         .findByStatusAndRegistrationType(SessionStatus.IN_PROGRESS, RegistrationType.ANONYMOUS);
-    verifyNoMoreInteractions(this.workflowErrorMailService);
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getUserDeactivateActions();
-    verify(this.deactivateActionsRegistry, atLeastOnce()).getSessionDeactivateActions();
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
+    verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verify(deactivateUserAction, times(1)).execute(user);
-    user.getSessions().forEach(session ->
-        verify(deactivateSessionAction, times(1)).execute(session));
+    user.getSessions().forEach(session -> {
+        verify(deactivateSessionAction, times(1)).execute(session);
+        verify(setRocketChatRoomReadOnlyAction, times(1)).execute(session);
+    });
   }
 
   private static List<LocalDateTime> createOverdueUpdateDates() {
@@ -204,26 +202,4 @@ class DeactivateAnonymousUserServiceTest {
     return List.of(oneDeletionPeriodAgo, timeLongInThePast);
   }
 
-  @ParameterizedTest
-  @MethodSource("createOverdueUpdateDates")
-  void deactivateStaleAnonymousUsers_Should_sendErrorMails_When_someActionsFail(LocalDateTime overdueUpdateDate) {
-    var user = createUserWithSingleSession(overdueUpdateDate);
-    when(this.sessionRepository.findByStatusAndRegistrationType(any(), any()))
-        .thenReturn(new ArrayList<>(user.getSessions()));
-
-    var deactivateUserAction = mock(DeactivateKeycloakUserAction.class);
-    when(this.deactivateActionsRegistry.getUserDeactivateActions())
-        .thenReturn(List.of(deactivateUserAction));
-    var deactivateSessionAction = mock(DeactivateSessionAction.class);
-    when(this.deactivateActionsRegistry.getSessionDeactivateActions())
-        .thenReturn(List.of(deactivateSessionAction));
-
-    DeactivateWorkflowError error = mock(DeactivateWorkflowError.class);
-    when(deactivateUserAction.execute(any())).thenReturn(List.of(error));
-    when(deactivateSessionAction.execute(any())).thenReturn(List.of(error));
-
-    this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
-
-    verify(this.workflowErrorMailService, times(1)).buildAndSendErrorMail(List.of(error, error));
-  }
 }

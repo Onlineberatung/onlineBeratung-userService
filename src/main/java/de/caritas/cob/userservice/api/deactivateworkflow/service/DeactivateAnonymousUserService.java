@@ -1,20 +1,17 @@
 package de.caritas.cob.userservice.api.deactivateworkflow.service;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-
-import de.caritas.cob.userservice.api.deactivateworkflow.AbstractDeactivateAction;
-import de.caritas.cob.userservice.api.deactivateworkflow.model.DeactivateWorkflowError;
-import de.caritas.cob.userservice.api.deactivateworkflow.registry.DeactivateActionsRegistry;
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
+import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
+import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -31,8 +28,7 @@ import org.springframework.stereotype.Service;
 public class DeactivateAnonymousUserService {
 
   private final @NonNull SessionRepository sessionRepository;
-  private final @NonNull DeactivateActionsRegistry deactivateActionsRegistry;
-  private final @NonNull DeactivateWorkflowErrorMailService workflowErrorMailService;
+  private final @NonNull ActionsRegistry actionsRegistry;
   @Value("${user.anonymous.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodMinutes;
 
@@ -50,61 +46,37 @@ public class DeactivateAnonymousUserService {
         .filter(isSessionOutsideOfDeactivationTime(deactivationTime))
         .collect(Collectors.toSet());
 
-    var workflowErrors = deactivateAnonymousUsersAndSessions(staleAnonymousSessions);
-
-    if (isNotEmpty(workflowErrors)) {
-      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
-    }
+    deactivateAnonymousUsersAndSessions(staleAnonymousSessions);
   }
 
   private Predicate<Session> isSessionOutsideOfDeactivationTime(LocalDateTime deactivationTime) {
     return session -> session.getUpdateDate().isBefore(deactivationTime);
   }
 
-  private List<DeactivateWorkflowError> deactivateAnonymousUsersAndSessions(
-      Set<Session> staleSessions) {
+  private void deactivateAnonymousUsersAndSessions(Set<Session> staleSessions) {
     Set<User> usersToDeactivate = staleSessions.stream()
         .map(Session::getUser)
         .collect(Collectors.toSet());
 
-    var workflowErrors = this.performUserDeactivationActions(usersToDeactivate);
-    workflowErrors.addAll(performSessionDeactivationActions(staleSessions));
-
-    return workflowErrors;
+    this.performUserDeactivationActions(usersToDeactivate);
+    this.performSessionDeactivationActions(staleSessions);
   }
 
-  private List<DeactivateWorkflowError> performUserDeactivationActions(
-      Set<User> usersToDeactivate) {
-    var userDeactivationActions = this.deactivateActionsRegistry.getUserDeactivateActions();
-    return usersToDeactivate.stream()
-        .map(this.performUserDeactivationWithActions(userDeactivationActions))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+  private void performUserDeactivationActions(Set<User> usersToDeactivate) {
+    var userDeactivationActions = this.actionsRegistry.buildContainerForType(User.class);
+    usersToDeactivate
+        .forEach(userToDeactivate -> userDeactivationActions
+            .addActionToExecute(DeactivateKeycloakUserActionCommand.class)
+            .executeActions(userToDeactivate));
   }
 
-  private Function<User, List<DeactivateWorkflowError>> performUserDeactivationWithActions(
-      List<AbstractDeactivateAction<User>> userDeactivationActions) {
-    return user -> userDeactivationActions.stream()
-        .map(action -> action.execute(user))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
-  }
-
-  private List<DeactivateWorkflowError> performSessionDeactivationActions(
-      Set<Session> staleAnonymousSessions) {
-    var sessionDeactivationActions = this.deactivateActionsRegistry.getSessionDeactivateActions();
-    return staleAnonymousSessions.stream()
-        .map(this.performSessionDeactivationWithActions(sessionDeactivationActions))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
-  }
-
-  private Function<Session, List<DeactivateWorkflowError>> performSessionDeactivationWithActions(
-      List<AbstractDeactivateAction<Session>> sessionDeactivationActions) {
-    return session -> sessionDeactivationActions.stream()
-        .map(deactivationAction -> deactivationAction.execute(session))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+  private void performSessionDeactivationActions(Set<Session> staleAnonymousSessions) {
+    var sessionDeactivationActions = this.actionsRegistry.buildContainerForType(Session.class);
+    staleAnonymousSessions.forEach(staleSession -> sessionDeactivationActions
+        .addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class)
+        .addActionToExecute(DeactivateSessionActionCommand.class)
+        .executeActions(staleSession)
+    );
   }
 
 }

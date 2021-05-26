@@ -70,6 +70,10 @@ public class KeycloakTestConfig {
       @Override
       public void deleteUser(String userId) {
       }
+
+      @Override
+      public void deactivateUser(String userId) {
+      }
     };
   }
 

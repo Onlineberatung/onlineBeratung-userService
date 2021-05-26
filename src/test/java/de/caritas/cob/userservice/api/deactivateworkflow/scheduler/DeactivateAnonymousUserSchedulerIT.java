@@ -3,7 +3,8 @@ package de.caritas.cob.userservice.api.deactivateworkflow.scheduler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -42,6 +43,9 @@ class DeactivateAnonymousUserSchedulerIT {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private ActionsRegistry actionsRegistry;
 
   @Value("${user.anonymous.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodInMinutes;
@@ -118,4 +122,5 @@ class DeactivateAnonymousUserSchedulerIT {
     currentSession.setUpdateDate(timeToDeactivation);
     sessionRepository.save(currentSession);
   }
+
 }

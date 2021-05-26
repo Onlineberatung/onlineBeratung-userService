@@ -114,8 +114,9 @@ public class ConsultantService {
    * @return {@link List} of {@link Consultant}
    */
   public List<Consultant> findConsultantsByAgencyIds(Set<ChatAgency> chatAgencies) {
-    List<Long> agencyIds =
-        chatAgencies.stream().map(ChatAgency::getAgencyId).collect(Collectors.toList());
+    List<Long> agencyIds = chatAgencies.stream()
+        .map(ChatAgency::getAgencyId)
+        .collect(Collectors.toList());
 
     return consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(agencyIds);
   }
