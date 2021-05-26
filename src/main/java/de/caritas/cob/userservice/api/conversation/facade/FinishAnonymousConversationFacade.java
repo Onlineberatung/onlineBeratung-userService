@@ -33,11 +33,11 @@ public class FinishAnonymousConversationFacade {
         .orElseThrow(() -> new NotFoundException(
             String.format("Session with id %s does not exist", sessionId)));
 
-    actionsRegistry.buildContainerForType(User.class)
+    this.actionsRegistry.buildContainerForType(User.class)
         .addActionToExecute(DeactivateKeycloakUserActionCommand.class)
         .executeActions(session.getUser());
 
-    actionsRegistry.buildContainerForType(Session.class)
+    this.actionsRegistry.buildContainerForType(Session.class)
         .addActionToExecute(DeactivateSessionActionCommand.class)
         .addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class)
         .addActionToExecute(SendFinishedAnonymousConversationEventActionCommand.class)

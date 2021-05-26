@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
-import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
+import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.ROCKET_CHAT;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -12,14 +12,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -31,13 +32,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeleteDatabaseAskerActionTest {
+public class DeleteRocketChatAskerActionTest {
 
   @InjectMocks
-  private DeleteDatabaseAskerAction deleteDatabaseAskerAction;
+  private DeleteRocketChatAskerAction deleteRocketChatAskerAction;
 
   @Mock
-  private UserRepository userRepository;
+  private RocketChatService rocketChatService;
 
   @Mock
   private Logger logger;
@@ -48,32 +49,46 @@ public class DeleteDatabaseAskerActionTest {
   }
 
   @Test
-  public void execute_Should_returnEmptyList_When_deletionOfUserIsSuccessful() {
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), emptyList());
+  public void execute_Should_deleteRocketChatUserAndReturnEmptyList_When_userDeletionIsSuccessful()
+      throws RocketChatDeleteUserException {
+    User user = new User();
+    user.setRcUserId("rcId");
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(user, emptyList());
 
-    this.deleteDatabaseAskerAction.execute(workflowDTO);
+    this.deleteRocketChatAskerAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(0));
-    verify(this.userRepository, times(1)).delete(any());
-    verifyNoMoreInteractions(this.logger);
+    verify(this.rocketChatService, times(1)).deleteUser(any());
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deletionOfUserFails() {
-    doThrow(new RuntimeException()).when(this.userRepository).delete(any());
+  public void execute_Should_notDeleteRocketChatUserAndReturnEmptyList_When_userHasNoRcId() {
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), emptyList());
+
+    this.deleteRocketChatAskerAction.execute(workflowDTO);
+    List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
+
+    assertThat(workflowErrors, hasSize(0));
+    verifyNoInteractions(this.rocketChatService);
+  }
+
+  @Test
+  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_userDeletionFailes()
+      throws RocketChatDeleteUserException {
     User user = new User();
-    user.setUserId("user id");
+    user.setRcUserId("userId");
+    doThrow(new RuntimeException()).when(this.rocketChatService).deleteUser(any());
     AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(user, new ArrayList<>());
 
-    this.deleteDatabaseAskerAction.execute(workflowDTO);
+    this.deleteRocketChatAskerAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(1));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
-    assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
-    assertThat(workflowErrors.get(0).getIdentifier(), is("user id"));
-    assertThat(workflowErrors.get(0).getReason(), is("Unable to delete user"));
+    assertThat(workflowErrors.get(0).getDeletionTargetType(), is(ROCKET_CHAT));
+    assertThat(workflowErrors.get(0).getIdentifier(), is("userId"));
+    assertThat(workflowErrors.get(0).getReason(), is("Unable to delete Rocket.Chat user account"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(this.logger, times(1)).error(anyString(), anyString());
   }

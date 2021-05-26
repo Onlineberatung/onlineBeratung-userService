@@ -1,44 +1,46 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
-import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.ANONYMOUS_REGISTRY_IDS;
+import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.KEYCLOAK;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
-import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;
+import de.caritas.cob.userservice.api.deleteworkflow.action.DeleteKeycloakUserAction;
 import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * Deletes a registry id by username.
+ * Action to delete a user account in keycloak.
  */
 @Component
-@RequiredArgsConstructor
-public class DeleteAnonymousRegistryIdAction implements ActionCommand<AskerDeletionWorkflowDTO> {
+public class DeleteKeycloakAskerAction extends DeleteKeycloakUserAction implements
+    ActionCommand<AskerDeletionWorkflowDTO> {
 
-  private final @NonNull AnonymousUsernameRegistry anonymousUsernameRegistry;
+  public DeleteKeycloakAskerAction(@NonNull KeycloakAdminClientService keycloakAdminClientService) {
+    super(keycloakAdminClientService);
+  }
 
   /**
-   * Deletes a registry id by username.
+   * Deletes the given {@link AskerDeletionWorkflowDTO}s user in keycloak.
    *
-   * @param actionTarget the {@link AskerDeletionWorkflowDTO}
+   * @param actionTarget the {@link AskerDeletionWorkflowDTO} to delete
    */
   @Override
   public void execute(AskerDeletionWorkflowDTO actionTarget) {
     try {
-      anonymousUsernameRegistry.removeRegistryIdByUsername(actionTarget.getUser().getUsername());
+      this.deleteUserWithId(actionTarget.getUser().getUserId());
     } catch (Exception e) {
       LogService.logDeleteWorkflowError(e);
       actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)
-              .deletionTargetType(ANONYMOUS_REGISTRY_IDS)
+              .deletionTargetType(KEYCLOAK)
               .identifier(actionTarget.getUser().getUserId())
-              .reason("Could not delete registry id for anonymous users by username")
+              .reason(ERROR_REASON)
               .timestamp(nowInUtc())
               .build()
       );

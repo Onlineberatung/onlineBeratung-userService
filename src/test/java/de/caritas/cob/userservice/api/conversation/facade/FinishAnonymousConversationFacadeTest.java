@@ -51,23 +51,23 @@ class FinishAnonymousConversationFacadeTest {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionService.getSession(any())).thenReturn(Optional.of(session));
     when(this.actionsRegistry.buildContainerForType(Session.class))
-        .thenReturn(this.actionCommandMockProvider.getSessionActionContainer());
+        .thenReturn(this.actionCommandMockProvider.getActionContainer(Session.class));
     when(this.actionsRegistry.buildContainerForType(User.class))
-        .thenReturn(this.actionCommandMockProvider.getUserActionContainer());
+        .thenReturn(this.actionCommandMockProvider.getActionContainer(User.class));
 
     this.finishAnonymousConversationFacade.finishConversation(session.getId());
 
     verify(this.actionCommandMockProvider
-        .getSessionActionMock(SendFinishedAnonymousConversationEventActionCommand.class), times(1))
+        .getActionMock(SendFinishedAnonymousConversationEventActionCommand.class), times(1))
         .execute(session);
     verify(this.actionCommandMockProvider
-        .getSessionActionMock(DeactivateSessionActionCommand.class), times(1))
+        .getActionMock(DeactivateSessionActionCommand.class), times(1))
         .execute(session);
     verify(this.actionCommandMockProvider
-        .getSessionActionMock(SetRocketChatRoomReadOnlyActionCommand.class), times(1))
+        .getActionMock(SetRocketChatRoomReadOnlyActionCommand.class), times(1))
         .execute(session);
     verify(this.actionCommandMockProvider
-        .getUserActionMock(DeactivateKeycloakUserActionCommand.class), times(1))
+        .getActionMock(DeactivateKeycloakUserActionCommand.class), times(1))
         .execute(session.getUser());
   }
 

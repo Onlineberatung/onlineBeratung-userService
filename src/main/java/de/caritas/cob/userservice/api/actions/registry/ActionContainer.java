@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.actions.registry;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.NonNull;
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class ActionContainer<T> {
 
   private final @NonNull Set<ActionCommand<T>> allActionsByType;
-  private final Set<ActionCommand<T>> actionsToExecute = new HashSet<>();
+  private final Set<ActionCommand<T>> actionsToExecute = new LinkedHashSet<>();
 
   /**
    * Adds the {@link ActionCommand} to the current instance.
@@ -30,7 +30,7 @@ public class ActionContainer<T> {
         .findFirst()
         .orElseThrow(() -> new NoSuchElementException(
             String.format("ActionCommand class %s does not exist or is not implemented yet",
-            actionToAdd.getSimpleName()))));
+                actionToAdd.getSimpleName()))));
     return this;
   }
 

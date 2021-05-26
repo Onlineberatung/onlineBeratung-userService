@@ -3,51 +3,51 @@ package de.caritas.cob.userservice.api.actions;
 import static org.mockito.Mockito.mock;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
-import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
-import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
-import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
-import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.user.User;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.reflections.Reflections;
 
 public class ActionCommandMockProvider {
 
-  private final Map<Class<? extends ActionCommand<Session>>, ActionCommand<Session>> sessionActionMocks = new HashMap<>();
-  private final Map<Class<? extends ActionCommand<User>>, ActionCommand<User>> userActionMocks = new HashMap<>();
+  private final Map<Class<? extends ActionCommand<?>>, ActionCommand<?>> actionMocks =
+      new HashMap<>();
 
+  @SuppressWarnings("unchecked")
   public ActionCommandMockProvider() {
-    addSessionMock(DeactivateSessionActionCommand.class);
-    addSessionMock(SendFinishedAnonymousConversationEventActionCommand.class);
-    addSessionMock(SetRocketChatRoomReadOnlyActionCommand.class);
-    addUserMock(DeactivateKeycloakUserActionCommand.class);
+    var reflections = new Reflections("de.caritas.cob.userservice.api");
+    reflections.getSubTypesOf(ActionCommand.class)
+        .forEach(actionClass -> actionMocks
+            .put((Class<? extends ActionCommand<?>>) actionClass, mock(actionClass)));
   }
 
-  private void addSessionMock(Class<? extends ActionCommand<Session>> classToMock) {
-    sessionActionMocks.put(classToMock, mock(classToMock));
+  @SuppressWarnings("unchecked")
+  public <T> ActionCommand<T> getActionMock(Class<? extends ActionCommand<T>> actionClass) {
+    return (ActionCommand<T>) this.actionMocks.get(actionClass);
   }
 
-  private void addUserMock(Class<? extends ActionCommand<User>> classToMock) {
-    userActionMocks.put(classToMock, mock(classToMock));
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public <T> ActionContainer<T> getActionContainer(Class<T> classType) {
+    HashSet<ActionCommand<T>> actionCommands = new HashSet(this.actionMocks.keySet().stream()
+        .filter(actionClass -> byClassType(actionClass, classType))
+        .map(this.actionMocks::get)
+        .collect(Collectors.toUnmodifiableList()));
+    return new ActionContainer(actionCommands);
   }
 
-  public ActionCommand<Session> getSessionActionMock(
-      Class<? extends ActionCommand<Session>> actionClass) {
-    return this.sessionActionMocks.get(actionClass);
+  private boolean byClassType(Class<?> actionCommand, Class<?> type) {
+    return Arrays.stream(actionCommand.getGenericInterfaces())
+        .map(Type::getTypeName)
+        .anyMatch(typeName -> typeName.contains(type.getTypeName()));
   }
 
-  public ActionContainer<Session> getSessionActionContainer() {
-    return new ActionContainer<>(new HashSet<>(this.sessionActionMocks.values()));
-  }
-
-  public ActionCommand<User> getUserActionMock(Class<? extends ActionCommand<User>> actionClass) {
-    return this.userActionMocks.get(actionClass);
-  }
-
-  public ActionContainer<User> getUserActionContainer() {
-    return new ActionContainer<>(new HashSet<>(this.userActionMocks.values()));
+  public void setCustomClassForAction(Class<? extends ActionCommand<?>> key,
+      ActionCommand<?> value) {
+    this.actionMocks.remove(key);
+    this.actionMocks.put(key, value);
   }
 
 }
