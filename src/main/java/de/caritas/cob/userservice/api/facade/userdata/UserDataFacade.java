@@ -1,10 +1,14 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import static de.caritas.cob.userservice.api.authorization.UserRole.ANONYMOUS;
+import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
+import static de.caritas.cob.userservice.api.authorization.UserRole.USER;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import java.util.Arrays;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -31,15 +35,20 @@ public class UserDataFacade {
   public UserDataResponseDTO buildUserDataByRole() {
     Set<String> roles = authenticatedUser.getRoles();
 
-    if (roles.contains(UserRole.CONSULTANT.getValue())) {
+    if (userRolesContainAnyRoleOf(roles, CONSULTANT.getValue())) {
       return consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant());
-    } else if (roles.contains(UserRole.USER.getValue())) {
+    } else if (userRolesContainAnyRoleOf(roles, USER.getValue(), ANONYMOUS.getValue())) {
       return askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
     } else {
       throw new InternalServerErrorException(
-          String.format("User with id %s has neither Consultant-Role, nor User-Role .",
+          String.format("User with id %s has neither Consultant-Role, nor User/Anonymous-Role .",
               authenticatedUser.getUserId()));
     }
+  }
+
+  private boolean userRolesContainAnyRoleOf(Set<String> userRoles, String... roles) {
+    return Arrays.stream(roles)
+        .anyMatch(userRoles::contains);
   }
 
 }

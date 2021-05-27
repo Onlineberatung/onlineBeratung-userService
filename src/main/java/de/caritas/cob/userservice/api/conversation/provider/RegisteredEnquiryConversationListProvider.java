@@ -6,9 +6,11 @@ import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.support.PagedListHolder;
@@ -23,6 +25,7 @@ public class RegisteredEnquiryConversationListProvider implements ConversationLi
 
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
   private final @NonNull SessionService sessionService;
+  private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
 
   /**
    * Builds the {@link ConsultantSessionListResponseDTO}.
@@ -33,17 +36,23 @@ public class RegisteredEnquiryConversationListProvider implements ConversationLi
   @Override
   public ConsultantSessionListResponseDTO buildConversations(
       PageableListRequest pageableListRequest) {
-    Consultant consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
     PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(
-        this.sessionService.getEnquiriesForConsultant(consultant));
-    enquiriesForConsultant.setPage(pageableListRequest.getOffset());
+        this.sessionService.getEnquiriesForConsultant(consultant, RegistrationType.REGISTERED));
+
+    enquiriesForConsultant.setPage(obtainPageByOffsetAndCount(pageableListRequest));
     enquiriesForConsultant.setPageSize(pageableListRequest.getCount());
 
+    List<ConsultantSessionResponseDTO> pageList = enquiriesForConsultant.getPageList();
+    pageList.forEach(sessionResponse -> this.consultantSessionEnricher
+        .updateRequiredConsultantSessionValues(sessionResponse,
+            pageableListRequest.getRcToken(), consultant));
+
     return new ConsultantSessionListResponseDTO()
-        .sessions(enquiriesForConsultant.getPageList())
+        .sessions(pageList)
         .offset(pageableListRequest.getOffset())
-        .count(enquiriesForConsultant.getPageList().size())
+        .count(pageList.size())
         .total(enquiriesForConsultant.getNrOfElements());
   }
 

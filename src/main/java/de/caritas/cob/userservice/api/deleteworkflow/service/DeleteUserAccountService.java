@@ -46,7 +46,7 @@ public class DeleteUserAccountService {
         .collect(Collectors.toList());
   }
 
-  private List<DeletionWorkflowError> performUserDeletion(User user) {
+  List<DeletionWorkflowError> performUserDeletion(User user) {
     return this.deleteActionsRegistry.getAskerDeleteActions().stream()
         .map(deleteAskerAction -> deleteAskerAction.execute(user))
         .flatMap(Collection::stream)

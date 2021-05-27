@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.service.agency;
 
+import static java.util.Collections.emptyList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
@@ -16,7 +19,6 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 /**
@@ -75,10 +77,13 @@ public class AgencyService {
    * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
-    addDefaultHeaders(this.agencyControllerApi.getApiClient());
-    return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
-        .map(this::fromOriginalAgency)
-        .collect(Collectors.toList());
+    if (isNotEmpty(agencyIds)) {
+      addDefaultHeaders(this.agencyControllerApi.getApiClient());
+      return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
+          .map(this::fromOriginalAgency)
+          .collect(Collectors.toList());
+    }
+    return emptyList();
   }
 
   /**
@@ -96,12 +101,12 @@ public class AgencyService {
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
-    HttpHeaders headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
+    var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 
   private AgencyDTO fromOriginalAgency(AgencyResponseDTO agencyResponseDTO) {
-    ObjectMapper objectMapper = new ObjectMapper();
+    var objectMapper = new ObjectMapper();
     try {
       return objectMapper
           .readValue(objectMapper.writeValueAsString(agencyResponseDTO), AgencyDTO.class);

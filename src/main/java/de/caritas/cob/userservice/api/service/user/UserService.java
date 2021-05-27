@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final @NonNull UserRepository userRepository;
-  private final @NonNull UsernameTranscoder usernameTranscoder;
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   /**
    * Deletes an user.

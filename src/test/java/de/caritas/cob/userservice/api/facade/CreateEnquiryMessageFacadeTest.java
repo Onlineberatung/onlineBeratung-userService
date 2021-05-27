@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -740,7 +740,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
     when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        Authority.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
+        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     doThrow(RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION).when(rocketChatService)
         .removeSystemMessages(Mockito.eq(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId()),
             Mockito.any(), Mockito.any());
@@ -776,7 +776,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
     when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        Authority.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
+        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     Mockito.doThrow(RC_ADD_USER_TO_GROUP_EXCEPTION).when(rocketChatService)
         .addUserToGroup(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getRocketChatId(),
             FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());

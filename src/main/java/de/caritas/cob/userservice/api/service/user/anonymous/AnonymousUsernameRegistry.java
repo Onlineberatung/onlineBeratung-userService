@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class AnonymousUsernameRegistry {
 
   private final @NonNull UserService userService;
-  private final @NonNull UsernameTranscoder usernameTranscoder;
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   @Value("${anonymous.username.prefix}")
   private String usernamePrefix;
@@ -39,7 +39,6 @@ public class AnonymousUsernameRegistry {
       username = generateUsername();
       ID_REGISTRY.add(obtainUsernameId(username));
     } while (isUsernameOccupied(username));
-
 
     return usernameTranscoder.encodeUsername(username);
   }
@@ -72,4 +71,20 @@ public class AnonymousUsernameRegistry {
   private int obtainUsernameId(String username) {
     return parseInt(substringAfter(username, usernamePrefix));
   }
+
+  /**
+   * Removes a name from the registry.
+   *
+   * @param encodedUsername the encoded username to remove from the registry
+   */
+  public synchronized void removeRegistryIdByUsername(String encodedUsername) {
+    try {
+      var decodedUsername = usernameTranscoder.decodeUsername(encodedUsername);
+      Integer usernameId = obtainUsernameId(decodedUsername);
+      ID_REGISTRY.remove(usernameId);
+    } catch (Exception ex) {
+      // do nothing
+    }
+  }
+
 }

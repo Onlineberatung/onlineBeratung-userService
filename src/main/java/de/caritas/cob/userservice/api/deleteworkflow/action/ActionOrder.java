@@ -13,6 +13,7 @@ public enum ActionOrder {
   SECOND(1),
   THIRD(2),
   FOURTH(3),
+  FIFTH(4),
   LAST(MAX_VALUE);
 
   private final int order;

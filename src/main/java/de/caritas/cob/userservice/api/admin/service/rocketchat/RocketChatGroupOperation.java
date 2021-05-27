@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
-import static de.caritas.cob.userservice.api.authorization.Authorities.Authority.VIEW_ALL_FEEDBACK_SESSIONS;
-import static de.caritas.cob.userservice.api.authorization.Authorities.Authority.VIEW_ALL_PEER_SESSIONS;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;

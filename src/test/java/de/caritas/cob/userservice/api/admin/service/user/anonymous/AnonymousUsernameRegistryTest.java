@@ -4,9 +4,11 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.internal.WhiteboxImpl.getInternalState;
 import static org.powermock.reflect.internal.WhiteboxImpl.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
@@ -36,6 +38,7 @@ public class AnonymousUsernameRegistryTest {
 
   @Before
   public void setUp() {
+    setField(anonymousUsernameRegistry, "usernameTranscoder", usernameTranscoder);
     setField(anonymousUsernameRegistry, "usernamePrefix", "Ratsuchende_r ");
   }
 
@@ -110,5 +113,83 @@ public class AnonymousUsernameRegistryTest {
     ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
     verify(usernameTranscoder, times(1)).encodeUsername(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 7"));
+  }
+
+  @Test
+  public void removeRegistryIdByUsername_Should_RemoveIdFromRegistry_When_UsernameMatchesUsernamePattern() {
+    String usernameToDelete = "Ratsuchende_r 2";
+
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
+    setIdRegistryField(idRegistryListWithoutThree);
+    when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
+    when(usernameTranscoder.decodeUsername(anyString())).thenReturn(usernameToDelete);
+
+    anonymousUsernameRegistry.removeRegistryIdByUsername(usernameToDelete);
+
+    List<Integer> resultingRegistry = getIdRegistryField();
+    assertThat(resultingRegistry, is(List.of(1, 4, 5)));
+    verify(usernameTranscoder, times(1)).decodeUsername(usernameToDelete);
+  }
+
+  private List<Integer> getIdRegistryField() {
+    return getInternalState(AnonymousUsernameRegistry.class, "ID_REGISTRY");
+  }
+
+  @Test
+  public void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_UsernameDoesNotMatchUsernamePattern() {
+    String usernameNotMatchingPattern = "something else";
+
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
+    setIdRegistryField(idRegistryListWithoutThree);
+    when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
+    when(usernameTranscoder.decodeUsername(anyString())).thenReturn(usernameNotMatchingPattern);
+
+    anonymousUsernameRegistry.removeRegistryIdByUsername(usernameNotMatchingPattern);
+
+    List<Integer> resultingRegistry = getIdRegistryField();
+    assertThat(resultingRegistry, is(idRegistryListWithoutThree));
+    verify(usernameTranscoder, times(1)).decodeUsername(usernameNotMatchingPattern);
+  }
+
+  @Test
+  public void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_UsernameDoesMatchUsernamePatternButHasNotExistingNumber() {
+    String usernameWithNotExistingId = "Ratsuchende_r 3";
+
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
+    setIdRegistryField(idRegistryListWithoutThree);
+    when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
+    when(usernameTranscoder.decodeUsername(anyString())).thenReturn(usernameWithNotExistingId);
+
+    anonymousUsernameRegistry.removeRegistryIdByUsername(usernameWithNotExistingId);
+
+    List<Integer> resultingRegistry = getIdRegistryField();
+    assertThat(resultingRegistry, is(idRegistryListWithoutThree));
+    verify(usernameTranscoder, times(1)).decodeUsername(usernameWithNotExistingId);
+  }
+
+  @Test
+  public void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_EmptyValuePassed() {
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
+    setIdRegistryField(idRegistryListWithoutThree);
+    when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
+
+    List<String> emptyStrings = List.of("", "   ");
+    emptyStrings.forEach(emptyValue -> {
+      when(usernameTranscoder.decodeUsername(anyString())).thenReturn(emptyValue);
+      anonymousUsernameRegistry.removeRegistryIdByUsername(emptyValue);
+      List<Integer> resultingRegistry = getIdRegistryField();
+      assertThat(resultingRegistry, is(idRegistryListWithoutThree));
+    });
+  }
+
+  @Test
+  public void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_NullPassed() {
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
+    setIdRegistryField(idRegistryListWithoutThree);
+    when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
+
+    anonymousUsernameRegistry.removeRegistryIdByUsername(null);
+    List<Integer> resultingRegistry = getIdRegistryField();
+    assertThat(resultingRegistry, is(idRegistryListWithoutThree));
   }
 }
