@@ -62,8 +62,7 @@ public class DeleteUserAccountService {
 
   List<DeletionWorkflowError> performUserDeletion(User user) {
 
-    var deletionWorkflowDTO = new AskerDeletionWorkflowDTO(user,
-        new ArrayList<>());
+    var deletionWorkflowDTO = new AskerDeletionWorkflowDTO(user, new ArrayList<>());
 
     this.actionsRegistry.buildContainerForType(AskerDeletionWorkflowDTO.class)
         .addActionToExecute(DeleteKeycloakAskerAction.class)

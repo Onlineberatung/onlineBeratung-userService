@@ -3,6 +3,8 @@ package de.caritas.cob.userservice.api.actions;
 import static org.mockito.Mockito.mock;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.deleteworkflow.service.DeleteUserAccountServiceTest;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +13,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.reflections.Reflections;
 
+/**
+ * Holds dynamically all {@link ActionCommand} implementation classes as mocks with the class itself
+ * as a key in a map. So this provider can be used for all unit tests of classes using the {@link
+ * ActionsRegistry}. For a sample usage see {@link DeleteUserAccountServiceTest}.
+ */
 public class ActionCommandMockProvider {
 
   private final Map<Class<? extends ActionCommand<?>>, ActionCommand<?>> actionMocks =
