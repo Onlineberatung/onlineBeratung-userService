@@ -20,6 +20,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ROOMS_UPDATE_D
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_NOT_RECEIVED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_RECEIVED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERS_ROOMS_LIST;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -72,8 +73,8 @@ public class ConsultantSessionEnricherTest {
             RC_GROUP_ID)).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertTrue(result.getSession().getMessagesRead());
   }
@@ -97,8 +98,8 @@ public class ConsultantSessionEnricherTest {
             RC_GROUP_ID)).thenReturn(false);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertFalse(result.getSession().getMessagesRead());
   }
@@ -121,8 +122,8 @@ public class ConsultantSessionEnricherTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertEquals(
         Helper
@@ -153,8 +154,8 @@ public class ConsultantSessionEnricherTest {
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO_2, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO_2),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertFalse(result.getSession().getAttachment().getFileReceived());
   }
@@ -180,8 +181,8 @@ public class ConsultantSessionEnricherTest {
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_RECEIVED);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertTrue(result.getSession().getAttachment().getFileReceived());
   }
@@ -205,8 +206,8 @@ public class ConsultantSessionEnricherTest {
             Mockito.any())).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertFalse(result.getSession().getFeedbackRead());
   }
@@ -226,8 +227,8 @@ public class ConsultantSessionEnricherTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertFalse(result.getSession().getMonitoring());
   }
@@ -247,8 +248,8 @@ public class ConsultantSessionEnricherTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MONITORING);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertTrue(result.getSession().getMonitoring());
   }
@@ -274,8 +275,8 @@ public class ConsultantSessionEnricherTest {
             Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertEquals(FILE_DTO.getType(), result.getSession().getAttachment().getFileType());
     assertEquals(ATTACHMENT_DTO.getImagePreview(),
@@ -300,8 +301,8 @@ public class ConsultantSessionEnricherTest {
             RC_GROUP_ID)).thenReturn(false);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertFalse(result.getSession().getMessagesRead());
   }
@@ -325,8 +326,8 @@ public class ConsultantSessionEnricherTest {
             Mockito.any())).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertTrue(result.getSession().getFeedbackRead());
 
@@ -347,8 +348,8 @@ public class ConsultantSessionEnricherTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertEquals(Long.valueOf(Helper.UNIXTIME_0.getTime()),
         result.getSession().getMessageDate());
@@ -375,7 +376,8 @@ public class ConsultantSessionEnricherTest {
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
         .updateRequiredConsultantSessionValues(
-            CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT, RC_TOKEN, CONSULTANT);
+            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT), RC_TOKEN,
+            CONSULTANT).get(0);
 
     assertTrue(result.getSession().getFeedbackRead());
 
@@ -398,8 +400,8 @@ public class ConsultantSessionEnricherTest {
         Mockito.any(), Mockito.any())).thenReturn(false);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertFalse(result.getSession().getMessagesRead());
   }
@@ -421,8 +423,8 @@ public class ConsultantSessionEnricherTest {
         Mockito.any(), Mockito.any())).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(CONSULTANT_SESSION_RESPONSE_DTO, RC_TOKEN,
-            CONSULTANT);
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
 
     assertTrue(result.getSession().getMessagesRead());
   }
