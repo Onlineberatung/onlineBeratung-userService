@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toIsoTime;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -24,14 +25,14 @@ public class SessionMapperTest {
   }
 
   @Test
-  public void convertToSessionDTO_Should_returnSessionDTOWithCreateDate_When_registrationTypeIsAnonymous() {
+  public void convertToSessionDTO_Should_returnSessionDTOWithCreateDateInIsoFormat_When_registrationTypeIsAnonymous() {
     Session session = new EasyRandom().nextObject(Session.class);
     LocalDateTime createDate = new EasyRandom().nextObject(LocalDateTime.class);
     session.setCreateDate(createDate);
 
     SessionDTO sessionDTO = new SessionMapper().convertToSessionDTO(session);
 
-    assertThat(sessionDTO.getCreateDate(), is(String.valueOf(createDate)));
+    assertThat(sessionDTO.getCreateDate(), is(toIsoTime(createDate)));
   }
 
   @Test
