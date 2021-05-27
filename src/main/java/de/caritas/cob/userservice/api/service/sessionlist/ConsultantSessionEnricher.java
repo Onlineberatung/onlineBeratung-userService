@@ -29,11 +29,11 @@ public class ConsultantSessionEnricher {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
-   * Enriches the given session with the following information from Rocket.Chat. "last message",
+   * Enriches the given session with the following information from Rocket.Chat: "last message",
    * "last message date", and "messages read".
    *
    * @param consultantSessionResponseDTOs the session list to be enriched
-   * @param rcToken                      the Rocket.Chat authentiaction token of the current
+   * @param rcToken                      the Rocket.Chat authentication token of the current
    *                                     consultant
    * @param consultant                   the {@link Consultant}
    * @return the enriched {@link ConsultantSessionResponseDTO}s
