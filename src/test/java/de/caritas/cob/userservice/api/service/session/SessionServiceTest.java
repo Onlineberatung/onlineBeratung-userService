@@ -93,10 +93,10 @@ class SessionServiceTest {
       false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
       SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
-      false, false, null, null);
+      false, false, nowInUtc(), null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
       SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
-      false, false, null, null);
+      false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
