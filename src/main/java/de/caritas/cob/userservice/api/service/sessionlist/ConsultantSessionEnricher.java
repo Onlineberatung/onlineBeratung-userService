@@ -10,6 +10,8 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.List;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,17 +28,17 @@ public class ConsultantSessionEnricher {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
-   * Enriches the given session with the following information from Rocket.Chat. "last message",
+   * Enriches the given session with the following information from Rocket.Chat: "last message",
    * "last message date", and "messages read".
    *
-   * @param consultantSessionResponseDTO the session to be enriched
-   * @param rcToken                      the Rocket.Chat authentiaction token of the current
+   * @param consultantSessionResponseDTOs the session list to be enriched
+   * @param rcToken                      the Rocket.Chat authentication token of the current
    *                                     consultant
    * @param consultant                   the {@link Consultant}
-   * @return the enriched {@link ConsultantSessionResponseDTO}
+   * @return the enriched {@link ConsultantSessionResponseDTO}s
    */
-  public ConsultantSessionResponseDTO updateRequiredConsultantSessionValues(
-      ConsultantSessionResponseDTO consultantSessionResponseDTO, String rcToken,
+  public List<ConsultantSessionResponseDTO> updateRequiredConsultantSessionValues(
+      List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs, String rcToken,
       Consultant consultant) {
 
     var rocketChatRoomInformation = this.rocketChatRoomInformationProvider
@@ -45,6 +47,15 @@ public class ConsultantSessionEnricher {
             .rocketChatUserId(consultant.getRocketChatId())
             .build());
 
+    consultantSessionResponseDTOs.forEach(consultantSessionResponseDTO -> this
+        .enrichConsultantSession(consultantSessionResponseDTO, rocketChatRoomInformation,
+            consultant));
+
+    return consultantSessionResponseDTOs;
+  }
+
+  private void enrichConsultantSession(ConsultantSessionResponseDTO consultantSessionResponseDTO,
+      RocketChatRoomInformation rocketChatRoomInformation, Consultant consultant) {
     SessionDTO session = consultantSessionResponseDTO.getSession();
     String groupId = session.getGroupId();
 
@@ -72,8 +83,6 @@ public class ConsultantSessionEnricher {
       session.setFeedbackRead(!rocketChatRoomInformation.getLastMessagesRoom()
           .containsKey(session.getFeedbackGroupId()));
     }
-
-    return consultantSessionResponseDTO;
   }
 
   private boolean getMonitoringProperty(SessionDTO session) {

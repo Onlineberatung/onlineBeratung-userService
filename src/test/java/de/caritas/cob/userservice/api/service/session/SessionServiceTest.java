@@ -93,10 +93,10 @@ class SessionServiceTest {
       false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
-      false, false, null, null);
+      false, false, nowInUtc(), null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
-      false, false, null, null);
+      false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
@@ -141,11 +141,11 @@ class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
-    sessionService.getEnquiriesForConsultant(consultant);
+    sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
     verify(sessionRepository, times(1))
-        .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(agencyIds,
-            SessionStatus.NEW);
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.NEW, REGISTERED);
   }
 
   @Test
@@ -267,10 +267,11 @@ class SessionServiceTest {
     Consultant consultant = mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(sessionRepository.findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-        any(), any())).thenReturn(SESSION_LIST_WITH_CONSULTANT);
+    when(sessionRepository
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            any(), any(), any())).thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
-    assertThat(sessionService.getEnquiriesForConsultant(consultant),
+    assertThat(sessionService.getRegisteredEnquiriesForConsultant(consultant),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
   }
 
@@ -526,7 +527,7 @@ class SessionServiceTest {
     when(consultant.getConsultantAgencies()).thenReturn(emptyConsultantAgencies);
 
     List<ConsultantSessionResponseDTO> enquiriesForConsultant = this.sessionService
-        .getEnquiriesForConsultant(consultant);
+        .getRegisteredEnquiriesForConsultant(consultant);
 
     assertThat(enquiriesForConsultant, hasSize(0));
   }
@@ -540,7 +541,7 @@ class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
-    sessionService.getEnquiriesForConsultant(consultant, REGISTERED);
+    sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
     verify(sessionRepository, times(1))
         .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
@@ -556,11 +557,11 @@ class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
-    sessionService.getEnquiriesForConsultant(consultant, null);
+    sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
     verify(sessionRepository, times(1))
-        .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-            agencyIds, SessionStatus.NEW);
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.NEW, REGISTERED);
   }
 
   @Test

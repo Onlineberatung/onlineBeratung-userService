@@ -24,20 +24,8 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * Find a {@link Session} with unassigned consultant by agency ids and status ordery by creation
    * date ascending.
    *
-   * @param agencyIds     ids of agencies to search for
-   * @param sessionStatus {@link SessionStatus} to search for
-   * @return A list of {@link Session}s for the specific agency ids and status orderd by creation
-   * date ascending
-   */
-  List<Session> findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-      List<Long> agencyIds, SessionStatus sessionStatus);
-
-  /**
-   * Find a {@link Session} with unassigned consultant by agency ids and status ordery by creation
-   * date ascending.
-   *
-   * @param agencyIds     ids of agencies to search for
-   * @param sessionStatus {@link SessionStatus} to search for
+   * @param agencyIds        ids of agencies to search for
+   * @param sessionStatus    {@link SessionStatus} to search for
    * @param registrationType {@link RegistrationType} to search for
    * @return A list of {@link Session}s for the specific agency ids and status orderd by creation
    * date ascending
@@ -184,9 +172,9 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   /**
    * Find the {@link Session}s by consulting type, registration type and pageable.
    *
-   * @param consultingTypes the {@link ConsultingType}s to search for
+   * @param consultingTypes  the {@link ConsultingType}s to search for
    * @param registrationType the {@link RegistrationType} to seach for
-   * @param pageable       the pagination object
+   * @param pageable         the pagination object
    * @return the result {@link Page}
    */
   Page<Session> findByConsultingTypeIdInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(
