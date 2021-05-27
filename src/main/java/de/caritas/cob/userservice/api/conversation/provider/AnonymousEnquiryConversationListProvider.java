@@ -58,9 +58,8 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
 
-    sessions.forEach(session -> this.consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(session, pageableListRequest.getRcToken(),
-            consultant));
+    this.consultantSessionEnricher.updateRequiredConsultantSessionValues(sessions,
+        pageableListRequest.getRcToken(), consultant);
 
     return new ConsultantSessionListResponseDTO()
         .sessions(sessions)

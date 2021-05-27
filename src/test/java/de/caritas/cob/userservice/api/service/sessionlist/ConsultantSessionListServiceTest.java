@@ -1,9 +1,6 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_3;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK;
@@ -58,28 +55,21 @@ public class ConsultantSessionListServiceTest {
 
   @Before
   public void setup() {
-    when(sessionService.getEnquiriesForConsultant(Mockito.any()))
+    when(sessionService.getRegisteredEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     when(this.consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(eq(CONSULTANT_SESSION_RESPONSE_DTO), any(), any()))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO);
-    when(this.consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(eq(CONSULTANT_SESSION_RESPONSE_DTO_2), any(), any()))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_2);
-    when(this.consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(eq(CONSULTANT_SESSION_RESPONSE_DTO_3), any(), any()))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_3);
+        .updateRequiredConsultantSessionValues(eq(CONSULTANT_SESSION_RESPONSE_DTO_LIST),
+            any(), any())).thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     when(this.consultantChatEnricher.updateRequiredConsultantChatValues(
-        eq(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), any(), any()))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE);
+        eq(List.of(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE)), any(), any()))
+        .thenReturn(List.of(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE));
   }
 
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnOnlySessions_WhenQueryParameterSessionStatusIsNew() {
-    List<ConsultantSessionResponseDTO> result =
-        consultantSessionListService
-            .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
-                RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
+    List<ConsultantSessionResponseDTO> result = consultantSessionListService
+        .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
+            RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
     assertFalse(result.isEmpty());
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.size());
@@ -92,10 +82,9 @@ public class ConsultantSessionListServiceTest {
 
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_ShouldNot_SendChatsInEnquiryList() {
-    List<ConsultantSessionResponseDTO> result =
-        consultantSessionListService
-            .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
-                RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
+    List<ConsultantSessionResponseDTO> result = consultantSessionListService
+        .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
+            RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
     assertNull(result.get(0).getChat());
     verify(chatService, never()).getChatsForConsultant(Mockito.any());

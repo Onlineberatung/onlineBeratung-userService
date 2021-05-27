@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.user.anonymous;
 
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -13,6 +14,7 @@ import static org.powermock.reflect.internal.WhiteboxImpl.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUsernameRegistry;
 import java.util.LinkedList;
@@ -33,6 +35,8 @@ public class AnonymousUsernameRegistryTest {
   private AnonymousUsernameRegistry anonymousUsernameRegistry;
   @Mock
   private UserService userService;
+  @Mock
+  private ConsultantService consultantService;
   @Mock
   private UsernameTranscoder usernameTranscoder;
 
@@ -107,6 +111,21 @@ public class AnonymousUsernameRegistryTest {
     when(userService.findUserByUsername("Ratsuchende_r 3")).thenReturn(Optional.of(USER));
     when(userService.findUserByUsername("Ratsuchende_r 5")).thenReturn(Optional.of(USER));
     when(userService.findUserByUsername("Ratsuchende_r 7")).thenReturn(Optional.empty());
+
+    anonymousUsernameRegistry.generateUniqueUsername();
+
+    ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+    verify(usernameTranscoder, times(1)).encodeUsername(argumentCaptor.capture());
+    assertThat(argumentCaptor.getValue(), is("Ratsuchende_r 7"));
+  }
+
+  @Test
+  public void generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_MissingIdsOfListHaveExistingConsultantsInDb() {
+    LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
+    setIdRegistryField(idRegistryListWithoutThree);
+    when(consultantService.getConsultantByUsername("Ratsuchende_r 3")).thenReturn(Optional.of(CONSULTANT));
+    when(consultantService.getConsultantByUsername("Ratsuchende_r 5")).thenReturn(Optional.of(CONSULTANT));
+    when(consultantService.getConsultantByUsername("Ratsuchende_r 7")).thenReturn(Optional.empty());
 
     anonymousUsernameRegistry.generateUniqueUsername();
 
