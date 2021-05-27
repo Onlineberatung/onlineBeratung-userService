@@ -141,11 +141,11 @@ class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
-    sessionService.getEnquiriesForConsultant(consultant);
+    sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
     verify(sessionRepository, times(1))
-        .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(agencyIds,
-            SessionStatus.NEW);
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.NEW, REGISTERED);
   }
 
   @Test
@@ -267,10 +267,11 @@ class SessionServiceTest {
     Consultant consultant = mock(Consultant.class);
 
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
-    when(sessionRepository.findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-        any(), any())).thenReturn(SESSION_LIST_WITH_CONSULTANT);
+    when(sessionRepository
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            any(), any(), any())).thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
-    assertThat(sessionService.getEnquiriesForConsultant(consultant),
+    assertThat(sessionService.getRegisteredEnquiriesForConsultant(consultant),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
   }
 
@@ -526,7 +527,7 @@ class SessionServiceTest {
     when(consultant.getConsultantAgencies()).thenReturn(emptyConsultantAgencies);
 
     List<ConsultantSessionResponseDTO> enquiriesForConsultant = this.sessionService
-        .getEnquiriesForConsultant(consultant);
+        .getRegisteredEnquiriesForConsultant(consultant);
 
     assertThat(enquiriesForConsultant, hasSize(0));
   }
@@ -540,7 +541,7 @@ class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
-    sessionService.getEnquiriesForConsultant(consultant, REGISTERED);
+    sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
     verify(sessionRepository, times(1))
         .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
@@ -556,11 +557,11 @@ class SessionServiceTest {
 
     when(consultant.getConsultantAgencies()).thenReturn(agencySet);
 
-    sessionService.getEnquiriesForConsultant(consultant, null);
+    sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
     verify(sessionRepository, times(1))
-        .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-            agencyIds, SessionStatus.NEW);
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.NEW, REGISTERED);
   }
 
   @Test

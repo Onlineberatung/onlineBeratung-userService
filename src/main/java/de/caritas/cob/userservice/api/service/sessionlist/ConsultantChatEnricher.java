@@ -32,14 +32,14 @@ public class ConsultantChatEnricher {
    * Enriches the given session with the following information from Rocket.Chat. - last message -
    * last message date - messages read
    *
-   * @param consultantSessionResponseDTO the session to be enriched
+   * @param consultantSessionResponseDTOs the session list to be enriched
    * @param rcToken                      the Rocket.Chat authentiaction token of the current
    *                                     consultant
    * @param consultant                   the {@link Consultant}
-   * @return the enriched {@link ConsultantSessionResponseDTO}
+   * @return the enriched {@link ConsultantSessionResponseDTO}s
    */
-  public ConsultantSessionResponseDTO updateRequiredConsultantChatValues(
-      ConsultantSessionResponseDTO consultantSessionResponseDTO, String rcToken,
+  public List<ConsultantSessionResponseDTO> updateRequiredConsultantChatValues(
+      List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs, String rcToken,
       Consultant consultant) {
 
     var rocketChatRoomInformation = this.rocketChatRoomInformationProvider
@@ -48,11 +48,14 @@ public class ConsultantChatEnricher {
             .rocketChatUserId(consultant.getRocketChatId())
             .build());
 
-    return updateRequiredChatValues(rocketChatRoomInformation, consultant.getRocketChatId(),
-        consultantSessionResponseDTO);
+    consultantSessionResponseDTOs.forEach(
+        consultantSessionResponseDTO -> updateRequiredChatValues(rocketChatRoomInformation,
+            consultant.getRocketChatId(), consultantSessionResponseDTO));
+
+    return consultantSessionResponseDTOs;
   }
 
-  private ConsultantSessionResponseDTO updateRequiredChatValues(
+  private void updateRequiredChatValues(
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
       ConsultantSessionResponseDTO consultantSessionResponseDTO) {
     UserChatDTO chat = consultantSessionResponseDTO.getChat();
@@ -70,7 +73,6 @@ public class ConsultantChatEnricher {
     } else {
       consultantSessionResponseDTO.setLatestMessage(Timestamp.valueOf(chat.getStartDateWithTime()));
     }
-    return consultantSessionResponseDTO;
   }
 
   private boolean isRoomSubscribedByConsultant(List<String> userRoomsList,
