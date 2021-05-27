@@ -60,10 +60,10 @@ import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
+import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
@@ -171,7 +171,7 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private SessionDataService sessionDataService;
   @MockBean
-  private UsernameTranscoder usernameTranscoder;
+  private UserDataFacade userDataFacade;
 
   private Cookie csrfCookie;
 
@@ -2000,6 +2000,8 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+
+    verify(this.userDataFacade, times(1)).buildUserDataByRole();
   }
 
   @Test

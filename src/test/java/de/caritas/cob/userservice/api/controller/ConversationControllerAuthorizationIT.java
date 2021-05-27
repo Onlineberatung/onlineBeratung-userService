@@ -22,7 +22,6 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
 import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import javax.servlet.http.Cookie;
 import org.jeasy.random.EasyRandom;
@@ -60,9 +59,6 @@ public class ConversationControllerAuthorizationIT {
 
   @MockBean
   private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
-
-  @MockBean
-  private UsernameTranscoder usernameTranscoder;
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})

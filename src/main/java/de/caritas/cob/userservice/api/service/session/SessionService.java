@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -21,15 +20,15 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -139,8 +138,8 @@ public class SessionService {
   /**
    * Initialize a {@link Session} as initial registered enquiry.
    *
-   * @param user                   the user
-   * @param userDto                the dto of the user
+   * @param user    the user
+   * @param userDto the dto of the user
    * @return the initialized session
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession) {
@@ -151,11 +150,11 @@ public class SessionService {
   /**
    * Initialize a {@link Session}.
    *
-   * @param user                   {@link User}
-   * @param userDto                {@link UserDTO}
-   * @param isTeamSession          is team session flag
-   * @param registrationType       {@link RegistrationType}
-   * @param sessionStatus          {@link SessionStatus}
+   * @param user             {@link User}
+   * @param userDto          {@link UserDTO}
+   * @param isTeamSession    is team session flag
+   * @param registrationType {@link RegistrationType}
+   * @param sessionStatus    {@link SessionStatus}
    * @return the initialized {@link Session}
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,

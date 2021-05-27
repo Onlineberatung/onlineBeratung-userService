@@ -1,17 +1,23 @@
 package de.caritas.cob.userservice.api.deleteworkflow.scheduler;
 
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyShort;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.testConfig.ApiControllerTestConfig;
+import de.caritas.cob.userservice.testConfig.ConsultingTypeManagerTestConfig;
 import de.caritas.cob.userservice.testConfig.KeycloakTestConfig;
 import de.caritas.cob.userservice.testConfig.RocketChatTestConfig;
 import java.time.LocalDateTime;
@@ -23,13 +29,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-@Import({KeycloakTestConfig.class, RocketChatTestConfig.class, ApiControllerTestConfig.class})
+@Import({KeycloakTestConfig.class, RocketChatTestConfig.class, ApiControllerTestConfig.class,
+    ConsultingTypeManagerTestConfig.class})
 class DeleteUserAnonymousSchedulerIT {
 
   @Autowired
@@ -55,7 +63,7 @@ class DeleteUserAnonymousSchedulerIT {
   @BeforeEach
   public void setup() {
     var createAnonymousEnquiryDTO = new CreateAnonymousEnquiryDTO()
-        .consultingType(ConsultingType.AIDS.getValue());
+        .consultingType(CONSULTING_TYPE_ID_AIDS);
     var responseDTO =
         createAnonymousEnquiryFacade.createAnonymousEnquiry(createAnonymousEnquiryDTO);
 

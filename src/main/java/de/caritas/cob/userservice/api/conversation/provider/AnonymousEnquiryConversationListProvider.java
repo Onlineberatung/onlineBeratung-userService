@@ -83,7 +83,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
     var pageable = PageRequest.of(requestedPage, pageableListRequest.getCount());
 
     return this.sessionRepository
-        .findByConsultingTypeInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(
+        .findByConsultingTypeIdInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(
             relatedConsultingTypes, ANONYMOUS, SessionStatus.NEW, pageable);
   }
 

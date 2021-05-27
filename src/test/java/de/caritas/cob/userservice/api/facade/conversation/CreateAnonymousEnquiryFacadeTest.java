@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade.conversation;
 
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,7 +12,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.conversation.anonymous.AnonymousConversationCreatorService;
 import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUserCreatorService;
@@ -42,7 +43,7 @@ public class CreateAnonymousEnquiryFacadeTest {
   public void createAnonymousEnquiry_Should_ThrowBadRequestException_When_GivenConsultingTypeDoesNotSupportAnonymousConversations() {
     CreateAnonymousEnquiryDTO anonymousEnquiryDTO =
         easyRandom.nextObject(CreateAnonymousEnquiryDTO.class);
-    anonymousEnquiryDTO.setConsultingType(ConsultingType.KREUZBUND.getValue());
+    anonymousEnquiryDTO.setConsultingType(CONSULTING_TYPE_ID_KREUZBUND);
 
     createAnonymousEnquiryFacade.createAnonymousEnquiry(anonymousEnquiryDTO);
 
@@ -56,7 +57,7 @@ public class CreateAnonymousEnquiryFacadeTest {
   public void createAnonymousEnquiry_Should_ReturnValidCreateAnonymousEnquiryResponseDTO() {
     CreateAnonymousEnquiryDTO anonymousEnquiryDTO =
         easyRandom.nextObject(CreateAnonymousEnquiryDTO.class);
-    anonymousEnquiryDTO.setConsultingType(ConsultingType.SUCHT.getValue());
+    anonymousEnquiryDTO.setConsultingType(CONSULTING_TYPE_ID_SUCHT);
     AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
     when(anonymousUserCreatorService.createAnonymousUser(any())).thenReturn(credentials);
     Session session = easyRandom.nextObject(Session.class);

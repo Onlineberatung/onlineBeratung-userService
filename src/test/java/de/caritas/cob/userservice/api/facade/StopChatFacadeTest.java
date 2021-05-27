@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.KREUZBUND;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_WEEKLY_PLUS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
