@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
@@ -39,15 +38,15 @@ public class RegisteredEnquiryConversationListProvider implements ConversationLi
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
     PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(
-        this.sessionService.getEnquiriesForConsultant(consultant, RegistrationType.REGISTERED));
+        this.sessionService.getRegisteredEnquiriesForConsultant(consultant));
 
     enquiriesForConsultant.setPage(obtainPageByOffsetAndCount(pageableListRequest));
     enquiriesForConsultant.setPageSize(pageableListRequest.getCount());
 
     List<ConsultantSessionResponseDTO> pageList = enquiriesForConsultant.getPageList();
-    pageList.forEach(sessionResponse -> this.consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(sessionResponse,
-            pageableListRequest.getRcToken(), consultant));
+    this.consultantSessionEnricher
+        .updateRequiredConsultantSessionValues(pageList, pageableListRequest.getRcToken(),
+            consultant);
 
     return new ConsultantSessionListResponseDTO()
         .sessions(pageList)
