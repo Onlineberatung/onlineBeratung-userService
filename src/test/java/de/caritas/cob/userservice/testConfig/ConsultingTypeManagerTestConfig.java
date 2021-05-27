@@ -21,18 +21,18 @@ public class ConsultingTypeManagerTestConfig {
         return createDummy(Integer.parseInt(consultingTypeId));
       }
 
+      @Override
+      public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId)
+          throws MissingConsultingTypeException {
+        return createDummy(consultingTypeId);
+      }
+
       private ExtendedConsultingTypeResponseDTO createDummy(Integer consultingTypeId) {
         var extendedConsultingTypeResponseDTO = new EasyRandom()
             .nextObject(ExtendedConsultingTypeResponseDTO.class);
         extendedConsultingTypeResponseDTO.getMonitoring().setInitializeMonitoring(false);
         extendedConsultingTypeResponseDTO.setId((int) consultingTypeId);
         return extendedConsultingTypeResponseDTO;
-      }
-
-      @Override
-      public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId)
-          throws MissingConsultingTypeException {
-        return createDummy(consultingTypeId);
       }
     };
   }
