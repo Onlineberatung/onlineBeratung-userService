@@ -64,7 +64,7 @@ public class ConsultantSessionListService {
       return this.sessionService.getEnquiriesForConsultant(consultant);
     }
     if (sessionStatus.equals(SessionStatus.IN_PROGRESS)) {
-      return this.sessionService.getActiveSessionsForConsultant(consultant);
+      return this.sessionService.getActiveAndDoneSessionsForConsultant(consultant);
     }
     return emptyList();
   }
