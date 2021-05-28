@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;

@@ -1,10 +1,12 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.U25;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -21,6 +23,7 @@ class RocketChatOperationConditionProvider {
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull Session session;
   private final @NonNull Consultant consultant;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Checks if the current {@link Consultant} can be added to Rocket.Chat group.
@@ -40,8 +43,12 @@ class RocketChatOperationConditionProvider {
         && this.session.isTeamSession() && canAddToTeamConsultingSession();
   }
 
-  private boolean canAddToTeamConsultingSession() {
-    return !this.session.getConsultingType().equals(U25) || isMainConsultant();
+  private Boolean canAddToTeamConsultingSession() {
+    var consultingTypeSettings = consultingTypeManager
+        .getConsultingTypeSettings(this.session.getConsultingTypeId());
+    return (nonNull(consultingTypeSettings) && isFalse(
+        consultingTypeSettings.getExcludeNonMainConsultantsFromTeamSessions()))
+        || isMainConsultant();
   }
 
   private boolean isMainConsultant() {

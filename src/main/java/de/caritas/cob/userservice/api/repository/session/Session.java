@@ -48,10 +48,10 @@ import org.springframework.lang.Nullable;
 @ToString
 public class Session {
 
-  public Session(User user, ConsultingType consultingType, String postcode, Long agencyId,
+  public Session(User user, int consultingTypeId, String postcode, Long agencyId,
       SessionStatus status, boolean teamSession, boolean monitoring) {
     this.user = user;
-    this.consultingType = consultingType;
+    this.consultingTypeId = consultingTypeId;
     this.postcode = postcode;
     this.agencyId = agencyId;
     this.status = status;
@@ -76,8 +76,7 @@ public class Session {
   private Consultant consultant;
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
-  @NonNull
-  private ConsultingType consultingType;
+  private int consultingTypeId;
 
   @Column(name = "registration_type", updatable = false, nullable = false)
   @Enumerated(EnumType.STRING)

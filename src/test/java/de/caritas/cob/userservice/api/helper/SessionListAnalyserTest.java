@@ -91,11 +91,12 @@ public class SessionListAnalyserTest {
   }
 
   /*
-  * Method: getAttachmentFromRocketChatMessageIfAvailable
+   * Method: getAttachmentFromRocketChatMessageIfAvailable
    */
   @Test
   public void getAttachmentFromRocketChatMessageIfAvailable_Should_ReturnNull_When_FileNotAvailable() {
-    assertNull(sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(RC_USER_ID, ROOMS_LAST_MESSAGE_DTO_WITHOUT_ATTACHMENT));
+    assertNull(sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(RC_USER_ID,
+        ROOMS_LAST_MESSAGE_DTO_WITHOUT_ATTACHMENT));
   }
 
   @Test

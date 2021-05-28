@@ -52,7 +52,7 @@ public class SessionMapper {
     return new SessionDTO()
         .id(session.getId())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .status(session.getStatus().getValue())
         .postcode(session.getPostcode())
         .groupId(session.getGroupId())

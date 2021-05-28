@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_LIST;
@@ -9,6 +8,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ROLES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY_2;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ENQUIRY_ID_2;
@@ -85,17 +85,21 @@ class SessionServiceTest {
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
-  private final Session SESSION = new Session(ENQUIRY_ID, null, null, SUCHT, REGISTERED, "99999",
+  private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
+      REGISTERED, "99999",
       1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
-  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, SUCHT, REGISTERED,
+  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, CONSULTING_TYPE_ID_SUCHT,
+      REGISTERED,
       "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
+      null,
       false, false, nowInUtc(), null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
+      null,
       false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
@@ -103,7 +107,7 @@ class SessionServiceTest {
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
-      null, null, SUCHT.getValue() + "", true);
+      null, null, CONSULTING_TYPE_ID_SUCHT + "", true);
 
   @InjectMocks
   private SessionService sessionService;
@@ -251,11 +255,11 @@ class SessionServiceTest {
     sessions.add(SESSION);
     sessions.add(SESSION_2);
 
-    when(sessionRepository.findByUserAndConsultingType(USER, SUCHT))
+    when(sessionRepository.findByUserAndConsultingTypeId(USER, CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(sessions);
 
     List<Session> result =
-        sessionService.getSessionsForUserByConsultingType(USER, SUCHT);
+        sessionService.getSessionsForUserByConsultingTypeId(USER, CONSULTING_TYPE_ID_SUCHT);
 
     assertEquals(sessions, result);
     assertThat(result.get(0), instanceOf(Session.class));
@@ -461,7 +465,7 @@ class SessionServiceTest {
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
-    assertEquals(session.getConsultingType().getValue(), result.getConsultingType().intValue());
+    assertEquals(session.getConsultingTypeId(), result.getConsultingType().intValue());
 
   }
 

@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
@@ -73,12 +72,11 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_MESSAG
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CREATE_CHAT_RESPONSE_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DECODED_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
@@ -155,6 +153,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
@@ -184,8 +183,8 @@ import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.ArrayList;
@@ -262,7 +261,7 @@ public class UserControllerIT {
       .description(DESCRIPTION)
       .teamAgency(false)
       .offline(false)
-      .consultingType(SUCHT);
+      .consultingType(CONSULTING_TYPE_ID_SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
       new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
@@ -288,21 +287,24 @@ public class UserControllerIT {
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
-      SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS,
+      nowInUtc(), RC_GROUP_ID,
       null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER, null, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
+          AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
+          AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
@@ -322,7 +324,8 @@ public class UserControllerIT {
   private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
-      .asList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
+      .asList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
       new HashSet<>(Collections.singletonList(AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_ENQUIRY =
@@ -446,7 +449,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidAge()
       throws Exception {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25))
+    when(consultingTypeManager.getConsultingTypeSettings(1))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     mvc.perform(post(PATH_REGISTER_USER)
@@ -462,7 +465,9 @@ public class UserControllerIT {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
         .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+            MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+                CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration()
+                    .getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(INVALID_U25_USER_REQUEST_BODY_STATE)
@@ -475,7 +480,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooShort()
       throws Exception {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(0))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER)
@@ -489,7 +494,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooLong()
       throws Exception {
 
-    when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT))
+    when(consultingTypeManager.getConsultingTypeSettings(0))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS);
 
     mvc.perform(post(PATH_REGISTER_USER)
@@ -504,8 +509,9 @@ public class UserControllerIT {
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
-            .getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
+                .getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY)
@@ -520,7 +526,9 @@ public class UserControllerIT {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
         .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+            MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+                CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration()
+                    .getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_U25_USER_REQUEST_BODY)
@@ -535,7 +543,9 @@ public class UserControllerIT {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
         .thenReturn(
-            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration().getMandatoryFields());
+            MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+                CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration()
+                    .getMandatoryFields()));
     doThrow(new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT))
         .when(createUserFacade).createUserAccountWithInitializedConsultingType(Mockito.any());
 
@@ -551,7 +561,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields()));
 
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -566,7 +577,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields()));
 
     mvc.perform(post(PATH_POST_REGISTER_USER)
         .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
@@ -1770,8 +1782,9 @@ public class UserControllerIT {
   public void registerUser_Should_DecodePassword() throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
-        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
-            .getMandatoryFields());
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
+                .getMandatoryFields()));
 
     mvc.perform(post(PATH_REGISTER_USER)
         .content(VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD)
@@ -2266,7 +2279,8 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateUserData_Should_ReturnBadRequest_When_emailAddressIsNotValid() throws Exception {
+  public void updateUserData_Should_ReturnBadRequest_When_emailAddressIsNotValid()
+      throws Exception {
     mvc.perform(put(PATH_GET_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(

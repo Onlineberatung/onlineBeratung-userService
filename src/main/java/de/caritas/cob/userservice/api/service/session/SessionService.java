@@ -2,8 +2,10 @@ package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
@@ -12,7 +14,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -21,7 +22,6 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -30,6 +30,8 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,9 +79,9 @@ public class SessionService {
    * @param user {@link User}
    * @return list of {@link Session}
    */
-  public List<Session> getSessionsForUserByConsultingType(User user,
-      ConsultingType consultingType) {
-    return sessionRepository.findByUserAndConsultingType(user, consultingType);
+  public List<Session> getSessionsForUserByConsultingTypeId(User user,
+      int consultingTypeId) {
+    return sessionRepository.findByUserAndConsultingTypeId(user, consultingTypeId);
   }
 
   /**
@@ -160,26 +162,41 @@ public class SessionService {
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
       RegistrationType registrationType, SessionStatus sessionStatus) {
-    var consultingTypeSettings = obtainConsultingTypeSettings(userDto);
+    var extendedConsultingTypeResponseDTO = obtainConsultingTypeSettings(userDto);
+
     var session = Session.builder()
         .user(user)
-        .consultingType(consultingTypeSettings.getConsultingType())
+        .consultingTypeId(obtainCheckedConsultingTypeId(extendedConsultingTypeResponseDTO))
         .registrationType(registrationType)
         .postcode(userDto.getPostcode())
         .agencyId(userDto.getAgencyId())
         .status(sessionStatus)
         .teamSession(isTeamSession)
-        .monitoring(consultingTypeSettings.isMonitoring())
+        .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
         .build();
-
     return saveSession(session);
   }
 
-  private ConsultingTypeSettings obtainConsultingTypeSettings(UserDTO userDTO) {
-    return consultingTypeManager.getConsultingTypeSettings(
-        ConsultingType.fromConsultingType(userDTO.getConsultingType()));
+  private ExtendedConsultingTypeResponseDTO obtainConsultingTypeSettings(UserDTO userDTO) {
+    return consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
+  }
+
+  private Integer obtainCheckedConsultingTypeId(
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    var consultingTypeId = extendedConsultingTypeResponseDTO.getId();
+    if (isNull(consultingTypeId)) {
+      throw new BadRequestException("Consulting type id must not be null");
+    }
+    return consultingTypeId;
+  }
+
+  private boolean retrieveCheckedMonitoringProperty(
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    MonitoringDTO monitoring = extendedConsultingTypeResponseDTO.getMonitoring();
+
+    return nonNull(monitoring) && isTrue(monitoring.getInitializeMonitoring());
   }
 
   /**
@@ -230,7 +247,8 @@ public class SessionService {
    * @param consultant the consultant
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
-  public List<ConsultantSessionResponseDTO> getRegisteredEnquiriesForConsultant(Consultant consultant) {
+  public List<ConsultantSessionResponseDTO> getRegisteredEnquiriesForConsultant(
+      Consultant consultant) {
     Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
     if (isNotEmpty(consultantAgencies)) {
       return retrieveRegisteredEnquiriesForConsultantAgencies(consultantAgencies);
@@ -388,7 +406,7 @@ public class SessionService {
     return new ConsultantSessionDTO()
         .isTeamSession(session.isTeamSession())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .id(session.getId())
         .status(session.getStatus().getValue())
         .askerId(session.getUser().getUserId())

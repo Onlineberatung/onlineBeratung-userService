@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -81,7 +80,8 @@ public class RelevantUserAccountIdsBySessionProviderTest {
 
   @Test
   public void collectUserIds_Should_returnAllUserIds_When_userIsAuthenticatedUserAndRcIdIsFeedbackGroupId() {
-    when(sessionRepository.findByFeedbackGroupId(any())).thenReturn(buildSessionWithUserAndConsultant());
+    when(sessionRepository.findByFeedbackGroupId(any()))
+        .thenReturn(buildSessionWithUserAndConsultant());
 
     List<String> userIds = this.bySessionProvider.collectUserIds("rcGroupId");
 

@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveF
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -43,6 +44,7 @@ public class AssignSessionFacade {
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -113,7 +115,7 @@ public class AssignSessionFacade {
         .collect(Collectors.toList());
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromGroupsOrRollbackOnFailure();
   }

@@ -78,7 +78,8 @@ public class DeleteKeycloakUserActionTest {
 
   @Test
   public void execute_Should_deleteKeycloakUserAndReturnEmptyList_When_consultantDeletionIsSuccessful() {
-    List<DeletionWorkflowError> workflowErrors = this.deleteKeycloakUserAction.execute(new Consultant());
+    List<DeletionWorkflowError> workflowErrors = this.deleteKeycloakUserAction
+        .execute(new Consultant());
 
     assertThat(workflowErrors, hasSize(0));
     verify(this.keycloakAdminClientService, times(1)).deleteUser(any());

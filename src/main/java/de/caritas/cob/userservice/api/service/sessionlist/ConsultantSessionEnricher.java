@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
@@ -9,12 +12,9 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import java.util.List;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,9 +33,9 @@ public class ConsultantSessionEnricher {
    * "last message date", and "messages read".
    *
    * @param consultantSessionResponseDTOs the session list to be enriched
-   * @param rcToken                      the Rocket.Chat authentication token of the current
-   *                                     consultant
-   * @param consultant                   the {@link Consultant}
+   * @param rcToken                       the Rocket.Chat authentication token of the current
+   *                                      consultant
+   * @param consultant                    the {@link Consultant}
    * @return the enriched {@link ConsultantSessionResponseDTO}s
    */
   public List<ConsultantSessionResponseDTO> updateRequiredConsultantSessionValues(
@@ -88,22 +88,12 @@ public class ConsultantSessionEnricher {
 
   private boolean getMonitoringProperty(SessionDTO session) {
 
-    Optional<ConsultingType> consultingType = ConsultingType.valueOf(session.getConsultingType());
+    var extendedConsultingTypeResponseDTO = consultingTypeManager
+        .getConsultingTypeSettings(session.getConsultingType());
 
-    if (consultingType.isEmpty()) {
-      throw new ServiceException(String
-          .format("Session with id %s does not have a valid consulting type.", session.getId()));
-    }
-    var consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(consultingType.get());
-
-    return consultingTypeSettings.isMonitoring();
-  }
-
-  private void setFallbackDate(ConsultantSessionResponseDTO consultantSessionResponseDTO,
-      SessionDTO session) {
-    session.setMessageDate(Helper.UNIXTIME_0.getTime());
-    consultantSessionResponseDTO.setLatestMessage(Helper.UNIXTIME_0);
+    return nonNull(extendedConsultingTypeResponseDTO) && nonNull(
+        extendedConsultingTypeResponseDTO.getMonitoring()) && isTrue(
+        extendedConsultingTypeResponseDTO.getMonitoring().getInitializeMonitoring());
   }
 
   private boolean isFeedbackFlagAvailable(RocketChatRoomInformation rocketChatRoomInformation,
@@ -112,6 +102,12 @@ public class ConsultantSessionEnricher {
         .containsKey(session.getSession().getFeedbackGroupId())
         && rocketChatRoomInformation.getReadMessages()
         .containsKey(session.getSession().getFeedbackGroupId());
+  }
+
+  private void setFallbackDate(ConsultantSessionResponseDTO consultantSessionResponseDTO,
+      SessionDTO session) {
+    session.setMessageDate(Helper.UNIXTIME_0.getTime());
+    consultantSessionResponseDTO.setLatestMessage(Helper.UNIXTIME_0);
   }
 
 }

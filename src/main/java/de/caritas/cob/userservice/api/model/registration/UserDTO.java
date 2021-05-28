@@ -106,14 +106,14 @@ public class UserDTO implements UserRegistrationDTO {
   }
 
   public UserDTO(String username, String postcode, Long agencyId, String password, String email,
-      String termsAccepted, String consultingType) {
+      String termsAccepted, String consultingTypeId) {
     this.username = username;
     this.postcode = postcode;
     this.agencyId = agencyId;
     this.password = password;
     this.email = email;
     this.termsAccepted = termsAccepted;
-    this.consultingType = consultingType;
+    this.consultingType = consultingTypeId;
   }
 
   public UserDTO(String age, String state, String consultingType) {

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,7 +13,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -103,7 +103,7 @@ public class SessionToConsultantVerifierTest {
   public void verifyPreconditionsForAssignment_Should_notThrowException_When_anonymousSessionIsValid() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setConsultant(null);
-    session.setConsultingType(ConsultingType.U25);
+    session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
     session.setRegistrationType(RegistrationType.ANONYMOUS);
     ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
     ConsultantAgency otherConsultantAgency = mock(ConsultantAgency.class);
@@ -123,7 +123,7 @@ public class SessionToConsultantVerifierTest {
   public void verifyPreconditionsForAssignment_Should_throwException_When_anonymousSessionHasNotConsultingType() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setConsultant(null);
-    session.setConsultingType(ConsultingType.U25);
+    session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
     session.setRegistrationType(RegistrationType.ANONYMOUS);
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     consultant.setConsultantAgencies(null);

@@ -72,7 +72,8 @@ public class DeleteDatabaseConsultantAgencyActionTest {
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(CONSULTANT));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
     assertThat(workflowErrors.get(0).getIdentifier(), is("consultantId"));
-    assertThat(workflowErrors.get(0).getReason(), is("Could not delete consultant agency relations"));
+    assertThat(workflowErrors.get(0).getReason(),
+        is("Could not delete consultant agency relations"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(this.logger, times(1)).error(anyString(), anyString());
   }

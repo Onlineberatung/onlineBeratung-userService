@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_DEBT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
@@ -11,7 +14,6 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -232,11 +234,11 @@ public class SessionToConsultantConditionProviderTest {
 
   @Test
   public void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionConsultingType() {
-    session.setConsultingType(ConsultingType.U25);
-    AgencyDTO differentAgencyDTO = new AgencyDTO().consultingType(ConsultingType.SUCHT);
+    session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
+    AgencyDTO differentAgencyDTO = new AgencyDTO().consultingType(CONSULTING_TYPE_ID_SUCHT);
     ConsultantAgency differentConsultantAgency = mock(ConsultantAgency.class);
     whenAgencyServiceReturnsDTOForId(differentConsultantAgency, 1L, differentAgencyDTO);
-    AgencyDTO otherAgencyDTO = new AgencyDTO().consultingType(ConsultingType.DEBT);
+    AgencyDTO otherAgencyDTO = new AgencyDTO().consultingType(CONSULTING_TYPE_ID_DEBT);
     ConsultantAgency otherConsultantAgency = mock(ConsultantAgency.class);
     whenAgencyServiceReturnsDTOForId(otherConsultantAgency, 2L, otherAgencyDTO);
     consultant.setConsultantAgencies(asSet(differentConsultantAgency, otherConsultantAgency));
@@ -247,16 +249,10 @@ public class SessionToConsultantConditionProviderTest {
     assertThat(result, is(true));
   }
 
-  private void whenAgencyServiceReturnsDTOForId(ConsultantAgency consultantAgency,
-      long agencyId, AgencyDTO agencyDTO) {
-    when(consultantAgency.getAgencyId()).thenReturn(agencyId);
-    when(agencyService.getAgency(agencyId)).thenReturn(agencyDTO);
-  }
-
   @Test
   public void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnFalse_When_ConsultantAgenciesContainSessionConsultingType() {
-    session.setConsultingType(ConsultingType.U25);
-    AgencyDTO u25AgencyDTO = new AgencyDTO().consultingType(ConsultingType.U25);
+    session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
+    AgencyDTO u25AgencyDTO = new AgencyDTO().consultingType(CONSULTING_TYPE_ID_U25);
     ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
     when(agencyService.getAgency(any())).thenReturn(u25AgencyDTO);
     consultant.setConsultantAgencies(asSet(u25ConsultantAgency));
@@ -267,4 +263,9 @@ public class SessionToConsultantConditionProviderTest {
     assertThat(result, is(false));
   }
 
+  private void whenAgencyServiceReturnsDTOForId(ConsultantAgency consultantAgency,
+      long agencyId, AgencyDTO agencyDTO) {
+    when(consultantAgency.getAgencyId()).thenReturn(agencyId);
+    when(agencyService.getAgency(agencyId)).thenReturn(agencyDTO);
+  }
 }

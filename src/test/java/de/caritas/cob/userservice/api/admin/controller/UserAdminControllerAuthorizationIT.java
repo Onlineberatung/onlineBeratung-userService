@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.admin.controller;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.AGENCY_CHANGE_TYPE_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCIES_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCY_PATH;
-import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTING_TYPE_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.DELETE_ASKER_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.DELETE_CONSULTANT_AGENCY_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.DELETE_CONSULTANT_PATH;
@@ -29,10 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
@@ -70,9 +67,6 @@ public class UserAdminControllerAuthorizationIT {
   private SessionAdminService sessionAdminService;
 
   @MockBean
-  private ConsultingTypeAdminService consultingTypeAdminService;
-
-  @MockBean
   private ViolationReportGenerator violationReportGenerator;
 
   @MockBean
@@ -80,9 +74,6 @@ public class UserAdminControllerAuthorizationIT {
 
   @MockBean
   private UserAdminFacade userAdminFacade;
-
-  @MockBean
-  private UsernameTranscoder usernameTranscoder;
 
   @Test
   public void getSessions_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
@@ -98,9 +89,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void getSessions_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -129,50 +123,6 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  public void getConsultingTypes_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-
-    mvc.perform(get(CONSULTING_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
-        .andExpect(status().isUnauthorized());
-
-    verifyNoMoreInteractions(consultingTypeAdminService);
-  }
-
-  @Test
-  @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
-  public void getConsultingTypes_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
-      throws Exception {
-
-    mvc.perform(get(CONSULTING_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(consultingTypeAdminService);
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void getConsultingTypes_Should_ReturnOkAndCallSessionAdminService_When_userAdminAuthority()
-      throws Exception {
-
-    mvc.perform(get(CONSULTING_TYPE_PATH)
-        .param(PAGE_PARAM, "0")
-        .param(PER_PAGE_PARAM, "1")
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
-        .andExpect(status().isOk());
-
-    verify(consultingTypeAdminService, times(1)).findConsultingTypes(any(), any());
-  }
-
-  @Test
   public void generateViolationReport_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
 
@@ -186,9 +136,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void generateViolationReport_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -228,9 +181,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void getConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -272,9 +228,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void getConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -316,9 +275,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void getConsultantAgencies_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -362,9 +324,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void createConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -406,9 +371,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void updateConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -450,9 +418,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void createConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -495,9 +466,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void changeAgencyType_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -537,9 +511,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void deleteConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -579,9 +556,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void deleteConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
@@ -619,9 +599,12 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.START_CHAT,
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
           AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
   public void deleteAsker_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
