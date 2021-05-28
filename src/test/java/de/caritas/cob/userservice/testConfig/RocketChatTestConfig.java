@@ -46,32 +46,41 @@ public class RocketChatTestConfig {
       }
 
       @Override
-      public void deleteGroupAsTechnicalUser(String groupId) {}
+      public void deleteGroupAsTechnicalUser(String groupId) {
+      }
 
       @Override
-      public void addUserToGroup(String rcUserId, String rcGroupId) {}
+      public void addUserToGroup(String rcUserId, String rcGroupId) {
+      }
 
       @Override
-      public void addTechnicalUserToGroup(String rcGroupId) {}
+      public void addTechnicalUserToGroup(String rcGroupId) {
+      }
 
       @Override
-      public void removeUserFromGroup(String rcUserId, String rcGroupId) {}
+      public void removeUserFromGroup(String rcUserId, String rcGroupId) {
+      }
 
       @Override
-      public void removeTechnicalUserFromGroup(String rcGroupId) {}
+      public void removeTechnicalUserFromGroup(String rcGroupId) {
+      }
 
       @Override
-      public void removeAllStandardUsersFromGroup(String rcGroupId) {}
+      public void removeAllStandardUsersFromGroup(String rcGroupId) {
+      }
 
       @Override
-      public void removeSystemMessages(String rcGroupId, LocalDateTime oldest, LocalDateTime latest)
-      {}
+      public void removeSystemMessages(String rcGroupId, LocalDateTime oldest,
+          LocalDateTime latest) {
+      }
 
       @Override
-      public void removeAllMessages(String rcGroupId) {}
+      public void removeAllMessages(String rcGroupId) {
+      }
 
       @Override
-      public void deleteUser(String rcUserId) {}
+      public void deleteUser(String rcUserId) {
+      }
     };
   }
 }

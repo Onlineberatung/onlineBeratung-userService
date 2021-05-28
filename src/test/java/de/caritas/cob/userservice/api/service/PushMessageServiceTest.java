@@ -78,7 +78,8 @@ public class PushMessageServiceTest {
   }
 
   @Test
-  public void pushMessage_Should_notSendNotification_When_firebaseIsDisabled() throws FirebaseMessagingException {
+  public void pushMessage_Should_notSendNotification_When_firebaseIsDisabled()
+      throws FirebaseMessagingException {
     setField(this.pushMessageService, "isEnabled", false);
 
     this.pushMessageService.pushNewMessageEvent("registrationToken");

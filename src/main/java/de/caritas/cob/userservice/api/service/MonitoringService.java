@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -13,34 +13,30 @@ import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
 import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for {@link Monitoring}
+ * Service for {@link Monitoring}.
  */
 @Service
+@RequiredArgsConstructor
 public class MonitoringService {
 
-  private final MonitoringRepository monitoringRepository;
-  private final MonitoringStructureProvider monitoringStructureProvider;
-
-  @Autowired
-  public MonitoringService(MonitoringRepository monitoringRepository,
-      MonitoringStructureProvider monitoringStructureProvider) {
-    this.monitoringRepository = monitoringRepository;
-    this.monitoringStructureProvider = monitoringStructureProvider;
-  }
+  private final @NonNull MonitoringRepository monitoringRepository;
+  private final @NonNull MonitoringStructureProvider monitoringStructureProvider;
 
   /**
    * Creates and inserts the initial monitoring data for the given {@link Session} into the database
    * if monitoring is activated for the given {@link ExtendedConsultingTypeResponseDTO}.
    *
-   * @param session                {@link Session}
+   * @param session                           {@link Session}
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    * @throws CreateMonitoringException @link CreateMonitoringException}
    */
@@ -48,7 +44,8 @@ public class MonitoringService {
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
       throws CreateMonitoringException {
 
-    if (nonNull(session) && extendedConsultingTypeResponseDTO.getMonitoring().getInitializeMonitoring()) {
+    var monitoring = extendedConsultingTypeResponseDTO.getMonitoring();
+    if (nonNull(session) && nonNull(monitoring) && isTrue(monitoring.getInitializeMonitoring())) {
       try {
         updateMonitoring(session.getId(),
             monitoringStructureProvider.getMonitoringInitialList(session.getConsultingTypeId()));

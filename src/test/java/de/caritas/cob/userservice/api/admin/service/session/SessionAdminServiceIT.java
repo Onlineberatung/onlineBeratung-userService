@@ -29,21 +29,24 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnAllSessions_When_noFilterIsGiven() {
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 100, new SessionFilter());
+    SessionAdminResultDTO sessions = this.sessionAdminService
+        .findSessions(1, 100, new SessionFilter());
 
     assertThat(sessions.getEmbedded(), hasSize(100));
   }
 
   @Test
   public void findSessions_Should_returnOneSession_When_perPageIsNegativeValue() {
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, -100, new SessionFilter());
+    SessionAdminResultDTO sessions = this.sessionAdminService
+        .findSessions(1, -100, new SessionFilter());
 
     assertThat(sessions.getEmbedded(), hasSize(1));
   }
 
   @Test
   public void findSessions_Should_returnFullMappedSessionAdminDTO() {
-    SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 1, new SessionFilter());
+    SessionAdminResultDTO sessions = this.sessionAdminService
+        .findSessions(1, 1, new SessionFilter());
 
     SessionAdminDTO sessionAdminDTO = sessions.getEmbedded().iterator().next();
     assertThat(sessionAdminDTO.getAgencyId(), notNullValue());
@@ -62,8 +65,10 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_haveCorrectPagedResults_When_noFilterIsGiven() {
-    SessionAdminResultDTO firstPage = this.sessionAdminService.findSessions(1, 100, new SessionFilter());
-    SessionAdminResultDTO secondPage = this.sessionAdminService.findSessions(2, 100, new SessionFilter());
+    SessionAdminResultDTO firstPage = this.sessionAdminService
+        .findSessions(1, 100, new SessionFilter());
+    SessionAdminResultDTO secondPage = this.sessionAdminService
+        .findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
     assertThat(secondPage.getEmbedded(), hasSize(41));
@@ -82,7 +87,8 @@ public class SessionAdminServiceIT {
 
   @Test
   public void findSessions_Should_returnSessionsFilteredByConsultant_When_filterHasConsultantSet() {
-    SessionFilter sessionFilter = new SessionFilter().consultant("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc");
+    SessionFilter sessionFilter = new SessionFilter()
+        .consultant("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc");
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 

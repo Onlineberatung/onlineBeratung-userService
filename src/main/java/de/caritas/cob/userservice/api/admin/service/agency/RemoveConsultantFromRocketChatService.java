@@ -40,7 +40,8 @@ public class RemoveConsultantFromRocketChatService {
         .collect(Collectors.toMap(session -> session, this::observeConsultantsToRemove));
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, this.consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
+            this.consultingTypeManager)
         .onSessionConsultants(consultantsFromSession)
         .removeFromGroupsOrRollbackOnFailure();
   }

@@ -209,7 +209,7 @@ public class MonitoringStructureProviderTest {
   @Test
   public void getMonitoringInitialList_Should_returnExpectedMonitoring_When_consultingTypeHAsMonitoring() {
     ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
-    var monitoringDTO  = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
+    var monitoringDTO = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
     monitoringDTO.setMonitoringTemplateFile("/monitoring/sucht.json");
     when(settings.getMonitoring()).thenReturn(monitoringDTO);
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);

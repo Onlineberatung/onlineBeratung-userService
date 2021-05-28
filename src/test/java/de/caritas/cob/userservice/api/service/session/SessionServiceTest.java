@@ -85,17 +85,21 @@ class SessionServiceTest {
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
       null, null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
-  private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999",
+  private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
+      REGISTERED, "99999",
       1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
-  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
+  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, CONSULTING_TYPE_ID_SUCHT,
+      REGISTERED,
       "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
+      null,
       false, false, nowInUtc(), null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
+      null,
       false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());

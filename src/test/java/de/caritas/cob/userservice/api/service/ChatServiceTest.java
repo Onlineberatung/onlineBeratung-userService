@@ -14,6 +14,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -88,8 +89,8 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertEquals(ACTIVE_CHAT.getConsultingTypeId(),
-        resultList.get(0).getChat().getConsultingType());
+    assertThat(ACTIVE_CHAT.getConsultingTypeId(),
+        is(resultList.get(0).getChat().getConsultingType()));
     assertEquals(
         LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
             ACTIVE_CHAT.getStartDate().getDayOfMonth()),
@@ -121,8 +122,8 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertEquals(ACTIVE_CHAT.getConsultingTypeId(),
-        resultList.get(0).getChat().getConsultingType());
+    assertThat(ACTIVE_CHAT.getConsultingTypeId(),
+        is(resultList.get(0).getChat().getConsultingType()));
     assertEquals(
         LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
             ACTIVE_CHAT.getStartDate().getDayOfMonth()),

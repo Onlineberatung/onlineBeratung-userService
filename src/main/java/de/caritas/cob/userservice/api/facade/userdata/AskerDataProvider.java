@@ -74,7 +74,6 @@ public class AskerDataProvider {
     return consultingTypes;
   }
 
-
   private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
 

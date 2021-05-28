@@ -6,8 +6,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -75,7 +75,7 @@ public class ConsultantAgencyRelationCreatorService {
 
   private void createNewConsultantAgency(ConsultantAgencyCreationInput input,
       Consumer<String> logMethod) {
-    Consultant consultant = this.retrieveConsultant(input.getConsultantId());
+    var consultant = this.retrieveConsultant(input.getConsultantId());
 
     this.checkConsultantHasRole(input);
 
@@ -112,7 +112,7 @@ public class ConsultantAgencyRelationCreatorService {
   }
 
   private AgencyDTO retrieveAgency(Long agencyId) {
-    AgencyDTO agencyDto = this.agencyService.getAgencyWithoutCaching(agencyId);
+    var agencyDto = this.agencyService.getAgencyWithoutCaching(agencyId);
     return Optional.ofNullable(agencyDto)
         .orElseThrow(() -> new BadRequestException(
             String.format("AgencyId %s is not a valid agency", agencyId)));
@@ -124,7 +124,7 @@ public class ConsultantAgencyRelationCreatorService {
       consultant.getConsultantAgencies().stream()
           .map(ConsultantAgency::getAgencyId)
           .map(this::retrieveAgency)
-          .filter(agency -> (agency.getConsultingType() != consultingTypeId))
+          .filter(agency -> agency.getConsultingType() != consultingTypeId)
           .findFirst()
           .ifPresent(agency -> {
             throw new BadRequestException(String
@@ -138,7 +138,6 @@ public class ConsultantAgencyRelationCreatorService {
       Consumer<String> logMethod) {
     List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
     RocketChatAddToGroupOperationService
-
         .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod, consultingTypeManager)
         .onSessions(relevantSessions)
         .withConsultant(consultant)

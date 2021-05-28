@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
@@ -16,6 +16,7 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class CreateUserFacade {
   /**
    * Updates Keycloak role and password and creates a user account in MariaDB.
    *
-   * @param userId Keycloak user ID
+   * @param userId  Keycloak user ID
    * @param userDTO {@link UserDTO}
    * @return {@link User}
    */
@@ -67,11 +68,12 @@ public class CreateUserFacade {
     try {
       updateKeycloakRoleAndPassword(userId, userDTO, role);
 
-      var extendedConsultingTypeResponseDTO = consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
+      var extendedConsultingTypeResponseDTO = consultingTypeManager
+          .getConsultingTypeSettings(userDTO.getConsultingType());
 
       user = userService
           .createUser(userId, userDTO.getUsername(), returnDummyEmailIfNoneGiven(userDTO, userId),
-              extendedConsultingTypeResponseDTO.getLanguageFormal());
+              isTrue(extendedConsultingTypeResponseDTO.getLanguageFormal()));
 
     } catch (Exception ex) {
       rollBackAccountInitialization(userId, userDTO);

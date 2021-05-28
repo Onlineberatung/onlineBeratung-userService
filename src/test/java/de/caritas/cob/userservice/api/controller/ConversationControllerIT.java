@@ -7,8 +7,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -181,7 +181,8 @@ public class ConversationControllerIT {
   }
 
   @Test
-  public void acceptAnonymousEnquiry_Should_returnBadRequest_When_sessionIdIsInvalid() throws Exception {
+  public void acceptAnonymousEnquiry_Should_returnBadRequest_When_sessionIdIsInvalid()
+      throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH.replace("1", "invalid"))
         .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
         .andExpect(status().isBadRequest());

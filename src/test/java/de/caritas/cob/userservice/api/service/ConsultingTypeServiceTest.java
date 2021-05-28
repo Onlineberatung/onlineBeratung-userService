@@ -1,7 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
@@ -30,14 +31,16 @@ public class ConsultingTypeServiceTest {
   private SecurityHeaderSupplier securityHeaderSupplier;
 
   @Test
-  public void ConsultingTypeService_Should_Return_A_IdList_From_BasicConsultingTypeResponseDTO() {
+  public void ConsultingTypeService_Should_Return_expectedIdList_From_BasicConsultingTypeResponseDTO() {
     int size = 15;
     var randomBasicConsultingTypeResponseDTOList = generateRandomExtendedConsultingTypeResponseDTOList(
         size);
     when(consultingTypeControllerApi.getBasicConsultingTypeList())
         .thenReturn(randomBasicConsultingTypeResponseDTOList);
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
+
     List<Integer> consultingTypeIds = consultingTypeService.getAllConsultingTypeIds();
+
     assertEquals(consultingTypeIds.size(), size);
     assertEquals(randomBasicConsultingTypeResponseDTOList.stream().map(
         BasicConsultingTypeResponseDTO::getId)
@@ -53,6 +56,15 @@ public class ConsultingTypeServiceTest {
     return new Random().ints(size, Integer.MIN_VALUE, Integer.MAX_VALUE)
         .mapToObj(this::generateExtendedConsultingTypeResponseDTO).collect(
             Collectors.toList());
+  }
+
+  @Test
+  public void getExtendedConsultingTypeResponseDTO_Should_callConsultingTypeController_When_idExists() {
+    when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
+
+    this.consultingTypeService.getExtendedConsultingTypeResponseDTO(1);
+
+    verify(this.consultingTypeControllerApi, times(1)).getExtendedConsultingTypeById(1);
   }
 
 }

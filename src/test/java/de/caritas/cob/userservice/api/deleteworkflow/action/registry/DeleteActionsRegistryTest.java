@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.registry;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.LAST;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FIRST;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.FOURTH;
+import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.LAST;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.SECOND;
 import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.THIRD;
 import static java.util.Arrays.asList;

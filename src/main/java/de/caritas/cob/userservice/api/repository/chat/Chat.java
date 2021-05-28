@@ -53,7 +53,7 @@ public class Chat {
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
   @NonNull
-  private int consultingTypeId;
+  private Integer consultingTypeId;
 
   @Column(name = "initial_start_date", updatable = true, nullable = false)
   @NonNull

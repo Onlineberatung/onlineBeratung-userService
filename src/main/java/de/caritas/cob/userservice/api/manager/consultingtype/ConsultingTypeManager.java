@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
@@ -20,13 +22,10 @@ public class ConsultingTypeManager {
   /**
    * Returns the {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID.
    *
-   * @param consultingTypeId The consulting ID for which the seetings are searched
+   * @param consultingTypeId The consulting ID for which the settings are searched
    * @return {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID
-   * @throws MissingConsultingTypeException when no settings for provided consulting type where
-   *                                        found
    */
-  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId)
-      throws MissingConsultingTypeException {
+  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId) {
     try {
       return consultingTypeService.getExtendedConsultingTypeResponseDTO(consultingTypeId);
     } catch (RestClientException ex) {
@@ -35,6 +34,12 @@ public class ConsultingTypeManager {
     }
   }
 
+  /**
+   * Returns the {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID.
+   *
+   * @param consultingTypeId The consulting ID for which the settings are searched
+   * @return {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID
+   */
   public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(String consultingTypeId) {
     return getConsultingTypeSettings(Integer.parseInt(consultingTypeId));
   }
@@ -49,8 +54,9 @@ public class ConsultingTypeManager {
   }
 
   public boolean isConsultantBoundedToAgency(int consultingTypeId) {
-    return consultingTypeService.getExtendedConsultingTypeResponseDTO(consultingTypeId)
-        .getConsultantBoundedToConsultingType();
+    var extendedConsultingTypeResponseDTO = consultingTypeService
+        .getExtendedConsultingTypeResponseDTO(consultingTypeId);
+    return isTrue(extendedConsultingTypeResponseDTO.getConsultantBoundedToConsultingType());
   }
 
 }

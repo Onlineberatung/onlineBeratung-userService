@@ -123,8 +123,10 @@ public class AnonymousUsernameRegistryTest {
   public void generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_MissingIdsOfListHaveExistingConsultantsInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
     setIdRegistryField(idRegistryListWithoutThree);
-    when(consultantService.getConsultantByUsername("Ratsuchende_r 3")).thenReturn(Optional.of(CONSULTANT));
-    when(consultantService.getConsultantByUsername("Ratsuchende_r 5")).thenReturn(Optional.of(CONSULTANT));
+    when(consultantService.getConsultantByUsername("Ratsuchende_r 3"))
+        .thenReturn(Optional.of(CONSULTANT));
+    when(consultantService.getConsultantByUsername("Ratsuchende_r 5"))
+        .thenReturn(Optional.of(CONSULTANT));
     when(consultantService.getConsultantByUsername("Ratsuchende_r 7")).thenReturn(Optional.empty());
 
     anonymousUsernameRegistry.generateUniqueUsername();

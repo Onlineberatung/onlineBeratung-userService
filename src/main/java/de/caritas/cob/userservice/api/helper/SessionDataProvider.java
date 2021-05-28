@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.helper;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
@@ -51,8 +50,8 @@ public class SessionDataProvider {
   /**
    * Get list of session data items for session.
    *
-   * @param session       the {@link Session}
-   * @param sessionData   the {@link SessionDataDTO}
+   * @param session     the {@link Session}
+   * @param sessionData the {@link SessionDataDTO}
    * @return the list of session data items
    */
   public List<SessionData> createSessionDataList(Session session,
@@ -96,7 +95,7 @@ public class SessionDataProvider {
   }
 
   private SessionData obtainUpdatedOrInitialSessionData(Session session, String key, String value) {
-    SessionData sessionData = session.getSessionData()
+    var sessionData = session.getSessionData()
         .stream()
         .filter(data -> data.getKey().equals(key))
         .findFirst()
@@ -134,7 +133,7 @@ public class SessionDataProvider {
    * Returns the {@link SessionDataDTO} for the given {@link UserDTO}.
    *
    * @param userDTO {@link UserDTO}
-   * @return        {@link SessionDataDTO}
+   * @return {@link SessionDataDTO}
    */
   public static SessionDataDTO fromUserDTO(UserDTO userDTO) {
     return (SessionDataDTO) new SessionDataDTO()

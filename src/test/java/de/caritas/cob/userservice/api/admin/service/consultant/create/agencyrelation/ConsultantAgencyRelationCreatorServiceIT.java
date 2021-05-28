@@ -140,7 +140,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     agencyDTO.setTeamAgency(true);
     agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
-    when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(extendedConsultingTypeResponseDTO);
+    when(consultingTypeManager.getConsultingTypeSettings(0))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
         SessionStatus.IN_PROGRESS);

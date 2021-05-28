@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.facade;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -35,6 +35,7 @@ import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -84,8 +85,8 @@ public class CreateEnquiryMessageFacade {
       var session = fetchSessionForEnquiryMessage(sessionId, user);
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
-          consultingTypeManager.getConsultingTypeSettings(session.getConsultingTypeId());
+      var extendedConsultingTypeResponseDTO = consultingTypeManager
+          .getConsultingTypeSettings(session.getConsultingTypeId());
 
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
@@ -241,11 +242,11 @@ public class CreateEnquiryMessageFacade {
   }
 
   private String retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(Session session,
-      String rcGroupId,
-      List<ConsultantAgency> agencyList, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
+      String rcGroupId, List<ConsultantAgency> agencyList,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
       throws CreateEnquiryException {
 
-    if (!extendedConsultingTypeResponseDTO.getInitializeFeedbackChat()) {
+    if (isFalse(extendedConsultingTypeResponseDTO.getInitializeFeedbackChat())) {
       return null;
     }
 

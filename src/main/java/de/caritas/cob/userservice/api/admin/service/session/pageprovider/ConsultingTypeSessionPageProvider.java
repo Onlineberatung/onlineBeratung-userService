@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -19,7 +18,6 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
 
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull SessionFilter sessionFilter;
-  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Executes the search query on the repository.

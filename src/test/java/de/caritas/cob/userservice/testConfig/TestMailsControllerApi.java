@@ -14,7 +14,8 @@ public class TestMailsControllerApi extends MailsControllerApi {
   }
 
   @Override
-  public void sendErrorMail(ErrorMailDTO errorMailDTO) {}
+  public void sendErrorMail(ErrorMailDTO errorMailDTO) {
+  }
 
   @Override
   public ResponseEntity<Void> sendErrorMailWithHttpInfo(ErrorMailDTO errorMailDTO)
@@ -23,7 +24,8 @@ public class TestMailsControllerApi extends MailsControllerApi {
   }
 
   @Override
-  public void sendMails(MailsDTO mailsDTO) {}
+  public void sendMails(MailsDTO mailsDTO) {
+  }
 
   @Override
   public ResponseEntity<Void> sendMailsWithHttpInfo(MailsDTO mailsDTO) {
