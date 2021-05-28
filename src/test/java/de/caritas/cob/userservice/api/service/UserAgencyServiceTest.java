@@ -17,6 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,8 +27,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 
 @RunWith(SpringRunner.class)
 public class UserAgencyServiceTest {
@@ -41,14 +41,14 @@ public class UserAgencyServiceTest {
 
   /**
    * Method: saveUserAgency
-   * 
    */
 
   @Test
   public void saveUserAgency_Should_ThrowInternalServerErrorException_When_DatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
     when(userAgencyRepository.save(Mockito.any())).thenThrow(ex);
 
     try {
@@ -72,7 +72,6 @@ public class UserAgencyServiceTest {
 
   /**
    * Method: getUserAgenciesByUser
-   * 
    */
 
   @Test
@@ -80,7 +79,8 @@ public class UserAgencyServiceTest {
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
     when(userAgencyRepository.findByUser(Mockito.any())).thenThrow(ex);
 
     try {
@@ -103,14 +103,14 @@ public class UserAgencyServiceTest {
 
   /**
    * Method: deleteUser
-   * 
    */
 
   @Test
   public void deleteUserAgency_Should_ThrowInternalServerErrorException_When_DatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {};
+    DataAccessException ex = new DataAccessException(ERROR) {
+    };
     doThrow(ex).when(userAgencyRepository).delete(USER_AGENCY);
 
     try {

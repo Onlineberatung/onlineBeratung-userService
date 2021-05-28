@@ -6,6 +6,7 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -43,6 +44,7 @@ public class AssignEnquiryFacade {
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatRollbackService rocketChatRollbackService;
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -122,7 +124,7 @@ public class AssignEnquiryFacade {
         .collect(Collectors.toList());
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromGroupsOrRollbackOnFailure();
   }

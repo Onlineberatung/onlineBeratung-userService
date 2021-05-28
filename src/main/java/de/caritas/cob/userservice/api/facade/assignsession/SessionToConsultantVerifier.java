@@ -115,7 +115,7 @@ public class SessionToConsultantVerifier {
         consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
       var message = String.format(
           "Consulting type %s of session %s is not available for consultant %s.",
-          consultantSessionDTO.getSession().getConsultingType(),
+          consultantSessionDTO.getSession().getConsultingTypeId(),
           consultantSessionDTO.getSession().getId().toString(),
           consultantSessionDTO.getConsultant().getId());
 

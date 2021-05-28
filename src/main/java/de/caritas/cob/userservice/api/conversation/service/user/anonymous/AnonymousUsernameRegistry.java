@@ -5,6 +5,7 @@ import static java.util.Collections.sort;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.LinkedList;
 import lombok.NonNull;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 public class AnonymousUsernameRegistry {
 
   private final @NonNull UserService userService;
+  private final @NonNull ConsultantService consultantService;
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   @Value("${anonymous.username.prefix}")
@@ -63,9 +65,8 @@ public class AnonymousUsernameRegistry {
   }
 
   private boolean isUsernameOccupied(String username) {
-    return userService.findUserByUsername(username)
-        .stream()
-        .count() > 0;
+    return userService.findUserByUsername(username).isPresent()
+        || consultantService.getConsultantByUsername(username).isPresent();
   }
 
   private int obtainUsernameId(String username) {

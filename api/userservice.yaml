@@ -1663,10 +1663,8 @@ components:
           type: boolean
           example: false
         consultingType:
-          $ref: '#/components/schemas/ConsultingType'
-
-    ConsultingType:
-      type: object
+          type: integer
+          example: 1
 
     MobileTokenDTO:
       type: object

@@ -6,8 +6,6 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
@@ -56,7 +54,8 @@ public class ConsultantWithWrongTeamConsultantFlagViolationReportRuleTest {
         .thenReturn(singletonList(violatedConsultantAgency.getConsultant()));
     when(this.consultantAgencyRepository.findAll())
         .thenReturn(singletonList(violatedConsultantAgency));
-    this.reportRule.setAllAgencies(singletonList(new AgencyAdminResponseDTO().id(1L).teamAgency(false)));
+    this.reportRule
+        .setAllAgencies(singletonList(new AgencyAdminResponseDTO().id(1L).teamAgency(false)));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();
 

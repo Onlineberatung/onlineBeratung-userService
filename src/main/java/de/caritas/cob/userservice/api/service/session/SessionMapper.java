@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.session;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toIsoTime;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toUnixTime;
 import static java.util.Objects.nonNull;
 
@@ -51,7 +52,7 @@ public class SessionMapper {
     return new SessionDTO()
         .id(session.getId())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .status(session.getStatus().getValue())
         .postcode(session.getPostcode())
         .groupId(session.getGroupId())
@@ -63,7 +64,7 @@ public class SessionMapper {
         .isTeamSession(session.isTeamSession())
         .monitoring(session.isMonitoring())
         .registrationType(session.getRegistrationType().name())
-        .createDate(String.valueOf(session.getCreateDate()));
+        .createDate(toIsoTime(session.getCreateDate()));
   }
 
   private SessionUserDTO convertToSessionUserDTO(Session session) {

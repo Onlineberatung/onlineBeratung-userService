@@ -100,7 +100,8 @@ public class KeycloakTestConfig {
       }
 
       @Override
-      public void changeEmailAddress(String emailAddress) {}
+      public void changeEmailAddress(String emailAddress) {
+      }
     };
   }
 }

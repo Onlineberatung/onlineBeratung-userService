@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -44,13 +45,17 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   @Mock
   private Consultant consultant;
 
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
+
   @Before
   public void setup() {
     Map<Session, List<Consultant>> sessionConsultants = new HashMap<>();
     sessionConsultants.put(session, singletonList(consultant));
     this.removeService =
         RocketChatRemoveFromGroupOperationService
-            .getInstance(this.rocketChatFacade, this.keycloakAdminClientService)
+            .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
+                consultingTypeManager)
             .onSessionConsultants(sessionConsultants);
   }
 

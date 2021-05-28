@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
@@ -10,13 +11,12 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInforma
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,8 +37,8 @@ public class CreateUserFacade {
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 
   /**
-   * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on
-   * the provided {@link ConsultingType}.
+   * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
+   * provided consulting ID.
    *
    * @param userDTO {@link UserDTO}
    */
@@ -57,7 +57,7 @@ public class CreateUserFacade {
   /**
    * Updates Keycloak role and password and creates a user account in MariaDB.
    *
-   * @param userId Keycloak user ID
+   * @param userId  Keycloak user ID
    * @param userDTO {@link UserDTO}
    * @return {@link User}
    */
@@ -68,9 +68,12 @@ public class CreateUserFacade {
     try {
       updateKeycloakRoleAndPassword(userId, userDTO, role);
 
-      user = userService.createUser(userId, userDTO.getUsername(),
-          returnDummyEmailIfNoneGiven(userDTO, userId),
-          obtainConsultingTypeSettings(userDTO).isLanguageFormal());
+      var extendedConsultingTypeResponseDTO = consultingTypeManager
+          .getConsultingTypeSettings(userDTO.getConsultingType());
+
+      user = userService
+          .createUser(userId, userDTO.getUsername(), returnDummyEmailIfNoneGiven(userDTO, userId),
+              isTrue(extendedConsultingTypeResponseDTO.getLanguageFormal()));
 
     } catch (Exception ex) {
       rollBackAccountInitialization(userId, userDTO);
@@ -79,9 +82,8 @@ public class CreateUserFacade {
     return user;
   }
 
-  private ConsultingTypeSettings obtainConsultingTypeSettings(UserDTO userDTO) {
-    return consultingTypeManager.getConsultingTypeSettings(
-            ConsultingType.fromConsultingType(userDTO.getConsultingType()));
+  private ExtendedConsultingTypeResponseDTO obtainConsultingTypeSettings(UserDTO userDTO) {
+    return consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
   }
 
   private void updateKeycloakRoleAndPassword(String userId, UserDTO userDTO, UserRole role) {

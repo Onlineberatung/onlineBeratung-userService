@@ -472,6 +472,36 @@
 							<modelPackage>${project.groupId}.${project.artifactId}.liveservice.generated.web.model</modelPackage>
 						</configuration>
 					</execution>
+					<execution>
+						<id>consulting-type-service-client-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<library>resttemplate</library>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/consultingtypeservice.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<generateApis>true</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.consultingtypeservice.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.consultingtypeservice.generated.web.model
+							</modelPackage>
+							<typeMappings>
+								<typeMapping>
+									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingtype.roles.Consultant
+								</typeMapping>
+							</typeMappings>
+						</configuration>
+					</execution>
 					<!-- Generate client API for agency admin service -->
 					<execution>
 						<id>agency-admin-service-client-model</id>

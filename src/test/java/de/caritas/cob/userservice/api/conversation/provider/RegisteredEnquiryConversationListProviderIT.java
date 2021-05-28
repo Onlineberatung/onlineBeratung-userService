@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -26,6 +25,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.PeekingIterator;
 import org.jeasy.random.EasyRandom;
@@ -58,9 +58,6 @@ public class RegisteredEnquiryConversationListProviderIT {
 
   @MockBean
   private ValidatedUserAccountProvider userAccountProvider;
-
-  @MockBean
-  private UsernameTranscoder usernameTranscoder;
 
   @Before
   public void setup() {
@@ -141,6 +138,7 @@ public class RegisteredEnquiryConversationListProviderIT {
   }
 
   private void saveRegisteredSessions(int amount) {
+    var random = new Random();
     List<Session> sessions = new EasyRandom().objects(Session.class, amount)
         .collect(Collectors.toList());
     User user = this.userRepository.findAll().iterator().next();
@@ -153,6 +151,7 @@ public class RegisteredEnquiryConversationListProviderIT {
       session.setPostcode("12345");
       session.setAgencyId(1L);
       session.setStatus(SessionStatus.NEW);
+      session.setConsultingTypeId(random.nextInt(127));
     });
     this.sessionRepository.saveAll(sessions);
   }

@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.model.validation;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import java.util.regex.Pattern;
@@ -14,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Checks if the age in a {@link UserDTO} is valid (depending on value in
- * {@link ConsultingTypeSettings}.
+ * the consulting type).
  */
 @RequiredArgsConstructor
 public class ValidAgeValidator implements ConstraintValidator<ValidAge, UserDTO> {

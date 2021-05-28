@@ -97,7 +97,8 @@ class DeleteUserAnonymousServiceTest {
     return (sessionStatus) -> createSessionForUser(user, sessionUpdateDate, sessionStatus);
   }
 
-  private Session createSessionForUser(User user, LocalDateTime updateDate, SessionStatus sessionStatus) {
+  private Session createSessionForUser(User user, LocalDateTime updateDate,
+      SessionStatus sessionStatus) {
     Session session = new Session();
     session.setId((long) sessionStatus.getValue());
     session.setUpdateDate(updateDate);
@@ -119,7 +120,8 @@ class DeleteUserAnonymousServiceTest {
 
   @ParameterizedTest
   @MethodSource("createUpdateDatesWithinDeletionPeriod")
-  void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_sessionsAreDoneWithinDeletionPeriod(LocalDateTime updateDate) {
+  void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_sessionsAreDoneWithinDeletionPeriod(
+      LocalDateTime updateDate) {
     User user = new User();
     Set<Session> userSessions = Set.of(createSessionForUser(user, updateDate, SessionStatus.DONE));
     user.setSessions(userSessions);
@@ -144,7 +146,8 @@ class DeleteUserAnonymousServiceTest {
 
   @ParameterizedTest
   @MethodSource("createOverdueUpdateDates")
-  void deleteInactiveAnonymousUsers_Should_performAskerDeletion_When_userSessionsAreDoneAndOverdue(LocalDateTime overdueUpdateDate) {
+  void deleteInactiveAnonymousUsers_Should_performAskerDeletion_When_userSessionsAreDoneAndOverdue(
+      LocalDateTime overdueUpdateDate) {
     User user = new User();
     Set<Session> userSessions = Set.of(createSessionForUser(user, overdueUpdateDate,
         SessionStatus.DONE));

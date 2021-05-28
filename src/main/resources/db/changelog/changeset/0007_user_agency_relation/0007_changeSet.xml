@@ -1,10 +1,17 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
-    <changeSet author="COBH-2046" id="COBH-2046_user_agency_relation">
-		<sqlFile path="db/changelog/changeset/0007_user_agency_relation/user-agency-relation.sql" stripComments="true" />
-		<sqlFile endDelimiter="//" path="db/changelog/changeset/0007_user_agency_relation/user-agency-relation-trigger.sql" stripComments="true" />
-	    <rollback>
-			<sqlFile path="db/changelog/changeset/0007_user_agency_relation/user-agency-relation-rollback.sql" stripComments="true" />
-		</rollback>
-	</changeSet>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+  <changeSet author="COBH-2046" id="COBH-2046_user_agency_relation">
+    <sqlFile path="db/changelog/changeset/0007_user_agency_relation/user-agency-relation.sql"
+      stripComments="true"/>
+    <sqlFile endDelimiter="//"
+      path="db/changelog/changeset/0007_user_agency_relation/user-agency-relation-trigger.sql"
+      stripComments="true"/>
+    <rollback>
+      <sqlFile
+        path="db/changelog/changeset/0007_user_agency_relation/user-agency-relation-rollback.sql"
+        stripComments="true"/>
+    </rollback>
+  </changeSet>
 </databaseChangeLog>

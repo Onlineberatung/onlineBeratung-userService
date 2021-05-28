@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.session;
 
 import de.caritas.cob.userservice.api.admin.service.session.pageprovider.PageProviderFactory;
-import de.caritas.cob.userservice.api.admin.service.session.pageprovider.SessionPageProvider;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -21,20 +20,21 @@ public class SessionAdminService {
   private final @NonNull SessionRepository sessionRepository;
 
   /**
-   * Finds existing sessions filtered by {@link SessionFilter} and retrieves all sessions if no filter
-   * is set.
+   * Finds existing sessions filtered by {@link SessionFilter} and retrieves all sessions if no
+   * filter is set.
    *
-   * @param page the current page
-   * @param perPage number of items per page
+   * @param page          the current page
+   * @param perPage       number of items per page
    * @param sessionFilter criteria to filter on sessions
    * @return a generated {@link SessionAdminResultDTO} containing the results
    */
-  public SessionAdminResultDTO findSessions(Integer page, Integer perPage, SessionFilter sessionFilter) {
+  public SessionAdminResultDTO findSessions(Integer page, Integer perPage,
+      SessionFilter sessionFilter) {
     Pageable pageable = PageRequest.of(Math.max(page - 1, 0), Math.max(perPage, 1));
 
-    SessionPageProvider sessionPageProvider =
-        PageProviderFactory.getInstance(this.sessionRepository, sessionFilter)
-            .retrieveFirstSupportedSessionPageProvider();
+    var sessionPageProvider = PageProviderFactory
+        .getInstance(this.sessionRepository, sessionFilter)
+        .retrieveFirstSupportedSessionPageProvider();
 
     return SessionAdminResultDTOBuilder.getInstance()
         .withPage(page)

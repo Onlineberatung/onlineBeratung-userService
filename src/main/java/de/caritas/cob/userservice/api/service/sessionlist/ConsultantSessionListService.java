@@ -18,7 +18,6 @@ import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,7 +60,7 @@ public class ConsultantSessionListService {
     var sessionStatus = getVerifiedSessionStatus(status);
 
     if (sessionStatus.equals(SessionStatus.NEW)) {
-      return this.sessionService.getEnquiriesForConsultant(consultant);
+      return this.sessionService.getRegisteredEnquiriesForConsultant(consultant);
     }
     if (sessionStatus.equals(SessionStatus.IN_PROGRESS)) {
       return this.sessionService.getActiveAndDoneSessionsForConsultant(consultant);
@@ -131,18 +130,14 @@ public class ConsultantSessionListService {
 
   private List<ConsultantSessionResponseDTO> updateConsultantSessionValues(
       List<ConsultantSessionResponseDTO> sessions, String rcAuthToken, Consultant consultant) {
-    return sessions.stream()
-        .map(session -> this.consultantSessionEnricher
-            .updateRequiredConsultantSessionValues(session, rcAuthToken, consultant))
-        .collect(Collectors.toList());
+    return this.consultantSessionEnricher
+        .updateRequiredConsultantSessionValues(sessions, rcAuthToken, consultant);
   }
 
   private List<ConsultantSessionResponseDTO> updateConsultantChatValues(
       List<ConsultantSessionResponseDTO> chats, String rcAuthToken, Consultant consultant) {
-    return chats.stream()
-        .map(chat -> this.consultantChatEnricher
-            .updateRequiredConsultantChatValues(chat, rcAuthToken, consultant))
-        .collect(Collectors.toList());
+    return this.consultantChatEnricher.updateRequiredConsultantChatValues(chats, rcAuthToken,
+        consultant);
   }
 
 }

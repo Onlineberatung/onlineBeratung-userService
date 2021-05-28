@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityVa
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -22,10 +23,10 @@ abstract class RocketChatGroupOperation {
 
   protected Consumer<String> logMethod = LogService::logInfo;
 
-  void addConsultantToGroupOfSession(Session session, Consultant consultant) {
+  void addConsultantToGroupOfSession(Session session, Consultant consultant, ConsultingTypeManager consultingTypeManager) {
     var operationConditionProvider =
         new RocketChatOperationConditionProvider(this.keycloakAdminClientService, session,
-            consultant);
+            consultant, consultingTypeManager);
 
     if (operationConditionProvider.canAddToRocketChatGroup()) {
       rocketChatFacade.addUserToRocketChatGroup(consultant.getRocketChatId(), session.getGroupId());

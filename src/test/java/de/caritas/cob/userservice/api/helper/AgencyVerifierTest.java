@@ -2,8 +2,8 @@ package de.caritas.cob.userservice.api.helper;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -39,7 +39,7 @@ public class AgencyVerifierTest {
         .thenThrow(new InternalServerErrorException(""));
 
     try {
-      agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
+      agencyVerifier.getVerifiedAgency(AGENCY_ID, 0);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
       assertTrue("Excepted InternalServerErrorException thrown", true);
@@ -51,7 +51,7 @@ public class AgencyVerifierTest {
     when(agencyService.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
     try {
-      agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_KREUZBUND);
+      agencyVerifier.getVerifiedAgency(AGENCY_ID, 15);
       fail("Expected exception: BadRequestException");
     } catch (BadRequestException badRequestException) {
       assertTrue("Excepted BadRequestException thrown", true);
@@ -61,8 +61,7 @@ public class AgencyVerifierTest {
   @Test
   public void getVerifiedAgency_Should_ReturnCorrectAgency_When_AgencyIsFoundAndValid() {
     when(agencyService.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
-
-    AgencyDTO agency = agencyVerifier.getVerifiedAgency(AGENCY_ID, CONSULTING_TYPE_SUCHT);
+    AgencyDTO agency = agencyVerifier.getVerifiedAgency(AGENCY_ID, 0);
 
     assertEquals(AGENCY_ID, agency.getId());
   }
@@ -72,7 +71,7 @@ public class AgencyVerifierTest {
     when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_KREUZBUND.getValue()));
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_KREUZBUND));
     agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
   }
 
@@ -81,7 +80,7 @@ public class AgencyVerifierTest {
     when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_SUCHT.getValue()));
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_SUCHT));
     agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
   }
 }

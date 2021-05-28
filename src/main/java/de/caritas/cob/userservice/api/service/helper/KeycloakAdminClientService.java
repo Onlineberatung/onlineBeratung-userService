@@ -180,8 +180,8 @@ public class KeycloakAdminClientService {
   /**
    * Assigns the given {@link UserRole} to the given user ID.
    *
-   * @param userId  Keycloak user ID
-   * @param role    {@link UserRole}
+   * @param userId Keycloak user ID
+   * @param role   {@link UserRole}
    */
   public void updateRole(final String userId, final UserRole role) {
     this.updateRole(userId, role.getValue());

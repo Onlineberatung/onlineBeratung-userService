@@ -17,7 +17,6 @@ public class MessageHelper {
     Map<String, Object> placeholderMap = new HashMap<String, Object>();
     placeholderMap.put("username", username);
     return replacePlaceholderInMessage(message, placeholderMap);
-
   }
 
   /**
@@ -29,8 +28,7 @@ public class MessageHelper {
    */
   public static String replacePlaceholderInMessage(String message,
       Map<String, Object> placeholderMap) {
-    StringSubstitutor stringSubstitutor = new StringSubstitutor(placeholderMap, "${", "}");
-    return stringSubstitutor.replace(message);
+    return new StringSubstitutor(placeholderMap, "${", "}").replace(message);
   }
 
 }

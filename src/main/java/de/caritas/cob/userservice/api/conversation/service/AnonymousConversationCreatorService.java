@@ -8,7 +8,6 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -56,7 +55,7 @@ public class AnonymousConversationCreatorService {
     try {
       session = sessionService.initializeSession(user, userDTO, false,
           RegistrationType.ANONYMOUS, SessionStatus.NEW);
-      consultantAgencies = obtainConsultants(session.getConsultingType());
+      consultantAgencies = obtainConsultants(session.getConsultingTypeId());
       String rcGroupId = createEnquiryMessageFacade.createRocketChatRoom(session, consultantAgencies,
           credentials.getRocketChatCredentials());
       session.setGroupId(rcGroupId);
@@ -81,8 +80,8 @@ public class AnonymousConversationCreatorService {
             credentials.getUserId())));
   }
 
-  private List<ConsultantAgency> obtainConsultants(ConsultingType consultingType) {
-    List<Long> agencyList = agencyService.getAgenciesByConsultingType(consultingType).stream()
+  private List<ConsultantAgency> obtainConsultants(int consultingTypeId) {
+    List<Long> agencyList = agencyService.getAgenciesByConsultingType(consultingTypeId).stream()
         .map(AgencyDTO::getId)
         .collect(Collectors.toList());
 

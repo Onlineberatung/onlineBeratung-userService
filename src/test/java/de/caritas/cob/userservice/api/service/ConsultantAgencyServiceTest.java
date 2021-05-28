@@ -77,8 +77,9 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void isConsultantInAgency_Should_ReturnTrue_WhenConsultantFound() {
 
-    when(consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
-        Mockito.anyLong())).thenReturn(CONSULTANT_AGENY_LIST);
+    when(consultantAgencyRepository
+        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
+            Mockito.anyLong())).thenReturn(CONSULTANT_AGENY_LIST);
 
     assertTrue(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
   }
@@ -86,8 +87,9 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void isConsultantInAgency_Should_ReturnFalse_WhenConsultantNotFound() {
 
-    when(consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
-        Mockito.anyLong())).thenReturn(null);
+    when(consultantAgencyRepository
+        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
+            Mockito.anyLong())).thenReturn(null);
 
     assertFalse(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
   }
@@ -113,7 +115,8 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyIsNull() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
+    when(consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENCY_NULL_LIST);
 
     try {
@@ -128,7 +131,8 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void getConsultantsOfAgency_Should_ThrowInternalServerErrorException_WhenDatabaseAgencyConsultantIsNull() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
+    when(consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_NULL_AGENCY_LIST);
 
     try {
@@ -143,7 +147,8 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void getConsultantsOfAgency_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
+    when(consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(Mockito.anyLong()))
         .thenReturn(CONSULTANT_AGENY_LIST);
 
     assertThat(consultantAgencyService.getConsultantsOfAgency(AGENCY_ID),

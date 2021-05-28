@@ -26,7 +26,8 @@ class ConversationListProviderTest {
 
   @ParameterizedTest
   @ValueSource(ints = {0, -1, -999})
-  void obtainPageByOffsetAndCount_Should_throwInternalServerErrorException_When_countIsLowerThanOne(int invalidCount) {
+  void obtainPageByOffsetAndCount_Should_throwInternalServerErrorException_When_countIsLowerThanOne(
+      int invalidCount) {
     PageableListRequest listRequest = PageableListRequest.builder()
         .count(invalidCount)
         .build();

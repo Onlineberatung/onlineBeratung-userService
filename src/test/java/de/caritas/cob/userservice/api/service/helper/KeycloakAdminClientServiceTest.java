@@ -385,7 +385,8 @@ public class KeycloakAdminClientServiceTest {
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
-    when(usersResource.search(any(), any(), any())).thenReturn(singletonList(otherUserRepresentation));
+    when(usersResource.search(any(), any(), any()))
+        .thenReturn(singletonList(otherUserRepresentation));
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail("newemail");

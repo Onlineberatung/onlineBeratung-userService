@@ -13,8 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -41,6 +41,9 @@ public class RocketChatAddToGroupOperationServiceTest {
   @Mock
   private Consumer<String> logMethod;
 
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
+
   @Test
   public void addToGroupsOrRollbackOnFailure_Should_performRocketChatGroupActions_When_paramsAreValid() {
 
@@ -49,7 +52,8 @@ public class RocketChatAddToGroupOperationServiceTest {
     Consultant consultant = easyRandom.nextObject(Consultant.class);
 
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
+            consultingTypeManager)
         .onSessions(singletonList(session))
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();
@@ -75,7 +79,8 @@ public class RocketChatAddToGroupOperationServiceTest {
         memberOfGroup));
 
     RocketChatAddToGroupOperationService operationService = RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
+            consultingTypeManager)
         .onSessions(singletonList(session))
         .withConsultant(consultant);
 
@@ -100,7 +105,8 @@ public class RocketChatAddToGroupOperationServiceTest {
         .addUserToRocketChatGroup(anyString(), anyString());
 
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
+            consultingTypeManager)
         .onSessions(singletonList(session))
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();
@@ -123,7 +129,8 @@ public class RocketChatAddToGroupOperationServiceTest {
         .removeUserFromGroup(anyString(), anyString());
 
     RocketChatAddToGroupOperationService operationService = RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
+            consultingTypeManager)
         .onSessions(singletonList(session))
         .withConsultant(consultant);
     try {
