@@ -31,8 +31,8 @@ public class ConsultingTypeService {
    * @param consultingTypeId the consulting type ID for the extended consulting type response DTO
    * @return ExtendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  @Cacheable(value = ConsultingTypeCachingConfig.CONSULTING_TYPE_CACHE, key = "#consultingTypeId"
-      , cacheManager = "consultingTypeCacheManager")
+  @Cacheable(value = ConsultingTypeCachingConfig.CONSULTING_TYPE_CACHE, key = "#consultingTypeId",
+      cacheManager = "consultingTypeCacheManager")
   public ExtendedConsultingTypeResponseDTO getExtendedConsultingTypeResponseDTO(
       int consultingTypeId) throws RestClientException {
     addDefaultHeaders(this.consultingTypeControllerApi.getApiClient());
