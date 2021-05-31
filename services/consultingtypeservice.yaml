@@ -133,6 +133,9 @@ components:
         isSubsequentRegistrationAllowed:
           type: boolean
           example: true
+        isAnonymousConversationAllowed:
+          type: boolean
+          example: false
         isSetEmailAllowed:
           type: boolean
           example: true
@@ -194,9 +197,6 @@ components:
         - $ref: '#/components/schemas/ExtendedConsultingTypeResponseDTO'
         - type: object
           properties:
-            showAskerProfile:
-              type: boolean
-              example: true
             voluntaryComponents:
               type: array
               items:

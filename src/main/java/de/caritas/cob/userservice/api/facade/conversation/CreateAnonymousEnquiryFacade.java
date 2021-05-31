@@ -1,16 +1,17 @@
 package de.caritas.cob.userservice.api.facade.conversation;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.conversation.anonymous.AnonymousConversationCreatorService;
 import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUserCreatorService;
 import de.caritas.cob.userservice.api.service.user.anonymous.AnonymousUsernameRegistry;
-import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class CreateAnonymousEnquiryFacade {
   private final @NonNull AnonymousConversationCreatorService anonymousConversationCreatorService;
   private final @NonNull AnonymousUsernameRegistry usernameRegistry;
   private final @NonNull UserHelper userHelper;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   private static final String DEFAULT_ANONYMOUS_POSTCODE = "00000";
 
@@ -39,7 +41,7 @@ public class CreateAnonymousEnquiryFacade {
   public CreateAnonymousEnquiryResponseDTO createAnonymousEnquiry(
       CreateAnonymousEnquiryDTO createAnonymousEnquiryDTO) {
 
-    checkIfConsultingTypeHasAnonymousConsulting(createAnonymousEnquiryDTO);
+    checkIfConsultingTypeHasAnonymousConsulting(createAnonymousEnquiryDTO.getConsultingType());
 
     var userDto = buildUserDto(createAnonymousEnquiryDTO);
     AnonymousUserCredentials credentials = anonymousUserCreatorService.createAnonymousUser(userDto);
@@ -56,14 +58,10 @@ public class CreateAnonymousEnquiryFacade {
         .sessionId(session.getId());
   }
 
-  private void checkIfConsultingTypeHasAnonymousConsulting(
-      CreateAnonymousEnquiryDTO createAnonymousEnquiryDTO) {
-    var consultingTypeValue = createAnonymousEnquiryDTO.getConsultingType().toString();
-    var consultingType = ConsultingType.fromConsultingType(consultingTypeValue);
-    List<ConsultingType> blockedConsultingTypes = List.of(ConsultingType.U25,
-        ConsultingType.REGIONAL, ConsultingType.KREUZBUND, ConsultingType.SUPPORTGROUPVECHTA);
+  private void checkIfConsultingTypeHasAnonymousConsulting(int consultingTypeId) {
+    var consultingTypeSettings = consultingTypeManager.getConsultingTypeSettings(consultingTypeId);
 
-    if (blockedConsultingTypes.contains(consultingType)) {
+    if (isFalse(consultingTypeSettings.getIsAnonymousConversationAllowed())) {
       throw new BadRequestException("Consulting type does not support anonymous conversations.");
     }
   }
