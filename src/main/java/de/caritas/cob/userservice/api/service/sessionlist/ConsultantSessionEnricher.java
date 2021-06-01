@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toDate;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -107,7 +109,11 @@ public class ConsultantSessionEnricher {
   private void setFallbackDate(ConsultantSessionResponseDTO consultantSessionResponseDTO,
       SessionDTO session) {
     session.setMessageDate(Helper.UNIXTIME_0.getTime());
-    consultantSessionResponseDTO.setLatestMessage(Helper.UNIXTIME_0);
+    if (ANONYMOUS.name().equals(session.getRegistrationType())) {
+      consultantSessionResponseDTO.setLatestMessage(toDate(session.getCreateDate()));
+    } else {
+      consultantSessionResponseDTO.setLatestMessage(Helper.UNIXTIME_0);
+    }
   }
 
 }
