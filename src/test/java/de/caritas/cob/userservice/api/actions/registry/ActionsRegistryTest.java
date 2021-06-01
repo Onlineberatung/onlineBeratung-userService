@@ -28,14 +28,14 @@ class ActionsRegistryTest {
   private ApplicationContext applicationContext;
 
   @Test
-  void gbuildContainerForType_Should_useApplicationContextForActionCommand() {
+  void buildContainerForType_Should_useApplicationContextForActionCommand_When_typeIsUser() {
     this.actionsRegistry.buildContainerForType(User.class);
 
     verify(this.applicationContext, times(1)).getBeansOfType(ActionCommand.class);
   }
 
   @Test
-  void buildContainerForType_Should_useApplicationContextForActionCommand() {
+  void buildContainerForType_Should_useApplicationContextForActionCommand_When_typeIsSession() {
     this.actionsRegistry.buildContainerForType(Session.class);
 
     verify(this.applicationContext, times(1)).getBeansOfType(ActionCommand.class);
