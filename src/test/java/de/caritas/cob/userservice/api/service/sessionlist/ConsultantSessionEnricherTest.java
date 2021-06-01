@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toDate;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ATTACHMENT_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_2;
@@ -21,6 +23,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ATTACH
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_RECEIVED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERS_ROOMS_LIST;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +37,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -354,7 +359,6 @@ public class ConsultantSessionEnricherTest {
 
     assertEquals(Long.valueOf(Helper.UNIXTIME_0.getTime()),
         result.getSession().getMessageDate());
-
   }
 
   @Test
@@ -428,6 +432,32 @@ public class ConsultantSessionEnricherTest {
             RC_TOKEN, CONSULTANT).get(0);
 
     assertTrue(result.getSession().getMessagesRead());
+  }
+
+  @Test
+  public void updateRequiredConsultantSessionValues_Should_ReturnMessageDateAsFromCreateDate_When_sessionIsAnonymous() {
+    RocketChatRoomInformation rocketChatRoomInformation =
+        RocketChatRoomInformation.builder()
+            .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .userRooms(USERS_ROOMS_LIST)
+            .build();
+    when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
+        .thenReturn(rocketChatRoomInformation);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
+    ConsultantSessionResponseDTO consultantSessionResponseDTO =
+        new EasyRandom().nextObject(ConsultantSessionResponseDTO.class);
+    consultantSessionResponseDTO.getSession().setRegistrationType("ANONYMOUS");
+    String createDate = nowInUtc().toString();
+    consultantSessionResponseDTO.getSession().setCreateDate(createDate);
+
+    ConsultantSessionResponseDTO result = consultantSessionEnricher
+        .updateRequiredConsultantSessionValues(singletonList(consultantSessionResponseDTO),
+            RC_TOKEN, CONSULTANT).get(0);
+
+    assertThat(result.getLatestMessage(), is(toDate(createDate)));
   }
 
 }

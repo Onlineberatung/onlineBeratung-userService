@@ -5,13 +5,14 @@ import static java.util.Objects.nonNull;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 /**
  * Local date time class providing now and epoch seconds with zone offset utc.
  */
 public class CustomLocalDateTime {
 
-  private static String isoDateFormat = "uuuu-MM-dd'T'HH:mm:ssX";
+  private static final String ISO_DATE_FORMAT = "uuuu-MM-dd'T'HH:mm:ssX";
 
   private CustomLocalDateTime() {
   }
@@ -45,6 +46,18 @@ public class CustomLocalDateTime {
   public static String toIsoTime(LocalDateTime localDateTime) {
     return localDateTime
         .atOffset(ZoneOffset.UTC)
-        .format(DateTimeFormatter.ofPattern(isoDateFormat));
+        .format(DateTimeFormatter.ofPattern(ISO_DATE_FORMAT));
+  }
+
+  /**
+   * Converts the given {@link LocalDateTime} string to {@link Date}.
+   *
+   * @param localDateTime the local date time as string
+   * @return converted time in {@link Date}
+   */
+  public static Date toDate(String localDateTime) {
+    return Date.from(LocalDateTime.parse(localDateTime.replace("Z", ""))
+        .atOffset(ZoneOffset.UTC)
+        .toInstant());
   }
 }
