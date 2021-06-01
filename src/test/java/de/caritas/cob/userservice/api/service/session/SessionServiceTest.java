@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -285,7 +286,7 @@ class SessionServiceTest {
     when(sessionRepository.findByConsultantAndStatus(any(), any()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
-    assertThat(sessionService.getActiveSessionsForConsultant(CONSULTANT),
+    assertThat(sessionService.getActiveAndDoneSessionsForConsultant(CONSULTANT),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
   }
 
@@ -363,12 +364,15 @@ class SessionServiceTest {
 
   @Test
   void getSessionByGroupIdAndUser_Should_ThrowForbiddenException_When_NotAskerOrConsultantRole() {
-    Session session = new EasyRandom().nextObject(Session.class);
+    var session = new EasyRandom().nextObject(Session.class);
     when(sessionRepository.findByGroupId(any())).thenReturn(Optional.of(session));
 
+    var roles = new HashSet<>(singletonList("no-role"));
     assertThrows(ForbiddenException.class,
-        () -> sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID,
-            new HashSet<>(singletonList("no-role"))));
+        () -> {
+          sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID,
+              roles);
+        });
   }
 
   /**
@@ -481,10 +485,11 @@ class SessionServiceTest {
         .iterator()
         .next()
         .getAgencyId());
-    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+    Long sessionId = session.getId();
+    when(sessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
 
     assertThrows(ForbiddenException.class,
-        () -> sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
+        () -> sessionService.fetchSessionForConsultant(sessionId, CONSULTANT_WITH_AGENCY));
   }
 
   @Test
@@ -577,6 +582,20 @@ class SessionServiceTest {
     List<UserSessionResponseDTO> sessionsForUserId = sessionService.getSessionsForUserId(USER_ID);
 
     assertNull(sessionsForUserId.iterator().next().getAgency());
+  }
+
+  @Test
+  void getActiveAndDoneSessionsForConsultant_Should_ReturnListOfActiveAndDoneSessions_When_statusInProgress() {
+    Session session = new EasyRandom().nextObject(Session.class);
+    when(sessionRepository.findByConsultantAndStatus(any(), eq(SessionStatus.IN_PROGRESS)))
+        .thenReturn(List.of(session));
+    when(sessionRepository.findByConsultantAndStatus(any(), eq(SessionStatus.DONE)))
+        .thenReturn(List.of(session));
+
+    var activeAndDoneSessionsForConsultant = sessionService
+        .getActiveAndDoneSessionsForConsultant(CONSULTANT);
+
+    assertThat(activeAndDoneSessionsForConsultant, hasSize(2));
   }
 
 }

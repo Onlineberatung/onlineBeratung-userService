@@ -94,7 +94,7 @@ public class ConsultantSessionListServiceTest {
   public void retrieveSessionsForAuthenticatedConsultant_Should_MergeSessionsAndChats() {
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
-    when(sessionService.getActiveSessionsForConsultant(Mockito.any()))
+    when(sessionService.getActiveAndDoneSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
 
     List<ConsultantSessionResponseDTO> result =

@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.consultant;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.THIRD;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.CONSULTANT;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.ROCKET_CHAT;
@@ -9,6 +8,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.actions.ActionCommand;
+import de.caritas.cob.userservice.api.deleteworkflow.model.ConsultantDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class DeleteChatAction implements DeleteConsultantAction {
+public class DeleteChatAction implements ActionCommand<ConsultantDeletionWorkflowDTO> {
 
   private final @NonNull ChatRepository chatRepository;
   private final @NonNull RocketChatService rocketChatService;
@@ -36,22 +37,21 @@ public class DeleteChatAction implements DeleteConsultantAction {
   /**
    * Deletes all chats in database and Rocket.Chat owned by given {@link Consultant}.
    *
-   * @param consultant the {@link Consultant}
-   * @return possible generated {@link DeletionWorkflowError}
+   * @param actionTarget the {@link ConsultantDeletionWorkflowDTO} containing the {@link
+   *                     Consultant}
    */
   @Override
-  public List<DeletionWorkflowError> execute(Consultant consultant) {
-    List<Chat> chatsByChatOwner = this.chatRepository.findByChatOwner(consultant);
+  public void execute(ConsultantDeletionWorkflowDTO actionTarget) {
+    var chatsByChatOwner = this.chatRepository.findByChatOwner(actionTarget.getConsultant());
 
-    List<DeletionWorkflowError> workflowErrors = chatsByChatOwner.stream()
+    var workflowErrors = chatsByChatOwner.stream()
         .map(Chat::getGroupId)
         .map(this::deleteRocketChatRoom)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
 
     deleteDatabaseChat(chatsByChatOwner, workflowErrors);
-
-    return workflowErrors;
+    actionTarget.getDeletionWorkflowErrors().addAll(workflowErrors);
   }
 
   private List<DeletionWorkflowError> deleteRocketChatRoom(String rcGroupId) {
@@ -90,10 +90,5 @@ public class DeleteChatAction implements DeleteConsultantAction {
         );
       }
     }
-  }
-
-  @Override
-  public int getOrder() {
-    return THIRD.getOrder();
   }
 }

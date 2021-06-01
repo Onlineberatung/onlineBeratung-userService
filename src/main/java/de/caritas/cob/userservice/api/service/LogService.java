@@ -509,11 +509,20 @@ public class LogService {
   }
 
   /**
-   * Logs an delete workflow error.
+   * Logs a delete workflow error.
    *
    * @param e the cause exception
    */
   public static void logDeleteWorkflowError(Exception e) {
     LOGGER.error("UserService delete workflow error: {}", getStackTrace(e));
+  }
+
+  /**
+   * Logs a deactivate workflow error.
+   *
+   * @param e the cause exception
+   */
+  public static void logDeactivateWorkflowError(Exception e) {
+    LOGGER.error("UserService deactivate workflow error: {}", getStackTrace(e));
   }
 }

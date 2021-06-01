@@ -33,11 +33,13 @@ import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -281,11 +283,17 @@ public class SessionService {
    * @param consultant the consultant
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
-  public List<ConsultantSessionResponseDTO> getActiveSessionsForConsultant(Consultant consultant) {
-    return sessionRepository.findByConsultantAndStatus(consultant, SessionStatus.IN_PROGRESS)
-        .stream()
+  public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(Consultant consultant) {
+    return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
+        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+        .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
+  }
+
+  private List<Session> getSessionsForConsultantByStatus(Consultant consultant,
+      SessionStatus sessionStatus) {
+    return sessionRepository.findByConsultantAndStatus(consultant, sessionStatus);
   }
 
   private List<UserSessionResponseDTO> convertToUserSessionResponseDTO(List<Session> sessions,

@@ -14,8 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
-import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -41,6 +42,7 @@ public class ConversationControllerIT {
   static final String GET_REGISTERED_ENQUIRIES_PATH = ENQUIRIES_BASE_PATH + "registered";
   static final String POST_CREATE_ANONYMOUS_ENQUIRY_PATH = "/conversations/askers/anonymous/new";
   static final String ACCEPT_ANONYMOUS_ENQUIRY_PATH = "/conversations/askers/anonymous/1/accept";
+  static final String FINISH_ANONYMOUS_CONVERSATION_PATH = "/conversations/anonymous/1/finish";
 
   @Autowired
   private MockMvc mvc;
@@ -59,6 +61,9 @@ public class ConversationControllerIT {
 
   @MockBean
   private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
+
+  @MockBean
+  private FinishAnonymousConversationFacade finishAnonymousConversationFacade;
 
   @Test
   public void getAnonymousEnquiries_Should_returnOk_When_requestParamsAreValid() throws Exception {
@@ -210,4 +215,23 @@ public class ConversationControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  public void finishAnonymousConversation_Should_ReturnBadRequest_WhenProvidedWithInvalidSessionId()
+      throws Exception {
+    this.mvc.perform(put(FINISH_ANONYMOUS_CONVERSATION_PATH.replace("1", "invalid"))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void finishAnonymousConversation_Should_ReturnOk_WhenProvidedWithValidSessionId()
+      throws Exception {
+    this.mvc.perform(put(FINISH_ANONYMOUS_CONVERSATION_PATH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
 }

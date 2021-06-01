@@ -49,6 +49,7 @@ components:
       type: string
       enum:
         - "anonymousEnquiryAccepted"
+        - "anonymousConversationFinished"
         - "directMessage"
         - "newAnonymousEnquiry"
         - "videoCallRequest"
