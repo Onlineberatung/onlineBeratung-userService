@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
-import de.caritas.cob.userservice.config.ConsultingTypeCachingConfig;
+import de.caritas.cob.userservice.config.CacheManagerConfig;
 import de.caritas.cob.userservice.consultingtypeservice.generated.ApiClient;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
@@ -31,8 +31,7 @@ public class ConsultingTypeService {
    * @param consultingTypeId the consulting type ID for the extended consulting type response DTO
    * @return ExtendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  @Cacheable(value = ConsultingTypeCachingConfig.CONSULTING_TYPE_CACHE, key = "#consultingTypeId",
-      cacheManager = "consultingTypeCacheManager")
+  @Cacheable(cacheNames = CacheManagerConfig.CONSULTING_TYPE_CACHE, key = "#consultingTypeId")
   public ExtendedConsultingTypeResponseDTO getExtendedConsultingTypeResponseDTO(
       int consultingTypeId) throws RestClientException {
     addDefaultHeaders(this.consultingTypeControllerApi.getApiClient());
@@ -44,7 +43,7 @@ public class ConsultingTypeService {
    *
    * @return list with consulting type ids
    */
-  @Cacheable(value = ConsultingTypeCachingConfig.CONSULTING_TYPE_CACHE, cacheManager = "consultingTypeCacheManager")
+  @Cacheable(cacheNames = CacheManagerConfig.CONSULTING_TYPE_CACHE)
   public List<Integer> getAllConsultingTypeIds() {
     addDefaultHeaders(this.consultingTypeControllerApi.getApiClient());
     return this.consultingTypeControllerApi.getBasicConsultingTypeList().stream()
