@@ -1,13 +1,16 @@
 package de.caritas.cob.userservice.api.deactivateworkflow.service;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
+import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NEW;
+
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
-import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
+import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
-import de.caritas.cob.userservice.api.repository.session.RegistrationType;
+import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,11 +41,10 @@ public class DeactivateAnonymousUserService {
   @Transactional
   public void deactivateStaleAnonymousUsers() {
     LocalDateTime deactivationTime = LocalDateTime.now().minusMinutes(deactivatePeriodMinutes);
-    List<Session> anonymousSessionsInProgress =
-        this.sessionRepository.findByStatusAndRegistrationType(
-            SessionStatus.IN_PROGRESS, RegistrationType.ANONYMOUS);
+    List<Session> anonymousSessions = this.sessionRepository
+        .findByStatusInAndRegistrationType(Set.of(NEW, IN_PROGRESS), ANONYMOUS);
 
-    Set<Session> staleAnonymousSessions = anonymousSessionsInProgress.stream()
+    Set<Session> staleAnonymousSessions = anonymousSessions.stream()
         .filter(isSessionOutsideOfDeactivationTime(deactivationTime))
         .collect(Collectors.toSet());
 
@@ -75,6 +77,7 @@ public class DeactivateAnonymousUserService {
     staleAnonymousSessions.forEach(staleSession -> sessionDeactivationActions
         .addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class)
         .addActionToExecute(DeactivateSessionActionCommand.class)
+        .addActionToExecute(SendFinishedAnonymousConversationEventActionCommand.class)
         .executeActions(staleSession)
     );
   }

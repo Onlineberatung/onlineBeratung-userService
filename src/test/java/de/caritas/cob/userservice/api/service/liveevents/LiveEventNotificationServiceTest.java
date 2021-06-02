@@ -25,6 +25,8 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource.FinishConversationPhaseEnum;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -232,14 +234,15 @@ public class LiveEventNotificationServiceTest {
 
   @Test
   public void sendLiveFinishedAnonymousConversationToUsers_Should_doNothing_When_userIdIsNull() {
-    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(null);
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(null, null);
 
     verifyNoInteractions(this.liveControllerApi);
   }
 
   @Test
   public void sendLiveFinishedAnonymousConversationToUsers_Should_doNothing_When_userIdIsEmpty() {
-    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(emptyList());
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(emptyList(),
+        null);
 
     verifyNoInteractions(this.liveControllerApi);
   }
@@ -247,10 +250,13 @@ public class LiveEventNotificationServiceTest {
   @Test
   public void sendLiveFinishedAnonymousConversationToUsers_Should_triggerLiveEvent_When_userIdIsValid() {
     this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(singletonList(
-        "userId"));
+        "userId"), FinishConversationPhaseEnum.IN_PROGRESS);
 
     verify(this.liveControllerApi, times(1)).sendLiveEvent(
-        new LiveEventMessage().eventType(ANONYMOUSCONVERSATIONFINISHED)
-            .userIds(singletonList("userId")));
+        new LiveEventMessage()
+            .eventType(ANONYMOUSCONVERSATIONFINISHED)
+            .userIds(singletonList("userId"))
+            .eventContent(new StatusSource()
+                .finishConversationPhase(FinishConversationPhaseEnum.IN_PROGRESS)));
   }
 }
