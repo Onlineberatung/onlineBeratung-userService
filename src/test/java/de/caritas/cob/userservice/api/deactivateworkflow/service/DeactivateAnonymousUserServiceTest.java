@@ -8,9 +8,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.actions.ActionCommandMockProvider;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
+import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
@@ -49,6 +51,8 @@ class DeactivateAnonymousUserServiceTest {
   @Mock
   private ActionsRegistry actionsRegistry;
 
+  private final ActionCommandMockProvider commandMockProvider = new ActionCommandMockProvider();
+
   @BeforeEach
   public void setUp() {
     ReflectionTestUtils.setField(deactivateAnonymousUserService, "deactivatePeriodMinutes",
@@ -78,7 +82,8 @@ class DeactivateAnonymousUserServiceTest {
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
-        .findByStatusAndRegistrationType(SessionStatus.IN_PROGRESS, RegistrationType.ANONYMOUS);
+        .findByStatusInAndRegistrationType(Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS),
+            RegistrationType.ANONYMOUS);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verifyNoMoreInteractions(deactivateUserAction, deactivateSessionAction);
@@ -98,7 +103,7 @@ class DeactivateAnonymousUserServiceTest {
         .collect(Collectors.toSet());
     user.setSessions(userSessions);
 
-    when(this.sessionRepository.findByStatusAndRegistrationType(any(), any()))
+    when(this.sessionRepository.findByStatusInAndRegistrationType(any(), any()))
         .thenReturn(new ArrayList<>(userSessions));
   }
 
@@ -127,7 +132,7 @@ class DeactivateAnonymousUserServiceTest {
   void deactivateStaleAnonymousUsers_Should_notPerformAnyDeactivation_When_sessionsAreInProgressWithinDeactivatePeriod(
       LocalDateTime updateDate) {
     var user = createUserWithSingleSession(updateDate);
-    when(this.sessionRepository.findByStatusAndRegistrationType(any(), any()))
+    when(this.sessionRepository.findByStatusInAndRegistrationType(any(), any()))
         .thenReturn(new ArrayList<>(user.getSessions()));
     var deactivateUserAction = mock(DeactivateKeycloakUserActionCommand.class);
     when(this.actionsRegistry.buildContainerForType(User.class))
@@ -139,7 +144,8 @@ class DeactivateAnonymousUserServiceTest {
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
-        .findByStatusAndRegistrationType(SessionStatus.IN_PROGRESS, RegistrationType.ANONYMOUS);
+        .findByStatusInAndRegistrationType(Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS),
+            RegistrationType.ANONYMOUS);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verifyNoMoreInteractions(deactivateUserAction, deactivateSessionAction);
@@ -169,28 +175,30 @@ class DeactivateAnonymousUserServiceTest {
       LocalDateTime overdueUpdateDate) {
     var user = createUserWithSingleSession(overdueUpdateDate);
 
-    when(this.sessionRepository.findByStatusAndRegistrationType(any(), any()))
+    when(this.sessionRepository.findByStatusInAndRegistrationType(any(), any()))
         .thenReturn(new ArrayList<>(user.getSessions()));
 
     var deactivateUserAction = mock(DeactivateKeycloakUserActionCommand.class);
     when(this.actionsRegistry.buildContainerForType(User.class))
         .thenReturn(new ActionContainer<>(Set.of(deactivateUserAction)));
-    var deactivateSessionAction = mock(DeactivateSessionActionCommand.class);
-    var setRocketChatRoomReadOnlyAction = mock(SetRocketChatRoomReadOnlyActionCommand.class);
     when(this.actionsRegistry.buildContainerForType(Session.class))
-        .thenReturn(new ActionContainer<>(
-            Set.of(deactivateSessionAction, setRocketChatRoomReadOnlyAction)));
+        .thenReturn(this.commandMockProvider.getActionContainer(Session.class));
 
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
-        .findByStatusAndRegistrationType(SessionStatus.IN_PROGRESS, RegistrationType.ANONYMOUS);
+        .findByStatusInAndRegistrationType(Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS),
+            RegistrationType.ANONYMOUS);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verify(deactivateUserAction, times(1)).execute(user);
     user.getSessions().forEach(session -> {
-      verify(deactivateSessionAction, times(1)).execute(session);
-      verify(setRocketChatRoomReadOnlyAction, times(1)).execute(session);
+      verify(this.commandMockProvider.getActionMock(DeactivateSessionActionCommand.class), times(1))
+          .execute(session);
+      verify(this.commandMockProvider.getActionMock(SetRocketChatRoomReadOnlyActionCommand.class),
+          times(1)).execute(session);
+      verify(this.commandMockProvider.getActionMock(
+          SendFinishedAnonymousConversationEventActionCommand.class), times(1)).execute(session);
     });
   }
 

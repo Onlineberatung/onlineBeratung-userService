@@ -4,23 +4,25 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class SetRocketChatRoomReadOnlyActionCommandTest {
@@ -30,6 +32,13 @@ class SetRocketChatRoomReadOnlyActionCommandTest {
 
   @Mock
   private RocketChatService rocketChatService;
+
+  private static final Logger LOGGER = mock(Logger.class);
+
+  @BeforeAll
+  public static void setup() {
+    setInternalState(LogService.class, "LOGGER", LOGGER);
+  }
 
   @ParameterizedTest
   @MethodSource("sessionsWithoutInteractionsExpected")
@@ -57,12 +66,14 @@ class SetRocketChatRoomReadOnlyActionCommandTest {
   }
 
   @Test
-  void execute_Should_throwInternalServerException_When_rocketChatCallFails() throws Exception {
+  void execute_Should_logError_When_rocketChatCallFails() throws Exception {
     Session session = new Session();
     session.setGroupId("group id");
-    doThrow(new RuntimeException()).when(this.rocketChatService).setRoomReadOnly(anyString());
+    doThrow(new RuntimeException("")).when(this.rocketChatService).setRoomReadOnly(anyString());
 
-    assertThrows(InternalServerErrorException.class, () -> this.actionCommand.execute(session));
+    this.actionCommand.execute(session);
+
+    verify(LOGGER, times(1)).error(anyString(), anyString(), anyString());
   }
 
 }

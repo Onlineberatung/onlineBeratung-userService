@@ -15,6 +15,8 @@ import de.caritas.cob.userservice.api.service.PushMessageService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource.FinishConversationPhaseEnum;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -147,12 +149,14 @@ public class LiveEventNotificationService {
   /**
    * Sends a anonymous conversation finished live event to the provided user IDs.
    *
-   * @param userIds   list of consultant user IDs
+   * @param userIds list of consultant user IDs
    */
-  public void sendLiveFinishedAnonymousConversationToUsers(List<String> userIds) {
+  public void sendLiveFinishedAnonymousConversationToUsers(List<String> userIds,
+      FinishConversationPhaseEnum finishConversationPhase) {
     if (isNotEmpty(userIds)) {
       var liveEventMessage = new LiveEventMessage()
           .eventType(ANONYMOUSCONVERSATIONFINISHED)
+          .eventContent(new StatusSource().finishConversationPhase(finishConversationPhase))
           .userIds(userIds);
 
       sendLiveEventMessage(liveEventMessage);
