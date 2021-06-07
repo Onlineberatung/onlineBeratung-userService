@@ -79,4 +79,12 @@ public class SecurityHeaderSupplierTest {
     assertThat(result.get("Cookie").get(0), startsWith(CSRF_TOKEN_COOKIE_VALUE + "="));
     assertNotNull(result.get(CSRF_TOKEN_HEADER_VALUE));
   }
+
+  @Test
+  public void getTechnicalKeycloakAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthorizationHeader() {
+    HttpHeaders result = securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders("token");
+
+    assertThat(result.get("Authorization").get(0), is("Bearer " + "token"));
+    assertNotNull(result.get(CSRF_TOKEN_HEADER_VALUE));
+  }
 }

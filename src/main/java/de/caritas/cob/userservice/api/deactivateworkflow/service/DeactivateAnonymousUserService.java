@@ -6,6 +6,7 @@ import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NE
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
+import de.caritas.cob.userservice.api.actions.session.PostConversationFinishedAliasMessageActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -75,8 +76,9 @@ public class DeactivateAnonymousUserService {
   private void performSessionDeactivationActions(Set<Session> staleAnonymousSessions) {
     var sessionDeactivationActions = this.actionsRegistry.buildContainerForType(Session.class);
     staleAnonymousSessions.forEach(staleSession -> sessionDeactivationActions
-        .addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class)
         .addActionToExecute(DeactivateSessionActionCommand.class)
+        .addActionToExecute(PostConversationFinishedAliasMessageActionCommand.class)
+        .addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class)
         .addActionToExecute(SendFinishedAnonymousConversationEventActionCommand.class)
         .executeActions(staleSession)
     );
