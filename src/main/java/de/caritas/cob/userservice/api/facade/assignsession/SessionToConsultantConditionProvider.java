@@ -112,6 +112,6 @@ public class SessionToConsultantConditionProvider {
     return consultant.getConsultantAgencies().stream()
         .map(agency -> agencyService.getAgency(agency.getAgencyId()))
         .map(AgencyDTO::getConsultingType)
-        .noneMatch(consultingType -> session.getConsultingType().equals(consultingType));
+        .noneMatch(consultingType -> session.getConsultingTypeId() == consultingType);
   }
 }

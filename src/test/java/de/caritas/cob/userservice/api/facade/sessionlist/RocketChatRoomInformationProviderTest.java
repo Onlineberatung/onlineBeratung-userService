@@ -16,6 +16,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Test;
@@ -23,8 +26,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatRoomInformationProviderTest {

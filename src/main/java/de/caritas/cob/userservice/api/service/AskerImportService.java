@@ -4,7 +4,8 @@ import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUser
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.ImportException;
@@ -20,7 +21,6 @@ import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
@@ -28,7 +28,6 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -49,7 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,7 +93,6 @@ public class AskerImportService {
   private final String IMPORT_CHARSET = "UTF-8";
   private final String IMPORT_LOG_CHARSET = "UTF-8";
   private final String DUMMY_POSTCODE = "00000";
-
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserService userService;
   private final @NonNull SessionService sessionService;
@@ -183,11 +181,11 @@ public class AskerImportService {
         keycloakAdminClientService.updateUserRole(keycloakUserId);
 
         // Create user in MariaDB
-        ConsultingTypeSettings consultingTypeSettings =
+        ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
             consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
-                userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
+                userDTO.getEmail(), extendedConsultingTypeResponseDTO.getLanguageFormal());
         if (dbUser.getUserId() == null || dbUser.getUserId().equals(StringUtils.EMPTY)) {
           throw new ImportException(
               String.format("Could not create user %s in mariaDB", record.getUsername()));
@@ -258,7 +256,6 @@ public class AskerImportService {
     Iterable<CSVRecord> records = null;
     String systemUserId;
     String systemUserToken;
-    Map<ConsultingType, String> welcomeMessageMap = null;
 
     // Read in asker import file, log in Rocket.Chat system message user to get the token and read
     // in welcome messages
@@ -275,8 +272,6 @@ public class AskerImportService {
           || systemUserId == null || systemUserToken == null) {
         throw new ImportException("Could not log in Rocket.Chat system message user.");
       }
-
-      welcomeMessageMap = getWelcomeMessageMap(protocolFile);
 
     } catch (ImportException importExcetion) {
       writeToImportLog(importExcetion.getMessage(), protocolFile);
@@ -356,11 +351,11 @@ public class AskerImportService {
         keycloakAdminClientService.updateUserRole(keycloakUserId);
 
         // Create user in MariaDB
-        ConsultingTypeSettings consultingTypeSettings =
+        ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
             consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
             userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
-                userDTO.getEmail(), consultingTypeSettings.isLanguageFormal());
+                userDTO.getEmail(), extendedConsultingTypeResponseDTO.getLanguageFormal());
         if (dbUser.getUserId() == null || dbUser.getUserId().equals(StringUtils.EMPTY)) {
           throw new ImportException(
               String.format("Could not create user %s in mariaDB", record.getUsername()));
@@ -412,7 +407,7 @@ public class AskerImportService {
             consultantAgencyService.findConsultantsByAgencyId(record.getAgencyId());
 
         // Create feedback group and add consultants if enabled for this agency/consulting type
-        if (consultingTypeSettings.isFeedbackChat()) {
+        if (extendedConsultingTypeResponseDTO.getInitializeFeedbackChat().booleanValue()) {
           String rcFeedbackGroupId = rocketChatService
               .createPrivateGroupWithSystemUser(
                   rocketChatRoomNameGenerator.generateFeedbackGroupName(session))
@@ -426,7 +421,7 @@ public class AskerImportService {
           // group that have the right to view all feedback sessions
           for (ConsultantAgency agency : agencyList) {
             if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-                Authority.VIEW_ALL_FEEDBACK_SESSIONS)
+                AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
                 || agency.getConsultant().getId().equals(record.getConsultantId())) {
               rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
                   rcFeedbackGroupId);
@@ -466,9 +461,9 @@ public class AskerImportService {
             for (ConsultantAgency agency : agencyList) {
               // If feedback chat enabled add all main consultants and the assigned consultant. If
               // it is a "normal" team session add all consultants.
-              if (consultingTypeSettings.isFeedbackChat()) {
+              if (extendedConsultingTypeResponseDTO.getInitializeFeedbackChat().booleanValue()) {
                 if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-                    Authority.VIEW_ALL_FEEDBACK_SESSIONS)
+                    AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
                     || agency.getConsultant().getId().equals(record.getConsultantId())) {
                   rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
                       rcGroupId);
@@ -489,7 +484,7 @@ public class AskerImportService {
 
         // Send welcome message
         messageServiceProvider
-            .postWelcomeMessageIfConfigured(rcGroupId, dbUser, consultingTypeSettings,
+            .postWelcomeMessageIfConfigured(rcGroupId, dbUser, extendedConsultingTypeResponseDTO,
                 CreateEnquiryExceptionInformation.builder().build());
 
         // Remove all system messages from group
@@ -503,8 +498,8 @@ public class AskerImportService {
         }
 
         // Create an initial monitoring data set for the session
-        if (consultingTypeSettings.getMonitoringFile() != null
-            && !consultingTypeSettings.getMonitoringFile().equals(StringUtils.EMPTY)) {
+        if (extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile() != null
+            && !extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile().equals(StringUtils.EMPTY)) {
           MonitoringDTO monitoringDTO =
               monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
           if (monitoringDTO != null) {
@@ -557,17 +552,17 @@ public class AskerImportService {
     }
   }
 
-  private UserDTO convertAskerToUserDTO(ImportRecordAsker record, ConsultingType consultingType) {
+  private UserDTO convertAskerToUserDTO(ImportRecordAsker record, int consultingTypeId) {
     return new UserDTO(record.getUsernameEncoded(), record.getPostcode(), record.getAgencyId(),
         record.getPassword(), record.getEmail(), new Date().toString(),
-        Integer.toString(consultingType.getValue()));
+        Integer.toString(consultingTypeId));
   }
 
   private UserDTO convertAskerWithoutSessionToUserDTO(ImportRecordAskerWithoutSession record,
-      ConsultingType consultingType) {
+      int consultingTypeId) {
     return new UserDTO(record.getUsernameEncoded(), DUMMY_POSTCODE, record.getAgencyId(),
         record.getPassword(), record.getEmail(), new Date().toString(),
-        Integer.toString(consultingType.getValue()));
+        Integer.toString(consultingTypeId));
   }
 
   /**
@@ -582,7 +577,7 @@ public class AskerImportService {
     importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
     String email = StringUtils.deleteWhitespace(
         record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
-    if (email != null && !email.equals(StringUtils.EMPTY)
+    if (!email.equals(StringUtils.EMPTY)
         && !EmailValidator.getInstance().isValid(email)) {
       throw new ImportException(
           String.format("Asker with old id %s could not be imported: Invalid email address",
@@ -611,7 +606,7 @@ public class AskerImportService {
     importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
     String email = StringUtils.deleteWhitespace(
         record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
-    if (email != null && !email.equals(StringUtils.EMPTY)
+    if (!email.equals(StringUtils.EMPTY)
         && !EmailValidator.getInstance().isValid(email)) {
       throw new ImportException(
           String.format("Asker with old id %s could not be imported: Invalid email address",
@@ -624,42 +619,6 @@ public class AskerImportService {
             : record.get(4));
 
     return importRecord;
-  }
-
-  /**
-   * Reads in all welcome message files (according to consulting type id) and returns the result as
-   * a map.
-   */
-  private Map<ConsultingType, String> getWelcomeMessageMap(String protocolFile) {
-
-    Map<ConsultingType, String> welcomeMessageMap = new EnumMap<>(ConsultingType.class);
-
-    for (ConsultingType type : ConsultingType.values()) {
-      String welcomeMessage = "";
-      String fileName = welcomeMsgFilename.replace(welcomeMsgFilenameReplaceValue,
-          Integer.toString(type.getValue()));
-
-      if (fileName != null && !fileName.equals(StringUtils.EMPTY)) {
-        List<String> lines;
-        try {
-          lines = FileUtils.readLines(new File(fileName), Charset.forName(IMPORT_CHARSET));
-          for (String line : lines) {
-            welcomeMessage += line + NEWLINE_CHAR;
-          }
-
-        } catch (IOException e) {
-          writeToImportLog(String.format(
-              "Error while reading message file or no welcome message file defined for consulting type %s",
-              type), protocolFile);
-        }
-      }
-
-      welcomeMessageMap.put(type,
-          welcomeMessage != null && !welcomeMessage.equals(StringUtils.EMPTY) ? welcomeMessage
-              : null);
-    }
-
-    return welcomeMessageMap;
   }
 
   private UserAgency getUserAgency(User user, Long agencyId) {

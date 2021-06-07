@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -15,10 +16,13 @@ import java.util.Map;
 public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOperation {
 
   private Map<Session, List<Consultant>> consultantsToRemoveFromSessions;
+  private final ConsultingTypeManager consultingTypeManager;
 
   private RocketChatRemoveFromGroupOperationService(RocketChatFacade rocketChatFacade,
-      KeycloakAdminClientService keycloakAdminClientService) {
+      KeycloakAdminClientService keycloakAdminClientService,
+        ConsultingTypeManager consultingTypeManager) {
     super(rocketChatFacade, keycloakAdminClientService);
+    this.consultingTypeManager = consultingTypeManager;
   }
 
   /**
@@ -28,9 +32,9 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
    * @return the {@link RocketChatRemoveFromGroupOperationService} instance
    */
   public static RocketChatRemoveFromGroupOperationService getInstance(
-      RocketChatFacade rocketChatFacade, KeycloakAdminClientService keycloakAdminClientService) {
+      RocketChatFacade rocketChatFacade, KeycloakAdminClientService keycloakAdminClientService, ConsultingTypeManager consultingTypeManager) {
     return new RocketChatRemoveFromGroupOperationService(rocketChatFacade,
-        keycloakAdminClientService);
+        keycloakAdminClientService, consultingTypeManager);
   }
 
   /**
@@ -74,7 +78,7 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private void performRollback(Session session, Consultant consultant) {
     try {
-      addConsultantToGroupOfSession(session, consultant);
+      addConsultantToGroupOfSession(session, consultant, consultingTypeManager);
     } catch (Exception e) {
       throw new InternalServerErrorException(
           String.format("ERROR: Failed to rollback %s of group %s:",

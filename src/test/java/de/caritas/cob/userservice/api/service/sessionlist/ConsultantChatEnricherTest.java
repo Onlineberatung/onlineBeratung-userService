@@ -13,6 +13,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ROOMS_UPDATE_D
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_NOT_RECEIVED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERS_EMPTY_ROOMS_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERS_ROOMS_LIST;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -57,7 +58,8 @@ public class ConsultantChatEnricherTest {
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
-            CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE, RC_TOKEN, CONSULTANT);
+            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
+            CONSULTANT).get(0);
 
     assertTrue(result.getChat().isSubscribed());
   }
@@ -78,7 +80,8 @@ public class ConsultantChatEnricherTest {
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
-            CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE, RC_TOKEN, CONSULTANT);
+            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
+            CONSULTANT).get(0);
 
     assertFalse(result.getChat().isSubscribed());
   }
@@ -103,7 +106,8 @@ public class ConsultantChatEnricherTest {
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
-            CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE, RC_TOKEN, CONSULTANT);
+            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
+            CONSULTANT).get(0);
 
     assertEquals(FILE_DTO.getType(), result.getChat().getAttachment().getFileType());
     assertEquals(ATTACHMENT_DTO.getImagePreview(),
@@ -127,7 +131,8 @@ public class ConsultantChatEnricherTest {
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
-            CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE, RC_TOKEN, CONSULTANT);
+            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
+            CONSULTANT).get(0);
 
     assertFalse(result.getChat().isMessagesRead());
   }
@@ -148,7 +153,8 @@ public class ConsultantChatEnricherTest {
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
-            CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE, RC_TOKEN, CONSULTANT);
+            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
+            CONSULTANT).get(0);
 
     assertTrue(result.getChat().isMessagesRead());
   }

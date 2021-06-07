@@ -27,7 +27,7 @@ public class SecurityHeaderSupplier {
    * @return {@link HttpHeaders}
    */
   public HttpHeaders getCsrfHttpHeaders() {
-    HttpHeaders httpHeaders = new HttpHeaders();
+    var httpHeaders = new HttpHeaders();
 
     return this.addCsrfValues(httpHeaders);
   }
@@ -38,18 +38,32 @@ public class SecurityHeaderSupplier {
    * @return the created {@link HttpHeaders}
    */
   public HttpHeaders getKeycloakAndCsrfHttpHeaders() {
-    HttpHeaders header = getCsrfHttpHeaders();
-    this.addKeycloakAuthorizationHeader(header);
+    var header = getCsrfHttpHeaders();
+    this.addKeycloakAuthorizationHeader(header, authenticatedUser.getAccessToken());
 
     return header;
   }
 
-  private void addKeycloakAuthorizationHeader(HttpHeaders httpHeaders) {
-    httpHeaders.add("Authorization", "Bearer " + authenticatedUser.getAccessToken());
+  /**
+   * Creates the headers containing keycloak token of technical user and csrf headers {@link
+   * HttpHeaders} object.
+   *
+   * @param accessToken the token used for keycloak authorization header
+   * @return the created {@link HttpHeaders}
+   */
+  public HttpHeaders getKeycloakAndCsrfHttpHeaders(String accessToken) {
+    var header = getCsrfHttpHeaders();
+    this.addKeycloakAuthorizationHeader(header, accessToken);
+
+    return header;
+  }
+
+  private void addKeycloakAuthorizationHeader(HttpHeaders httpHeaders, String accessToken) {
+    httpHeaders.add("Authorization", "Bearer " + accessToken);
   }
 
   private HttpHeaders addCsrfValues(HttpHeaders httpHeaders) {
-    String csrfToken = UUID.randomUUID().toString();
+    var csrfToken = UUID.randomUUID().toString();
 
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     httpHeaders.add("Cookie", csrfCookieProperty + "=" + csrfToken);

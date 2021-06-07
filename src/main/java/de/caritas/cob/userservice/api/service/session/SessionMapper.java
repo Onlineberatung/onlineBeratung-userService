@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.session;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toIsoTime;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toUnixTime;
 import static java.util.Objects.nonNull;
 
@@ -51,7 +52,7 @@ public class SessionMapper {
     return new SessionDTO()
         .id(session.getId())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .status(session.getStatus().getValue())
         .postcode(session.getPostcode())
         .groupId(session.getGroupId())
@@ -62,12 +63,13 @@ public class SessionMapper {
         .messageDate(toUnixTime(session.getEnquiryMessageDate()))
         .isTeamSession(session.isTeamSession())
         .monitoring(session.isMonitoring())
-        .registrationType(session.getRegistrationType().name());
+        .registrationType(session.getRegistrationType().name())
+        .createDate(toIsoTime(session.getCreateDate()));
   }
 
   private SessionUserDTO convertToSessionUserDTO(Session session) {
     if (nonNull(session.getUser()) && nonNull(session.getSessionData())) {
-      SessionUserDTO sessionUserDto = new SessionUserDTO();
+      var sessionUserDto = new SessionUserDTO();
       sessionUserDto
           .setUsername(new UsernameTranscoder().decodeUsername(session.getUser().getUsername()));
       sessionUserDto.setSessionData(buildSessionDataMapFromSession(session));

@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.ImportException;
@@ -9,10 +10,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.io.FileReader;
@@ -119,20 +118,18 @@ public class ConsultantImportService {
 
           agencyIds.add(Long.valueOf(agencyRoleArray[0]));
 
-          Optional<ConsultingType> consultingType = Optional.of(agency.getConsultingType());
+          ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+              consultingTypeManager.getConsultingTypeSettings(agency.getConsultingType());
 
-          ConsultingTypeSettings consultingTypeSettings =
-              consultingTypeManager.getConsultingTypeSettings(consultingType.get());
-
-          if (!consultingTypeSettings.getRoles().getConsultant().getRoleNames()
+          if (!extendedConsultingTypeResponseDTO.getRoles().getConsultant().getRoleNames()
               .containsKey(agencyRoleArray[1])) {
             throw new ImportException(String.format(
                 "Consultant %s could not be imported: invalid role set %s for agency id %s and consulting type %s",
                 importRecord.getUsername(), agencyRoleArray[1], agencyRoleArray[0],
-                consultingType.get().getValue()));
+                extendedConsultingTypeResponseDTO.getSlug()));
           }
 
-          for (Map.Entry<String, List<String>> roleSet : consultingTypeSettings.getRoles()
+          for (Map.Entry<String, List<String>> roleSet : extendedConsultingTypeResponseDTO.getRoles()
               .getConsultant().getRoleNames().entrySet()) {
             if (roleSet.getKey().equals(agencyRoleArray[1])) {
               roles.addAll(roleSet.getValue());
@@ -140,7 +137,7 @@ public class ConsultantImportService {
             }
           }
 
-          formalLanguageList.add(consultingTypeSettings.isLanguageFormal());
+          formalLanguageList.add(extendedConsultingTypeResponseDTO.getLanguageFormal());
 
           if (isTrue(agency.getTeamAgency())) {
             importRecord.setTeamConsultant(true);

@@ -22,8 +22,8 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
 import org.apache.commons.collections.SetUtils;
 import org.junit.Before;
@@ -111,7 +111,8 @@ public class ConsultantDataProviderTest {
     assertEquals(CONSULTANT_WITH_AGENCY.isTeamConsultant(), result.isInTeamAgency());
     assertEquals(GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT,
         result.getGrantedAuthorities().stream().findFirst().orElse(null));
-    assertEquals(UserRole.CONSULTANT.toString(), result.getUserRoles().stream().findFirst().orElse(null));
+    assertEquals(UserRole.CONSULTANT.toString(),
+        result.getUserRoles().stream().findFirst().orElse(null));
     assertEquals(AGENCY_DTO_SUCHT, result.getAgencies().get(0));
   }
 

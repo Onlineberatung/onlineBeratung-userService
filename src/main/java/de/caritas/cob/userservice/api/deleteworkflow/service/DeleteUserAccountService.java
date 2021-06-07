@@ -2,12 +2,26 @@ package de.caritas.cob.userservice.api.deleteworkflow.service;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.deleteworkflow.action.registry.DeleteActionsRegistry;
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteAnonymousRegistryIdAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteAskerRoomsAndSessionsAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteDatabaseAskerAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteDatabaseAskerAgencyAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteKeycloakAskerAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteRocketChatAskerAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteChatAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteDatabaseConsultantAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteDatabaseConsultantAgencyAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteKeycloakConsultantAction;
+import de.caritas.cob.userservice.api.deleteworkflow.action.consultant.DeleteRocketChatConsultantAction;
+import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.deleteworkflow.model.ConsultantDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,14 +38,14 @@ public class DeleteUserAccountService {
 
   private final @NonNull UserRepository userRepository;
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull DeleteActionsRegistry deleteActionsRegistry;
+  private final @NonNull ActionsRegistry actionsRegistry;
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
 
   /**
    * Deletes all user accounts marked as deleted in database.
    */
   public void deleteUserAccounts() {
-    List<DeletionWorkflowError> workflowErrors = deleteAskersAndCollectPossibleErrors();
+    var workflowErrors = deleteAskersAndCollectPossibleErrors();
     workflowErrors.addAll(deleteConsultantsAndCollectPossibleErrors());
 
     if (isNotEmpty(workflowErrors)) {
@@ -46,11 +60,20 @@ public class DeleteUserAccountService {
         .collect(Collectors.toList());
   }
 
-  private List<DeletionWorkflowError> performUserDeletion(User user) {
-    return this.deleteActionsRegistry.getAskerDeleteActions().stream()
-        .map(deleteAskerAction -> deleteAskerAction.execute(user))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+  List<DeletionWorkflowError> performUserDeletion(User user) {
+
+    var deletionWorkflowDTO = new AskerDeletionWorkflowDTO(user, new ArrayList<>());
+
+    this.actionsRegistry.buildContainerForType(AskerDeletionWorkflowDTO.class)
+        .addActionToExecute(DeleteKeycloakAskerAction.class)
+        .addActionToExecute(DeleteAskerRoomsAndSessionsAction.class)
+        .addActionToExecute(DeleteDatabaseAskerAgencyAction.class)
+        .addActionToExecute(DeleteRocketChatAskerAction.class)
+        .addActionToExecute(DeleteAnonymousRegistryIdAction.class)
+        .addActionToExecute(DeleteDatabaseAskerAction.class)
+        .executeActions(deletionWorkflowDTO);
+
+    return deletionWorkflowDTO.getDeletionWorkflowErrors();
   }
 
   private List<DeletionWorkflowError> deleteConsultantsAndCollectPossibleErrors() {
@@ -61,10 +84,19 @@ public class DeleteUserAccountService {
   }
 
   private List<DeletionWorkflowError> performConsultantDeletion(Consultant consultant) {
-    return this.deleteActionsRegistry.getConsultantDeleteActions().stream()
-        .map(deleteConsultantAction -> deleteConsultantAction.execute(consultant))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+
+    var deletionWorkflowDTO =
+        new ConsultantDeletionWorkflowDTO(consultant, new ArrayList<>());
+
+    this.actionsRegistry.buildContainerForType(ConsultantDeletionWorkflowDTO.class)
+        .addActionToExecute(DeleteKeycloakConsultantAction.class)
+        .addActionToExecute(DeleteDatabaseConsultantAgencyAction.class)
+        .addActionToExecute(DeleteChatAction.class)
+        .addActionToExecute(DeleteRocketChatConsultantAction.class)
+        .addActionToExecute(DeleteDatabaseConsultantAction.class)
+        .executeActions(deletionWorkflowDTO);
+
+    return deletionWorkflowDTO.getDeletionWorkflowErrors();
   }
 
 }

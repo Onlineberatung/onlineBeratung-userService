@@ -2,9 +2,9 @@ package de.caritas.cob.userservice.api.facade.userdata;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ public class AskerDataProvider {
   private final @NonNull AgencyService agencyService;
   private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull AuthenticatedUser authenticatedUser;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
 
@@ -45,7 +47,7 @@ public class AskerDataProvider {
    */
   public UserDataResponseDTO retrieveData(User user) {
     String email = observeUserEmailAddress(user);
-    UserDataResponseDTO responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
+    var responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
         null, null, email, false, user.isLanguageFormal(), null, false, null,
         authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
 
@@ -64,15 +66,15 @@ public class AskerDataProvider {
     List<Long> agencyIds = mergeAgencyIdsFromSessionAndUser(user, sessionList);
     List<AgencyDTO> agencyDTOs = this.agencyService.getAgencies(agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
-    for (ConsultingType type : ConsultingType.values()) {
-      consultingTypes.put(Integer.toString(type.getValue()),
+    for (int type : consultingTypeManager.getAllConsultingTypeIds()) {
+      consultingTypes.put(Integer.toString(type),
           getConsultingTypeData(type, sessionList, agencyDTOs));
     }
 
     return consultingTypes;
   }
 
-  private LinkedHashMap<String, Object> getConsultingTypeData(ConsultingType consultingType,
+  private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
 
     LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
@@ -89,17 +91,17 @@ public class AskerDataProvider {
     return consultingTypeData;
   }
 
-  private Optional<AgencyDTO> findAgencyByConsultingType(ConsultingType consultingType,
+  private Optional<AgencyDTO> findAgencyByConsultingType(int consultingTypeId,
       List<AgencyDTO> agencyDTOs) {
     return agencyDTOs.stream()
-        .filter(agencyDTO -> agencyDTO.getConsultingType() == consultingType)
+        .filter(agencyDTO -> agencyDTO.getConsultingType() == consultingTypeId)
         .findFirst();
   }
 
-  private Optional<Session> findSessionByConsultingType(ConsultingType consultingType,
+  private Optional<Session> findSessionByConsultingType(int consultingTypeId,
       Set<Session> sessionList) {
     return sessionList.stream()
-        .filter(session -> session.getConsultingType() == consultingType)
+        .filter(session -> session.getConsultingTypeId() == consultingTypeId)
         .findFirst();
   }
 
@@ -111,13 +113,16 @@ public class AskerDataProvider {
   }
 
   private List<Long> collectAgencyIdsFromSessions(Set<Session> sessionList) {
-    return CollectionUtils.isNotEmpty(sessionList) ? sessionList.stream().map(Session::getAgencyId)
+    return CollectionUtils.isNotEmpty(sessionList) ? sessionList.stream()
+        .map(Session::getAgencyId)
+        .filter(Objects::nonNull)
         .collect(Collectors.toList()) : Collections.emptyList();
   }
 
   private List<Long> collectAgencyIdsFromUser(User user) {
     return CollectionUtils.isNotEmpty(user.getUserAgencies()) ? user.getUserAgencies().stream()
         .map(UserAgency::getAgencyId)
+        .filter(Objects::nonNull)
         .collect(Collectors.toList()) : Collections.emptyList();
   }
 

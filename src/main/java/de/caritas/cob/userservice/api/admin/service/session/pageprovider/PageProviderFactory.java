@@ -28,12 +28,13 @@ public class PageProviderFactory {
 
   public static PageProviderFactory getInstance(SessionRepository sessionRepository,
       SessionFilter sessionFilter) {
-    return new PageProviderFactory(requireNonNull(sessionRepository), requireNonNull(sessionFilter));
+    return new PageProviderFactory(requireNonNull(sessionRepository),
+        requireNonNull(sessionFilter));
   }
 
   /**
-   * Retrieves the first supported {@link SessionPageProvider} by given {@link SessionFilter}. Returns
-   * the {@link AllSessionPageProvider} if no filter is set.
+   * Retrieves the first supported {@link SessionPageProvider} by given {@link SessionFilter}.
+   * Returns the {@link AllSessionPageProvider} if no filter is set.
    *
    * @return the dedicated {@link SessionPageProvider}
    */

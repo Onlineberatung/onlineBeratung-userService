@@ -2,8 +2,10 @@ package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
@@ -12,7 +14,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
@@ -21,20 +22,24 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -76,9 +81,9 @@ public class SessionService {
    * @param user {@link User}
    * @return list of {@link Session}
    */
-  public List<Session> getSessionsForUserByConsultingType(User user,
-      ConsultingType consultingType) {
-    return sessionRepository.findByUserAndConsultingType(user, consultingType);
+  public List<Session> getSessionsForUserByConsultingTypeId(User user,
+      int consultingTypeId) {
+    return sessionRepository.findByUserAndConsultingTypeId(user, consultingTypeId);
   }
 
   /**
@@ -125,9 +130,11 @@ public class SessionService {
     List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
     List<Session> sessions = sessionRepository.findByUserUserId(userId);
     if (isNotEmpty(sessions)) {
-      List<AgencyDTO> agencies =
-          agencyService.getAgencies(
-              sessions.stream().map(Session::getAgencyId).collect(Collectors.toList()));
+      List<Long> agencyIds = sessions.stream()
+          .map(Session::getAgencyId)
+          .filter(Objects::nonNull)
+          .collect(Collectors.toList());
+      List<AgencyDTO> agencies = agencyService.getAgencies(agencyIds);
       sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
     }
     return sessionResponseDTOs;
@@ -136,8 +143,8 @@ public class SessionService {
   /**
    * Initialize a {@link Session} as initial registered enquiry.
    *
-   * @param user                   the user
-   * @param userDto                the dto of the user
+   * @param user    the user
+   * @param userDto the dto of the user
    * @return the initialized session
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession) {
@@ -148,35 +155,50 @@ public class SessionService {
   /**
    * Initialize a {@link Session}.
    *
-   * @param user                   {@link User}
-   * @param userDto                {@link UserDTO}
-   * @param isTeamSession          is team session flag
-   * @param registrationType       {@link RegistrationType}
-   * @param sessionStatus          {@link SessionStatus}
+   * @param user             {@link User}
+   * @param userDto          {@link UserDTO}
+   * @param isTeamSession    is team session flag
+   * @param registrationType {@link RegistrationType}
+   * @param sessionStatus    {@link SessionStatus}
    * @return the initialized {@link Session}
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
       RegistrationType registrationType, SessionStatus sessionStatus) {
-    var consultingTypeSettings = obtainConsultingTypeSettings(userDto);
+    var extendedConsultingTypeResponseDTO = obtainConsultingTypeSettings(userDto);
+
     var session = Session.builder()
         .user(user)
-        .consultingType(consultingTypeSettings.getConsultingType())
+        .consultingTypeId(obtainCheckedConsultingTypeId(extendedConsultingTypeResponseDTO))
         .registrationType(registrationType)
         .postcode(userDto.getPostcode())
         .agencyId(userDto.getAgencyId())
         .status(sessionStatus)
         .teamSession(isTeamSession)
-        .monitoring(consultingTypeSettings.isMonitoring())
+        .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
         .build();
-
     return saveSession(session);
   }
 
-  private ConsultingTypeSettings obtainConsultingTypeSettings(UserDTO userDTO) {
-    return consultingTypeManager.getConsultingTypeSettings(
-        ConsultingType.fromConsultingType(userDTO.getConsultingType()));
+  private ExtendedConsultingTypeResponseDTO obtainConsultingTypeSettings(UserDTO userDTO) {
+    return consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
+  }
+
+  private Integer obtainCheckedConsultingTypeId(
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    var consultingTypeId = extendedConsultingTypeResponseDTO.getId();
+    if (isNull(consultingTypeId)) {
+      throw new BadRequestException("Consulting type id must not be null");
+    }
+    return consultingTypeId;
+  }
+
+  private boolean retrieveCheckedMonitoringProperty(
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    MonitoringDTO monitoring = extendedConsultingTypeResponseDTO.getMonitoring();
+
+    return nonNull(monitoring) && isTrue(monitoring.getInitializeMonitoring());
   }
 
   /**
@@ -222,51 +244,37 @@ public class SessionService {
   }
 
   /**
-   * Retrieves all related enquiries of given {@link Consultant}.
+   * Retrieves all related registered enquiries of given {@link Consultant}.
    *
    * @param consultant the consultant
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
-  public List<ConsultantSessionResponseDTO> getEnquiriesForConsultant(Consultant consultant) {
-    return getEnquiriesForConsultant(consultant, null);
-  }
-
-  public List<ConsultantSessionResponseDTO> getEnquiriesForConsultant(Consultant consultant,
-      RegistrationType registrationType) {
+  public List<ConsultantSessionResponseDTO> getRegisteredEnquiriesForConsultant(
+      Consultant consultant) {
     Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
     if (isNotEmpty(consultantAgencies)) {
-      return retrieveEnquiriesForConsultantAgencies(consultantAgencies, registrationType);
+      return retrieveRegisteredEnquiriesForConsultantAgencies(consultantAgencies);
     }
     return emptyList();
   }
 
-  private List<ConsultantSessionResponseDTO> retrieveEnquiriesForConsultantAgencies(
-      Set<ConsultantAgency> consultantAgencies, RegistrationType registrationType) {
+  private List<ConsultantSessionResponseDTO> retrieveRegisteredEnquiriesForConsultantAgencies(
+      Set<ConsultantAgency> consultantAgencies) {
     List<Long> consultantAgencyIds = consultantAgencies.stream()
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toList());
 
-    final List<Session> sessions = retrieveSessionsByRegistrationType(
-        registrationType, consultantAgencyIds);
+    final List<Session> sessions = retrieveRegisteredSessions(consultantAgencyIds);
 
     return sessions.stream()
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
   }
 
-  private List<Session> retrieveSessionsByRegistrationType(RegistrationType registrationType,
-      List<Long> consultantAgencyIds) {
-    final List<Session> sessions;
-    if (registrationType != null) {
-      sessions = this.sessionRepository
-          .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
-              consultantAgencyIds, SessionStatus.NEW, registrationType);
-    } else {
-      sessions = this.sessionRepository
-          .findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-              consultantAgencyIds, SessionStatus.NEW);
-    }
-    return sessions;
+  private List<Session> retrieveRegisteredSessions(List<Long> consultantAgencyIds) {
+    return this.sessionRepository
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            consultantAgencyIds, SessionStatus.NEW, RegistrationType.REGISTERED);
   }
 
   /**
@@ -275,11 +283,17 @@ public class SessionService {
    * @param consultant the consultant
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
-  public List<ConsultantSessionResponseDTO> getActiveSessionsForConsultant(Consultant consultant) {
-    return sessionRepository.findByConsultantAndStatus(consultant, SessionStatus.IN_PROGRESS)
-        .stream()
+  public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(Consultant consultant) {
+    return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
+        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+        .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
+  }
+
+  private List<Session> getSessionsForConsultantByStatus(Consultant consultant,
+      SessionStatus sessionStatus) {
+    return sessionRepository.findByConsultantAndStatus(consultant, sessionStatus);
   }
 
   private List<UserSessionResponseDTO> convertToUserSessionResponseDTO(List<Session> sessions,
@@ -295,7 +309,7 @@ public class SessionService {
         .agency(agencies.stream()
             .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
             .findAny()
-            .orElseThrow())
+            .orElse(null))
         .consultant(nonNull(session.getConsultant()) ? convertToSessionConsultantForUserDTO(
             session.getConsultant()) : null);
   }
@@ -400,7 +414,7 @@ public class SessionService {
     return new ConsultantSessionDTO()
         .isTeamSession(session.isTeamSession())
         .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .id(session.getId())
         .status(session.getStatus().getValue())
         .askerId(session.getUser().getUserId())

@@ -133,7 +133,7 @@ public class SessionListFacadeTest {
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnCorrectOffset() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, COUNT_10, SessionFilter.ALL);
+        OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
         RC_TOKEN, sessionListQueryParameter))
@@ -150,7 +150,7 @@ public class SessionListFacadeTest {
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnNoSessions_When_OffsetIsGreaterThanTotal() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0 + CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 1, COUNT_10,
+        OFFSET_0 + CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 1, COUNT_10,
         SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
@@ -168,7 +168,7 @@ public class SessionListFacadeTest {
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_When_CountIsSmallerThanTotal() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, COUNT_1, SessionFilter.ALL);
+        OFFSET_0, COUNT_1, SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
         RC_TOKEN, sessionListQueryParameter))
@@ -185,7 +185,7 @@ public class SessionListFacadeTest {
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnCorrectNumberOfSessions_When_CountIsGreaterThanTotal() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 5,
+        OFFSET_0, CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 5,
         SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
@@ -203,7 +203,7 @@ public class SessionListFacadeTest {
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnFilteredSessionList_When_FeedbackFilterIsSet() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, COUNT_10, SessionFilter.FEEDBACK);
+        OFFSET_0, COUNT_10, SessionFilter.FEEDBACK);
 
     when(consultantSessionListService.retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
         RC_TOKEN, sessionListQueryParameter))
@@ -225,7 +225,7 @@ public class SessionListFacadeTest {
   public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnCorrectlySortedSessionList() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, COUNT_10, SessionFilter.ALL);
+        OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
         RC_TOKEN, sessionListQueryParameter))
@@ -247,7 +247,7 @@ public class SessionListFacadeTest {
   public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_When_CountIsGreaterThanTotal() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, COUNT_10, SessionFilter.ALL);
+        OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
         RC_TOKEN, sessionListQueryParameter))
@@ -266,7 +266,7 @@ public class SessionListFacadeTest {
   public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_When_CountIsSmallerThanTotal() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, COUNT_10, SessionFilter.ALL);
+        OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
         RC_TOKEN, sessionListQueryParameter))
@@ -284,7 +284,7 @@ public class SessionListFacadeTest {
   public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnCorrectOffset() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0, COUNT_10, SessionFilter.ALL);
+        OFFSET_0, COUNT_10, SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
         RC_TOKEN, sessionListQueryParameter))
@@ -302,7 +302,7 @@ public class SessionListFacadeTest {
   public void retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnNoSessionsIfOffsetIsGreaterThanTotal() {
 
     SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
-         OFFSET_0 + CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 1, COUNT_10,
+        OFFSET_0 + CONSULTANT_SESSION_RESPONSE_DTO_LIST.size() + 1, COUNT_10,
         SessionFilter.ALL);
 
     when(consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,

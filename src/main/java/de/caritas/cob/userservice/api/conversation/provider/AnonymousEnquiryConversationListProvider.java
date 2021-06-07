@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -49,7 +48,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
   public ConsultantSessionListResponseDTO buildConversations(
       PageableListRequest pageableListRequest) {
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
-    Set<ConsultingType> relatedConsultingTypes = retrieveRelatedConsultingTypes(consultant);
+    Set<Integer> relatedConsultingTypes = retrieveRelatedConsultingTypes(consultant);
 
     Page<Session> anonymousSessionsOfConsultant = queryForRelevantSessions(
         pageableListRequest, relatedConsultingTypes);
@@ -58,9 +57,8 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
 
-    sessions.forEach(session -> this.consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(session, pageableListRequest.getRcToken(),
-            consultant));
+    this.consultantSessionEnricher.updateRequiredConsultantSessionValues(sessions,
+        pageableListRequest.getRcToken(), consultant);
 
     return new ConsultantSessionListResponseDTO()
         .sessions(sessions)
@@ -69,7 +67,7 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
         .total((int) anonymousSessionsOfConsultant.getTotalElements());
   }
 
-  private Set<ConsultingType> retrieveRelatedConsultingTypes(Consultant consultant) {
+  private Set<Integer> retrieveRelatedConsultingTypes(Consultant consultant) {
     List<Long> consultantAgencyIds = consultant.getConsultantAgencies().stream()
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toList());
@@ -79,12 +77,12 @@ public class AnonymousEnquiryConversationListProvider implements ConversationLis
   }
 
   private Page<Session> queryForRelevantSessions(PageableListRequest pageableListRequest,
-      Set<ConsultingType> relatedConsultingTypes) {
-    var pageable = PageRequest.of(pageableListRequest.getOffset(),
-        pageableListRequest.getCount());
+      Set<Integer> relatedConsultingTypes) {
+    var requestedPage = obtainPageByOffsetAndCount(pageableListRequest);
+    var pageable = PageRequest.of(requestedPage, pageableListRequest.getCount());
 
     return this.sessionRepository
-        .findByConsultingTypeInAndRegistrationTypeAndStatusOrderByEnquiryMessageDateAsc(
+        .findByConsultingTypeIdInAndRegistrationTypeAndStatusOrderByCreateDateAsc(
             relatedConsultingTypes, ANONYMOUS, SessionStatus.NEW, pageable);
   }
 

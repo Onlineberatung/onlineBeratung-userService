@@ -1,79 +1,62 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
-import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.LogService;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-import javax.annotation.PostConstruct;
+import de.caritas.cob.userservice.api.service.ConsultingTypeService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.List;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 @Service
 @Getter
+@RequiredArgsConstructor
 public class ConsultingTypeManager {
 
-  @Value("${consulting.types.settings.json.path}")
-  private String consultingTypesSettingsJsonPath;
+  private final @NonNull ConsultingTypeService consultingTypeService;
 
-  private final Map<Integer, ConsultingTypeSettings> consultingTypeSettingsMap = new HashMap<>();
-
-  @PostConstruct
-  private void init() {
-
-    LogService.logInfo("Start initializing consulting type settings...");
-
-    Stream.of(ConsultingType.values())
-        .forEach(this::appendConsutingTypeSetting);
-
-    LogService.logInfo("Finished initializing consulting type settings...");
-  }
-
-  private void appendConsutingTypeSetting(ConsultingType consultingType) {
-    ObjectMapper mapper = new ObjectMapper();
-    TypeReference<ConsultingTypeSettings> typeReference = new TypeReference<>() {};
-    InputStream inputStream =
-        TypeReference.class.getResourceAsStream(getJsonFileNameWithPath(consultingType));
+  /**
+   * Returns the {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID.
+   *
+   * @param consultingTypeId The consulting ID for which the settings are searched
+   * @return {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID
+   */
+  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(int consultingTypeId) {
     try {
-      ConsultingTypeSettings consultingTypeSettings = mapper.readValue(inputStream, typeReference);
-      consultingTypeSettings.setConsultingType(consultingType);
-      this.consultingTypeSettingsMap.put(consultingType.getValue(), consultingTypeSettings);
-    } catch (IOException e) {
-      LogService.logWarn(String.format("Unable to provide settings for consulting type %s",
-          consultingType));
+      return consultingTypeService.getExtendedConsultingTypeResponseDTO(consultingTypeId);
+    } catch (RestClientException ex) {
+      throw new MissingConsultingTypeException(
+          String.format("No settings for consulting type %s found.", consultingTypeId));
     }
   }
 
   /**
-   * Returns the {@link ConsultingTypeSettings} for the provided {@link ConsultingType}.
-   * 
-   * @param consultingType {@link ConsultingType}
-   * @return {@link ConsultingTypeSettings} for the provided {@link ConsultingType}
-   * @throws MissingConsultingTypeException when no settings for provided consulting type where
-   *         found
+   * Returns the {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID.
+   *
+   * @param consultingTypeId The consulting ID for which the settings are searched
+   * @return {@link ExtendedConsultingTypeResponseDTO} for the provided consulting ID
    */
-  public ConsultingTypeSettings getConsultingTypeSettings(ConsultingType consultingType) {
-
-    if (consultingTypeSettingsMap.containsKey(consultingType.getValue())
-        && nonNull(consultingTypeSettingsMap.get(consultingType.getValue()))) {
-      return consultingTypeSettingsMap.get(consultingType.getValue());
-    } else {
-      throw new MissingConsultingTypeException(
-          String.format("No settings for consulting type %s found.", consultingType.name()));
-    }
-
+  public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(String consultingTypeId) {
+    return getConsultingTypeSettings(Integer.parseInt(consultingTypeId));
   }
 
-  private String getJsonFileNameWithPath(ConsultingType consultingType) {
-    return consultingTypesSettingsJsonPath + "/" + consultingType.name().toLowerCase() + ".json";
+  /**
+   * Returns the a list with all consulting type IDs
+   *
+   * @return {@link List} with all consulting type IDS
+   */
+  public List<Integer> getAllConsultingTypeIds() {
+    return consultingTypeService.getAllConsultingTypeIds();
+  }
+
+  public boolean isConsultantBoundedToAgency(int consultingTypeId) {
+    var extendedConsultingTypeResponseDTO = consultingTypeService
+        .getExtendedConsultingTypeResponseDTO(consultingTypeId);
+    return isTrue(extendedConsultingTypeResponseDTO.getConsultantBoundedToConsultingType());
   }
 
 }

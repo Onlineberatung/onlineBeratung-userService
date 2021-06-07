@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice;
 
 import static org.junit.Assert.assertNull;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;

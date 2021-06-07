@@ -1,152 +1,79 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_AIDS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CHILDREN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_CURE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_DEBT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_DISABILITY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_LAW;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_OFFENDER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PARENTING;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PLANB;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_PREGNANCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_REHABILITATION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SENIORITY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_AIDS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CHILDREN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_CURE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_DEBT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_DISABILITY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_LAW;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_OFFENDER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_PARENTING;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_PLANB;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_PREGNANCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_REHABILITATION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SENIORITY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SOCIAL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SOCIAL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_U25;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.PostConstruct;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.internal.util.reflection.FieldSetter;
-import org.mockito.junit.MockitoJUnitRunner;
+import de.caritas.cob.userservice.api.service.ConsultingTypeService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestClientException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConsultingTypeManagerTest {
+@ExtendWith(MockitoExtension.class)
+class ConsultingTypeManagerTest {
 
-  private static final String INIT_GROUP_NAME = "init";
-  private static final String FIELD_NAME_CONSULTING_TYPE_SETTINGS_MAP = "consultingTypeSettingsMap";
-  private static final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH =
-      "consultingTypesSettingsJsonPath";
-  private static final String FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE =
-      "/consulting-type-settings";
-  private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP =
-      new HashMap<Integer, ConsultingTypeSettings>() {
-        private static final long serialVersionUID = 1L;
-        {
-          put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
-          put(CONSULTING_TYPE_U25.getValue(), CONSULTING_TYPE_SETTINGS_U25);
-          put(CONSULTING_TYPE_PREGNANCY.getValue(), CONSULTING_TYPE_SETTINGS_PREGNANCY);
-          put(CONSULTING_TYPE_AIDS.getValue(), CONSULTING_TYPE_SETTINGS_AIDS);
-          put(CONSULTING_TYPE_CHILDREN.getValue(), CONSULTING_TYPE_SETTINGS_CHILDREN);
-          put(CONSULTING_TYPE_CURE.getValue(), CONSULTING_TYPE_SETTINGS_CURE);
-          put(CONSULTING_TYPE_DEBT.getValue(), CONSULTING_TYPE_SETTINGS_DEBT);
-          put(CONSULTING_TYPE_DISABILITY.getValue(), CONSULTING_TYPE_SETTINGS_DISABILITY);
-          put(CONSULTING_TYPE_LAW.getValue(), CONSULTING_TYPE_SETTINGS_LAW);
-          put(CONSULTING_TYPE_OFFENDER.getValue(), CONSULTING_TYPE_SETTINGS_OFFENDER);
-          put(CONSULTING_TYPE_PARENTING.getValue(), CONSULTING_TYPE_SETTINGS_PARENTING);
-          put(CONSULTING_TYPE_PLANB.getValue(), CONSULTING_TYPE_SETTINGS_PLANB);
-          put(CONSULTING_TYPE_REHABILITATION.getValue(), CONSULTING_TYPE_SETTINGS_REHABILITATION);
-          put(CONSULTING_TYPE_SENIORITY.getValue(), CONSULTING_TYPE_SETTINGS_SENIORITY);
-          put(CONSULTING_TYPE_SOCIAL.getValue(), CONSULTING_TYPE_SETTINGS_SOCIAL);
-        }
-      };
-  private final Map<Integer, ConsultingTypeSettings> CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25 =
-      new HashMap<Integer, ConsultingTypeSettings>() {
-        private static final long serialVersionUID = 1L;
-        {
-          put(CONSULTING_TYPE_SUCHT.getValue(), CONSULTING_TYPE_SETTINGS_SUCHT);
-        }
-      };
+  @InjectMocks
+  private ConsultingTypeManager consultingTypeManager;
+
+  @Mock
+  private ConsultingTypeService consultingTypeService;
 
   @Test
-  public void test_Should_Fail_WhenMethodInitDoesNotHavePostConstructAnnotation()
-      throws NoSuchMethodException, SecurityException {
+  void getConsultantTypeSettings_Should_Throw_MissingConsultingTypeException_When_RestClientException() {
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenThrow(new RestClientException(""));
 
-    ConsultingTypeManager consultingTypeManager = new ConsultingTypeManager();
-    Class<? extends ConsultingTypeManager> classToTest = consultingTypeManager.getClass();
-
-    Method methodToTest = classToTest.getDeclaredMethod(INIT_GROUP_NAME);
-    methodToTest.setAccessible(true);
-    PostConstruct annotation = methodToTest.getAnnotation(PostConstruct.class);
-
-    assertNotNull(annotation);
+    assertThrows(MissingConsultingTypeException.class,
+        () -> consultingTypeManager.getConsultingTypeSettings(1));
   }
 
   @Test
-  public void getConsultantTypeSettings_Should_ReturnConsultantTypeSettingsForConsultingType()
-      throws NoSuchFieldException, SecurityException {
+  void getConsultantTypeSettings_Should_Return_ExtendedConsultingTypeResponseDTO()
+      throws MissingConsultingTypeException {
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
-    ConsultingTypeManager consultingTypeManager = new ConsultingTypeManager();
-    FieldSetter.setField(consultingTypeManager,
-        consultingTypeManager.getClass().getDeclaredField(FIELD_NAME_CONSULTING_TYPE_SETTINGS_MAP),
-        CONSULTING_TYPE_SETTINGS_MAP);
-
-    ConsultingTypeSettings result =
-        consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_SUCHT);
-    assertEquals(CONSULTING_TYPE_SETTINGS_SUCHT, result);
-
-    result = consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
-    assertEquals(CONSULTING_TYPE_SETTINGS_U25, result);
+    assertEquals(extendedConsultingTypeResponseDTO,
+        consultingTypeManager.getConsultingTypeSettings(anyInt()));
   }
 
   @Test
-  public void getConsultantTypeSettings_Should_ThrowMissingConsultingTypeException_WhenSettingsForGivenConsultingTypeAreMissing()
-      throws NoSuchFieldException, SecurityException {
+  void isConsultantBoundedToAgency_Should_Return_True()
+      throws MissingConsultingTypeException {
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(true);
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
-    ConsultingTypeManager consultingTypeManager = new ConsultingTypeManager();
-    FieldSetter.setField(consultingTypeManager,
-        consultingTypeManager.getClass().getDeclaredField(FIELD_NAME_CONSULTING_TYPE_SETTINGS_MAP),
-        CONSULTING_TYPE_SETTINGS_MAP_WITH_MISSING_CONSULTING_TYPE_SETTINGS_FOR_U25);
-
-    try {
-      consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_U25);
-      fail("Expected exception: MissingConsultingTypeException");
-    } catch (MissingConsultingTypeException missingConsultingTypeException) {
-      assertTrue("Excepted MissingConsultingTypeException thrown", true);
-    }
-
+    assertTrue(consultingTypeManager.isConsultantBoundedToAgency(anyInt()));
   }
 
-  protected static ConsultingTypeSettings loadConsultingTypeSettings(ConsultingType consultingType)
-      throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    TypeReference<ConsultingTypeSettings> typeReference =
-        new TypeReference<ConsultingTypeSettings>() {};
-    InputStream inputStream =
-        TypeReference.class.getResourceAsStream(FIELD_NAME_CONSULTING_TYPES_SETTINGS_JSON_PATH_VALUE
-            + "/" + consultingType.name().toLowerCase() + ".json");
+  @Test
+  void isConsultantBoundedToAgency_Should_Return_False()
+      throws MissingConsultingTypeException {
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(false);
+    when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
-    return mapper.readValue(inputStream, typeReference);
+    assertFalse(consultingTypeManager.isConsultantBoundedToAgency(anyInt()));
   }
 
+  @Test
+  void getAllConsultingTypeIds_Should_Return_The_Same_List()
+      throws MissingConsultingTypeException {
+    when(consultingTypeService.getAllConsultingTypeIds()).thenReturn(List.of(1, 2, 3, 4));
+
+    assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(1, 2, 3, 4));
+  }
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -35,6 +36,9 @@ public class RemoveConsultantFromRocketChatServiceTest {
 
   @Mock
   private KeycloakAdminClientService keycloakAdminClientService;
+
+  @Mock
+  private ConsultingTypeManager consultingTypeManager;
 
   @Test
   public void removeConsultantFromSessions_Should_removeConsultant_When_consultantIsNotUserAndNotDireclyAssigned() {

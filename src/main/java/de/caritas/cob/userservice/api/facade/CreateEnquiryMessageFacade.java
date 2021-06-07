@@ -1,9 +1,11 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
@@ -19,7 +21,6 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -29,11 +30,12 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -83,14 +85,15 @@ public class CreateEnquiryMessageFacade {
       var session = fetchSessionForEnquiryMessage(sessionId, user);
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
-      var consultingTypeSettings =
-          consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
+      var extendedConsultingTypeResponseDTO = consultingTypeManager
+          .getConsultingTypeSettings(session.getConsultingTypeId());
+
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
       String rcGroupId = createRocketChatRoom(session, agencyList, rocketChatCredentials);
       String rcFeedbackGroupId = retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(session,
-          rcGroupId, agencyList, consultingTypeSettings);
+          rcGroupId, agencyList, extendedConsultingTypeResponseDTO);
 
       var createEnquiryExceptionInformation = CreateEnquiryExceptionInformation.builder()
           .session(session)
@@ -103,9 +106,9 @@ public class CreateEnquiryMessageFacade {
       messageServiceProvider.postEnquiryMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);
       messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, user,
-          consultingTypeSettings, createEnquiryExceptionInformation);
+          extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
       messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(rcGroupId,
-          consultingTypeSettings, createEnquiryExceptionInformation);
+          extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
 
       updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
 
@@ -167,7 +170,9 @@ public class CreateEnquiryMessageFacade {
 
     try {
       addSystemUserToGroup(rcGroupId);
-      addConsultantsToGroup(rcGroupId, agencyList);
+      if (!ANONYMOUS.equals(session.getRegistrationType())) {
+        addConsultantsToGroup(rcGroupId, agencyList);
+      }
       rocketChatService.removeSystemMessages(rcGroupId,
           nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
 
@@ -237,11 +242,11 @@ public class CreateEnquiryMessageFacade {
   }
 
   private String retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(Session session,
-      String rcGroupId,
-      List<ConsultantAgency> agencyList, ConsultingTypeSettings consultingTypeSettings)
+      String rcGroupId, List<ConsultantAgency> agencyList,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
       throws CreateEnquiryException {
 
-    if (!consultingTypeSettings.isFeedbackChat()) {
+    if (isFalse(extendedConsultingTypeResponseDTO.getInitializeFeedbackChat())) {
       return null;
     }
 
@@ -301,7 +306,7 @@ public class CreateEnquiryMessageFacade {
 
     for (ConsultantAgency agency : agencyList) {
       if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-          Authority.VIEW_ALL_FEEDBACK_SESSIONS)) {
+          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)) {
         rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
             rcFeedbackGroupId);
       }

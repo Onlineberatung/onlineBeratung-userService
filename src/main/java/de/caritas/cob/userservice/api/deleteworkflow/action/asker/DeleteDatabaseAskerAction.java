@@ -1,17 +1,15 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.LAST;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
+import de.caritas.cob.userservice.api.actions.ActionCommand;
+import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.LogService;
-import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,43 +19,30 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class DeleteDatabaseAskerAction implements DeleteAskerAction {
+public class DeleteDatabaseAskerAction implements ActionCommand<AskerDeletionWorkflowDTO> {
 
   private final @NonNull UserRepository userRepository;
 
   /**
    * Deletes the given {@link User} in database.
    *
-   * @param user the {@link User} to delete
-   * @return a possible generated {@link DeletionWorkflowError}
+   * @param actionTarget the {@link AskerDeletionWorkflowDTO} with the {@link User} to delete
    */
   @Override
-  public List<DeletionWorkflowError> execute(User user) {
+  public void execute(AskerDeletionWorkflowDTO actionTarget) {
     try {
-      this.userRepository.delete(user);
+      this.userRepository.delete(actionTarget.getUser());
     } catch (Exception e) {
       LogService.logDeleteWorkflowError(e);
-      return singletonList(
+      actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)
               .deletionTargetType(DATABASE)
-              .identifier(user.getUserId())
+              .identifier(actionTarget.getUser().getUserId())
               .reason("Unable to delete user")
               .timestamp(nowInUtc())
               .build()
       );
     }
-    return emptyList();
   }
-
-  /**
-   * Provides the execution order.
-   *
-   * @return the value for the execution order
-   */
-  @Override
-  public int getOrder() {
-    return LAST.getOrder();
-  }
-
 }

@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static org.junit.Assert.assertTrue;
@@ -48,7 +48,8 @@ public class MonitoringServiceTest {
   private final String ERROR = "error";
   private final Long SESSION_ID = 123L;
   private final Session SESSION =
-      new Session(SESSION_ID, null, null, SUCHT, REGISTERED, POSTCODE, null, IN_PROGRESS, null, null,
+      new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
+          IN_PROGRESS, null, null,
           null, null, false, false, null, null);
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
@@ -128,13 +129,15 @@ public class MonitoringServiceTest {
   public void createMonitoring_Should_UpdateMonitoring_WithInitialMonitoringListOfSessionsConsultingType()
       throws CreateMonitoringException {
 
-    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitialList(Mockito.any());
+    doReturn(MONITORING_DTO).when(monitoringStructureProvider)
+        .getMonitoringInitialList(Mockito.anyInt());
 
     monitoringService
         .createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
-    verify(monitoringStructureProvider, times(1)).getMonitoringInitialList(SESSION.getConsultingType());
+    verify(monitoringStructureProvider, times(1))
+        .getMonitoringInitialList(SESSION.getConsultingTypeId());
 
   }
 
@@ -145,12 +148,14 @@ public class MonitoringServiceTest {
   @Test
   public void deleteInitialMonitoring_Should_DeleteMonitoring_WithInitialMonitoringListOfSessionsConsultingType() {
 
-    doReturn(MONITORING_DTO).when(monitoringStructureProvider).getMonitoringInitialList(Mockito.any());
+    doReturn(MONITORING_DTO).when(monitoringStructureProvider)
+        .getMonitoringInitialList(Mockito.anyInt());
 
     monitoringService.rollbackInitializeMonitoring(SESSION);
 
     verify(monitoringService, times(1)).deleteMonitoring(SESSION_ID, MONITORING_DTO);
-    verify(monitoringStructureProvider, times(1)).getMonitoringInitialList(SESSION.getConsultingType());
+    verify(monitoringStructureProvider, times(1))
+        .getMonitoringInitialList(SESSION.getConsultingTypeId());
 
   }
 }
