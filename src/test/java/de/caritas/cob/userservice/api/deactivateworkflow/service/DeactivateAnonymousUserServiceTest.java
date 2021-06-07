@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.actions.ActionCommandMockProvider;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
+import de.caritas.cob.userservice.api.actions.session.PostConversationFinishedAliasMessageActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -199,6 +200,9 @@ class DeactivateAnonymousUserServiceTest {
           times(1)).execute(session);
       verify(this.commandMockProvider.getActionMock(
           SendFinishedAnonymousConversationEventActionCommand.class), times(1)).execute(session);
+      verify(this.commandMockProvider
+          .getActionMock(PostConversationFinishedAliasMessageActionCommand.class), times(1))
+          .execute(session);
     });
   }
 

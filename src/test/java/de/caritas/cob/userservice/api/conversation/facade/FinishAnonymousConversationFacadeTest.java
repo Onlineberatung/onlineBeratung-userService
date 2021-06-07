@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.actions.ActionCommandMockProvider;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
+import de.caritas.cob.userservice.api.actions.session.PostConversationFinishedAliasMessageActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -69,6 +70,9 @@ class FinishAnonymousConversationFacadeTest {
     verify(this.actionCommandMockProvider
         .getActionMock(DeactivateKeycloakUserActionCommand.class), times(1))
         .execute(session.getUser());
+    verify(this.actionCommandMockProvider
+        .getActionMock(PostConversationFinishedAliasMessageActionCommand.class), times(1))
+        .execute(session);
   }
 
 }

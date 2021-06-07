@@ -41,7 +41,7 @@ paths:
     post:
       tags:
         - message-controller
-      summary: 'Add new Rocket.Chat message [Authorization: Role: user, consultant,
+      summary: 'Add new Rocket.Chat message [Authorization: Role: user, anonymous, consultant,
         technical]'
       operationId: createMessage
       parameters:
@@ -130,7 +130,7 @@ paths:
       tags:
         - message-controller
       summary: 'Add new Rocket.Chat system video call event message [Authorization: Role: user,
-      consultant]'
+      anonymous, consultant]'
       operationId: createVideoHintMessage
       parameters:
         - name: rcGroupId
@@ -161,7 +161,7 @@ paths:
     get:
       tags:
         - message-controller
-      summary: 'Get Rocket.Chat message stream [Authorization: Role: user, consultant]'
+      summary: 'Get Rocket.Chat message stream [Authorization: Role: user, anonymous, consultant]'
       operationId: getMessageStream
       parameters:
         - name: rcToken
@@ -248,7 +248,7 @@ paths:
     post:
       tags:
         - message-controller
-      summary: 'Save a draft message [Authorization: Role: user, consultant]'
+      summary: 'Save a draft message [Authorization: Role: user, anonymous, consultant]'
       operationId: saveDraftMessage
       parameters:
         - name: rcGroupId
@@ -314,7 +314,7 @@ paths:
       tags:
         - message-controller
       summary: 'Saves a new empty system message containing the provided message type in the alias.
-      [Authorization: Role: user, consultant]'
+      [Authorization: Role: user, consultant, technical]'
       operationId: saveAliasOnlyMessage
       parameters:
         - name: rcGroupId
@@ -478,9 +478,10 @@ components:
     MessageType:
       type: string
       enum:
+        - "FINISHED_CONVERSATION"
+        - "FORWARD"
         - "FURTHER_STEPS"
         - "UPDATE_SESSION_DATA"
-        - "FORWARD"
         - "VIDEOCALL"
 
     UserDTO:
