@@ -126,8 +126,7 @@ public class MonitoringService {
     if (nonNull(monitoringList)) {
       for (MonitoringType type : MonitoringType.values()) {
         if (type.getConsultingTypeId() == consultingTypeId) {
-          map.put(type.getKey(),
-              convertToMonitoring(type, monitoringList));
+          map.put(type.getKey(), convertToMonitoring(type, monitoringList));
         }
       }
     }
