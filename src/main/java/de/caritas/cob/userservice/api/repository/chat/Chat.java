@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.repository.chat;
 
+import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -92,6 +94,9 @@ public class Chat {
   @OneToMany(mappedBy = "chat", orphanRemoval = true)
   private Set<ChatAgency> chatAgencies;
 
+  @Column(name = "update_date")
+  private LocalDateTime updateDate;
+
   public Chat(String topic, int consultingTypeId, LocalDateTime initialStartDate,
       LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
       Consultant chatOwner) {
@@ -103,6 +108,7 @@ public class Chat {
     this.repetitive = repetitive;
     this.chatInterval = chatInterval;
     this.chatOwner = chatOwner;
+    this.updateDate = nowInUtc();
   }
 
   @Override
@@ -113,7 +119,7 @@ public class Chat {
     if (!(o instanceof Chat)) {
       return false;
     }
-    Chat chat = (Chat) o;
+    var chat = (Chat) o;
     return id.equals(chat.id);
   }
 

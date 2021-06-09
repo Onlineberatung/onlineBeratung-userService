@@ -26,4 +26,6 @@ public interface ChatRepository extends CrudRepository<Chat, Long> {
   Optional<Chat> findByGroupId(String groupId);
 
   List<Chat> findByChatOwner(Consultant chatOwner);
+
+  List<Chat> findAllByActiveIsTrue();
 }
