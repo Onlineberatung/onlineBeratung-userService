@@ -595,6 +595,27 @@
 							<modelPackage>${project.groupId}.${project.artifactId}.mailservice.generated.web.model</modelPackage>
 						</configuration>
 					</execution>
+					<execution>
+						<id>keycloak-extension</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<sourceFolder>/</sourceFolder>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/keycloakextension.yaml</inputSpec>
+							<generateApis>false</generateApis>
+							<generateSupportingFiles>false</generateSupportingFiles>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generatorName>spring</generatorName>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<output>target/generated-sources</output>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<!-- Liquibase Maven plugin -->
