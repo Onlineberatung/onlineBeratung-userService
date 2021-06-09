@@ -46,14 +46,18 @@ public class AskerDataProvider {
    * @return the user data
    */
   public UserDataResponseDTO retrieveData(User user) {
-    String email = observeUserEmailAddress(user);
-    var responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
-        null, null, email, false, user.isLanguageFormal(), null, false, null,
-        authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
-
-    responseDTO.setConsultingTypes(getConsultingTypes(user));
-
-    return responseDTO;
+    return UserDataResponseDTO.builder()
+        .userId(user.getUserId())
+        .userName(user.getUsername())
+        .email(observeUserEmailAddress(user))
+        .isAbsent(false)
+        .isFormalLanguage(user.isLanguageFormal())
+        .isInTeamAgency(false)
+        .userRoles(authenticatedUser.getRoles())
+        .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
+        .consultingTypes(getConsultingTypes(user))
+        .hasAnonymousConversations(false)
+        .build();
   }
 
   private String observeUserEmailAddress(User user) {
