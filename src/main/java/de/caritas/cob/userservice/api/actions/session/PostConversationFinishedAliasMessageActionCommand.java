@@ -27,10 +27,10 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull KeycloakService keycloakService;
 
-  @Value("${keycloakService.admin.username}")
+  @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
 
-  @Value("${keycloakService.admin.password}")
+  @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
   /**
