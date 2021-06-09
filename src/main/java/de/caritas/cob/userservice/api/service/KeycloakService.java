@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,7 +82,8 @@ public class KeycloakService {
   }
 
   /**
-   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on success.
+   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on
+   * success.
    *
    * @param userName the username
    * @param password the password
@@ -139,11 +141,17 @@ public class KeycloakService {
     var requestUrl = keycloakOtpSetupInfo + userName;
     var request = new HttpEntity<>(httpHeaders);
 
-    try{
-      ResponseEntity<OtpInfoDTO> response = restTemplate.exchange(requestUrl, HttpMethod.GET,request,
-          OtpInfoDTO.class);
-      return response.getBody().getOtpSetup();
-    } catch(RestClientException ex){
+    try {
+      ResponseEntity<OtpInfoDTO> response = restTemplate
+          .exchange(requestUrl, HttpMethod.GET, request,
+              OtpInfoDTO.class);
+      if (!Objects.isNull(response.getBody()) && !Objects.isNull(response.getBody().getOtpSetup())) {
+        return response.getBody().getOtpSetup();
+      }
+
+      return false;
+
+    } catch (RestClientException ex) {
       LogService.logKeycloakError("Could not fetch otp credential info", ex);
     }
 
@@ -156,11 +164,12 @@ public class KeycloakService {
     var requestUrl = keycloakOtpSetupInfo + userName;
     var request = new HttpEntity<>(httpHeaders);
 
-    try{
-      ResponseEntity<OtpInfoDTO> response = restTemplate.exchange(requestUrl, HttpMethod.GET,request,
-          OtpInfoDTO.class);
+    try {
+      ResponseEntity<OtpInfoDTO> response = restTemplate
+          .exchange(requestUrl, HttpMethod.GET, request,
+              OtpInfoDTO.class);
       return response.getBody();
-    } catch(RestClientException ex){
+    } catch (RestClientException ex) {
       LogService.logKeycloakError("Could not fetch otp credential info", ex);
     }
 
@@ -171,13 +180,13 @@ public class KeycloakService {
 
     var httpHeaders = getAuthorizedFormHttpHeaders();
     var requestUrl = keycloakOtpSetup + userName;
-    var request = new HttpEntity<>(otpSetupDTO,httpHeaders);
+    var request = new HttpEntity<>(otpSetupDTO, httpHeaders);
 
-    try{
-      restTemplate.exchange(requestUrl, HttpMethod.PUT,request,
+    try {
+      restTemplate.exchange(requestUrl, HttpMethod.PUT, request,
           OtpInfoDTO.class);
       return true;
-    } catch(RestClientException ex){
+    } catch (RestClientException ex) {
       LogService.logKeycloakError("Could not set up otp credential", ex);
     }
 
@@ -190,16 +199,15 @@ public class KeycloakService {
     var requestUrl = keycloakOtpDelete + userName;
     var request = new HttpEntity<>(httpHeaders);
 
-    try{
-      restTemplate.exchange(requestUrl, HttpMethod.DELETE,request,
+    try {
+      restTemplate.exchange(requestUrl, HttpMethod.DELETE, request,
           OtpInfoDTO.class);
       return true;
-    } catch(RestClientException ex){
+    } catch (RestClientException ex) {
       LogService.logKeycloakError("Could not set up otp credential", ex);
     }
     return false;
   }
-
 
 
   private boolean wasLogoutSuccessful(ResponseEntity<Void> responseEntity, String refreshToken) {
