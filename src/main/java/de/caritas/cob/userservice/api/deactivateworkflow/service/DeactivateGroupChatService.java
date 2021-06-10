@@ -37,7 +37,7 @@ public class DeactivateGroupChatService {
   }
 
   private Predicate<Chat> isChatOutsideOfDeactivationTime(LocalDateTime deactivationTime) {
-    return chat -> chat.getUpdateDate().isBefore(deactivationTime);
+    return chat -> chat.getUpdateDate().isBefore(deactivationTime.minusMinutes(chat.getDuration()));
   }
 
   private void deactivateStaleActiveChat(Chat staleChat) {

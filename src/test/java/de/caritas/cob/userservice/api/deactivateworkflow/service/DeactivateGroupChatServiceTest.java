@@ -66,6 +66,7 @@ class DeactivateGroupChatServiceTest {
   void deactivateStaleGroupChats_Should_notPerformAnyDeactivation_When_chatsAreActiveWithinDeactivatePeriod(
       LocalDateTime updateDate) {
     var chat = new Chat();
+    chat.setDuration(120);
     chat.setActive(true);
     chat.setUpdateDate(updateDate);
     when(this.chatRepository.findAllByActiveIsTrue()).thenReturn(List.of(chat));
@@ -91,6 +92,7 @@ class DeactivateGroupChatServiceTest {
   void deactivateStaleGroupChats_Should_callStopChatAction_When_chatIsActiveTooLong(
       LocalDateTime overdueUpdateDate) {
     var chat = new Chat();
+    chat.setDuration(120);
     chat.setActive(true);
     chat.setUpdateDate(overdueUpdateDate);
     when(this.chatRepository.findAllByActiveIsTrue()).thenReturn(List.of(chat));
@@ -107,7 +109,7 @@ class DeactivateGroupChatServiceTest {
   private static List<LocalDateTime> createOverdueUpdateDates() {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime oneDeletionPeriodAgo = now
-        .minusMinutes(DEACTIVATE_PERIOD_MINUTES);
+        .minusMinutes(DEACTIVATE_PERIOD_MINUTES).minusMinutes(120);
     LocalDateTime timeLongInThePast = oneDeletionPeriodAgo.minusMinutes(10);
 
     return List.of(oneDeletionPeriodAgo, timeLongInThePast);
