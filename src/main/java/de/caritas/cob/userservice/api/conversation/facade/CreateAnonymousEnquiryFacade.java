@@ -52,6 +52,8 @@ public class CreateAnonymousEnquiryFacade {
         .userName(userDto.getUsername())
         .accessToken(credentials.getAccessToken())
         .refreshToken(credentials.getRefreshToken())
+        .expiresIn(credentials.getExpiresIn())
+        .refreshExpiresIn(credentials.getRefreshExpiresIn())
         .rcUserId(credentials.getRocketChatCredentials().getRocketChatUserId())
         .rcToken(credentials.getRocketChatCredentials().getRocketChatToken())
         .rcGroupId(session.getGroupId())
