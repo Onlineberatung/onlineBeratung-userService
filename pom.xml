@@ -309,6 +309,15 @@
 							<output>target/generated-sources</output>
 							<importMappings>
 								<importMapping>
+									Activate2faUserDTO=OtpSetupDTO
+								</importMapping>
+								<importMapping>
+									OtpSetupDTO=${project.groupId}.${project.artifactId}.api.model.OtpSetupDTO
+								</importMapping>
+								<importMapping>
+									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
+								</importMapping>
+								<importMapping>
 									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
 								</importMapping>
 								<importMapping>

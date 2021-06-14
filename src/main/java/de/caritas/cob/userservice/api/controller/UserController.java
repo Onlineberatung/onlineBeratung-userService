@@ -35,10 +35,12 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.model.InlineResponse200;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
@@ -60,6 +62,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
+import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -120,6 +123,7 @@ public class  UserController implements UsersApi {
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
+  private final @NotNull KeycloakService keycloakService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -437,7 +441,7 @@ public class  UserController implements UsersApi {
 
     // Check if session exists
     Optional<Session> session = sessionService.getSession(sessionId);
-    if (!session.isPresent()) {
+    if (session.isEmpty()) {
       LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -527,7 +531,7 @@ public class  UserController implements UsersApi {
 
     Optional<Session> session = sessionService.getSession(sessionId);
 
-    if (!session.isPresent()) {
+    if (session.isEmpty()) {
       LogService.logInternalServerError(String.format("Session with id %s not found.", sessionId));
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -780,5 +784,24 @@ public class  UserController implements UsersApi {
       @Valid SessionDataDTO sessionDataDTO) {
     this.sessionDataService.saveSessionData(sessionId, sessionDataDTO);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> activate2faForUser(OtpSetupDTO otpSetupDTO) {
+    return generateResponseKeycloakExtension(keycloakService.setUpOtpCredential(authenticatedUser.getUsername(),otpSetupDTO));
+  }
+
+  @Override
+  public ResponseEntity<Void> deactivate2faForUser() {
+    return generateResponseKeycloakExtension(keycloakService.deleteOtpCredential(authenticatedUser.getUsername()));
+  }
+
+  @Override
+  public ResponseEntity<InlineResponse200> getUser2faSetupInformation(String username) {
+    return new ResponseEntity<>(new InlineResponse200().is2faActivated(keycloakService.hasUserOtpCredential(username)), HttpStatus.OK);
+  }
+
+  private ResponseEntity<Void> generateResponseKeycloakExtension(boolean successful) {
+    return successful ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

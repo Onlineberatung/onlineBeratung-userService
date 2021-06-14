@@ -45,6 +45,10 @@ public class KeycloakAdminClientAccessor {
     return getInstance().realm(this.keycloakRealm);
   }
 
+  public String getBearerToken() {
+    return getInstance().tokenManager().getAccessTokenString();
+  }
+
   private Keycloak getInstance() {
     return Keycloak
         .getInstance(this.keycloakServerUrl, this.keycloakRealm, this.keycloakUsername,

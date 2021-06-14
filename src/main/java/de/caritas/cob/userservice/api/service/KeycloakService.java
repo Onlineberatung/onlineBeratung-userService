@@ -7,7 +7,6 @@ import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -136,26 +135,7 @@ public class KeycloakService {
   }
 
   public boolean hasUserOtpCredential(final String userName) {
-
-    var httpHeaders = getAuthorizedFormHttpHeaders();
-    var requestUrl = keycloakOtpSetupInfo + userName;
-    var request = new HttpEntity<>(httpHeaders);
-
-    try {
-      ResponseEntity<OtpInfoDTO> response = restTemplate
-          .exchange(requestUrl, HttpMethod.GET, request,
-              OtpInfoDTO.class);
-      if (!Objects.isNull(response.getBody()) && !Objects.isNull(response.getBody().getOtpSetup())) {
-        return response.getBody().getOtpSetup();
-      }
-
-      return false;
-
-    } catch (RestClientException ex) {
-      LogService.logKeycloakError("Could not fetch otp credential info", ex);
-    }
-
-    return false;
+    return getOtpCredential(userName).getOtpSetup();
   }
 
   public OtpInfoDTO getOtpCredential(final String userName) {
@@ -176,7 +156,7 @@ public class KeycloakService {
     return null;
   }
 
-  public boolean getOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
+  public boolean setUpOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders();
     var requestUrl = keycloakOtpSetup + userName;

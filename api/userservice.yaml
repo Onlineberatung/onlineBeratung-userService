@@ -1082,6 +1082,88 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/2fa/activate:
+    put:
+      tags:
+        - user-controller
+      summary: 'activates 2fa for a user'
+      operationId: activate2faForUser
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Activate2faUserDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/2fa/deactivate:
+    put:
+      tags:
+        - user-controller
+      summary: 'deactivates 2fa for a user'
+      operationId: deactivate2faForUser
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/2fa/{username}:
+    get:
+      tags:
+        - user-controller
+      summary: 'returns if a user has 2fa activated'
+      operationId: getUser2faSetupInformation
+      parameters:
+        - name: username
+          in: path
+          description: username in keycloak
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/json':
+              schema:
+                type: object
+                required:
+                  - is2faActivated
+                properties:
+                  is2faActivated:
+                    type: boolean
+                    example: true
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        404:
+          description: NOT FOUND - user not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /liveproxy/send:
     post:
       tags:
@@ -1604,6 +1686,9 @@ components:
             type: string
         consultingTypes:
           $ref: "#/components/schemas/ConsultingTypeMap"
+        2fa:
+          $ref: "#/components/schemas/2faDTO"
+
 
     UpdateConsultantDTO:
       type: object
@@ -1859,6 +1944,31 @@ components:
         password:
           type: string
           example: p@ssw0rd
+
+    Activate2faUserDTO:
+      type: object
+      required:
+        - secret
+        - topt
+      properties:
+        secret:
+          type: string
+        totp:
+          type: string
+
+    2faDTO:
+      type: object
+      properties:
+        isEnabled:
+          type: boolean
+          example: true
+        isActive:
+          type: boolean
+          example: true
+        secret:
+          type: string
+        qrCode:
+          type: string
 
   securitySchemes:
     Bearer:
