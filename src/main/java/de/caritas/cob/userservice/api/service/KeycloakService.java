@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -134,8 +135,14 @@ public class KeycloakService {
     }
   }
 
-  public boolean hasUserOtpCredential(final String userName) {
-    return getOtpCredential(userName).getOtpSetup();
+  public Boolean hasUserOtpCredential(final String userName) {
+    var otpInfoDTO = getOtpCredential(userName);
+
+    if(!Objects.isNull(otpInfoDTO) && !Objects.isNull(otpInfoDTO.getOtpSetup())) {
+      return otpInfoDTO.getOtpSetup();
+    }
+
+    throw new RestClientException("The OTPInfoDTO is not Valid");
   }
 
   public OtpInfoDTO getOtpCredential(final String userName) {

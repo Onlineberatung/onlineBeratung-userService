@@ -798,6 +798,7 @@ public class  UserController implements UsersApi {
 
   @Override
   public ResponseEntity<InlineResponse200> getUser2faSetupInformation(String username) {
+
     return new ResponseEntity<>(new InlineResponse200().is2faActivated(keycloakService.hasUserOtpCredential(username)), HttpStatus.OK);
   }
 
