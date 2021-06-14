@@ -622,11 +622,13 @@ public class TestConstants {
   public static final Chat ACTIVE_CHAT = new Chat(CHAT_ID, CHAT_TOPIC, 0,
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME),
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME), CHAT_DURATION_30, IS_REPETITIVE,
-      CHAT_INTERVAL_WEEKLY, IS_ACTIVE, CHAT_MAX_PARTICIPANTS, RC_GROUP_ID, CONSULTANT, null);
+      CHAT_INTERVAL_WEEKLY, IS_ACTIVE, CHAT_MAX_PARTICIPANTS, RC_GROUP_ID, CONSULTANT, null,
+      nowInUtc());
   public static final Chat INACTIVE_CHAT = new Chat(CHAT_ID_2, CHAT_TOPIC, 0,
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME),
       LocalDateTime.of(CHAT_START_DATE, CHAT_START_TIME), CHAT_DURATION_30, IS_REPETITIVE,
-      ChatInterval.WEEKLY, IS_NOT_ACTIVE, CHAT_MAX_PARTICIPANTS, RC_GROUP_ID, CONSULTANT, null);
+      ChatInterval.WEEKLY, IS_NOT_ACTIVE, CHAT_MAX_PARTICIPANTS, RC_GROUP_ID, CONSULTANT, null,
+      nowInUtc());
   public static final ChatAgency CHAT_AGENCY = new ChatAgency(ACTIVE_CHAT, AGENCY_ID);
   public static final Set<ChatAgency> CHAT_AGENCIES =
       new HashSet<>(Collections.singletonList(CHAT_AGENCY));
