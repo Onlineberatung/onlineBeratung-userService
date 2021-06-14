@@ -108,7 +108,7 @@ public class ConsultantService {
   }
 
   /**
-   * Find consultants by agency ID.
+   * Find consultants by list of agency IDs.
    *
    * @param chatAgencies {@link Set} of {@link ChatAgency}
    * @return {@link List} of {@link Consultant}
@@ -119,5 +119,15 @@ public class ConsultantService {
         .collect(Collectors.toList());
 
     return consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(agencyIds);
+  }
+
+  /**
+   * Find all consultants of given agency ID.
+   *
+   * @param agencyId agency ID
+   * @return {@link List} of {@link Consultant}
+   */
+  public List<Consultant> findConsultantsByAgencyId(Long agencyId) {
+    return consultantRepository.findByConsultantAgenciesAgencyIdAndDeleteDateIsNull(agencyId);
   }
 }

@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -111,7 +112,7 @@ public class ConsultantAgencyAdminServiceTest {
 
     when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
         .thenReturn(singletonList(session));
-    when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(any()))
+    when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(anyList()))
         .thenReturn(consultants);
     when(this.agencyService.getAgency(any())).thenReturn(agencyDTO);
 
@@ -130,7 +131,7 @@ public class ConsultantAgencyAdminServiceTest {
 
     when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
         .thenReturn(singletonList(session));
-    when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(any()))
+    when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(anyList()))
         .thenReturn(consultants);
     when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
 

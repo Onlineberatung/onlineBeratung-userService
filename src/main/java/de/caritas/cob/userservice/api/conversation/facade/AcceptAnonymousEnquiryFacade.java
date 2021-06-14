@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Facade to encapsulate neccessary steps to accept an anonymous enquiry.
+ * Facade to encapsulate necessary steps to accept an anonymous enquiry.
  */
 @Service
 @RequiredArgsConstructor

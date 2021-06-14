@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -17,6 +17,8 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private Map<Session, List<Consultant>> consultantsToRemoveFromSessions;
   private final ConsultingTypeManager consultingTypeManager;
+  public static final String FAILED_TO_REMOVE_CONSULTANTS_ERROR =
+      "Failed to remove consultants from Rocket.Chat groups %s for session %s:";
 
   private RocketChatRemoveFromGroupOperationService(RocketChatFacade rocketChatFacade,
       KeycloakAdminClientService keycloakAdminClientService,
@@ -52,22 +54,59 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
   }
 
   /**
-   * Removes the given consultant from Rocket.Chat rooms of given session.
+   * Removes the given consultant from Rocket.Chat group and feedback group of given session.
    */
   public void removeFromGroupsOrRollbackOnFailure() {
     this.consultantsToRemoveFromSessions.forEach((session, consultants) ->
-        consultants.forEach(consultant -> performRemove(session, consultant)));
+        consultants.forEach(consultant -> performGroupsRemove(session, consultants)));
   }
 
-  private void performRemove(Session session, Consultant consultant) {
+  private void performGroupsRemove(Session session, List<Consultant> consultants) {
     try {
-      removeConsultantFromSession(session, consultant);
+      removeConsultantsFromSessionGroups(session, consultants);
     } catch (Exception e) {
       rollback();
       throw new InternalServerErrorException(
-          String.format("ERROR: Failed to remove consultant %s from group %s:",
-              consultant.getRocketChatId(), session.getGroupId()), e,
-          LogService::logRocketChatError);
+          String.format(FAILED_TO_REMOVE_CONSULTANTS_ERROR, session.getGroupId(), session.getId()),
+          e, LogService::logRocketChatError);
+    }
+  }
+
+  /**
+   * Removes the given consultant from Rocket.Chat group of given session.
+   */
+  public void removeFromGroupOrRollbackOnFailure() {
+    this.consultantsToRemoveFromSessions.forEach((session, consultants) ->
+        consultants.forEach(consultant -> performGroupRemove(session, consultants)));
+  }
+
+  /**
+   * Removes the given consultant from Rocket.Chat feedback group of given session.
+   */
+  public void removeFromFeedbackGroupOrRollbackOnFailure() {
+    this.consultantsToRemoveFromSessions.forEach((session, consultants) ->
+        consultants.forEach(consultant -> performFeedbackGroupRemove(session, consultants)));
+  }
+
+  private void performGroupRemove(Session session, List<Consultant> consultants) {
+    try {
+      removeConsultantsFromSessionGroup(session, consultants);
+    } catch (Exception e) {
+      rollback();
+      throw new InternalServerErrorException(
+          String.format(FAILED_TO_REMOVE_CONSULTANTS_ERROR, session.getGroupId(), session.getId()),
+          e, LogService::logRocketChatError);
+    }
+  }
+
+  private void performFeedbackGroupRemove(Session session, List<Consultant> consultants) {
+    try {
+      removeConsultantsFromSessionFeedbackGroup(session, consultants);
+    } catch (Exception e) {
+      rollback();
+      throw new InternalServerErrorException(
+          String.format(FAILED_TO_REMOVE_CONSULTANTS_ERROR, session.getFeedbackGroupId(),
+              session.getId()), e, LogService::logRocketChatError);
     }
   }
 

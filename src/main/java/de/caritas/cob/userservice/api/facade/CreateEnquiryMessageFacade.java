@@ -91,7 +91,7 @@ public class CreateEnquiryMessageFacade {
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
-      String rcGroupId = createRocketChatRoom(session, agencyList, rocketChatCredentials);
+      String rcGroupId = createRocketChatRoomAndAddUsers(session, agencyList, rocketChatCredentials);
       String rcFeedbackGroupId = retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(session,
           rcGroupId, agencyList, extendedConsultingTypeResponseDTO);
 
@@ -163,7 +163,7 @@ public class CreateEnquiryMessageFacade {
    * @return Rocket.Chat group ID
    * @throws CreateEnquiryException when error occurs during creation
    */
-  public String createRocketChatRoom(Session session, List<ConsultantAgency> agencyList,
+  public String createRocketChatRoomAndAddUsers(Session session, List<ConsultantAgency> agencyList,
       RocketChatCredentials rocketChatCredentials) throws CreateEnquiryException {
 
     String rcGroupId = createRocketChatGroupForSession(session, rocketChatCredentials);
