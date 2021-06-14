@@ -275,11 +275,13 @@ public class UserControllerIT {
       put("state", "4");
     }
   };
-  private final UserDataResponseDTO CONSULTANT_USER_DATA_RESPONSE_DTO =
-      new UserDataResponseDTO(USER_ID, "Beraterbiene", "Max", "Mustermann", "mail@muster.mann",
-          true, false, "Bin weg", true, AGENCY_LIST, null, null, null);
-  private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = new UserDataResponseDTO(USER_ID,
-      NAME, null, null, null, false, false, null, false, null, null, null, SESSION_DATA);
+  private final UserDataResponseDTO CONSULTANT_USER_DATA_RESPONSE_DTO = UserDataResponseDTO
+      .builder().userId(USER_ID).userName("Beraterbiene").firstName("Max").lastName("Mustermann")
+      .email("mail@muster.mann").isAbsent(true).isFormalLanguage(false).absenceMessage("Bin weg")
+      .isInTeamAgency(true).agencies(AGENCY_LIST).hasAnonymousConversations(false).build();
+  private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = UserDataResponseDTO.builder()
+      .userId(USER_ID).userName(NAME).isAbsent(false).isFormalLanguage(false).isInTeamAgency(false)
+      .consultingTypes(SESSION_DATA).hasAnonymousConversations(false).build();
   private final String VALID_NEW_MESSAGE_REQUEST_BODY = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
   private final String PATH_PUT_SESSIONS_MONITORING = "/users/sessions/monitoring/" + SESSION_ID;
   private final String PATH_GET_MONITORING = "/users/sessions/" + SESSION_ID + "/monitoring";
