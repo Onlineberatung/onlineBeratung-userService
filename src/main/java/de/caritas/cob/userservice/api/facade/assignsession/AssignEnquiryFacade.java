@@ -108,7 +108,7 @@ public class AssignEnquiryFacade {
     rollbackSessionUpdate(session);
   }
 
-  public void removeUnauthorizedMembers(String rcGroupId, Session session, Consultant consultant,
+  private void removeUnauthorizedMembers(String rcGroupId, Session session, Consultant consultant,
       List<GroupMemberDTO> memberList) {
     List<Consultant> consultantsToRemoveFromRocketChat =
         unauthorizedMembersProvider.obtainConsultantsToRemove(rcGroupId, session, consultant, memberList);

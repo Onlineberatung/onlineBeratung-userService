@@ -50,40 +50,22 @@ abstract class RocketChatGroupOperation {
 
   void removeConsultantsFromSessionGroups(Session session,
       List<Consultant> consultants) {
-    removeConsultantsFromRocketChatGroup(session, consultants);
-    removeConsultantsFromRocketChatFeedbackGroup(session, consultants);
+    removeConsultantsFromRocketChatGroup(session.getGroupId(), consultants);
+    removeConsultantsFromRocketChatGroup(session.getFeedbackGroupId(), consultants);
   }
 
-  void removeConsultantsFromSessionGroup(Session session, List<Consultant> consultants) {
-    removeConsultantsFromRocketChatGroup(session, consultants);
+  void removeConsultantsFromSessionGroup(String rcGroupId, List<Consultant> consultants) {
+    removeConsultantsFromRocketChatGroup(rcGroupId, consultants);
   }
 
-  void removeConsultantsFromSessionFeedbackGroup(Session session,
+  private void removeConsultantsFromRocketChatGroup(String rcGroupId,
       List<Consultant> consultants) {
-    removeConsultantsFromRocketChatFeedbackGroup(session, consultants);
-  }
+    List<String> groupMemberList = obtainRocketChatGroupMemberIds(rcGroupId);
 
-  private void removeConsultantsFromRocketChatGroup(Session session, List<Consultant> consultants) {
-    List<String> groupMemberList = obtainRocketChatGroupMemberIds(session.getGroupId());
-
-    consultants.forEach(consultant -> {
-      if (groupMemberList.contains(consultant.getRocketChatId())) {
-        rocketChatFacade.removeUserFromGroup(consultant.getRocketChatId(), session.getGroupId());
-      }
-    });
-  }
-
-  private void removeConsultantsFromRocketChatFeedbackGroup(Session session,
-      List<Consultant> consultants) {
-    List<String> feedbackGroupMemberList =
-        obtainRocketChatGroupMemberIds(session.getFeedbackGroupId());
-
-    consultants.forEach(consultant -> {
-      if (feedbackGroupMemberList.contains(consultant.getRocketChatId())) {
-        rocketChatFacade.removeUserFromGroup(consultant.getRocketChatId(),
-            session.getFeedbackGroupId());
-      }
-    });
+    consultants.stream()
+        .map(Consultant::getRocketChatId)
+        .filter(groupMemberList::contains)
+        .forEach(rcUserId -> rocketChatFacade.removeUserFromGroup(rcUserId, rcGroupId));
   }
 
   private List<String> obtainRocketChatGroupMemberIds(String groupId) {

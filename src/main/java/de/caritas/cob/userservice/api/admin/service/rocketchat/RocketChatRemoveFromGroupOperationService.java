@@ -17,7 +17,7 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private Map<Session, List<Consultant>> consultantsToRemoveFromSessions;
   private final ConsultingTypeManager consultingTypeManager;
-  public static final String FAILED_TO_REMOVE_CONSULTANTS_ERROR =
+  private static final String FAILED_TO_REMOVE_CONSULTANTS_ERROR =
       "Failed to remove consultants from Rocket.Chat groups %s for session %s:";
 
   private RocketChatRemoveFromGroupOperationService(RocketChatFacade rocketChatFacade,
@@ -90,7 +90,7 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private void performGroupRemove(Session session, List<Consultant> consultants) {
     try {
-      removeConsultantsFromSessionGroup(session, consultants);
+      removeConsultantsFromSessionGroup(session.getGroupId(), consultants);
     } catch (Exception e) {
       rollback();
       throw new InternalServerErrorException(
@@ -101,7 +101,7 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private void performFeedbackGroupRemove(Session session, List<Consultant> consultants) {
     try {
-      removeConsultantsFromSessionFeedbackGroup(session, consultants);
+      removeConsultantsFromSessionGroup(session.getFeedbackGroupId(), consultants);
     } catch (Exception e) {
       rollback();
       throw new InternalServerErrorException(

@@ -34,9 +34,19 @@ public class UnauthorizedMembersProvider {
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
+  /**
+   * Obtains a list of {@link Consultant}s which are not authorized to view the given Rocket.Chat
+   * group and therefore should be removed.
+   *
+   * @param rcGroupId the Rocket.Chat group ID
+   * @param session {@link Session}
+   * @param consultant {@link Consultant}
+   * @param memberList list of {@link GroupMemberDTO} containing the current members of the group
+   * @return list of {@link Consultant}s to be removed
+   */
   public List<Consultant> obtainConsultantsToRemove(String rcGroupId, Session session,
       Consultant consultant, List<GroupMemberDTO> memberList) {
-    List<String> authorizedMembers = obtainAuthorizedMembers(rcGroupId, session, consultant);
+    var authorizedMembers = obtainAuthorizedMembers(rcGroupId, session, consultant);
     return memberList.stream()
         .map(GroupMemberDTO::get_id)
         .filter(memberRcId -> !authorizedMembers.contains(memberRcId))
@@ -92,22 +102,22 @@ public class UnauthorizedMembersProvider {
       List<String> authorizedMembers) {
     if (session.isTeamSession() && session.hasFeedbackChat()) {
       consultantService.findConsultantsByAgencyId(session.getAgencyId()).stream()
-          .filter(consultant -> !isPeerConsultantOfGroup(rcGroupId, session, consultant))
-          .filter(consultant -> !isPeerConsultantOfFeedbackGroup(rcGroupId, session, consultant))
+          .filter(consultant -> isMainConsultantOfGroup(rcGroupId, session, consultant))
+          .filter(consultant -> isMainConsultantOfFeedbackGroup(rcGroupId, session, consultant))
           .map(Consultant::getRocketChatId)
           .forEach(authorizedMembers::add);
     }
   }
 
-  private boolean isPeerConsultantOfGroup(String rcGroupId, Session session, Consultant consultant) {
+  private boolean isMainConsultantOfGroup(String rcGroupId, Session session, Consultant consultant) {
     return rcGroupId.equalsIgnoreCase(session.getGroupId())
-        && !keycloakAdminClientService.userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS);
+        && keycloakAdminClientService.userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS);
   }
 
-  private boolean isPeerConsultantOfFeedbackGroup(String rcGroupId, Session session,
+  private boolean isMainConsultantOfFeedbackGroup(String rcGroupId, Session session,
       Consultant consultant) {
     return rcGroupId.equalsIgnoreCase(session.getFeedbackGroupId())
-        && !keycloakAdminClientService.userHasAuthority(consultant.getId(),
+        && keycloakAdminClientService.userHasAuthority(consultant.getId(),
         VIEW_ALL_FEEDBACK_SESSIONS);
   }
 }

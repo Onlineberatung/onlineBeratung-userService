@@ -68,14 +68,14 @@ public class AssignSessionFacade {
 
   private void updateRocketChatRooms(Session session, Consultant consultant) {
     addConsultantToRocketChatGroup(session.getGroupId(), consultant);
-    List<GroupMemberDTO> memberList =
+    var memberList =
         rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
     removeUnauthorizedMembersFromGroup(session, consultant, memberList);
 
     if (session.hasFeedbackChat()) {
       addConsultantToRocketChatGroup(session.getFeedbackGroupId(), consultant);
-      List<GroupMemberDTO> feedbackMemberList =
-          rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
+      var feedbackMemberList =
+          rocketChatFacade.retrieveRocketChatMembers(session.getFeedbackGroupId());
       removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList);
     }
   }
