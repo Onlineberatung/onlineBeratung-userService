@@ -89,7 +89,7 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
 
   private void removeUserFromSession(Session session) {
     try {
-      removeConsultantFromSession(session, this.consultant);
+      removeConsultantsFromSessionGroups(session, List.of(this.consultant));
     } catch (Exception e) {
       throw new InternalServerErrorException(
           String.format("ERROR: Failed to rollback %s of group %s:",

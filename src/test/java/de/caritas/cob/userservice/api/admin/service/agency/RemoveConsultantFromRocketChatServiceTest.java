@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,7 +40,7 @@ public class RemoveConsultantFromRocketChatServiceTest {
   private ConsultingTypeManager consultingTypeManager;
 
   @Test
-  public void removeConsultantFromSessions_Should_removeConsultant_When_consultantIsNotUserAndNotDireclyAssigned() {
+  public void removeConsultantFromSessions_Should_removeConsultant_When_consultantIsNotUserAndNotDirectlyAssigned() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.getConsultant().setRocketChatId("consultant");
     session.getUser().setRcUserId("user");
@@ -56,14 +55,13 @@ public class RemoveConsultantFromRocketChatServiceTest {
         .thenReturn(singletonList(groupMemberDTO));
     when(this.rocketChatFacade.retrieveRocketChatMembers(any()))
         .thenReturn(singletonList(otherConsultant));
-    when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
 
     this.removeConsultantFromRocketChatService.removeConsultantFromSessions(singletonList(session));
 
     verify(this.rocketChatFacade, times(1))
-        .removeUserFromGroup(eq(consultant.getRocketChatId()), eq(session.getGroupId()));
+        .removeUserFromGroup(consultant.getRocketChatId(), session.getGroupId());
     verify(this.rocketChatFacade, times(1))
-        .removeUserFromGroup(eq(consultant.getRocketChatId()), eq(session.getFeedbackGroupId()));
+        .removeUserFromGroup(consultant.getRocketChatId(), session.getFeedbackGroupId());
   }
 
 }

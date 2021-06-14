@@ -99,7 +99,7 @@ public class AnonymousConversationCreatorServiceTest {
     when(sessionService.initializeSession(any(User.class), any(UserDTO.class), anyBoolean(),
         any(RegistrationType.class), any(SessionStatus.class))).thenReturn(SESSION);
     CreateEnquiryException exception = easyRandom.nextObject(CreateEnquiryException.class);
-    when(createEnquiryMessageFacade.createRocketChatRoom(any(), any(), any()))
+    when(createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(any(), any(), any()))
         .thenThrow(exception);
     AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
 
@@ -116,7 +116,7 @@ public class AnonymousConversationCreatorServiceTest {
     when(userService.getUser(anyString())).thenReturn(Optional.of(USER));
     when(sessionService.initializeSession(any(User.class), any(UserDTO.class), anyBoolean(),
         any(RegistrationType.class), any(SessionStatus.class))).thenReturn(SESSION);
-    when(createEnquiryMessageFacade.createRocketChatRoom(any(), any(), any()))
+    when(createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(any(), any(), any()))
         .thenReturn(ROCKETCHAT_ID);
     AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
 
