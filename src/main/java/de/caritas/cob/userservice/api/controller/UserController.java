@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
@@ -38,8 +39,10 @@ import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.InlineResponse200;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
+import de.caritas.cob.userservice.api.model.Model2faDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
@@ -61,7 +64,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.service.Keycloak2faService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -70,11 +73,14 @@ import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -82,6 +88,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
 
 /**
  * Controller for user api requests
@@ -89,7 +96,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
-public class  UserController implements UsersApi {
+public class UserController implements UsersApi {
+
+  @Value("${2fa.user.enabled}")
+  private Boolean isUser2faEnabled;
+
+  @Value("${2fa.consultant.enabled}")
+  private Boolean isConsultant2faEnabled;
 
   static final int MIN_OFFSET = 0;
   static final int MIN_COUNT = 1;
@@ -122,7 +135,7 @@ public class  UserController implements UsersApi {
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
-  private final @NotNull KeycloakService keycloakService;
+  private final @NotNull Keycloak2faService keycloak2faService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -260,7 +273,20 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
 
+    var model2faDTO = new Model2faDTO();
+    model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? isUser2faEnabled : isConsultant2faEnabled);
+
+    OtpInfoDTO otpInfoDTO = keycloak2faService.getOtpCredential(authenticatedUser.getUsername());
+    model2faDTO.isActive(otpInfoDTO.getOtpSetup());
+
+    if (Boolean.FALSE.equals(otpInfoDTO.getOtpSetup())) {
+      model2faDTO.setQrCode(otpInfoDTO.getOtpSecretQrCode());
+      model2faDTO.setSecret(otpInfoDTO.getOtpSecret());
+    }
+
     UserDataResponseDTO responseDTO = this.userDataFacade.buildUserDataByRole();
+
+    responseDTO.setModel2faDTO(model2faDTO);
 
     return new ResponseEntity<>(responseDTO, HttpStatus.OK);
   }
@@ -268,7 +294,7 @@ public class  UserController implements UsersApi {
   /**
    * Updates the data for the current logged in consultant.
    *
-   * @param updateConsultantDTO  (required) the request {@link UpdateConsultantDTO}
+   * @param updateConsultantDTO (required) the request {@link UpdateConsultantDTO}
    * @return {@link ResponseEntity}
    */
   @Override
@@ -774,8 +800,8 @@ public class  UserController implements UsersApi {
   /**
    * Updates the session data for the given session.
    *
-   * @param sessionId       (required) session ID
-   * @param sessionDataDTO  (required) {@link SessionDataDTO}
+   * @param sessionId      (required) session ID
+   * @param sessionDataDTO (required) {@link SessionDataDTO}
    * @return {@link ResponseEntity}
    */
   @Override
@@ -787,21 +813,55 @@ public class  UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> activate2faForUser(OtpSetupDTO otpSetupDTO) {
-    return generateResponseKeycloakExtension(keycloakService.setUpOtpCredential(authenticatedUser.getUsername(),otpSetupDTO));
+
+    if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !isUser2faEnabled)
+        || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !isConsultant2faEnabled)) {
+      return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    return generateResponseKeycloakExtension(
+        keycloak2faService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO));
   }
 
   @Override
   public ResponseEntity<Void> deactivate2faForUser() {
-    return generateResponseKeycloakExtension(keycloakService.deleteOtpCredential(authenticatedUser.getUsername()));
+    return generateResponseKeycloakExtension(
+        keycloak2faService.deleteOtpCredential(authenticatedUser.getUsername()));
   }
 
   @Override
-  public ResponseEntity<InlineResponse200> getUser2faSetupInformation(String username) {
+  public ResponseEntity<InlineResponse200> getUser2faSetupInformation(String encodedUsername) {
+    // First try to fetch data with encoded username
+    ResponseEntity<InlineResponse200> response = fetch2faSetupInformation(encodedUsername);
 
-    return new ResponseEntity<>(new InlineResponse200().is2faActivated(keycloakService.hasUserOtpCredential(username)), HttpStatus.OK);
+    if (!Objects.isNull(response)) {
+      return response;
+    }
+    // Second try to fetch data with decoded username
+    response = fetch2faSetupInformation(new String(new Base32().decode(encodedUsername)));
+
+    if (!Objects.isNull(response)) {
+      return response;
+    }
+
+    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+  }
+
+  private ResponseEntity<InlineResponse200> fetch2faSetupInformation(String username) {
+    try {
+      Boolean hasOtpCredential = keycloak2faService.hasUserOtpCredential(username);
+      var inlineResponse = new InlineResponse200();
+      inlineResponse.setUsername(username);
+      inlineResponse.setIs2faActivated(hasOtpCredential);
+      return new ResponseEntity<>(inlineResponse, HttpStatus.OK);
+    } catch (RestClientException ex) {
+      return null;
+    }
   }
 
   private ResponseEntity<Void> generateResponseKeycloakExtension(boolean successful) {
-    return successful ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    return successful ? new ResponseEntity<>(HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

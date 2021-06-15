@@ -1108,7 +1108,7 @@ paths:
       security:
         - Bearer: [ ]
   /users/2fa/deactivate:
-    put:
+    delete:
       tags:
         - user-controller
       summary: 'deactivates 2fa for a user'
@@ -1126,19 +1126,20 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/2fa/{username}:
+  /users/2fa/{encodedUsername}:
     get:
       tags:
         - user-controller
       summary: 'returns if a user has 2fa activated'
       operationId: getUser2faSetupInformation
       parameters:
-        - name: username
+        - name: encodedUsername
           in: path
           description: username in keycloak
           required: true
           schema:
             type: string
+            format: base32
       responses:
         200:
           description: OK - successfull operation
@@ -1152,6 +1153,8 @@ paths:
                   is2faActivated:
                     type: boolean
                     example: true
+                  username:
+                    type: string
         400:
           description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
         401:
@@ -1684,11 +1687,10 @@ components:
           type: array
           items:
             type: string
-        consultingTypes:
-          $ref: "#/components/schemas/ConsultingTypeMap"
         2fa:
           $ref: "#/components/schemas/2faDTO"
-
+        consultingTypes:
+          $ref: "#/components/schemas/ConsultingTypeMap"
 
     UpdateConsultantDTO:
       type: object

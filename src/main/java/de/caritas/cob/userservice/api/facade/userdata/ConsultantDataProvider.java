@@ -59,7 +59,7 @@ public class ConsultantDataProvider {
         consultant.getFirstName(), consultant.getLastName(), consultant.getEmail(),
         consultant.isAbsent(), consultant.isLanguageFormal(), consultant.getAbsenceMessage(),
         consultant.isTeamConsultant(), agencyDTOs, authenticatedUser.getRoles(),
-        authenticatedUser.getGrantedAuthorities(), null);
+        authenticatedUser.getGrantedAuthorities(), null, null);
   }
 
   private AgencyDTO fetchAgencyViaAgencyService(ConsultantAgency consultantAgency) {

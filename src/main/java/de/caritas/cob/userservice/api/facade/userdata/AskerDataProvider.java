@@ -48,7 +48,7 @@ public class AskerDataProvider {
     String email = observeUserEmailAddress(user);
     var responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
         null, null, email, false, user.isLanguageFormal(), null, false, null,
-        authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null);
+        authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null, null);
 
     responseDTO.setConsultingTypes(getConsultingTypes(user));
 

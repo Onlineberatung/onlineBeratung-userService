@@ -3,24 +3,19 @@ package de.caritas.cob.userservice.api.service;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,15 +31,6 @@ public class KeycloakService {
 
   @Value("${keycloakApi.logout}")
   private String keycloakLogoutUrl;
-
-  @Value("${keycloakApi.otp.setup.info}")
-  private String keycloakOtpSetupInfo;
-
-  @Value("${keycloakApi.otp.setup}")
-  private String keycloakOtpSetup;
-
-  @Value("${keycloakApi.otp.delete}")
-  private String keycloakOtpDelete;
 
   @Value("${keycloakService.app.clientId}")
   private String keycloakClientId;
@@ -134,68 +120,6 @@ public class KeycloakService {
       return false;
     }
   }
-
-  public Boolean hasUserOtpCredential(final String userName) {
-    var otpInfoDTO = getOtpCredential(userName);
-
-    if(!Objects.isNull(otpInfoDTO) && !Objects.isNull(otpInfoDTO.getOtpSetup())) {
-      return otpInfoDTO.getOtpSetup();
-    }
-
-    throw new RestClientException("The OTPInfoDTO is not Valid");
-  }
-
-  public OtpInfoDTO getOtpCredential(final String userName) {
-
-    var httpHeaders = getAuthorizedFormHttpHeaders();
-    var requestUrl = keycloakOtpSetupInfo + userName;
-    var request = new HttpEntity<>(httpHeaders);
-
-    try {
-      ResponseEntity<OtpInfoDTO> response = restTemplate
-          .exchange(requestUrl, HttpMethod.GET, request,
-              OtpInfoDTO.class);
-      return response.getBody();
-    } catch (RestClientException ex) {
-      LogService.logKeycloakError("Could not fetch otp credential info", ex);
-    }
-
-    return null;
-  }
-
-  public boolean setUpOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
-
-    var httpHeaders = getAuthorizedFormHttpHeaders();
-    var requestUrl = keycloakOtpSetup + userName;
-    var request = new HttpEntity<>(otpSetupDTO, httpHeaders);
-
-    try {
-      restTemplate.exchange(requestUrl, HttpMethod.PUT, request,
-          OtpInfoDTO.class);
-      return true;
-    } catch (RestClientException ex) {
-      LogService.logKeycloakError("Could not set up otp credential", ex);
-    }
-
-    return false;
-  }
-
-  public boolean deleteOtpCredential(final String userName) {
-
-    var httpHeaders = getAuthorizedFormHttpHeaders();
-    var requestUrl = keycloakOtpDelete + userName;
-    var request = new HttpEntity<>(httpHeaders);
-
-    try {
-      restTemplate.exchange(requestUrl, HttpMethod.DELETE, request,
-          OtpInfoDTO.class);
-      return true;
-    } catch (RestClientException ex) {
-      LogService.logKeycloakError("Could not set up otp credential", ex);
-    }
-    return false;
-  }
-
 
   private boolean wasLogoutSuccessful(ResponseEntity<Void> responseEntity, String refreshToken) {
     if (!responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {

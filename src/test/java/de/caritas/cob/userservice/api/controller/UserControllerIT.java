@@ -159,6 +159,8 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
+import de.caritas.cob.userservice.api.model.Model2faDTO;
+import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
@@ -180,6 +182,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
+import de.caritas.cob.userservice.api.service.Keycloak2faService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -278,9 +281,9 @@ public class UserControllerIT {
   };
   private final UserDataResponseDTO CONSULTANT_USER_DATA_RESPONSE_DTO =
       new UserDataResponseDTO(USER_ID, "Beraterbiene", "Max", "Mustermann", "mail@muster.mann",
-          true, false, "Bin weg", true, AGENCY_LIST, null, null, null);
+          true, false, "Bin weg", true, AGENCY_LIST, null, null, null, null);
   private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = new UserDataResponseDTO(USER_ID,
-      NAME, null, null, null, false, false, null, false, null, null, null, SESSION_DATA);
+      NAME, null, null, null, false, false, null, false, null, null, null, SESSION_DATA, null);
   private final String VALID_NEW_MESSAGE_REQUEST_BODY = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
   private final String PATH_PUT_SESSIONS_MONITORING = "/users/sessions/monitoring/" + SESSION_ID;
   private final String PATH_GET_MONITORING = "/users/sessions/" + SESSION_ID + "/monitoring";
@@ -410,6 +413,8 @@ public class UserControllerIT {
   private UserService userService;
   @MockBean
   private SessionDataService sessionDataService;
+  @MockBean
+  private Keycloak2faService keycloak2faService;
 
   @Mock
   private Logger logger;
@@ -1149,6 +1154,14 @@ public class UserControllerIT {
     responseDto.setUserRoles(ROLES_WITH_USER);
     responseDto.setGrantedAuthorities(
         new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
+
+    var validOtpInfoDTO = new OtpInfoDTO();
+    validOtpInfoDTO.setOtpSecret("Secret");
+    validOtpInfoDTO.setOtpSecretQrCode("QRCode");
+    validOtpInfoDTO.setOtpSetup(false);
+
+    when(keycloak2faService.getOtpCredential(null)).thenReturn(validOtpInfoDTO);
+
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
 
@@ -1201,8 +1214,14 @@ public class UserControllerIT {
     responseDto.setGrantedAuthorities(
         new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
 
+    var validOtpInfoDTO = new OtpInfoDTO();
+    validOtpInfoDTO.setOtpSecret("Secret");
+    validOtpInfoDTO.setOtpSecretQrCode("QRCode");
+    validOtpInfoDTO.setOtpSetup(false);
+
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
+    when(keycloak2faService.getOtpCredential(null)).thenReturn(validOtpInfoDTO);
 
     mvc.perform(get(PATH_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
