@@ -159,7 +159,6 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
-import de.caritas.cob.userservice.api.model.Model2faDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;

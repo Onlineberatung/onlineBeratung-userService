@@ -1082,7 +1082,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/2fa/activate:
+  /users/twoFactorAuth:
     put:
       tags:
         - user-controller
@@ -1107,7 +1107,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/2fa/deactivate:
+
     delete:
       tags:
         - user-controller
@@ -1126,7 +1126,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/2fa/{encodedUsername}:
+  /users/twoFactorAuth/{encodedUsername}:
     get:
       tags:
         - user-controller
@@ -1687,8 +1687,8 @@ components:
           type: array
           items:
             type: string
-        2fa:
-          $ref: "#/components/schemas/2faDTO"
+        twoFactorAuth:
+          $ref: "#/components/schemas/twoFactorAuthDTO"
         consultingTypes:
           $ref: "#/components/schemas/ConsultingTypeMap"
 
@@ -1958,7 +1958,7 @@ components:
         totp:
           type: string
 
-    2faDTO:
+    twoFactorAuthDTO:
       type: object
       properties:
         isEnabled:

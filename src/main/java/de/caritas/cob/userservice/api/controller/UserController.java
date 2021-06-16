@@ -39,13 +39,13 @@ import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.InlineResponse200;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
-import de.caritas.cob.userservice.api.model.Model2faDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
+import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
@@ -273,7 +273,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
 
-    var model2faDTO = new Model2faDTO();
+    var model2faDTO = new TwoFactorAuthDTO();
     model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? isUser2faEnabled : isConsultant2faEnabled);
 
     OtpInfoDTO otpInfoDTO = keycloak2faService.getOtpCredential(authenticatedUser.getUsername());

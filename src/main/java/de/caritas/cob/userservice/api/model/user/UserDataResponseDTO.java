@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.model.user;
 
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.Model2faDTO;
+import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -47,5 +47,5 @@ public class UserDataResponseDTO {
   @ApiModelProperty(position = 11)
   private Set<String> grantedAuthorities;
   private LinkedHashMap<String, Object> consultingTypes;
-  private Model2faDTO model2faDTO;
+  private TwoFactorAuthDTO model2faDTO;
 }
