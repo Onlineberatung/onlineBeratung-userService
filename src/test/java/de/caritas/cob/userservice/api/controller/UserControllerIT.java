@@ -6,6 +6,7 @@ import static de.caritas.cob.userservice.api.repository.session.RegistrationType
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -199,13 +200,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.hibernate.service.spi.ServiceException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -430,6 +436,12 @@ public class UserControllerIT {
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
     setInternalState(LogService.class, "LOGGER", logger);
   }
+
+  static Stream<Arguments> activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole_Arguments() {
+    return Stream.of(
+        Arguments.of(true,true,UserRole.USER.getValue()),
+        Arguments.of(true,true,UserRole.USER.getValue()));
+    };
 
   /**
    * Method: registerUser
@@ -2291,6 +2303,45 @@ public class UserControllerIT {
             new UpdateConsultantDTO().email("invalid").firstname("firstname").lastname("lastname")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void deactivate2faForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(true);
+
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
+  }
+
+  @Test
+  public void deactivate2faForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(false);
+
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+
+    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
+  }
+
+  @ParameterizedTest
+  @MethodSource("activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole_Arguments")
+  public void activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole(Boolean isUser2faEnabled,
+      Boolean isConsultant2faEnabled, String requestRole)
+      throws Exception {
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+
+    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
   }
 
 }

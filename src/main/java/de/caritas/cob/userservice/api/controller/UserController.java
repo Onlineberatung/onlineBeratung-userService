@@ -274,7 +274,7 @@ public class UserController implements UsersApi {
   public ResponseEntity<UserDataResponseDTO> getUserData() {
 
     var model2faDTO = new TwoFactorAuthDTO();
-    model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? isUser2faEnabled : isConsultant2faEnabled);
+    model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? getUser2faEnabled() : getConsultant2faEnabled());
 
     OtpInfoDTO otpInfoDTO = keycloak2faService.getOtpCredential(authenticatedUser.getUsername());
     model2faDTO.isActive(otpInfoDTO.getOtpSetup());
@@ -286,7 +286,7 @@ public class UserController implements UsersApi {
 
     UserDataResponseDTO responseDTO = this.userDataFacade.buildUserDataByRole();
 
-    responseDTO.setModel2faDTO(model2faDTO);
+    responseDTO.setTwoFactorAuth(model2faDTO);
 
     return new ResponseEntity<>(responseDTO, HttpStatus.OK);
   }
@@ -814,8 +814,8 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> activate2faForUser(OtpSetupDTO otpSetupDTO) {
 
-    if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !isUser2faEnabled)
-        || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !isConsultant2faEnabled)) {
+    if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !getUser2faEnabled())
+        || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !getConsultant2faEnabled())) {
       return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
 
@@ -863,5 +863,13 @@ public class UserController implements UsersApi {
   private ResponseEntity<Void> generateResponseKeycloakExtension(boolean successful) {
     return successful ? new ResponseEntity<>(HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  public Boolean getUser2faEnabled() {
+    return isUser2faEnabled;
+  }
+
+  public Boolean getConsultant2faEnabled() {
+    return isConsultant2faEnabled;
   }
 }

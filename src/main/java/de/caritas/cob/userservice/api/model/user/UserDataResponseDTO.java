@@ -47,5 +47,5 @@ public class UserDataResponseDTO {
   @ApiModelProperty(position = 11)
   private Set<String> grantedAuthorities;
   private LinkedHashMap<String, Object> consultingTypes;
-  private TwoFactorAuthDTO model2faDTO;
+  private TwoFactorAuthDTO twoFactorAuth;
 }

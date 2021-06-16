@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -21,6 +22,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_IMPO
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_START;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_STOP;
@@ -39,6 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -62,6 +65,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
@@ -71,6 +75,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
+import de.caritas.cob.userservice.api.service.Keycloak2faService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -165,6 +170,8 @@ public class UserControllerAuthorizationIT {
   private SessionDataService sessionDataService;
   @MockBean
   private UsernameTranscoder usernameTranscoder;
+  @MockBean
+  private Keycloak2faService keycloak2faService;
 
   private Cookie csrfCookie;
 
@@ -1916,4 +1923,112 @@ public class UserControllerAuthorizationIT {
     verify(this.consultantDataFacade, times(1)).updateConsultantData(any());
   }
 
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT})
+  public void deactivate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
+      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
+      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
+      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  public void deactivate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(this.keycloak2faService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT})
+  public void deactivate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(this.keycloak2faService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT})
+  public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    when(keycloak2faService.setUpOtpCredential(any(), any())).thenReturn(true);
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new OtpSetupDTO().secret("secret").initialCode("code")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloak2faService, times(1)).setUpOtpCredential(any(), any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT})
+  public void activate2faForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
+      throws Exception {
+    when(keycloak2faService.setUpOtpCredential(any(), any())).thenReturn(true);
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .cookie(csrfCookie)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(this.keycloak2faService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USE_FEEDBACK, Authority.TECHNICAL_DEFAULT,
+      Authority.VIEW_AGENCY_CONSULTANTS, Authority.VIEW_ALL_PEER_SESSIONS,
+      Authority.CREATE_NEW_CHAT, Authority.START_CHAT, Authority.STOP_CHAT,
+      Authority.VIEW_ALL_FEEDBACK_SESSIONS, Authority.ASSIGN_CONSULTANT_TO_SESSION,
+      Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.USER_ADMIN})
+  public void activate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(this.keycloak2faService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {Authority.USER_DEFAULT, Authority.CONSULTANT_DEFAULT})
+  public void activate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(this.keycloak2faService);
+  }
 }
