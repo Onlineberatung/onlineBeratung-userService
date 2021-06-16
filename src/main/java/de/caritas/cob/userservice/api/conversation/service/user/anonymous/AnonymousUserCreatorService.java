@@ -65,7 +65,7 @@ public class AnonymousUserCreatorService {
         .accessToken(kcLoginResponseDTO.getAccessToken())
         .expiresIn(kcLoginResponseDTO.getExpiresIn())
         .refreshToken(kcLoginResponseDTO.getRefreshToken())
-        .refreshExpiresIn(kcLoginResponseDTO.getExpiresIn())
+        .refreshExpiresIn(kcLoginResponseDTO.getRefreshExpiresIn())
         .rocketChatCredentials(obtainRocketChatCredentials(rcLoginResponseDto))
         .build();
 
