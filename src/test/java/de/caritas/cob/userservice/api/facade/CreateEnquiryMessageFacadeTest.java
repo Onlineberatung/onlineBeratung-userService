@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
@@ -86,6 +87,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Welc
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -226,6 +228,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     this.session = new Session();
     session.setId(SESSION_ID);
+    session.setRegistrationType(REGISTERED);
     Consultant consultant = new Consultant();
     consultant.setId(USER_ID);
     consultant.setRocketChatId(RC_USER_ID);
@@ -300,6 +303,18 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.empty());
+    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void createEnquiryMessage_Should_ThrowBadRequestException_When_SessionIsAnonymous() {
+    Session anonymousSession = new EasyRandom().nextObject(Session.class);
+    anonymousSession.setRegistrationType(ANONYMOUS);
+    anonymousSession.getUser().setUserId(USER.getUserId());
+    when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
+    when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(anonymousSession));
+
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
   }
 
