@@ -269,12 +269,12 @@ dem Rocket.Chat Raum hinzufügen.<y:LabelModel><y:SmartNodeLabelModel distance="
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e4" source="n6" target="n5">
+    <edge id="e4" source="n6" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+          <y:Path sx="0.0" sy="0.0" tx="44.859375" ty="4.910377502441406">
             <y:Point x="1106.8749999999998" y="884.4489974975585"/>
-            <y:Point x="1106.8749999999998" y="818.8864974975586"/>
+            <y:Point x="1106.8749999999998" y="940.859375"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
