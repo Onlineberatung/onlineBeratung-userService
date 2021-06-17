@@ -147,7 +147,7 @@ public class CreateEnquiryMessageFacade {
   }
 
   private void checkIfNotAnonymousEnquiry(Session session) {
-    if(session.getRegistrationType().equals(ANONYMOUS)) {
+    if (session.getRegistrationType().equals(ANONYMOUS)) {
       throw new BadRequestException(
           String.format("Session %s is anonymous and therefore can't have an enquiry message.",
               session.getId()), LogService::logCreateEnquiryMessageException);
