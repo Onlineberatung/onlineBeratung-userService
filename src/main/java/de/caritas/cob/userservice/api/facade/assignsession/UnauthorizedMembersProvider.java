@@ -83,13 +83,17 @@ public class UnauthorizedMembersProvider {
 
   private void addTeamConsultantsIfNecessary(String rcGroupId, Session session,
       List<String> authorizedMembers) {
-    addTeamConsultantsIfTeamSession(session, authorizedMembers);
-    addMainConsultantsIfFeedbackTeamSession(rcGroupId, session, authorizedMembers);
+    List<Consultant> consultantsOfAgency =
+        consultantService.findConsultantsByAgencyId(session.getAgencyId());
+    addTeamConsultantsIfTeamSession(session, authorizedMembers, consultantsOfAgency);
+    addMainConsultantsIfFeedbackTeamSession(rcGroupId, session, authorizedMembers,
+        consultantsOfAgency);
   }
 
-  private void addTeamConsultantsIfTeamSession(Session session, List<String> authorizedMembers) {
+  private void addTeamConsultantsIfTeamSession(Session session, List<String> authorizedMembers,
+      List<Consultant> consultantsOfAgency) {
     if (session.isTeamSession() && !session.hasFeedbackChat()) {
-      consultantService.findConsultantsByAgencyId(session.getAgencyId()).stream()
+      consultantsOfAgency.stream()
           .filter(Consultant::isTeamConsultant)
           .map(Consultant::getRocketChatId)
           .filter(rocketChatId -> !rocketChatId.equalsIgnoreCase(
@@ -99,25 +103,39 @@ public class UnauthorizedMembersProvider {
   }
 
   private void addMainConsultantsIfFeedbackTeamSession(String rcGroupId, Session session,
-      List<String> authorizedMembers) {
-    if (session.isTeamSession() && session.hasFeedbackChat()) {
-      consultantService.findConsultantsByAgencyId(session.getAgencyId()).stream()
-          .filter(consultant -> isMainConsultantOfGroup(rcGroupId, session, consultant))
-          .filter(consultant -> isMainConsultantOfFeedbackGroup(rcGroupId, session, consultant))
-          .map(Consultant::getRocketChatId)
-          .forEach(authorizedMembers::add);
+      List<String> authorizedMembers, List<Consultant> consultantsOfAgency) {
+    if (session.isTeamSession() && session.hasFeedbackChat()
+        && rcGroupId.equalsIgnoreCase(session.getGroupId())) {
+      obtainMainConsultantsOfGroup(authorizedMembers, consultantsOfAgency);
+    }
+    if (session.isTeamSession() && session.hasFeedbackChat()
+        && rcGroupId.equalsIgnoreCase(session.getFeedbackGroupId())) {
+      obtainMainConsultantsOfFeedbackGroup(authorizedMembers, consultantsOfAgency);
     }
   }
 
-  private boolean isMainConsultantOfGroup(String rcGroupId, Session session, Consultant consultant) {
-    return rcGroupId.equalsIgnoreCase(session.getGroupId())
-        && keycloakAdminClientService.userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS);
+  private void obtainMainConsultantsOfGroup(List<String> authorizedMembers,
+      List<Consultant> consultantsOfAgency) {
+    consultantsOfAgency.stream()
+        .filter(this::hasAuthorityToViewPeerGroups)
+        .map(Consultant::getRocketChatId)
+        .forEach(authorizedMembers::add);
   }
 
-  private boolean isMainConsultantOfFeedbackGroup(String rcGroupId, Session session,
-      Consultant consultant) {
-    return rcGroupId.equalsIgnoreCase(session.getFeedbackGroupId())
-        && keycloakAdminClientService.userHasAuthority(consultant.getId(),
+  private boolean hasAuthorityToViewPeerGroups(Consultant consultant) {
+    return keycloakAdminClientService.userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS);
+  }
+
+  private void obtainMainConsultantsOfFeedbackGroup(List<String> authorizedMembers,
+      List<Consultant> consultantsOfAgency) {
+    consultantsOfAgency.stream()
+        .filter(this::hasAuthorityToViewFeedbackGroups)
+        .map(Consultant::getRocketChatId)
+        .forEach(authorizedMembers::add);
+  }
+
+  private boolean hasAuthorityToViewFeedbackGroups(Consultant consultant) {
+    return keycloakAdminClientService.userHasAuthority(consultant.getId(),
         VIEW_ALL_FEEDBACK_SESSIONS);
   }
 }
