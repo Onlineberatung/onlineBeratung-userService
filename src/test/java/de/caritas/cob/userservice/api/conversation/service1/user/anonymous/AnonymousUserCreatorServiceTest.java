@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.conversation.service1.user.anonymous;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_SUCHT;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,6 +109,10 @@ public class AnonymousUserCreatorServiceTest {
         .createAnonymousUser(USER_DTO_SUCHT);
 
     assertThat(credentials, instanceOf(AnonymousUserCredentials.class));
+    assertThat(credentials.getExpiresIn(), is(keycloakLoginResponseDTO.getExpiresIn()));
+    assertThat(credentials.getRefreshExpiresIn(), is(keycloakLoginResponseDTO.getRefreshExpiresIn()));
+    assertThat(credentials.getAccessToken(), is(keycloakLoginResponseDTO.getAccessToken()));
+    assertThat(credentials.getRefreshToken(), is(keycloakLoginResponseDTO.getRefreshToken()));
     verifyNoInteractions(rollbackFacade);
     verify(userService, times(1)).updateRocketChatIdInDatabase(any(), any());
   }
