@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsPr
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +39,8 @@ public class UnauthorizedMembersProvider {
    * Obtains a list of {@link Consultant}s which are not authorized to view the given Rocket.Chat
    * group and therefore should be removed.
    *
-   * @param rcGroupId the Rocket.Chat group ID
-   * @param session {@link Session}
+   * @param rcGroupId  the Rocket.Chat group ID
+   * @param session    {@link Session}
    * @param consultant {@link Consultant}
    * @param memberList list of {@link GroupMemberDTO} containing the current members of the group
    * @return list of {@link Consultant}s to be removed
@@ -104,34 +105,32 @@ public class UnauthorizedMembersProvider {
 
   private void addMainConsultantsIfFeedbackTeamSession(String rcGroupId, Session session,
       List<String> authorizedMembers, List<Consultant> consultantsOfAgency) {
-    if (session.isTeamSession() && session.hasFeedbackChat()
-        && rcGroupId.equalsIgnoreCase(session.getGroupId())) {
-      obtainMainConsultantsOfGroup(authorizedMembers, consultantsOfAgency);
-    }
-    if (session.isTeamSession() && session.hasFeedbackChat()
-        && rcGroupId.equalsIgnoreCase(session.getFeedbackGroupId())) {
-      obtainMainConsultantsOfFeedbackGroup(authorizedMembers, consultantsOfAgency);
+    if (isTeamSessionWithFeedbackChat(session)) {
+      if (rcGroupId.equalsIgnoreCase(session.getGroupId())) {
+        obtainMainConsultantsOfGroup(authorizedMembers, consultantsOfAgency,
+            this::hasAuthorityToViewPeerGroups);
+      }
+      if (rcGroupId.equalsIgnoreCase(session.getFeedbackGroupId())) {
+        obtainMainConsultantsOfGroup(authorizedMembers, consultantsOfAgency,
+            this::hasAuthorityToViewFeedbackGroups);
+      }
     }
   }
 
+  private boolean isTeamSessionWithFeedbackChat(Session session) {
+    return session.isTeamSession() && session.hasFeedbackChat();
+  }
+
   private void obtainMainConsultantsOfGroup(List<String> authorizedMembers,
-      List<Consultant> consultantsOfAgency) {
+      List<Consultant> consultantsOfAgency, Predicate<Consultant> authorityMethod) {
     consultantsOfAgency.stream()
-        .filter(this::hasAuthorityToViewPeerGroups)
+        .filter(authorityMethod)
         .map(Consultant::getRocketChatId)
         .forEach(authorizedMembers::add);
   }
 
   private boolean hasAuthorityToViewPeerGroups(Consultant consultant) {
     return keycloakAdminClientService.userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS);
-  }
-
-  private void obtainMainConsultantsOfFeedbackGroup(List<String> authorizedMembers,
-      List<Consultant> consultantsOfAgency) {
-    consultantsOfAgency.stream()
-        .filter(this::hasAuthorityToViewFeedbackGroups)
-        .map(Consultant::getRocketChatId)
-        .forEach(authorizedMembers::add);
   }
 
   private boolean hasAuthorityToViewFeedbackGroups(Consultant consultant) {
