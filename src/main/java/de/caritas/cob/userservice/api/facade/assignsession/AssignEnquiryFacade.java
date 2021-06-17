@@ -64,6 +64,7 @@ public class AssignEnquiryFacade {
     try {
       this.rocketChatFacade
           .addUserToRocketChatGroup(consultant.getRocketChatId(), session.getGroupId());
+      this.rocketChatFacade.removeSystemMessagesFromRocketChatGroup(session.getGroupId());
     } catch (Exception e) {
       rollbackSessionUpdate(session);
       throw new InternalServerErrorException(

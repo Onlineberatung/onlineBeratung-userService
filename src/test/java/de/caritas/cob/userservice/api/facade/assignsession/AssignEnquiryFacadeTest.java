@@ -320,6 +320,16 @@ public class AssignEnquiryFacadeTest {
         ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT.getGroupId());
   }
 
+  @Test
+  public void assignAnonymousEnquiry_Should_RemoveSystemMessagesFromGroup() {
+    assignEnquiryFacade
+        .assignAnonymousEnquiry(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+
+    verifyConsultantAndSessionHaveBeenChecked(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT,
+        CONSULTANT_WITH_AGENCY);
+    verify(rocketChatFacade, times(1)).removeSystemMessagesFromRocketChatGroup(anyString());
+  }
+
   @Test(expected = InternalServerErrorException.class)
   public void assignAnonymousEnquiry_Should_ReturnInternalServerErrorAndDoARollback_WhenAddConsultantToGroupFails() {
     doThrow(new InternalServerErrorException("")).when(rocketChatFacade)
