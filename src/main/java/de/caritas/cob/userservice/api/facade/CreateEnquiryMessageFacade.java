@@ -83,6 +83,7 @@ public class CreateEnquiryMessageFacade {
       checkIfKeycloakAndRocketChatUsernamesMatch(rocketChatCredentials.getRocketChatUserId(), user);
 
       var session = fetchSessionForEnquiryMessage(sessionId, user);
+      checkIfNotAnonymousEnquiry(session);
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
       var extendedConsultingTypeResponseDTO = consultingTypeManager
@@ -122,6 +123,17 @@ public class CreateEnquiryMessageFacade {
 
   }
 
+  private void checkIfKeycloakAndRocketChatUsernamesMatch(String rcUserId, User user) {
+
+    UserInfoResponseDTO rcUserInfoDTO = rocketChatService.getUserInfo(rcUserId);
+
+    if (!userHelper.doUsernamesMatch(rcUserInfoDTO.getUser().getUsername(), user.getUsername())) {
+      throw new BadRequestException(String.format(
+          "Enquiry message check: User with username %s does not match user with Rocket.Chat ID %s",
+          user.getUsername(), rcUserId), LogService::logCreateEnquiryMessageException);
+    }
+  }
+
   private Session fetchSessionForEnquiryMessage(Long sessionId, User user) {
 
     Optional<Session> session = sessionService.getSession(sessionId);
@@ -134,22 +146,19 @@ public class CreateEnquiryMessageFacade {
         LogService::logCreateEnquiryMessageException);
   }
 
+  private void checkIfNotAnonymousEnquiry(Session session) {
+    if(session.getRegistrationType().equals(ANONYMOUS)) {
+      throw new BadRequestException(
+          String.format("Session %s is anonymous and therefore can't have an enquiry message.",
+              session.getId()), LogService::logCreateEnquiryMessageException);
+    }
+  }
+
   private void checkIfEnquiryMessageIsAlreadyWrittenForSession(Session session) {
     if (nonNull(session.getEnquiryMessageDate())) {
       throw new ConflictException(
           String.format("Enquiry message already written for session %s", session.getId()),
           LogService::logCreateEnquiryMessageException);
-    }
-  }
-
-  private void checkIfKeycloakAndRocketChatUsernamesMatch(String rcUserId, User user) {
-
-    UserInfoResponseDTO rcUserInfoDTO = rocketChatService.getUserInfo(rcUserId);
-
-    if (!userHelper.doUsernamesMatch(rcUserInfoDTO.getUser().getUsername(), user.getUsername())) {
-      throw new BadRequestException(String.format(
-          "Enquiry message check: User with username %s does not match user with Rocket.Chat ID %s",
-          user.getUsername(), rcUserId), LogService::logCreateEnquiryMessageException);
     }
   }
 
