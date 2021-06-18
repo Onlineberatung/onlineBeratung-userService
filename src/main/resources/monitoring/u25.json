@@ -1,122 +1,119 @@
 {
-    "generalData":
-    {
-    	"location":
-    	{
-    		"freiburg": false,
-    		"badenWuerttemberg": false,
-    		"bavaria": false,
-    		"berlin": false,
-    		"brandenburg": false,
-    		"bremen": false,
-    		"hamburg": false,
-    		"hessia": false,
-    		"mecklenburgWesternPomerania": false,
-    		"lowerSaxony": false,
-    		"northRhineWestphalia": false,
-    		"rhinelandPalatinate": false,
-    		"saarland": false,
-    		"saxony": false,
-    		"saxonyAnhalt": false,
-    		"schleswigHolstein": false,
-    		"thuringia": false,
-    		"abroadAustria": false,
-    		"abroadSwitzerland": false,
-    		"abroadOthers": false
-    	},
-    	"occupation":
-    	{
-    		"schoolStudies": false,
-    		"apprenticeship": false,
-    		"employed": false,
-    		"unemployed": false
-    	},
-    	"housingSituation":
-    	{
-    		"family": false,
-    		"partnerLivingCommunity": false,
-    		"alone": false,
-    		"assistedLiving": false,
-    		"homeless": false
-    	}
+  "generalData": {
+    "location": {
+      "freiburg": false,
+      "badenWuerttemberg": false,
+      "bavaria": false,
+      "berlin": false,
+      "brandenburg": false,
+      "bremen": false,
+      "hamburg": false,
+      "hessia": false,
+      "mecklenburgWesternPomerania": false,
+      "lowerSaxony": false,
+      "northRhineWestphalia": false,
+      "rhinelandPalatinate": false,
+      "saarland": false,
+      "saxony": false,
+      "saxonyAnhalt": false,
+      "schleswigHolstein": false,
+      "thuringia": false,
+      "abroadAustria": false,
+      "abroadSwitzerland": false,
+      "abroadOthers": false
     },
-    "consultingData":
-    {
-    	"suicidality": 
-    	{
-    		"crisis": false,
-    		"thoughtsOfSuicide": false,
-    		"acuteThoughtsOfSuicide": false,
-    		"afterSuicideAttempt": false,
-    		"concern": false,
-    		"mourning": false
-    	},
-    	"stressfulFactors": 
-    	{
-    		"mentalOverload": false,
-    		"anxieties": false,
-    		"futility": false,
-    		"isolation": false,
-    		"svv": false,
-    		"eatingDisorder": false,
-    		"bullying": false,
-    		"sexualAbuse": false,
-    		"mentalIllness": false,
-    		"addictionDrugs": false,
-    		"addictionAlcohol": false,
-    		"addictionInternetComputer": false,
-    		"addictionOthers": false,
-    		"physicalIllness": false,
-    		"physicalHandicap": false,
-    		"conflictsPartnership": false,
-    		"divorce": false,
-    		"deceaseLovedOne": false,
-    		"mourning": false,
-    		"concernLovedOne": false,
-    		"relationshipRelative": false,
-    		"relationshipSocialEnvironment": false,
-    		"workSchool": false,
-    		"housingSituation": false,
-    		"financialSituation": false,
-    		"debt": false,
-    		"experienceOfViolence": false,
-    		"stressfulChildhood": false,
-    		"crime": false,
-    		"migrationProblems": false,
-    		"sexualOrientation": false,
-    		"genderIdentity": false,
-    		"others": false
-    	},
-    	"supportDuration": 
-    	{
-    		"onetime": false,
-    		"threeMonths": false,
-    		"sixMonths": false,
-    		"oneYear": false,
-    		"oneAndAHalfYear": false,
-    		"longer": false
-    	},
-    	"endOfContact": 
-    	{
-    		"mutually": false,
-    		"noAnswer": false,
-    		"suicideAnnouncement": false,
-    		"suicide": false,
-    		"noFirstAnswer": false,
-    		"others": false
-    	},
-    	"helpfulness": 
-    	{
-    		"one": false,
-    		"two": false,
-    		"three": false,
-    		"four": false,
-    		"five": false,
-    		"six": false,
-    		"seven": false,
-    		"eight": false,
-    		"nine": false,
-    		"ten": false
-    	}
+    "occupation": {
+      "school": false,
+      "studies": false,
+      "apprenticeship": false,
+      "employed": false,
+      "unemployed": false
+    },
+    "housingSituation": {
+      "family": false,
+      "partner": false,
+      "livingCommunity": false,
+      "alone": false,
+      "assistedLiving": false,
+      "homeless": false
     }
+  },
+  "consultingData": {
+    "suicidality": {
+      "crisis": false,
+      "thoughtsOfSuicide": false,
+      "acuteThoughtsOfSuicide": false,
+      "afterSuicideAttempt": false
+    },
+    "stressfulFactors": {
+      "mentalOverload": false,
+      "anxieties": false,
+      "futility": false,
+      "isolation": false,
+      "svv": false,
+      "bullying": false,
+      "sexualAbuse": false,
+      "substanceAbuse": false,
+      "mediaConsumption": false,
+      "physicalIllness": false,
+      "physicalHandicap": false,
+      "conflictsPartnership": false,
+      "divorce": false,
+      "deceaseLovedOne": false,
+      "mourning": false,
+      "concernLovedOne": false,
+      "relationshipRelative": false,
+      "relationshipSocialEnvironment": false,
+      "workSchool": false,
+      "housingSituation": false,
+      "financialSituation": false,
+      "debt": false,
+      "experienceOfViolence": false,
+      "stressfulChildhood": false,
+      "crime": false,
+      "migrationProblems": false,
+      "sexualOrientation": false,
+      "genderIdentity": false,
+      "others": false
+    },
+    "diagnosis": {
+      "depression": false,
+      "eatingDisorder": false,
+      "adhs": false,
+      "borderline": false,
+      "autism": false,
+      "personalityDisorder": false,
+      "traumaRelatedDisorder": false,
+      "anxietyDisorder": false,
+      "addiction": false,
+      "obsessiveCompulsiveDisorder": false,
+      "schizophrenia": false,
+      "others": false
+    },
+    "furtherConnection": {
+      "outpatientTherapy": false,
+      "inpationsTherapy": false,
+      "consultation": false,
+      "supportGroups": false,
+      "medicalTherapy": false,
+      "others": false
+    },
+    "supportDuration": {
+      "onetime": false,
+      "oneMonth": false,
+      "threeMonths": false,
+      "sixMonths": false,
+      "oneYear": false,
+      "oneAndAHalfYear": false,
+      "longer": false,
+      "inConsultation": false
+    },
+    "endOfContact": {
+      "mutually": false,
+      "noAnswer": false,
+      "suicideAnnouncement": false,
+      "suicide": false,
+      "others": false
+    }
+  }
 }
