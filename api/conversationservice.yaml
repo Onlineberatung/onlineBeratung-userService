@@ -3,8 +3,6 @@ info:
   title: will be replaced
   description: This information will be replaced by the SpringFox config information
   version: 0.0.1
-servers:
-  - url: /
 paths:
   /conversations/consultants/enquiries/registered:
     get:
@@ -151,6 +149,34 @@ paths:
         409:
           description: CONFLICT - enquiry already accepted by another consultant or
             consulting type of session is not assigned to consultant
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /conversations/anonymous/{sessionId}/finish:
+    put:
+      tags:
+        - conversation-controller
+      summary: 'Set the status of the given session to done [Authorization: Role:
+      anonymous, consultant]'
+      operationId: finishAnonymousConversation
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - session is already marked as done
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

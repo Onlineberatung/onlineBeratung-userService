@@ -4,15 +4,15 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECOD
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import de.caritas.cob.userservice.api.helper.UserHelper;
 import java.io.IOException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import com.fasterxml.jackson.core.JsonGenerator;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DecodeUsernameJsonSerializerTest {

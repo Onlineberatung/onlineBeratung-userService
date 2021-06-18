@@ -17,14 +17,13 @@ import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -34,6 +33,7 @@ import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -85,7 +85,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   private RocketChatFacade rocketChatFacade;
 
   @MockBean
-  private UsernameTranscoder usernameTranscoder;
+  private ConsultingTypeManager consultingTypeManager;
 
   @Test
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid() {
@@ -101,7 +101,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(false);
-    agencyDTO.setConsultingType(ConsultingType.SUCHT);
+    agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
@@ -133,12 +133,15 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     createConsultantAgencyDTO.setRole("valid-role");
 
     when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
-
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setExcludeNonMainConsultantsFromTeamSessions(true);
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
     agencyDTO.setTeamAgency(true);
-    agencyDTO.setConsultingType(ConsultingType.SUCHT);
+    agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+    when(consultingTypeManager.getConsultingTypeSettings(0))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
         SessionStatus.IN_PROGRESS);
@@ -242,15 +245,16 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsU25AndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(ConsultingType.EMIGRATION);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.U25)
+        .consultingType(1)
         .id(2L);
 
     when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
     when(agencyService.getAgencyWithoutCaching(2L)).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(consultingTypeManager.isConsultantBoundedToAgency(1)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role")
@@ -265,15 +269,16 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   public void createNewConsultantAgency_Should_throwBadRequestException_When_agencyTypeIsKreuzbundAndConsultantHasAnotherConsultingTypeAssigned() {
 
     AgencyDTO emigrationAgency = new AgencyDTO()
-        .consultingType(ConsultingType.EMIGRATION);
+        .consultingType(17);
 
     AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(ConsultingType.KREUZBUND)
+        .consultingType(15)
         .id(2L);
 
     when(agencyService.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
     when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(consultingTypeManager.isConsultantBoundedToAgency(15)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .role("valid role")

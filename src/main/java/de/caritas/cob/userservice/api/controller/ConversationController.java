@@ -9,8 +9,9 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
-import de.caritas.cob.userservice.api.facade.conversation.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryResponseDTO;
@@ -36,6 +37,7 @@ public class ConversationController implements ConversationsApi {
   private final @NonNull ConversationListResolver conversationListResolver;
   private final @NonNull CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
   private final @NonNull AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
+  private final @NonNull FinishAnonymousConversationFacade finishAnonymousConversationFacade;
 
   /**
    * Entry point to retrieve all anonymous enquiries for current authenticated consultant.
@@ -104,5 +106,17 @@ public class ConversationController implements ConversationsApi {
         .createAnonymousEnquiry(createAnonymousEnquiryDTO);
 
     return new ResponseEntity<>(createAnonymousEnquiryResponseDTO, HttpStatus.CREATED);
+  }
+
+  /**
+   * Finishes a anonymous conversation and sets the status to done.
+   *
+   * @param sessionId the identifier of the session
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> finishAnonymousConversation(Long sessionId) {
+    this.finishAnonymousConversationFacade.finishConversation(sessionId);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

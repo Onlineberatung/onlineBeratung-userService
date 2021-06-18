@@ -117,7 +117,7 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
         .id(session.getId())
         .agencyId(session.getAgencyId().intValue())
         .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
-        .consultingType(session.getConsultingType().getValue())
+        .consultingType(session.getConsultingTypeId())
         .email(session.getUser().getEmail())
         .postcode(session.getPostcode())
         .userId(session.getUser().getUserId())

@@ -21,7 +21,7 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.bridge.builtin.LongBridge;
 
-/** Represents a the relation between consultant and agency */
+/** Represents the relation between consultant and agency */
 @Entity
 @Table(name = "consultant_agency")
 @AllArgsConstructor

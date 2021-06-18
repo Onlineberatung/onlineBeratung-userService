@@ -1,16 +1,18 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.registration.UserRegistrationDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,18 +35,17 @@ public class CreateNewConsultingTypeFacade {
    * @param userRegistrationDTO   {@link UserRegistrationDTO}
    * @param user                  {@link User}
    * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @return session ID of created session (if not consulting type {@link ConsultingType#KREUZBUND}
+   * @return session ID of created session (if not consulting id refers to a group only consulting
+   * type)
    */
   public Long initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
       RocketChatCredentials rocketChatCredentials) {
     try {
-      ConsultingType consultingType = ConsultingType
-          .fromConsultingType(userRegistrationDTO.getConsultingType());
-      ConsultingTypeSettings consultingTypeSettings = consultingTypeManager
-          .getConsultingTypeSettings(consultingType);
+      var extendedConsultingTypeResponseDTO = consultingTypeManager
+          .getConsultingTypeSettings(userRegistrationDTO.getConsultingType());
 
       return createSessionOrChat(userRegistrationDTO, user,
-          consultingTypeSettings, rocketChatCredentials);
+          extendedConsultingTypeResponseDTO, rocketChatCredentials);
     } catch (MissingConsultingTypeException | IllegalArgumentException e) {
       throw new BadRequestException(e.getMessage(), LogService::logInternalServerError);
     }
@@ -54,22 +55,24 @@ public class CreateNewConsultingTypeFacade {
    * Initializes the new consulting type settings and creates a session or a chat-agency relation
    * depending on its type. This method should be used for new user account registrations.
    *
-   * @param userRegistrationDTO    {@link UserRegistrationDTO}
-   * @param user                   {@link User}
-   * @param consultingTypeSettings {@link ConsultingTypeSettings}
+   * @param userRegistrationDTO               {@link UserRegistrationDTO}
+   * @param user                              {@link User}
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
   public void initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings) {
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
-    createSessionOrChat(userRegistrationDTO, user, consultingTypeSettings, null);
+    createSessionOrChat(userRegistrationDTO, user, extendedConsultingTypeResponseDTO, null);
   }
 
   private Long createSessionOrChat(UserRegistrationDTO userRegistrationDTO, User user,
-      ConsultingTypeSettings consultingTypeSettings, RocketChatCredentials rocketChatCredentials) {
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
+      RocketChatCredentials rocketChatCredentials) {
 
     Long sessionId = null;
 
-    if (consultingTypeSettings.getConsultingType().isGroupChat()) {
+    var groupChat = extendedConsultingTypeResponseDTO.getGroupChat();
+    if (nonNull(groupChat) && isTrue(groupChat.getIsGroupChat())) {
       createUserChatRelationFacade
           .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
               rocketChatCredentials);
@@ -77,7 +80,7 @@ public class CreateNewConsultingTypeFacade {
     } else {
       sessionId = createSessionFacade
           .createUserSession(fromUserRegistrationDTO(userRegistrationDTO), user,
-              consultingTypeSettings);
+              extendedConsultingTypeResponseDTO);
     }
 
     return sessionId;
@@ -85,7 +88,7 @@ public class CreateNewConsultingTypeFacade {
 
   private UserDTO fromUserRegistrationDTO(UserRegistrationDTO userRegistrationDTO) {
     if (userRegistrationDTO instanceof NewRegistrationDto) {
-      UserDTO userDTO = new UserDTO();
+      var userDTO = new UserDTO();
       userDTO.setAgencyId(userRegistrationDTO.getAgencyId());
       userDTO.setPostcode(userRegistrationDTO.getPostcode());
       userDTO.setConsultingType(userRegistrationDTO.getConsultingType());

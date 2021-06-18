@@ -7,7 +7,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -50,41 +50,42 @@ public class SessionDataProvider {
   /**
    * Get list of session data items for session.
    *
-   * @param session       the {@link Session}
-   * @param sessionData   the {@link SessionDataDTO}
+   * @param session     the {@link Session}
+   * @param sessionData the {@link SessionDataDTO}
    * @return the list of session data items
    */
   public List<SessionData> createSessionDataList(Session session,
       SessionDataDTO sessionData) {
 
     List<SessionData> sessionDataList = new ArrayList<>();
-    if (getSessionDataInitializing(session.getConsultingType()).isAddictiveDrugs()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isAddictiveDrugs()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),
           getAddictiveDrugsValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isAge()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isAge()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.AGE.getValue(), getAgeValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isGender()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isGender()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.GENDER.getValue(), getGenderValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isRelation()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isRelation()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.RELATION.getValue(), getRelationValue(sessionData)));
     }
-    if (getSessionDataInitializing(session.getConsultingType()).isState()) {
+    if (getSessionDataInitializing(session.getConsultingTypeId()).isState()) {
       sessionDataList.add(obtainSessionData(session,
           SessionDataKeyRegistration.STATE.getValue(), getStateValue(sessionData)));
     }
     return sessionDataList;
   }
 
-  private SessionDataInitializing getSessionDataInitializing(ConsultingType consultingType) {
-    return consultingTypeManager.getConsultingTypeSettings(consultingType)
-        .getSessionDataInitializing();
+  private SessionDataInitializing getSessionDataInitializing(int consultingTypeId) {
+    return SessionDataInitializing.convertSessionDataInitializingDTOtoSessionDataInitializing(
+        Objects.requireNonNull(consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
+            .getSessionDataInitializing()));
   }
 
   private SessionData obtainSessionData(Session session, String key, String value) {
@@ -94,7 +95,7 @@ public class SessionDataProvider {
   }
 
   private SessionData obtainUpdatedOrInitialSessionData(Session session, String key, String value) {
-    SessionData sessionData = session.getSessionData()
+    var sessionData = session.getSessionData()
         .stream()
         .filter(data -> data.getKey().equals(key))
         .findFirst()
@@ -132,7 +133,7 @@ public class SessionDataProvider {
    * Returns the {@link SessionDataDTO} for the given {@link UserDTO}.
    *
    * @param userDTO {@link UserDTO}
-   * @return        {@link SessionDataDTO}
+   * @return {@link SessionDataDTO}
    */
   public static SessionDataDTO fromUserDTO(UserDTO userDTO) {
     return (SessionDataDTO) new SessionDataDTO()

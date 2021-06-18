@@ -15,12 +15,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeSettings;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -110,17 +110,24 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   }
 
   private boolean shouldInformAllConsultantsOfTeamSession() {
-    ConsultingTypeSettings consultingTypeSettings =
-        consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
-    return session.isTeamSession() && isTrue(
-        consultingTypeSettings.getNotifications().getNewMessage()
-            .getTeamSession().getToConsultant().getAllTeamConsultants());
+    var extendedConsultingTypeResponseDTO = consultingTypeManager
+        .getConsultingTypeSettings(session.getConsultingTypeId());
+    return session.isTeamSession() && retrieveCheckedAllTeamConsultantsProperty(
+        extendedConsultingTypeResponseDTO.getNotifications());
+  }
+
+  private boolean retrieveCheckedAllTeamConsultantsProperty(NotificationsDTO notificationsDTO) {
+    if (isNull(notificationsDTO) || isNull(notificationsDTO.getTeamSessions()) || isNull(
+        notificationsDTO.getTeamSessions().getNewMessage())) {
+      return false;
+    }
+    return isTrue(notificationsDTO.getTeamSessions().getNewMessage().getAllTeamConsultants());
   }
 
   private MailDTO toNewConsultantMessageMailDTO(ConsultantAgency agency) {
     return buildMailDtoForNewMessageNotificationConsultant(
-        agency.getConsultant().getEmail(),
-        agency.getConsultant().getFullName(), session.getPostcode());
+        agency.getConsultant().getEmail(), agency.getConsultant().getFullName(),
+        session.getPostcode());
   }
 
   private MailDTO buildMailDtoForNewMessageNotificationConsultant(String email, String name,

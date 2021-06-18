@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
 
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSCONVERSATIONFINISHED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSENQUIRYACCEPTED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static java.util.Arrays.asList;
@@ -24,6 +25,8 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource.FinishConversationPhaseEnum;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -82,7 +85,7 @@ public class LiveEventNotificationServiceTest {
 
     verify(userIdsProviderFactory, times(1)).byRocketChatGroup("valid");
     verify(liveControllerApi, times(1))
-        .sendLiveEvent(asList("1", "2"), MESSAGE);
+        .sendLiveEvent(MESSAGE.userIds(asList("1", "2")));
   }
 
   @Test
@@ -106,8 +109,7 @@ public class LiveEventNotificationServiceTest {
   public void sendLiveDirectMessageEventToUsers_Should_logError_When_apiCallFails() {
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
     when(this.bySessionProvider.collectUserIds(any())).thenReturn(singletonList("test"));
-    doThrow(new RestClientException("")).when(this.liveControllerApi)
-        .sendLiveEvent(any(), any());
+    doThrow(new RestClientException("")).when(this.liveControllerApi).sendLiveEvent(any());
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
@@ -124,8 +126,7 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
     List<String> expectedIds = asList("id1", "id3", "id4");
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(expectedIds,
-        MESSAGE);
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(MESSAGE.userIds(expectedIds));
   }
 
   @Test
@@ -146,7 +147,7 @@ public class LiveEventNotificationServiceTest {
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(userIds, MESSAGE);
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(MESSAGE.userIds(userIds));
   }
 
   @Test
@@ -204,7 +205,7 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveNewAnonymousEnquiryEventToUsers(userIds, 1L);
 
     ArgumentCaptor<LiveEventMessage> captor = ArgumentCaptor.forClass(LiveEventMessage.class);
-    verify(liveControllerApi, times(1)).sendLiveEvent(any(), captor.capture());
+    verify(liveControllerApi, times(1)).sendLiveEvent(captor.capture());
     assertEquals(EventType.NEWANONYMOUSENQUIRY, captor.getValue().getEventType());
   }
 
@@ -226,7 +227,36 @@ public class LiveEventNotificationServiceTest {
   public void sendAcceptAnonymousEnquiryEventToUser_Should_triggerLiveEvent_When_userIdIsValid() {
     this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("userId");
 
-    verify(this.liveControllerApi, times(1)).sendLiveEvent(singletonList("userId"),
-        new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED));
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(
+        new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED)
+            .userIds(singletonList("userId")));
+  }
+
+  @Test
+  public void sendLiveFinishedAnonymousConversationToUsers_Should_doNothing_When_userIdIsNull() {
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(null, null);
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendLiveFinishedAnonymousConversationToUsers_Should_doNothing_When_userIdIsEmpty() {
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(emptyList(),
+        null);
+
+    verifyNoInteractions(this.liveControllerApi);
+  }
+
+  @Test
+  public void sendLiveFinishedAnonymousConversationToUsers_Should_triggerLiveEvent_When_userIdIsValid() {
+    this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(singletonList(
+        "userId"), FinishConversationPhaseEnum.IN_PROGRESS);
+
+    verify(this.liveControllerApi, times(1)).sendLiveEvent(
+        new LiveEventMessage()
+            .eventType(ANONYMOUSCONVERSATIONFINISHED)
+            .userIds(singletonList("userId"))
+            .eventContent(new StatusSource()
+                .finishConversationPhase(FinishConversationPhaseEnum.IN_PROGRESS)));
   }
 }

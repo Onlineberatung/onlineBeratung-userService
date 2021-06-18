@@ -31,10 +31,9 @@ import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Optional;
 import org.junit.Before;
@@ -86,7 +85,7 @@ public class CreateChatFacadeTest {
   @Before
   public void setup() {
     when(chat.getId()).thenReturn(CHAT_ID);
-    when(chat.getConsultingType()).thenReturn(ConsultingType.KREUZBUND);
+    when(chat.getConsultingTypeId()).thenReturn(15);
     when(agencyService.getAgency(any())).thenReturn(AGENCY_DTO_KREUZBUND);
     setInternalState(LogService.class, "LOGGER", logger);
   }

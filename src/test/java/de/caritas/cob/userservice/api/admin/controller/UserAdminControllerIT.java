@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.ConsultingTypeAdminService;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
@@ -80,9 +79,6 @@ public class UserAdminControllerIT {
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
 
   @MockBean
-  private ConsultingTypeAdminService consultingTypeAdminService;
-
-  @MockBean
   private UserAdminFacade userAdminFacade;
 
   @Test
@@ -132,24 +128,6 @@ public class UserAdminControllerIT {
 
     verify(this.consultantAdminFacade, times(1))
         .findConsultantAgencies(eq(consultantId));
-  }
-
-  @Test
-  public void getConsultingTypes_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
-      throws Exception {
-    this.mvc.perform(get(CONSULTING_TYPE_PATH)).andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void getConsultingTypes_Should_returnOk_When_requiredPaginationParamsAreGiven()
-      throws Exception {
-    this.mvc.perform(get(CONSULTING_TYPE_PATH)
-        .param(PAGE_PARAM, "0")
-        .param(PER_PAGE_PARAM, "1"))
-        .andExpect(status().isOk());
-
-    verify(this.consultingTypeAdminService, times(1))
-        .findConsultingTypes(eq(0), eq(1));
   }
 
   @Test

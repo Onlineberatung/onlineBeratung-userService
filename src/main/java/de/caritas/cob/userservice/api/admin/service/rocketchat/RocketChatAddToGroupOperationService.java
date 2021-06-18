@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -16,11 +17,14 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
 
   private List<Session> sessions;
   private Consultant consultant;
+  private final ConsultingTypeManager consultingTypeManager;
 
   private RocketChatAddToGroupOperationService(RocketChatFacade rocketChatFacade,
-      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod) {
+      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod,
+      ConsultingTypeManager consultingTypeManager) {
     super(rocketChatFacade, keycloakAdminClientService);
     this.logMethod = logMethod;
+    this.consultingTypeManager = consultingTypeManager;
   }
 
   /**
@@ -30,9 +34,10 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
    * @return the {@link RocketChatAddToGroupOperationService} instance
    */
   public static RocketChatAddToGroupOperationService getInstance(RocketChatFacade rocketChatFacade,
-      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod) {
+      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod,
+      ConsultingTypeManager consultingTypeManager) {
     return new RocketChatAddToGroupOperationService(rocketChatFacade, keycloakAdminClientService,
-        logMethod);
+        logMethod, consultingTypeManager);
   }
 
   /**
@@ -66,7 +71,7 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
 
   private void addToSpecificSessionOrRollbackOnFailure(Session session) {
     try {
-      addConsultantToGroupOfSession(session, this.consultant);
+      addConsultantToGroupOfSession(session, this.consultant, this.consultingTypeManager);
     } catch (Exception e) {
       rollback();
       throw new InternalServerErrorException(
@@ -84,7 +89,7 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
 
   private void removeUserFromSession(Session session) {
     try {
-      removeConsultantFromSession(session, this.consultant);
+      removeConsultantsFromSessionGroups(session, List.of(this.consultant));
     } catch (Exception e) {
       throw new InternalServerErrorException(
           String.format("ERROR: Failed to rollback %s of group %s:",

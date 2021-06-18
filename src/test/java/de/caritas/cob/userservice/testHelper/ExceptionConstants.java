@@ -54,10 +54,12 @@ public class ExceptionConstants {
    */
   @SuppressWarnings("serial")
   public static final HttpStatusCodeException HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION =
-      new HttpStatusCodeException(HttpStatus.INTERNAL_SERVER_ERROR) {};
+      new HttpStatusCodeException(HttpStatus.INTERNAL_SERVER_ERROR) {
+      };
   @SuppressWarnings("serial")
   public static final HttpStatusCodeException HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION =
-      new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
+      new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {
+      };
 
   /**
    * InternalServerErrorException

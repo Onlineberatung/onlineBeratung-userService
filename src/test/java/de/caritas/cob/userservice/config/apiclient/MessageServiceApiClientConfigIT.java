@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -25,9 +23,6 @@ public class MessageServiceApiClientConfigIT {
 
   @Autowired
   private MessageControllerApi messageControllerApi;
-
-  @MockBean
-  private UsernameTranscoder usernameTranscoder;
 
   @Value("${message.service.api.url}")
   private String messageServiceApiUrl;

@@ -4,8 +4,8 @@ package de.caritas.cob.userservice.api.service.message;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS;
@@ -180,7 +180,7 @@ public class MessageServiceProviderTest {
     verify(messageControllerApi, times(1))
         .createMessage(anyString(), anyString(), eq(RC_GROUP_ID), captor.capture());
     assertThat(captor.getValue().getMessage(),
-        is(CONSULTING_TYPE_SETTINGS_U25.getWelcomeMessage()));
+        is(CONSULTING_TYPE_SETTINGS_U25.getWelcomeMessage().getWelcomeMessageText()));
   }
 
   @Test

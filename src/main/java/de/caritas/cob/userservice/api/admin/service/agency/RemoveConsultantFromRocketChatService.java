@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -27,6 +28,7 @@ public class RemoveConsultantFromRocketChatService {
   private final @NonNull RocketChatFacade rocketChatFacade;
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
    * Removes the consultant who is not directly assigned to session from Rocket.Chat rooms.
@@ -38,7 +40,8 @@ public class RemoveConsultantFromRocketChatService {
         .collect(Collectors.toMap(session -> session, this::observeConsultantsToRemove));
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
+            this.consultingTypeManager)
         .onSessionConsultants(consultantsFromSession)
         .removeFromGroupsOrRollbackOnFailure();
   }

@@ -1,0 +1,26 @@
+https://plantuml.com/de/state-diagram
+
+@startuml
+hide empty description
+
+[*] --> HourlyCronJob
+
+HourlyCronJob : user.anonymous.deactivateworkflow.cron
+HourlyCronJob --> DeactivateUserAnonymousScheduler : triggers
+
+note right of HourlyCronJob : Configured in application.properties
+
+DeactivateUserAnonymousScheduler --> DeactivateUserAnonymousService : executes
+
+state DeactivateUserAnonymousService #lightblue {
+  [*] --> CollectStaleAnonymousSessions
+  CollectStaleAnonymousSessions --> DeactivateUserActions : executes
+
+  state DeactivateUserActions {
+    DeactivateKeycloakUserAction --> DeactivateSessionAction
+    DeactivateSessionAction --> SetRocketChatRoomsToReadOnlyAction
+    SetRocketChatRoomsToReadOnlyAction:
+  }
+}
+
+@enduml

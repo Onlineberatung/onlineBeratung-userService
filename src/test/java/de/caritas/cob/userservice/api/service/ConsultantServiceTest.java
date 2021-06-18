@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_AGENCIES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
@@ -14,6 +15,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -27,7 +30,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -181,7 +183,7 @@ public class ConsultantServiceTest {
 
   @Test
   public void findConsultantsByAgencyIds_Should_ReturnListOfConsultants() {
-    when(consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(Mockito.any()))
+    when(consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(anyList()))
         .thenReturn(Collections.singletonList(CONSULTANT));
 
     List<Consultant> result = consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);
@@ -192,4 +194,15 @@ public class ConsultantServiceTest {
 
   }
 
+  @Test
+  public void findConsultantsByAgencyId_Should_ReturnListOfConsultants() {
+    when(consultantRepository.findByConsultantAgenciesAgencyIdAndDeleteDateIsNull(any()))
+        .thenReturn(Collections.singletonList(CONSULTANT));
+
+    List<Consultant> result = consultantService.findConsultantsByAgencyId(AGENCY_ID);
+
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertEquals(CONSULTANT, result.get(0));
+  }
 }
