@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.config;
+/*package de.caritas.cob.userservice.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -45,4 +45,4 @@ public class ConsultingTypeCachingConfig {
     return new EhCacheCacheManager(ehCacheManager());
   }
 
-}
+}*/
