@@ -63,7 +63,8 @@ public class UserHelperTest {
 
   @Test
   public void generateChatUrl_Should_ReturnChatLinkWithConsultingTypeUrlNameAndEncodedChatId() {
-    when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
+    when(consultingTypeManager.getConsultingTypeSettings(0))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
     assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, 0));
   }
 

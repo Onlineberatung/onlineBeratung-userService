@@ -15,8 +15,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -71,6 +72,7 @@ public class KeycloakAdminClientServiceTest {
 
   @Before
   public void setup() {
+    setField(keycloakAdminClientService, "usernameTranscoder", usernameTranscoder);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -383,7 +385,8 @@ public class KeycloakAdminClientServiceTest {
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
-    when(usersResource.search(any(), any(), any())).thenReturn(singletonList(otherUserRepresentation));
+    when(usersResource.search(any(), any(), any()))
+        .thenReturn(singletonList(otherUserRepresentation));
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail("newemail");
@@ -437,7 +440,7 @@ public class KeycloakAdminClientServiceTest {
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
     boolean hasAuthority = this.keycloakAdminClientService
-        .userHasAuthority("user", Authority.USER_DEFAULT);
+        .userHasAuthority("user", AuthorityValue.USER_DEFAULT);
 
     assertThat(hasAuthority, is(true));
   }
@@ -467,7 +470,7 @@ public class KeycloakAdminClientServiceTest {
     when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
 
     boolean hasAuthority = this.keycloakAdminClientService
-        .userHasAuthority("user", Authority.USER_ADMIN);
+        .userHasAuthority("user", AuthorityValue.USER_ADMIN);
 
     assertThat(hasAuthority, is(false));
   }

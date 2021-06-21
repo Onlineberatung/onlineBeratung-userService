@@ -1,39 +1,36 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_3;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.HashSet;
 import java.util.List;
-import org.apache.commons.collections.SetUtils;
-import org.junit.Before;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantDataProviderTest {
@@ -48,17 +45,13 @@ public class ConsultantDataProviderTest {
   AuthenticatedUser authenticatedUser;
 
   @Mock
-  private Logger logger;
+  private ConsultingTypeManager consultingTypeManager;
 
-  @Before
-  public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
-  }
 
   @Test(expected = InternalServerErrorException.class)
   public void retrieveData_Should_ThrowInternalServerErrorException_When_NoAgenciesFound() {
     Consultant consultant = Mockito.mock(Consultant.class);
-    when(consultant.getConsultantAgencies()).thenReturn(SetUtils.EMPTY_SET);
+    when(consultant.getConsultantAgencies()).thenReturn(new HashSet<>());
 
     consultantDataProvider.retrieveData(consultant);
   }
@@ -66,7 +59,7 @@ public class ConsultantDataProviderTest {
   @Test
   public void retrieveData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
-    when(agencyService.getAgency(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgencies(any())).thenReturn(List.of(AGENCY_DTO_SUCHT));
 
     List<AgencyDTO> result = consultantDataProvider.retrieveData(CONSULTANT_WITH_AGENCY)
         .getAgencies();
@@ -76,23 +69,8 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_LogError_When_AgencyHelperCallFails() {
-    Consultant consultant = Mockito.mock(Consultant.class);
-    when(consultant.getConsultantAgencies())
-        .thenReturn(asSet(CONSULTANT_AGENCY_2, CONSULTANT_AGENCY_3));
-    when(agencyService.getAgency(CONSULTANT_AGENCY_2.getId())).thenThrow(new RuntimeException());
-    when(agencyService.getAgency(CONSULTANT_AGENCY_3.getId())).thenReturn(AGENCY_DTO_SUCHT);
-
-    consultantDataProvider.retrieveData(consultant);
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-  }
-
-  @Test
   public void retrieveData_Should_ReturnValidData() {
-    when(agencyService.getAgency(
-        CONSULTANT_WITH_AGENCY.getConsultantAgencies().stream().findFirst().get().getId()))
-        .thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgencies(any())).thenReturn(List.of(AGENCY_DTO_SUCHT));
 
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(asSet(GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT));
@@ -111,8 +89,35 @@ public class ConsultantDataProviderTest {
     assertEquals(CONSULTANT_WITH_AGENCY.isTeamConsultant(), result.isInTeamAgency());
     assertEquals(GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT,
         result.getGrantedAuthorities().stream().findFirst().orElse(null));
-    assertEquals(UserRole.CONSULTANT.toString(), result.getUserRoles().stream().findFirst().orElse(null));
+    assertEquals(UserRole.CONSULTANT.toString(),
+        result.getUserRoles().stream().findFirst().orElse(null));
     assertEquals(AGENCY_DTO_SUCHT, result.getAgencies().get(0));
+  }
+
+  @Test
+  public void retrieveData_Should_returnDataWithAnonymousConversationsTrue_When_consultantHasAtLeastOneConsultingTypeWithAnonymousConversationsAllowed() {
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    when(this.agencyService.getAgencies(any()))
+        .thenReturn(List.of(new AgencyDTO().consultingType(1)));
+    when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(true));
+
+    var result = consultantDataProvider.retrieveData(consultant);
+
+    assertThat(result.isHasAnonymousConversations(), is(true));
+  }
+
+  @Test
+  public void retrieveData_Should_returnDataWithAnonymousConversationsFalse_When_allConsultingTypesHaveAnonymousConversationsDisabled() {
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    when(this.agencyService.getAgencies(any()))
+        .thenReturn(List.of(new AgencyDTO().consultingType(1)));
+    when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
+
+    var result = consultantDataProvider.retrieveData(consultant);
+
+    assertThat(result.isHasAnonymousConversations(), is(false));
   }
 
 }

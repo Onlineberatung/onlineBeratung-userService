@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID;
 import static de.caritas.cob.userservice.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_KREUZBUND;

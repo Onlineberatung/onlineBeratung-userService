@@ -1,12 +1,13 @@
 package de.caritas.cob.userservice.api.model.validation;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +27,13 @@ public class MandatoryFieldsProvider {
    * @return the {@link MandatoryFields} for the given consulting type
    */
   public MandatoryFields fetchMandatoryFieldsForConsultingType(String consultingTypeId) {
-    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = consultingTypeManager
+    var extendedConsultingTypeResponseDTO = consultingTypeManager
         .getConsultingTypeSettings(consultingTypeId);
     ensureConsultingTypeSettingsAreNotNull(consultingTypeId, extendedConsultingTypeResponseDTO);
-    return MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(extendedConsultingTypeResponseDTO.getRegistration().getMandatoryFields());
+    var registration = extendedConsultingTypeResponseDTO.getRegistration();
+    assert nonNull(registration) && nonNull(registration.getMandatoryFields());
+    return MandatoryFields
+        .convertMandatoryFieldsDTOtoMandatoryFields(registration.getMandatoryFields());
 
   }
 

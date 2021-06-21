@@ -3,8 +3,6 @@ info:
   title: will be replaced
   description: This information will be replaced by the SpringFox config information
   version: 0.0.1
-servers:
-  - url: /
 paths:
   /users/askers/new:
     post:
@@ -195,7 +193,7 @@ paths:
         - user-controller
       summary: 'Returns a list of open session(s) for the currently authenticated
         user. Note: Either a session or a chat object is provided. [Authorization:
-        Role: user]'
+        Role: user, anonymous]'
       operationId: getSessionsForAuthenticatedUser
       parameters:
         - name: RCToken
@@ -253,7 +251,7 @@ paths:
       tags:
         - user-controller
       summary: 'Returns user (meta)data for the currently authenticated user [Authorization:
-        Role: user/consultant]'
+        Role: user, anonymous, consultant]'
       operationId: getUserData
       responses:
         200:
@@ -1239,6 +1237,7 @@ components:
         status:
           type: integer
           example: 0
+          description: "0 = INITIAL, 1 = NEW, 2 = IN PROGRESS, 3 = DONE"
         postcode:
           type: string
           minLength: 1
@@ -1278,6 +1277,9 @@ components:
         registrationType:
           type: string
           example: ANONYMOUS
+        createDate:
+          type: string
+          example: 2021-05-11T15:29:37
         attachment:
           $ref: '#/components/schemas/SessionAttachmentDTO'
         videoCallMessageDTO:
@@ -1604,6 +1606,11 @@ components:
             type: string
         consultingTypes:
           $ref: "#/components/schemas/ConsultingTypeMap"
+        hasAnonymousConversations:
+          type: boolean
+          example: true
+          description: "Is true if consultant has at least one consulting type containing
+          anonymous conversations active"
 
     UpdateConsultantDTO:
       type: object
@@ -1745,7 +1752,7 @@ components:
           example: WCET6GWir78pNMyyD
         chatLink:
           type: string
-          example: http://{baseUrl}}/{consultingTypeName}/GEYDA
+          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     ChatInfoResponseDTO:
       type: object
@@ -1798,7 +1805,7 @@ components:
           example: WCET6GWir78pNMyyD
         chatLink:
           type: string
-          example: http://{baseUrl}}/{consultingTypeName}/GEYDA
+          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     NewRegistrationDto:
       type: object

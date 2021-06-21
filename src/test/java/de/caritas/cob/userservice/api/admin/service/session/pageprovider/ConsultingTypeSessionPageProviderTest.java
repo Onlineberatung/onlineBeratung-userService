@@ -1,24 +1,18 @@
 package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,9 +26,6 @@ public class ConsultingTypeSessionPageProviderTest {
 
   @Mock
   private SessionFilter sessionFilter;
-
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
 
   @Test
   public void supports_Should_returnTrue_When_consultantTypeFilterIsSet() {

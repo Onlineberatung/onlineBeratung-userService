@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.conversation.service.AnonymousConversationCreatorService;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
@@ -98,7 +99,7 @@ public class AnonymousConversationCreatorServiceTest {
     when(sessionService.initializeSession(any(User.class), any(UserDTO.class), anyBoolean(),
         any(RegistrationType.class), any(SessionStatus.class))).thenReturn(SESSION);
     CreateEnquiryException exception = easyRandom.nextObject(CreateEnquiryException.class);
-    when(createEnquiryMessageFacade.createRocketChatRoom(any(), any(), any()))
+    when(createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(any(), any(), any()))
         .thenThrow(exception);
     AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
 
@@ -115,7 +116,7 @@ public class AnonymousConversationCreatorServiceTest {
     when(userService.getUser(anyString())).thenReturn(Optional.of(USER));
     when(sessionService.initializeSession(any(User.class), any(UserDTO.class), anyBoolean(),
         any(RegistrationType.class), any(SessionStatus.class))).thenReturn(SESSION);
-    when(createEnquiryMessageFacade.createRocketChatRoom(any(), any(), any()))
+    when(createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(any(), any(), any()))
         .thenReturn(ROCKETCHAT_ID);
     AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
 

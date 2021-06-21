@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RegistrationMandatoryFieldsDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +19,8 @@ public class MandatoryFields {
 
   public static MandatoryFields convertMandatoryFieldsDTOtoMandatoryFields(
       RegistrationMandatoryFieldsDTO registrationMandatoryFieldsDTO) {
-    return new MandatoryFields(registrationMandatoryFieldsDTO.getAge(),
-        registrationMandatoryFieldsDTO.getState());
+    return new MandatoryFields(isTrue(registrationMandatoryFieldsDTO.getAge()),
+        isTrue(registrationMandatoryFieldsDTO.getState()));
   }
 
 }

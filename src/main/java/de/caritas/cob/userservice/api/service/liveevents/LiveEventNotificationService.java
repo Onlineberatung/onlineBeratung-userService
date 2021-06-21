@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
+import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSCONVERSATIONFINISHED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.ANONYMOUSENQUIRYACCEPTED;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.DIRECTMESSAGE;
 import static de.caritas.cob.userservice.liveservice.generated.web.model.EventType.NEWANONYMOUSENQUIRY;
@@ -14,6 +15,8 @@ import de.caritas.cob.userservice.api.service.PushMessageService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
+import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource.FinishConversationPhaseEnum;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -46,29 +49,30 @@ public class LiveEventNotificationService {
    */
   public void sendAcceptAnonymousEnquiryEventToUser(String userId) {
     if (isNotBlank(userId)) {
-      var liveEventMessage = new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED);
-      sendLiveEventMessage(singletonList(userId), liveEventMessage);
+      var liveEventMessage = new LiveEventMessage()
+          .eventType(ANONYMOUSENQUIRYACCEPTED)
+          .userIds(singletonList(userId));
+      sendLiveEventMessage(liveEventMessage);
     }
   }
 
-  private void sendLiveEventMessage(List<String> userIds, LiveEventMessage liveEventMessage) {
-    sendLiveEventMessage(userIds, liveEventMessage,
-        () -> String.format("Unable to trigger live event to users %s with message %s",
-            userIds, liveEventMessage));
+  private void sendLiveEventMessage(LiveEventMessage liveEventMessage) {
+    sendLiveEventMessage(liveEventMessage,
+        () -> String.format("Unable to trigger live event message %s", liveEventMessage));
   }
 
-  private void sendLiveEventMessage(List<String> userIds, LiveEventMessage liveEventMessage,
+  private void sendLiveEventMessage(LiveEventMessage liveEventMessage,
       Supplier<String> errorMessageSupplier) {
     try {
-      this.liveControllerApi.sendLiveEvent(userIds, liveEventMessage);
+      this.liveControllerApi.sendLiveEvent(liveEventMessage);
     } catch (RestClientException e) {
       LogService.logInternalServerError(errorMessageSupplier.get(), e);
     }
   }
 
   /**
-   * Collects all relevant user or consultant ids of chats and sessions and sends a new
-   * direct message to the live service.
+   * Collects all relevant user or consultant ids of chats and sessions and sends a new direct
+   * message to the live service.
    *
    * @param rcGroupId the rocket chat group id used to observe relevant users
    */
@@ -90,19 +94,21 @@ public class LiveEventNotificationService {
 
   private void triggerDirectMessageLiveEvent(List<String> userIds, String rcGroupId) {
     if (isNotEmpty(userIds)) {
-      var liveEventMessage = new LiveEventMessage().eventType(DIRECTMESSAGE);
+      var liveEventMessage = new LiveEventMessage()
+          .eventType(DIRECTMESSAGE)
+          .userIds(userIds);
 
-      sendLiveEventMessage(userIds, liveEventMessage, () -> {
+      sendLiveEventMessage(liveEventMessage, () -> {
         var rcMessage = String.format(RC_GROUP_ID_MESSAGE_TEMPLATE, rcGroupId);
-        return makeUserIdsEventTypeMessage(liveEventMessage, userIds, rcMessage);
+        return makeUserIdsEventTypeMessage(liveEventMessage, rcMessage);
       });
     }
   }
 
   private String makeUserIdsEventTypeMessage(LiveEventMessage triggeredLiveEventMessage,
-      List<String> toUsers, String withMessage) {
-    return String.format("Unable to trigger %s live event to users %s with message %s",
-        triggeredLiveEventMessage.getEventType(), toUsers, withMessage);
+      String withMessage) {
+    return String.format("Unable to trigger %s live event message %s",
+        triggeredLiveEventMessage.getEventType(), withMessage);
   }
 
   private void triggerMobilePushNotification(List<String> userIds) {
@@ -123,19 +129,38 @@ public class LiveEventNotificationService {
   /**
    * Sends a new anonymous enquiry live event to the provided user IDs.
    *
-   * @param userIds list of consultant user IDs
+   * @param userIds   list of consultant user IDs
    * @param sessionId anonymous enquiry ID
    */
   public void sendLiveNewAnonymousEnquiryEventToUsers(List<String> userIds, Long sessionId) {
     if (isNotEmpty(userIds)) {
       var liveEventMessage = new LiveEventMessage()
-          .eventType(NEWANONYMOUSENQUIRY);
+          .eventType(NEWANONYMOUSENQUIRY)
+          .userIds(userIds);
 
-      sendLiveEventMessage(userIds, liveEventMessage, () -> {
+      sendLiveEventMessage(liveEventMessage, () -> {
         var anonymousEnquiryMessage =
             String.format(NEW_ANONYMOUS_ENQUIRY_MESSAGE_TEMPLATE, sessionId);
-        return makeUserIdsEventTypeMessage(liveEventMessage, userIds, anonymousEnquiryMessage);
+        return makeUserIdsEventTypeMessage(liveEventMessage, anonymousEnquiryMessage);
       });
     }
   }
+
+  /**
+   * Sends a anonymous conversation finished live event to the provided user IDs.
+   *
+   * @param userIds list of consultant user IDs
+   */
+  public void sendLiveFinishedAnonymousConversationToUsers(List<String> userIds,
+      FinishConversationPhaseEnum finishConversationPhase) {
+    if (isNotEmpty(userIds)) {
+      var liveEventMessage = new LiveEventMessage()
+          .eventType(ANONYMOUSCONVERSATIONFINISHED)
+          .eventContent(new StatusSource().finishConversationPhase(finishConversationPhase))
+          .userIds(userIds);
+
+      sendLiveEventMessage(liveEventMessage);
+    }
+  }
+
 }

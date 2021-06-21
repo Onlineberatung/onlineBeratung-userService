@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityHeaderSupplierTest {
@@ -77,6 +77,14 @@ public class SecurityHeaderSupplierTest {
     HttpHeaders result = securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
 
     assertThat(result.get("Cookie").get(0), startsWith(CSRF_TOKEN_COOKIE_VALUE + "="));
+    assertNotNull(result.get(CSRF_TOKEN_HEADER_VALUE));
+  }
+
+  @Test
+  public void getTechnicalKeycloakAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthorizationHeader() {
+    HttpHeaders result = securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders("token");
+
+    assertThat(result.get("Authorization").get(0), is("Bearer " + "token"));
     assertNotNull(result.get(CSRF_TOKEN_HEADER_VALUE));
   }
 }

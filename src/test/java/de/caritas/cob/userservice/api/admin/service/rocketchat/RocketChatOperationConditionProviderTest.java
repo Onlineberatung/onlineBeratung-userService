@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -51,7 +50,8 @@ public class RocketChatOperationConditionProviderTest {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
     when(this.session.getConsultingTypeId()).thenReturn(15);
-    when(consultingTypeManager.getConsultingTypeSettings(15)).thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
+    when(consultingTypeManager.getConsultingTypeSettings(15))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
 
@@ -63,7 +63,8 @@ public class RocketChatOperationConditionProviderTest {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
     when(this.session.getConsultingTypeId()).thenReturn(1);
-    when(consultingTypeManager.getConsultingTypeSettings(1)).thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
+    when(consultingTypeManager.getConsultingTypeSettings(1))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
 
@@ -77,7 +78,8 @@ public class RocketChatOperationConditionProviderTest {
     when(this.session.getConsultingTypeId()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
     when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
-    when(this.consultingTypeManager.getConsultingTypeSettings(1)).thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+    when(this.consultingTypeManager.getConsultingTypeSettings(1))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
 
@@ -110,7 +112,8 @@ public class RocketChatOperationConditionProviderTest {
     when(this.session.getConsultingTypeId()).thenReturn(1);
     when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
     when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(false);
-    when(this.consultingTypeManager.getConsultingTypeSettings(1)).thenReturn(CONSULTING_TYPE_SETTINGS_U25);
+    when(this.consultingTypeManager.getConsultingTypeSettings(1))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
     boolean result = this.conditionProvider.canAddToRocketChatGroup();
 

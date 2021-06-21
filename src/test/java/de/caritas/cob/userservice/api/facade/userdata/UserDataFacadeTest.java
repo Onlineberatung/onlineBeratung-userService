@@ -72,4 +72,14 @@ public class UserDataFacadeTest {
     userDataFacade.buildUserDataByRole();
   }
 
+  @Test
+  public void buildUserDataByRole_Should_BuildUserData_WhenRoleAnonymous() {
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.ANONYMOUS.getValue()));
+    when(userAccountProvider.retrieveValidatedUser()).thenReturn(USER);
+
+    userDataFacade.buildUserDataByRole();
+
+    verify(askerDataProvider, times(1)).retrieveData(USER);
+  }
+
 }

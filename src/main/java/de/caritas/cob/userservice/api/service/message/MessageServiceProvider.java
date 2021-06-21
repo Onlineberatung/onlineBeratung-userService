@@ -1,5 +1,9 @@
 package de.caritas.cob.userservice.api.service.message;
 
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
@@ -7,11 +11,11 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessage
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.MessageHelper;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
@@ -19,7 +23,6 @@ import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
@@ -80,12 +83,13 @@ public class MessageServiceProvider {
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostWelcomeMessageException {
 
-    if (!extendedConsultingTypeResponseDTO.getWelcomeMessage().getSendWelcomeMessage()) {
+    var welcomeMessageDTO = extendedConsultingTypeResponseDTO.getWelcomeMessage();
+    if (isNull(welcomeMessageDTO) || isFalse(welcomeMessageDTO.getSendWelcomeMessage())) {
       return;
     }
 
     String welcomeMessage =
-        MessageHelper.replaceUsernameInMessage(extendedConsultingTypeResponseDTO.getWelcomeMessage().getWelcomeMessageText(),
+        MessageHelper.replaceUsernameInMessage(welcomeMessageDTO.getWelcomeMessageText(),
             new UsernameTranscoder().decodeUsername(user.getUsername()));
 
     try {
@@ -101,7 +105,7 @@ public class MessageServiceProvider {
   private void postMessageAsSystemUser(String message, String rcGroupId)
       throws RocketChatUserNotInitializedException {
 
-    RocketChatCredentials systemUser = rocketChatCredentialsProvider.getSystemUser();
+    var systemUser = rocketChatCredentialsProvider.getSystemUser();
     this.postMessage(message, systemUser, rcGroupId);
   }
 
@@ -109,20 +113,20 @@ public class MessageServiceProvider {
    * Posts an alias only message and/or save session data message as system user in the provided
    * Rocket.Chat group ID.
    *
-   * @param rcGroupId              Rocket.Chat group ID
+   * @param rcGroupId                         Rocket.Chat group ID
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
-   * @param exceptionInformation   {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation              {@link CreateEnquiryExceptionInformation}
    */
   public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {
 
-    if (extendedConsultingTypeResponseDTO.getSendFurtherStepsMessage()) {
+    if (isTrue(extendedConsultingTypeResponseDTO.getSendFurtherStepsMessage())) {
       this.postAliasOnlyMessage(rcGroupId, MessageType.FURTHER_STEPS, exceptionInformation);
     }
 
-    if (extendedConsultingTypeResponseDTO.getSendSaveSessionDataMessage()) {
+    if (isTrue(extendedConsultingTypeResponseDTO.getSendSaveSessionDataMessage())) {
       this.postAliasOnlyMessage(rcGroupId, MessageType.UPDATE_SESSION_DATA, exceptionInformation);
     }
   }
@@ -143,7 +147,7 @@ public class MessageServiceProvider {
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
-    HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
+    var headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 }

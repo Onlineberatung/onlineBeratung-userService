@@ -48,7 +48,8 @@ public class MonitoringServiceTest {
   private final String ERROR = "error";
   private final Long SESSION_ID = 123L;
   private final Session SESSION =
-      new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null, IN_PROGRESS, null, null,
+      new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
+          IN_PROGRESS, null, null,
           null, null, false, false, null, null);
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 

@@ -67,7 +67,7 @@ public class UserHelper {
             return "!()$%&";
           }
         }, 1));
-    PasswordGenerator generator = new PasswordGenerator();
+    var generator = new PasswordGenerator();
     // Generated password is 8 characters long, which complies with policy
     return generator.generatePassword(10, rules);
   }
@@ -108,12 +108,13 @@ public class UserHelper {
   /**
    * Generates the URL for a chat with the given {@link Chat} id and consultingType ID.
    *
-   * @param chatId the {@link Chat}'s id
+   * @param chatId           the {@link Chat}'s id
    * @param consultingTypeId the chat's consultingType ID
    * @return URL (String)
    */
   public String generateChatUrl(Long chatId, int consultingTypeId) {
-    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getSlug() + "/"
+    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
+        .getSlug() + "/"
         + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(Long.toString(chatId),
         BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }

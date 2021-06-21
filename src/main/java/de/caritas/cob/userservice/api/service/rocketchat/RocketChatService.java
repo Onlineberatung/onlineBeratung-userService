@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.SetRoomReadOnlyBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserDeleteBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
@@ -108,6 +109,8 @@ public class RocketChatService {
   private String rocketChatApiUserDelete;
   @Value("${rocket.chat.api.rooms.clean.history}")
   private String rocketChatApiCleanRoomHistory;
+  @Value("${rocket.chat.api.group.set.readOnly}")
+  private String rocketChatApiGroupSetReadOnly;
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull RocketChatCredentialsProvider rcCredentialHelper;
@@ -125,8 +128,8 @@ public class RocketChatService {
 
     try {
 
-      HttpHeaders headers = getStandardHttpHeaders(rocketChatCredentials);
-      GroupCreateBodyDTO groupCreateBodyDto = new GroupCreateBodyDTO(name, false);
+      var headers = getStandardHttpHeaders(rocketChatCredentials);
+      var groupCreateBodyDto = new GroupCreateBodyDTO(name, false);
       HttpEntity<GroupCreateBodyDTO> request =
           new HttpEntity<>(groupCreateBodyDto, headers);
       response =
@@ -211,8 +214,8 @@ public class RocketChatService {
 
     try {
 
-      HttpHeaders headers = getStandardHttpHeaders(rocketChatCredentials);
-      GroupDeleteBodyDTO groupDeleteBodyDto = new GroupDeleteBodyDTO(groupId);
+      var headers = getStandardHttpHeaders(rocketChatCredentials);
+      var groupDeleteBodyDto = new GroupDeleteBodyDTO(groupId);
       HttpEntity<GroupDeleteBodyDTO> request =
           new HttpEntity<>(groupDeleteBodyDto, headers);
       response = restTemplate.postForObject(rocketChatApiGroupDeleteUrl, request,
@@ -237,7 +240,7 @@ public class RocketChatService {
 
   private HttpHeaders getStandardHttpHeaders(RocketChatCredentials rocketChatCredentials) {
 
-    HttpHeaders httpHeaders = new HttpHeaders();
+    var httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     httpHeaders.add(rocketChatHeaderAuthToken, rocketChatCredentials.getRocketChatToken());
     httpHeaders.add(rocketChatHeaderUserId, rocketChatCredentials.getRocketChatUserId());
@@ -264,9 +267,9 @@ public class RocketChatService {
       response = this.rcCredentialHelper.loginUser(username, password);
     }
 
-    RocketChatCredentials rocketChatCredentials =
-        RocketChatCredentials.builder().rocketChatUserId(response.getBody().getData().getUserId())
-            .rocketChatToken(response.getBody().getData().getAuthToken()).build();
+    var rocketChatCredentials = RocketChatCredentials.builder()
+        .rocketChatUserId(response.getBody().getData().getUserId())
+        .rocketChatToken(response.getBody().getData().getAuthToken()).build();
 
     logoutUser(rocketChatCredentials);
 
@@ -285,10 +288,10 @@ public class RocketChatService {
       throws RocketChatLoginException {
 
     try {
-      HttpHeaders headers = new HttpHeaders();
+      var headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
 
-      LdapLoginDTO ldapLoginDTO = new LdapLoginDTO();
+      var ldapLoginDTO = new LdapLoginDTO();
       ldapLoginDTO.setLdap(true);
       ldapLoginDTO.setUsername(username);
       ldapLoginDTO.setLdapPass(password);
@@ -311,7 +314,7 @@ public class RocketChatService {
   public boolean logoutUser(RocketChatCredentials rocketChatCredentials) {
 
     try {
-      HttpHeaders headers = getStandardHttpHeaders(rocketChatCredentials);
+      var headers = getStandardHttpHeaders(rocketChatCredentials);
 
       HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -340,8 +343,8 @@ public class RocketChatService {
     GroupResponseDTO response;
     try {
       RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
-      HttpHeaders header = getStandardHttpHeaders(technicalUser);
-      GroupAddUserBodyDTO body = new GroupAddUserBodyDTO(rcUserId, rcGroupId);
+      var header = getStandardHttpHeaders(technicalUser);
+      var body = new GroupAddUserBodyDTO(rcUserId, rcGroupId);
       HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(body, header);
 
       response =
@@ -353,7 +356,7 @@ public class RocketChatService {
     }
 
     if (nonNull(response) && !response.isSuccess()) {
-      String error = "Could not add user %s to Rocket.Chat group with id %s";
+      var error = "Could not add user %s to Rocket.Chat group with id %s";
       throw new RocketChatAddUserToGroupException(String.format(error, rcUserId, rcGroupId));
     }
   }
@@ -381,8 +384,8 @@ public class RocketChatService {
     GroupResponseDTO response;
     try {
       RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
-      HttpHeaders header = getStandardHttpHeaders(technicalUser);
-      GroupRemoveUserBodyDTO body = new GroupRemoveUserBodyDTO(rcUserId, rcGroupId);
+      var header = getStandardHttpHeaders(technicalUser);
+      var body = new GroupRemoveUserBodyDTO(rcUserId, rcGroupId);
       HttpEntity<GroupRemoveUserBodyDTO> request =
           new HttpEntity<>(body, header);
 
@@ -395,7 +398,7 @@ public class RocketChatService {
     }
 
     if (response != null && !response.isSuccess()) {
-      String error = "Could not remove user %s from Rocket.Chat group with id %s";
+      var error = "Could not remove user %s from Rocket.Chat group with id %s";
       throw new RocketChatRemoveUserFromGroupException(String.format(error, rcUserId, rcGroupId));
     }
   }
@@ -431,7 +434,7 @@ public class RocketChatService {
 
     Iterator<GroupMemberDTO> groupMemberListIterator = groupMemberList.iterator();
     while (groupMemberListIterator.hasNext()) {
-      GroupMemberDTO groupMemberDTO = groupMemberListIterator.next();
+      var groupMemberDTO = groupMemberListIterator.next();
       if (groupMemberDTO.get_id()
           .equals(rcCredentialHelper.getTechnicalUser().getRocketChatUserId())
           || groupMemberDTO.get_id()
@@ -478,7 +481,7 @@ public class RocketChatService {
     ResponseEntity<GroupMemberResponseDTO> response;
     try {
       RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
-      HttpHeaders header = getStandardHttpHeaders(systemUser);
+      var header = getStandardHttpHeaders(systemUser);
       HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
 
       response = restTemplate.exchange(buildGetGroupMembersPath(rcGroupId),
@@ -492,7 +495,7 @@ public class RocketChatService {
     if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
       return Arrays.asList(response.getBody().getMembers());
     } else {
-      String error = "Could not get Rocket.Chat group members for room id %s";
+      var error = "Could not get Rocket.Chat group members for room id %s";
       throw new RocketChatGetGroupMembersException(String.format(error, rcGroupId));
     }
   }
@@ -536,8 +539,8 @@ public class RocketChatService {
     StandardResponseDTO response;
     try {
       RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
-      HttpHeaders header = getStandardHttpHeaders(technicalUser);
-      GroupCleanHistoryDTO body = new GroupCleanHistoryDTO(rcGroupId,
+      var header = getStandardHttpHeaders(technicalUser);
+      var body = new GroupCleanHistoryDTO(rcGroupId,
           oldest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
           latest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
           (isNotEmpty(users)) ? users : new String[]{});
@@ -569,7 +572,7 @@ public class RocketChatService {
     ResponseEntity<SubscriptionsGetDTO> response = null;
 
     try {
-      HttpHeaders header = getStandardHttpHeaders(rocketChatCredentials);
+      var header = getStandardHttpHeaders(rocketChatCredentials);
       HttpEntity<Void> request = new HttpEntity<>(header);
 
       response = restTemplate.exchange(rocketChatApiSubscriptionsGet, HttpMethod.GET, request,
@@ -587,7 +590,7 @@ public class RocketChatService {
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
-      String error = "Could not get Rocket.Chat subscriptions for user id %s";
+      var error = "Could not get Rocket.Chat subscriptions for user id %s";
       throw new InternalServerErrorException(error, LogService::logRocketChatError);
     }
   }
@@ -603,7 +606,7 @@ public class RocketChatService {
     ResponseEntity<RoomsGetDTO> response;
 
     try {
-      HttpHeaders header = getStandardHttpHeaders(rocketChatCredentials);
+      var header = getStandardHttpHeaders(rocketChatCredentials);
       HttpEntity<Void> request = new HttpEntity<>(header);
 
       response =
@@ -618,7 +621,7 @@ public class RocketChatService {
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
-      String error = String.format(CHAT_ROOM_ERROR_MESSAGE,
+      var error = String.format(CHAT_ROOM_ERROR_MESSAGE,
           rocketChatCredentials.getRocketChatUserId());
       throw new InternalServerErrorException(error, LogService::logRocketChatError);
     }
@@ -635,10 +638,10 @@ public class RocketChatService {
     ResponseEntity<UserInfoResponseDTO> response;
     try {
       RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
-      HttpHeaders header = getStandardHttpHeaders(technicalUser);
+      var header = getStandardHttpHeaders(technicalUser);
       HttpEntity<Void> request = new HttpEntity<>(header);
 
-      String fields = "{\"userRooms\":1}";
+      var fields = "{\"userRooms\":1}";
       String url = rocketChatApiUserInfo + "?userId=" + rcUserId + "&fields={fields}";
       response = restTemplate
           .exchange(url, HttpMethod.GET, request, UserInfoResponseDTO.class, fields);
@@ -663,8 +666,9 @@ public class RocketChatService {
   }
 
   private boolean isResponseNotSuccess(ResponseEntity<UserInfoResponseDTO> response) {
-    return isNull(response.getBody()) || response.getStatusCode() != HttpStatus.OK
-        || !response.getBody().isSuccess();
+    UserInfoResponseDTO responseBody = response.getBody();
+    return isNull(responseBody) || response.getStatusCode() != HttpStatus.OK || !responseBody
+        .isSuccess();
   }
 
   /**
@@ -705,7 +709,7 @@ public class RocketChatService {
   private HttpEntity<UserUpdateRequestDTO> buildRocketChatUserUpdateRequestEntity(
       UserUpdateRequestDTO requestDTO) throws RocketChatUserNotInitializedException {
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
-    HttpHeaders header = getStandardHttpHeaders(technicalUser);
+    var header = getStandardHttpHeaders(technicalUser);
     return new HttpEntity<>(requestDTO, header);
   }
 
@@ -723,12 +727,11 @@ public class RocketChatService {
     }
   }
 
-  private void deleteUserData(String rcUserId)
-      throws RocketChatUserNotInitializedException {
+  private void deleteUserData(String rcUserId) throws RocketChatUserNotInitializedException {
 
-    UserDeleteBodyDTO requestDTO = new UserDeleteBodyDTO(rcUserId);
+    var requestDTO = new UserDeleteBodyDTO(rcUserId);
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
-    HttpHeaders header = getStandardHttpHeaders(technicalUser);
+    var header = getStandardHttpHeaders(technicalUser);
     HttpEntity<UserDeleteBodyDTO> request = new HttpEntity<>(requestDTO, header);
 
     ResponseEntity<UserInfoResponseDTO> response = restTemplate
@@ -744,4 +747,25 @@ public class RocketChatService {
     }
   }
 
+  /**
+   * Sets the Rocket.Chat room with the given id read only.
+   *
+   * @param rcRoomId the Rocket.Chat room id
+   * @throws RocketChatUserNotInitializedException if technical user isn´t initialized
+   */
+  public void setRoomReadOnly(String rcRoomId) throws RocketChatUserNotInitializedException {
+    var requestDTO = new SetRoomReadOnlyBodyDTO(rcRoomId, true);
+    RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
+    var header = getStandardHttpHeaders(systemUser);
+    HttpEntity<SetRoomReadOnlyBodyDTO> request = new HttpEntity<>(requestDTO, header);
+
+    ResponseEntity<GroupResponseDTO> response = restTemplate
+        .exchange(rocketChatApiGroupSetReadOnly, HttpMethod.POST, request, GroupResponseDTO.class);
+
+    GroupResponseDTO responseBody = response.getBody();
+    if (nonNull(responseBody) && !responseBody.isSuccess()) {
+      LogService.logRocketChatError(String.format("Mark group with id %s as read only failed "
+          + "with reason %s", rcRoomId, responseBody.getError()));
+    }
+  }
 }

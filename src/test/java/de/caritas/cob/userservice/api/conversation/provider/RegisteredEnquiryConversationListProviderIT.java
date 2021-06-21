@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -60,9 +59,6 @@ public class RegisteredEnquiryConversationListProviderIT {
   @MockBean
   private ValidatedUserAccountProvider userAccountProvider;
 
-  @MockBean
-  private UsernameTranscoder usernameTranscoder;
-
   @Before
   public void setup() {
     Consultant consultant = mock(Consultant.class);
@@ -99,14 +95,14 @@ public class RegisteredEnquiryConversationListProviderIT {
     saveRegisteredSessions(10);
     PageableListRequest request = PageableListRequest.builder()
         .count(3)
-        .offset(3)
+        .offset(9)
         .build();
 
     ConsultantSessionListResponseDTO responseDTO = this.registeredEnquiryConversationListProvider
         .buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(1));
-    assertThat(responseDTO.getOffset(), is(3));
+    assertThat(responseDTO.getOffset(), is(9));
     assertThat(responseDTO.getTotal(), is(10));
     assertThat(responseDTO.getSessions(), hasSize(1));
   }

@@ -9,7 +9,6 @@ import static org.junit.Assert.fail;
 
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
@@ -40,9 +39,6 @@ public class ConsultantUpdateServiceIT {
 
   @MockBean
   private RocketChatService rocketChatService;
-
-  @MockBean
-  private UsernameTranscoder usernameTranscoder;
 
   @Test
   public void updateConsultant_Should_returnUpdatedPersistedConsultant_When_inputDataIsValid() {

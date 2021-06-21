@@ -1,18 +1,16 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.THIRD;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
+import de.caritas.cob.userservice.api.actions.ActionCommand;
+import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import de.caritas.cob.userservice.api.service.LogService;
-import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,43 +20,31 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class DeleteDatabaseAskerAgencyAction implements DeleteAskerAction {
+public class DeleteDatabaseAskerAgencyAction implements ActionCommand<AskerDeletionWorkflowDTO> {
 
   private final @NonNull UserAgencyRepository userAgencyRepository;
 
   /**
    * Deletes all {@link User} regarding {@link UserAgency} relations.
    *
-   * @param userAccount the {@link User}
-   * @return a possible generated {@link DeletionWorkflowError}
+   * @param actionTarget the {@link AskerDeletionWorkflowDTO} containing the user
    */
   @Override
-  public List<DeletionWorkflowError> execute(User userAccount) {
+  public void execute(AskerDeletionWorkflowDTO actionTarget) {
     try {
-      List<UserAgency> userAgencies = this.userAgencyRepository.findByUser(userAccount);
+      var userAgencies = this.userAgencyRepository.findByUser(actionTarget.getUser());
       this.userAgencyRepository.deleteAll(userAgencies);
     } catch (Exception e) {
       LogService.logDeleteWorkflowError(e);
-      return singletonList(
+      actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)
               .deletionTargetType(DATABASE)
-              .identifier(userAccount.getUserId())
+              .identifier(actionTarget.getUser().getUserId())
               .reason("Could not delete user agency relations")
               .timestamp(nowInUtc())
               .build()
       );
     }
-    return emptyList();
-  }
-
-  /**
-   * Provides the execution order.
-   *
-   * @return the value for the execution order
-   */
-  @Override
-  public int getOrder() {
-    return THIRD.getOrder();
   }
 }

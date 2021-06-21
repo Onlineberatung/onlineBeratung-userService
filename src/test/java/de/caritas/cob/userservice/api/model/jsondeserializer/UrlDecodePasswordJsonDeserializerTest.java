@@ -3,6 +3,11 @@ package de.caritas.cob.userservice.api.model.jsondeserializer;
 import static de.caritas.cob.userservice.testHelper.TestConstants.PASSWORD;
 import static de.caritas.cob.userservice.testHelper.TestConstants.PASSWORD_URL_ENCODED;
 import static org.junit.Assert.assertEquals;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,10 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UrlDecodePasswordJsonDeserializerTest {

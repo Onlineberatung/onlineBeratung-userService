@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,10 +23,10 @@ public class SessionDataInitializing {
   public static SessionDataInitializing convertSessionDataInitializingDTOtoSessionDataInitializing(
       SessionDataInitializingDTO sessionDataInitializingDTO) {
 
-    return new SessionDataInitializing(sessionDataInitializingDTO.getAddictiveDrugs(),
-        sessionDataInitializingDTO.getAge(), sessionDataInitializingDTO.getGender(),
-        sessionDataInitializingDTO.getRelation(),
-        sessionDataInitializingDTO.getState());
+    return new SessionDataInitializing(isTrue(sessionDataInitializingDTO.getAddictiveDrugs()),
+        isTrue(sessionDataInitializingDTO.getAge()), isTrue(sessionDataInitializingDTO.getGender()),
+        isTrue(sessionDataInitializingDTO.getRelation()),
+        isTrue(sessionDataInitializingDTO.getState()));
   }
 
 }

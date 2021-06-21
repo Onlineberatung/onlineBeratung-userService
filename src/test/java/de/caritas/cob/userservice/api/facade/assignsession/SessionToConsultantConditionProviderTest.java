@@ -7,13 +7,13 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYP
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -254,8 +254,7 @@ public class SessionToConsultantConditionProviderTest {
     session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
     AgencyDTO u25AgencyDTO = new AgencyDTO().consultingType(CONSULTING_TYPE_ID_U25);
     ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
-    whenAgencyServiceReturnsDTOForId(u25ConsultantAgency, 1L, u25AgencyDTO);
-
+    when(agencyService.getAgency(any())).thenReturn(u25AgencyDTO);
     consultant.setConsultantAgencies(asSet(u25ConsultantAgency));
 
     boolean result = sessionToConsultantConditionProvider

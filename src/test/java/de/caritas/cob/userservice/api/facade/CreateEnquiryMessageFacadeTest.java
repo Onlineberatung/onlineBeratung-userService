@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
@@ -44,7 +45,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -86,6 +87,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Welc
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -226,6 +228,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     this.session = new Session();
     session.setId(SESSION_ID);
+    session.setRegistrationType(REGISTERED);
     Consultant consultant = new Consultant();
     consultant.setId(USER_ID);
     consultant.setRocketChatId(RC_USER_ID);
@@ -300,6 +303,18 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.empty());
+    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void createEnquiryMessage_Should_ThrowBadRequestException_When_SessionIsAnonymous() {
+    Session anonymousSession = new EasyRandom().nextObject(Session.class);
+    anonymousSession.setRegistrationType(ANONYMOUS);
+    anonymousSession.getUser().setUserId(USER.getUserId());
+    when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
+    when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+    when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(anonymousSession));
+
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
   }
 
@@ -740,7 +755,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
     when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        Authority.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
+        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     doThrow(RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION).when(rocketChatService)
         .removeSystemMessages(Mockito.eq(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId()),
             Mockito.any(), Mockito.any());
@@ -776,7 +791,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
     when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        Authority.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
+        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     Mockito.doThrow(RC_ADD_USER_TO_GROUP_EXCEPTION).when(rocketChatService)
         .addUserToGroup(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getRocketChatId(),
             FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());

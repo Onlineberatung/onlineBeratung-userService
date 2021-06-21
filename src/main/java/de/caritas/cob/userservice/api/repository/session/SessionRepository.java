@@ -24,13 +24,14 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * Find a {@link Session} with unassigned consultant by agency ids and status ordery by creation
    * date ascending.
    *
-   * @param agencyIds     ids of agencies to search for
-   * @param sessionStatus {@link SessionStatus} to search for
+   * @param agencyIds        ids of agencies to search for
+   * @param sessionStatus    {@link SessionStatus} to search for
+   * @param registrationType {@link RegistrationType} to search for
    * @return A list of {@link Session}s for the specific agency ids and status orderd by creation
    * date ascending
    */
-  List<Session> findByAgencyIdInAndConsultantIsNullAndStatusOrderByEnquiryMessageDateAsc(
-      List<Long> agencyIds, SessionStatus sessionStatus);
+  List<Session> findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+      List<Long> agencyIds, SessionStatus sessionStatus, RegistrationType registrationType);
 
   /**
    * Find a {@link Session} by agency ids with status and teamberatung where consultant is not the
@@ -161,7 +162,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * Find the {@link Session}s by consulting type and pageable.
    *
    * @param consultingTypeId the consulting ID to search for
-   * @param pageable     the pagination object
+   * @param pageable         the pagination object
    * @return the result {@link Page}
    */
   Page<Session> findByConsultingTypeId(int consultingTypeId, Pageable pageable);
@@ -171,11 +172,24 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   /**
    * Find the {@link Session}s by consulting type, registration type and pageable.
    *
-   * @param consultingTypes the {@link ConsultingType}s to search for
+   * @param consultingTypes  the {@link ConsultingType}s to search for
    * @param registrationType the {@link RegistrationType} to seach for
-   * @param pageable       the pagination object
+   * @param pageable         the pagination object
    * @return the result {@link Page}
    */
-  Page<Session> findByConsultingTypeIdInAndRegistrationTypeOrderByEnquiryMessageDateAsc(
-      Set<Integer> consultingTypes, RegistrationType registrationType, Pageable pageable);
+  Page<Session> findByConsultingTypeIdInAndRegistrationTypeAndStatusOrderByCreateDateAsc(
+      Set<Integer> consultingTypes, RegistrationType registrationType,
+      SessionStatus sessionStatus, Pageable pageable);
+
+  /**
+   * Find all sessions by a given {@link SessionStatus}.
+   */
+  List<Session> findByStatus(SessionStatus status);
+
+  /**
+   * Find all sessions by a given {@link SessionStatus} and {@link RegistrationType}.
+   */
+  List<Session> findByStatusInAndRegistrationType(Set<SessionStatus> status,
+      RegistrationType registrationType);
+
 }
