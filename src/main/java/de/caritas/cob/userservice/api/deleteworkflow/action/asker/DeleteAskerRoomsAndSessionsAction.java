@@ -1,27 +1,23 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.SECOND;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.ROCKET_CHAT;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.actions.ActionCommand;
+import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
-import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -31,7 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class DeleteAskerRoomsAndSessionsAction implements DeleteAskerAction {
+public class DeleteAskerRoomsAndSessionsAction implements ActionCommand<AskerDeletionWorkflowDTO> {
 
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull SessionDataRepository sessionDataRepository;
@@ -39,22 +35,21 @@ public class DeleteAskerRoomsAndSessionsAction implements DeleteAskerAction {
   private final @NonNull RocketChatService rocketChatService;
 
   /**
-   * Deletes all Rocket.Chat rooms containing all messages and uploads and sessions in database
-   * of a given {@link User}.
+   * Deletes all Rocket.Chat rooms containing all messages and uploads and sessions in database of a
+   * given {@link User}.
    *
-   * @param user the user for session and room deletion
-   * @return a generated {@link List} containing possible {@link DeletionWorkflowError}
+   * @param actionTarget the {@link AskerDeletionWorkflowDTO} with the user for session and room
+   *                     deletion
    */
   @Override
-  public List<DeletionWorkflowError> execute(User user) {
-    return this.sessionRepository.findByUser(user).stream()
-        .map(this::performSessionDeletion)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+  public void execute(AskerDeletionWorkflowDTO actionTarget) {
+    this.sessionRepository.findByUser(actionTarget.getUser())
+        .forEach(
+            session -> performSessionDeletion(session, actionTarget.getDeletionWorkflowErrors()));
   }
 
-  private List<DeletionWorkflowError> performSessionDeletion(Session session) {
-    List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
+
+  private void performSessionDeletion(Session session, List<DeletionWorkflowError> workflowErrors) {
 
     deleteRocketChatGroup(session.getGroupId(), workflowErrors);
     deleteRocketChatGroup(session.getFeedbackGroupId(), workflowErrors);
@@ -62,7 +57,6 @@ public class DeleteAskerRoomsAndSessionsAction implements DeleteAskerAction {
     deleteSessionData(session, workflowErrors);
     deleteSession(session, workflowErrors);
 
-    return workflowErrors;
   }
 
   private void deleteRocketChatGroup(String rcGroupId,
@@ -87,7 +81,7 @@ public class DeleteAskerRoomsAndSessionsAction implements DeleteAskerAction {
 
   private void deleteMonitorings(Session session, List<DeletionWorkflowError> workflowErrors) {
     try {
-      List<Monitoring> monitorings = this.monitoringRepository.findBySessionId(session.getId());
+      var monitorings = this.monitoringRepository.findBySessionId(session.getId());
       this.monitoringRepository.deleteAll(monitorings);
     } catch (Exception e) {
       LogService.logDeleteWorkflowError(e);
@@ -105,7 +99,7 @@ public class DeleteAskerRoomsAndSessionsAction implements DeleteAskerAction {
 
   private void deleteSessionData(Session session, List<DeletionWorkflowError> workflowErrors) {
     try {
-      List<SessionData> sessionData = this.sessionDataRepository.findBySessionId(session.getId());
+      var sessionData = this.sessionDataRepository.findBySessionId(session.getId());
       this.sessionDataRepository.deleteAll(sessionData);
     } catch (Exception e) {
       LogService.logDeleteWorkflowError(e);
@@ -137,15 +131,4 @@ public class DeleteAskerRoomsAndSessionsAction implements DeleteAskerAction {
       );
     }
   }
-
-  /**
-   * Provides the execution order.
-   *
-   * @return the value for the execution order
-   */
-  @Override
-  public int getOrder() {
-    return SECOND.getOrder();
-  }
-
 }

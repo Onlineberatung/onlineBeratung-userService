@@ -14,10 +14,10 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
   @Value("${springfox.docuPath}")
   private String docuPath;
 
-  @Value("${cors.allowed.paths}")
+  @Value("${registration.cors.allowed.paths}")
   private List<String> allowedPaths;
 
-  @Value("${cors.allowed.origins}")
+  @Value("${registration.cors.allowed.origins}")
   private String[] allowedOrigins;
 
   @Override

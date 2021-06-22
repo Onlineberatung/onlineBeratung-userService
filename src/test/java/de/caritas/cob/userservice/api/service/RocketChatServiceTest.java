@@ -11,6 +11,7 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_RO
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_INFO;
@@ -30,6 +31,7 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_DELETE;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_MEMBERS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_REMOVE_USER;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_SET_READ_ONLY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_ROOMS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_SUBSCRIPTIONS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_USERS_INFO_GET;
@@ -50,8 +52,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -204,6 +208,8 @@ public class RocketChatServiceTest {
         RC_URL_CHAT_USER_UPDATE);
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS,
         RC_URL_GROUPS_MEMBERS_GET);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY,
+        RC_URL_GROUPS_SET_READ_ONLY);
 
     setInternalState(LogService.class, "LOGGER", logger);
   }
@@ -528,7 +534,8 @@ public class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, DATETIME_LATEST);
+    assertDoesNotThrow(() -> rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST,
+        DATETIME_LATEST));
   }
 
   /**
@@ -744,7 +751,7 @@ public class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatService.removeAllMessages(GROUP_ID);
+    assertDoesNotThrow(() -> rocketChatService.removeAllMessages(GROUP_ID));
   }
 
   @Test(expected = RocketChatRemoveSystemMessagesException.class)
@@ -814,9 +821,9 @@ public class RocketChatServiceTest {
 
     List<GroupMemberDTO> result = rocketChatService.getStandardMembersOfGroup(GROUP_ID);
 
-    assertTrue(result.size() == 1);
-    assertTrue(result.get(0).get_id() != RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId());
-    assertTrue(result.get(0).get_id() != RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId());
+    assertEquals(result.size(), 1);
+    assertNotSame(result.get(0).get_id(), RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId());
+    assertNotSame(result.get(0).get_id(), RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId());
   }
 
   /**
@@ -975,6 +982,34 @@ public class RocketChatServiceTest {
         .thenThrow(new RocketChatUserNotInitializedException(""));
 
     this.rocketChatService.deleteGroupAsSystemUser("");
+  }
+
+  @Test
+  public void setRoomReadOnly_Should_performRocketChatSetRoomReadOnly() throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
+        eq(GroupResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(new GroupResponseDTO(), HttpStatus.OK));
+
+    this.rocketChatService.setRoomReadOnly("");
+
+    verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
+        eq(HttpMethod.POST), any(), eq(GroupResponseDTO.class));
+  }
+
+  @Test
+  public void setRoomReadOnly_Should_logError_When_responseIsNotSuccess()
+      throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
+    groupResponseDTO.setSuccess(false);
+    when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
+        eq(GroupResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(groupResponseDTO, HttpStatus.OK));
+
+    this.rocketChatService.setRoomReadOnly("");
+
+    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
   }
 
 }

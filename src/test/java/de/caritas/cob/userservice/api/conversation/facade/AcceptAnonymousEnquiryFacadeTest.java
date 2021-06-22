@@ -46,7 +46,7 @@ public class AcceptAnonymousEnquiryFacadeTest {
     this.acceptAnonymousEnquiryFacade.acceptAnonymousEnquiry(session.getId());
 
     verify(this.validatedUserAccountProvider, times(1)).retrieveValidatedConsultant();
-    verify(this.assignEnquiryFacade, times(1)).assignEnquiry(eq(session), any());
+    verify(this.assignEnquiryFacade, times(1)).assignAnonymousEnquiry(eq(session), any());
     verify(this.liveEventNotificationService, times(1))
         .sendAcceptAnonymousEnquiryEventToUser(session.getUser().getUserId());
   }

@@ -1,8 +1,7 @@
 package de.caritas.cob.userservice.api.repository.session;
 
-import java.util.Arrays;
-import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -39,10 +38,6 @@ public enum ConsultingType {
   private final int value;
   private final String urlName;
 
-  public static Optional<ConsultingType> valueOf(int value) {
-    return Arrays.stream(values()).filter(legNo -> legNo.value == value).findFirst();
-  }
-
   public static ConsultingType fromConsultingType(String value) {
     return Arrays.stream(values())
         .filter(legNo -> legNo.value == Integer.parseInt(value))
@@ -50,7 +45,4 @@ public enum ConsultingType {
         .orElseThrow(IllegalArgumentException::new);
   }
 
-  public boolean isGroupChat() {
-    return this.value == KREUZBUND.value || this.value == SUPPORTGROUPVECHTA.value;
-  }
 }

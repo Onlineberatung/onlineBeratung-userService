@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.service.agency;
 
+import static java.util.Collections.emptyList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
@@ -7,16 +10,14 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
-import de.caritas.cob.userservice.config.AgencyCachingConfig;
+import de.caritas.cob.userservice.config.CacheManagerConfig;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,7 +37,7 @@ public class AgencyService {
    * @param agencyId {@link AgencyDTO#getId()}
    * @return AgencyDTO {@link AgencyDTO}
    */
-  @Cacheable(value = AgencyCachingConfig.AGENCY_CACHE, key = "#agencyId")
+  @Cacheable(value = CacheManagerConfig.AGENCY_CACHE, key = "#agencyId")
   public AgencyDTO getAgency(Long agencyId) {
     return getAgenciesFromAgencyService(Collections.singletonList(agencyId))
         .iterator()
@@ -63,7 +64,7 @@ public class AgencyService {
    * @param agencyIds List of {@link AgencyDTO#getId()}
    * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
-  @Cacheable(value = AgencyCachingConfig.AGENCY_CACHE, key = "#agencyIds")
+  @Cacheable(value = CacheManagerConfig.AGENCY_CACHE, key = "#agencyIds")
   public List<AgencyDTO> getAgencies(List<Long> agencyIds) {
     return getAgenciesFromAgencyService(agencyIds);
   }
@@ -75,10 +76,13 @@ public class AgencyService {
    * @return List<AgencyDTO> List of {@link AgencyDTO}
    */
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
-    addDefaultHeaders(this.agencyControllerApi.getApiClient());
-    return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
-        .map(this::fromOriginalAgency)
-        .collect(Collectors.toList());
+    if (isNotEmpty(agencyIds)) {
+      addDefaultHeaders(this.agencyControllerApi.getApiClient());
+      return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
+          .map(this::fromOriginalAgency)
+          .collect(Collectors.toList());
+    }
+    return emptyList();
   }
 
   /**
@@ -96,12 +100,12 @@ public class AgencyService {
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
-    HttpHeaders headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
+    var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 
   private AgencyDTO fromOriginalAgency(AgencyResponseDTO agencyResponseDTO) {
-    ObjectMapper objectMapper = new ObjectMapper();
+    var objectMapper = new ObjectMapper();
     try {
       return objectMapper
           .readValue(objectMapper.writeValueAsString(agencyResponseDTO), AgencyDTO.class);

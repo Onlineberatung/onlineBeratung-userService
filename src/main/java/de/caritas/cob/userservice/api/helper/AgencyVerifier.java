@@ -6,7 +6,6 @@ import static java.util.Objects.nonNull;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +21,16 @@ public class AgencyVerifier {
   private final @NonNull AgencyService agencyService;
 
   /**
-   * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided consulting ID
-   * and returns the corresponding agency as {@link AgencyDTO}.
+   * Checks if the given agency ID {@link AgencyDTO#getId()} is assigned to the provided consulting
+   * ID and returns the corresponding agency as {@link AgencyDTO}.
    *
-   * @param agencyId       {@link AgencyDTO#getId()}
+   * @param agencyId         {@link AgencyDTO#getId()}
    * @param consultingTypeId the consulting Id
    * @return {@link AgencyDTO} or null if agency is not found
    */
   public AgencyDTO getVerifiedAgency(Long agencyId, int consultingTypeId) {
 
-    AgencyDTO agencyDTO = agencyService.getAgencyWithoutCaching(agencyId);
+    var agencyDTO = agencyService.getAgencyWithoutCaching(agencyId);
     if (nonNull(agencyDTO) && !agencyDTO.getConsultingType().equals(consultingTypeId)) {
       throw new BadRequestException(String.format(
           "The provided agency with id %s is not assigned to the provided consulting type %s",
@@ -43,7 +42,8 @@ public class AgencyVerifier {
 
   public void checkIfConsultingTypeMatchesToAgency(UserDTO userDTO) {
 
-    if (isNull(getVerifiedAgency(userDTO.getAgencyId(), Integer.parseInt(userDTO.getConsultingType())))) {
+    if (isNull(
+        getVerifiedAgency(userDTO.getAgencyId(), Integer.parseInt(userDTO.getConsultingType())))) {
       throw new BadRequestException(String.format("Agency with id %s does not match to consulting"
           + " type %s", userDTO.getAgencyId(), userDTO.getConsultingType()));
     }

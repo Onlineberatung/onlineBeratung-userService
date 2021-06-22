@@ -4,7 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -55,7 +55,6 @@ import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
@@ -97,12 +96,6 @@ import org.springframework.web.client.RestClientException;
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
 public class UserController implements UsersApi {
-
-  @Value("${2fa.user.enabled}")
-  private Boolean isUser2faEnabled;
-
-  @Value("${2fa.consultant.enabled}")
-  private Boolean isConsultant2faEnabled;
 
   static final int MIN_OFFSET = 0;
   static final int MIN_COUNT = 1;
@@ -198,7 +191,7 @@ public class UserController implements UsersApi {
     }
 
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
-    this.assignEnquiryFacade.assignEnquiry(session.get(), consultant);
+    this.assignEnquiryFacade.assignRegisteredEnquiry(session.get(), consultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -274,7 +267,7 @@ public class UserController implements UsersApi {
   public ResponseEntity<UserDataResponseDTO> getUserData() {
 
     var model2faDTO = new TwoFactorAuthDTO();
-    model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? getUser2faEnabled() : getConsultant2faEnabled());
+    model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? keycloak2faService.getUser2faEnabled() : keycloak2faService.getConsultant2faEnabled());
 
     OtpInfoDTO otpInfoDTO = keycloak2faService.getOtpCredential(authenticatedUser.getUsername());
     model2faDTO.isActive(otpInfoDTO.getOtpSetup());
@@ -564,7 +557,7 @@ public class UserController implements UsersApi {
     // Check if the calling consultant has the correct right to assign this session to a new
     // consultant
     if (session.get().getStatus().equals(SessionStatus.IN_PROGRESS) && !authenticatedUser
-        .getGrantedAuthorities().contains(Authority.ASSIGN_CONSULTANT_TO_SESSION)) {
+        .getGrantedAuthorities().contains(AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)) {
       LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign a session to a another consultant.",
           authenticatedUser.getUserId()));
@@ -574,7 +567,7 @@ public class UserController implements UsersApi {
 
     // Check if the calling consultant has the correct right to assign the enquiry to a consultant
     if (session.get().getStatus().equals(SessionStatus.NEW) && !authenticatedUser
-        .getGrantedAuthorities().contains(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY)) {
+        .getGrantedAuthorities().contains(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY)) {
       LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign the enquiry to a consultant.",
           authenticatedUser.getUserId()));
@@ -646,7 +639,7 @@ public class UserController implements UsersApi {
         .orElseThrow(() -> new BadRequestException(
             String.format("Chat with id %s not found for starting chat.", chatId)));
 
-    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
     startChatFacade.startChat(chat, callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -694,7 +687,7 @@ public class UserController implements UsersApi {
         .orElseThrow(() -> new BadRequestException(
             String.format("Chat with id %s not found while trying to stop the chat.", chatId)));
 
-    Consultant callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
     stopChatFacade.stopChat(chat, callingConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -813,9 +806,8 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> activate2faForUser(OtpSetupDTO otpSetupDTO) {
-
-    if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !getUser2faEnabled())
-        || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !getConsultant2faEnabled())) {
+    if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !keycloak2faService.getUser2faEnabled())
+        || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !keycloak2faService.getConsultant2faEnabled())) {
       return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
 
@@ -863,13 +855,5 @@ public class UserController implements UsersApi {
   private ResponseEntity<Void> generateResponseKeycloakExtension(boolean successful) {
     return successful ? new ResponseEntity<>(HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-
-  public Boolean getUser2faEnabled() {
-    return isUser2faEnabled;
-  }
-
-  public Boolean getConsultant2faEnabled() {
-    return isConsultant2faEnabled;
   }
 }

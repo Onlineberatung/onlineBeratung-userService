@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.model.jsonserializer.DecodeUsernameJsonSer
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @ApiModel(value = "UserData")
 public class UserDataResponseDTO {
 
@@ -47,5 +49,6 @@ public class UserDataResponseDTO {
   @ApiModelProperty(position = 11)
   private Set<String> grantedAuthorities;
   private LinkedHashMap<String, Object> consultingTypes;
+  private boolean hasAnonymousConversations;
   private TwoFactorAuthDTO twoFactorAuth;
 }

@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUserDTO;
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
@@ -17,8 +18,8 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -94,9 +95,10 @@ public class CreateSessionFacade {
     }
   }
 
-  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
-    var agencyDTO =
-        agencyVerifier.getVerifiedAgency(userDTO.getAgencyId(), extendedConsultingTypeResponseDTO.getId());
+  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    var agencyDTO = agencyVerifier.getVerifiedAgency(userDTO.getAgencyId(),
+        requireNonNull(extendedConsultingTypeResponseDTO.getId()));
 
     if (isNull(agencyDTO)) {
       throw new BadRequestException(

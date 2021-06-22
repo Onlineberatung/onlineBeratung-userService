@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.THIRD;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -15,10 +15,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
 import de.caritas.cob.userservice.api.service.LogService;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,14 +48,11 @@ public class DeleteDatabaseAskerAgencyActionTest {
   }
 
   @Test
-  public void getOrder_Should_returnSecond() {
-    assertThat(this.deleteDatabaseAskerAgencyAction.getOrder(), is(THIRD.getOrder()));
-  }
-
-  @Test
   public void execute_Should_returnEmptyListAndPerformDeletion_When_userHasNoAgencyAssigned() {
-    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseAskerAgencyAction
-        .execute(new User());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), emptyList());
+
+    this.deleteDatabaseAskerAgencyAction.execute(workflowDTO);
+    List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(0));
     verifyNoMoreInteractions(this.logger);
@@ -62,11 +61,12 @@ public class DeleteDatabaseAskerAgencyActionTest {
   @Test
   public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deletionFails() {
     doThrow(new RuntimeException()).when(this.userAgencyRepository).deleteAll(any());
-
     User user = new User();
     user.setUserId("userId");
-    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseAskerAgencyAction
-        .execute(user);
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(user, new ArrayList<>());
+
+    this.deleteDatabaseAskerAgencyAction.execute(workflowDTO);
+    List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(1));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));

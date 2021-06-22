@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ConsultantDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -32,9 +30,6 @@ public class ConsultantAdminFilterServiceIT {
 
   @Autowired
   private ConsultantAdminFilterService consultantAdminFilterService;
-
-  @MockBean
-  private UsernameTranscoder usernameTranscoder;
 
   @Test
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven() {

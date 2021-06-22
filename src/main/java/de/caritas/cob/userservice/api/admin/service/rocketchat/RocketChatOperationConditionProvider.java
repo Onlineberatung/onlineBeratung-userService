@@ -1,8 +1,10 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -41,14 +43,17 @@ class RocketChatOperationConditionProvider {
         && this.session.isTeamSession() && canAddToTeamConsultingSession();
   }
 
-  private boolean canAddToTeamConsultingSession() {
-    return !consultingTypeManager.getConsultingTypeSettings(this.session.getConsultingTypeId())
-        .getExcludeNonMainConsultantsFromTeamSessions() || isMainConsultant();
+  private Boolean canAddToTeamConsultingSession() {
+    var consultingTypeSettings = consultingTypeManager
+        .getConsultingTypeSettings(this.session.getConsultingTypeId());
+    return (nonNull(consultingTypeSettings) && isFalse(
+        consultingTypeSettings.getExcludeNonMainConsultantsFromTeamSessions()))
+        || isMainConsultant();
   }
 
   private boolean isMainConsultant() {
     return keycloakAdminClientService
-        .userHasAuthority(this.consultant.getId(), Authority.VIEW_ALL_FEEDBACK_SESSIONS)
+        .userHasAuthority(this.consultant.getId(), AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
         || keycloakAdminClientService
         .userHasRole(this.consultant.getId(), UserRole.U25_MAIN_CONSULTANT.name());
   }

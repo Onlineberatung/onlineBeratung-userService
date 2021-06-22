@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,14 +46,18 @@ public class AskerDataProvider {
    * @return the user data
    */
   public UserDataResponseDTO retrieveData(User user) {
-    String email = observeUserEmailAddress(user);
-    var responseDTO = new UserDataResponseDTO(user.getUserId(), user.getUsername(),
-        null, null, email, false, user.isLanguageFormal(), null, false, null,
-        authenticatedUser.getRoles(), authenticatedUser.getGrantedAuthorities(), null, null);
-
-    responseDTO.setConsultingTypes(getConsultingTypes(user));
-
-    return responseDTO;
+    return UserDataResponseDTO.builder()
+        .userId(user.getUserId())
+        .userName(user.getUsername())
+        .email(observeUserEmailAddress(user))
+        .isAbsent(false)
+        .isFormalLanguage(user.isLanguageFormal())
+        .isInTeamAgency(false)
+        .userRoles(authenticatedUser.getRoles())
+        .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
+        .consultingTypes(getConsultingTypes(user))
+        .hasAnonymousConversations(false)
+        .build();
   }
 
   private String observeUserEmailAddress(User user) {
@@ -72,7 +77,6 @@ public class AskerDataProvider {
 
     return consultingTypes;
   }
-
 
   private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,
       Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
@@ -113,13 +117,16 @@ public class AskerDataProvider {
   }
 
   private List<Long> collectAgencyIdsFromSessions(Set<Session> sessionList) {
-    return CollectionUtils.isNotEmpty(sessionList) ? sessionList.stream().map(Session::getAgencyId)
+    return CollectionUtils.isNotEmpty(sessionList) ? sessionList.stream()
+        .map(Session::getAgencyId)
+        .filter(Objects::nonNull)
         .collect(Collectors.toList()) : Collections.emptyList();
   }
 
   private List<Long> collectAgencyIdsFromUser(User user) {
     return CollectionUtils.isNotEmpty(user.getUserAgencies()) ? user.getUserAgencies().stream()
         .map(UserAgency::getAgencyId)
+        .filter(Objects::nonNull)
         .collect(Collectors.toList()) : Collections.emptyList();
   }
 

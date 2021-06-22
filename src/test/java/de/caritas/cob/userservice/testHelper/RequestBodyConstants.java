@@ -25,24 +25,28 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_L
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_SHORT;
 
 public class RequestBodyConstants {
+
   public static final String VALID_USER_REQUEST_BODY = "{\"username\": \"" + USERNAME + "\","
       + "\"postcode\": \"" + POSTCODE + "\", \"agencyId\": " + AGENCY_ID + ", \"password\": \""
       + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
       + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
       + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
       + TERMS_ACCEPTED + "\", \"consultingType\": \"" + CONSULTING_TYPE_ID_SUCHT + "\"}";
-  public static final String INVALID_USER_REQUEST_BODY_WITOUT_POSTCODE = "{\"username\": \"" + USERNAME + "\","
-      + "\"agencyId\": " + AGENCY_ID + ", \"password\": \""
-      + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
-      + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
-      + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
-      + TERMS_ACCEPTED + "\", \"consultingType\": \"" + CONSULTING_TYPE_ID_SUCHT + "\"}";
-  public static final String INVALID_USER_REQUEST_BODY_WITH_INVALID_POSTCODE = "{\"username\": \"" + USERNAME + "\","
-      + "\"postcode\": \"" + INVALID_POSTCODE + "\", \"agencyId\": " + AGENCY_ID + ", \"password\": \""
-      + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
-      + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
-      + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
-      + TERMS_ACCEPTED + "\", \"consultingType\": \"" + CONSULTING_TYPE_ID_SUCHT + "\"}";
+  public static final String INVALID_USER_REQUEST_BODY_WITOUT_POSTCODE =
+      "{\"username\": \"" + USERNAME + "\","
+          + "\"agencyId\": " + AGENCY_ID + ", \"password\": \""
+          + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
+          + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
+          + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
+          + TERMS_ACCEPTED + "\", \"consultingType\": \"" + CONSULTING_TYPE_ID_SUCHT + "\"}";
+  public static final String INVALID_USER_REQUEST_BODY_WITH_INVALID_POSTCODE =
+      "{\"username\": \"" + USERNAME + "\","
+          + "\"postcode\": \"" + INVALID_POSTCODE + "\", \"agencyId\": " + AGENCY_ID
+          + ", \"password\": \""
+          + PASSWORD + "\"," + "\"email\": \"" + EMAIL + "\", \"addictiveDrugs\": \""
+          + ADDICTIVE_DRUGS_VALUE + "\"," + "\"relation\": \"" + RELATION_VALUE + "\", \"age\": \""
+          + AGE_VALUE + "\", \"gender\": \"" + GENDER_VALUE + "\"," + "\"termsAccepted\": \""
+          + TERMS_ACCEPTED + "\", \"consultingType\": \"" + CONSULTING_TYPE_ID_SUCHT + "\"}";
   public static final String VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD =
       "{\"username\": \"" + USERNAME + "\"," + "\"postcode\": \"" + POSTCODE + "\", \"agencyId\": "
           + AGENCY_ID + ", \"password\": \"" + ENCODED_PASSWORD + "\"," + "\"email\": \"" + EMAIL
@@ -88,9 +92,10 @@ public class RequestBodyConstants {
       + "  \"duration\": " + CHAT_DURATION + ", \"repetitive\": " + CHAT_REPETITIVE + " }";
   public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE = "{\"agencyId\": \""
       + AGENCY_ID + "\", \"consultingType\": " + CONSULTING_TYPE_ID_U25 + "}";
-  public static final String INVALID_NEW_REGISTRATION_BODY_WITH_INVALID_POSTCODE = "{\"postcode\": \""
-      + INVALID_POSTCODE + "\",\"agencyId\": \""
-      + AGENCY_ID + "\", \"consultingType\": " + CONSULTING_TYPE_ID_U25 + "}";
+  public static final String INVALID_NEW_REGISTRATION_BODY_WITH_INVALID_POSTCODE =
+      "{\"postcode\": \""
+          + INVALID_POSTCODE + "\",\"agencyId\": \""
+          + AGENCY_ID + "\", \"consultingType\": " + CONSULTING_TYPE_ID_U25 + "}";
   public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_AGENCY_ID = "{\"postcode\": \""
       + POSTCODE + "\", \"consultingType\": " + CONSULTING_TYPE_ID_U25 + "}";
   public static final String INVALID_NEW_REGISTRATION_BODY_WITHOUT_CONSULTING_TYPE =

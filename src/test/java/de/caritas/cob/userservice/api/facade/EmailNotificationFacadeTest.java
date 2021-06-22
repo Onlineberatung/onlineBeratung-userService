@@ -169,20 +169,27 @@ public class EmailNotificationFacadeTest {
       new NotificationsDTO().teamSessions(
           new TeamSessionsDTO().newMessage(new NewMessageDTO().allTeamConsultants(false)));
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ALL_TEAM_CONSULTANTS =
-      new ExtendedConsultingTypeResponseDTO().id(0).slug("suchtberatung").excludeNonMainConsultantsFromTeamSessions(true)
-      .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
-      .welcomeMessage(new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
-      .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
-      .sessionDataInitializing(null).monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
-      .initializeFeedbackChat(false).notifications(NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS)
-      .languageFormal(false).roles(null).registration(null);
-  private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
-      new ExtendedConsultingTypeResponseDTO().id(0).slug("suchtberatung").excludeNonMainConsultantsFromTeamSessions(true)
+      new ExtendedConsultingTypeResponseDTO().id(0).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(true)
           .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
-          .welcomeMessage(new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
-          .sessionDataInitializing(null).monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
-          .initializeFeedbackChat(false).notifications(NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false).notifications(NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS)
+          .languageFormal(false).roles(null).registration(null);
+  private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NOTIFICATION_TO_ASSIGNED_CONSULTANT_ONLY =
+      new ExtendedConsultingTypeResponseDTO().id(0).slug("suchtberatung")
+          .excludeNonMainConsultantsFromTeamSessions(true)
+          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
+          .welcomeMessage(
+              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
+          .sessionDataInitializing(null)
+          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+          .initializeFeedbackChat(false)
+          .notifications(NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY)
           .languageFormal(false).roles(null).registration(null);
 
   @InjectMocks

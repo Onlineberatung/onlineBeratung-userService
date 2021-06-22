@@ -1,54 +1,43 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.controller.UserAdminController;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestClientException;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = UserServiceApplication.class)
-@TestPropertySource(properties = "spring.profiles.active=testing")
-@AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultingTypeManagerTest {
+@ExtendWith(MockitoExtension.class)
+class ConsultingTypeManagerTest {
 
-  @Autowired
+  @InjectMocks
   private ConsultingTypeManager consultingTypeManager;
 
-  @MockBean
+  @Mock
   private ConsultingTypeService consultingTypeService;
 
   @Test
-  public void getConsultantTypeSettings_Should_Throw_MissingConsultingTypeException_When_RestClientException() {
+  void getConsultantTypeSettings_Should_Throw_MissingConsultingTypeException_When_RestClientException() {
     when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
         .thenThrow(new RestClientException(""));
-    int random = anyInt();
+
     assertThrows(MissingConsultingTypeException.class,
-        () -> consultingTypeManager.getConsultingTypeSettings(random));
+        () -> consultingTypeManager.getConsultingTypeSettings(1));
   }
 
   @Test
-  public void getConsultantTypeSettings_Should_Return_ExtendedConsultingTypeResponseDTO()
+  void getConsultantTypeSettings_Should_Return_ExtendedConsultingTypeResponseDTO()
       throws MissingConsultingTypeException {
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
@@ -56,11 +45,10 @@ public class ConsultingTypeManagerTest {
 
     assertEquals(extendedConsultingTypeResponseDTO,
         consultingTypeManager.getConsultingTypeSettings(anyInt()));
-
   }
 
   @Test
-  public void isConsultantBoundedToAgency_Should_Return_True()
+  void isConsultantBoundedToAgency_Should_Return_True()
       throws MissingConsultingTypeException {
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(true);
@@ -71,7 +59,7 @@ public class ConsultingTypeManagerTest {
   }
 
   @Test
-  public void isConsultantBoundedToAgency_Should_Return_False()
+  void isConsultantBoundedToAgency_Should_Return_False()
       throws MissingConsultingTypeException {
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(false);
@@ -82,7 +70,7 @@ public class ConsultingTypeManagerTest {
   }
 
   @Test
-  public void getAllConsultingTypeIds_Should_Return_The_Same_List()
+  void getAllConsultingTypeIds_Should_Return_The_Same_List()
       throws MissingConsultingTypeException {
     when(consultingTypeService.getAllConsultingTypeIds()).thenReturn(List.of(1, 2, 3, 4));
 

@@ -32,6 +32,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_USER_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -103,6 +104,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID_HEA
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.otpInfoDTO;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -124,8 +126,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.Authorities;
-import de.caritas.cob.userservice.api.authorization.Authorities.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority;
+import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -159,7 +161,7 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
-import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
@@ -244,10 +246,10 @@ public class UserControllerIT {
       new HashSet<>(Arrays.asList(DUMMY_ROLE_A, UserRole.CONSULTANT.getValue(), DUMMY_ROLE_B));
   private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\""
       + UserRole.USER.getValue() + "\",\"" + DUMMY_ROLE_B + "\"],\"grantedAuthorities\": [\""
-      + Authority.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
+      + AuthorityValue.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
   private final String VALID_CONSULTANT_ROLE_RESULT =
       "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\"" + UserRole.CONSULTANT.getValue() + "\",\""
-          + DUMMY_ROLE_B + "\"], \"grantedAuthorities\": [ \"" + Authority.CONSULTANT_DEFAULT
+          + DUMMY_ROLE_B + "\"], \"grantedAuthorities\": [ \"" + AuthorityValue.CONSULTANT_DEFAULT
           + "\" ], \"inTeamAgency\":true}";
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
@@ -282,11 +284,13 @@ public class UserControllerIT {
       put("state", "4");
     }
   };
-  private final UserDataResponseDTO CONSULTANT_USER_DATA_RESPONSE_DTO =
-      new UserDataResponseDTO(USER_ID, "Beraterbiene", "Max", "Mustermann", "mail@muster.mann",
-          true, false, "Bin weg", true, AGENCY_LIST, null, null, null, null);
-  private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = new UserDataResponseDTO(USER_ID,
-      NAME, null, null, null, false, false, null, false, null, null, null, SESSION_DATA, null);
+  private final UserDataResponseDTO CONSULTANT_USER_DATA_RESPONSE_DTO = UserDataResponseDTO
+      .builder().userId(USER_ID).userName("Beraterbiene").firstName("Max").lastName("Mustermann")
+      .email("mail@muster.mann").isAbsent(true).isFormalLanguage(false).absenceMessage("Bin weg")
+      .isInTeamAgency(true).agencies(AGENCY_LIST).hasAnonymousConversations(false).build();
+  private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = UserDataResponseDTO.builder()
+      .userId(USER_ID).userName(NAME).isAbsent(false).isFormalLanguage(false).isInTeamAgency(false)
+      .consultingTypes(SESSION_DATA).hasAnonymousConversations(false).build();
   private final String VALID_NEW_MESSAGE_REQUEST_BODY = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
   private final String PATH_PUT_SESSIONS_MONITORING = "/users/sessions/monitoring/" + SESSION_ID;
   private final String PATH_GET_MONITORING = "/users/sessions/" + SESSION_ID + "/monitoring";
@@ -331,11 +335,12 @@ public class UserControllerIT {
   private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
-      .asList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY, Authority.ASSIGN_CONSULTANT_TO_SESSION));
+      .asList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
-      new HashSet<>(Collections.singletonList(Authority.ASSIGN_CONSULTANT_TO_SESSION));
+      new HashSet<>(Collections.singletonList(AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_ENQUIRY =
-      new HashSet<>(Collections.singletonList(Authority.ASSIGN_CONSULTANT_TO_ENQUIRY));
+      new HashSet<>(Collections.singletonList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY));
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
   private final String VALID_MONITORING_RESPONSE_JSON =
       "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
@@ -440,8 +445,18 @@ public class UserControllerIT {
 
   static Stream<Arguments> activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole_Arguments() {
     return Stream.of(
+        Arguments.of(false, true, UserRole.USER.getValue()),
+        Arguments.of(false, false, UserRole.USER.getValue()),
+        Arguments.of(true, false, UserRole.CONSULTANT.getValue()),
+        Arguments.of(false, false, UserRole.CONSULTANT.getValue()));
+  }
+
+  static Stream<Arguments> activate2faForUser_Should_ReturnOk_When_Request_Is_From_2faEnabledRole_Arguments() {
+    return Stream.of(
+        Arguments.of(true, false, UserRole.USER.getValue()),
         Arguments.of(true, true, UserRole.USER.getValue()),
-        Arguments.of(true, true, UserRole.USER.getValue()));
+        Arguments.of(true, true, UserRole.CONSULTANT.getValue()),
+        Arguments.of(false, true, UserRole.CONSULTANT.getValue()));
   }
 
   /**
@@ -801,7 +816,7 @@ public class UserControllerIT {
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
     doThrow(new ConflictException("")).when(assignEnquiryFacade)
-        .assignEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
+        .assignRegisteredEnquiry(TEAM_SESSION, TEAM_CONSULTANT);
 
     mvc.perform(
         put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
@@ -1174,17 +1189,10 @@ public class UserControllerIT {
     UserDataResponseDTO responseDto = USER_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_USER);
     responseDto.setGrantedAuthorities(
-        new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
-
-    var validOtpInfoDTO = new OtpInfoDTO();
-    validOtpInfoDTO.setOtpSecret("Secret");
-    validOtpInfoDTO.setOtpSecretQrCode("QRCode");
-    validOtpInfoDTO.setOtpSetup(false);
-
-    when(keycloak2faService.getOtpCredential(null)).thenReturn(validOtpInfoDTO);
-
+        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
+    when(keycloak2faService.getOtpCredential(null)).thenReturn(otpInfoDTO);
 
     mvc.perform(get(PATH_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
@@ -1200,7 +1208,7 @@ public class UserControllerIT {
     when(authenticatedUser.getRoles())
         .thenReturn(ROLES_WITH_USER);
     when(authenticatedUser.getGrantedAuthorities())
-        .thenReturn(new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.USER)));
+        .thenReturn(new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(authenticatedUser.getUserId())
         .thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser())
@@ -1233,16 +1241,12 @@ public class UserControllerIT {
     UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
     responseDto.setGrantedAuthorities(
-        new HashSet<>(Authorities.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
-
-    var validOtpInfoDTO = new OtpInfoDTO();
-    validOtpInfoDTO.setOtpSecret("Secret");
-    validOtpInfoDTO.setOtpSecretQrCode("QRCode");
-    validOtpInfoDTO.setOtpSetup(false);
+        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
 
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
-    when(keycloak2faService.getOtpCredential(null)).thenReturn(validOtpInfoDTO);
+
+    when(keycloak2faService.getOtpCredential(null)).thenReturn(otpInfoDTO);
 
     mvc.perform(get(PATH_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2345,16 +2349,41 @@ public class UserControllerIT {
 
   @ParameterizedTest
   @MethodSource("activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole_Arguments")
-  public void activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole(
-      Boolean isUser2faEnabled,
+  public void activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole(Boolean isUser2faEnabled,
       Boolean isConsultant2faEnabled, String requestRole)
       throws Exception {
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError());
+    when(keycloak2faService.getUser2faEnabled()).thenReturn(isUser2faEnabled);
+    when(keycloak2faService.getConsultant2faEnabled()).thenReturn(isConsultant2faEnabled);
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
 
-    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new OtpSetupDTO().initialCode("code").secret("secret")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotAcceptable());
+
+    verifyNoMoreInteractions(this.keycloak2faService);
+  }
+
+  @ParameterizedTest
+  @MethodSource("activate2faForUser_Should_ReturnOk_When_Request_Is_From_2faEnabledRole_Arguments")
+  public void activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faEnabledRole(Boolean isUser2faEnabled,
+      Boolean isConsultant2faEnabled, String requestRole)
+      throws Exception {
+    when(keycloak2faService.getUser2faEnabled()).thenReturn(isUser2faEnabled);
+    when(keycloak2faService.getConsultant2faEnabled()).thenReturn(isConsultant2faEnabled);
+    when(authenticatedUser.getRoles().contains(anyString())).thenReturn(false);
+    when(authenticatedUser.getRoles().contains(requestRole)).thenReturn(true);
+
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            new OtpSetupDTO().initialCode("code").secret("secret")))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloak2faService.setUpOtpCredential(anyString(), any()),times(1));
   }
 
 }

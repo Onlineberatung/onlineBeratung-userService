@@ -33,7 +33,8 @@ public class AliasJsonDeserializerTest {
 
   private static final UserHelper USER_HELPER = new UserHelper();
   private static final String DECODED_USERNAME = "username";
-  private static final String ENCODE_USERNAME = new UsernameTranscoder().encodeUsername(DECODED_USERNAME);
+  private static final String ENCODE_USERNAME = new UsernameTranscoder()
+      .encodeUsername(DECODED_USERNAME);
   private static final String MESSAGE_FORWARD_ALIAS_JSON_WITH_ENCODED_USERNAME =
       "{\"alias\":\"%7B%22timestamp%22%3A%221568128850636%22%2C%22username%22%3A%22"
           + ENCODE_USERNAME

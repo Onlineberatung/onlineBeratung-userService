@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.api.repository.session.ConsultingType.SUCHT;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
@@ -39,7 +38,8 @@ public class AuthenticatedUserHelperTest {
   private final Consultant TEAM_CONSULTANT = new Consultant(TEAM_CONSULTANT_ID, ROCKETCHAT_ID,
       USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null,
       null);
-  private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT, CONSULTING_TYPE_ID_SUCHT,
+  private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT,
+      CONSULTING_TYPE_ID_SUCHT,
       REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(), null, null, null,
       false, false, null, null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =
@@ -47,12 +47,14 @@ public class AuthenticatedUserHelperTest {
           AGENCY_ID, SessionStatus.NEW, nowInUtc(), null, null, null,
           false, false, null, null);
   private final Session TEAM_SESSION =
-      new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
+      new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
+          POSTCODE, AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
           null, null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(TEAM_SESSION_ID, null, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
+          AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
+          IS_MONITORING,
           null, null);
 
   @InjectMocks

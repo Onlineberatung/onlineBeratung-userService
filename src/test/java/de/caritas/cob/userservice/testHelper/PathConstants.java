@@ -6,6 +6,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_CHAT_I
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 
 public class PathConstants {
+
   public static final String PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER = "/users/sessions/askers";
   public static final String PATH_CREATE_ENQUIRY_MESSAGE =
       "/users/sessions/" + SESSION_ID + "/enquiry/new";
@@ -92,5 +93,4 @@ public class PathConstants {
       + "/1x2y3/data";
   public static final String PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH = "/users/twoFactorAuth";
   public static final String PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH = "/users/twoFactorAuth";
-  public static final String PATH_GET_TWO_FACTOR_AUTH_INFO = "/users/twoFactorAuth/Username";
 }

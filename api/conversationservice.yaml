@@ -3,8 +3,6 @@ info:
   title: will be replaced
   description: This information will be replaced by the SpringFox config information
   version: 0.0.1
-servers:
-  - url: /
 paths:
   /conversations/consultants/enquiries/registered:
     get:
@@ -28,6 +26,11 @@ paths:
           schema:
             minimum: 1
             type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK - successfull operation
@@ -35,6 +38,14 @@ paths:
             application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/consultants/enquiries/anonymous:
@@ -59,6 +70,11 @@ paths:
           schema:
             minimum: 1
             type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK - successfull operation
@@ -66,6 +82,14 @@ paths:
             application/json:
               schema:
                 $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
   /conversations/askers/anonymous/new:
@@ -125,6 +149,34 @@ paths:
         409:
           description: CONFLICT - enquiry already accepted by another consultant or
             consulting type of session is not assigned to consultant
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /conversations/anonymous/{sessionId}/finish:
+    put:
+      tags:
+        - conversation-controller
+      summary: 'Set the status of the given session to done [Authorization: Role:
+      anonymous, consultant]'
+      operationId: finishAnonymousConversation
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - session is already marked as done
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

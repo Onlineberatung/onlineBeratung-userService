@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.model.validation;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITHOUT_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITHOUT_MANDATORY_STATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITH_INVALID_STATE;
@@ -39,7 +39,8 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_U25)))
-        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_INVALID_STATE, null);
     assertFalse(result);
@@ -50,7 +51,8 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_U25)))
-        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITH_STATE, null);
     assertTrue(result);
@@ -61,7 +63,9 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_SUCHT)))
-        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE.getRegistration().getMandatoryFields()));
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE.getRegistration()
+                .getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
     assertTrue(result);
@@ -72,7 +76,8 @@ public class ValidStateValidatorTest {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(String.valueOf(
         CONSULTING_TYPE_ID_SUCHT)))
-        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
+        .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+            CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE.getRegistration().getMandatoryFields()));
 
     boolean result = validStateValidator.isValid(USER_DTO_WITHOUT_MANDATORY_STATE, null);
     assertFalse(result);

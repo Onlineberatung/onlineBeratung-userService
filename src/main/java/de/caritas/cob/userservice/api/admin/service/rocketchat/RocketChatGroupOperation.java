@@ -1,19 +1,16 @@
 package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
-import static de.caritas.cob.userservice.api.authorization.Authorities.Authority.VIEW_ALL_FEEDBACK_SESSIONS;
-import static de.caritas.cob.userservice.api.authorization.Authorities.Authority.VIEW_ALL_PEER_SESSIONS;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -51,30 +48,29 @@ abstract class RocketChatGroupOperation {
     return session.isTeamSession() ? "team-session" : "standard-session";
   }
 
-  void removeConsultantFromSession(Session session, Consultant consultant) {
-    if (isUserInRocketChatGroup(session.getGroupId(), consultant)
-        && consultantHasNoAuthorityTo(VIEW_ALL_PEER_SESSIONS, consultant)) {
-      this.rocketChatFacade
-          .removeUserFromGroup(consultant.getRocketChatId(), session.getGroupId());
-    }
-
-    if (isUserInRocketChatGroup(session.getFeedbackGroupId(), consultant)
-        && consultantHasNoAuthorityTo(VIEW_ALL_FEEDBACK_SESSIONS, consultant)) {
-      this.rocketChatFacade
-          .removeUserFromGroup(consultant.getRocketChatId(), session.getFeedbackGroupId());
-    }
+  void removeConsultantsFromSessionGroups(Session session,
+      List<Consultant> consultants) {
+    removeConsultantsFromRocketChatGroup(session.getGroupId(), consultants);
+    removeConsultantsFromRocketChatGroup(session.getFeedbackGroupId(), consultants);
   }
 
-  private boolean isUserInRocketChatGroup(String rcGroupId, Consultant consultant) {
-    if (isBlank(rcGroupId)) {
-      return false;
-    }
-    return this.rocketChatFacade.retrieveRocketChatMembers(rcGroupId).stream()
-        .anyMatch(groupMember -> groupMember.get_id().equals(consultant.getRocketChatId()));
+  void removeConsultantsFromSessionGroup(String rcGroupId, List<Consultant> consultants) {
+    removeConsultantsFromRocketChatGroup(rcGroupId, consultants);
   }
 
-  private boolean consultantHasNoAuthorityTo(String authorityValue, Consultant consultant) {
-    return !keycloakAdminClientService.userHasAuthority(consultant.getId(), authorityValue);
+  private void removeConsultantsFromRocketChatGroup(String rcGroupId,
+      List<Consultant> consultants) {
+    List<String> groupMemberList = obtainRocketChatGroupMemberIds(rcGroupId);
+
+    consultants.stream()
+        .map(Consultant::getRocketChatId)
+        .filter(groupMemberList::contains)
+        .forEach(rcUserId -> rocketChatFacade.removeUserFromGroup(rcUserId, rcGroupId));
   }
 
+  private List<String> obtainRocketChatGroupMemberIds(String groupId) {
+    return this.rocketChatFacade.retrieveRocketChatMembers(groupId).stream()
+        .map(GroupMemberDTO::get_id)
+        .collect(Collectors.toList());
+  }
 }

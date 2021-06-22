@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import java.util.List;
@@ -17,24 +16,25 @@ public class PageProviderFactory {
   private final List<SessionPageProvider> pageProviderRegistry;
   private final SessionPageProvider allSessionsPageProvider;
 
-  private PageProviderFactory(SessionRepository sessionRepository, SessionFilter sessionFilter, ConsultingTypeManager consultingTypeManager) {
+  private PageProviderFactory(SessionRepository sessionRepository, SessionFilter sessionFilter) {
     this.pageProviderRegistry = asList(
         new AgencySessionPageProvider(sessionRepository, sessionFilter),
         new AskerSessionPageProvider(sessionRepository, sessionFilter),
         new ConsultantSessionPageProvider(sessionRepository, sessionFilter),
-        new ConsultingTypeSessionPageProvider(sessionRepository, sessionFilter, consultingTypeManager)
+        new ConsultingTypeSessionPageProvider(sessionRepository, sessionFilter)
     );
     this.allSessionsPageProvider = new AllSessionPageProvider(sessionRepository);
   }
 
   public static PageProviderFactory getInstance(SessionRepository sessionRepository,
-      SessionFilter sessionFilter, ConsultingTypeManager consultingTypeManager) {
-    return new PageProviderFactory(requireNonNull(sessionRepository), requireNonNull(sessionFilter), consultingTypeManager);
+      SessionFilter sessionFilter) {
+    return new PageProviderFactory(requireNonNull(sessionRepository),
+        requireNonNull(sessionFilter));
   }
 
   /**
-   * Retrieves the first supported {@link SessionPageProvider} by given {@link SessionFilter}. Returns
-   * the {@link AllSessionPageProvider} if no filter is set.
+   * Retrieves the first supported {@link SessionPageProvider} by given {@link SessionFilter}.
+   * Returns the {@link AllSessionPageProvider} if no filter is set.
    *
    * @return the dedicated {@link SessionPageProvider}
    */

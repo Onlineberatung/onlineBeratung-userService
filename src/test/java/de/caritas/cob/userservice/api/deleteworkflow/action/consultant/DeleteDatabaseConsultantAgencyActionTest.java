@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.deleteworkflow.action.consultant;
 
-import static de.caritas.cob.userservice.api.deleteworkflow.action.ActionOrder.SECOND;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType.CONSULTANT;
 import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTargetType.DATABASE;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -15,10 +15,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.deleteworkflow.model.ConsultantDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.LogService;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,33 +48,33 @@ public class DeleteDatabaseConsultantAgencyActionTest {
   }
 
   @Test
-  public void getOrder_Should_returnSecond() {
-    assertThat(this.deleteDatabaseConsultantAgencyAction.getOrder(), is(SECOND.getOrder()));
-  }
-
-  @Test
   public void execute_Should_returnEmptyListAndPerformDeletion_When_consultantAgencyCanBeDeleted() {
-    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseConsultantAgencyAction
-        .execute(new Consultant());
+    ConsultantDeletionWorkflowDTO workflowDTO = new ConsultantDeletionWorkflowDTO(new Consultant(),
+        emptyList());
 
-    assertThat(workflowErrors, hasSize(0));
+    this.deleteDatabaseConsultantAgencyAction.execute(workflowDTO);
+
+    assertThat(workflowDTO.getDeletionWorkflowErrors(), hasSize(0));
     verifyNoMoreInteractions(this.logger);
   }
 
   @Test
   public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deletionFails() {
-    doThrow(new RuntimeException()).when(this.consultantAgencyRepository).deleteAll(any());
-
     Consultant consultant = new Consultant();
     consultant.setId("consultantId");
-    List<DeletionWorkflowError> workflowErrors = this.deleteDatabaseConsultantAgencyAction
-        .execute(consultant);
+    ConsultantDeletionWorkflowDTO workflowDTO = new ConsultantDeletionWorkflowDTO(consultant,
+        new ArrayList<>());
+    doThrow(new RuntimeException()).when(this.consultantAgencyRepository).deleteAll(any());
+
+    this.deleteDatabaseConsultantAgencyAction.execute(workflowDTO);
+    List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(1));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(CONSULTANT));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
     assertThat(workflowErrors.get(0).getIdentifier(), is("consultantId"));
-    assertThat(workflowErrors.get(0).getReason(), is("Could not delete consultant agency relations"));
+    assertThat(workflowErrors.get(0).getReason(),
+        is("Could not delete consultant agency relations"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(this.logger, times(1)).error(anyString(), anyString());
   }

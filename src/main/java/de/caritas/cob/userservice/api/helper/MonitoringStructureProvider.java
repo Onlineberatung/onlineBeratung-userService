@@ -5,7 +5,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.InitializeMonitoringException;
@@ -17,6 +16,7 @@ import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
 import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
@@ -66,7 +67,7 @@ public class MonitoringStructureProvider {
 
   @SuppressWarnings("unchecked")
   private List<Monitoring> fromRootLevelEntry(Entry<String, Object> entry, Long sessionId) {
-    MonitoringType monitoringType = getMonitoringType(entry.getKey());
+    var monitoringType = getMonitoringType(entry.getKey());
     if (entry.getValue() instanceof Map) {
       return fromSecondLevel((Map<String, Object>) entry.getValue(), sessionId, monitoringType);
     }
@@ -90,7 +91,7 @@ public class MonitoringStructureProvider {
     if (entry.getValue() instanceof Boolean) {
       return new Monitoring(sessionId, monitoringType, entry.getKey(), (Boolean) entry.getValue());
     } else {
-      Monitoring monitoring = new Monitoring(sessionId, monitoringType, entry.getKey(), null,
+      var monitoring = new Monitoring(sessionId, monitoringType, entry.getKey(), null,
           new ArrayList<>());
       buildMonitoringOptions((Map<String, Object>) entry.getValue(), sessionId, monitoringType,
           monitoring);
@@ -101,22 +102,22 @@ public class MonitoringStructureProvider {
   private void buildMonitoringOptions(Map<String, Object> thirdLevel, Long sessionId,
       MonitoringType monitoringType, Monitoring parentMonitoring) {
     thirdLevel.forEach((key, value) -> {
-      MonitoringOption monitoringOption = new MonitoringOption(sessionId, monitoringType,
+      var monitoringOption = new MonitoringOption(sessionId, monitoringType,
           parentMonitoring.getKey(), key, (Boolean) value, parentMonitoring);
       parentMonitoring.getMonitoringOptionList().add(monitoringOption);
     });
   }
 
   /**
-   * Creates the initial monitoring data of a session for the given consultingType ID. The
-   * structure (JSON) is being imported from the JSON file provided in the {@link
+   * Creates the initial monitoring data of a session for the given consultingType ID. The structure
+   * (JSON) is being imported from the JSON file provided in the {@link
    * ExtendedConsultingTypeResponseDTO}.
    *
    * @param consultingTypeId the consultingType ID to load the initial monitoring
    * @return the generated {@link MonitoringDTO}
    */
   public MonitoringDTO getMonitoringInitialList(int consultingTypeId) {
-    InputStream inputStream = getMonitoringJSONStream(consultingTypeId);
+    var inputStream = getMonitoringJSONStream(consultingTypeId);
     try {
       return new ObjectMapper().readValue(inputStream, MonitoringDTO.class);
     } catch (IOException ex) {
@@ -125,9 +126,11 @@ public class MonitoringStructureProvider {
   }
 
   private InputStream getMonitoringJSONStream(int consultingTypeId) {
-    String monitoringFilePath = consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
-        .getMonitoring().getMonitoringTemplateFile();
+    String monitoringFilePath = null;
     try {
+      monitoringFilePath = Objects
+          .requireNonNull(consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
+              .getMonitoring()).getMonitoringTemplateFile();
       return TypeReference.class.getResourceAsStream(monitoringFilePath);
     } catch (NullPointerException e) {
       throw new InternalServerErrorException(String
@@ -147,7 +150,7 @@ public class MonitoringStructureProvider {
    * Returns a sorted {@link Map} of monitoring items according to the order that is defined in the
    * monitoring JSON file.
    *
-   * @param unsortedMap  the {@link Map} before sorting
+   * @param unsortedMap      the {@link Map} before sorting
    * @param consultingTypeId the consultingType ID to use for sorting
    * @return the sorted {@link Map}
    */
