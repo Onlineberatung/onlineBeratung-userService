@@ -344,6 +344,7 @@ public class UserControllerIT {
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
   private final String VALID_MONITORING_RESPONSE_JSON =
       "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
+  private final OtpSetupDTO otpSetupDTO = new OtpSetupDTO().initialCode("code").secret("secret");
 
   @Autowired
   private MockMvc mvc;
@@ -2363,7 +2364,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotAcceptable());
 
-    verifyNoMoreInteractions(this.keycloak2faService);
+    verify(this.keycloak2faService, times(0)).setUpOtpCredential(null, otpSetupDTO);
   }
 
   @ParameterizedTest
@@ -2373,8 +2374,8 @@ public class UserControllerIT {
       throws Exception {
     when(keycloak2faService.getUser2faEnabled()).thenReturn(isUser2faEnabled);
     when(keycloak2faService.getConsultant2faEnabled()).thenReturn(isConsultant2faEnabled);
-    when(authenticatedUser.getRoles().contains(anyString())).thenReturn(false);
-    when(authenticatedUser.getRoles().contains(requestRole)).thenReturn(true);
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
+    when(this.keycloak2faService.setUpOtpCredential(null, otpSetupDTO)).thenReturn(true);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2383,7 +2384,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloak2faService.setUpOtpCredential(anyString(), any()),times(1));
+    verify(this.keycloak2faService, times(1)).setUpOtpCredential(null, otpSetupDTO);
   }
 
 }
