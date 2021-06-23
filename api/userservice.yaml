@@ -1124,47 +1124,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/twoFactorAuth/{encodedUsername}:
-    get:
-      tags:
-        - user-controller
-      summary: 'returns if a user has 2fa activated'
-      operationId: getUser2faSetupInformation
-      parameters:
-        - name: encodedUsername
-          in: path
-          description: username in keycloak
-          required: true
-          schema:
-            type: string
-            format: base32
-      responses:
-        200:
-          description: OK - successfull operation
-          content:
-            'application/json':
-              schema:
-                type: object
-                required:
-                  - is2faActivated
-                properties:
-                  is2faActivated:
-                    type: boolean
-                    example: true
-                  username:
-                    type: string
-        400:
-          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        404:
-          description: NOT FOUND - user not found
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
   /liveproxy/send:
     post:
       tags:

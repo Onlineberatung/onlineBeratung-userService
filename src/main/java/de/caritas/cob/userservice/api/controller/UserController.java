@@ -36,12 +36,10 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
-import de.caritas.cob.userservice.api.model.InlineResponse200;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
-import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
@@ -72,14 +70,11 @@ import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.collections.MapUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,7 +82,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClientException;
 
 /**
  * Controller for user api requests
@@ -269,7 +263,7 @@ public class UserController implements UsersApi {
     var model2faDTO = new TwoFactorAuthDTO();
     model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? keycloak2faService.getUser2faEnabled() : keycloak2faService.getConsultant2faEnabled());
 
-    OtpInfoDTO otpInfoDTO = keycloak2faService.getOtpCredential(authenticatedUser.getUsername());
+    var otpInfoDTO = keycloak2faService.getOtpCredential(authenticatedUser.getUsername());
     model2faDTO.isActive(otpInfoDTO.getOtpSetup());
 
     if (Boolean.FALSE.equals(otpInfoDTO.getOtpSetup())) {
@@ -819,37 +813,6 @@ public class UserController implements UsersApi {
   public ResponseEntity<Void> deactivate2faForUser() {
     return generateResponseKeycloakExtension(
         keycloak2faService.deleteOtpCredential(authenticatedUser.getUsername()));
-  }
-
-  @Override
-  public ResponseEntity<InlineResponse200> getUser2faSetupInformation(String encodedUsername) {
-    // First try to fetch data with encoded username
-    ResponseEntity<InlineResponse200> response = fetch2faSetupInformation(encodedUsername);
-
-    if (!Objects.isNull(response)) {
-      return response;
-    }
-    // Second try to fetch data with decoded username
-    response = fetch2faSetupInformation(new String(new Base32().decode(encodedUsername)));
-
-    if (!Objects.isNull(response)) {
-      return response;
-    }
-
-    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-  }
-
-  private ResponseEntity<InlineResponse200> fetch2faSetupInformation(String username) {
-    try {
-      Boolean hasOtpCredential = keycloak2faService.hasUserOtpCredential(username);
-      var inlineResponse = new InlineResponse200();
-      inlineResponse.setUsername(username);
-      inlineResponse.setIs2faActivated(hasOtpCredential);
-      return new ResponseEntity<>(inlineResponse, HttpStatus.OK);
-    } catch (RestClientException ex) {
-      return null;
-    }
   }
 
   private ResponseEntity<Void> generateResponseKeycloakExtension(boolean successful) {
