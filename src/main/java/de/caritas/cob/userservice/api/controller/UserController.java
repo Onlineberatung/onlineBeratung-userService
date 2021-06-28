@@ -802,7 +802,7 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> activate2faForUser(OtpSetupDTO otpSetupDTO) {
-    if(otpSetupDTO.getInitialCode().length() != OTP_INITIAL_CODE_LENGTH || otpSetupDTO.getSecret().length() != OTP_SECRET_LENGTH){
+    if (otpSetupDTO.getInitialCode().length() != OTP_INITIAL_CODE_LENGTH || otpSetupDTO.getSecret().length() != OTP_SECRET_LENGTH) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
