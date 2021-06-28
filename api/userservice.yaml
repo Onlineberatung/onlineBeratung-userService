@@ -1101,6 +1101,8 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        406:
+          description: Not Acceptable - user or consultant two factor authentication is disabled
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

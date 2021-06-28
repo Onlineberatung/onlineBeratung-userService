@@ -93,6 +93,8 @@ public class UserController implements UsersApi {
 
   static final int MIN_OFFSET = 0;
   static final int MIN_COUNT = 1;
+  static final int OTP_INITIAL_CODE_LENGTH = 6;
+  static final int OTP_SECRET_LENGTH = 32;
   static final String OFFSET_INVALID_MESSAGE = "offset must be a positive number";
   static final String COUNT_INVALID_MESSAGE = "count must be a positive number";
 
@@ -800,13 +802,18 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> activate2faForUser(OtpSetupDTO otpSetupDTO) {
+    if(otpSetupDTO.getInitialCode().length() != OTP_INITIAL_CODE_LENGTH || otpSetupDTO.getSecret().length() != OTP_SECRET_LENGTH){
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !keycloak2faService.getUser2faEnabled())
         || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !keycloak2faService.getConsultant2faEnabled())) {
       return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
 
-    return generateResponseKeycloakExtension(
-        keycloak2faService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO));
+    boolean requestSuccessfully = keycloak2faService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
+
+    return new ResponseEntity<>((requestSuccessfully) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
   }
 
   @Override

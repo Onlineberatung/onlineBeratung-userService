@@ -84,6 +84,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.DECODED_PASSWO
 import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.FIRST_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INACTIVE_CHAT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_CODE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_SECRET;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_SESSION;
@@ -104,6 +106,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID_HEA
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.otpInfoDTO;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -209,6 +212,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
+import org.keycloak.common.util.RandomString;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -344,7 +348,6 @@ public class UserControllerIT {
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
   private final String VALID_MONITORING_RESPONSE_JSON =
       "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
-  private final OtpSetupDTO otpSetupDTO = new OtpSetupDTO().initialCode("code").secret("secret");
 
   @Autowired
   private MockMvc mvc;
@@ -2360,11 +2363,11 @@ public class UserControllerIT {
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(
-            new OtpSetupDTO().initialCode("code").secret("secret")))
+            VALID_OTP_SETUP_DTO))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotAcceptable());
 
-    verify(this.keycloak2faService, times(0)).setUpOtpCredential(null, otpSetupDTO);
+    verify(this.keycloak2faService, times(0)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
   }
 
   @ParameterizedTest
@@ -2375,16 +2378,46 @@ public class UserControllerIT {
     when(keycloak2faService.getUser2faEnabled()).thenReturn(isUser2faEnabled);
     when(keycloak2faService.getConsultant2faEnabled()).thenReturn(isConsultant2faEnabled);
     when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
-    when(this.keycloak2faService.setUpOtpCredential(null, otpSetupDTO)).thenReturn(true);
+    when(this.keycloak2faService.setUpOtpCredential(null, VALID_OTP_SETUP_DTO)).thenReturn(true);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(
-            new OtpSetupDTO().initialCode("code").secret("secret")))
+            VALID_OTP_SETUP_DTO))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloak2faService, times(1)).setUpOtpCredential(null, otpSetupDTO);
+    verify(this.keycloak2faService, times(1)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
+  }
+
+  @Test
+  public void activate2faForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(false);
+
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            INVALID_OTP_SETUP_DTO_WRONG_SECRET))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(keycloak2faService);
+  }
+
+  @Test
+  public void activate2faForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
+      throws Exception {
+    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(false);
+
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            INVALID_OTP_SETUP_DTO_WRONG_CODE))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(this.keycloak2faService, times(0)).deleteOtpCredential(any());
   }
 
 }

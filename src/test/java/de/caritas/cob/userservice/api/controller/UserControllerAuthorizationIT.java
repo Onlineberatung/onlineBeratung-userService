@@ -39,6 +39,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KE
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
+import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.otpInfoDTO;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -2087,7 +2088,7 @@ public class UserControllerAuthorizationIT {
         .header(CSRF_HEADER, CSRF_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(
-            new OtpSetupDTO().secret("secret").initialCode("code")))
+            VALID_OTP_SETUP_DTO))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 

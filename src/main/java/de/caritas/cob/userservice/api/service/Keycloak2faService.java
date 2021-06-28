@@ -92,11 +92,10 @@ public class Keycloak2faService {
     var request = new HttpEntity<>(httpHeaders);
 
     try {
-      restTemplate.delete(requestUrl, request);
+      restTemplate.exchange(requestUrl, HttpMethod.DELETE, request, (Class<Object>) null);
       return true;
     } catch (RestClientException ex) {
-      ex.printStackTrace();
-      LogService.logKeycloakError("Could not set up otp credential", ex);
+      LogService.logKeycloakError("Could not delete otp credential ", ex);
     }
     return false;
   }

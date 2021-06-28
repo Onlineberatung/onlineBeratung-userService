@@ -24,6 +24,12 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/OtpInfoDTO'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /otp-config/setup-otp/{username}:
     put:
@@ -46,15 +52,27 @@ paths:
         200:
           description: otp was already created
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/Success'
         201:
           description: otp created
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/Success'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: the code was not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /otp-config/delete-otp/{username}:
     get:
@@ -70,10 +88,19 @@ paths:
       responses:
         200:
           description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
-
     OtpInfoDTO:
       type: object
       properties:
@@ -93,4 +120,18 @@ components:
         secret:
           type: string
         initialCode:
+          type: string
+
+    Success:
+      type: object
+      properties:
+        info:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
           type: string
