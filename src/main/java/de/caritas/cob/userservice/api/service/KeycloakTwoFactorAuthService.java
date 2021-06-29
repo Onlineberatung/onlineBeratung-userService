@@ -1,15 +1,19 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -51,7 +55,7 @@ public class KeycloakTwoFactorAuthService {
     throw new RestClientException("The OTPInfoDTO is not Valid");
   }
 
-  public OtpInfoDTO getOtpCredential(final String userName) {
+  public Optional<OtpInfoDTO> getOtpCredential(final String userName) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders();
     var requestUrl = keycloakOtpSetupInfo + userName;
@@ -61,15 +65,15 @@ public class KeycloakTwoFactorAuthService {
       ResponseEntity<OtpInfoDTO> response = restTemplate
           .exchange(requestUrl, HttpMethod.GET, request,
               OtpInfoDTO.class);
-      return response.getBody();
+      return Optional.of(response.getBody());
     } catch (RestClientException ex) {
       LogService.logKeycloakError("Could not fetch otp credential info", ex);
     }
 
-    return null;
+    return Optional.empty();
   }
 
-  public boolean setUpOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
+  public void setUpOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -78,14 +82,12 @@ public class KeycloakTwoFactorAuthService {
 
     try {
       restTemplate.put(requestUrl, request, OtpInfoDTO.class);
-      return true;
     } catch (RestClientException ex) {
-      LogService.logKeycloakError("Could not set up otp credential", ex);
+      throw new BadRequestException("Could not set up otp credential");
     }
-    return false;
   }
 
-  public boolean deleteOtpCredential(final String userName) {
+  public void deleteOtpCredential(final String userName) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders();
     var requestUrl = keycloakOtpDelete + userName;
@@ -93,11 +95,9 @@ public class KeycloakTwoFactorAuthService {
 
     try {
       restTemplate.exchange(requestUrl, HttpMethod.DELETE, request, (Class<Object>) null);
-      return true;
     } catch (RestClientException ex) {
-      LogService.logKeycloakError("Could not delete otp credential ", ex);
+      throw new InternalServerErrorException("Could not delete otp credential");
     }
-    return false;
   }
 
   private HttpHeaders getAuthorizedFormHttpHeaders() {

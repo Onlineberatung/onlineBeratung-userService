@@ -6,6 +6,7 @@ import static de.caritas.cob.userservice.api.authorization.UserRole.USER;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ public class UserDataFacade {
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
   private final @NonNull ConsultantDataProvider consultantDataProvider;
   private final @NonNull AskerDataProvider askerDataProvider;
+  private final @NonNull TwoFactorAuthValidator twoFactorAuthValidator;
 
   /**
    * Returns the user data of the authenticated user preferred by role consultant.
@@ -36,9 +38,13 @@ public class UserDataFacade {
     Set<String> roles = authenticatedUser.getRoles();
 
     if (userRolesContainAnyRoleOf(roles, CONSULTANT.getValue())) {
-      return consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant());
+      var userDataResponseDTO = consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant());
+      userDataResponseDTO.setTwoFactorAuth(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser));
+      return userDataResponseDTO;
     } else if (userRolesContainAnyRoleOf(roles, USER.getValue(), ANONYMOUS.getValue())) {
-      return askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
+      var userDataResponseDTO = askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
+      userDataResponseDTO.setTwoFactorAuth(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser));
+      return userDataResponseDTO;
     } else {
       throw new InternalServerErrorException(
           String.format("User with id %s has neither Consultant-Role, nor User/Anonymous-Role .",
