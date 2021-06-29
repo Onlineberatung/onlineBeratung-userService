@@ -36,17 +36,19 @@ public class TwoFactorAuthValidator {
   public TwoFactorAuthDTO createAndValidateTwoFactorAuthDTO(AuthenticatedUser authenticatedUser) {
     var twoFactorAuthDTO = new TwoFactorAuthDTO();
 
-    if(authenticatedUser.getRoles().contains(UserRole.USER.getValue()))
+    if (authenticatedUser.getRoles().contains(UserRole.USER.getValue())) {
       twoFactorAuthDTO.isEnabled(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled());
-    else if(authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()))
+    } else if (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue())) {
       twoFactorAuthDTO.isEnabled(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled());
-    else
+    } else {
       twoFactorAuthDTO.isEnabled(false);
+    }
 
-    if(Boolean.TRUE.equals(twoFactorAuthDTO.getIsEnabled())){
-      var optionalOtpInfoDTO = keycloakTwoFactorAuthService.getOtpCredential(authenticatedUser.getUsername());
+    if (Boolean.TRUE.equals(twoFactorAuthDTO.getIsEnabled())) {
+      var optionalOtpInfoDTO = keycloakTwoFactorAuthService
+          .getOtpCredential(authenticatedUser.getUsername());
 
-      if(optionalOtpInfoDTO.isPresent()){
+      if (optionalOtpInfoDTO.isPresent()) {
         twoFactorAuthDTO.isActive(optionalOtpInfoDTO.get().getOtpSetup());
 
         if (Boolean.FALSE.equals(optionalOtpInfoDTO.get().getOtpSetup())) {
