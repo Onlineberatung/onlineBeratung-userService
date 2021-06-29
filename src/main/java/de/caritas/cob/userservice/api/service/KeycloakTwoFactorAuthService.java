@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedFormHttpHeaders;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
@@ -10,7 +12,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,7 @@ public class KeycloakTwoFactorAuthService {
 
   public Optional<OtpInfoDTO> getOtpCredential(final String userName) {
 
-    var httpHeaders = getAuthorizedFormHttpHeaders();
+    var httpHeaders = getAuthorizedFormHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken());
     var requestUrl = keycloakOtpSetupInfo + userName;
     var request = new HttpEntity<>(httpHeaders);
 
@@ -63,7 +64,7 @@ public class KeycloakTwoFactorAuthService {
 
   public void setUpOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
 
-    var httpHeaders = getAuthorizedFormHttpHeaders();
+    var httpHeaders = getAuthorizedFormHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken());
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     var requestUrl = keycloakOtpSetup + userName;
     var request = new HttpEntity<>(otpSetupDTO, httpHeaders);
@@ -77,30 +78,15 @@ public class KeycloakTwoFactorAuthService {
 
   public void deleteOtpCredential(final String userName) {
 
-    var httpHeaders = getAuthorizedFormHttpHeaders();
+    var httpHeaders = getAuthorizedFormHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken());
     var requestUrl = keycloakOtpDelete + userName;
     var request = new HttpEntity<>(httpHeaders);
 
     try {
-      restTemplate.exchange(requestUrl, HttpMethod.DELETE, request, (Class<Object>) null);
+      restTemplate.exchange(requestUrl, HttpMethod.DELETE, request, Void.class);
     } catch (RestClientException ex) {
       throw new InternalServerErrorException("Could not delete otp credential");
     }
-  }
-
-  private HttpHeaders getAuthorizedFormHttpHeaders() {
-    var httpHeaders = getFormHttpHeaders();
-    httpHeaders.add(HEADER_AUTHORIZATION_KEY,
-        HEADER_BEARER_KEY + this.keycloakAdminClientAccessor.getBearerToken());
-
-    return httpHeaders;
-  }
-
-  private HttpHeaders getFormHttpHeaders() {
-    var httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-    return httpHeaders;
   }
 
   public Boolean getUserTwoFactorAuthEnabled() {

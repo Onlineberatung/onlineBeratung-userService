@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedFormHttpHeaders;
+import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
+
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -9,9 +12,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -41,8 +42,6 @@ public class KeycloakService {
   private static final String BODY_KEY_PASSWORD = "password";
   private static final String BODY_KEY_CLIENT_ID = "client_id";
   private static final String BODY_KEY_GRANT_TYPE = "grant_type";
-  private static final String HEADER_AUTHORIZATION_KEY = "Authorization";
-  private static final String HEADER_BEARER_KEY = "Bearer ";
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -103,7 +102,7 @@ public class KeycloakService {
    */
   public boolean logoutUser(final String refreshToken) {
 
-    var httpHeaders = getAuthorizedFormHttpHeaders();
+    var httpHeaders = getAuthorizedFormHttpHeaders(authenticatedUser.getAccessToken());
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add(BODY_KEY_CLIENT_ID, keycloakClientId);
     map.add(BODY_KEY_GRANT_TYPE, KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN);
@@ -128,21 +127,6 @@ public class KeycloakService {
       return false;
     }
     return true;
-  }
-
-  private HttpHeaders getAuthorizedFormHttpHeaders() {
-    var httpHeaders = getFormHttpHeaders();
-    httpHeaders.add(HEADER_AUTHORIZATION_KEY,
-        HEADER_BEARER_KEY + authenticatedUser.getAccessToken());
-
-    return httpHeaders;
-  }
-
-  private HttpHeaders getFormHttpHeaders() {
-    var httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-    return httpHeaders;
   }
 
   /**
