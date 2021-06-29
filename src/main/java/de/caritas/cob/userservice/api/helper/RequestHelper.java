@@ -8,7 +8,7 @@ public class RequestHelper {
   private static final String HEADER_AUTHORIZATION_KEY = "Authorization";
   private static final String HEADER_BEARER_KEY = "Bearer ";
 
-  private RequestHelper(){
+  private RequestHelper() {
     throw new IllegalStateException("Utility class");
   }
 

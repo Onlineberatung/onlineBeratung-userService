@@ -84,13 +84,13 @@ public class KeycloakTwoFactorAuthService {
       throw new BadRequestException("Could not set up otp credential");
     }
   }
+
   /**
    * Performs a Keycloak request to delete the two Factor Authentication
    *
    * @param userName the username
    */
   public void deleteOtpCredential(final String userName) {
-
     var httpHeaders = getAuthorizedFormHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken());
     var requestUrl = keycloakOtpDelete + userName;
     var request = new HttpEntity<>(httpHeaders);
