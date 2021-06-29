@@ -43,15 +43,15 @@ public class TwoFactorAuthValidator {
     else
       twoFactorAuthDTO.isEnabled(false);
 
-    if(twoFactorAuthDTO.getIsEnabled()){
-      var OptionalOtpInfoDTO = keycloakTwoFactorAuthService.getOtpCredential(authenticatedUser.getUsername());
+    if(Boolean.TRUE.equals(twoFactorAuthDTO.getIsEnabled())){
+      var optionalOtpInfoDTO = keycloakTwoFactorAuthService.getOtpCredential(authenticatedUser.getUsername());
 
-      if(OptionalOtpInfoDTO.isPresent()){
-        twoFactorAuthDTO.isActive(OptionalOtpInfoDTO.get().getOtpSetup());
+      if(optionalOtpInfoDTO.isPresent()){
+        twoFactorAuthDTO.isActive(optionalOtpInfoDTO.get().getOtpSetup());
 
-        if (Boolean.FALSE.equals(OptionalOtpInfoDTO.get().getOtpSetup())) {
-          twoFactorAuthDTO.setQrCode(OptionalOtpInfoDTO.get().getOtpSecretQrCode());
-          twoFactorAuthDTO.setSecret(OptionalOtpInfoDTO.get().getOtpSecret());
+        if (Boolean.FALSE.equals(optionalOtpInfoDTO.get().getOtpSetup())) {
+          twoFactorAuthDTO.setQrCode(optionalOtpInfoDTO.get().getOtpSecretQrCode());
+          twoFactorAuthDTO.setSecret(optionalOtpInfoDTO.get().getOtpSecret());
         }
         return twoFactorAuthDTO;
       }
