@@ -18,13 +18,13 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class Keycloak2faService {
+public class KeycloakTwoFactorAuthService {
 
-  @Value("${2fa.user.enabled}")
-  private Boolean isUser2faEnabled;
+  @Value("${twoFactorAuth.user.enabled}")
+  private Boolean isUserTwoFactorAuthEnabled;
 
-  @Value("${2fa.consultant.enabled}")
-  private Boolean isConsultant2faEnabled;
+  @Value("${twoFactorAuth.consultant.enabled}")
+  private Boolean isConsultantTwoFactorAuthEnabled;
 
   @Value("${keycloakApi.otp.setup.info}")
   private String keycloakOtpSetupInfo;
@@ -115,11 +115,11 @@ public class Keycloak2faService {
     return httpHeaders;
   }
 
-  public Boolean getUser2faEnabled() {
-    return isUser2faEnabled;
+  public Boolean getUserTwoFactorAuthEnabled() {
+    return isUserTwoFactorAuthEnabled;
   }
 
-  public Boolean getConsultant2faEnabled() {
-    return isConsultant2faEnabled;
+  public Boolean getConsultantTwoFactorAuthEnabled() {
+    return isConsultantTwoFactorAuthEnabled;
   }
 }

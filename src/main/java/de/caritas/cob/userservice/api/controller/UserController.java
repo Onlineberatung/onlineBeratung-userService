@@ -61,7 +61,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.Keycloak2faService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -124,7 +124,7 @@ public class UserController implements UsersApi {
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
-  private final @NotNull Keycloak2faService keycloak2faService;
+  private final @NotNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -263,9 +263,10 @@ public class UserController implements UsersApi {
   public ResponseEntity<UserDataResponseDTO> getUserData() {
 
     var model2faDTO = new TwoFactorAuthDTO();
-    model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? keycloak2faService.getUser2faEnabled() : keycloak2faService.getConsultant2faEnabled());
+    model2faDTO.isEnabled((authenticatedUser.getRoles().contains(UserRole.USER.getValue())) ? keycloakTwoFactorAuthService
+        .getUserTwoFactorAuthEnabled() : keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled());
 
-    var otpInfoDTO = keycloak2faService.getOtpCredential(authenticatedUser.getUsername());
+    var otpInfoDTO = keycloakTwoFactorAuthService.getOtpCredential(authenticatedUser.getUsername());
     model2faDTO.isActive(otpInfoDTO.getOtpSetup());
 
     if (Boolean.FALSE.equals(otpInfoDTO.getOtpSetup())) {
@@ -801,25 +802,28 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> activate2faForUser(OtpSetupDTO otpSetupDTO) {
+  public ResponseEntity<Void> activateTwoFactorAuthForUser(OtpSetupDTO otpSetupDTO) {
     if (otpSetupDTO.getInitialCode().length() != OTP_INITIAL_CODE_LENGTH || otpSetupDTO.getSecret().length() != OTP_SECRET_LENGTH) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !keycloak2faService.getUser2faEnabled())
-        || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !keycloak2faService.getConsultant2faEnabled())) {
+    if ((authenticatedUser.getRoles().contains(UserRole.USER.getValue()) && !keycloakTwoFactorAuthService
+        .getUserTwoFactorAuthEnabled())
+        || (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue()) && !keycloakTwoFactorAuthService
+        .getConsultantTwoFactorAuthEnabled())) {
       return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
 
-    boolean requestSuccessfully = keycloak2faService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
+    boolean requestSuccessfully = keycloakTwoFactorAuthService
+        .setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
 
     return new ResponseEntity<>((requestSuccessfully) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
   }
 
   @Override
-  public ResponseEntity<Void> deactivate2faForUser() {
+  public ResponseEntity<Void> deactivateTwoFactorAuthForUser() {
     return generateResponseKeycloakExtension(
-        keycloak2faService.deleteOtpCredential(authenticatedUser.getUsername()));
+        keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername()));
   }
 
   private ResponseEntity<Void> generateResponseKeycloakExtension(boolean successful) {

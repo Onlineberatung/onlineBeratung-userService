@@ -164,7 +164,6 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
@@ -186,7 +185,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.Keycloak2faService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -212,7 +211,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
-import org.keycloak.common.util.RandomString;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -429,7 +427,7 @@ public class UserControllerIT {
   @MockBean
   private SessionDataService sessionDataService;
   @MockBean
-  private Keycloak2faService keycloak2faService;
+  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
 
   @Mock
   private Logger logger;
@@ -447,7 +445,7 @@ public class UserControllerIT {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
-  static Stream<Arguments> activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole_Arguments() {
+  static Stream<Arguments> activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments() {
     return Stream.of(
         Arguments.of(false, true, UserRole.USER.getValue()),
         Arguments.of(false, false, UserRole.USER.getValue()),
@@ -455,7 +453,7 @@ public class UserControllerIT {
         Arguments.of(false, false, UserRole.CONSULTANT.getValue()));
   }
 
-  static Stream<Arguments> activate2faForUser_Should_ReturnOk_When_Request_Is_From_2faEnabledRole_Arguments() {
+  static Stream<Arguments> activateTwoFactorAuthForUser_Should_ReturnOk_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments() {
     return Stream.of(
         Arguments.of(true, false, UserRole.USER.getValue()),
         Arguments.of(true, true, UserRole.USER.getValue()),
@@ -1196,7 +1194,7 @@ public class UserControllerIT {
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
-    when(keycloak2faService.getOtpCredential(null)).thenReturn(otpInfoDTO);
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(otpInfoDTO);
 
     mvc.perform(get(PATH_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
@@ -1250,7 +1248,7 @@ public class UserControllerIT {
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
 
-    when(keycloak2faService.getOtpCredential(null)).thenReturn(otpInfoDTO);
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(otpInfoDTO);
 
     mvc.perform(get(PATH_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2326,38 +2324,38 @@ public class UserControllerIT {
   }
 
   @Test
-  public void deactivate2faForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
+  public void deactivateTwoFactorAuthForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(true);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(true);
 
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
+    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
   }
 
   @Test
-  public void deactivate2faForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
+  public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(false);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(false);
 
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError());
 
-    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
+    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
   }
 
   @ParameterizedTest
-  @MethodSource("activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole_Arguments")
-  public void activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faDisabledRole(Boolean isUser2faEnabled,
-      Boolean isConsultant2faEnabled, String requestRole)
+  @MethodSource("activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments")
+  public void activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthDisabledRole(Boolean isUserTwoFactorAuthEnabled,
+      Boolean isConsultantTwoFactorAuthEnabled, String requestRole)
       throws Exception {
-    when(keycloak2faService.getUser2faEnabled()).thenReturn(isUser2faEnabled);
-    when(keycloak2faService.getConsultant2faEnabled()).thenReturn(isConsultant2faEnabled);
+    when(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
+    when(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
     when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
@@ -2367,18 +2365,18 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotAcceptable());
 
-    verify(this.keycloak2faService, times(0)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
+    verify(this.keycloakTwoFactorAuthService, times(0)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
   }
 
   @ParameterizedTest
-  @MethodSource("activate2faForUser_Should_ReturnOk_When_Request_Is_From_2faEnabledRole_Arguments")
-  public void activate2faForUser_Should_ReturnNotAcceptable_When_Request_Is_From_2faEnabledRole(Boolean isUser2faEnabled,
-      Boolean isConsultant2faEnabled, String requestRole)
+  @MethodSource("activateTwoFactorAuthForUser_Should_ReturnOk_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments")
+  public void activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthEnabledRole(Boolean isUserTwoFactorAuthEnabled,
+      Boolean isConsultantTwoFactorAuthEnabled, String requestRole)
       throws Exception {
-    when(keycloak2faService.getUser2faEnabled()).thenReturn(isUser2faEnabled);
-    when(keycloak2faService.getConsultant2faEnabled()).thenReturn(isConsultant2faEnabled);
+    when(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
+    when(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
     when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
-    when(this.keycloak2faService.setUpOtpCredential(null, VALID_OTP_SETUP_DTO)).thenReturn(true);
+    when(this.keycloakTwoFactorAuthService.setUpOtpCredential(null, VALID_OTP_SETUP_DTO)).thenReturn(true);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2387,13 +2385,13 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloak2faService, times(1)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
+    verify(this.keycloakTwoFactorAuthService, times(1)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
   }
 
   @Test
-  public void activate2faForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
+  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(false);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(false);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2402,13 +2400,13 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verifyNoMoreInteractions(keycloak2faService);
+    verifyNoMoreInteractions(keycloakTwoFactorAuthService);
   }
 
   @Test
-  public void activate2faForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
+  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(null)).thenReturn(false);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(false);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2417,7 +2415,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verify(this.keycloak2faService, times(0)).deleteOtpCredential(any());
+    verify(this.keycloakTwoFactorAuthService, times(0)).deleteOtpCredential(any());
   }
 
 }

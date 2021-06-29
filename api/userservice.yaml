@@ -1084,13 +1084,13 @@ paths:
     put:
       tags:
         - user-controller
-      summary: 'activates 2fa for a user'
-      operationId: activate2faForUser
+      summary: 'activates twoFactorAuth for a user'
+      operationId: activateTwoFactorAuthForUser
       requestBody:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/Activate2faUserDTO'
+              $ref: '#/components/schemas/ActivateTwoFactorAuthUserDTO'
         required: true
       responses:
         200:
@@ -1111,8 +1111,8 @@ paths:
     delete:
       tags:
         - user-controller
-      summary: 'deactivates 2fa for a user'
-      operationId: deactivate2faForUser
+      summary: 'deactivates twoFactorAuth for a user'
+      operationId: deactivateTwoFactorAuthForUser
       responses:
         200:
           description: OK - successfull operation
@@ -1915,7 +1915,7 @@ components:
           type: string
           example: p@ssw0rd
 
-    Activate2faUserDTO:
+    ActivateTwoFactorAuthUserDTO:
       type: object
       required:
         - secret

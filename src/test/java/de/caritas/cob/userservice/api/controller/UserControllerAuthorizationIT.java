@@ -70,7 +70,6 @@ import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
@@ -82,7 +81,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.Keycloak2faService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -180,7 +179,7 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private UserDataFacade userDataFacade;
   @MockBean
-  private Keycloak2faService keycloak2faService;
+  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
 
   private Cookie csrfCookie;
 
@@ -2002,7 +2001,7 @@ public class UserControllerAuthorizationIT {
     when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
     when(this.validatedUserAccountProvider.retrieveValidatedUser())
         .thenReturn(new EasyRandom().nextObject(User.class));
-    when(this.keycloak2faService.getOtpCredential(null)).thenReturn(otpInfoDTO);
+    when(this.keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(otpInfoDTO);
     when(this.userDataFacade.buildUserDataByRole()).thenReturn(new UserDataResponseDTO());
 
     mvc.perform(get(PATH_GET_USER_DATA)
@@ -2034,9 +2033,9 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+  public void deactivateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(any())).thenReturn(true);
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
@@ -2044,7 +2043,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloak2faService, times(1)).deleteOtpCredential(any());
+    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
   }
 
   @Test
@@ -2054,35 +2053,35 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
-  public void deactivate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+  public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(any())).thenReturn(true);
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloak2faService);
+    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+  public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(any())).thenReturn(true);
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloak2faService);
+    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+  public void activateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    when(keycloak2faService.setUpOtpCredential(any(), any())).thenReturn(true);
+    when(keycloakTwoFactorAuthService.setUpOtpCredential(any(), any())).thenReturn(true);
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
@@ -2092,14 +2091,14 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloak2faService, times(1)).setUpOtpCredential(any(), any());
+    verify(this.keycloakTwoFactorAuthService, times(1)).setUpOtpCredential(any(), any());
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activate2faForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
+  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
       throws Exception {
-    when(keycloak2faService.setUpOtpCredential(any(), any())).thenReturn(true);
+    when(keycloakTwoFactorAuthService.setUpOtpCredential(any(), any())).thenReturn(true);
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .cookie(csrfCookie)
         .header(CSRF_HEADER, CSRF_VALUE)
@@ -2107,7 +2106,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verifyNoMoreInteractions(this.keycloak2faService);
+    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
   }
 
   @Test
@@ -2117,27 +2116,27 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
-  public void activate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+  public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(any())).thenReturn(true);
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloak2faService);
+    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activate2faForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+  public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    when(keycloak2faService.deleteOtpCredential(any())).thenReturn(true);
+    when(keycloakTwoFactorAuthService.deleteOtpCredential(any())).thenReturn(true);
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloak2faService);
+    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
   }
 }
