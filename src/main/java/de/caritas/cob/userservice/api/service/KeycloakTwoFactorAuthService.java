@@ -45,16 +45,6 @@ public class KeycloakTwoFactorAuthService {
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
 
-  public Boolean hasUserOtpCredential(final String userName) {
-    var otpInfoDTO = getOtpCredential(userName);
-
-    if (!Objects.isNull(otpInfoDTO) && !Objects.isNull(otpInfoDTO.getOtpSetup())) {
-      return otpInfoDTO.getOtpSetup();
-    }
-
-    throw new RestClientException("The OTPInfoDTO is not Valid");
-  }
-
   public Optional<OtpInfoDTO> getOtpCredential(final String userName) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders();
