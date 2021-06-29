@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TwoFactorAuthValidator {
 
+  private final @NonNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+
   private static final int OTP_INITIAL_CODE_LENGTH = 6;
   private static final int OTP_SECRET_LENGTH = 32;
-
-  private final @NonNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
 
   public void checkRequestParameterForTwoFactorAuthActivations(OtpSetupDTO otpSetupDTO) {
     if (otpSetupDTO.getInitialCode().length() != OTP_INITIAL_CODE_LENGTH
@@ -43,18 +43,21 @@ public class TwoFactorAuthValidator {
     else
       twoFactorAuthDTO.isEnabled(false);
 
-    var OptionalOtpInfoDTO = keycloakTwoFactorAuthService.getOtpCredential(authenticatedUser.getUsername());
+    if(twoFactorAuthDTO.getIsEnabled()){
+      var OptionalOtpInfoDTO = keycloakTwoFactorAuthService.getOtpCredential(authenticatedUser.getUsername());
 
-    if(OptionalOtpInfoDTO.isPresent()){
-      twoFactorAuthDTO.isActive(OptionalOtpInfoDTO.get().getOtpSetup());
+      if(OptionalOtpInfoDTO.isPresent()){
+        twoFactorAuthDTO.isActive(OptionalOtpInfoDTO.get().getOtpSetup());
 
-      if (Boolean.FALSE.equals(OptionalOtpInfoDTO.get().getOtpSetup())) {
-        twoFactorAuthDTO.setQrCode(OptionalOtpInfoDTO.get().getOtpSecretQrCode());
-        twoFactorAuthDTO.setSecret(OptionalOtpInfoDTO.get().getOtpSecret());
+        if (Boolean.FALSE.equals(OptionalOtpInfoDTO.get().getOtpSetup())) {
+          twoFactorAuthDTO.setQrCode(OptionalOtpInfoDTO.get().getOtpSecretQrCode());
+          twoFactorAuthDTO.setSecret(OptionalOtpInfoDTO.get().getOtpSecret());
+        }
+        return twoFactorAuthDTO;
       }
-      return twoFactorAuthDTO;
+      return twoFactorAuthDTO.isEnabled(false);
     }
-    return null;
+    return twoFactorAuthDTO;
   }
 
 }

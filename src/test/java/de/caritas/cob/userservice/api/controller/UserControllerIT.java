@@ -97,6 +97,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.MASTER_KEY_DTO
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
+import static de.caritas.cob.userservice.testHelper.TestConstants.OPTIONAL_OTP_INFO_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
@@ -107,7 +108,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.otpInfoDTO;
+import static de.caritas.cob.userservice.testHelper.TestConstants.OTP_INFO_DTO;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -134,6 +135,7 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -157,6 +159,7 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
+import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
@@ -212,6 +215,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -428,6 +432,8 @@ public class UserControllerIT {
   private SessionDataService sessionDataService;
   @MockBean
   private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  @MockBean
+  private TwoFactorAuthValidator twoFactorAuthValidator;
 
   @Mock
   private Logger logger;
@@ -1194,7 +1200,7 @@ public class UserControllerIT {
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
-    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(otpInfoDTO);
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
@@ -1248,7 +1254,7 @@ public class UserControllerIT {
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
 
-    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(otpInfoDTO);
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2326,7 +2332,6 @@ public class UserControllerIT {
   @Test
   public void deactivateTwoFactorAuthForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
       throws Exception {
-    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(true);
 
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2339,7 +2344,7 @@ public class UserControllerIT {
   @Test
   public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
       throws Exception {
-    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(false);
+    Mockito.doThrow(new InternalServerErrorException("Fail test case")).when(keycloakTwoFactorAuthService).deleteOtpCredential(null);
 
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2363,7 +2368,7 @@ public class UserControllerIT {
         .content(new ObjectMapper().writeValueAsString(
             VALID_OTP_SETUP_DTO))
         .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotAcceptable());
+        .andExpect(status().isConflict());
 
     verify(this.keycloakTwoFactorAuthService, times(0)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
   }
@@ -2376,7 +2381,6 @@ public class UserControllerIT {
     when(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
     when(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
     when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
-    when(this.keycloakTwoFactorAuthService.setUpOtpCredential(null, VALID_OTP_SETUP_DTO)).thenReturn(true);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
@@ -2391,8 +2395,7 @@ public class UserControllerIT {
   @Test
   public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
       throws Exception {
-    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(false);
-
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_SECRET);
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(
@@ -2406,7 +2409,7 @@ public class UserControllerIT {
   @Test
   public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
       throws Exception {
-    when(keycloakTwoFactorAuthService.deleteOtpCredential(null)).thenReturn(false);
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_CODE);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
         .contentType(MediaType.APPLICATION_JSON)
