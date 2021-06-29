@@ -38,12 +38,15 @@ public class KeycloakTwoFactorAuthService {
   @Value("${keycloakApi.otp.delete}")
   private String keycloakOtpDelete;
 
-  private static final String HEADER_AUTHORIZATION_KEY = "Authorization";
-  private static final String HEADER_BEARER_KEY = "Bearer ";
-
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
 
+  /**
+   * Performs a Keycloak request to get the {@link OtpInfoDTO} for the two Factor Authentication
+   *
+   * @param userName the username
+   * @return {@link OtpInfoDTO}
+   */
   public Optional<OtpInfoDTO> getOtpCredential(final String userName) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken());
@@ -62,6 +65,12 @@ public class KeycloakTwoFactorAuthService {
     return Optional.empty();
   }
 
+  /**
+   * Performs a Keycloak request to set up the two Factor Authentication
+   *
+   * @param userName the username
+   * @param otpSetupDTO the secret and code for the two Factor Authentication
+   */
   public void setUpOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken());
@@ -75,7 +84,11 @@ public class KeycloakTwoFactorAuthService {
       throw new BadRequestException("Could not set up otp credential");
     }
   }
-
+  /**
+   * Performs a Keycloak request to delete the two Factor Authentication
+   *
+   * @param userName the username
+   */
   public void deleteOtpCredential(final String userName) {
 
     var httpHeaders = getAuthorizedFormHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken());
