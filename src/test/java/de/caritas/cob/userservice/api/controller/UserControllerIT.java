@@ -451,22 +451,6 @@ public class UserControllerIT {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
-  static Stream<Arguments> activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments() {
-    return Stream.of(
-        Arguments.of(false, true, UserRole.USER.getValue()),
-        Arguments.of(false, false, UserRole.USER.getValue()),
-        Arguments.of(true, false, UserRole.CONSULTANT.getValue()),
-        Arguments.of(false, false, UserRole.CONSULTANT.getValue()));
-  }
-
-  static Stream<Arguments> activateTwoFactorAuthForUser_Should_ReturnOk_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments() {
-    return Stream.of(
-        Arguments.of(true, false, UserRole.USER.getValue()),
-        Arguments.of(true, true, UserRole.USER.getValue()),
-        Arguments.of(true, true, UserRole.CONSULTANT.getValue()),
-        Arguments.of(false, true, UserRole.CONSULTANT.getValue()));
-  }
-
   /**
    * Method: registerUser
    */
@@ -2352,44 +2336,6 @@ public class UserControllerIT {
         .andExpect(status().isInternalServerError());
 
     verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
-  }
-
-  @ParameterizedTest
-  @MethodSource("activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments")
-  public void activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthDisabledRole(Boolean isUserTwoFactorAuthEnabled,
-      Boolean isConsultantTwoFactorAuthEnabled, String requestRole)
-      throws Exception {
-    when(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
-    when(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
-    when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
-
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(
-            VALID_OTP_SETUP_DTO))
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isConflict());
-
-    verify(this.keycloakTwoFactorAuthService, times(0)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
-  }
-
-  @ParameterizedTest
-  @MethodSource("activateTwoFactorAuthForUser_Should_ReturnOk_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments")
-  public void activateTwoFactorAuthForUser_Should_ReturnNotAcceptable_When_Request_Is_From_TwoFactorAuthEnabledRole(Boolean isUserTwoFactorAuthEnabled,
-      Boolean isConsultantTwoFactorAuthEnabled, String requestRole)
-      throws Exception {
-    when(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
-    when(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
-    when(authenticatedUser.getRoles()).thenReturn(Set.of(requestRole));
-
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(
-            VALID_OTP_SETUP_DTO))
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(this.keycloakTwoFactorAuthService, times(1)).setUpOtpCredential(null, VALID_OTP_SETUP_DTO);
   }
 
   @Test
