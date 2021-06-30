@@ -35,21 +35,21 @@ public class UserDataFacade {
    * @return UserDataResponseDTO {@link UserDataResponseDTO}
    */
   public UserDataResponseDTO buildUserDataByRole() {
+    UserDataResponseDTO userDataResponseDTO;
     Set<String> roles = authenticatedUser.getRoles();
 
     if (userRolesContainAnyRoleOf(roles, CONSULTANT.getValue())) {
-      var userDataResponseDTO = consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant());
-      userDataResponseDTO.setTwoFactorAuth(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser));
-      return userDataResponseDTO;
+      userDataResponseDTO = consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant());
     } else if (userRolesContainAnyRoleOf(roles, USER.getValue(), ANONYMOUS.getValue())) {
-      var userDataResponseDTO = askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
-      userDataResponseDTO.setTwoFactorAuth(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser));
-      return userDataResponseDTO;
+      userDataResponseDTO = askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
     } else {
       throw new InternalServerErrorException(
           String.format("User with id %s has neither Consultant-Role, nor User/Anonymous-Role .",
               authenticatedUser.getUserId()));
     }
+
+    userDataResponseDTO.setTwoFactorAuth(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser));
+    return userDataResponseDTO;
   }
 
   private boolean userRolesContainAnyRoleOf(Set<String> userRoles, String... roles) {
