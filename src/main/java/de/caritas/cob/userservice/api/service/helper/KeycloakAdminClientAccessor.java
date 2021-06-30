@@ -37,7 +37,7 @@ public class KeycloakAdminClientAccessor {
   }
 
   /**
-   * Returnes the {@link RealmResource} of current realm.
+   * Returns the {@link RealmResource} of current realm.
    *
    * @return the {@link RealmResource}
    */
@@ -45,6 +45,11 @@ public class KeycloakAdminClientAccessor {
     return getInstance().realm(this.keycloakRealm);
   }
 
+  /**
+   * Returns the {@link String} bearer token of the technical user.
+   *
+   * @return the bearer token{@link String}
+   */
   public String getBearerToken() {
     return getInstance().tokenManager().getAccessTokenString();
   }

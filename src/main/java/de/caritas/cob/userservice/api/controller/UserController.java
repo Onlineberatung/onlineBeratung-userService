@@ -5,7 +5,6 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
@@ -44,7 +43,6 @@ import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
-import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
@@ -787,24 +785,29 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Activates two factor authentication for the user.
+   *
+   * @param otpSetupDTO      (required) otpSetupDTO
+   * @return {@link ResponseEntity}
+   */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthForUser(OtpSetupDTO otpSetupDTO) {
 
     twoFactorAuthValidator.checkRequestParameterForTwoFactorAuthActivations(otpSetupDTO);
 
-    twoFactorAuthValidator
-        .checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser.getRoles(), UserRole.USER.getValue(),
-            keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled());
-
-    twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser.getRoles(),
-        UserRole.CONSULTANT.getValue(),
-        keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled());
+    twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
 
     keycloakTwoFactorAuthService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Deactivates two factor authentication for the user.
+   *
+   * @return {@link ResponseEntity}
+   */
   @Override
   public ResponseEntity<Void> deactivateTwoFactorAuthForUser() {
     keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
