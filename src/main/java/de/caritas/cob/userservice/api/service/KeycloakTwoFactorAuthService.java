@@ -97,8 +97,8 @@ public class KeycloakTwoFactorAuthService {
 
     try {
       restTemplate.exchange(requestUrl, HttpMethod.DELETE, request, Void.class);
-    } catch (RestClientException ex) {
-      throw new InternalServerErrorException("Could not delete otp credential");
+    } catch (RestClientException e) {
+      throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }
   }
 
