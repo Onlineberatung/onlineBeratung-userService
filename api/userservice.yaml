@@ -1103,6 +1103,8 @@ paths:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
         406:
           description: Not Acceptable - user or consultant two factor authentication is disabled
+        409:
+          description: Cnflict - role from the request has no two factor auth enabled
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -1923,8 +1925,12 @@ components:
       properties:
         secret:
           type: string
-        totp:
+          minLength: 32
+          maxLength: 32
+        otp:
           type: string
+          minLength: 6
+          maxLength: 6
 
     twoFactorAuthDTO:
       type: object
