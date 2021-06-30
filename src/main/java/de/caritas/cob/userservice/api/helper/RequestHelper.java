@@ -8,9 +8,7 @@ public class RequestHelper {
   private static final String HEADER_AUTHORIZATION_KEY = "Authorization";
   private static final String HEADER_BEARER_KEY = "Bearer ";
 
-  private RequestHelper() {
-    throw new IllegalStateException("Utility class");
-  }
+  private RequestHelper() { }
 
   public static HttpHeaders getAuthorizedFormHttpHeaders(String bearerToken) {
     var httpHeaders = getFormHttpHeaders();
