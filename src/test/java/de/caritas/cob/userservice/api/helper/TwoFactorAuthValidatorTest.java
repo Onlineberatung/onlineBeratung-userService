@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.helper;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_SECRET;
 import static de.caritas.cob.userservice.testHelper.TestConstants.OPTIONAL_OTP_INFO_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,35 +42,46 @@ public class TwoFactorAuthValidatorTest {
 
   static Stream<Arguments> checkIfRoleHasTwoFactorAuthEnabled_Should_Not_ThrowConflictException_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments() {
     return Stream.of(
-        Arguments.of(true, UserRole.USER.getValue()),
-        Arguments.of(true, UserRole.CONSULTANT.getValue()));
+        Arguments.of(true, false, UserRole.USER.getValue()),
+        Arguments.of(true, true, UserRole.USER.getValue()),
+        Arguments.of(false, true, UserRole.CONSULTANT.getValue()),
+        Arguments.of(true, true, UserRole.CONSULTANT.getValue()));
   }
 
   static Stream<Arguments> checkIfRoleHasTwoFactorAuthEnabled_Should_ThrowConflictException_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments() {
     return Stream.of(
-        Arguments.of(false, UserRole.USER.getValue()),
-        Arguments.of(false, UserRole.CONSULTANT.getValue()));
+        Arguments.of(false, false, UserRole.USER.getValue()),
+        Arguments.of(false, true, UserRole.USER.getValue()),
+        Arguments.of(false, false, UserRole.CONSULTANT.getValue()),
+        Arguments.of(true, false, UserRole.CONSULTANT.getValue()));
   }
 
 
   @ParameterizedTest
   @MethodSource("checkIfRoleHasTwoFactorAuthEnabled_Should_Not_ThrowConflictException_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments")
   public void checkIfRoleHasTwoFactorAuthEnabled_Should_Not_ThrowConflictException_When_Request_Is_From_TwoFactorAuthEnabledRole(
-      Boolean isRoleTwoFactorAuthEnabled,
+      Boolean isUserTwoFactorAuthEnabled,
+      Boolean isConsultantTwoFactorAuthEnabled,
       String requestRole) {
-    twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(Set.of(requestRole), requestRole,
-        isRoleTwoFactorAuthEnabled);
+    var authenticatedUser = new AuthenticatedUser();
+    authenticatedUser.setRoles(Set.of(requestRole));
+    lenient().when(this.keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
+    lenient().when(this.keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
+    twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
 
   }
 
   @ParameterizedTest
   @MethodSource("checkIfRoleHasTwoFactorAuthEnabled_Should_ThrowConflictException_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments")
   public void checkIfRoleHasTwoFactorAuthEnabled_Should_ThrowConflictException_When_Request_Is_From_TwoFactorAuthDisabledRole(
-      Boolean isRoleTwoFactorAuthEnabled,
+      Boolean isUserTwoFactorAuthEnabled,
+      Boolean isConsultantTwoFactorAuthEnabled,
       String requestRole) {
-    Assert.assertThrows(ConflictException.class, () -> twoFactorAuthValidator
-        .checkIfRoleHasTwoFactorAuthEnabled(Set.of(requestRole), requestRole,
-            isRoleTwoFactorAuthEnabled));
+    var authenticatedUser = new AuthenticatedUser();
+    authenticatedUser.setRoles(Set.of(requestRole));
+    lenient().when(this.keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
+    lenient().when(this.keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
+    Assert.assertThrows(ConflictException.class, () -> twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser));
   }
 
 
