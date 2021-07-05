@@ -786,18 +786,16 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Activates two factor authentication for the user.
+   * Activates 2FA for the given user.
    *
-   * @param otpSetupDTO      (required) otpSetupDTO
-   * @return {@link ResponseEntity}
+   * @param otpSetupDTO (required) {@link OtpSetupDTO}
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthForUser(OtpSetupDTO otpSetupDTO) {
 
     twoFactorAuthValidator.checkRequestParameterForTwoFactorAuthActivations(otpSetupDTO);
-
     twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
-
     keycloakTwoFactorAuthService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -806,7 +804,7 @@ public class UserController implements UsersApi {
   /**
    * Deactivates two factor authentication for the user.
    *
-   * @return {@link ResponseEntity}
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
   public ResponseEntity<Void> deactivateTwoFactorAuthForUser() {

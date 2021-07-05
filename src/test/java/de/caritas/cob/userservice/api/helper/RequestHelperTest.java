@@ -26,11 +26,11 @@ public class RequestHelperTest {
 
   @Test
   public void getAuthorizedFormHttpHeaders_Should_Return_HttpHeader_With_BearerToken() {
-    var httpHeaders = RequestHelper.getAuthorizedFormHttpHeaders(BEARER_TOKEN);
+    var httpHeaders = RequestHelper.getAuthorizedHttpHeaders(BEARER_TOKEN,
+        MediaType.APPLICATION_FORM_URLENCODED);
 
-    Assertions.assertEquals(true, httpHeaders.containsKey(HEADER_AUTHORIZATION_KEY));
-    Assertions
-        .assertEquals(true, httpHeaders.containsValue(List.of(HEADER_BEARER_KEY + BEARER_TOKEN)));
+    Assertions.assertTrue(httpHeaders.containsKey(HEADER_AUTHORIZATION_KEY));
+    Assertions.assertTrue(httpHeaders.containsValue(List.of(HEADER_BEARER_KEY + BEARER_TOKEN)));
     Assertions.assertEquals(MediaType.APPLICATION_FORM_URLENCODED, httpHeaders.getContentType());
   }
 

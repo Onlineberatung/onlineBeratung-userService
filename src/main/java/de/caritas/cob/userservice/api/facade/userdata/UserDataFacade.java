@@ -47,7 +47,6 @@ public class UserDataFacade {
           String.format("User with id %s has neither Consultant-Role, nor User/Anonymous-Role .",
               authenticatedUser.getUserId()));
     }
-
     userDataResponseDTO.setTwoFactorAuth(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser));
     return userDataResponseDTO;
   }
