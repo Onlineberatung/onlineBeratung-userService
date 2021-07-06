@@ -13,7 +13,10 @@ import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
@@ -27,7 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-@SpringBootApplication
+@SpringBootApplication(exclude={MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @EnableAsync
 @EnableScheduling
 @EnableConfigurationProperties({CsrfSecurityProperties.class})
@@ -52,8 +55,8 @@ public class UserServiceApplication {
   /**
    * Returns the @KeycloakAuthenticationToken which represents the token for a Keycloak
    * authentication.
-   * 
-   * 
+   *
+   *
    * @return KeycloakAuthenticationToken
    */
   @Bean
@@ -64,7 +67,7 @@ public class UserServiceApplication {
 
   /**
    * Returns the @KeycloakSecurityContext
-   * 
+   *
    * @return KeycloakSecurityContext
    */
   @Bean
@@ -76,7 +79,7 @@ public class UserServiceApplication {
 
   /**
    * Returns the Keycloak user id of the authenticated user
-   * 
+   *
    * @return {@link AuthenticatedUser}
    */
   @Bean

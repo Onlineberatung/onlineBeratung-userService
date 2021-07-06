@@ -32,7 +32,7 @@ public class DecryptionService {
 
   /**
    * Updates the master key fragment
-   * 
+   *
    * @param masterKey The master key fragment
    */
   public void updateMasterKey(String masterKey) {
@@ -41,7 +41,7 @@ public class DecryptionService {
 
   /**
    * Returns the current master key
-   * 
+   *
    * @return the current master key
    */
   public String getMasterKey() {
@@ -50,7 +50,7 @@ public class DecryptionService {
 
   /**
    * Returns the current application key
-   * 
+   *
    * @return the current application key
    */
   public String getApplicationKey() {
@@ -59,7 +59,7 @@ public class DecryptionService {
 
   /**
    * Prepares the SecretKeySpec for a given key
-   * 
+   *
    * @param secret the key for the generation
    * @return The SecretKeySpec based on the key or <null> in case of an error
    * @throws NoSuchAlgorithmException
@@ -81,7 +81,7 @@ public class DecryptionService {
 
   /**
    * Decrypts a given message with the given secret
-   * 
+   *
    * @param messageToDecrypt The message to decrypt
    * @param secret The secret to be used
    * @return The decrypted message
