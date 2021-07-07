@@ -5,10 +5,7 @@ import static de.caritas.cob.userservice.api.deleteworkflow.model.DeletionTarget
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
-import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -25,11 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +42,7 @@ public class DeleteInactiveSessionsAndUserService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull DeleteUserAccountService deleteUserAccountService;
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
-  private final @NonNull ActionsRegistry actionsRegistry;
+  private final @NonNull DeleteSessionService deleteSessionService;
 
   @Value("${inactive.session.and.user.deleteWorkflow.days}")
   private int inactiveSessionAndUserDeleteWorkflowDays;
@@ -55,17 +52,17 @@ public class DeleteInactiveSessionsAndUserService {
    * sessions.
    */
   public void deleteInactiveSessionsAndUsers() {
-    Map<String, List<String>> userInactiveGroupMap = new HashMap<>();
 
+    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>();
     fetchAllInactivePrivateGroups()
-        .forEach(group -> userInactiveGroupMap
+        .forEach(group -> userWithInactiveGroupsMap
             .computeIfAbsent(group.getUser().getId(), v -> new ArrayList<>())
             .add(group.getId()));
 
-    List<DeletionWorkflowError> workflowErrors = userInactiveGroupMap
+    List<DeletionWorkflowError> workflowErrors = userWithInactiveGroupsMap
         .entrySet()
         .stream()
-        .map(this::performDeletionWorkflowForGroup)
+        .map(this::performDeletionWorkflow)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
 
@@ -74,7 +71,7 @@ public class DeleteInactiveSessionsAndUserService {
 
   private List<GroupDTO> fetchAllInactivePrivateGroups() {
     LocalDateTime dateTimeToCheck = calculateDateTimeToCheck();
-    return fetchAllInactivePrivateGroupsSinceGivenDate(dateTimeToCheck);
+    return fetchAllInactivePrivateRocketChatGroupsSinceGivenDate(dateTimeToCheck);
   }
 
   private LocalDateTime calculateDateTimeToCheck() {
@@ -84,7 +81,7 @@ public class DeleteInactiveSessionsAndUserService {
         .minusDays(inactiveSessionAndUserDeleteWorkflowDays);
   }
 
-  private List<GroupDTO> fetchAllInactivePrivateGroupsSinceGivenDate(
+  private List<GroupDTO> fetchAllInactivePrivateRocketChatGroupsSinceGivenDate(
       LocalDateTime dateTimeToCheck) {
     try {
       return rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateTimeToCheck);
@@ -93,7 +90,7 @@ public class DeleteInactiveSessionsAndUserService {
           .deletionSourceType(ASKER)
           .deletionTargetType(ALL)
           .identifier("n/a")
-          .reason("Unable to delete inactive users and sessions")
+          .reason("Unable to fetch inactive groups from Rocket.Chat")
           .timestamp(nowInUtc())
           .build();
       sendWorkflowErrorsMail(Collections.singletonList(deletionWorkflowError));
@@ -101,54 +98,68 @@ public class DeleteInactiveSessionsAndUserService {
     return Collections.emptyList();
   }
 
-  private List<DeletionWorkflowError> performDeletionWorkflowForGroup(
+  private List<DeletionWorkflowError> performDeletionWorkflow(
       Entry<String, List<String>> userInactiveGroupEntry) {
+
+    List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
 
     Optional<User> user = userRepository
         .findByRcUserIdAndDeleteDateIsNull(userInactiveGroupEntry.getKey());
-    if (user.isPresent()) {
-      List<Session> userSessionList = sessionRepository.findByUser(user.get());
-      if (userInactiveGroupEntry.getValue().size() == userSessionList.size()) {
-        return deleteUserAccountService.performUserDeletion(user.get());
-      } else {
-        return userInactiveGroupEntry.getValue()
-            .stream()
-            .map(rcGroupId -> performSessionDeletion(rcGroupId, userSessionList))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-      }
+    user.ifPresent(u -> workflowErrors.addAll(
+        deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)));
+
+    return workflowErrors;
+  }
+
+  private List<DeletionWorkflowError> deleteInactiveGroupsOrUser(
+      Entry<String, List<String>> userInactiveGroupEntry, User user) {
+
+    List<Session> userSessionList = sessionRepository.findByUser(user);
+
+    if (allSessionsOfUserAreInactive(userInactiveGroupEntry, userSessionList)) {
+      return deleteUserAccountService.performUserDeletion(user);
     }
-    return Collections.emptyList();
+
+    return userInactiveGroupEntry.getValue()
+        .stream()
+        .map(rcGroupId -> performSessionDeletion(rcGroupId, userSessionList))
+        .flatMap(Collection::stream)
+        .collect(Collectors.toList());
+  }
+
+  private boolean allSessionsOfUserAreInactive(Entry<String, List<String>> userInactiveGroupEntry,
+      List<Session> userSessionList) {
+    return userInactiveGroupEntry.getValue().size() == userSessionList.size();
   }
 
   private List<DeletionWorkflowError> performSessionDeletion(String rcGroupId,
       List<Session> userSessionList) {
 
-    Optional<Session> session = userSessionList
+    List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
+
+    Optional<Session> session = findSessionInUserSessionList(rcGroupId, userSessionList);
+
+    session
+        .ifPresentOrElse(s ->
+                workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)),
+            () -> workflowErrors.add(DeletionWorkflowError.builder()
+                .deletionSourceType(ASKER)
+                .deletionTargetType(ALL)
+                .identifier(rcGroupId)
+                .reason("Session with rc group id could not be found.")
+                .timestamp(nowInUtc())
+                .build()));
+
+    return workflowErrors;
+  }
+
+  @NotNull
+  private Optional<Session> findSessionInUserSessionList(String rcGroupId,
+      List<Session> userSessionList) {
+    return userSessionList
         .stream()
         .filter(s -> s.getGroupId().equals(rcGroupId))
         .findFirst();
-
-    if (session.isPresent()) {
-
-      var deletionWorkflowDTO = new SessionDeletionWorkflowDTO(session.get(), new ArrayList<>());
-
-      this.actionsRegistry.buildContainerForType(SessionDeletionWorkflowDTO.class)
-          .addActionToExecute(DeleteSingleRoomAndSessionAction.class)
-          .executeActions(deletionWorkflowDTO);
-
-      return deletionWorkflowDTO.getDeletionWorkflowErrors();
-
-    }
-
-    var deletionWorkflowError = DeletionWorkflowError.builder()
-        .deletionSourceType(ASKER)
-        .deletionTargetType(ALL)
-        .identifier(rcGroupId)
-        .reason("Session with rc group id could not be found.")
-        .timestamp(nowInUtc())
-        .build();
-    return Collections.singletonList(deletionWorkflowError);
   }
 
   private void sendWorkflowErrorsMail(List<DeletionWorkflowError> workflowErrors) {
