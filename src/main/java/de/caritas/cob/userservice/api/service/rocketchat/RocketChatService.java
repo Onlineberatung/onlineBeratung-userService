@@ -5,7 +5,6 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
-import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -794,7 +793,7 @@ public class RocketChatService {
         .start(GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD)
         .lessThan(QueryBuilder
                 .start("$date")
-                .is("2021-07-07T14:59:58.665Z")
+                .is(dateTimeSinceInactive.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)))
                 .get())
         .and(QueryBuilder
             .start(GROUP_RESPONSE_GROUP_TYPE_FIELD)

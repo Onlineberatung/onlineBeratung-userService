@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,7 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Service to trigger deletion of inactive sessions and user accounts.
+ * Service to trigger deletion of inactive sessions and asker accounts.
  */
 @Service
 @RequiredArgsConstructor
@@ -44,11 +45,11 @@ public class DeleteInactiveSessionsAndUserService {
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
   private final @NonNull DeleteSessionService deleteSessionService;
 
-  @Value("${inactive.session.and.user.deleteWorkflow.days}")
-  private int inactiveSessionAndUserDeleteWorkflowDays;
+  @Value("${session.inactive.deleteWorkflow.check.days}")
+  private int sessionInactiveDeleteWorkflowCheckDays;
 
   /**
-   * Deletes all inactive sessions and even the user accounts, if there are no more active
+   * Deletes all inactive sessions and even the asker accounts, if there are no more active
    * sessions.
    */
   public void deleteInactiveSessionsAndUsers() {
@@ -78,7 +79,7 @@ public class DeleteInactiveSessionsAndUserService {
     return LocalDateTime
         .now()
         .with(LocalTime.MIDNIGHT)
-        .minusDays(inactiveSessionAndUserDeleteWorkflowDays);
+        .minusDays(sessionInactiveDeleteWorkflowCheckDays);
   }
 
   private List<GroupDTO> fetchAllInactivePrivateRocketChatGroupsSinceGivenDate(
@@ -86,6 +87,7 @@ public class DeleteInactiveSessionsAndUserService {
     try {
       return rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateTimeToCheck);
     } catch (RocketChatGetGroupsListAllException ex) {
+      LogService.logRocketChatError(ex);
       var deletionWorkflowError = DeletionWorkflowError.builder()
           .deletionSourceType(ASKER)
           .deletionTargetType(ALL)

@@ -12,7 +12,7 @@ public class DeleteInactiveSessionsAndUserScheduler {
 
   private final @NonNull DeleteInactiveSessionsAndUserService deleteInactiveSessionsAndUserService;
 
-  @Scheduled(cron = "${inactive.session.and.user.deleteWorkflow.cron}")
+  @Scheduled(cron = "${session.inactive.deleteWorkflow.cron}")
   public void performDeletionWorkflow() {
     this.deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
   }
