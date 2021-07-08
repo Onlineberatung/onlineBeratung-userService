@@ -25,8 +25,6 @@ public class DeleteUsersRegisteredOnlyService {
   private final @NonNull DeleteUserAccountService deleteUserAccountService;
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
 
-  @Value("${user.registeredonly.deleteWorkflow.enabled}")
-  private boolean userRegisteredOnlyDeleteWorkflowEnabled;
   @Value("${user.registeredonly.deleteWorkflow.check.days}")
   private int userRegisteredOnlyDeleteWorkflowCheckDays;
 
@@ -34,10 +32,6 @@ public class DeleteUsersRegisteredOnlyService {
    * Deletes all askers without running sessions.
    */
   public void deleteUserAccounts() {
-
-    if (!userRegisteredOnlyDeleteWorkflowEnabled) {
-      return;
-    }
 
     var workflowErrors = deleteAskersAndCollectPossibleErrors();
 
