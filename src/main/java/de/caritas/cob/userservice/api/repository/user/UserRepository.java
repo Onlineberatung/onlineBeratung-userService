@@ -35,6 +35,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
               + "FROM session s "
               + "WHERE u.user_id = s.user_id "
               + "AND s.status > 0 "
+              + "AND s.message_date IS NOT NULL "
               + "AND s.rc_group_id IS NOT NULL)",
       nativeQuery = true)
   List<User> findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(

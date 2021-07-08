@@ -569,7 +569,19 @@ VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMU
         '2020-10-14 06:40:03'),
        ('fda9a0a1-c936-45ee-9141-d73dfc0a3348', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2MJQ',
         'fda9a0a1-c936-45ee-9141-d73dfc0a3348@beratungcaritas.de', 'v43RmkXQG23tf3kWf', 1,
-        '2020-10-08 09:04:32', '2020-10-08 09:04:32');
+        '2020-10-08 09:04:32', '2020-10-08 09:04:32'),
+       ('abc9a0a1-c936-45ee-9141-d73dfc0a3999', 0, NULL, 'enc.OBSXEZTPOJBWC3TAMUWWC43LMVZC2MJQ',
+        'abc9a0a1-c936-45ee-9141-d73dfc0a3999@beratungcaritas.de', '3tf3kWfdG23tf3kWf', 1,
+        '2018-05-01 09:04:32', '2020-10-08 09:04:32'),
+       ('def9a0a1-c936-45ee-9141-d73dfc0a3888', 0, NULL, 'enc.OBSXEZTCOJDWC3TAMUWWC43LMVZC2MJQ',
+        'def9a0a1-c936-45ee-9141-d73dfc0a3888@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
+        '2018-04-20 11:09:32', '2018-04-20 11:09:32'),
+       ('hki9a0a1-c936-45ee-9141-d73dfc0a3777', 0, NULL, 'enc.ODDXEZTCOJDWC3TAMUWWC43LMVZC2MJQ',
+        'hki9a0a1-c936-45ee-9141-d73dfc0a3777@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
+        '2018-02-05 11:09:32', '2018-02-05 11:09:32'),
+       ('dlk9a0a1-c936-45ee-9141-d73dfc0a3666', 0, NULL, 'enc.ODDXEZTCOJDWC3TAMUWWC43DMVZF2MJQ',
+        'dlk9a0a1-c936-45ee-9141-d73dfc0a3666@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
+        '2018-01-01 11:09:32', '2018-01-01 11:09:32');
 INSERT INTO CONSULTANT (`consultant_id`, `username`, `first_name`, `last_name`, `email`,
                         `is_team_consultant`, `is_absent`, `absence_message`, `rc_user_id`,
                         `language_formal`, `id_old`, `delete_date`, `create_date`, `update_date`)
@@ -1221,4 +1233,16 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
         '2020-11-04 14:56:08', '2020-11-04 14:57:28'),
        (1200, '06c6601f-a5b4-4812-9260-20065390b1f5', NULL, 1, '2020-11-05 14:18:16', '12345', 121,
         'ix7E7HzXKTgGeQMyb', 'EQBcSwxn4eCAPYQ2J', 1, 1, 1, '2020-11-05 14:17:34',
-        '2020-11-05 14:18:16');
+        '2020-11-05 14:18:16'),
+       (1201, 'def9a0a1-c936-45ee-9141-d73dfc0a3888', NULL, 1, NULL, '12345', 121,
+        NULL, NULL, 0, 1, 1, '2018-04-20 11:09:32',
+        '2018-04-20 11:09:32'),
+       (1202, 'hki9a0a1-c936-45ee-9141-d73dfc0a3777', NULL, 1, NULL, '12345', 121,
+        NULL, NULL, 0, 1, 1, '2018-02-05 11:09:32',
+        '2018-02-05 11:09:32'),
+       (1203, 'hki9a0a1-c936-45ee-9141-d73dfc0a3777', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
+        '2018-02-05 11:09:32', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
+        '2018-02-05 11:09:32', '2018-02-05 11:09:32'),
+        (1204, 'dlk9a0a1-c936-45ee-9141-d73dfc0a3666', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
+        '2018-01-01 11:09:32', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
+        '2018-01-01 11:09:32', '2018-01-01 11:09:32');
