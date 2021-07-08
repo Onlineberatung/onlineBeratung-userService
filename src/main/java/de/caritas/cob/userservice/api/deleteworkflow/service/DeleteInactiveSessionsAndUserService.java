@@ -45,6 +45,8 @@ public class DeleteInactiveSessionsAndUserService {
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
   private final @NonNull DeleteSessionService deleteSessionService;
 
+  @Value("${session.inactive.deleteWorkflow.enabled}")
+  private boolean sessionInactiveDeleteWorkflowEnabled;
   @Value("${session.inactive.deleteWorkflow.check.days}")
   private int sessionInactiveDeleteWorkflowCheckDays;
 
@@ -53,6 +55,10 @@ public class DeleteInactiveSessionsAndUserService {
    * sessions.
    */
   public void deleteInactiveSessionsAndUsers() {
+
+    if (!sessionInactiveDeleteWorkflowEnabled) {
+      return;
+    }
 
     Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>();
     fetchAllInactivePrivateGroups()
