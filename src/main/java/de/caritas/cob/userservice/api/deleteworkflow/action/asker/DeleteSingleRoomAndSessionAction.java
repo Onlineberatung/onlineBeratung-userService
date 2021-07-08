@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.deleteworkflow.action.asker;
 import de.caritas.cob.userservice.api.actions.ActionCommand;
 import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
+import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
