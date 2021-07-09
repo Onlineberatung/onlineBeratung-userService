@@ -3,9 +3,9 @@ package de.caritas.cob.userservice.api.deleteworkflow.service;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
+import de.caritas.cob.userservice.api.helper.DateCalculator;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,20 +43,14 @@ public class DeleteUsersRegisteredOnlyService {
 
   private List<DeletionWorkflowError> deleteAskersAndCollectPossibleErrors() {
 
-    LocalDateTime dateTimeToCheck = calculateDateTimeToCheck();
+    LocalDateTime dateTimeToCheck = DateCalculator
+        .calculateDateInThePastAtMidnight(userRegisteredOnlyDeleteWorkflowCheckDays);
     return userRepository
         .findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateTimeToCheck)
         .stream()
         .map(deleteUserAccountService::performUserDeletion)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
-  }
-
-  private LocalDateTime calculateDateTimeToCheck() {
-    return LocalDateTime
-        .now()
-        .with(LocalTime.MIDNIGHT)
-        .minusDays(userRegisteredOnlyDeleteWorkflowCheckDays);
   }
 
 }

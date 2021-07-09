@@ -1,11 +1,11 @@
 package de.caritas.cob.userservice.api.deleteworkflow.service.provider;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
+import de.caritas.cob.userservice.api.helper.DateCalculator;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,15 +44,9 @@ public class InactivePrivateGroupsProvider {
   }
 
   private List<GroupDTO> fetchAllInactivePrivateGroups() {
-    LocalDateTime dateTimeToCheck = calculateDateTimeToCheck();
+    LocalDateTime dateTimeToCheck = DateCalculator
+        .calculateDateInThePastAtMidnight(sessionInactiveDeleteWorkflowCheckDays);
     return fetchAllInactivePrivateRocketChatGroupsSinceGivenDate(dateTimeToCheck);
-  }
-
-  private LocalDateTime calculateDateTimeToCheck() {
-    return LocalDateTime
-        .now()
-        .with(LocalTime.MIDNIGHT)
-        .minusDays(sessionInactiveDeleteWorkflowCheckDays);
   }
 
   private List<GroupDTO> fetchAllInactivePrivateRocketChatGroupsSinceGivenDate(

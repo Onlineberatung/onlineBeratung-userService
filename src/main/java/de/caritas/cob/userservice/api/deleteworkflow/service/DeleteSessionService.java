@@ -1,11 +1,14 @@
 package de.caritas.cob.userservice.api.deleteworkflow.service;
 
+import static java.util.Objects.isNull;
+
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,10 @@ public class DeleteSessionService {
    * @return a {@link List} of {@link DeletionWorkflowError}
    */
   public List<DeletionWorkflowError> performSessionDeletion(Session session) {
+
+    if (isNull(session)) {
+      return Collections.emptyList();
+    }
 
     var deletionWorkflowDTO = new SessionDeletionWorkflowDTO(session, new ArrayList<>());
 
