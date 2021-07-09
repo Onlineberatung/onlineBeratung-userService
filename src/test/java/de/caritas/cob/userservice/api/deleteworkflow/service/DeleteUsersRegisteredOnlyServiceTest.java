@@ -11,6 +11,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
@@ -33,6 +34,8 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   private DeleteUserAccountService deleteUserAccountService;
   @Mock
   private WorkflowErrorMailService workflowErrorMailService;
+  @Mock
+  private RocketChatService rocketChatService;
 
   @Test
   public void deleteUserAccounts_Should_notPerformAnyDeletion_When_noUserAccountWithoutRunningSessionsIsFound() {
