@@ -24,9 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteUsersRegisteredOnlyServiceTest {
 
-  private final String FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_CHECK_DAYS = "userRegisteredOnlyDeleteWorkflowCheckDays";
-  private final int VALUE_USER_REGISTERED_ONLY_DELETE_WORKFLOW_CHECK_DAYS = 30;
-
   @InjectMocks
   private DeleteUsersRegisteredOnlyService deleteUsersRegisteredOnlyService;
 
@@ -88,17 +85,20 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   @Test
   public void deleteUserAccounts_Should_CheckUsersWithCorrectDate() {
 
-    setField(deleteUsersRegisteredOnlyService, FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_CHECK_DAYS,
-        VALUE_USER_REGISTERED_ONLY_DELETE_WORKFLOW_CHECK_DAYS);
+    String fieldNameUserRegisteredOnlyDeleteWorkflowCheckDays = "userRegisteredOnlyDeleteWorkflowCheckDays";
+    int valueUserRegisteredOnlyDeleteWorkflowCheckDays = 30;
+
+    setField(deleteUsersRegisteredOnlyService,
+        fieldNameUserRegisteredOnlyDeleteWorkflowCheckDays,
+        valueUserRegisteredOnlyDeleteWorkflowCheckDays);
     LocalDateTime dateToCheck = LocalDateTime
         .now()
         .with(LocalTime.MIDNIGHT)
-        .minusDays(VALUE_USER_REGISTERED_ONLY_DELETE_WORKFLOW_CHECK_DAYS);
+        .minusDays(valueUserRegisteredOnlyDeleteWorkflowCheckDays);
 
     this.deleteUsersRegisteredOnlyService.deleteUserAccounts();
 
     verify(userRepository, times(1)).findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateToCheck);
-
 
   }
 }

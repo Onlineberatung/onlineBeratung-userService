@@ -6,20 +6,13 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
+import de.caritas.cob.userservice.api.deleteworkflow.service.provider.InactivePrivateGroupsProvider;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,8 +20,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,15 +29,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DeleteInactiveSessionsAndUserService {
 
-  private final @NonNull RocketChatService rocketChatService;
   private final @NonNull UserRepository userRepository;
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull DeleteUserAccountService deleteUserAccountService;
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
   private final @NonNull DeleteSessionService deleteSessionService;
-
-  @Value("${session.inactive.deleteWorkflow.check.days}")
-  private int sessionInactiveDeleteWorkflowCheckDays;
+  private final @NonNull InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
 
   /**
    * Deletes all inactive sessions and even the asker accounts, if there are no more active
@@ -54,11 +42,8 @@ public class DeleteInactiveSessionsAndUserService {
    */
   public void deleteInactiveSessionsAndUsers() {
 
-    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>();
-    fetchAllInactivePrivateGroups()
-        .forEach(group -> userWithInactiveGroupsMap
-            .computeIfAbsent(group.getUser().getId(), v -> new ArrayList<>())
-            .add(group.getId()));
+    Map<String, List<String>> userWithInactiveGroupsMap =
+        inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap();
 
     List<DeletionWorkflowError> workflowErrors = userWithInactiveGroupsMap
         .entrySet()
@@ -70,34 +55,10 @@ public class DeleteInactiveSessionsAndUserService {
     sendWorkflowErrorsMail(workflowErrors);
   }
 
-  private List<GroupDTO> fetchAllInactivePrivateGroups() {
-    LocalDateTime dateTimeToCheck = calculateDateTimeToCheck();
-    return fetchAllInactivePrivateRocketChatGroupsSinceGivenDate(dateTimeToCheck);
-  }
-
-  private LocalDateTime calculateDateTimeToCheck() {
-    return LocalDateTime
-        .now()
-        .with(LocalTime.MIDNIGHT)
-        .minusDays(sessionInactiveDeleteWorkflowCheckDays);
-  }
-
-  private List<GroupDTO> fetchAllInactivePrivateRocketChatGroupsSinceGivenDate(
-      LocalDateTime dateTimeToCheck) {
-    try {
-      return rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateTimeToCheck);
-    } catch (RocketChatGetGroupsListAllException ex) {
-      LogService.logRocketChatError(ex);
-      var deletionWorkflowError = DeletionWorkflowError.builder()
-          .deletionSourceType(ASKER)
-          .deletionTargetType(ALL)
-          .identifier("n/a")
-          .reason("Unable to fetch inactive groups from Rocket.Chat")
-          .timestamp(nowInUtc())
-          .build();
-      sendWorkflowErrorsMail(Collections.singletonList(deletionWorkflowError));
+  private void sendWorkflowErrorsMail(List<DeletionWorkflowError> workflowErrors) {
+    if (isNotEmpty(workflowErrors)) {
+      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
     }
-    return Collections.emptyList();
   }
 
   private List<DeletionWorkflowError> performDeletionWorkflow(
@@ -107,8 +68,15 @@ public class DeleteInactiveSessionsAndUserService {
 
     Optional<User> user = userRepository
         .findByRcUserIdAndDeleteDateIsNull(userInactiveGroupEntry.getKey());
-    user.ifPresent(u -> workflowErrors.addAll(
-        deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)));
+    user.ifPresentOrElse(u -> workflowErrors.addAll(
+        deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)),
+        () -> workflowErrors.add(DeletionWorkflowError.builder()
+            .deletionSourceType(ASKER)
+            .deletionTargetType(ALL)
+            .identifier(userInactiveGroupEntry.getKey())
+            .reason("User could not be found.")
+            .timestamp(nowInUtc())
+            .build()));
 
     return workflowErrors;
   }
@@ -155,7 +123,6 @@ public class DeleteInactiveSessionsAndUserService {
     return workflowErrors;
   }
 
-  @NotNull
   private Optional<Session> findSessionInUserSessionList(String rcGroupId,
       List<Session> userSessionList) {
     return userSessionList
@@ -163,11 +130,4 @@ public class DeleteInactiveSessionsAndUserService {
         .filter(s -> s.getGroupId().equals(rcGroupId))
         .findFirst();
   }
-
-  private void sendWorkflowErrorsMail(List<DeletionWorkflowError> workflowErrors) {
-    if (isNotEmpty(workflowErrors)) {
-      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
-    }
-  }
-
 }
