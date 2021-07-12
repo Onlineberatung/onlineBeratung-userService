@@ -21,7 +21,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupAddUserBodyDTO;
@@ -85,7 +84,9 @@ public class RocketChatService {
   private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
   private static final String GROUPS_LIST_ALL_ERROR_MESSAGE = "Could not get all rocket chat groups";
   private static final String USERS_LIST_ERROR_MESSAGE = "Could not get users list from Rocket.Chat";
+  private static final String USER_LIST_GET_FIELD_SELECTION = "{\"_id\":1}";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 1, 1, 0, 0);
+
 
   private final LocalDateTime localDateTimeFuture = nowInUtc().plusYears(1L);
   private final @NonNull RestTemplate restTemplate;
@@ -581,7 +582,7 @@ public class RocketChatService {
   public List<SubscriptionsUpdateDTO> getSubscriptionsOfUser(
       RocketChatCredentials rocketChatCredentials) {
 
-    ResponseEntity<SubscriptionsGetDTO> response = null;
+    ResponseEntity<SubscriptionsGetDTO> response;
 
     try {
       var header = getStandardHttpHeaders(rocketChatCredentials);
@@ -853,23 +854,17 @@ public class RocketChatService {
   public String getRocketChatUserIdByUsername(String username)
       throws RocketChatGetUserIdException {
 
-    var fields = "{\"_id\":1}";
-    var query = "{\"username\":{\"$eq\":\""
-        + Helper.removeHTMLFromText(username.toLowerCase())
-        + "\"}}";
-    var url = rocketChatApiUsersListGet + "?query={query}&fields={fields}";
-
     ResponseEntity<UsersListReponseDTO> response;
     try {
       var technicalUser = rcCredentialHelper.getTechnicalUser();
       var header = getStandardHttpHeaders(technicalUser);
       HttpEntity<UsersListReponseDTO> request = new HttpEntity<>(header);
-      response = restTemplate.exchange(url,
+      response = restTemplate.exchange(buildUsersListGetUrl(),
           HttpMethod.GET,
           request,
           UsersListReponseDTO.class,
-          query,
-          fields);
+          buildUsernameQuery(username),
+          USER_LIST_GET_FIELD_SELECTION);
     } catch (Exception ex) {
       throw new RocketChatGetUserIdException(USERS_LIST_ERROR_MESSAGE, ex);
     }
@@ -890,5 +885,13 @@ public class RocketChatService {
 
     throw new RocketChatGetUserIdException(String.format("Found %s users by username", users.length));
 
+  }
+
+  private String buildUsersListGetUrl() {
+    return rocketChatApiUsersListGet + "?query={query}&fields={fields}";
+  }
+
+  private String buildUsernameQuery(String username) {
+    return String.format("{\"username\":{\"$eq\":\"%s\"}}", username.toLowerCase());
   }
 }
