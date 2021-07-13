@@ -32,6 +32,8 @@ public class UserRepositoryTest {
     final String USER_ID_SHOULD_IN_LIST_2 = "def9a0a1-c936-45ee-9141-d73dfc0a3888";
     final String USER_ID_SHOULD_NOT_IN_LIST_1 = "hki9a0a1-c936-45ee-9141-d73dfc0a3777";
     final String USER_ID_SHOULD_NOT_IN_LIST_2 = "dlk9a0a1-c936-45ee-9141-d73dfc0a3666";
+    final String USER_ID_SHOULD_NOT_IN_LIST_3 = "arb9a0a1-c936-45ee-9141-d73dfc0a3111";
+    final String USER_ID_SHOULD_NOT_IN_LIST_4 = "jurea0a1-c936-45ee-9141-d73dfc0a3000";
     List<User> result =
         userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateCheck);
 
@@ -44,6 +46,10 @@ public class UserRepositoryTest {
     assertThat(result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_NOT_IN_LIST_1::equals),
         is(false));
     assertThat(result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_NOT_IN_LIST_2::equals),
+        is(false));
+    assertThat(result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_NOT_IN_LIST_3::equals),
+        is(false));
+    assertThat(result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_NOT_IN_LIST_4::equals),
         is(false));
   }
 

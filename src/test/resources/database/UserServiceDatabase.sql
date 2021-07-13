@@ -581,6 +581,12 @@ VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMU
         '2018-02-05 11:09:32', '2018-02-05 11:09:32'),
        ('dlk9a0a1-c936-45ee-9141-d73dfc0a3666', 0, NULL, 'enc.ODDXEZTCOJDWC3TAMUWWC43DMVZF2MJQ',
         'dlk9a0a1-c936-45ee-9141-d73dfc0a3666@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
+        '2018-01-01 11:09:32', '2018-01-01 11:09:32'),
+       ('arb9a0a1-c936-45ee-9141-d73dfc0a3111', 0, NULL, 'enc.ODDXEZTCOJDWC3T5MUWGC43DMAZF2MJQ',
+        'arb9a0a1-c936-45ee-9141-d73dfc0a3111@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
+        '2018-01-01 11:09:32', '2018-01-01 11:09:32'),
+       ('jurea0a1-c936-45ee-9141-d73dfc0a3000', 0, NULL, 'enc.ODDXEZDCOJDFC3T5AUWGC43DMAZF2MJQ',
+        'jurea0a1-c936-45ee-9141-d73dfc0a3000@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
         '2018-01-01 11:09:32', '2018-01-01 11:09:32');
 INSERT INTO CONSULTANT (`consultant_id`, `username`, `first_name`, `last_name`, `email`,
                         `is_team_consultant`, `is_absent`, `absence_message`, `rc_user_id`,
@@ -1243,6 +1249,18 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
        (1203, 'hki9a0a1-c936-45ee-9141-d73dfc0a3777', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
         '2018-02-05 11:09:32', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
         '2018-02-05 11:09:32', '2018-02-05 11:09:32'),
-        (1204, 'dlk9a0a1-c936-45ee-9141-d73dfc0a3666', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
+       (1204, 'dlk9a0a1-c936-45ee-9141-d73dfc0a3666', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
         '2018-01-01 11:09:32', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
-        '2018-01-01 11:09:32', '2018-01-01 11:09:32');
+        '2018-01-01 11:09:32', '2018-01-01 11:09:32'),
+       (1205, 'abc9a0a1-c936-45ee-9141-d73dfc0a3999', NULL, 1, NULL, '12345', 121,
+        NULL, NULL, 0, 1, 1, '2018-05-01 09:04:32', '2018-05-01 09:04:32'),
+       (1206, 'arb9a0a1-c936-45ee-9141-d73dfc0a3111', NULL, 1, NULL, '12345', 121,
+        NULL, NULL, 0, 1, 1, '2019-02-02 09:04:32', '2019-02-02 09:04:32'),
+       (1207, 'jurea0a1-c936-45ee-9141-d73dfc0a3000', NULL, 1, NULL, '12345', 121,
+        NULL, NULL, 0, 1, 1, '2018-05-01 09:04:32', '2018-05-01 09:04:32'),
+       (1208, 'jurea0a1-c936-45ee-9141-d73dfc0a3000', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
+        '2020-02-05 11:09:32', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
+        '2020-02-05 11:09:32', '2020-02-05 11:09:32');
+
+
+
