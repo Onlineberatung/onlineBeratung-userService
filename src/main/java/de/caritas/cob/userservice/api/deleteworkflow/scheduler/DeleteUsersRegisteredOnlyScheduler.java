@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * Scheduler for deletion of only registered users without sessions.
+ */
 @Component
 @RequiredArgsConstructor
 public class DeleteUsersRegisteredOnlyScheduler {
@@ -16,15 +19,15 @@ public class DeleteUsersRegisteredOnlyScheduler {
   @Value("${user.registeredonly.deleteWorkflow.enabled}")
   private boolean userRegisteredOnlyDeleteWorkflowEnabled;
 
+  /**
+   * Entry method to perform deletion workflow.
+   */
   @Scheduled(cron = "${user.registeredonly.deleteWorkflow.cron}")
   public void performDeletionWorkflow() {
 
-    if (!userRegisteredOnlyDeleteWorkflowEnabled) {
-      return;
+    if (userRegisteredOnlyDeleteWorkflowEnabled) {
+      this.deleteUsersRegisteredOnlyService.deleteUserAccounts();
     }
-
-    this.deleteUsersRegisteredOnlyService.deleteUserAccounts();
-
   }
 
 }

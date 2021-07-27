@@ -587,6 +587,9 @@ VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMU
         '2018-01-01 11:09:32', '2018-01-01 11:09:32'),
        ('jurea0a1-c936-45ee-9141-d73dfc0a3000', 0, NULL, 'enc.ODDXEZDCOJDFC3T5AUWGC43DMAZF2MJQ',
         'jurea0a1-c936-45ee-9141-d73dfc0a3000@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
+        '2018-01-01 11:09:32', '2018-01-01 11:09:32'),
+       ('opiti0a1-c936-45ee-9141-d73dfc0a3000', 0, NULL, 'enc.ODDAEZGDCHOJDAT5AUWGC43DMAZF2MJQ',
+        'opiti0a1-c936-45ee-9141-d73dfc0a3000@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
         '2018-01-01 11:09:32', '2018-01-01 11:09:32');
 INSERT INTO CONSULTANT (`consultant_id`, `username`, `first_name`, `last_name`, `email`,
                         `is_team_consultant`, `is_absent`, `absence_message`, `rc_user_id`,
@@ -1261,6 +1264,7 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
        (1208, 'jurea0a1-c936-45ee-9141-d73dfc0a3000', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
         '2020-02-05 11:09:32', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
         '2020-02-05 11:09:32', '2020-02-05 11:09:32');
-
+INSERT INTO USER_AGENCY (`id`, `user_id`, `agency_id`, `create_date`, `update_date`)
+VALUES (0, 'opiti0a1-c936-45ee-9141-d73dfc0a3000', 777, '2020-02-05 11:09:32', '2020-02-05 11:09:32');
 
 
