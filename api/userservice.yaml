@@ -1084,7 +1084,7 @@ paths:
     put:
       tags:
         - user-controller
-      summary: 'activates twoFactorAuth for a user'
+      summary: 'Activates Two-Factor Authentication for a user'
       operationId: activateTwoFactorAuthForUser
       requestBody:
         content:
@@ -1101,10 +1101,8 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        406:
-          description: Not Acceptable - user or consultant two factor authentication is disabled
         409:
-          description: Cnflict - role from the request has no two factor auth enabled
+          description: CONFLICT - role from the request has no two factor auth enabled
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -1113,8 +1111,8 @@ paths:
     delete:
       tags:
         - user-controller
-      summary: 'deactivates twoFactorAuth for a user'
-      operationId: deactivateTwoFactorAuthForUser
+      summary: 'Deletes the Two-Factor Authentication for a user'
+      operationId: deleteTwoFactorAuthForUser
       responses:
         200:
           description: OK - successfull operation
@@ -1128,6 +1126,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+
   /liveproxy/send:
     post:
       tags:
@@ -1653,7 +1652,7 @@ components:
           items:
             type: string
         twoFactorAuth:
-          $ref: "#/components/schemas/twoFactorAuthDTO"
+          $ref: "#/components/schemas/TwoFactorAuthDTO"
         consultingTypes:
           $ref: "#/components/schemas/ConsultingTypeMap"
         hasAnonymousConversations:
@@ -1932,7 +1931,7 @@ components:
           minLength: 6
           maxLength: 6
 
-    twoFactorAuthDTO:
+    TwoFactorAuthDTO:
       type: object
       properties:
         isEnabled:
