@@ -63,7 +63,7 @@ public class RocketChatCredentialsProvider {
   private final AtomicReference<RocketChatCredentials> systemUserB = new AtomicReference<>();
 
   /**
-   * Get a valid technical Users
+   * Get valid technical user credentials
    */
   public RocketChatCredentials getTechnicalUser() throws RocketChatUserNotInitializedException {
     return observeNonNullOrLatestUser(this.techUserA, this.techUserB);
@@ -190,7 +190,7 @@ public class RocketChatCredentialsProvider {
       throws RocketChatLoginException {
 
     try {
-      HttpHeaders headers = new HttpHeaders();
+      var headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
       MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -217,7 +217,7 @@ public class RocketChatCredentialsProvider {
   public boolean logoutUser(String rcUserId, String rcAuthToken) {
 
     try {
-      HttpHeaders headers = getStandardHttpHeaders(rcAuthToken, rcUserId);
+      var headers = getStandardHttpHeaders(rcAuthToken, rcUserId);
 
       HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -250,7 +250,7 @@ public class RocketChatCredentialsProvider {
    */
   private HttpHeaders getStandardHttpHeaders(String rcToken, String rcUserId) {
 
-    HttpHeaders httpHeaders = new HttpHeaders();
+    var httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     httpHeaders.add(rocketChatHeaderAuthToken, rcToken);
     httpHeaders.add(rocketChatHeaderUserId, rcUserId);

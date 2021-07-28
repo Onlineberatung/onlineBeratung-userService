@@ -46,6 +46,8 @@ public class FieldConstants {
       "rocketChatApiGroupRemoveUserUrl";
   public static final String FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL = "rocketChatApiUserDelete";
   public static final String FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL = "rocketChatApiUserUpdate";
+  public static final String FIELD_NAME_ROCKET_CHAT_API_USERS_LIST_GET_URL = "rocketChatApiUsersListGet";
+  public static final String FIELD_NAME_ROCKET_CHAT_API_GROUPS_LIST_ALL_GET_URL = "rocketChatApiGetGroupsListAll";
   public static final String FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY =
       "rocketChatApiCleanRoomHistory";
   public static final String FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN = "technUserAuthToken";
@@ -68,4 +70,6 @@ public class FieldConstants {
   public static final String RC_URL_SUBSCRIPTIONS_GET = "http://localhost/api/v1/subscriptions.get";
   public static final String RC_URL_ROOMS_GET = "http://localhost/api/v1/rooms.get";
   public static final String RC_URL_USERS_INFO_GET = "http://localhost/api/v1/users.info";
+  public static final String RC_URL_USERS_LIST_GET = "http://localhost/api/v1/users.list";
+  public static final String RC_URL_GROUPS_LIST_ALL = "http://localhost/api/v1/groups.listAll";
 }

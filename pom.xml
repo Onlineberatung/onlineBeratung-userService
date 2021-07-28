@@ -253,7 +253,20 @@
 			<artifactId>plantuml</artifactId>
 			<version>1.2021.1</version>
 		</dependency>
-  </dependencies>
+
+		<!-- MongoDB dependencies -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver</artifactId>
+			<version>3.12.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>RELEASE</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<finalName>${project.name}</finalName>
