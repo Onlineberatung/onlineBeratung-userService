@@ -5,6 +5,8 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
+import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
@@ -13,20 +15,25 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroup
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupAddUserBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCleanHistoryDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupCreateBodyDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupRemoveUserBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupsListAllResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LdapLoginDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
@@ -38,6 +45,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.user.SetRoomReadOnlyBodyD
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserDeleteBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UsersListReponseDTO;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.NonNull;
@@ -75,10 +82,15 @@ public class RocketChatService {
       + "%s could not be deleted";
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
+  private static final String GROUPS_LIST_ALL_ERROR_MESSAGE = "Could not get all rocket chat groups";
+  private static final String USERS_LIST_ERROR_MESSAGE = "Could not get users list from Rocket.Chat";
+  private static final String USER_LIST_GET_FIELD_SELECTION = "{\"_id\":1}";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 1, 1, 0, 0);
 
-  private final LocalDateTime localDateTimeFuture = nowInUtc().plusYears(1L);
 
+  private final LocalDateTime localDateTimeFuture = nowInUtc().plusYears(1L);
+  private final @NonNull RestTemplate restTemplate;
+  private final @NonNull RocketChatCredentialsProvider rcCredentialHelper;
   @Value("${rocket.chat.header.auth.token}")
   private String rocketChatHeaderAuthToken;
   @Value("${rocket.chat.header.user.id}")
@@ -93,6 +105,8 @@ public class RocketChatService {
   private String rocketChatApiGroupRemoveUserUrl;
   @Value("${rocket.chat.api.group.get.member}")
   private String rocketChatApiGetGroupMembersUrl;
+  @Value("${rocket.chat.api.group.list.all}")
+  private String rocketChatApiGetGroupsListAll;
   @Value("${rocket.chat.api.subscriptions.get}")
   private String rocketChatApiSubscriptionsGet;
   @Value("${rocket.chat.api.rooms.get}")
@@ -107,13 +121,12 @@ public class RocketChatService {
   private String rocketChatApiUserUpdate;
   @Value("${rocket.chat.api.user.delete}")
   private String rocketChatApiUserDelete;
+  @Value("${rocket.chat.api.user.list}")
+  private String rocketChatApiUsersListGet;
   @Value("${rocket.chat.api.rooms.clean.history}")
   private String rocketChatApiCleanRoomHistory;
   @Value("${rocket.chat.api.group.set.readOnly}")
   private String rocketChatApiGroupSetReadOnly;
-
-  private final @NonNull RestTemplate restTemplate;
-  private final @NonNull RocketChatCredentialsProvider rcCredentialHelper;
 
   /**
    * Creation of a private Rocket.Chat group.
@@ -492,7 +505,7 @@ public class RocketChatService {
           + " members for room id %s", rcGroupId), ex);
     }
 
-    if (response.getStatusCode() == HttpStatus.OK && !Objects.isNull(response.getBody())) {
+    if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getMembers());
     } else {
       var error = "Could not get Rocket.Chat group members for room id %s";
@@ -569,7 +582,7 @@ public class RocketChatService {
   public List<SubscriptionsUpdateDTO> getSubscriptionsOfUser(
       RocketChatCredentials rocketChatCredentials) {
 
-    ResponseEntity<SubscriptionsGetDTO> response = null;
+    ResponseEntity<SubscriptionsGetDTO> response;
 
     try {
       var header = getStandardHttpHeaders(rocketChatCredentials);
@@ -767,5 +780,118 @@ public class RocketChatService {
       LogService.logRocketChatError(String.format("Mark group with id %s as read only failed "
           + "with reason %s", rcRoomId, responseBody.getError()));
     }
+  }
+
+  /**
+   * Returns all private Rocket.Chat groups which are inactive (= no messages written) since given
+   * date.
+   *
+   * @param dateTimeSinceInactive the date and time since when the groups should be inactive
+   * @return a {@link List} of {@link GroupDTO} instances
+   */
+  public List<GroupDTO> fetchAllInactivePrivateGroupsSinceGivenDate(
+      LocalDateTime dateTimeSinceInactive)
+      throws RocketChatGetGroupsListAllException {
+
+    final var GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD = "lastMessage.ts";
+    final var GROUP_RESPONSE_GROUP_TYPE_FIELD = "t";
+    final var GROUP_RESPONSE_GROUP_TYPE_PRIVATE = "p";
+
+    DBObject mongoDbQuery = QueryBuilder
+        .start(GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD)
+        .lessThan(QueryBuilder
+            .start("$date")
+            .is(dateTimeSinceInactive.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)))
+            .get())
+        .and(QueryBuilder
+            .start(GROUP_RESPONSE_GROUP_TYPE_FIELD)
+            .is(GROUP_RESPONSE_GROUP_TYPE_PRIVATE)
+            .get())
+        .get();
+
+    return getGroupsListAll(mongoDbQuery);
+  }
+
+  /**
+   * Returns a list of all Rocket.Chat groups.
+   *
+   * @param mongoDbQuery mongoDB Query as {@link DBObject} created with {@link QueryBuilder}
+   * @return a {@link List} of {@link GroupDTO} instances
+   * @throws RocketChatGetGroupsListAllException when request fails
+   */
+  private List<GroupDTO> getGroupsListAll(DBObject mongoDbQuery)
+      throws RocketChatGetGroupsListAllException {
+
+    ResponseEntity<GroupsListAllResponseDTO> response;
+    try {
+      var technicalUser = rcCredentialHelper.getTechnicalUser();
+      var header = getStandardHttpHeaders(technicalUser);
+      HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
+      var url = rocketChatApiGetGroupsListAll + "?query={query}";
+      response = restTemplate.exchange(url,
+          HttpMethod.GET,
+          request,
+          GroupsListAllResponseDTO.class,
+          mongoDbQuery.toString());
+    } catch (Exception ex) {
+      throw new RocketChatGetGroupsListAllException(GROUPS_LIST_ALL_ERROR_MESSAGE, ex);
+    }
+
+    if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
+      return Arrays.asList(response.getBody().getGroups());
+    } else {
+      throw new RocketChatGetGroupsListAllException(GROUPS_LIST_ALL_ERROR_MESSAGE);
+    }
+  }
+
+  /**
+   * Returns the id of a Rocket.Chat user by username.
+   *
+   * @param username the username to search for
+   * @return the Rocket.Chat user id
+   * @throws RocketChatGetUserIdException when request fails
+   */
+  public String getRocketChatUserIdByUsername(String username)
+      throws RocketChatGetUserIdException {
+
+    ResponseEntity<UsersListReponseDTO> response;
+    try {
+      var technicalUser = rcCredentialHelper.getTechnicalUser();
+      var header = getStandardHttpHeaders(technicalUser);
+      HttpEntity<UsersListReponseDTO> request = new HttpEntity<>(header);
+      response = restTemplate.exchange(buildUsersListGetUrl(),
+          HttpMethod.GET,
+          request,
+          UsersListReponseDTO.class,
+          buildUsernameQuery(username),
+          USER_LIST_GET_FIELD_SELECTION);
+    } catch (Exception ex) {
+      throw new RocketChatGetUserIdException(USERS_LIST_ERROR_MESSAGE, ex);
+    }
+
+    if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
+      return extractUserIdFromResponse(response.getBody().getUsers());
+    } else {
+      throw new RocketChatGetUserIdException(USERS_LIST_ERROR_MESSAGE);
+    }
+  }
+
+  private String extractUserIdFromResponse(RocketChatUserDTO[] users)
+      throws RocketChatGetUserIdException {
+
+    if (users.length == 1) {
+      return users[0].getId();
+    }
+
+    throw new RocketChatGetUserIdException(String.format("Found %s users by username", users.length));
+
+  }
+
+  private String buildUsersListGetUrl() {
+    return rocketChatApiUsersListGet + "?query={query}&fields={fields}";
+  }
+
+  private String buildUsernameQuery(String username) {
+    return String.format("{\"username\":{\"$eq\":\"%s\"}}", username.toLowerCase());
   }
 }
