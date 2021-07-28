@@ -786,7 +786,7 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Activates 2FA for the given user.
+   * Activates 2FA for the calling user.
    *
    * @param otpSetupDTO (required) {@link OtpSetupDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
@@ -802,12 +802,12 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Deactivates two factor authentication for the user.
+   * Deletes 2FA for the calling user.
    *
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> deactivateTwoFactorAuthForUser() {
+  public ResponseEntity<Void> deleteTwoFactorAuthForUser() {
     keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
     return new ResponseEntity<>(HttpStatus.OK);
   }

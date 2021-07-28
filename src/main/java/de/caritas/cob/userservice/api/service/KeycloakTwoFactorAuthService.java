@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
@@ -56,8 +55,7 @@ public class KeycloakTwoFactorAuthService {
 
     try {
       ResponseEntity<OtpInfoDTO> response = restTemplate
-          .exchange(requestUrl, HttpMethod.GET, request,
-              OtpInfoDTO.class);
+          .exchange(requestUrl, HttpMethod.GET, request, OtpInfoDTO.class);
       return Optional.ofNullable(response.getBody());
     } catch (RestClientException ex) {
       LogService.logKeycloakError("Could not fetch otp credential info", ex);
@@ -67,10 +65,10 @@ public class KeycloakTwoFactorAuthService {
   }
 
   /**
-   * Performs a Keycloak request to set up the two Factor Authentication.
+   * Performs a Keycloak request to set up the Two-Factor Authentication.
    *
    * @param userName    the username
-   * @param otpSetupDTO the secret and code for the two Factor Authentication
+   * @param otpSetupDTO the secret and code for the Two-Factor Authentication
    */
   public void setUpOtpCredential(final String userName, final OtpSetupDTO otpSetupDTO) {
 
@@ -83,7 +81,8 @@ public class KeycloakTwoFactorAuthService {
     try {
       restTemplate.put(requestUrl, request, OtpInfoDTO.class);
     } catch (RestClientException ex) {
-      throw new BadRequestException("Could not set up otp credential", ex);
+      throw new InternalServerErrorException(ex.getMessage(), ex,
+          LogService::logInternalServerError);
     }
   }
 
@@ -102,8 +101,8 @@ public class KeycloakTwoFactorAuthService {
     try {
       restTemplate.exchange(requestUrl, HttpMethod.DELETE, request, Void.class);
     } catch (RestClientException ex) {
-      throw new InternalServerErrorException(ex.getMessage(),
-          ex, LogService::logInternalServerError);
+      throw new InternalServerErrorException(ex.getMessage(), ex,
+          LogService::logInternalServerError);
     }
   }
 

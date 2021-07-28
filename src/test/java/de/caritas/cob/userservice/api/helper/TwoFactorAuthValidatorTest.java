@@ -40,7 +40,7 @@ public class TwoFactorAuthValidatorTest {
   @Mock
   private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
 
-  static Stream<Arguments> checkIfRoleHasTwoFactorAuthEnabled_Should_Not_ThrowConflictException_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments() {
+  static Stream<Arguments> twoFactorAuthEnabledRoleArguments() {
     return Stream.of(
         Arguments.of(true, false, UserRole.USER.getValue()),
         Arguments.of(true, true, UserRole.USER.getValue()),
@@ -48,7 +48,7 @@ public class TwoFactorAuthValidatorTest {
         Arguments.of(true, true, UserRole.CONSULTANT.getValue()));
   }
 
-  static Stream<Arguments> checkIfRoleHasTwoFactorAuthEnabled_Should_ThrowConflictException_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments() {
+  static Stream<Arguments> twoFactorAuthDisabledRoleArguments() {
     return Stream.of(
         Arguments.of(false, false, UserRole.USER.getValue()),
         Arguments.of(false, true, UserRole.USER.getValue()),
@@ -56,32 +56,36 @@ public class TwoFactorAuthValidatorTest {
         Arguments.of(true, false, UserRole.CONSULTANT.getValue()));
   }
 
-
   @ParameterizedTest
-  @MethodSource("checkIfRoleHasTwoFactorAuthEnabled_Should_Not_ThrowConflictException_When_Request_Is_From_TwoFactorAuthEnabledRole_Arguments")
+  @MethodSource("twoFactorAuthEnabledRoleArguments")
   public void checkIfRoleHasTwoFactorAuthEnabled_Should_Not_ThrowConflictException_When_Request_Is_From_TwoFactorAuthEnabledRole(
       Boolean isUserTwoFactorAuthEnabled,
       Boolean isConsultantTwoFactorAuthEnabled,
       String requestRole) {
     var authenticatedUser = new AuthenticatedUser();
     authenticatedUser.setRoles(Set.of(requestRole));
-    lenient().when(this.keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
-    lenient().when(this.keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
+    lenient().when(this.keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled())
+        .thenReturn(isUserTwoFactorAuthEnabled);
+    lenient().when(this.keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled())
+        .thenReturn(isConsultantTwoFactorAuthEnabled);
     twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
 
   }
 
   @ParameterizedTest
-  @MethodSource("checkIfRoleHasTwoFactorAuthEnabled_Should_ThrowConflictException_When_Request_Is_From_TwoFactorAuthDisabledRole_Arguments")
+  @MethodSource("twoFactorAuthDisabledRoleArguments")
   public void checkIfRoleHasTwoFactorAuthEnabled_Should_ThrowConflictException_When_Request_Is_From_TwoFactorAuthDisabledRole(
       Boolean isUserTwoFactorAuthEnabled,
       Boolean isConsultantTwoFactorAuthEnabled,
       String requestRole) {
     var authenticatedUser = new AuthenticatedUser();
     authenticatedUser.setRoles(Set.of(requestRole));
-    lenient().when(this.keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(isUserTwoFactorAuthEnabled);
-    lenient().when(this.keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled()).thenReturn(isConsultantTwoFactorAuthEnabled);
-    Assert.assertThrows(ConflictException.class, () -> twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser));
+    lenient().when(this.keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled())
+        .thenReturn(isUserTwoFactorAuthEnabled);
+    lenient().when(this.keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled())
+        .thenReturn(isConsultantTwoFactorAuthEnabled);
+    Assert.assertThrows(ConflictException.class,
+        () -> twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser));
   }
 
 
@@ -107,10 +111,11 @@ public class TwoFactorAuthValidatorTest {
     authenticatedUser.setRoles(Set.of(UserRole.USER.getValue()));
     authenticatedUser.setUsername("test");
     when(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(true);
-    when(keycloakTwoFactorAuthService.getOtpCredential("test")).thenReturn(OPTIONAL_OTP_INFO_DTO);
+    when(keycloakTwoFactorAuthService.getOtpCredential("test"))
+        .thenReturn(OPTIONAL_OTP_INFO_DTO);
 
-    var twoFactorAuthDTO = new TwoFactorAuthDTO().isEnabled(true).isActive(false).secret("secret")
-        .qrCode("QrCode");
+    var twoFactorAuthDTO = new TwoFactorAuthDTO()
+        .isEnabled(true).isActive(false).secret("secret").qrCode("QrCode");
 
     Assertions
         .assertEquals(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser),
@@ -123,7 +128,8 @@ public class TwoFactorAuthValidatorTest {
     authenticatedUser.setRoles(Set.of(UserRole.USER.getValue()));
     authenticatedUser.setUsername("test");
     when(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled()).thenReturn(true);
-    when(keycloakTwoFactorAuthService.getOtpCredential("test")).thenReturn(Optional.empty());
+    when(keycloakTwoFactorAuthService.getOtpCredential("test"))
+        .thenReturn(Optional.empty());
 
     var twoFactorAuthDTO = new TwoFactorAuthDTO().isEnabled(false);
 
@@ -144,7 +150,8 @@ public class TwoFactorAuthValidatorTest {
     Assertions
         .assertEquals(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser),
             twoFactorAuthDTO);
-    verify(keycloakTwoFactorAuthService, times(0)).getOtpCredential(Mockito.any());
+    verify(keycloakTwoFactorAuthService, times(0))
+        .getOtpCredential(Mockito.any());
   }
 
 }
