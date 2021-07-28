@@ -523,6 +523,13 @@ components:
           minimum: 0
           maximum: 127
           example: 1
+        url:
+          type: string
+          maxLength: 500
+          example: https://www.domain.com
+        external:
+          type: boolean
+          example: false
         createDate:
           type: string
           example: "2019-08-23T08:52:05"
@@ -586,6 +593,7 @@ components:
         - name
         - teamAgency
         - consultingType
+        - external
       properties:
         dioceseId:
           type: integer
@@ -600,7 +608,7 @@ components:
         description:
           type: string
           maxLength: 10000
-          example: "Beschreibung Beratungsstelle..."
+          example: "Beschreibung Beratungsstelle"
         postcode:
           type: string
           minLength: 5
@@ -618,6 +626,13 @@ components:
           minimum: 0
           maximum: 127
           example: 1
+        url:
+          type: string
+          maxLength: 500
+          example: https://www.domain.com
+        external:
+          type: boolean
+          example: false
 
     AgencyAdminFullResponseDTO:
       type: object
@@ -633,6 +648,7 @@ components:
         - dioceseId
         - name
         - offline
+        - external
       properties:
         dioceseId:
           type: integer
@@ -659,6 +675,13 @@ components:
           example: "Muenchen"
           maxLength: 100
         offline:
+          type: boolean
+          example: false
+        url:
+          type: string
+          maxLength: 500
+          example: https://www.domain.com
+        external:
           type: boolean
           example: false
 
