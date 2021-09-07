@@ -123,9 +123,7 @@ public class RocketChatFacade {
    */
   public void removeUserFromGroup(String rcUserId, String groupId) {
     try {
-      addTechnicalUserToGroup(groupId);
       this.rocketChatService.removeUserFromGroup(rcUserId, groupId);
-      removeTechnicalUserFromGroup(groupId);
     } catch (RocketChatRemoveUserFromGroupException e) {
       var message = String.format(
           "Could not remove user with id %s from Rocket.Chat group id %s", rcUserId, groupId);
