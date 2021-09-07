@@ -117,7 +117,7 @@ public class AssignEnquiryFacadeTest {
 
     verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID,
         RC_GROUP_ID);
-    verify(rocketChatFacade, times(2)).retrieveRocketChatMembers(Mockito.any());
+    verify(rocketChatFacade, atLeastOnce()).retrieveRocketChatMembers(Mockito.any());
   }
 
   @Test(expected = InternalServerErrorException.class)
