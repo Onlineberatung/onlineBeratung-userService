@@ -60,6 +60,7 @@ public class AssignEnquiryFacadeTest {
 
   static final RocketChatAddUserToGroupException RC_ADD_USER_TO_GROUP_EXC =
       new RocketChatAddUserToGroupException(new Exception());
+  private static final int MAX_TIMEOUT = 5;
 
   @InjectMocks
   AssignEnquiryFacade assignEnquiryFacade;
@@ -118,7 +119,7 @@ public class AssignEnquiryFacadeTest {
     verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID,
         RC_GROUP_ID);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification((a) -> verify(rocketChatFacade, times(1))
             .removeSystemMessagesFromRocketChatGroup(anyString())));
   }
@@ -160,7 +161,7 @@ public class AssignEnquiryFacadeTest {
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY,
         SessionStatus.IN_PROGRESS);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification(
             (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
   }
@@ -193,7 +194,7 @@ public class AssignEnquiryFacadeTest {
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification(
             (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
@@ -211,7 +212,7 @@ public class AssignEnquiryFacadeTest {
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification(
             (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
@@ -229,7 +230,7 @@ public class AssignEnquiryFacadeTest {
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification(
             (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
@@ -251,7 +252,7 @@ public class AssignEnquiryFacadeTest {
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification(
             (a) -> verify(rocketChatFacade, times(1))
                 .addUserToRocketChatGroup(ROCKETCHAT_ID,
@@ -286,7 +287,7 @@ public class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(session, consultant);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification((a) -> verify(this.rocketChatFacade, times(1))
             .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId())));
     verify(this.rocketChatFacade, times(1))
@@ -323,7 +324,7 @@ public class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(session, consultant);
     await()
-        .atMost(1, SECONDS)
+        .atMost(MAX_TIMEOUT, SECONDS)
         .until(verification((a) -> verify(this.rocketChatFacade, atLeastOnce())
             .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId())));
     verify(this.rocketChatFacade, atLeastOnce())
