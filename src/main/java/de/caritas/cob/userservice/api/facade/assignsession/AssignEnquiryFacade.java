@@ -14,6 +14,8 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.statistic.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistic.event.AssignSessionStatisticsEvent;
 import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
@@ -35,6 +37,7 @@ public class AssignEnquiryFacade {
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull UnauthorizedMembersProvider unauthorizedMembersProvider;
+  private final @NonNull StatisticsService statisticsService;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -50,6 +53,8 @@ public class AssignEnquiryFacade {
     if (session.hasFeedbackChat()) {
       updateRocketChatRooms(session.getFeedbackGroupId(), session, consultant);
     }
+    statisticsService
+        .fireEvent(new AssignSessionStatisticsEvent(consultant.getId()));
   }
 
   /**

@@ -12,6 +12,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_SY
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.U25_SESSION_WITHOUT_CONSULTANT;
 import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -39,14 +41,19 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.statistic.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistic.event.AssignSessionStatisticsEvent;
 import java.util.List;
+import java.util.Objects;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignEnquiryFacadeTest {
@@ -74,6 +81,8 @@ public class AssignEnquiryFacadeTest {
   LogService logService;
   @Mock
   UnauthorizedMembersProvider unauthorizedMembersProvider;
+  @Mock
+  StatisticsService statisticsService;
 
   @Test
   public void assignEnquiry_Should_ReturnOKAndNotRemoveSystemUser() {
@@ -84,6 +93,22 @@ public class AssignEnquiryFacadeTest {
         CONSULTANT_WITH_AGENCY);
     verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID,
         RC_GROUP_ID);
+  }
+
+  @Test
+  public void assignEnquiry_Should_FireAssignSessionStatisticsEvent() {
+
+    assignEnquiryFacade
+        .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+
+    verify(statisticsService, times(1)).fireEvent(any(AssignSessionStatisticsEvent.class));
+
+    ArgumentCaptor<AssignSessionStatisticsEvent> captor = ArgumentCaptor.forClass(
+        AssignSessionStatisticsEvent.class);
+    verify(statisticsService, times(1)).fireEvent(captor.capture());
+    String consultantId = Objects.requireNonNull(
+        ReflectionTestUtils.getField(captor.getValue(), "consultantId")).toString();
+    assertThat(consultantId, is(CONSULTANT_WITH_AGENCY.getId()));
   }
 
   private void verifyConsultantAndSessionHaveBeenChecked(Session session, Consultant consultant) {

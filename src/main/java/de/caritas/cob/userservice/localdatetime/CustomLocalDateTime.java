@@ -13,6 +13,7 @@ import java.util.Date;
 public class CustomLocalDateTime {
 
   private static final String ISO_DATE_FORMAT = "uuuu-MM-dd'T'HH:mm:ssX";
+  private static final String FULL_QUALIFIED_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
   private CustomLocalDateTime() {
   }
@@ -59,5 +60,14 @@ public class CustomLocalDateTime {
     return Date.from(LocalDateTime.parse(localDateTime.replace("Z", ""))
         .atOffset(ZoneOffset.UTC)
         .toInstant());
+  }
+
+  /**
+   * Creates a full qualified timestamp.
+   *
+   * @return Full qualified timestamp
+   */
+  public static String nowAsFullQualifiedTimestamp() {
+    return LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(FULL_QUALIFIED_TIMESTAMP_FORMAT));
   }
 }
