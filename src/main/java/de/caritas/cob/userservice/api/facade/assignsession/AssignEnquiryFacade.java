@@ -71,16 +71,6 @@ public class AssignEnquiryFacade {
     }
   }
 
-  private Supplier<Object> updateRocketChatRooms(Session session, Consultant consultant) {
-    return () -> {
-      updateRocketChatRooms(session.getGroupId(), session, consultant);
-      if (session.hasFeedbackChat()) {
-        updateRocketChatRooms(session.getFeedbackGroupId(), session, consultant);
-      }
-      return null;
-    };
-  }
-
   private void assignEnquiry(Session session, Consultant consultant) {
     var consultantSessionDTO = ConsultantSessionDTO.builder()
         .consultant(consultant)
@@ -90,6 +80,16 @@ public class AssignEnquiryFacade {
     sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
+  }
+
+  private Supplier<Object> updateRocketChatRooms(Session session, Consultant consultant) {
+    return () -> {
+      updateRocketChatRooms(session.getGroupId(), session, consultant);
+      if (session.hasFeedbackChat()) {
+        updateRocketChatRooms(session.getFeedbackGroupId(), session, consultant);
+      }
+      return null;
+    };
   }
 
   private void updateRocketChatRooms(String rcGroupId, Session session, Consultant consultant) {
