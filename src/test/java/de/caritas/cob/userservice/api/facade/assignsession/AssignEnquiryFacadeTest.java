@@ -118,10 +118,8 @@ public class AssignEnquiryFacadeTest {
         CONSULTANT_WITH_AGENCY);
     verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID,
         RC_GROUP_ID);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification((a) -> verify(rocketChatFacade, times(1))
-            .removeSystemMessagesFromRocketChatGroup(anyString())));
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
+        .removeSystemMessagesFromRocketChatGroup(anyString()));
   }
 
   @Test
@@ -129,9 +127,10 @@ public class AssignEnquiryFacadeTest {
     assignEnquiryFacade
         .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
-    verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID,
-        RC_GROUP_ID);
-    verify(rocketChatFacade, atLeastOnce()).retrieveRocketChatMembers(Mockito.any());
+    verifyAsync((a) -> verify(rocketChatFacade, times(0))
+        .removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID, RC_GROUP_ID));
+    verifyAsync(
+        (a) -> verify(rocketChatFacade, atLeastOnce()).retrieveRocketChatMembers(Mockito.any()));
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -160,10 +159,7 @@ public class AssignEnquiryFacadeTest {
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY,
         SessionStatus.IN_PROGRESS);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification(
-            (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -183,20 +179,16 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignEnquiry_Should_ReturnInternalServerErrorAndLogError_WhenAddPeerConsultantToFeedbackGroupFails() {
+  public void assignEnquiry_Should_LogError_WhenAddPeerConsultantToFeedbackGroupFails() {
     doThrow(new InternalServerErrorException("")).when(rocketChatFacade)
-        .addUserToRocketChatGroup(ROCKETCHAT_ID,
-            RC_FEEDBACK_GROUP_ID);
+        .addUserToRocketChatGroup(ROCKETCHAT_ID, RC_FEEDBACK_GROUP_ID);
 
     assignEnquiryFacade
         .assignRegisteredEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification(
-            (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, IN_PROGRESS);
   }
@@ -211,10 +203,7 @@ public class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification(
-            (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, IN_PROGRESS);
   }
@@ -229,19 +218,9 @@ public class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification(
-            (a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString())));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
     verify(sessionService, times(1)).updateConsultantAndStatusForSession(
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, IN_PROGRESS);
-  }
-
-  private Callable<Boolean> verification(Consumer<Void> verificationFunction) {
-    return () -> {
-      verificationFunction.accept(null);
-      return true;
-    };
   }
 
   @Test
@@ -251,12 +230,8 @@ public class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(U25_SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification(
-            (a) -> verify(rocketChatFacade, times(1))
-                .addUserToRocketChatGroup(ROCKETCHAT_ID,
-                    U25_SESSION_WITHOUT_CONSULTANT.getFeedbackGroupId())));
+    verifyAsync((a) -> verify(rocketChatFacade, times(1)).addUserToRocketChatGroup(ROCKETCHAT_ID,
+        U25_SESSION_WITHOUT_CONSULTANT.getFeedbackGroupId()));
   }
 
   @Test
@@ -286,12 +261,10 @@ public class AssignEnquiryFacadeTest {
     this.assignEnquiryFacade.assignRegisteredEnquiry(session, consultant);
 
     verifyConsultantAndSessionHaveBeenChecked(session, consultant);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification((a) -> verify(this.rocketChatFacade, times(1))
-            .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId())));
-    verify(this.rocketChatFacade, times(1))
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId());
+    verifyAsync((a) -> verify(this.rocketChatFacade, times(1))
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
+    verifyAsync((a) -> verify(this.rocketChatFacade, times(1))
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
   }
 
   @Test
@@ -323,14 +296,12 @@ public class AssignEnquiryFacadeTest {
     this.assignEnquiryFacade.assignRegisteredEnquiry(session, consultant);
 
     verifyConsultantAndSessionHaveBeenChecked(session, consultant);
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification((a) -> verify(this.rocketChatFacade, atLeastOnce())
-            .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId())));
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId", session.getGroupId());
+    verifyAsync((a) -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
+    verifyAsync((a) -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
+    verifyAsync((a) -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId", session.getGroupId()));
     verify(this.rocketChatFacade, never())
         .removeUserFromGroup("teamConsultantRcId", session.getFeedbackGroupId());
     verify(this.rocketChatFacade, never())
@@ -375,5 +346,18 @@ public class AssignEnquiryFacadeTest {
         ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT.getStatus());
     verify(sessionService, times(1))
         .updateConsultantAndStatusForSession(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, null, NEW);
+  }
+
+  private void verifyAsync(Consumer<Void> verificationFunction) {
+    await()
+        .atMost(MAX_TIMEOUT, SECONDS)
+        .until(verification(verificationFunction));
+  }
+
+  private Callable<Boolean> verification(Consumer<Void> verificationFunction) {
+    return () -> {
+      verificationFunction.accept(null);
+      return true;
+    };
   }
 }
