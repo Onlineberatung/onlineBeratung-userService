@@ -14,8 +14,8 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.statistic.StatisticsService;
-import de.caritas.cob.userservice.api.service.statistic.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
 import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
@@ -44,6 +44,9 @@ public class AssignEnquiryFacade {
    * consultants from the Rocket.Chat group which don't have the right to view this session anymore.
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
    *
+   * If the statistics function is enabled, the assignment of the enquired is processed as
+   * a statistical event.
+   *
    * @param session    the session to assign the consultant
    * @param consultant the consultant to assign
    */
@@ -54,7 +57,7 @@ public class AssignEnquiryFacade {
       updateRocketChatRooms(session.getFeedbackGroupId(), session, consultant);
     }
     statisticsService
-        .fireEvent(new AssignSessionStatisticsEvent(consultant.getId()));
+        .fireEvent(new AssignSessionStatisticsEvent(consultant.getId(), session.getId()));
   }
 
   /**

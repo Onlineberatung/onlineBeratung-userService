@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service.statistic.event;
+package de.caritas.cob.userservice.api.service.statistics.event;
 
 import java.util.Optional;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
@@ -21,5 +21,12 @@ public interface StatisticsEvent {
    * @return the {@link EventType}
    */
   EventType getEventType();
+
+  /**
+   * The timestamp of the event.
+   *
+   * @return the timestamp
+   */
+  String getTimestamp();
 
 }

@@ -1,8 +1,7 @@
-package de.caritas.cob.userservice.api.service.statistic;
+package de.caritas.cob.userservice.api.service.statistics;
 
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.statistic.event.StatisticsEvent;
-import de.caritas.cob.userservice.config.RabbitMqConfig;
+import de.caritas.cob.userservice.api.service.statistics.event.StatisticsEvent;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -16,8 +15,11 @@ import org.springframework.stereotype.Service;
 public class StatisticsService {
 
   private final @NotNull AmqpTemplate amqpTemplate;
+
   @Value("${statistics.enabled}")
   private boolean statisticsEnabled;
+  @Value("${statistics.rabbitmq.exchange.name}")
+  private String rabbitMqExchangeName;
 
   /**
    * Entry point to write statistics event data to the statistics queue.
@@ -33,7 +35,7 @@ public class StatisticsService {
           .ifPresentOrElse(
               payload ->
                   amqpTemplate.convertAndSend(
-                      RabbitMqConfig.STATISTICS_EXCHANGE_NAME,
+                      rabbitMqExchangeName,
                       statisticsEvent.getEventType().toString(),
                       payload),
               () ->

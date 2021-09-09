@@ -59,6 +59,7 @@ components:
       type: object
       required:
         - consultantId
+        - sessionId
         - timestamp
       allOf:
         - $ref: '#/components/schemas/StatisticsEventMessage'
@@ -68,6 +69,11 @@ components:
           type: string
           description: The keycloak id of the consultant
           example: d63f4cc0-215d-40e2-a866-2d3e910f0590
+        sessionId:
+          type: integer
+          format: int64
+          description: The id of the session
+          example: 12345
         timestamp:
           type: string
           description: "Full qualified timestamp"

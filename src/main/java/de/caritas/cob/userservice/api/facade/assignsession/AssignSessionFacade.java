@@ -12,6 +12,8 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
 import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
@@ -35,11 +37,15 @@ public class AssignSessionFacade {
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull UnauthorizedMembersProvider unauthorizedMembersProvider;
+  private final @NonNull StatisticsService statisticsService;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
    * consultants from the Rocket.Chat group which don't have the right to view this session anymore.
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
+   *
+   * If the statistics function is enabled, the assignment of the session is processed as a
+   * statistical event.
    */
   public void assignSession(Session session, Consultant consultant) {
     var consultantSessionDTO = ConsultantSessionDTO.builder()
@@ -64,6 +70,10 @@ public class AssignSessionFacade {
       throw exception;
     }
     sendEmailForConsultantChange(session, consultant);
+
+    statisticsService
+        .fireEvent(new AssignSessionStatisticsEvent(consultant.getId(), session.getId()));
+
   }
 
   private void updateRocketChatRooms(Session session, Consultant consultant) {

@@ -41,8 +41,8 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.statistic.StatisticsService;
-import de.caritas.cob.userservice.api.service.statistic.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
 import java.util.List;
 import java.util.Objects;
 import org.jeasy.random.EasyRandom;
@@ -109,6 +109,9 @@ public class AssignEnquiryFacadeTest {
     String consultantId = Objects.requireNonNull(
         ReflectionTestUtils.getField(captor.getValue(), "consultantId")).toString();
     assertThat(consultantId, is(CONSULTANT_WITH_AGENCY.getId()));
+    Long sessionId = Long.valueOf(Objects.requireNonNull(
+        ReflectionTestUtils.getField(captor.getValue(), "sessionId")).toString());
+    assertThat(sessionId, is(FEEDBACKSESSION_WITHOUT_CONSULTANT.getId()));
   }
 
   private void verifyConsultantAndSessionHaveBeenChecked(Session session, Consultant consultant) {

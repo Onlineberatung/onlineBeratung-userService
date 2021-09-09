@@ -1,26 +1,26 @@
-package de.caritas.cob.userservice.config;
+package de.caritas.cob.userservice.testConfig;
 
+import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-/**
- * RabbitMQ configuration for statistics.
- */
-@Configuration
-public class RabbitMqConfig {
-
-  @Value("${spring.rabbitmq.host}")
-  private String rabbitHost;
+@TestConfiguration
+public class RabbitMqTestConfig {
 
   public static final String STATISTICS_EXCHANGE_NAME = "statistics.topic";
   private static final String QUEUE_PREFIX = "statistics.";
   public static final String QUEUE_NAME_ASSIGN_SESSION = QUEUE_PREFIX + EventType.ASSIGN_SESSION;
+
+  @Bean ConnectionFactory connectionFactory() {
+    return new CachingConnectionFactory(new MockConnectionFactory());
+  }
 
   @Bean
   public Declarables topicBindings() {
@@ -33,6 +33,7 @@ public class RabbitMqConfig {
         topicExchange,
         BindingBuilder
             .bind(assignSessionStatisticEventQueue)
-            .to(topicExchange).with(EventType.ASSIGN_SESSION));
+            .to(topicExchange).with(
+                de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType.ASSIGN_SESSION));
   }
 }
