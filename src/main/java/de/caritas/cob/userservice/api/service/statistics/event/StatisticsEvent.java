@@ -22,11 +22,4 @@ public interface StatisticsEvent {
    */
   EventType getEventType();
 
-  /**
-   * The timestamp of the event.
-   *
-   * @return the timestamp
-   */
-  String getTimestamp();
-
 }

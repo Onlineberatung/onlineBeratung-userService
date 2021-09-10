@@ -6,6 +6,7 @@ import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.helper.Serializer;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -14,6 +15,7 @@ import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSe
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.testConfig.RabbitMqTestConfig;
 import java.io.IOException;
+import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
@@ -33,6 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class StatisticsServiceIT {
 
   private static final long MAX_TIMEOUT_MILLIS = 5000;
+  private static final String TIMESTAMP_FIELD_NAME = "TIMESTAMP";
 
   @Autowired
   StatisticsService statisticsService;
@@ -45,12 +49,19 @@ public class StatisticsServiceIT {
 
     AssignSessionStatisticsEvent assignSessionStatisticsEvent =
         new AssignSessionStatisticsEvent(CONSULTANT_ID, SESSION_ID);
+    String staticTimestamp =
+        Objects.requireNonNull(
+                ReflectionTestUtils.getField(
+                    assignSessionStatisticsEvent,
+                    AssignSessionStatisticsEvent.class,
+                    TIMESTAMP_FIELD_NAME))
+            .toString();
     AssignSessionStatisticsEventMessage assignSessionStatisticsEventMessage =
         new AssignSessionStatisticsEventMessage()
             .eventType(EventType.ASSIGN_SESSION)
             .consultantId(CONSULTANT_ID)
             .sessionId(SESSION_ID)
-            .timestamp(assignSessionStatisticsEvent.getTimestamp());
+            .timestamp(staticTimestamp);
 
     statisticsService.fireEvent(assignSessionStatisticsEvent);
     Message message =
@@ -58,14 +69,7 @@ public class StatisticsServiceIT {
     assert message != null;
     assertThat(
         extractBodyFromAmpQMessage(message),
-        jsonEquals(serializeEventMessage(assignSessionStatisticsEventMessage)));
-  }
-
-  private String serializeEventMessage(
-      AssignSessionStatisticsEventMessage assignSessionStatisticsEventMessage) {
-    return Serializer.serialize(
-            assignSessionStatisticsEventMessage, LogService::logStatisticsEventError)
-        .orElseThrow();
+        jsonEquals(new ObjectMapper().writeValueAsString(assignSessionStatisticsEventMessage)));
   }
 
   private String extractBodyFromAmpQMessage(Message message) throws IOException {

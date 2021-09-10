@@ -12,22 +12,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AssignSessionStatisticsEvent implements StatisticsEvent {
 
-  private static final EventType eventType = EventType.ASSIGN_SESSION;
-  private final String timestamp = CustomLocalDateTime.nowAsFullQualifiedTimestamp();
+  private static final EventType EVENT_TYPE = EventType.ASSIGN_SESSION;
+  private static final String TIMESTAMP = CustomLocalDateTime.nowAsFullQualifiedTimestamp();
 
   private @NonNull String consultantId;
   private @NonNull Long sessionId;
 
   /** {@inheritDoc} */
-  @Override
   public EventType getEventType() {
-    return eventType;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public String getTimestamp() {
-    return this.timestamp;
+    return EVENT_TYPE;
   }
 
   /** {@inheritDoc} */
@@ -39,9 +32,9 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
 
   private AssignSessionStatisticsEventMessage createAssignSessionStatisticsEventMessage() {
     return new AssignSessionStatisticsEventMessage()
-        .eventType(eventType)
+        .eventType(EVENT_TYPE)
         .consultantId(this.consultantId)
         .sessionId(this.sessionId)
-        .timestamp(timestamp);
+        .timestamp(TIMESTAMP);
   }
 }
