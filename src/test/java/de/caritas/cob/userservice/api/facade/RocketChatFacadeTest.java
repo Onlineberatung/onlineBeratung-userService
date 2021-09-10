@@ -124,9 +124,7 @@ public class RocketChatFacadeTest {
       throws Exception {
     this.rocketChatFacade.removeUserFromGroup("user", "group");
 
-    verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
     verify(this.rocketChatService, times(1)).removeUserFromGroup("user", "group");
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
