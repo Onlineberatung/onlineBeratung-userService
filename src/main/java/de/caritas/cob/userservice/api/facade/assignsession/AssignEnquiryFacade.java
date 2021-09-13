@@ -45,7 +45,7 @@ public class AssignEnquiryFacade {
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
    *
    * If the statistics function is enabled, the assignment of the enquired is processed as
-   * a statistical event.
+   * statistical event.
    *
    * @param session    the session to assign the consultant
    * @param consultant the consultant to assign

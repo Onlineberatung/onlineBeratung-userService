@@ -39,7 +39,7 @@ public class StatisticsService {
                       statisticsEvent.getEventType().toString(),
                       payload),
               () ->
-                  LogService.logWarn(
+                  LogService.logStatisticsEventWarning(
                       String.format(
                           "Empty statistics event message payload for type %s received",
                           statisticsEvent.getClass().getSimpleName())));
