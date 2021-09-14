@@ -1,10 +1,11 @@
 package de.caritas.cob.userservice.api.service.statistics.event;
 
+import de.caritas.cob.userservice.api.helper.JSONHelper;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.helper.Serializer;
-import de.caritas.cob.userservice.localdatetime.CustomLocalDateTime;
+import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class AssignSessionStatisticsEvent implements StatisticsEvent {
 
   private static final EventType EVENT_TYPE = EventType.ASSIGN_SESSION;
-  private static final String TIMESTAMP = CustomLocalDateTime.nowAsFullQualifiedTimestamp();
+  private static final OffsetDateTime TIMESTAMP = CustomOffsetDateTime.nowInUtc();
 
   private @NonNull String consultantId;
   private @NonNull Long sessionId;
@@ -26,7 +27,7 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
   /** {@inheritDoc} */
   @Override
   public Optional<String> getPayload() {
-    return Serializer.serialize(
+    return JSONHelper.serializeWithOffsetDateTimeAsString(
         createAssignSessionStatisticsEventMessage(), LogService::logStatisticsEventError);
   }
 
