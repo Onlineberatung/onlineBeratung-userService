@@ -5,7 +5,6 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 public class AssignSessionStatisticsEvent implements StatisticsEvent {
 
   private static final EventType EVENT_TYPE = EventType.ASSIGN_SESSION;
-  private static final OffsetDateTime TIMESTAMP = CustomOffsetDateTime.nowInUtc();
 
   private @NonNull String consultantId;
   private @NonNull Long sessionId;
@@ -36,6 +34,6 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
         .eventType(EVENT_TYPE)
         .consultantId(this.consultantId)
         .sessionId(this.sessionId)
-        .timestamp(TIMESTAMP);
+        .timestamp(CustomOffsetDateTime.nowInUtc());
   }
 }

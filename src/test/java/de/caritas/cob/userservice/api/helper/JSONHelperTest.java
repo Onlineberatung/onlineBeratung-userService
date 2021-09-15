@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -46,7 +47,7 @@ public class JSONHelperTest {
             + SESSION_ID
             + ","
             + "  \"timestamp\":\""
-            + offsetDateTime
+            + offsetDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
             + "\","
             + "  \"eventType\":\""
             + EventType.ASSIGN_SESSION

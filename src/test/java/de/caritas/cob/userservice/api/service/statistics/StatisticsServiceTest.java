@@ -31,7 +31,7 @@ public class StatisticsServiceTest {
   private static final String PAYLOAD = "payload";
 
   private AssignSessionStatisticsEvent assignSessionStatisticsEvent;
-  private EventType eventType = EventType.ASSIGN_SESSION;
+  private final EventType eventType = EventType.ASSIGN_SESSION;
 
   @InjectMocks
   private StatisticsService statisticsService;

@@ -6,6 +6,7 @@ import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,18 +20,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class AssignSessionStatisticsEventTest {
 
 
-  private final String TIMESTAMP_FIELD_NAME = "TIMESTAMP";
   private AssignSessionStatisticsEvent assignSessionStatisticsEvent;
-  private String staticTimestamp;
 
   @Before
   public void setup() throws NoSuchFieldException, IllegalAccessException {
     assignSessionStatisticsEvent = new AssignSessionStatisticsEvent(CONSULTANT_ID, SESSION_ID);
-    staticTimestamp = Objects.requireNonNull(ReflectionTestUtils
-            .getField(assignSessionStatisticsEvent,
-                AssignSessionStatisticsEvent.class,
-                TIMESTAMP_FIELD_NAME))
-        .toString();
   }
 
   @Test
@@ -46,14 +40,14 @@ public class AssignSessionStatisticsEventTest {
     String expectedJson = "{"
         + "  \"consultantId\":\"" + CONSULTANT_ID + "\","
         + "  \"sessionId\":" + SESSION_ID + ","
-        + "  \"timestamp\":\"" + staticTimestamp + "\","
+        + "  \"timestamp\":\"" + CustomOffsetDateTime.nowInUtc() + "\","
         + "  \"eventType\":\"" + EventType.ASSIGN_SESSION + "\""
         + "}";
 
     Optional<String> result =  assignSessionStatisticsEvent.getPayload();
 
     assertThat(result.isPresent(), is(true));
-    assertThat(result.get(), jsonEquals(expectedJson));
+    assertThat(result.get(), jsonEquals(expectedJson).whenIgnoringPaths("timestamp"));
   }
 
 }

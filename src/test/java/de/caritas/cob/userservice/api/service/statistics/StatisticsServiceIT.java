@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.testConfig.RabbitMqTestConfig;
@@ -35,7 +36,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class StatisticsServiceIT {
 
   private static final long MAX_TIMEOUT_MILLIS = 5000;
-  private static final String TIMESTAMP_FIELD_NAME = "TIMESTAMP";
 
   @Autowired StatisticsService statisticsService;
   @Autowired AmqpTemplate amqpTemplate;
@@ -46,19 +46,6 @@ public class StatisticsServiceIT {
 
     AssignSessionStatisticsEvent assignSessionStatisticsEvent =
         new AssignSessionStatisticsEvent(CONSULTANT_ID, SESSION_ID);
-    OffsetDateTime staticTimestamp =
-        (OffsetDateTime)
-            Objects.requireNonNull(
-                ReflectionTestUtils.getField(
-                    assignSessionStatisticsEvent,
-                    AssignSessionStatisticsEvent.class,
-                    TIMESTAMP_FIELD_NAME));
-    AssignSessionStatisticsEventMessage assignSessionStatisticsEventMessage =
-        new AssignSessionStatisticsEventMessage()
-            .eventType(EventType.ASSIGN_SESSION)
-            .consultantId(CONSULTANT_ID)
-            .sessionId(SESSION_ID)
-            .timestamp(staticTimestamp);
 
     statisticsService.fireEvent(assignSessionStatisticsEvent);
     Message message =
@@ -74,14 +61,16 @@ public class StatisticsServiceIT {
             + SESSION_ID
             + ","
             + "  \"timestamp\":\""
-            + staticTimestamp
+            + CustomOffsetDateTime.nowInUtc()
             + "\","
             + "  \"eventType\":\""
             + EventType.ASSIGN_SESSION
             + "\""
             + "}";
 
-    assertThat(extractBodyFromAmpQMessage(message), jsonEquals(expectedJson));
+    assertThat(
+        extractBodyFromAmpQMessage(message),
+        jsonEquals(expectedJson).whenIgnoringPaths("timestamp"));
   }
 
   private String extractBodyFromAmpQMessage(Message message) throws IOException {
