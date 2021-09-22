@@ -6,17 +6,13 @@ import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
 import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
-import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import de.caritas.cob.userservice.testConfig.RabbitMqTestConfig;
 import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +24,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
