@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -29,7 +30,8 @@ public class JSONHelperTest {
         new AssignSessionStatisticsEventMessage()
             .eventType(EventType.ASSIGN_SESSION)
             .sessionId(SESSION_ID)
-            .consultantId(CONSULTANT_ID)
+            .userId(CONSULTANT_ID)
+            .userRole(UserRole.CONSULTANT)
             .timestamp(offsetDateTime);
 
     Optional<String> result =
@@ -40,8 +42,11 @@ public class JSONHelperTest {
 
     String expectedJson =
         "{"
-            + "  \"consultantId\":\""
+            + "  \"userId\":\""
             + CONSULTANT_ID
+            + "\","
+            + "  \"userRole\":\""
+            + UserRole.CONSULTANT
             + "\","
             + "  \"sessionId\":"
             + SESSION_ID

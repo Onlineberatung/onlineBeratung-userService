@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStat
 import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import de.caritas.cob.userservice.testConfig.RabbitMqTestConfig;
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -45,7 +46,8 @@ public class StatisticsServiceIT {
       throws IOException {
 
     AssignSessionStatisticsEvent assignSessionStatisticsEvent =
-        new AssignSessionStatisticsEvent(CONSULTANT_ID, SESSION_ID);
+        new AssignSessionStatisticsEvent(CONSULTANT_ID, UserRole.CONSULTANT, SESSION_ID);
+
 
     statisticsService.fireEvent(assignSessionStatisticsEvent);
     Message message =
@@ -54,8 +56,11 @@ public class StatisticsServiceIT {
 
     String expectedJson =
         "{"
-            + "  \"consultantId\":\""
+            + "  \"userId\":\""
             + CONSULTANT_ID
+            + "\","
+            + "  \"userRole\":\""
+            + UserRole.CONSULTANT
             + "\","
             + "  \"sessionId\":"
             + SESSION_ID

@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackServi
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Objects;
 import org.jeasy.random.EasyRandom;
@@ -214,9 +215,12 @@ public class AssignSessionFacadeTest {
     ArgumentCaptor<AssignSessionStatisticsEvent> captor = ArgumentCaptor.forClass(
         AssignSessionStatisticsEvent.class);
     verify(statisticsService, times(1)).fireEvent(captor.capture());
-    String consultantId = Objects.requireNonNull(
-        ReflectionTestUtils.getField(captor.getValue(), "consultantId")).toString();
-    assertThat(consultantId, is(consultant.getId()));
+    String userId = Objects.requireNonNull(
+        ReflectionTestUtils.getField(captor.getValue(), "userId")).toString();
+    assertThat(userId, is(consultant.getId()));
+    String userRole = Objects.requireNonNull(
+        ReflectionTestUtils.getField(captor.getValue(), "userRole")).toString();
+    assertThat(userRole, is(UserRole.CONSULTANT.toString()));
     Long sessionId = Long.valueOf(Objects.requireNonNull(
         ReflectionTestUtils.getField(captor.getValue(), "sessionId").toString()));
     assertThat(sessionId, is(session.getId()));

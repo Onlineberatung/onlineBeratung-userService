@@ -8,46 +8,55 @@ import static org.hamcrest.Matchers.is;
 
 import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
-import java.util.Objects;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignSessionStatisticsEventTest {
-
 
   private AssignSessionStatisticsEvent assignSessionStatisticsEvent;
 
   @Before
   public void setup() throws NoSuchFieldException, IllegalAccessException {
-    assignSessionStatisticsEvent = new AssignSessionStatisticsEvent(CONSULTANT_ID, SESSION_ID);
+    assignSessionStatisticsEvent =
+        new AssignSessionStatisticsEvent(CONSULTANT_ID, UserRole.CONSULTANT, SESSION_ID);
   }
 
   @Test
   public void getEventType_Should_ReturnEventTypeCreateMessage() {
 
-    assertThat(assignSessionStatisticsEvent.getEventType(),
-        is(EventType.ASSIGN_SESSION));
+    assertThat(assignSessionStatisticsEvent.getEventType(), is(EventType.ASSIGN_SESSION));
   }
 
   @Test
   public void getPayload_Should_ReturnValidJsonPayload() {
 
-    String expectedJson = "{"
-        + "  \"consultantId\":\"" + CONSULTANT_ID + "\","
-        + "  \"sessionId\":" + SESSION_ID + ","
-        + "  \"timestamp\":\"" + CustomOffsetDateTime.nowInUtc() + "\","
-        + "  \"eventType\":\"" + EventType.ASSIGN_SESSION + "\""
-        + "}";
+    String expectedJson =
+        "{"
+            + "  \"userId\":\""
+            + CONSULTANT_ID
+            + "\","
+            + "  \"userRole\":\""
+            + UserRole.CONSULTANT
+            + "\","
+            + "  \"sessionId\":"
+            + SESSION_ID
+            + ","
+            + "  \"timestamp\":\""
+            + CustomOffsetDateTime.nowInUtc()
+            + "\","
+            + "  \"eventType\":\""
+            + EventType.ASSIGN_SESSION
+            + "\""
+            + "}";
 
-    Optional<String> result =  assignSessionStatisticsEvent.getPayload();
+    Optional<String> result = assignSessionStatisticsEvent.getPayload();
 
     assertThat(result.isPresent(), is(true));
     assertThat(result.get(), jsonEquals(expectedJson).whenIgnoringPaths("timestamp"));
   }
-
 }

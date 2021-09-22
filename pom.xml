@@ -250,12 +250,7 @@
       <artifactId>commons-collections4</artifactId>
       <version>4.1</version>
     </dependency>
-		<dependency>
-			<groupId>org.awaitility</groupId>
-			<artifactId>awaitility</artifactId>
-			<version>4.1.0</version>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>com.github.fridujo</groupId>
 			<artifactId>rabbitmq-mock</artifactId>
@@ -441,6 +436,24 @@
 									RoleConsultantDTO=${project.groupId}.${project.artifactId}.api.manager.consultingtype.roles.Consultant
 								</typeMapping>
 							</typeMappings>
+						</configuration>
+					</execution>
+					<execution>
+						<id>statistics-service</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<sourceFolder>/</sourceFolder>
+							</configOptions>
+							<inputSpec>${project.basedir}/api/userstatisticsservice.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.statistics.controller</apiPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<output>target/generated-sources</output>
 						</configuration>
 					</execution>
 					<!-- Generate conversations API -->
