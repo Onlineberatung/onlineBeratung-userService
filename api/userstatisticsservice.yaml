@@ -8,7 +8,7 @@ paths:
     get:
       tags:
         - user-statistics-controller
-      summary: 'Returns session informationen for statistics. [Authorization: Role: statistics]'
+      summary: 'Returns session informationen for statistics. [Authorization: none]'
       operationId: getSession
       parameters:
         - name: sessionId
@@ -37,8 +37,6 @@ paths:
           description: NOT FOUND - Session not found
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
 
 components:
   schemas:

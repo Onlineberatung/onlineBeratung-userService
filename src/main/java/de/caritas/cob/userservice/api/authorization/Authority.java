@@ -29,8 +29,7 @@ public enum Authority {
   GROUP_CHAT_CONSULTANT(UserRole.GROUP_CHAT_CONSULTANT, asList(
       AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.CREATE_NEW_CHAT,
       AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT)),
-  USER_ADMIN(UserRole.USER_ADMIN, singletonList(AuthorityValue.USER_ADMIN)),
-  STATISTICS(UserRole.STATISTICS, singletonList(AuthorityValue.STATISTICS_DEFAULT));
+  USER_ADMIN(UserRole.USER_ADMIN, singletonList(AuthorityValue.USER_ADMIN));
 
   private final UserRole userRole;
   private final List<String> grantedAuthorities;
@@ -67,7 +66,6 @@ public enum Authority {
     public static final String STOP_CHAT = PREFIX + "STOP_CHAT";
     public static final String UPDATE_CHAT = PREFIX + "UPDATE_CHAT";
     public static final String USER_ADMIN = PREFIX + "USER_ADMIN";
-    public static final String STATISTICS_DEFAULT = PREFIX + "STATISTICS_DEFAULT";
   }
 
 }
