@@ -779,4 +779,15 @@ public class  UserController implements UsersApi {
     this.sessionDataService.saveSessionData(sessionId, sessionDataDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
+
+  /**
+   * Put a session into the archive.
+   *
+   * @param sessionId (required) session ID
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> archiveSession(Long sessionId) {
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
 }
