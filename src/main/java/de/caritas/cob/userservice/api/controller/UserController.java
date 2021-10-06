@@ -787,7 +787,7 @@ public class  UserController implements UsersApi {
    * @return {@link ResponseEntity}
    */
   @Override
-  public ResponseEntity<Void> archiveSession(Long sessionId) {
+  public ResponseEntity<Void> archiveSession(@PathVariable Long sessionId) {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }
