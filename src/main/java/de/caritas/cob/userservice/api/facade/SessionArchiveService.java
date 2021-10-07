@@ -67,9 +67,8 @@ public class SessionArchiveService {
   }
 
   private void checkSessionPermission(Session session) {
-
     if (!isConsultantAssignedToSession(session)
-        && !isTeamSessionAndConsultantInAgency(session)) {
+        && !isTeamSessionAndConsultantInSessionAgency(session)) {
       throw new ForbiddenException(
           String.format("Put session %s in the archive is not allowed for consultant with id %s",
               session.getId(), authenticatedUser.getUserId()),
@@ -82,9 +81,9 @@ public class SessionArchiveService {
         && session.getConsultant().getId().equals(authenticatedUser.getUserId());
   }
 
-  private boolean isTeamSessionAndConsultantInAgency(Session session) {
-    List<ConsultantAgency> consultantAgencies = consultantAgencyRepository.findByConsultantId(
-        authenticatedUser.getUserId());
+  private boolean isTeamSessionAndConsultantInSessionAgency(Session session) {
+    List<ConsultantAgency> consultantAgencies =
+        consultantAgencyRepository.findByConsultantId(authenticatedUser.getUserId());
     return session.isTeamSession() && consultantAgencies.stream()
         .anyMatch(ca -> session.getAgencyId().equals(ca.getAgencyId()));
   }
