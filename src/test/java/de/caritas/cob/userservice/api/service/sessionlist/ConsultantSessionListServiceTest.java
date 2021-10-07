@@ -165,7 +165,7 @@ public class ConsultantSessionListServiceTest {
   }
 
   @Test
-  public void retrieveSessionsForAuthenticatedConsultant_Should_returnEmotyList_When_SessionStatusIsInitial() {
+  public void retrieveSessionsForAuthenticatedConsultant_Should_returnEmptyList_When_SessionStatusIsInitial() {
     SessionListQueryParameter sessionListQueryParameter =
         createStandardSessionListQueryParameterObject(0);
 
@@ -176,7 +176,7 @@ public class ConsultantSessionListServiceTest {
 
     assertEquals(0, result.size());
   }
-
+  
   private SessionListQueryParameter createStandardSessionListQueryParameterObject(
       int sessionStatus) {
     return SessionListQueryParameter.builder()
