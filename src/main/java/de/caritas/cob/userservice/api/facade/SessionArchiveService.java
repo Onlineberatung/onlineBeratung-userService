@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -46,23 +45,20 @@ public class SessionArchiveService {
     } catch (InternalServerErrorException ex) {
       throw new InternalServerErrorException(String
           .format("Could not archive session %s for consultant %s",
-              session.getId(), authenticatedUser.getUserId()),
-          LogService::logInternalServerError);
+              session.getId(), authenticatedUser.getUserId()));
     }
   }
 
   private Session retrieveSession(Long sessionId) {
     return sessionRepository.findById(sessionId).orElseThrow(
-        () -> new NotFoundException(String.format("Session with id %s not found.", sessionId),
-            LogService::logWarn));
+        () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
   }
 
   private void validateSession(Session session) {
     if (!session.getStatus().equals(SessionStatus.IN_PROGRESS)) {
       throw new ConflictException(
           String.format("Session %s should be archived but is not in progress.",
-              session.getId()),
-          LogService::logWarn);
+              session.getId()));
     }
   }
 
@@ -71,8 +67,7 @@ public class SessionArchiveService {
         && !isTeamSessionAndConsultantInSessionAgency(session)) {
       throw new ForbiddenException(
           String.format("Put session %s in the archive is not allowed for consultant with id %s",
-              session.getId(), authenticatedUser.getUserId()),
-          LogService::logWarn);
+              session.getId(), authenticatedUser.getUserId()));
     }
   }
 
