@@ -5,9 +5,9 @@ import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
+import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -175,15 +175,27 @@ public class UserAdminController implements UseradminApi {
   }
 
   /**
+   * GET /useradmin/agencies/{agencyId}/consultants: Returns all consultants for the agency.
+   *
+   * @param agencyId Agency Id (required)
+   * @return {@link ConsultantSearchResultDTO}
+   */
+  @Override
+  public ResponseEntity<List<ConsultantAdminResponseDTO>> getAgencyConsultants(String agencyId) {
+    var resultDTO = this.consultantAdminFacade.findConsultantsForAgency(agencyId);
+    return ResponseEntity.ok(resultDTO);
+  }
+
+  /**
    * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies.
    *
    * @param consultantId Consultant Id (required)
-   * @return {@link ConsultantAdminResponseDTO}
+   * @return {@link AgencyAdminFullResponseDTO}s
    */
   @Override
-  public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(
+  public ResponseEntity<List<AgencyAdminFullResponseDTO>> getConsultantAgencies(
       @PathVariable String consultantId) {
-    ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAdminFacade
+    var consultantAgencies = this.consultantAdminFacade
         .findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
   }

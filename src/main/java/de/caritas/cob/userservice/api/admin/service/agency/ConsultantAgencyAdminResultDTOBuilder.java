@@ -2,17 +2,11 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
+import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
+import de.caritas.cob.userservice.api.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultLinks;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyLinks;
-import de.caritas.cob.userservice.api.model.HalLink;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,8 +15,7 @@ import java.util.stream.Collectors;
  */
 public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
 
-  private List<ConsultantAgency> agencyList;
-  private String consultantId;
+  private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList;
 
   private ConsultantAgencyAdminResultDTOBuilder() {
   }
@@ -37,23 +30,13 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
   }
 
   /**
-   * Sets the consultantId.
-   *
-   * @param consultantId for building links
-   * @return the current {@link ConsultantAgencyAdminResultDTOBuilder}
-   */
-  public ConsultantAgencyAdminResultDTOBuilder withConsultantId(String consultantId) {
-    this.consultantId = consultantId;
-    return this;
-  }
-
-  /**
    * Sets the result param.
    *
    * @param agencyList the repository result for building links and embedded objects
    * @return the current {@link ConsultantAgencyAdminResultDTOBuilder}
    */
-  public ConsultantAgencyAdminResultDTOBuilder withResult(List<ConsultantAgency> agencyList) {
+  public ConsultantAgencyAdminResultDTOBuilder withResult(
+      List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList) {
     this.agencyList = agencyList;
     return this;
   }
@@ -63,50 +46,35 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
    *
    * @return the generated {@link ConsultantAgencyAdminResultDTO}
    */
-  public ConsultantAgencyAdminResultDTO build() {
-    return new ConsultantAgencyAdminResultDTO()
-        .embedded(buildSessionAdminResult())
-        .links(buildResultLinks())
-        .total(nonNullConsultantAgencies().size());
-  }
-
-  private List<ConsultantAgencyAdminDTO> buildSessionAdminResult() {
+  public List<AgencyAdminFullResponseDTO> build() {
     return nonNullConsultantAgencies().stream()
-        .map(this::fromConsultantAgency)
+        .map(this::fromAgency)
         .collect(Collectors.toList());
   }
 
-  private List<ConsultantAgency> nonNullConsultantAgencies() {
+  private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> nonNullConsultantAgencies() {
     return nonNull(this.agencyList) ? this.agencyList : emptyList();
   }
 
-  private ConsultantAgencyAdminDTO fromConsultantAgency(ConsultantAgency consultantAgency) {
-    ConsultantAgencyLinks consultantAgencyLinks = new ConsultantAgencyLinks()
-        .delete(buildDeleteConsultantAgencyLink(consultantAgency));
-    return new ConsultantAgencyAdminDTO()
-        .id(consultantAgency.getId())
-        .agencyId(consultantAgency.getAgencyId())
-        .consultantId(consultantAgency.getConsultant().getId())
-        .createDate(String.valueOf(consultantAgency.getCreateDate()))
-        .updateDate((String.valueOf(consultantAgency.getUpdateDate())))
-        .deleteDate(String.valueOf(consultantAgency.getDeleteDate()))
-        .links(consultantAgencyLinks);
-  }
-
-  private HalLink buildDeleteConsultantAgencyLink(ConsultantAgency consultantAgency) {
-    return buildHalLink(methodOn(UseradminApi.class)
-        .deleteConsultantAgency(consultantAgency.getConsultant().getId(),
-            consultantAgency.getAgencyId()), MethodEnum.DELETE);
-  }
-
-  private ConsultantAgencyAdminResultLinks buildResultLinks() {
-    return new ConsultantAgencyAdminResultLinks()
-        .self(buildSelfLink());
-  }
-
-  private HalLink buildSelfLink() {
-    return buildHalLink(methodOn(UseradminApi.class).getConsultantAgency(consultantId),
-        MethodEnum.GET);
+  private AgencyAdminFullResponseDTO fromAgency(
+      de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO agency) {
+    return new AgencyAdminFullResponseDTO()
+        .embedded(new AgencyAdminResponseDTO()
+            .id(agency.getId())
+            .name(agency.getName())
+            .dioceseId(agency.getDioceseId())
+            .teamAgency(agency.getTeamAgency())
+            .offline(agency.getOffline())
+            .postcode(agency.getPostcode())
+            .description(agency.getDescription())
+            .external(agency.getExternal())
+            .consultingType(agency.getConsultingType())
+            .city(agency.getCity())
+            .url(agency.getUrl())
+            .createDate(agency.getCreateDate())
+            .updateDate(agency.getUpdateDate())
+            .deleteDate(agency.getDeleteDate())
+        );
   }
 
 }

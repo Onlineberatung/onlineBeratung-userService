@@ -5,9 +5,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -21,70 +18,45 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
 
   private static final int MOCKED_CONSULTANT_AGENCY_LIST_SIZE = 6;
 
-  private List<ConsultantAgency> agencyList;
+  private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList;
 
   @Before
   public void setupResultPageMock() {
     EasyRandom easyRandom = new EasyRandom();
     agencyList = easyRandom
-        .objects(ConsultantAgency.class, MOCKED_CONSULTANT_AGENCY_LIST_SIZE)
+        .objects(
+            de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO.class,
+            MOCKED_CONSULTANT_AGENCY_LIST_SIZE)
         .collect(Collectors.toList());
   }
 
   @Test
-  public void build_Should_returnEmptyConsultantAgencyAdminResultDTOWithDefaultSelfLink_When_noParametersAreSet() {
-    ConsultantAgencyAdminResultDTO resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
+  public void build_Should_returnEmptyAgencyAdminSearchResultDTO_When_noParametersAreSet() {
+    var resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
         .build();
 
     assertThat(resultDTO, notNullValue());
-    assertThat(resultDTO.getEmbedded(), hasSize(0));
-    assertThat(resultDTO.getLinks(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/consultants/{consultantId}/agencies"));
+    assertThat(resultDTO, hasSize(0));
   }
 
   @Test
-  public void build_Should_returnEmptyConsultantAgencyAdminResultDTOWithParameterizedSelfLink_When_ConsultantIdParameterIsSet() {
-    ConsultantAgencyAdminResultDTO resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
-        .withConsultantId("1da238c6-cd46-4162-80f1-bff74eafe77f")
-        .build();
-
-    assertThat(resultDTO, notNullValue());
-    assertThat(resultDTO.getEmbedded(), hasSize(0));
-    assertThat(resultDTO.getLinks(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/consultants/1da238c6-cd46-4162-80f1-bff74eafe77f/agencies"));
-  }
-
-  @Test
-  public void build_Should_returnEmptyConsultantAgencyAdminResultDTOWithContent_When_ParametersAreSet() {
-    ConsultantAgencyAdminResultDTO resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
-        .withConsultantId("1da238c6-cd46-4162-80f1-bff74eafeAAA")
+  public void build_Should_returnEmptyAgencyAdminSearchResultDTOWithContent_When_ParametersAreSet() {
+    var resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
         .withResult(agencyList)
         .build();
 
     assertThat(resultDTO, notNullValue());
-    assertThat(resultDTO.getEmbedded(), hasSize(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
-    assertThat(resultDTO.getEmbedded().get(0).getLinks().getDelete().getHref(), notNullValue());
-    assertThat(resultDTO.getEmbedded().get(0).getLinks().getDelete().getMethod(),
-        is(MethodEnum.DELETE));
-    assertThat(resultDTO.getLinks(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/consultants/1da238c6-cd46-4162-80f1-bff74eafeAAA/agencies"));
+    assertThat(resultDTO, hasSize(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
   }
 
   @Test
-  public void build_Should_returnEmptyConsultantAgencyAdminResultDTOWithTotal_When_ParametersAreSet() {
-    ConsultantAgencyAdminResultDTO resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
-        .withConsultantId("1da238c6-cd46-4162-80f1-bff74eafeAAA")
+  public void build_Should_returnEmptyAgencyAdminSearchResultDTOWithTotal_When_ParametersAreSet() {
+    var resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
         .withResult(agencyList)
         .build();
 
     assertThat(resultDTO, notNullValue());
-    assertThat(resultDTO.getTotal(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
+    assertThat(resultDTO.size(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
   }
 
 }

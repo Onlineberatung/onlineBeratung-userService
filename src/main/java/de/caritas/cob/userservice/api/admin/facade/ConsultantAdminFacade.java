@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
@@ -19,6 +20,7 @@ import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -90,7 +92,7 @@ public class ConsultantAdminFacade {
    * @param consultantId id of the consultant
    * @return the list of agencies for the given consultant
    */
-  public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
+  public List<AgencyAdminFullResponseDTO> findConsultantAgencies(String consultantId) {
     return this.consultantAgencyAdminService.findConsultantAgencies(consultantId);
   }
 
@@ -139,5 +141,16 @@ public class ConsultantAdminFacade {
    */
   public void markConsultantForDeletion(String consultantId) {
     this.consultantAdminService.markConsultantForDeletion(consultantId);
+  }
+
+  /**
+   * Retrieves all consultants of the agency with given id.
+   *
+   * @param agencyId the agency id
+   * @return the generated {@link ConsultantSearchResultDTO}
+   */
+  public List<ConsultantAdminResponseDTO> findConsultantsForAgency(String agencyId) {
+    var parsedAgencyId = Long.valueOf(agencyId);
+    return this.consultantAgencyAdminService.findConsultantsForAgency(parsedAgencyId);
   }
 }

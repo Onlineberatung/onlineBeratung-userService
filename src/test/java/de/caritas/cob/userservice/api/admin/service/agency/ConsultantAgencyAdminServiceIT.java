@@ -16,16 +16,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.util.List;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,37 +59,50 @@ public class ConsultantAgencyAdminServiceIT {
   private AgencyService agencyService;
 
   @MockBean
+  private AgencyAdminService agencyAdminService;
+
+  @MockBean
   private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
 
   @Test
   public void findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {
+    var agencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
+    agencyAdminResponseDTO.setId(0L);
+    var anotherAgencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
+    anotherAgencyAdminResponseDTO.setId(1L);
+    when(this.agencyAdminService.retrieveAllAgencies())
+        .thenReturn(List.of(agencyAdminResponseDTO, anotherAgencyAdminResponseDTO));
 
-    ConsultantAgencyAdminResultDTO consultantAgencies = consultantAgencyAdminService
+    var consultantAgencies = consultantAgencyAdminService
         .findConsultantAgencies("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe");
 
     assertThat(consultantAgencies, notNullValue());
-    assertThat(consultantAgencies.getEmbedded(), hasSize(24));
+    assertThat(consultantAgencies, hasSize(2));
   }
 
   @Test
   public void findConsultantAgencies_Should_returnFullMappedSessionAdminDTO() {
+    var agencyAdminResponseDTO = new EasyRandom()
+        .nextObject(AgencyAdminResponseDTO.class);
+    agencyAdminResponseDTO.setId(0L);
+    when(this.agencyAdminService.retrieveAllAgencies())
+        .thenReturn(singletonList(agencyAdminResponseDTO));
 
-    ConsultantAgencyAdminResultDTO consultantAgencies = consultantAgencyAdminService
+    var consultantAgencies = consultantAgencyAdminService
         .findConsultantAgencies("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe");
 
-    ConsultantAgencyAdminDTO consultantAgencyAdminDTO = consultantAgencies.getEmbedded().iterator()
+    var consultantAgencyAdminDTO = consultantAgencies.iterator()
         .next();
-    assertThat(consultantAgencyAdminDTO.getConsultantId(), notNullValue());
-    assertThat(consultantAgencyAdminDTO.getAgencyId(), notNullValue());
-    assertThat(consultantAgencyAdminDTO.getCreateDate(), notNullValue());
-    assertThat(consultantAgencyAdminDTO.getUpdateDate(), notNullValue());
+    assertThat(consultantAgencyAdminDTO.getEmbedded().getCity(), notNullValue());
+    assertThat(consultantAgencyAdminDTO.getEmbedded().getId(), notNullValue());
+    assertThat(consultantAgencyAdminDTO.getEmbedded().getCreateDate(), notNullValue());
+    assertThat(consultantAgencyAdminDTO.getEmbedded().getUpdateDate(), notNullValue());
   }
 
   @Test
   public void findConsultantAgencies_Should_returnEmptyResult_with_incorrectConsultantId() {
     try {
-      ConsultantAgencyAdminResultDTO consultantAgencies = consultantAgencyAdminService
-          .findConsultantAgencies("12345678-1234-1234-1234-1234567890ab");
+      consultantAgencyAdminService.findConsultantAgencies("12345678-1234-1234-1234-1234567890ab");
       fail("There was no BadRequestException");
     } catch (Exception e) {
       assertThat(e, instanceOf(BadRequestException.class));

@@ -6,10 +6,13 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -19,7 +22,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,7 @@ public class ConsultantAgencyAdminService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull RemoveConsultantFromRocketChatService removeFromRocketChatService;
   private final @NonNull AgencyService agencyService;
+  private final @NonNull AgencyAdminService agencyAdminService;
   private final @NonNull ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
   /**
@@ -44,19 +48,25 @@ public class ConsultantAgencyAdminService {
    * @param consultantId id of the consultant
    * @return the list of agencies for the given consultant
    */
-  public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
-    Optional<Consultant> consultant = consultantRepository
+  public List<AgencyAdminFullResponseDTO> findConsultantAgencies(String consultantId) {
+    var consultant = consultantRepository
         .findByIdAndDeleteDateIsNull(consultantId);
-    if (!consultant.isPresent()) {
+    if (consultant.isEmpty()) {
       throw new BadRequestException(
           String.format("Consultant with id %s does not exist", consultantId));
     }
-    List<ConsultantAgency> agencyList = consultantAgencyRepository
-        .findByConsultantIdAndDeleteDateIsNull(consultantId);
+
+    var consultantAgencyIds = consultantAgencyRepository
+        .findByConsultantIdAndDeleteDateIsNull(consultantId).stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+
+    var agencyList = this.agencyAdminService.retrieveAllAgencies().stream()
+        .filter(agency -> consultantAgencyIds.contains(agency.getId()))
+        .collect(Collectors.toList());
 
     return ConsultantAgencyAdminResultDTOBuilder
         .getInstance()
-        .withConsultantId(consultantId)
         .withResult(agencyList)
         .build();
   }
@@ -150,4 +160,17 @@ public class ConsultantAgencyAdminService {
     this.consultantAgencyRepository.save(consultantAgency);
   }
 
+  /**
+   * retrieves all consultants of the agency with given id.
+   *
+   * @param agencyId the agency id
+   * @return the generated {@link ConsultantSearchResultDTO}
+   */
+  public List<ConsultantAdminResponseDTO> findConsultantsForAgency(Long agencyId) {
+    return this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId).stream()
+        .map(ConsultantAgency::getConsultant)
+        .map(ConsultantResponseDTOBuilder::getInstance)
+        .map(ConsultantResponseDTOBuilder::buildResponseDTO)
+        .collect(Collectors.toList());
+  }
 }
