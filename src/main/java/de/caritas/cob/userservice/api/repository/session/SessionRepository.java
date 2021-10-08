@@ -21,6 +21,15 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   List<Session> findByConsultantAndStatus(Consultant consultant, SessionStatus sessionStatus);
 
   /**
+   * Find a {@link Session} by a consultant id and a session status ordered by update date desc.
+   *
+   * @param consultant    {@link Consultant}
+   * @param sessionStatus {@link SessionStatus}
+   * @return A list of {@link Session}s for the specific consultant id and status ordered by update date desc
+   */
+  List<Session> findByConsultantAndStatusOrderByUpdateDateAsc(Consultant consultant, SessionStatus sessionStatus);
+
+  /**
    * Find a {@link Session} with unassigned consultant by agency ids and status ordery by creation
    * date ascending.
    *
@@ -34,8 +43,8 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
       List<Long> agencyIds, SessionStatus sessionStatus, RegistrationType registrationType);
 
   /**
-   * Find a {@link Session} by agency ids with status and teamberatung where consultant is not the
-   * given consultant ordery by creation date ascending.
+   * Find a {@link Session} by agency ids with status and team session where consultant is not the
+   * given consultant ordered by update date descending.
    *
    * @param agencyIds     ids of agencies to search for
    * @param sessionStatus {@link SessionStatus} to search for
@@ -46,6 +55,18 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   List<Session> findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
       List<Long> agencyIds, Consultant consultant, SessionStatus sessionStatus,
       boolean isTeamSession);
+
+  /**
+   * Find team {@link Session} by agency ids with status where consultant is not the
+   * given consultant ordered by creation date ascending.
+   *
+   * @param agencyIds     ids of agencies to search for
+   * @param sessionStatus {@link SessionStatus} to search for
+   * @return A list of {@link Session}s for the specific agency ids and status ordered by
+   * update date descending
+   */
+  List<Session> findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
+      List<Long> agencyIds, Consultant consultant, SessionStatus sessionStatus);
 
   List<Session> findByUser(User user);
 

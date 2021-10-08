@@ -467,6 +467,34 @@ public class SessionService {
 
   private List<Session> retrieveArchivedSessions(Consultant consultant) {
     return this.sessionRepository
-        .findByConsultantAndStatus(consultant, SessionStatus.IN_ARCHIVE);
+        .findByConsultantAndStatusOrderByUpdateDateAsc(consultant, SessionStatus.IN_ARCHIVE);
+  }
+
+  /**
+   * Retrieves all archived team sessions of given {@link Consultant}.
+   *
+   * @param consultant the consultant
+   * @return the related {@link ConsultantSessionResponseDTO}s
+   */
+  public List<ConsultantSessionResponseDTO> getArchivedTeamSessionsForConsultant(
+      Consultant consultant) {
+
+    final List<Session> sessions = retrieveArchivedTeamSessionsForConsultant(consultant);
+
+    return sessions.stream()
+        .map(session -> new SessionMapper().toConsultantSessionDto(session))
+        .collect(Collectors.toList());
+  }
+
+  private List<Session> retrieveArchivedTeamSessionsForConsultant(Consultant consultant) {
+    Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
+    if (isNotEmpty(consultantAgencies)) {
+      List<Long> consultantAgencyIds = consultantAgencies.stream()
+          .map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
+      return this.sessionRepository
+          .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
+              consultantAgencyIds, consultant, SessionStatus.IN_ARCHIVE);
+    }
+    return emptyList();
   }
 }
