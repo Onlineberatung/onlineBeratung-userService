@@ -283,9 +283,10 @@ public class SessionService {
    * @param consultant the consultant
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
-  public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(Consultant consultant) {
+  public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
+      Consultant consultant) {
     return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
@@ -447,5 +448,25 @@ public class SessionService {
   private boolean isConsultantAssignedToSessionAgency(Consultant consultant, Session session) {
     return consultant.getConsultantAgencies().stream()
         .anyMatch(consultantAgency -> consultantAgency.getAgencyId().equals(session.getAgencyId()));
+  }
+
+  /**
+   * Retrieves all archived sessions of given {@link Consultant}.
+   *
+   * @param consultant the consultant
+   * @return the related {@link ConsultantSessionResponseDTO}s
+   */
+  public List<ConsultantSessionResponseDTO> getArchivedSessionsForConsultant(
+      Consultant consultant) {
+    final List<Session> sessions = retrieveArchivedSessions(consultant);
+
+    return sessions.stream()
+        .map(session -> new SessionMapper().toConsultantSessionDto(session))
+        .collect(Collectors.toList());
+  }
+
+  private List<Session> retrieveArchivedSessions(Consultant consultant) {
+    return this.sessionRepository
+        .findByConsultantAndStatus(consultant, SessionStatus.IN_ARCHIVE);
   }
 }
