@@ -27,7 +27,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * @param sessionStatus {@link SessionStatus}
    * @return A list of {@link Session}s for the specific consultant id and status ordered by update date desc
    */
-  List<Session> findByConsultantAndStatusOrderByUpdateDateAsc(Consultant consultant, SessionStatus sessionStatus);
+  List<Session> findByConsultantAndStatusOrderByUpdateDateDesc(Consultant consultant, SessionStatus sessionStatus);
 
   /**
    * Find a {@link Session} with unassigned consultant by agency ids and status ordery by creation

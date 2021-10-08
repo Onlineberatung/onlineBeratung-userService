@@ -467,7 +467,7 @@ public class SessionService {
 
   private List<Session> retrieveArchivedSessions(Consultant consultant) {
     return this.sessionRepository
-        .findByConsultantAndStatusOrderByUpdateDateAsc(consultant, SessionStatus.IN_ARCHIVE);
+        .findByConsultantAndStatusOrderByUpdateDateDesc(consultant, SessionStatus.IN_ARCHIVE);
   }
 
   /**
