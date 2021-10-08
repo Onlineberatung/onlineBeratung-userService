@@ -91,4 +91,6 @@ public class PathConstants {
   public static final String PATH_PUT_UPDATE_SESSION_DATA = "/users/sessions/123/data";
   public static final String PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR = "/users/sessions"
       + "/1x2y3/data";
+  public static final String PATH_PUT_SESSION_TO_ARCHIVE = "/users/sessions/123/archive";
+  public static final String PATH_PUT_SESSION_TO_ARCHIVE_INVALID_PATH_VAR = "/users/sessions/xyz/archive";
 }

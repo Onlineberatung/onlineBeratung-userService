@@ -40,6 +40,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CONSULTANT_ABSENT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_SESSION_TO_ARCHIVE;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_SESSION_TO_ARCHIVE_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT_INVALID_PATH_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
@@ -141,6 +143,7 @@ import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
+import de.caritas.cob.userservice.api.facade.SessionArchiveService;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
@@ -415,6 +418,8 @@ public class UserControllerIT {
   private UserService userService;
   @MockBean
   private SessionDataService sessionDataService;
+  @MockBean
+  private SessionArchiveService sessionArchiveService;
 
   @Mock
   private Logger logger;
@@ -2289,6 +2294,23 @@ public class UserControllerIT {
             new UpdateConsultantDTO().email("invalid").firstname("firstname").lastname("lastname")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void archiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_PUT_SESSION_TO_ARCHIVE_INVALID_PATH_VAR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  public void archiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_PUT_SESSION_TO_ARCHIVE))
+        .andExpect(status().isOk());
   }
 
 }

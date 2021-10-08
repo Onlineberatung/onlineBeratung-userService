@@ -33,9 +33,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -151,6 +153,18 @@ class SessionServiceTest {
     verify(sessionRepository, times(1))
         .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
             agencyIds, SessionStatus.NEW, REGISTERED);
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.INITIAL, REGISTERED);
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.IN_PROGRESS, REGISTERED);
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.IN_ARCHIVE, REGISTERED);
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantIsNullAndStatusAndRegistrationTypeOrderByEnquiryMessageDateAsc(
+            agencyIds, SessionStatus.DONE, REGISTERED);
   }
 
   @Test
@@ -288,6 +302,12 @@ class SessionServiceTest {
 
     assertThat(sessionService.getActiveAndDoneSessionsForConsultant(CONSULTANT),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
+
+    verify(sessionRepository, times(1)).findByConsultantAndStatus(any(), eq(SessionStatus.IN_PROGRESS));
+    verify(sessionRepository, times(1)).findByConsultantAndStatus(any(), eq(SessionStatus.DONE));
+    verify(sessionRepository, never()).findByConsultantAndStatus(any(), eq(SessionStatus.IN_ARCHIVE));
+    verify(sessionRepository, never()).findByConsultantAndStatus(any(), eq(SessionStatus.INITIAL));
+    verify(sessionRepository, never()).findByConsultantAndStatus(any(), eq(SessionStatus.NEW));
   }
 
   @Test
@@ -369,10 +389,8 @@ class SessionServiceTest {
 
     var roles = new HashSet<>(singletonList("no-role"));
     assertThrows(ForbiddenException.class,
-        () -> {
-          sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID,
-              roles);
-        });
+        () -> sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID,
+            roles));
   }
 
   /**
@@ -387,11 +405,27 @@ class SessionServiceTest {
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-            any(), any(), any(), Mockito.anyBoolean()))
+            any(), any(), any(), anyBoolean()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     assertThat(sessionService.getTeamSessionsForConsultant(consultant),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
+
+    verify(sessionRepository, times(1))
+        .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
+        any(), any(), eq(SessionStatus.IN_PROGRESS), anyBoolean());
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
+            any(), any(), eq(SessionStatus.INITIAL), anyBoolean());
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
+            any(), any(), eq(SessionStatus.NEW), anyBoolean());
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
+            any(), any(), eq(SessionStatus.DONE), anyBoolean());
+    verify(sessionRepository, never())
+        .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
+            any(), any(), eq(SessionStatus.IN_ARCHIVE), anyBoolean());
   }
 
   @Test
@@ -402,7 +436,7 @@ class SessionServiceTest {
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCY_SET);
     when(sessionRepository
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-            any(), any(), any(), Mockito.anyBoolean()))
+            any(), any(), any(), anyBoolean()))
         .thenReturn(SESSION_LIST_WITH_CONSULTANT);
 
     SessionConsultantForConsultantDTO sessionDTO =
