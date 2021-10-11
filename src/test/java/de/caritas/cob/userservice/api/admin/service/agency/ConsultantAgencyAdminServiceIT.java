@@ -168,4 +168,20 @@ public class ConsultantAgencyAdminServiceIT {
     assertThat(deletedConsultantAgency.getDeleteDate(), notNullValue());
   }
 
+  @Test
+  public void findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
+    var consultantsOfAgency = this.consultantAgencyAdminService.findConsultantsForAgency(1L);
+
+    assertThat(consultantsOfAgency, hasSize(3));
+    consultantsOfAgency.forEach(consultant -> {
+      assertThat(consultant.getEmbedded(), notNullValue());
+      assertThat(consultant.getLinks(), notNullValue());
+      assertThat(consultant.getLinks().getAddAgency(), notNullValue());
+      assertThat(consultant.getLinks().getAgencies(), notNullValue());
+      assertThat(consultant.getLinks().getDelete(), notNullValue());
+      assertThat(consultant.getLinks().getSelf(), notNullValue());
+      assertThat(consultant.getLinks().getUpdate(), notNullValue());
+    });
+  }
+
 }
