@@ -20,10 +20,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import org.apache.commons.collections4.SetUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -107,6 +112,31 @@ public class AuthenticatedUserHelperTest {
         authenticatedUserHelper.hasPermissionForSession(TEAM_SESSION_WITH_DIFFERENT_CONSULTANT);
 
     assertTrue(result);
+  }
+
+  @Test
+  public void authenticatedUserRolesContainAnyRoleOf_Should_ReturnTrue_WhenAuthenticatedUserHasRole() {
+
+    when(authenticatedUser.getRoles()).thenReturn(
+        new HashSet<>(List.of(UserRole.CONSULTANT.getValue())));
+
+    boolean result =
+        authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
+            UserRole.CONSULTANT.getValue(), UserRole.U25_CONSULTANT.getValue());
+
+    assertTrue(result);
+  }
+
+  @Test
+  public void authenticatedUserRolesContainAnyRoleOf_Should_ReturnTrue_WhenAuthenticatedUserHasNotRole() {
+
+    when(authenticatedUser.getRoles()).thenReturn(
+        new HashSet<>(List.of(UserRole.CONSULTANT.getValue())));
+
+    boolean result =
+        authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.USER.toString());
+
+    assertFalse(result);
   }
 
 }

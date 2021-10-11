@@ -793,4 +793,16 @@ public class  UserController implements UsersApi {
     this.sessionArchiveService.archiveSession(sessionId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
+
+  /**
+   * Reactivate a session.
+   *
+   * @param sessionId (required) session ID
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> reactivateSession(@PathVariable Long sessionId) {
+    this.sessionArchiveService.reactivateSession(sessionId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
 }
