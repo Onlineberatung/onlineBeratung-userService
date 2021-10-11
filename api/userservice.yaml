@@ -220,6 +220,38 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/{sessionId}/archive:
+    put:
+      tags:
+        - user-controller
+      summary: 'Put a session into the archive [Authorization: Role: consultant]'
+      operationId: archiveSession
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token or consultant
+            or consultant has no authorization for this session
+        404:
+          description: NOT FOUND - session not found
+        409:
+          description: CONFLICT - session is already in the archive or is not in progress
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/consultants/absences:
     put:
       tags:
