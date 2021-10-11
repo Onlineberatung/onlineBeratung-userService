@@ -25,7 +25,9 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.PeekingIterator;
 import org.jeasy.random.EasyRandom;
@@ -65,14 +67,6 @@ public class ArchivedSessionConversationListProviderTestIT {
 
   @MockBean
   private ValidatedUserAccountProvider userAccountProvider;
-
-  private Consultant consultant;
-
-  @Before
-  public void setup() {
-    this.consultant = buildConsultant();
-    when(this.userAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
-  }
 
   @After
   public void cleanDatabase() {
@@ -146,11 +140,16 @@ public class ArchivedSessionConversationListProviderTestIT {
   }
 
   private void saveTestData(int amount) {
+    Consultant consultant = buildConsultant();
     consultantRepository.save(consultant);
-    ConsultantAgency consultantAgency = new ConsultantAgency();
-    consultantAgency.setConsultant(consultant);
-    consultantAgency.setAgencyId(1L);
+    when(this.userAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
+    Consultant consultant2 = buildConsultant();
+    consultantRepository.save(consultant2);
+
+    ConsultantAgency consultantAgency = buildConsultantAgency(consultant);
     consultantAgencyRepository.save(consultantAgency);
+    ConsultantAgency consultantAgency2 = buildConsultantAgency(consultant2);
+    consultantAgencyRepository.save(consultantAgency2);
 
     List<Session> sessions = new EasyRandom().objects(Session.class, amount + 5)
         .collect(Collectors.toList());
@@ -171,17 +170,18 @@ public class ArchivedSessionConversationListProviderTestIT {
     sessions.get(2).setStatus(SessionStatus.DONE);
     sessions.get(3).setStatus(SessionStatus.NEW);
     sessions.get(4).setStatus(SessionStatus.IN_ARCHIVE);
-
-    Consultant consultant = Mockito.mock(Consultant.class);
-    when(consultant.getId()).thenReturn("123");
-    sessions.get(4).setConsultant(consultant);
+    sessions.get(4).setConsultant(consultant2);
     sessions.get(4).setTeamSession(true);
     this.sessionRepository.saveAll(sessions);
   }
 
+  private void setupConsultants() {
+
+  }
+
   private Consultant buildConsultant() {
     Consultant consultant = new Consultant();
-    consultant.setId("xyz");
+    consultant.setId(UUID.randomUUID().toString());
     consultant.setUsername("consultant");
     consultant.setFirstName("firstname");
     consultant.setLastName("lastname");
@@ -190,6 +190,14 @@ public class ArchivedSessionConversationListProviderTestIT {
     consultant.setLanguageFormal(false);
     consultant.setAbsent(false);
     return consultant;
+  }
+
+  private ConsultantAgency buildConsultantAgency(Consultant consultant) {
+    ConsultantAgency consultantAgency = new ConsultantAgency();
+    consultantAgency.setConsultant(consultant);
+    consultantAgency.setAgencyId(1L);
+    consultant.setConsultantAgencies(Collections.singleton(consultantAgency));
+    return consultantAgency;
   }
 
 }

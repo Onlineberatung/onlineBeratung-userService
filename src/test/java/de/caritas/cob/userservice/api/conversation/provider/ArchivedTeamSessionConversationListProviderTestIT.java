@@ -67,16 +67,6 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
   @MockBean
   private ValidatedUserAccountProvider userAccountProvider;
 
-  private Consultant consultant;
-  private Consultant consultant2;
-
-  @Before
-  public void setup() {
-    this.consultant = buildConsultant();
-    this.consultant2 = buildConsultant();
-    when(this.userAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
-  }
-
   @After
   public void cleanDatabase() {
     this.sessionRepository.deleteAll();
@@ -149,18 +139,16 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
   }
 
   private void saveTestData(int amount) {
+    Consultant consultant = buildConsultant();
     consultantRepository.save(consultant);
+    when(this.userAccountProvider.retrieveValidatedConsultant()).thenReturn(consultant);
+    Consultant consultant2 = buildConsultant();
     consultantRepository.save(consultant2);
-    ConsultantAgency consultantAgency = new ConsultantAgency();
-    consultantAgency.setConsultant(consultant);
-    consultantAgency.setAgencyId(1L);
+
+    ConsultantAgency consultantAgency = buildConsultantAgency(consultant);
     consultantAgencyRepository.save(consultantAgency);
-    consultant.setConsultantAgencies(Collections.singleton(consultantAgency));
-    ConsultantAgency consultantAgency2 = new ConsultantAgency();
-    consultantAgency2.setConsultant(consultant2);
-    consultantAgency2.setAgencyId(1L);
+    ConsultantAgency consultantAgency2  = buildConsultantAgency(consultant2);
     consultantAgencyRepository.save(consultantAgency2);
-    consultant2.setConsultantAgencies(Collections.singleton(consultantAgency2));
 
     List<Session> sessions = new EasyRandom().objects(Session.class, amount + 5)
         .collect(Collectors.toList());
@@ -199,5 +187,13 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
     consultant.setLanguageFormal(false);
     consultant.setAbsent(false);
     return consultant;
+  }
+
+  private ConsultantAgency buildConsultantAgency(Consultant consultant) {
+    ConsultantAgency consultantAgency = new ConsultantAgency();
+    consultantAgency.setConsultant(consultant);
+    consultantAgency.setAgencyId(1L);
+    consultant.setConsultantAgencies(Collections.singleton(consultantAgency));
+    return consultantAgency;
   }
 }
