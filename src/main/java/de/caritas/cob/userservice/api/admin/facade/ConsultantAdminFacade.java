@@ -10,7 +10,6 @@ import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrela
 import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
@@ -101,7 +100,7 @@ public class ConsultantAdminFacade {
    * CreateConsultantAgencyDTO} input.
    *
    * @param consultantId              the consultant to use
-   * @param createConsultantAgencyDTO the agencyId and role {@link ConsultantAgencyAdminResultDTO}
+   * @param createConsultantAgencyDTO the agencyId and role {@link CreateConsultantAgencyDTO}
    */
   public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {

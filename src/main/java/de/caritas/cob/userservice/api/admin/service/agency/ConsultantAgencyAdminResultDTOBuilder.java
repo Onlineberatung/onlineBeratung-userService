@@ -6,12 +6,11 @@ import static java.util.Objects.nonNull;
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Builder to create a {@link ConsultantAgencyAdminResultDTO}.
+ * Builder to create a list of{@link AgencyAdminFullResponseDTO}.
  */
 public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
 
@@ -42,9 +41,9 @@ public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
   }
 
   /**
-   * Creates the {@link ConsultantAgencyAdminResultDTO}.
+   * Creates the list of {@link AgencyAdminFullResponseDTO}.
    *
-   * @return the generated {@link ConsultantAgencyAdminResultDTO}
+   * @return the generated {@link AgencyAdminFullResponseDTO}
    */
   public List<AgencyAdminFullResponseDTO> build() {
     return nonNullConsultantAgencies().stream()
