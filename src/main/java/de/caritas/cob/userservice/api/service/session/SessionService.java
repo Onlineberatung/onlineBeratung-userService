@@ -232,15 +232,7 @@ public class SessionService {
               consultantAgencyIds, consultant, SessionStatus.IN_PROGRESS, true);
     }
 
-    List<ConsultantSessionResponseDTO> sessionDTOs = null;
-
-    if (nonNull(sessions)) {
-      sessionDTOs = sessions.stream()
-          .map(session -> new SessionMapper().toConsultantSessionDto(session))
-          .collect(Collectors.toList());
-    }
-
-    return sessionDTOs;
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   /**
@@ -263,12 +255,8 @@ public class SessionService {
     List<Long> consultantAgencyIds = consultantAgencies.stream()
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toList());
-
     final List<Session> sessions = retrieveRegisteredSessions(consultantAgencyIds);
-
-    return sessions.stream()
-        .map(session -> new SessionMapper().toConsultantSessionDto(session))
-        .collect(Collectors.toList());
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   private List<Session> retrieveRegisteredSessions(List<Long> consultantAgencyIds) {
@@ -460,9 +448,7 @@ public class SessionService {
       Consultant consultant) {
     final List<Session> sessions = retrieveArchivedSessions(consultant);
 
-    return sessions.stream()
-        .map(session -> new SessionMapper().toConsultantSessionDto(session))
-        .collect(Collectors.toList());
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   private List<Session> retrieveArchivedSessions(Consultant consultant) {
@@ -478,12 +464,8 @@ public class SessionService {
    */
   public List<ConsultantSessionResponseDTO> getArchivedTeamSessionsForConsultant(
       Consultant consultant) {
-
     final List<Session> sessions = retrieveArchivedTeamSessionsForConsultant(consultant);
-
-    return sessions.stream()
-        .map(session -> new SessionMapper().toConsultantSessionDto(session))
-        .collect(Collectors.toList());
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   private List<Session> retrieveArchivedTeamSessionsForConsultant(Consultant consultant) {
@@ -494,6 +476,15 @@ public class SessionService {
       return this.sessionRepository
           .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
               consultantAgencyIds, consultant, SessionStatus.IN_ARCHIVE);
+    }
+    return emptyList();
+  }
+
+  private List<ConsultantSessionResponseDTO> mapSessionsToConsultantSessionDto(List<Session> sessions) {
+    if (nonNull(sessions)) {
+      return sessions.stream()
+          .map(session -> new SessionMapper().toConsultantSessionDto(session))
+          .collect(Collectors.toList());
     }
     return emptyList();
   }

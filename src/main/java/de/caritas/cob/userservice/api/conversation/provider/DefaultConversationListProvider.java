@@ -11,11 +11,17 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.support.PagedListHolder;
 
+/**
+ * Default basic provider for conversation lists.
+ */
 @RequiredArgsConstructor
 public abstract class DefaultConversationListProvider implements ConversationListProvider {
 
   private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
 
+  /**
+   * {@inheritDoc}
+   */
   protected ConsultantSessionListResponseDTO buildConversations(
       PageableListRequest pageableListRequest,
       Consultant consultant,

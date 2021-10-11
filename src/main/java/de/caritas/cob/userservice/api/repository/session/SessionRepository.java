@@ -21,7 +21,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   List<Session> findByConsultantAndStatus(Consultant consultant, SessionStatus sessionStatus);
 
   /**
-   * Find a {@link Session} by a consultant id and a session status ordered by update date desc.
+   * Find a {@link Session} list by a consultant and a session status ordered by update date desc.
    *
    * @param consultant    {@link Consultant}
    * @param sessionStatus {@link SessionStatus}
@@ -57,8 +57,8 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
       boolean isTeamSession);
 
   /**
-   * Find team {@link Session} by agency ids with status where consultant is not the
-   * given consultant ordered by creation date ascending.
+   * Find team {@link Session} list by agency ids and status where consultant is not the
+   * given consultant ordered by creation date descending.
    *
    * @param agencyIds     ids of agencies to search for
    * @param sessionStatus {@link SessionStatus} to search for

@@ -30,10 +30,7 @@ public class ArchivedTeamSessionConversationListProvider extends DefaultConversa
   }
 
   /**
-   * Builds the {@link ConsultantSessionListResponseDTO}.
-   *
-   * @param pageableListRequest the pageable request
-   * @return the relevant {@link ConsultantSessionListResponseDTO}
+   * {@inheritDoc}
    */
   @Override
   public ConsultantSessionListResponseDTO buildConversations(
@@ -46,9 +43,7 @@ public class ArchivedTeamSessionConversationListProvider extends DefaultConversa
   }
 
   /**
-   * Returns the {@link ConversationListType} the implementation is accountable for.
-   *
-   * @return the relevant {@link ConversationListType}
+   * {@inheritDoc}
    */
   @Override
   public ConversationListType providedType() {

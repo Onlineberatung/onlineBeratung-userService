@@ -101,6 +101,13 @@ public class ConversationController implements ConversationsApi {
     return ResponseEntity.ok(archivedSessions);
   }
 
+  /**
+   * Entry point to retrieve all archived team sessions for current authenticated consultant.
+   *
+   * @param offset Number of items where to start in the query (0 = first item) (required)
+   * @param count  Number of items which are being returned (required)
+   * @return the {@link ConsultantSessionListResponseDTO}
+   */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getArchivedTeamSessions(
       @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
@@ -144,7 +151,7 @@ public class ConversationController implements ConversationsApi {
   }
 
   /**
-   * Finishes a anonymous conversation and sets the status to done.
+   * Finishes an anonymous conversation and sets the status to done.
    *
    * @param sessionId the identifier of the session
    * @return {@link ResponseEntity}
