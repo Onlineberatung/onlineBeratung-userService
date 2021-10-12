@@ -9,10 +9,10 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 public class SessionArchiveService {
 
   private @NonNull SessionRepository sessionRepository;
-  private @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private @NonNull AuthenticatedUser authenticatedUser;
   private @NonNull AuthenticatedUserHelper authenticatedUserHelper;
 
@@ -35,7 +34,9 @@ public class SessionArchiveService {
    * @param sessionId the session id
    */
   public void archiveSession(Long sessionId) {
-    putSessionToStatus(sessionId, SessionStatus.IN_ARCHIVE);
+    putSessionToStatus(sessionId,
+        SessionStatus.IN_ARCHIVE,
+        SessionArchiveService::isValidForArchive);
   }
 
   /**
@@ -44,13 +45,16 @@ public class SessionArchiveService {
    * @param sessionId the session id
    */
   public void reactivateSession(Long sessionId) {
-    putSessionToStatus(sessionId, SessionStatus.IN_PROGRESS);
+    putSessionToStatus(sessionId,
+        SessionStatus.IN_PROGRESS,
+        SessionArchiveService::isValidForReactivate);
   }
 
-  private void putSessionToStatus(Long sessionId, SessionStatus sessionStatusTo) {
+  private void putSessionToStatus(Long sessionId, SessionStatus sessionStatusTo,
+      Consumer<Session> sessionValidator) {
     Session session = retrieveSession(sessionId);
     checkSessionPermission(session);
-    validateSession(session, sessionStatusTo);
+    sessionValidator.accept(session);
 
     session.setStatus(sessionStatusTo);
     try {
@@ -65,26 +69,6 @@ public class SessionArchiveService {
   private Session retrieveSession(Long sessionId) {
     return sessionRepository.findById(sessionId).orElseThrow(
         () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
-  }
-
-  private void validateSession(Session session, SessionStatus sessionStatusTo) {
-    if (!hasSessionCorrectStatusForArchive(session, sessionStatusTo)
-        && !hasSessionCorrectStatusForReactivating(session, sessionStatusTo)) {
-      throw new ConflictException(
-          String.format(
-              "Session %s has not the correct status to be archived/reactivated. Session status should be changed to: %s",
-              session.getId(), sessionStatusTo));
-    }
-  }
-
-  private boolean hasSessionCorrectStatusForArchive(Session session, SessionStatus sessionStatusTo) {
-    return sessionStatusTo.equals(SessionStatus.IN_ARCHIVE)
-        && session.getStatus().equals(SessionStatus.IN_PROGRESS);
-  }
-
-  private boolean hasSessionCorrectStatusForReactivating(Session session, SessionStatus sessionStatusTo) {
-    return sessionStatusTo.equals(SessionStatus.IN_PROGRESS)
-        && session.getStatus().equals(SessionStatus.IN_ARCHIVE);
   }
 
   private void checkSessionPermission(Session session) {
@@ -105,6 +89,24 @@ public class SessionArchiveService {
     return authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
         UserRole.USER.getValue()) && nonNull(session.getUser())
         && session.getUser().getUserId().equals(authenticatedUser.getUserId());
+  }
+
+  private static void isValidForArchive(Session session) {
+    if (!session.getStatus().equals(SessionStatus.IN_PROGRESS)) {
+      throw new ConflictException(
+          String.format(
+              "Session %s should be archived but has not status IN_PROGRESS",
+              session.getId()));
+    }
+  }
+
+  private static void isValidForReactivate(Session session) {
+    if (!session.getStatus().equals(SessionStatus.IN_ARCHIVE)) {
+      throw new ConflictException(
+          String.format(
+              "Session %s should be archived but has not status IN_ARCHIVE",
+              session.getId()));
+    }
   }
 
 }
