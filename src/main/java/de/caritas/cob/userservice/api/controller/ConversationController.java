@@ -5,6 +5,8 @@ import static de.caritas.cob.userservice.api.controller.UserController.MIN_COUNT
 import static de.caritas.cob.userservice.api.controller.UserController.MIN_OFFSET;
 import static de.caritas.cob.userservice.api.controller.UserController.OFFSET_INVALID_MESSAGE;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
+import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_SESSION;
+import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
@@ -80,6 +82,46 @@ public class ConversationController implements ConversationsApi {
   }
 
   /**
+   * Entry point to retrieve all archived sessions for current authenticated consultant.
+   *
+   * @param offset Number of items where to start in the query (0 = first item) (required)
+   * @param count  Number of items which are being returned (required)
+   * @return the {@link ConsultantSessionListResponseDTO}
+   */
+  @Override
+  public ResponseEntity<ConsultantSessionListResponseDTO> getArchivedSessions(
+      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
+      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
+      @RequestHeader String rcToken) {
+
+    ConsultantSessionListResponseDTO archivedSessions =
+        this.conversationListResolver
+            .resolveConversations(offset, count, ARCHIVED_SESSION, rcToken);
+
+    return ResponseEntity.ok(archivedSessions);
+  }
+
+  /**
+   * Entry point to retrieve all archived team sessions for current authenticated consultant.
+   *
+   * @param offset Number of items where to start in the query (0 = first item) (required)
+   * @param count  Number of items which are being returned (required)
+   * @return the {@link ConsultantSessionListResponseDTO}
+   */
+  @Override
+  public ResponseEntity<ConsultantSessionListResponseDTO> getArchivedTeamSessions(
+      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
+      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
+      @RequestHeader String rcToken) {
+
+    ConsultantSessionListResponseDTO archivedTeamSessions =
+        this.conversationListResolver
+            .resolveConversations(offset, count, ARCHIVED_TEAM_SESSION, rcToken);
+
+    return ResponseEntity.ok(archivedTeamSessions);
+  }
+
+  /**
    * Entry point to accept an existing anonymous enquiry for current authenticated consultant.
    *
    * @param sessionId the identifier of the existing anonymous session (required)
@@ -109,7 +151,7 @@ public class ConversationController implements ConversationsApi {
   }
 
   /**
-   * Finishes a anonymous conversation and sets the status to done.
+   * Finishes an anonymous conversation and sets the status to done.
    *
    * @param sessionId the identifier of the session
    * @return {@link ResponseEntity}

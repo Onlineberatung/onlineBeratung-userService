@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.conversation.provider;
 
-import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
+import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
 
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
@@ -12,15 +12,15 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * {@link ConversationListProvider} to provide registered enquiry conversations.
+ * {@link ConversationListProvider} to provide archived team session conversations.
  */
 @Service
-public class RegisteredEnquiryConversationListProvider extends DefaultConversationListProvider {
+public class ArchivedTeamSessionConversationListProvider extends DefaultConversationListProvider {
 
-  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
-  private final @NonNull SessionService sessionService;
+  private final SessionService sessionService;
+  private final ValidatedUserAccountProvider userAccountProvider;
 
-  public RegisteredEnquiryConversationListProvider(
+  public ArchivedTeamSessionConversationListProvider(
       @NonNull ValidatedUserAccountProvider userAccountProvider,
       @NonNull ConsultantSessionEnricher consultantSessionEnricher,
       @NonNull SessionService sessionService) {
@@ -39,7 +39,7 @@ public class RegisteredEnquiryConversationListProvider extends DefaultConversati
 
     return buildConversations(pageableListRequest,
         consultant,
-        sessionService.getRegisteredEnquiriesForConsultant(consultant));
+        sessionService.getArchivedTeamSessionsForConsultant(consultant));
   }
 
   /**
@@ -47,6 +47,6 @@ public class RegisteredEnquiryConversationListProvider extends DefaultConversati
    */
   @Override
   public ConversationListType providedType() {
-    return REGISTERED_ENQUIRY;
+    return ARCHIVED_TEAM_SESSION;
   }
 }
