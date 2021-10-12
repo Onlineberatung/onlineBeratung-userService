@@ -7,9 +7,10 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
-import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
+import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
@@ -19,7 +20,6 @@ import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -89,9 +89,9 @@ public class ConsultantAdminFacade {
    * Returns all Agencies for the given consultantId.
    *
    * @param consultantId id of the consultant
-   * @return the list of agencies for the given consultant
+   * @return the generated {@link ConsultantAgencyResponseDTO}
    */
-  public List<AgencyAdminFullResponseDTO> findConsultantAgencies(String consultantId) {
+  public ConsultantAgencyResponseDTO findConsultantAgencies(String consultantId) {
     return this.consultantAgencyAdminService.findConsultantAgencies(consultantId);
   }
 
@@ -146,9 +146,9 @@ public class ConsultantAdminFacade {
    * Retrieves all consultants of the agency with given id.
    *
    * @param agencyId the agency id
-   * @return the generated {@link ConsultantSearchResultDTO}
+   * @return the generated {@link AgencyConsultantResponseDTO}
    */
-  public List<ConsultantAdminResponseDTO> findConsultantsForAgency(String agencyId) {
+  public AgencyConsultantResponseDTO findConsultantsForAgency(String agencyId) {
     var parsedAgencyId = Long.valueOf(agencyId);
     return this.consultantAgencyAdminService.findConsultantsForAgency(parsedAgencyId);
   }

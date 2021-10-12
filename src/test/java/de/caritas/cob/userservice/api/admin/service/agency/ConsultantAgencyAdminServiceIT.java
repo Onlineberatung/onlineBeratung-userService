@@ -77,7 +77,10 @@ public class ConsultantAgencyAdminServiceIT {
         .findConsultantAgencies("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe");
 
     assertThat(consultantAgencies, notNullValue());
-    assertThat(consultantAgencies, hasSize(2));
+    assertThat(consultantAgencies.getEmbedded(), hasSize(2));
+    assertThat(consultantAgencies.getTotal(), is(2));
+    assertThat(consultantAgencies.getLinks().getSelf().getHref(),
+        is("http://localhost/useradmin/consultants/5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe/agencies"));
   }
 
   @Test
@@ -91,7 +94,7 @@ public class ConsultantAgencyAdminServiceIT {
     var consultantAgencies = consultantAgencyAdminService
         .findConsultantAgencies("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe");
 
-    var consultantAgencyAdminDTO = consultantAgencies.iterator()
+    var consultantAgencyAdminDTO = consultantAgencies.getEmbedded().iterator()
         .next();
     assertThat(consultantAgencyAdminDTO.getEmbedded().getCity(), notNullValue());
     assertThat(consultantAgencyAdminDTO.getEmbedded().getId(), notNullValue());
@@ -172,8 +175,8 @@ public class ConsultantAgencyAdminServiceIT {
   public void findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
     var consultantsOfAgency = this.consultantAgencyAdminService.findConsultantsForAgency(1L);
 
-    assertThat(consultantsOfAgency, hasSize(3));
-    consultantsOfAgency.forEach(consultant -> {
+    assertThat(consultantsOfAgency.getEmbedded(), hasSize(3));
+    consultantsOfAgency.getEmbedded().forEach(consultant -> {
       assertThat(consultant.getEmbedded(), notNullValue());
       assertThat(consultant.getLinks(), notNullValue());
       assertThat(consultant.getLinks().getAddAgency(), notNullValue());

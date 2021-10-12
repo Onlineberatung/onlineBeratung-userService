@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 
+import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -14,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConsultantAgencyAdminResultDTOBuilderTest {
+public class ConsultantResponseDTOBuilderTest {
 
   private static final int MOCKED_CONSULTANT_AGENCY_LIST_SIZE = 6;
 
@@ -32,31 +33,37 @@ public class ConsultantAgencyAdminResultDTOBuilderTest {
 
   @Test
   public void build_Should_returnEmptyAgencyAdminSearchResultDTO_When_noParametersAreSet() {
-    var resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
+    var resultDTO = ConsultantResponseDTOBuilder.getInstance()
         .build();
 
     assertThat(resultDTO, notNullValue());
-    assertThat(resultDTO, hasSize(0));
+    assertThat(resultDTO.getEmbedded(), hasSize(0));
+    assertThat(resultDTO.getTotal(), is(0));
+    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/consultants/{consultantId}/agencies"));
+    assertThat(resultDTO.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
   }
 
   @Test
   public void build_Should_returnEmptyAgencyAdminSearchResultDTOWithContent_When_ParametersAreSet() {
-    var resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
+    var resultDTO = ConsultantResponseDTOBuilder.getInstance()
         .withResult(agencyList)
         .build();
 
     assertThat(resultDTO, notNullValue());
-    assertThat(resultDTO, hasSize(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
+    assertThat(resultDTO.getEmbedded(), hasSize(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
+    assertThat(resultDTO.getTotal(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
+    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/consultants/{consultantId}/agencies"));
+    assertThat(resultDTO.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
   }
 
   @Test
   public void build_Should_returnEmptyAgencyAdminSearchResultDTOWithTotal_When_ParametersAreSet() {
-    var resultDTO = ConsultantAgencyAdminResultDTOBuilder.getInstance()
+    var resultDTO = ConsultantResponseDTOBuilder.getInstance()
         .withResult(agencyList)
         .build();
 
     assertThat(resultDTO, notNullValue());
-    assertThat(resultDTO.size(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
+    assertThat(resultDTO.getTotal(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
   }
 
 }

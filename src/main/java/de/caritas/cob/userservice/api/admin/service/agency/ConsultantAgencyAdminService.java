@@ -6,13 +6,11 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
+import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -46,9 +44,10 @@ public class ConsultantAgencyAdminService {
    * Returns all Agencies for the given consultantId.
    *
    * @param consultantId id of the consultant
-   * @return the list of agencies for the given consultant
+   * @return the list of agencies for the given consultant wrapped in a {@link
+   * ConsultantAgencyResponseDTO}
    */
-  public List<AgencyAdminFullResponseDTO> findConsultantAgencies(String consultantId) {
+  public ConsultantAgencyResponseDTO findConsultantAgencies(String consultantId) {
     var consultant = consultantRepository
         .findByIdAndDeleteDateIsNull(consultantId);
     if (consultant.isEmpty()) {
@@ -65,8 +64,9 @@ public class ConsultantAgencyAdminService {
         .filter(agency -> consultantAgencyIds.contains(agency.getId()))
         .collect(Collectors.toList());
 
-    return ConsultantAgencyAdminResultDTOBuilder
+    return ConsultantResponseDTOBuilder
         .getInstance()
+        .withConsultantId(consultantId)
         .withResult(agencyList)
         .build();
   }
@@ -164,13 +164,17 @@ public class ConsultantAgencyAdminService {
    * retrieves all consultants of the agency with given id.
    *
    * @param agencyId the agency id
-   * @return the generated {@link ConsultantSearchResultDTO}
+   * @return the generated {@link AgencyConsultantResponseDTO}
    */
-  public List<ConsultantAdminResponseDTO> findConsultantsForAgency(Long agencyId) {
-    return this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId).stream()
+  public AgencyConsultantResponseDTO findConsultantsForAgency(Long agencyId) {
+    var consultants = this.consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNull(agencyId).stream()
         .map(ConsultantAgency::getConsultant)
-        .map(ConsultantResponseDTOBuilder::getInstance)
-        .map(ConsultantResponseDTOBuilder::buildResponseDTO)
+        .map(de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::getInstance)
+        .map(de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::buildResponseDTO)
         .collect(Collectors.toList());
+    return AgencyConsultantResponseDTOBuilder.getInstance(consultants)
+        .withAgencyId(String.valueOf(agencyId))
+        .build();
   }
 }

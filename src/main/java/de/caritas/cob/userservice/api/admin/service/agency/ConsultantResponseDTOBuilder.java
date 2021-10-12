@@ -2,53 +2,81 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyLinks;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
+import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Builder to create a list of{@link AgencyAdminFullResponseDTO}.
  */
-public class ConsultantAgencyAdminResultDTOBuilder implements HalLinkBuilder {
+public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
   private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList;
+  private String consultantId;
 
-  private ConsultantAgencyAdminResultDTOBuilder() {
+  private ConsultantResponseDTOBuilder() {
   }
 
   /**
-   * Creates an {@link ConsultantAgencyAdminResultDTOBuilder} instance.
+   * Creates an {@link ConsultantResponseDTOBuilder} instance.
    *
-   * @return a instance of {@link ConsultantAgencyAdminResultDTOBuilder}
+   * @return a instance of {@link ConsultantResponseDTOBuilder}
    */
-  public static ConsultantAgencyAdminResultDTOBuilder getInstance() {
-    return new ConsultantAgencyAdminResultDTOBuilder();
+  public static ConsultantResponseDTOBuilder getInstance() {
+    return new ConsultantResponseDTOBuilder();
   }
 
   /**
    * Sets the result param.
    *
    * @param agencyList the repository result for building links and embedded objects
-   * @return the current {@link ConsultantAgencyAdminResultDTOBuilder}
+   * @return the current {@link ConsultantResponseDTOBuilder}
    */
-  public ConsultantAgencyAdminResultDTOBuilder withResult(
+  public ConsultantResponseDTOBuilder withResult(
       List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList) {
     this.agencyList = agencyList;
     return this;
   }
 
   /**
-   * Creates the list of {@link AgencyAdminFullResponseDTO}.
+   * Sets the id of the consultant.
    *
-   * @return the generated {@link AgencyAdminFullResponseDTO}
+   * @param consultantId the id of the consultant needed for the hal self link
+   * @return the current {@link ConsultantResponseDTOBuilder}
    */
-  public List<AgencyAdminFullResponseDTO> build() {
-    return nonNullConsultantAgencies().stream()
+  public ConsultantResponseDTOBuilder withConsultantId(String consultantId) {
+    this.consultantId = consultantId;
+    return this;
+  }
+
+  /**
+   * Creates the list of {@link AgencyAdminFullResponseDTO} and wrappes it into a hal conform {@link
+   * ConsultantAgencyResponseDTO}.
+   *
+   * @return the generated {@link ConsultantAgencyResponseDTO}
+   */
+  public ConsultantAgencyResponseDTO build() {
+    var agencies = nonNullConsultantAgencies().stream()
         .map(this::fromAgency)
         .collect(Collectors.toList());
+    return new ConsultantAgencyResponseDTO()
+        .total(agencies.size())
+        .embedded(agencies)
+        .links(buildConsultantAgencyLinks());
+  }
+
+  private ConsultantAgencyLinks buildConsultantAgencyLinks() {
+    return new ConsultantAgencyLinks()
+        .self(buildHalLink(methodOn(UseradminApi.class).getConsultantAgencies(this.consultantId),
+                MethodEnum.GET));
   }
 
   private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> nonNullConsultantAgencies() {
