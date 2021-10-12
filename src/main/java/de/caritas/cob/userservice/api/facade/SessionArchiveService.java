@@ -49,8 +49,8 @@ public class SessionArchiveService {
 
   private void putSessionToStatus(Long sessionId, SessionStatus sessionStatusTo) {
     Session session = retrieveSession(sessionId);
-    validateSession(session, sessionStatusTo);
     checkSessionPermission(session);
+    validateSession(session, sessionStatusTo);
 
     session.setStatus(sessionStatusTo);
     try {

@@ -59,6 +59,7 @@ public class SessionArchiveServiceIT {
     sessionArchiveService.archiveSession(2L);
 
     Optional<Session> session = sessionRepository.findById(2L);
+    assert session.isPresent();
     assertThat(session.get().getStatus(), is(SessionStatus.IN_ARCHIVE));
 
   }
@@ -91,7 +92,11 @@ public class SessionArchiveServiceIT {
 
   @Test(expected = ConflictException.class)
   public void archiveSession_Should_ThrowConflictException_WhenSessionIsNotInProgress() {
+
     when(authenticatedUser.getUserId()).thenReturn("88613f5d-0d40-47e0-b323-e792e7fba3ed");
+    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
+    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
+
     sessionArchiveService.archiveSession(200L);
   }
 
@@ -105,6 +110,7 @@ public class SessionArchiveServiceIT {
     sessionArchiveService.reactivateSession(1209L);
 
     Optional<Session> session = sessionRepository.findById(1209L);
+    assert session.isPresent();
     assertThat(session.get().getStatus(), is(SessionStatus.IN_PROGRESS));
   }
 
@@ -117,6 +123,7 @@ public class SessionArchiveServiceIT {
     sessionArchiveService.reactivateSession(1211L);
 
     Optional<Session> session = sessionRepository.findById(1211L);
+    assert session.isPresent();
     assertThat(session.get().getStatus(), is(SessionStatus.IN_PROGRESS));
   }
 
@@ -149,6 +156,8 @@ public class SessionArchiveServiceIT {
   @Test(expected = ConflictException.class)
   public void reactivateSession_Should_ThrowConflictException_WhenSessionIsNotInArchive() {
     when(authenticatedUser.getUserId()).thenReturn("473f7c4b-f011-4fc2-847c-ceb636a5b399");
+    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
+    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
     sessionArchiveService.reactivateSession(1L);
   }
 

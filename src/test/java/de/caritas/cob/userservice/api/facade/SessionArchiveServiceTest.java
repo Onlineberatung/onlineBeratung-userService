@@ -7,7 +7,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID_2;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
@@ -21,8 +20,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +53,8 @@ public class SessionArchiveServiceTest {
   @Test(expected = ConflictException.class)
   public void archiveSession_Should_ThrowConflictException_WhenSessionShouldBeArchivedAndIsNotInProgress() {
 
+    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
+    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Session session = Mockito.mock(Session.class);
     when(session.getStatus()).thenReturn(SessionStatus.NEW);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -71,7 +70,19 @@ public class SessionArchiveServiceTest {
     when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(false);
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Session session = Mockito.mock(Session.class);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+
+    sessionArchiveService.archiveSession(SESSION_ID);
+
+    verify(session, times(0)).setStatus(SessionStatus.IN_ARCHIVE);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void archiveSession_Should_ThrowForbiddenException_WhenNoConsultantRole() {
+
+    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
+    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(false);
+    Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.archiveSession(SESSION_ID);
@@ -101,7 +112,6 @@ public class SessionArchiveServiceTest {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.USER.getValue())).thenReturn(true);
     Session session = Mockito.mock(Session.class);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     User user = new User();
     user.setUserId(USER_ID_2);
     when(session.getUser()).thenReturn(user);
@@ -141,6 +151,8 @@ public class SessionArchiveServiceTest {
   @Test(expected = ConflictException.class)
   public void reactivateSession_Should_ThrowConflictException_WhenSessionShouldBeReactivatedAndIsAlreadyInProgress() {
 
+    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
+    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Session session = Mockito.mock(Session.class);
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -158,8 +170,6 @@ public class SessionArchiveServiceTest {
     when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(false);
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Session session = Mockito.mock(Session.class);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_ARCHIVE);
-
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.reactivateSession(SESSION_ID);
@@ -175,13 +185,23 @@ public class SessionArchiveServiceTest {
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
 
     Session session = Mockito.mock(Session.class);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_ARCHIVE);
-
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.reactivateSession(SESSION_ID);
 
     verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void reactivateSession_Should_ThrowForbiddenException_WhenNoConsultantOrUserRole() {
+
+    when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
+    Session session = Mockito.mock(Session.class);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+
+    sessionArchiveService.reactivateSession(SESSION_ID);
+
+    verify(session, times(0)).setStatus(SessionStatus.IN_PROGRESS);
   }
 
   @Test
@@ -206,11 +226,6 @@ public class SessionArchiveServiceTest {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.USER.getValue())).thenReturn(true);
     Session session = Mockito.mock(Session.class);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_ARCHIVE);
-    User user = new User();
-    user.setUserId(USER_ID_2);
-    when(session.getUser()).thenReturn(user);
-
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.reactivateSession(SESSION_ID);

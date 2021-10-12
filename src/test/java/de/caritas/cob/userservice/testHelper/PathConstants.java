@@ -93,4 +93,6 @@ public class PathConstants {
       + "/1x2y3/data";
   public static final String PATH_PUT_SESSION_TO_ARCHIVE = "/users/sessions/123/archive";
   public static final String PATH_PUT_SESSION_TO_ARCHIVE_INVALID_PATH_VAR = "/users/sessions/xyz/archive";
+  public static final String PATH_REACTIVATE_SESSION = "/users/sessions/123/reactivate";
+  public static final String PATH_REACTIVATE_SESSION_INVALID_PATH_VAR = "/users/sessions/xyz/reactivate";
 }

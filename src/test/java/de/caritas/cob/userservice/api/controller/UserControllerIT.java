@@ -49,6 +49,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REACTIVATE_SESSION;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REACTIVATE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -2310,6 +2312,23 @@ public class UserControllerIT {
   @Test
   public void archiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_PUT_SESSION_TO_ARCHIVE))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void reactivateSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_REACTIVATE_SESSION_INVALID_PATH_VAR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  public void reactivateSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_REACTIVATE_SESSION))
         .andExpect(status().isOk());
   }
 
