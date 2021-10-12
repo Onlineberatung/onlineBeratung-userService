@@ -39,7 +39,7 @@ public class RegisteredEnquiryConversationListProvider extends DefaultConversati
 
     return buildConversations(pageableListRequest,
         consultant,
-        () -> this.sessionService.getRegisteredEnquiriesForConsultant(consultant));
+        sessionService.getRegisteredEnquiriesForConsultant(consultant));
   }
 
   /**

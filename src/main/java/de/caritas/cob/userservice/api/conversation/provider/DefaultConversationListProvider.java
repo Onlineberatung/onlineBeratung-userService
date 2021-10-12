@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import java.util.List;
-import java.util.function.Supplier;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.support.PagedListHolder;
@@ -25,10 +24,9 @@ public abstract class DefaultConversationListProvider implements ConversationLis
   protected ConsultantSessionListResponseDTO buildConversations(
       PageableListRequest pageableListRequest,
       Consultant consultant,
-      Supplier<List<ConsultantSessionResponseDTO>> sessionSupplier) {
+      List<ConsultantSessionResponseDTO> sessionList) {
 
-    PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(
-        sessionSupplier.get());
+    PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(sessionList);
 
     enquiriesForConsultant.setPage(obtainPageByOffsetAndCount(pageableListRequest));
     enquiriesForConsultant.setPageSize(pageableListRequest.getCount());
