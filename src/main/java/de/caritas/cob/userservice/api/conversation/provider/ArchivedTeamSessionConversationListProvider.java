@@ -39,7 +39,7 @@ public class ArchivedTeamSessionConversationListProvider extends DefaultConversa
 
     return buildConversations(pageableListRequest,
         consultant,
-        () -> this.sessionService.getArchivedTeamSessionsForConsultant(consultant));
+        sessionService.getArchivedTeamSessionsForConsultant(consultant));
   }
 
   /**
