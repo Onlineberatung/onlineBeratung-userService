@@ -8,8 +8,9 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -19,7 +20,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,25 +37,34 @@ public class ConsultantAgencyAdminService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull RemoveConsultantFromRocketChatService removeFromRocketChatService;
   private final @NonNull AgencyService agencyService;
+  private final @NonNull AgencyAdminService agencyAdminService;
   private final @NonNull ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
   /**
    * Returns all Agencies for the given consultantId.
    *
    * @param consultantId id of the consultant
-   * @return the list of agencies for the given consultant
+   * @return the list of agencies for the given consultant wrapped in a {@link
+   * ConsultantAgencyResponseDTO}
    */
-  public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
-    Optional<Consultant> consultant = consultantRepository
+  public ConsultantAgencyResponseDTO findConsultantAgencies(String consultantId) {
+    var consultant = consultantRepository
         .findByIdAndDeleteDateIsNull(consultantId);
-    if (!consultant.isPresent()) {
+    if (consultant.isEmpty()) {
       throw new BadRequestException(
           String.format("Consultant with id %s does not exist", consultantId));
     }
-    List<ConsultantAgency> agencyList = consultantAgencyRepository
-        .findByConsultantIdAndDeleteDateIsNull(consultantId);
 
-    return ConsultantAgencyAdminResultDTOBuilder
+    var consultantAgencyIds = consultantAgencyRepository
+        .findByConsultantIdAndDeleteDateIsNull(consultantId).stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+
+    var agencyList = this.agencyAdminService.retrieveAllAgencies().stream()
+        .filter(agency -> consultantAgencyIds.contains(agency.getId()))
+        .collect(Collectors.toList());
+
+    return ConsultantResponseDTOBuilder
         .getInstance()
         .withConsultantId(consultantId)
         .withResult(agencyList)
@@ -150,4 +160,21 @@ public class ConsultantAgencyAdminService {
     this.consultantAgencyRepository.save(consultantAgency);
   }
 
+  /**
+   * retrieves all consultants of the agency with given id.
+   *
+   * @param agencyId the agency id
+   * @return the generated {@link AgencyConsultantResponseDTO}
+   */
+  public AgencyConsultantResponseDTO findConsultantsForAgency(Long agencyId) {
+    var consultants = this.consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNull(agencyId).stream()
+        .map(ConsultantAgency::getConsultant)
+        .map(de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::getInstance)
+        .map(de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::buildResponseDTO)
+        .collect(Collectors.toList());
+    return AgencyConsultantResponseDTOBuilder.getInstance(consultants)
+        .withAgencyId(String.valueOf(agencyId))
+        .build();
+  }
 }

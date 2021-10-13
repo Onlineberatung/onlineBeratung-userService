@@ -72,7 +72,7 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
   private HalLink buildAgenciesLink() {
     return buildHalLink(methodOn(UseradminApi.class)
-        .getConsultantAgency(this.consultant.getId()), MethodEnum.GET);
+        .getConsultantAgencies(this.consultant.getId()), MethodEnum.GET);
   }
 
   private HalLink buildAddAgencyLink() {
