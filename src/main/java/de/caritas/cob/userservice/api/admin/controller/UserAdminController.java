@@ -188,7 +188,8 @@ public class UserAdminController implements UseradminApi {
   }
 
   /**
-   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies.
+   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies for the consultant
+   * with given id.
    *
    * @param consultantId Consultant Id (required)
    * @return {@link de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO}s
