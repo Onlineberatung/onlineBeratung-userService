@@ -2,7 +2,8 @@ package de.caritas.cob.userservice.api.service.archive;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID_2;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
