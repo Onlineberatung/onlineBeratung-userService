@@ -122,7 +122,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/archive")
         .hasAuthority(CONSULTANT_DEFAULT)
-        .antMatchers("/users/sessions/{sessionId:[0-9]+}/reactivate")
+        .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .anyRequest().denyAll();
   }

@@ -252,12 +252,12 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/sessions/{sessionId}/reactivate:
+  /users/sessions/{sessionId}/dearchive:
     put:
       tags:
         - user-controller
-      summary: 'Reactivate an archived session [Authorization: Role: consultant or user]'
-      operationId: reactivateSession
+      summary: 'Dearchive an archived session [Authorization: Role: consultant or user]'
+      operationId: dearchiveSession
       parameters:
         - name: sessionId
           in: path

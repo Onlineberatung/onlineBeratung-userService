@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,12 +17,12 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.testConfig.ConsultingTypeManagerTestConfig;
 import java.util.Optional;
-import org.commonmark.renderer.text.TextContentRenderer.TextContentRendererExtension;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -48,6 +47,8 @@ public class SessionArchiveServiceIT {
   AuthenticatedUser authenticatedUser;
   @MockBean
   AuthenticatedUserHelper authenticatedUserHelper;
+  @MockBean
+  RocketChatService rocketChatService;
 
   @Test
   public void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
@@ -107,7 +108,7 @@ public class SessionArchiveServiceIT {
     when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
 
-    sessionArchiveService.reactivateSession(1209L);
+    sessionArchiveService.dearchiveSession(1209L);
 
     Optional<Session> session = sessionRepository.findById(1209L);
     assert session.isPresent();
@@ -120,7 +121,7 @@ public class SessionArchiveServiceIT {
     when(authenticatedUser.getUserId()).thenReturn("236b97bf-6cd7-434a-83f3-0a0b129dd45a");
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.USER.getValue())).thenReturn(true);
 
-    sessionArchiveService.reactivateSession(1211L);
+    sessionArchiveService.dearchiveSession(1211L);
 
     Optional<Session> session = sessionRepository.findById(1211L);
     assert session.isPresent();
@@ -129,7 +130,7 @@ public class SessionArchiveServiceIT {
 
   @Test(expected = NotFoundException.class)
   public void reactivateSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
-    sessionArchiveService.reactivateSession(99999999L);
+    sessionArchiveService.dearchiveSession(99999999L);
   }
 
   @Test(expected = ForbiddenException.class)
@@ -138,7 +139,7 @@ public class SessionArchiveServiceIT {
     when(authenticatedUser.getUserId()).thenReturn("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8");
     when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(false);
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    sessionArchiveService.reactivateSession(1210L);
+    sessionArchiveService.dearchiveSession(1210L);
 
     verify(sessionRepository, times(0)).save(any());
   }
@@ -148,7 +149,7 @@ public class SessionArchiveServiceIT {
 
     when(authenticatedUser.getUserId()).thenReturn("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8");
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.USER.getValue())).thenReturn(true);
-    sessionArchiveService.reactivateSession(1210L);
+    sessionArchiveService.dearchiveSession(1210L);
 
     verify(sessionRepository, times(0)).save(any());
   }
@@ -158,7 +159,7 @@ public class SessionArchiveServiceIT {
     when(authenticatedUser.getUserId()).thenReturn("473f7c4b-f011-4fc2-847c-ceb636a5b399");
     when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
     when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    sessionArchiveService.reactivateSession(1L);
+    sessionArchiveService.dearchiveSession(1L);
   }
 
 }
