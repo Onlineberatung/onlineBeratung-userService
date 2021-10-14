@@ -1,9 +1,6 @@
 package de.caritas.cob.userservice.api.service.archive;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID_2;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,10 +14,6 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.archive.SessionArchivePermissionChecker;
-import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
-import de.caritas.cob.userservice.api.service.archive.SessionArchiveValidator;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Optional;
 import org.junit.Test;
