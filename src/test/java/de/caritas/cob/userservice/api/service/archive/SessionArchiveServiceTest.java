@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.facade;
+package de.caritas.cob.userservice.api.service.archive;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
@@ -70,7 +70,7 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void archiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoAuthorizationForTheSession() {
+  public void archiveSession_Should_ThrowForbiddenException_WhenConsultantHasaNoAuthorizationForTheSession() {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));

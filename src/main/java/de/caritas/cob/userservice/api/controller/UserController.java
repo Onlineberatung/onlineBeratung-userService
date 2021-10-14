@@ -795,7 +795,7 @@ public class  UserController implements UsersApi {
   }
 
   /**
-   * Reactivate a session.
+   * Dearchive a session.
    *
    * @param sessionId (required) session ID
    * @return {@link ResponseEntity}
