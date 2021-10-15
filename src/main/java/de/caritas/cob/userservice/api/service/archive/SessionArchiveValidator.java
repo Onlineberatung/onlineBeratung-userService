@@ -14,7 +14,7 @@ public class SessionArchiveValidator {
   /**
    * Check whether the given session is valid for archiving.
    *
-   * @param session the session for the check
+   * @param session the session to check
    */
   public void isValidForArchiving(Session session) {
     if (!session.getStatus().equals(SessionStatus.IN_PROGRESS)) {
@@ -26,9 +26,9 @@ public class SessionArchiveValidator {
   }
 
   /**
-   * Check whether the given session is valid for rearchiving.
+   * Check whether the given session is valid for dearchiving.
    *
-   * @param session the session for the check
+   * @param session the session to check
    */
   public void isValidForDearchiving(Session session) {
     if (!session.getStatus().equals(SessionStatus.IN_ARCHIVE)) {
