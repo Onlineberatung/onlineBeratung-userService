@@ -17,7 +17,6 @@ import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
-import de.caritas.cob.userservice.api.facade.SessionArchiveService;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
@@ -62,6 +61,7 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
+import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
@@ -791,6 +791,18 @@ public class  UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> archiveSession(@PathVariable Long sessionId) {
     this.sessionArchiveService.archiveSession(sessionId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Dearchive a session.
+   *
+   * @param sessionId (required) session ID
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> dearchiveSession(@PathVariable Long sessionId) {
+    this.sessionArchiveService.dearchiveSession(sessionId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

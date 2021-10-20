@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -26,9 +27,9 @@ public class AuthenticatedUserHelper {
 
   /**
    * Checks if the currently authenticated user has the permission to access the given session.
-   * 
-   * @param session
-   * @return
+   *
+   * @param session the session
+   * @return true, if authenticated user has permission for session
    */
   public boolean hasPermissionForSession(Session session) {
 
@@ -38,12 +39,19 @@ public class AuthenticatedUserHelper {
     }
 
     // Session is team session and consultant is assigned to session's agency
-    if (session.isTeamSession() && consultantAgencyService
-        .isConsultantInAgency(authenticatedUser.getUserId(), session.getAgencyId())) {
-      return true;
-    }
+    return session.isTeamSession() && consultantAgencyService
+        .isConsultantInAgency(authenticatedUser.getUserId(), session.getAgencyId());
+  }
 
-    return false;
+  /**
+   * Checks if the currently authenticated user has the any of given roles.
+   *
+   * @param roles the roles to check
+   * @return true, if authenticated user has one the roles
+   */
+  public boolean authenticatedUserRolesContainAnyRoleOf(String... roles) {
+    return Arrays.stream(roles)
+        .anyMatch(authenticatedUser.getRoles()::contains);
   }
 
 }

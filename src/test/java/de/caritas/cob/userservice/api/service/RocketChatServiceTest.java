@@ -46,6 +46,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_U
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_USER_DTO;
@@ -102,6 +103,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.SetRoomReadOnlyBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UsersListReponseDTO;
@@ -123,6 +125,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -1017,10 +1020,13 @@ public class RocketChatServiceTest {
         eq(GroupResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(new GroupResponseDTO(), HttpStatus.OK));
 
-    this.rocketChatService.setRoomReadOnly("");
+    this.rocketChatService.setRoomReadOnly(RC_GROUP_ID);
 
+    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
-        eq(HttpMethod.POST), any(), eq(GroupResponseDTO.class));
+        eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
+    assertThat(captor.getValue().getBody().isReadOnly(), is(true));
+    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
   }
 
   @Test
@@ -1034,6 +1040,37 @@ public class RocketChatServiceTest {
         .thenReturn(new ResponseEntity<>(groupResponseDTO, HttpStatus.OK));
 
     this.rocketChatService.setRoomReadOnly("");
+
+    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  public void setRoomWriteable_Should_performRocketChatSetRoomReadOnly() throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
+        eq(GroupResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(new GroupResponseDTO(), HttpStatus.OK));
+
+    this.rocketChatService.setRoomWriteable(RC_GROUP_ID);
+
+    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+    verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
+        eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
+    assertThat(captor.getValue().getBody().isReadOnly(), is(false));
+    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
+  }
+
+  @Test
+  public void setRoomWriteable_Should_logError_When_responseIsNotSuccess()
+      throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
+    groupResponseDTO.setSuccess(false);
+    when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
+        eq(GroupResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(groupResponseDTO, HttpStatus.OK));
+
+    this.rocketChatService.setRoomWriteable("");
 
     verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
   }

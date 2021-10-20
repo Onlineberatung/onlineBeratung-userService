@@ -27,13 +27,14 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CONSULTANT_ABSENT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_LEAVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_SESSION_TO_ARCHIVE;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MONITORING;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
 import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
@@ -58,7 +59,6 @@ import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
 import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
-import de.caritas.cob.userservice.api.facade.SessionArchiveService;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
@@ -82,6 +82,7 @@ import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
+import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -2029,7 +2030,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void archiveSession_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
-    mvc.perform(put(PATH_PUT_SESSION_TO_ARCHIVE)
+    mvc.perform(put(PATH_ARCHIVE_SESSION)
             .cookie(csrfCookie)
             .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
@@ -2041,7 +2042,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void archiveSession_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(put(PATH_PUT_SESSION_TO_ARCHIVE))
+    mvc.perform(put(PATH_ARCHIVE_SESSION))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(sessionArchiveService);
@@ -2058,7 +2059,7 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.USER_DEFAULT})
   public void archiveSession_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
-    mvc.perform(put(PATH_PUT_SESSION_TO_ARCHIVE)
+    mvc.perform(put(PATH_ARCHIVE_SESSION)
             .cookie(csrfCookie)
             .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
@@ -2069,7 +2070,58 @@ public class UserControllerAuthorizationIT {
   @Test
   public void archiveSession_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
-    mvc.perform(put(PATH_PUT_SESSION_TO_ARCHIVE)
+    mvc.perform(put(PATH_ARCHIVE_SESSION)
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.USER_DEFAULT})
+  public void dearchiveSession_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
+      throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION)
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isOk());
+
+    verify(this.sessionArchiveService, times(1)).dearchiveSession(any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.USER_DEFAULT})
+  public void dearchiveSession_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  public void dearchiveSession_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
+      throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION)
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  public void dearchiveSession_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
+      throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION)
             .cookie(csrfCookie)
             .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());

@@ -767,7 +767,22 @@ public class RocketChatService {
    * @throws RocketChatUserNotInitializedException if technical user isn´t initialized
    */
   public void setRoomReadOnly(String rcRoomId) throws RocketChatUserNotInitializedException {
-    var requestDTO = new SetRoomReadOnlyBodyDTO(rcRoomId, true);
+    setRoomState(rcRoomId, true);
+  }
+
+  /**
+   * Sets the Rocket.Chat room with the given id writeable.
+   *
+   * @param rcRoomId the Rocket.Chat room id
+   * @throws RocketChatUserNotInitializedException if technical user isn´t initialized
+   */
+  public void setRoomWriteable(String rcRoomId) throws RocketChatUserNotInitializedException {
+    setRoomState(rcRoomId, false);
+  }
+
+  private void setRoomState(String rcRoomId, boolean readOnly)
+      throws RocketChatUserNotInitializedException {
+    var requestDTO = new SetRoomReadOnlyBodyDTO(rcRoomId, readOnly);
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
     var header = getStandardHttpHeaders(systemUser);
     HttpEntity<SetRoomReadOnlyBodyDTO> request = new HttpEntity<>(requestDTO, header);
@@ -883,7 +898,8 @@ public class RocketChatService {
       return users[0].getId();
     }
 
-    throw new RocketChatGetUserIdException(String.format("Found %s users by username", users.length));
+    throw new RocketChatGetUserIdException(
+        String.format("Found %s users by username", users.length));
 
   }
 
