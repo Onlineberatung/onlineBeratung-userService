@@ -177,6 +177,8 @@ public class AskerDataProviderTest {
     LinkedHashMap<String, Object> consultingTypeOtherEntry = (LinkedHashMap<String, Object>) result
         .getConsultingTypes().get(String.valueOf(CONSULTING_TYPE_ID_AIDS));
     assertFalse((boolean) consultingTypeOtherEntry.get("isRegistered"));
+    assertFalse(result.isHasAnonymousConversations());
+    assertFalse(result.isHasArchive());
   }
 
   @Test

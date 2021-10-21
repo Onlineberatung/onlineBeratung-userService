@@ -1675,6 +1675,10 @@ components:
           example: true
           description: "Is true if consultant has at least one consulting type containing
           anonymous conversations active"
+        hasArchive:
+          type: boolean
+          example: true
+          description: "Is true if consultant has access to archive"
 
     UpdateConsultantDTO:
       type: object
