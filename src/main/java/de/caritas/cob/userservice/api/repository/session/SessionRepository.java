@@ -25,9 +25,11 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    *
    * @param consultant    {@link Consultant}
    * @param sessionStatus {@link SessionStatus}
-   * @return A list of {@link Session}s for the specific consultant id and status ordered by update date desc
+   * @return A list of {@link Session}s for the specific consultant id and status ordered by update
+   * date desc
    */
-  List<Session> findByConsultantAndStatusOrderByUpdateDateDesc(Consultant consultant, SessionStatus sessionStatus);
+  List<Session> findByConsultantAndStatusOrderByUpdateDateDesc(Consultant consultant,
+      SessionStatus sessionStatus);
 
   /**
    * Find a {@link Session} with unassigned consultant by agency ids and status ordery by creation
@@ -57,13 +59,13 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
       boolean isTeamSession);
 
   /**
-   * Find team {@link Session} list by agency ids and status where consultant is not the
-   * given consultant ordered by creation date descending.
+   * Find team {@link Session} list by agency ids and status where consultant is not the given
+   * consultant ordered by creation date descending.
    *
    * @param agencyIds     ids of agencies to search for
    * @param sessionStatus {@link SessionStatus} to search for
-   * @return A list of {@link Session}s for the specific agency ids and status ordered by
-   * update date descending
+   * @return A list of {@link Session}s for the specific agency ids and status ordered by update
+   * date descending
    */
   List<Session> findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
       List<Long> agencyIds, Consultant consultant, SessionStatus sessionStatus);
@@ -194,7 +196,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * Find the {@link Session}s by consulting type, registration type and pageable.
    *
    * @param consultingTypes  the {@link ConsultingType}s to search for
-   * @param registrationType the {@link RegistrationType} to seach for
+   * @param registrationType the {@link RegistrationType} to search for
    * @param pageable         the pagination object
    * @return the result {@link Page}
    */
@@ -212,5 +214,16 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    */
   List<Session> findByStatusInAndRegistrationType(Set<SessionStatus> status,
       RegistrationType registrationType);
+
+  /**
+   * Count session by consultant, status and registration type.
+   *
+   * @param consultant the {@link Consultant} to search for
+   * @param sessionStatusList  a {@link List} of {@link SessionStatus} to search for
+   * @param registrationType the {@link RegistrationType} to search for
+   * @return the count
+   */
+  Long countByConsultantAndStatusInAndRegistrationType(Consultant consultant,
+      List<SessionStatus> sessionStatusList, RegistrationType registrationType);
 
 }
