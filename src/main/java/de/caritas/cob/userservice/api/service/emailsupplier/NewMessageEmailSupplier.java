@@ -13,12 +13,14 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
@@ -42,6 +44,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private final String userId;
   private final ConsultantAgencyService consultantAgencyService;
   private final ConsultingTypeManager consultingTypeManager;
+  private final ConsultantService consultantService;
   private final String applicationBaseUrl;
   private final String emailDummySuffix;
 
@@ -143,26 +146,51 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private List<MailDTO> buildMailForAsker() {
 
-    if (isSessionActiveAndBelongToConsultant() && isNotADummyMail()) {
-      var usernameTranscoder = new UsernameTranscoder();
-      return singletonList(
-          buildMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
-              usernameTranscoder.decodeUsername(session.getConsultant().getUsername()),
-              usernameTranscoder.decodeUsername(session.getUser().getUsername())));
+    if (isSessionAndUserValid()) {
+      return buildMailForAskerList();
     }
     if (isNotADummyMail()) {
       LogService.logEmailNotificationFacadeError(String.format(
-          "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s, the session does not belong to the user or has not provided a e-mail address.",
+          "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s or asker has not provided a e-mail address.",
           rcGroupId, userId));
     }
 
     return emptyList();
   }
 
-  private boolean isSessionActiveAndBelongToConsultant() {
-    return nonNull(session) && userId.equals(session.getConsultant().getId())
-        && session.getStatus().equals(SessionStatus.IN_PROGRESS)
-        && isNotBlank(session.getUser().getEmail());
+  private boolean isSessionAndUserValid() {
+    return nonNull(session)
+        && hasAskerMailAddress()
+        && isNotADummyMail();
+  }
+
+  private List<MailDTO> buildMailForAskerList() {
+    var usernameTranscoder = new UsernameTranscoder();
+    var consultantUsername = obtainConsultantUsername();
+    return singletonList(
+        buildMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
+            usernameTranscoder.decodeUsername(consultantUsername),
+            usernameTranscoder.decodeUsername(session.getUser().getUsername())));
+  }
+
+  private String obtainConsultantUsername() {
+    if (isSessionBelongsToConsultant()) {
+      return session.getConsultant().getUsername();
+    } else {
+      return consultantService
+          .getConsultant(userId)
+          .orElseThrow(() -> new InternalServerErrorException(
+              String.format("Consultant with id %s not found.", userId)))
+          .getUsername();
+    }
+  }
+
+  private boolean isSessionBelongsToConsultant() {
+    return nonNull(session.getConsultant()) && session.getConsultant().getId().equals(userId);
+  }
+
+  private boolean hasAskerMailAddress() {
+    return isNotBlank(session.getUser().getEmail());
   }
 
   private boolean isNotADummyMail() {
