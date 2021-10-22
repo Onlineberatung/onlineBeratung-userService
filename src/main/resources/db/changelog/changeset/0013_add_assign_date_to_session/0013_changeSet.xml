@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+  <changeSet author="COBH-3932" id="COBH-3932_assign_date">
+    <sqlFile path="db/changelog/changeset/0013_add_assign_date_to_session/add-assign-date-to-session.sql" stripComments="true"/>
+    <sqlFile endDelimiter="//" path="db/changelog/changeset/0013_add_assign_date_to_session/assign-date-trigger.sql"
+      stripComments="true"/>
+    <rollback>
+      <sqlFile
+        path="db/changelog/changeset/0013_add_assign_date_to_session/add-assign-date-to-session-rollback.sql"
+        stripComments="true"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
