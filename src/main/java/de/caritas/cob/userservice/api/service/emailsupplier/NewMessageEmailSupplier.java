@@ -148,8 +148,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
     if (isSessionAndUserValid()) {
       return buildMailForAskerList();
-    }
-    if (isNotADummyMail()) {
+    } else if (isNotADummyMail()) {
       LogService.logEmailNotificationFacadeError(String.format(
           "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s or asker has not provided a e-mail address.",
           rcGroupId, userId));
