@@ -186,7 +186,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   }
 
   private boolean isSessionBelongsToConsultant() {
-    return nonNull(session.getConsultant()) && session.getConsultant().getId().equals(userId);
+    return nonNull(session.getConsultant())
+        && session.getConsultant().getId().equals(userId);
   }
 
   private boolean hasAskerMailAddress() {
