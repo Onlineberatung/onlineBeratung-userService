@@ -8,6 +8,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_NO_RC_USER_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_RC_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -17,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
@@ -24,6 +26,7 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import java.util.Optional;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +44,14 @@ public class UserServiceTest {
   private UserRepository userRepository;
   @Mock
   private UsernameTranscoder usernameTranscoder;
+  @Mock
+  private UserEnricher userEnricher;
+
+  @Before
+  public void setup() {
+    when(userEnricher.enrichUserWithRocketChatId(any()))
+        .thenReturn(Optional.of(USER_WITH_RC_ID));
+  }
 
   @Test
   public void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {
@@ -145,4 +156,28 @@ public class UserServiceTest {
     verify(usernameTranscoder, times(1)).encodeUsername(USERNAME);
     verify(usernameTranscoder, times(1)).decodeUsername(USERNAME);
   }
+
+  @Test
+  public void getUser_Should_NotCallUserEnricherAndSaveUser_WhenRocketChatIdIsNotNull() {
+    when(userRepository.findByRcUserIdAndDeleteDateIsNull(any()))
+        .thenReturn(Optional.of(USER_WITH_RC_ID));
+
+    userService.getUser(USER_WITH_RC_ID.getUserId());
+
+    verifyNoMoreInteractions(userEnricher);
+    verify(userRepository, times(0)).save(any());
+  }
+
+  @Test
+  public void getUser_Should_CallUserEnricherAndSaveUser_WhenRocketChatIdIsNull() {
+    Optional<User> user = Optional.of(USER);
+    when(userRepository.findByUserIdAndDeleteDateIsNull(any()))
+        .thenReturn(user);
+
+    userService.getUser(USER.getUserId());
+
+    verify(userEnricher, times(1)).enrichUserWithRocketChatId(user);
+    verify(userRepository, times(1)).save(user.get());
+  }
+
 }

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.user;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final @NonNull UserRepository userRepository;
+  private final @NonNull UserEnricher userEnricher;
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   /**
@@ -64,7 +66,12 @@ public class UserService {
    * @return An {@link Optional} with the {@link User}, if found
    */
   public Optional<User> getUser(String userId) {
-    return userRepository.findByUserIdAndDeleteDateIsNull(userId);
+    Optional<User> user = userRepository.findByUserIdAndDeleteDateIsNull(userId);
+    if (user.isPresent() && isNull(user.get().getRcUserId())) {
+      user = userEnricher.enrichUserWithRocketChatId(user);
+      user.ifPresent(userRepository::save);
+    }
+    return user;
   }
 
   /**

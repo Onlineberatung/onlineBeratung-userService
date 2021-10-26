@@ -8,6 +8,7 @@ import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.MeDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.testHelper.TestConstants;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -80,6 +81,11 @@ public class RocketChatTestConfig {
 
       @Override
       public void deleteUser(String rcUserId) {
+      }
+
+      @Override
+      public String getRocketChatUserIdByUsername(String username) {
+        return TestConstants.RC_USER_ID;
       }
     };
   }

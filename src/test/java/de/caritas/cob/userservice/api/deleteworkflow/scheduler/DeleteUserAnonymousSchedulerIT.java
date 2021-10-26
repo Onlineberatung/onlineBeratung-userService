@@ -1,15 +1,20 @@
 package de.caritas.cob.userservice.api.deleteworkflow.scheduler;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.testConfig.ApiControllerTestConfig;
 import de.caritas.cob.userservice.testConfig.ConsultingTypeManagerTestConfig;
@@ -24,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
@@ -55,7 +61,7 @@ class DeleteUserAnonymousSchedulerIT {
   private Session currentSession;
 
   @BeforeEach
-  public void setup() {
+  public void setup() throws RocketChatGetUserIdException {
     var createAnonymousEnquiryDTO = new CreateAnonymousEnquiryDTO()
         .consultingType(CONSULTING_TYPE_ID_AIDS);
     var responseDTO =
@@ -72,6 +78,7 @@ class DeleteUserAnonymousSchedulerIT {
 
   @Test
   void performDeletionWorkflow_Should_notDeleteUser_When_SessionIsNotDone() {
+
     deleteUserAnonymousScheduler.performDeletionWorkflow();
 
     assertSessionAndUserArePresent(currentSession.getId());

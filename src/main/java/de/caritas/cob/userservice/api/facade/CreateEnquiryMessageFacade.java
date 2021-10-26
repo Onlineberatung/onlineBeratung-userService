@@ -102,8 +102,6 @@ public class CreateEnquiryMessageFacade {
           .rcFeedbackGroupId(rcFeedbackGroupId)
           .build();
 
-      saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
-
       messageServiceProvider.postEnquiryMessage(message, rocketChatCredentials, rcGroupId,
           createEnquiryExceptionInformation);
       messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, user,
@@ -319,19 +317,6 @@ public class CreateEnquiryMessageFacade {
         rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
             rcFeedbackGroupId);
       }
-    }
-  }
-
-  private void saveRocketChatIdForUser(User user, RocketChatCredentials rocketChatCredentials,
-      CreateEnquiryExceptionInformation createEnquiryExceptionInformation)
-      throws CreateEnquiryException {
-
-    try {
-      userService.updateRocketChatIdInDatabase(user, rocketChatCredentials.getRocketChatUserId());
-    } catch (IllegalArgumentException exception) {
-      throw new CreateEnquiryException(String.format("Could not update user %s", user.getUserId()),
-          exception,
-          createEnquiryExceptionInformation);
     }
   }
 
