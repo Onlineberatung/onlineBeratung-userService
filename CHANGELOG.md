@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.12.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.12.0...v2.12.1) (2021-10-27)
+
 ## [2.12.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.11.0...v2.12.0) (2021-10-27)
 
 
