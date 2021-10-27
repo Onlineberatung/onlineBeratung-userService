@@ -59,7 +59,7 @@ public class ConsultantAdminFacadeTest {
     this.consultantAgencyAdminService.findConsultantAgencies(consultantId);
 
     verify(this.consultantAgencyAdminService, times(1))
-        .findConsultantAgencies(eq(consultantId));
+        .findConsultantAgencies(consultantId);
   }
 
   @Test
@@ -120,6 +120,14 @@ public class ConsultantAdminFacadeTest {
 
     verify(this.consultantAdminService, times(1))
         .markConsultantForDeletion("1");
+  }
+
+  @Test
+  public void findConsultantsForAgency_Should_callConsultantAgencyAdminService() {
+    this.consultantAdminFacade.findConsultantsForAgency("1");
+
+    verify(this.consultantAgencyAdminService, times(1))
+        .findConsultantsForAgency(1L);
   }
 
 }

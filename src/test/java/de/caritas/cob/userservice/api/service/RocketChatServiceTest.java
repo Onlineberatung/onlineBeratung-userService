@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STAT
 import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUPS_LIST_ALL_GET_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL;
@@ -13,6 +14,7 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_RO
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USERS_LIST_GET_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_INFO;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL;
@@ -29,12 +31,14 @@ import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_U
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CLEAN_ROOM_HISTORY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_CREATE;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_DELETE;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_LIST_ALL;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_MEMBERS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_REMOVE_USER;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_SET_READ_ONLY;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_ROOMS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_SUBSCRIPTIONS_GET;
 import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_USERS_INFO_GET;
+import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_USERS_LIST_GET;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
 import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_USER_1;
@@ -42,7 +46,11 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_U
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_USER_DTO;
+import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_USER_DTO_2;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
@@ -74,16 +82,20 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroup
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.group.GroupsListAllResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
@@ -91,12 +103,15 @@ import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.SetRoomReadOnlyBodyDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.user.UsersListReponseDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
@@ -110,6 +125,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -122,8 +138,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatServiceTest {
 
-  private final String RC_TOKEN_HEADER_PARAMETER_NAME = "X-Auth-Token";
-  private final String RC_USER_ID_HEADER_PARAMETER_NAME = "X-User-Id";
   private final String MESSAGE = "Lorem Ipsum";
   private final String GROUP_ID = "xxxYYY";
   private final String GROUP_NAME = "group";
@@ -167,27 +181,38 @@ public class RocketChatServiceTest {
       new LogoutResponseDTO(null, null, null);
   private final GroupDTO GROUP_DTO =
       new GroupDTO(GROUP_ID, GROUP_NAME, null, null, 0, 0, null, null, false, false, null);
+  private final GroupDTO GROUP_DTO_2 =
+      new GroupDTO(RC_GROUP_ID_2, GROUP_NAME, null, null, 0, 0, null, null, false, false, null);
   private final GroupResponseDTO GROUP_RESPONSE_DTO =
       new GroupResponseDTO(GROUP_DTO, true, null, null);
+  private final UsersListReponseDTO USERS_LIST_RESPONSE_DTO_EMPTY = new UsersListReponseDTO(
+      new RocketChatUserDTO[0]);
+  private final UsersListReponseDTO USERS_LIST_RESPONSE_DTO = new UsersListReponseDTO(
+      new RocketChatUserDTO[]{ROCKET_CHAT_USER_DTO});
+  private final UsersListReponseDTO USERS_LIST_RESPONSE_DTO_WITH_2_USERS = new UsersListReponseDTO(
+      new RocketChatUserDTO[]{ROCKET_CHAT_USER_DTO, ROCKET_CHAT_USER_DTO_2});
+  private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO_EMPTY = new GroupsListAllResponseDTO(
+      new GroupDTO[0]);
+  private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO = new GroupsListAllResponseDTO(
+      new GroupDTO[]{GROUP_DTO, GROUP_DTO_2});
   private final LocalDateTime DATETIME_OLDEST = nowInUtc();
   private final LocalDateTime DATETIME_LATEST = nowInUtc();
   private final String PASSWORD = "password";
-
-  @InjectMocks
-  private RocketChatService rocketChatService;
-  @Mock
-  private RestTemplate restTemplate;
   @Mock
   Logger logger;
   @Mock
   RocketChatCredentialsProvider rcCredentialsHelper;
+  @InjectMocks
+  private RocketChatService rocketChatService;
+  @Mock
+  private RestTemplate restTemplate;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
-        RC_TOKEN_HEADER_PARAMETER_NAME);
+        "X-Auth-Token");
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
-        RC_USER_ID_HEADER_PARAMETER_NAME);
+        "X-User-Id");
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN, RC_URL_CHAT_USER_LOGIN);
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT,
         RC_URL_CHAT_USER_LOGOUT);
@@ -200,6 +225,10 @@ public class RocketChatServiceTest {
         RC_URL_CLEAN_ROOM_HISTORY);
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL,
         RC_URL_SUBSCRIPTIONS_GET);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USERS_LIST_GET_URL,
+        RC_URL_USERS_LIST_GET);
+    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GROUPS_LIST_ALL_GET_URL,
+        RC_URL_GROUPS_LIST_ALL);
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL, RC_URL_ROOMS_GET);
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_INFO, RC_URL_USERS_INFO_GET);
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL,
@@ -821,7 +850,7 @@ public class RocketChatServiceTest {
 
     List<GroupMemberDTO> result = rocketChatService.getStandardMembersOfGroup(GROUP_ID);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     assertNotSame(result.get(0).get_id(), RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId());
     assertNotSame(result.get(0).get_id(), RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId());
   }
@@ -991,10 +1020,13 @@ public class RocketChatServiceTest {
         eq(GroupResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(new GroupResponseDTO(), HttpStatus.OK));
 
-    this.rocketChatService.setRoomReadOnly("");
+    this.rocketChatService.setRoomReadOnly(RC_GROUP_ID);
 
+    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
-        eq(HttpMethod.POST), any(), eq(GroupResponseDTO.class));
+        eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
+    assertThat(captor.getValue().getBody().isReadOnly(), is(true));
+    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
   }
 
   @Test
@@ -1012,4 +1044,201 @@ public class RocketChatServiceTest {
     verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
   }
 
+  @Test
+  public void setRoomWriteable_Should_performRocketChatSetRoomReadOnly() throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
+        eq(GroupResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(new GroupResponseDTO(), HttpStatus.OK));
+
+    this.rocketChatService.setRoomWriteable(RC_GROUP_ID);
+
+    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+    verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
+        eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
+    assertThat(captor.getValue().getBody().isReadOnly(), is(false));
+    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
+  }
+
+  @Test
+  public void setRoomWriteable_Should_logError_When_responseIsNotSuccess()
+      throws Exception {
+    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
+    groupResponseDTO.setSuccess(false);
+    when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
+        eq(GroupResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(groupResponseDTO, HttpStatus.OK));
+
+    this.rocketChatService.setRoomWriteable("");
+
+    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  public void fetchAllInactivePrivateGroupsSinceGivenDate_ShouldThrowException_WhenRocketChatCallFails()
+      throws RocketChatUserNotInitializedException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    HttpServerErrorException httpServerErrorException =
+        new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(GroupsListAllResponseDTO.class), anyString()))
+        .thenThrow(httpServerErrorException);
+
+    try {
+      this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(LocalDateTime.now());
+      fail("Expected exception: RocketChatGetGroupsListAllException");
+    } catch (RocketChatGetGroupsListAllException ex) {
+      assertTrue("Excepted RocketChatGetGroupsListAllException thrown", true);
+      assertEquals("Could not get all rocket chat groups", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void fetchAllInactivePrivateGroupsSinceGivenDate_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
+      throws RocketChatUserNotInitializedException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(GroupsListAllResponseDTO.class), anyString()))
+        .thenReturn(
+            new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO_EMPTY, HttpStatus.BAD_REQUEST));
+
+    try {
+      this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(LocalDateTime.now());
+      fail("Expected exception: RocketChatGetGroupsListAllException");
+    } catch (RocketChatGetGroupsListAllException ex) {
+      assertTrue("Excepted RocketChatGetGroupsListAllException thrown", true);
+      assertEquals("Could not get all rocket chat groups", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void fetchAllInactivePrivateGroupsSinceGivenDate_Should_ReturnCorrectGroupDtoList()
+      throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(GroupsListAllResponseDTO.class), anyString()))
+        .thenReturn(
+            new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO, HttpStatus.OK));
+
+    List<GroupDTO> result = this.rocketChatService
+        .fetchAllInactivePrivateGroupsSinceGivenDate(LocalDateTime.now());
+
+    assertThat(result.size(), is(2));
+    assertThat(result.contains(GROUP_DTO), is(true));
+    assertThat(result.contains(GROUP_DTO_2), is(true));
+  }
+
+  @Test
+  public void fetchAllInactivePrivateGroupsSinceGivenDate_Should_UseCorrectMongoQuery()
+      throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
+
+    LocalDateTime dateToCheck = LocalDateTime.of(2021, 1, 1, 0, 0, 0);
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(GroupsListAllResponseDTO.class), anyString()))
+        .thenReturn(
+            new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO, HttpStatus.OK));
+
+    this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateToCheck);
+
+    String correctMongoQuery =
+        "{\"lastMessage.ts\": {\"$lt\": {\"$date\": \"2021-01-01T00:00:00.000Z\"}},"
+            + " \"$and\": [{\"t\": \"p\"}]}";
+    verify(restTemplate, times(1)).exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(GroupsListAllResponseDTO.class), eq(correctMongoQuery));
+
+  }
+
+  @Test
+  public void getRocketChatUserIdByUsername_Should_ThrowException_WhenRocketChatCallFails()
+      throws RocketChatUserNotInitializedException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    HttpServerErrorException httpServerErrorException =
+        new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(UsersListReponseDTO.class), anyString(), anyString()))
+        .thenThrow(httpServerErrorException);
+
+    try {
+      this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
+      fail("Expected exception: RocketChatGetUserIdException");
+    } catch (RocketChatGetUserIdException ex) {
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
+      assertEquals("Could not get users list from Rocket.Chat", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void getRocketChatUserIdByUsername_Should_ThrowException_WhenFoundNoUserByUsername()
+      throws RocketChatUserNotInitializedException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(UsersListReponseDTO.class), anyString(), anyString()))
+        .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO_EMPTY, HttpStatus.OK));
+
+    try {
+      this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
+      fail("Expected exception: RocketChatGetUserIdException");
+    } catch (RocketChatGetUserIdException ex) {
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
+      assertEquals("Found 0 users by username", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void getRocketChatUserIdByUsername_Should_ThrowException_WhenFound2UsersByUsername()
+      throws RocketChatUserNotInitializedException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(UsersListReponseDTO.class), anyString(), anyString()))
+        .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO_WITH_2_USERS, HttpStatus.OK));
+
+    try {
+      this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
+      fail("Expected exception: RocketChatGetUserIdException");
+    } catch (RocketChatGetUserIdException ex) {
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
+      assertEquals("Found 2 users by username", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void getRocketChatUserIdByUsername_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
+      throws RocketChatUserNotInitializedException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(UsersListReponseDTO.class), anyString(), anyString()))
+        .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO_EMPTY, HttpStatus.BAD_REQUEST));
+
+    try {
+      this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
+      fail("Expected exception: RocketChatGetUserIdException");
+    } catch (RocketChatGetUserIdException ex) {
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
+      assertEquals("Could not get users list from Rocket.Chat", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void getRocketChatUserIdByUsername_Should_ReturnRocketChatUserId()
+      throws RocketChatUserNotInitializedException, RocketChatGetUserIdException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET),
+        any(), eq(UsersListReponseDTO.class), anyString(), anyString()))
+        .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO, HttpStatus.OK));
+
+    String result = this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
+
+    assertThat(result, is(USERS_LIST_RESPONSE_DTO.getUsers()[0].getId()));
+  }
 }

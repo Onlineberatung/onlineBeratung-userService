@@ -5,60 +5,45 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
-import java.util.List;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Service;
 
 /**
  * {@link ConversationListProvider} to provide registered enquiry conversations.
  */
 @Service
-@RequiredArgsConstructor
-public class RegisteredEnquiryConversationListProvider implements ConversationListProvider {
+public class RegisteredEnquiryConversationListProvider extends DefaultConversationListProvider {
 
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
   private final @NonNull SessionService sessionService;
-  private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
+
+  public RegisteredEnquiryConversationListProvider(
+      @NonNull ValidatedUserAccountProvider userAccountProvider,
+      @NonNull ConsultantSessionEnricher consultantSessionEnricher,
+      @NonNull SessionService sessionService) {
+    super(consultantSessionEnricher);
+    this.sessionService = sessionService;
+    this.userAccountProvider = userAccountProvider;
+  }
 
   /**
-   * Builds the {@link ConsultantSessionListResponseDTO}.
-   *
-   * @param pageableListRequest the pageable request
-   * @return the relevant {@link ConsultantSessionListResponseDTO}
+   * {@inheritDoc}
    */
   @Override
   public ConsultantSessionListResponseDTO buildConversations(
       PageableListRequest pageableListRequest) {
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
 
-    PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(
-        this.sessionService.getRegisteredEnquiriesForConsultant(consultant));
-
-    enquiriesForConsultant.setPage(obtainPageByOffsetAndCount(pageableListRequest));
-    enquiriesForConsultant.setPageSize(pageableListRequest.getCount());
-
-    List<ConsultantSessionResponseDTO> pageList = enquiriesForConsultant.getPageList();
-    this.consultantSessionEnricher
-        .updateRequiredConsultantSessionValues(pageList, pageableListRequest.getRcToken(),
-            consultant);
-
-    return new ConsultantSessionListResponseDTO()
-        .sessions(pageList)
-        .offset(pageableListRequest.getOffset())
-        .count(pageList.size())
-        .total(enquiriesForConsultant.getNrOfElements());
+    return buildConversations(pageableListRequest,
+        consultant,
+        sessionService.getRegisteredEnquiriesForConsultant(consultant));
   }
 
   /**
-   * Returns the {@link ConversationListType} the implementation is accountable for.
-   *
-   * @return the relevant {@link ConversationListType}
+   * {@inheritDoc}
    */
   @Override
   public ConversationListType providedType() {

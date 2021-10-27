@@ -7,9 +7,10 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
@@ -88,9 +89,9 @@ public class ConsultantAdminFacade {
    * Returns all Agencies for the given consultantId.
    *
    * @param consultantId id of the consultant
-   * @return the list of agencies for the given consultant
+   * @return the generated {@link ConsultantAgencyResponseDTO}
    */
-  public ConsultantAgencyAdminResultDTO findConsultantAgencies(String consultantId) {
+  public ConsultantAgencyResponseDTO findConsultantAgencies(String consultantId) {
     return this.consultantAgencyAdminService.findConsultantAgencies(consultantId);
   }
 
@@ -99,7 +100,7 @@ public class ConsultantAdminFacade {
    * CreateConsultantAgencyDTO} input.
    *
    * @param consultantId              the consultant to use
-   * @param createConsultantAgencyDTO the agencyId and role {@link ConsultantAgencyAdminResultDTO}
+   * @param createConsultantAgencyDTO the agencyId and role {@link CreateConsultantAgencyDTO}
    */
   public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
@@ -139,5 +140,16 @@ public class ConsultantAdminFacade {
    */
   public void markConsultantForDeletion(String consultantId) {
     this.consultantAdminService.markConsultantForDeletion(consultantId);
+  }
+
+  /**
+   * Retrieves all consultants of the agency with given id.
+   *
+   * @param agencyId the agency id
+   * @return the generated {@link AgencyConsultantResponseDTO}
+   */
+  public AgencyConsultantResponseDTO findConsultantsForAgency(String agencyId) {
+    var parsedAgencyId = Long.valueOf(agencyId);
+    return this.consultantAgencyAdminService.findConsultantsForAgency(parsedAgencyId);
   }
 }

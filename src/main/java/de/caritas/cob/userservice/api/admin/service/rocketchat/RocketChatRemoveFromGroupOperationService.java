@@ -22,7 +22,7 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
 
   private RocketChatRemoveFromGroupOperationService(RocketChatFacade rocketChatFacade,
       KeycloakAdminClientService keycloakAdminClientService,
-        ConsultingTypeManager consultingTypeManager) {
+      ConsultingTypeManager consultingTypeManager) {
     super(rocketChatFacade, keycloakAdminClientService);
     this.consultingTypeManager = consultingTypeManager;
   }
@@ -34,7 +34,8 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
    * @return the {@link RocketChatRemoveFromGroupOperationService} instance
    */
   public static RocketChatRemoveFromGroupOperationService getInstance(
-      RocketChatFacade rocketChatFacade, KeycloakAdminClientService keycloakAdminClientService, ConsultingTypeManager consultingTypeManager) {
+      RocketChatFacade rocketChatFacade, KeycloakAdminClientService keycloakAdminClientService,
+      ConsultingTypeManager consultingTypeManager) {
     return new RocketChatRemoveFromGroupOperationService(rocketChatFacade,
         keycloakAdminClientService, consultingTypeManager);
   }
@@ -75,17 +76,34 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
   /**
    * Removes the given consultant from Rocket.Chat group of given session.
    */
+  public void removeFromGroup() {
+    this.consultantsToRemoveFromSessions.forEach(
+        ((session, consultants) -> removeConsultantsFromSessionGroup(session.getGroupId(),
+            consultants)));
+  }
+
+  /**
+   * Removes the given consultant from Rocket.Chat group of given session with rollback on error.
+   */
   public void removeFromGroupOrRollbackOnFailure() {
-    this.consultantsToRemoveFromSessions.forEach((session, consultants) ->
-        consultants.forEach(consultant -> performGroupRemove(session, consultants)));
+    this.consultantsToRemoveFromSessions.forEach(this::performGroupRemove);
   }
 
   /**
    * Removes the given consultant from Rocket.Chat feedback group of given session.
    */
+  public void removeFromFeedbackGroup() {
+    this.consultantsToRemoveFromSessions.forEach(
+        ((session, consultants) -> removeConsultantsFromSessionGroup(session.getFeedbackGroupId(),
+            consultants)));
+  }
+
+  /**
+   * Removes the given consultant from Rocket.Chat feedback group of given session with rollback on
+   * error.
+   */
   public void removeFromFeedbackGroupOrRollbackOnFailure() {
-    this.consultantsToRemoveFromSessions.forEach((session, consultants) ->
-        consultants.forEach(consultant -> performFeedbackGroupRemove(session, consultants)));
+    this.consultantsToRemoveFromSessions.forEach(this::performFeedbackGroupRemove);
   }
 
   private void performGroupRemove(Session session, List<Consultant> consultants) {

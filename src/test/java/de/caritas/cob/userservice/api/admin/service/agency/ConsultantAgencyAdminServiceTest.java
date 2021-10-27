@@ -56,6 +56,9 @@ public class ConsultantAgencyAdminServiceTest {
   private AgencyService agencyService;
 
   @Mock
+  private AgencyAdminService agencyAdminService;
+
+  @Mock
   private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
   @Test

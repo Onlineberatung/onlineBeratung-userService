@@ -50,7 +50,7 @@ public class RootDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildConsultantAgenciesLink() {
-    return buildHalLink(methodOn(UseradminApi.class).getConsultantAgency(null), MethodEnum.GET);
+    return buildHalLink(methodOn(UseradminApi.class).getConsultantAgencies(null), MethodEnum.GET);
   }
 
   private HalLink buildCreateConsultantLink() {

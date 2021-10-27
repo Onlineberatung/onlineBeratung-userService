@@ -38,7 +38,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AgencyResponseDTO'
+                  $ref: '#/components/schemas/FullAgencyResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         403:
@@ -107,6 +107,7 @@ paths:
           description: FORBIDDEN - no/invalid CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
+
 components:
   schemas:
     AgencyResponseDTO:
@@ -137,6 +138,20 @@ components:
         consultingType:
           type: integer
           example: 0
+
+    FullAgencyResponseDTO:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AgencyResponseDTO'
+        - type: object
+          properties:
+            url:
+              type: string
+              example: http://www.domain.com/agency
+            external:
+              type: boolean
+              example: "false"
+
   securitySchemes:
     Bearer:
       type: apiKey

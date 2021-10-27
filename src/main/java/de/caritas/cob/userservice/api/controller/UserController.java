@@ -61,6 +61,7 @@ import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
+import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
@@ -118,6 +119,7 @@ public class  UserController implements UsersApi {
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
+  private final @NotNull SessionArchiveService sessionArchiveService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -777,6 +779,30 @@ public class  UserController implements UsersApi {
   public ResponseEntity<Void> updateSessionData(@PathVariable Long sessionId,
       @Valid SessionDataDTO sessionDataDTO) {
     this.sessionDataService.saveSessionData(sessionId, sessionDataDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Put a session into the archive.
+   *
+   * @param sessionId (required) session ID
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> archiveSession(@PathVariable Long sessionId) {
+    this.sessionArchiveService.archiveSession(sessionId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Dearchive a session.
+   *
+   * @param sessionId (required) session ID
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> dearchiveSession(@PathVariable Long sessionId) {
+    this.sessionArchiveService.dearchiveSession(sessionId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

@@ -5,9 +5,10 @@ import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
+import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyAdminResultDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
@@ -175,15 +176,28 @@ public class UserAdminController implements UseradminApi {
   }
 
   /**
-   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies.
+   * GET /useradmin/agencies/{agencyId}/consultants: Returns all consultants for the agency.
    *
-   * @param consultantId Consultant Id (required)
-   * @return {@link ConsultantAdminResponseDTO}
+   * @param agencyId Agency Id (required)
+   * @return {@link AgencyConsultantResponseDTO}
    */
   @Override
-  public ResponseEntity<ConsultantAgencyAdminResultDTO> getConsultantAgency(
+  public ResponseEntity<AgencyConsultantResponseDTO> getAgencyConsultants(String agencyId) {
+    var resultDTO = this.consultantAdminFacade.findConsultantsForAgency(agencyId);
+    return ResponseEntity.ok(resultDTO);
+  }
+
+  /**
+   * GET /useradmin/consultant/{consultantId}/agencies: Returns all Agencies for the consultant
+   * with given id.
+   *
+   * @param consultantId Consultant Id (required)
+   * @return {@link de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO}s
+   */
+  @Override
+  public ResponseEntity<ConsultantAgencyResponseDTO> getConsultantAgencies(
       @PathVariable String consultantId) {
-    ConsultantAgencyAdminResultDTO consultantAgencies = this.consultantAdminFacade
+    var consultantAgencies = this.consultantAdminFacade
         .findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
   }

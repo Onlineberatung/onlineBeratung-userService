@@ -111,6 +111,7 @@ public class EmailNotificationFacade {
           .userId(userId)
           .consultantAgencyService(consultantAgencyService)
           .consultingTypeManager(consultingTypeManager)
+          .consultantService(consultantService)
           .applicationBaseUrl(applicationBaseUrl)
           .emailDummySuffix(emailDummySuffix)
           .build();

@@ -139,7 +139,7 @@ public class RegisteredEnquiryConversationListProviderIT {
 
   private void saveRegisteredSessions(int amount) {
     var random = new Random();
-    List<Session> sessions = new EasyRandom().objects(Session.class, amount)
+    List<Session> sessions = new EasyRandom().objects(Session.class, amount + 4)
         .collect(Collectors.toList());
     User user = this.userRepository.findAll().iterator().next();
     sessions.forEach(session -> {
@@ -153,6 +153,10 @@ public class RegisteredEnquiryConversationListProviderIT {
       session.setStatus(SessionStatus.NEW);
       session.setConsultingTypeId(random.nextInt(127));
     });
+    sessions.get(0).setStatus(SessionStatus.INITIAL);
+    sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);
+    sessions.get(2).setStatus(SessionStatus.DONE);
+    sessions.get(3).setStatus(SessionStatus.IN_ARCHIVE);
     this.sessionRepository.saveAll(sessions);
   }
 

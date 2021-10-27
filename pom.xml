@@ -246,6 +246,12 @@
       <artifactId>commons-collections4</artifactId>
       <version>4.1</version>
     </dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>4.1.0</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Documentation dependencies -->
 		<dependency>
@@ -253,7 +259,20 @@
 			<artifactId>plantuml</artifactId>
 			<version>1.2021.1</version>
 		</dependency>
-  </dependencies>
+
+		<!-- MongoDB dependencies -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver</artifactId>
+			<version>3.12.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>RELEASE</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<finalName>${project.name}</finalName>

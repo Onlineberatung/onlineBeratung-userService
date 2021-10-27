@@ -40,6 +40,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CONSULTANT_ABSENT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT_INVALID_PATH_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
@@ -47,6 +49,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -183,6 +187,7 @@ import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
+import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -415,6 +420,8 @@ public class UserControllerIT {
   private UserService userService;
   @MockBean
   private SessionDataService sessionDataService;
+  @MockBean
+  private SessionArchiveService sessionArchiveService;
 
   @Mock
   private Logger logger;
@@ -2289,6 +2296,40 @@ public class UserControllerIT {
             new UpdateConsultantDTO().email("invalid").firstname("firstname").lastname("lastname")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void archiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_ARCHIVE_SESSION_INVALID_PATH_VAR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  public void archiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_ARCHIVE_SESSION))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void dearchiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  public void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION))
+        .andExpect(status().isOk());
   }
 
 }
