@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.12.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.11.0...v2.12.0) (2021-10-27)
+
+
+### Features
+
+* added new field assign_date and trigger in session table ([576183f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/576183fa6b87bb0bc8c2c31681199360772a2c4b))
+* added new flag "hasArchive" to user data response ([7b98852](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/7b98852d31f1df86b6b2e6e750d080c3cc5e3d64))
+* added unit test for RocketChatService ([65cbb28](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/65cbb283bbffa9e1a98f870169c24b8cd0c6cef3))
+* added unit tests ([c99770b](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c99770b669cd49367477ab79c76e52e9dfa7b09c))
+* api endpoint for archived sessions and archived team sessions ([07b8c3b](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/07b8c3b6ddbb43b4b5faee830af0d3fb4ad17ec6))
+* api endpoint for archived sessions and archived team sessions ([9cb6fe4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9cb6fe444e4927f78242f904eaa6b5ebc77c20a1))
+* api specification ([e64575c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e64575cbf483201cb438f7452d809c14e28222a5))
+* extend admin api for consultant agency relation ([9e4dd52](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9e4dd52134007b27c1a1936bfa4eb87da7a14de1))
+* extension of archiving / dearchiving ([6a060e1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6a060e13c45deafab6001dfc2bb9de6945b5c05c))
+* extension of unit and integration tests ([9832d70](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9832d700bcaaac3757e9940c7c3596ffa5f9b436))
+* extract async verification ([00784fe](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/00784fe5d93f090b65188a86512a264a43acf2d2))
+* feature switch for new deletion workflows ([5f20ad6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5f20ad6d1937e867992939da23bf744938e4cba9))
+* fetch id from Rocket.Chat for user if only registered ([ab95acd](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ab95acd3307a76b463bd58e674db8a9aa936520b))
+* first implementation of new delete workflow ([c71632e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c71632e5542a0ad9a219bf402d5083f9dae99a91))
+* fix compiler errors ([8cc8cc7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8cc8cc73f47ad366649571c3d0ff60f3f1c148aa))
+* fix some sonar issues ([023b9ba](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/023b9ba4fb5d5fea2993581709e633548f112a34))
+* implementation of api endpoint and tests ([77aac1e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/77aac1ea67a76db8217d52965238d2f94d205a90))
+* implementation of deletion workflow for registered only users ([3ac72ab](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3ac72abdd4f06c4033ac76ffd846f38acae2c24e))
+* implementation of tests ([61cad18](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/61cad188086872772461f9e88a6ce21b52473cd2))
+* increment max timeout ([00391c4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/00391c479a881d53348409e5db34b60263a32464))
+* integration tests ([81ce54f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/81ce54f8db78faeb98dc05e15e95d747b3b29ca3))
+* javadoc extention ([3228a93](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3228a93fcec52150539b6b5917923c1e34caf390))
+* optimization for edge case ([627c5ba](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/627c5bae2f6347b433f5c6c717b0057e17aa7794))
+* optimizations, tests ([fdecea1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/fdecea1f1ef172a7111ea573ebd8a3851f87f385))
+* optimize amount of rocket chat user interactions ([51b7ff9](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/51b7ff9e2d9887a7abf1814d0d54dd6dd562fe3c))
+* provide asynchronus removal of consultants ([8208335](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8208335a5daf41957586b14eda4bc58647df1c1e))
+* remove redundant foreach iteration ([028b68c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/028b68ccbd84212e8d169b4c5c127f3afd588e0a))
+* replace order ([53e945b](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/53e945b7aaeee1836ca636b0ee6ebfd433c0dac9))
+* restructure api to be hal conform ([c49ff3a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c49ff3a3ffab4f2fb29af2a5319de21fcbb69157))
+* security config, integration and unit tests ([5952cb0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5952cb05c060ec4c50244ca8be8737e82a3db4bd))
+* start adjusting documentation ([6c39f45](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6c39f4568ac5d2f9ea99d2676503d2e533d197c7))
+* test for feature switches ([603a4c4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/603a4c495cfe402acd170f4767f1062618e199cc))
+* unit and integration tests ([c563749](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c56374953f7523e6a1e94fbbe4f2179a9a38ff7c))
+* unit and integration tests ([1bec4ef](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1bec4efb59edb6407a7d4d2223062c7da94c6667))
+* updated service api descriptions ([e141980](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e1419800093f7511ad15de5ed189400b7bf2699e))
+
+
+### Bug Fixes
+
+* bugfix for npe ([7fa7358](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/7fa73589124574043a650313a7b87c3467eb4afd))
+* checkstyle error ([06d9292](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/06d9292c67a08febeea11e75bdb256c40b6b63fa))
+* fixed unit test ([40dfba4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/40dfba47b04c0d77f3b378097f89a799a6c84f10))
+* minor changes and filtering of group chats for new deletion workflow ([668f845](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/668f8457f3c089c8dbbaef752ec77a5d533ea589))
+* minor changes and filtering of group chats for new deletion workflow ([74d36b6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/74d36b659e48ee2009e6ffd51d1327a797d48790))
+* missing import ([d56f5af](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d56f5afabe5bb57ac12a9ca195cd18639eac9264))
+* order of archived sessions list ([33a1e37](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/33a1e370c2076cef953c1d1aecd30f711c4109f9))
+
 ## [2.11.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.10.1...v2.11.0) (2021-06-18)
 
 
