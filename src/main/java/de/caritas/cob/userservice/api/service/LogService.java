@@ -8,9 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
-/**
- * Service for logging
- */
+/** Service for logging */
 public class LogService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class);
@@ -41,6 +39,8 @@ public class LogService {
   public static final String VALIDATION_ERROR = "Validation error: ";
   public static final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
   public static final String CREATE_SESSION_FACADE_ERROR = "CreateSessionFacade error: ";
+  public static final String STATISTICS_EVENT_PROCESSING_ERROR = "StatisticsEventProcessing error: ";
+  public static final String STATISTICS_EVENT_PROCESSING_WARNING = "StatisticsEventProcessing warning: ";
 
   private LogService() {}
 
@@ -193,7 +193,10 @@ public class LogService {
    * @param exception the exception
    */
   public static void logInternalServerError(Exception exception) {
-    LOGGER.error("UserService Api: {}, {}, {}", getStackTrace(exception), exception.getMessage(),
+    LOGGER.error(
+        "UserService Api: {}, {}, {}",
+        getStackTrace(exception),
+        exception.getMessage(),
         nonNull(exception.getCause()) ? getStackTrace(exception.getCause()) : "No Cause");
   }
 
@@ -223,8 +226,8 @@ public class LogService {
    * @param errorType the errorType
    */
   public static void logRocketChatError(String message, String error, String errorType) {
-    LOGGER.error("{}{} (Error: {} / ErrorType: {})", ROCKET_CHAT_ERROR_TEXT, message, error,
-        errorType);
+    LOGGER.error(
+        "{}{} (Error: {} / ErrorType: {})", ROCKET_CHAT_ERROR_TEXT, message, error, errorType);
   }
 
   /**
@@ -450,7 +453,6 @@ public class LogService {
     LOGGER.error("{}{}", VALIDATION_ERROR, message);
   }
 
-
   /**
    * Logs the exception message from creating the enquiry message
    *
@@ -524,5 +526,23 @@ public class LogService {
    */
   public static void logDeactivateWorkflowError(Exception e) {
     LOGGER.error("UserService deactivate workflow error: {}", getStackTrace(e));
+  }
+
+  /**
+   * Error while processing statistics event.
+   *
+   * @param exception Exception
+   */
+  public static void logStatisticsEventError(Exception exception) {
+    LOGGER.error("{}{}", STATISTICS_EVENT_PROCESSING_ERROR, getStackTrace(exception));
+  }
+
+  /**
+   * Warning while processing statistics event.
+   *
+   * @param message error message
+   */
+  public static void logStatisticsEventWarning(String message) {
+    LOGGER.warn("{}{}", STATISTICS_EVENT_PROCESSING_WARNING, message);
   }
 }
