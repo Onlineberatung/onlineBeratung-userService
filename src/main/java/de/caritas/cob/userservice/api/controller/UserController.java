@@ -26,6 +26,7 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
+import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
@@ -39,6 +40,7 @@ import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
@@ -58,6 +60,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -85,7 +88,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
-public class  UserController implements UsersApi {
+public class UserController implements UsersApi {
 
   static final int MIN_OFFSET = 0;
   static final int MIN_COUNT = 1;
@@ -118,6 +121,8 @@ public class  UserController implements UsersApi {
   private final @NotNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
+  private final @NotNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  private final @NotNull TwoFactorAuthValidator twoFactorAuthValidator;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -263,7 +268,7 @@ public class  UserController implements UsersApi {
   /**
    * Updates the data for the current logged in consultant.
    *
-   * @param updateConsultantDTO  (required) the request {@link UpdateConsultantDTO}
+   * @param updateConsultantDTO (required) the request {@link UpdateConsultantDTO}
    * @return {@link ResponseEntity}
    */
   @Override
@@ -769,14 +774,41 @@ public class  UserController implements UsersApi {
   /**
    * Updates the session data for the given session.
    *
-   * @param sessionId       (required) session ID
-   * @param sessionDataDTO  (required) {@link SessionDataDTO}
+   * @param sessionId      (required) session ID
+   * @param sessionDataDTO (required) {@link SessionDataDTO}
    * @return {@link ResponseEntity}
    */
   @Override
   public ResponseEntity<Void> updateSessionData(@PathVariable Long sessionId,
       @Valid SessionDataDTO sessionDataDTO) {
     this.sessionDataService.saveSessionData(sessionId, sessionDataDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Activates 2FA for the calling user.
+   *
+   * @param otpSetupDTO (required) {@link OtpSetupDTO}
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   */
+  @Override
+  public ResponseEntity<Void> activateTwoFactorAuthForUser(OtpSetupDTO otpSetupDTO) {
+
+    twoFactorAuthValidator.checkRequestParameterForTwoFactorAuthActivations(otpSetupDTO);
+    twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
+    keycloakTwoFactorAuthService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Deletes 2FA for the calling user.
+   *
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   */
+  @Override
+  public ResponseEntity<Void> deleteTwoFactorAuthForUser() {
+    keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

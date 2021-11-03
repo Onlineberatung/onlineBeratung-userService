@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.model.user;
 
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +23,7 @@ import lombok.Setter;
 @ApiModel(value = "UserData")
 public class UserDataResponseDTO {
 
-  @ApiModelProperty(example = "ajsd89-sdf9-sadk-as8j-asdf8jo", position = 0)
+  @ApiModelProperty(example = "ajsd89-sdf9-sadk-as8j-asdf8jo")
   private String userId;
   @ApiModelProperty(example = "max.muster", position = 1)
   @JsonSerialize(using = DecodeUsernameJsonSerializer.class)
@@ -49,4 +50,5 @@ public class UserDataResponseDTO {
   private Set<String> grantedAuthorities;
   private LinkedHashMap<String, Object> consultingTypes;
   private boolean hasAnonymousConversations;
+  private TwoFactorAuthDTO twoFactorAuth;
 }

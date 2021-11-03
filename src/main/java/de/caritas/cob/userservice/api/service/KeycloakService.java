@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
+import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
+
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -9,7 +12,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,28 +28,22 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class KeycloakService {
 
-  @Value("${keycloakApi.login}")
-  private String keycloakLoginUrl;
-
-  @Value("${keycloakApi.logout}")
-  private String keycloakLogoutUrl;
-
-  @Value("${keycloakService.app.clientId}")
-  private String keycloakClientId;
-
   private static final String KEYCLOAK_GRANT_TYPE_PW = "password";
   private static final String KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
   private static final String BODY_KEY_USERNAME = "username";
   private static final String BODY_KEY_PASSWORD = "password";
   private static final String BODY_KEY_CLIENT_ID = "client_id";
   private static final String BODY_KEY_GRANT_TYPE = "grant_type";
-  private static final String HEADER_AUTHORIZATION_KEY = "Authorization";
-  private static final String HEADER_BEARER_KEY = "Bearer ";
-
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
+  @Value("${keycloakApi.login}")
+  private String keycloakLoginUrl;
+  @Value("${keycloakApi.logout}")
+  private String keycloakLogoutUrl;
+  @Value("${keycloakService.app.clientId}")
+  private String keycloakClientId;
 
   /**
    * Changes the (Keycloak) password of a user and returns true on success.
@@ -68,7 +64,8 @@ public class KeycloakService {
   }
 
   /**
-   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on success.
+   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on
+   * success.
    *
    * @param userName the username
    * @param password the password
@@ -102,7 +99,9 @@ public class KeycloakService {
    */
   public boolean logoutUser(final String refreshToken) {
 
-    var httpHeaders = getAuthorizedFormHttpHeaders();
+    var httpHeaders =
+        getAuthorizedHttpHeaders(authenticatedUser.getAccessToken(),
+            MediaType.APPLICATION_FORM_URLENCODED);
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add(BODY_KEY_CLIENT_ID, keycloakClientId);
     map.add(BODY_KEY_GRANT_TYPE, KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN);
@@ -127,21 +126,6 @@ public class KeycloakService {
       return false;
     }
     return true;
-  }
-
-  private HttpHeaders getAuthorizedFormHttpHeaders() {
-    var httpHeaders = getFormHttpHeaders();
-    httpHeaders.add(HEADER_AUTHORIZATION_KEY,
-        HEADER_BEARER_KEY + authenticatedUser.getAccessToken());
-
-    return httpHeaders;
-  }
-
-  private HttpHeaders getFormHttpHeaders() {
-    var httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-    return httpHeaders;
   }
 
   /**
