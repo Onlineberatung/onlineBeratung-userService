@@ -1315,6 +1315,9 @@ components:
           type: string
           example: 8ertjlasdKJA
           description: Rocket.Chat feedback room ID
+        isPeerChat:
+          type: boolean
+          example: false
         askerRcId:
           type: string
           example: 8ertjlasdKJA

@@ -22,10 +22,12 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ROLES;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_RC_ID;
 import static java.util.Collections.singletonList;
+import static liquibase.util.BooleanUtils.isTrue;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -64,6 +66,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -75,9 +78,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
@@ -86,24 +90,20 @@ class SessionServiceTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
-      null, null, null);
+      nowInUtc(), null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
-      REGISTERED, "99999",
-      1L, SessionStatus.NEW, nowInUtc(), null, null, null,
-      false, false, null, null);
+      REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
+      false, nowInUtc(), null);
   private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, CONSULTING_TYPE_ID_SUCHT,
-      REGISTERED,
-      "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null,
-      false, false, null, null);
+      REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
+      false, nowInUtc(), null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
-      null,
-      false, false, nowInUtc(), null);
+      null, false, false, false, nowInUtc(), null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
-      null,
-      false, false, nowInUtc(), null);
+      null, false, false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
@@ -303,9 +303,11 @@ class SessionServiceTest {
     assertThat(sessionService.getActiveAndDoneSessionsForConsultant(CONSULTANT),
         everyItem(instanceOf(ConsultantSessionResponseDTO.class)));
 
-    verify(sessionRepository, times(1)).findByConsultantAndStatus(any(), eq(SessionStatus.IN_PROGRESS));
+    verify(sessionRepository, times(1))
+        .findByConsultantAndStatus(any(), eq(SessionStatus.IN_PROGRESS));
     verify(sessionRepository, times(1)).findByConsultantAndStatus(any(), eq(SessionStatus.DONE));
-    verify(sessionRepository, never()).findByConsultantAndStatus(any(), eq(SessionStatus.IN_ARCHIVE));
+    verify(sessionRepository, never())
+        .findByConsultantAndStatus(any(), eq(SessionStatus.IN_ARCHIVE));
     verify(sessionRepository, never()).findByConsultantAndStatus(any(), eq(SessionStatus.INITIAL));
     verify(sessionRepository, never()).findByConsultantAndStatus(any(), eq(SessionStatus.NEW));
   }
@@ -413,7 +415,7 @@ class SessionServiceTest {
 
     verify(sessionRepository, times(1))
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-        any(), any(), eq(SessionStatus.IN_PROGRESS), anyBoolean());
+            any(), any(), eq(SessionStatus.IN_PROGRESS), anyBoolean());
     verify(sessionRepository, never())
         .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
             any(), any(), eq(SessionStatus.INITIAL), anyBoolean());
@@ -551,6 +553,7 @@ class SessionServiceTest {
     Session session = easyRandom.nextObject(Session.class);
     session.setConsultant(CONSULTANT_WITH_AGENCY_2);
     session.setUser(USER_WITH_RC_ID);
+    session.setTeamSession(true);
     session.setAgencyId(CONSULTANT_WITH_AGENCY
         .getConsultantAgencies()
         .iterator()
@@ -630,6 +633,21 @@ class SessionServiceTest {
         .getActiveAndDoneSessionsForConsultant(CONSULTANT);
 
     assertThat(activeAndDoneSessionsForConsultant, hasSize(2));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  @NullSource
+  void initializeSession_Should_initializePeerChat_When_consultingTypeSettingsHasPeerChat(Boolean isPeerChat) {
+    var consultingTypeResponse = new EasyRandom()
+        .nextObject(ExtendedConsultingTypeResponseDTO.class);
+    consultingTypeResponse.setIsPeerChat(isPeerChat);
+    when(sessionRepository.save(any())).then(answer -> answer.getArgument(0, Session.class));
+    when(consultingTypeManager.getConsultingTypeSettings(any())).thenReturn(consultingTypeResponse);
+
+    var expectedSession = sessionService.initializeSession(USER, USER_DTO, IS_TEAM_SESSION);
+
+    assertThat(expectedSession.isPeerChat(), is(isTrue(isPeerChat)));
   }
 
 }

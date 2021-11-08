@@ -45,4 +45,13 @@ public class SessionMapperTest {
     assertThat(sessionDTO.getRegistrationType(), is("REGISTERED"));
   }
 
+  @Test
+  public void convertToSessionDTO_Should_returnSessionDTOWithPeerChatInfo() {
+    var session = new EasyRandom().nextObject(Session.class);
+
+    var sessionDTO = new SessionMapper().convertToSessionDTO(session);
+
+    assertThat(sessionDTO.getIsPeerChat(), is(session.isPeerChat()));
+  }
+
 }

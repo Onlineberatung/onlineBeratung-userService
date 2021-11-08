@@ -174,6 +174,7 @@ public class SessionService {
         .agencyId(userDto.getAgencyId())
         .status(sessionStatus)
         .teamSession(isTeamSession)
+        .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
         .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
         .createDate(nowInUtc())
         .updateDate(nowInUtc())

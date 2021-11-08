@@ -299,25 +299,23 @@ public class UserControllerIT {
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS,
-      nowInUtc(), RC_GROUP_ID,
-      null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
+      null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-          IS_MONITORING, null, null);
+          IS_MONITORING, false, nowInUtc(), null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID,
-          SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, null, null);
+          AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null,
+          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID,
-          SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
-          null, null);
+          AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
+          IS_MONITORING, false, nowInUtc(), null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
   private final Optional<Session> OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID =
       Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID);
@@ -332,8 +330,6 @@ public class UserControllerIT {
           + "\", \"lastName\": \"" + LAST_NAME + "\"}]";
   private final String VALID_PASSWORT_REQUEST_BODY =
       "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
-  private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
-  private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
           AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
@@ -2308,8 +2304,8 @@ public class UserControllerIT {
   public void archiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
       throws Exception {
     mvc.perform(put(PATH_ARCHIVE_SESSION_INVALID_PATH_VAR)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(sessionArchiveService);
@@ -2325,8 +2321,8 @@ public class UserControllerIT {
   public void dearchiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
       throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(sessionArchiveService);
