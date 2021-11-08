@@ -77,7 +77,7 @@ public class ConsultantDataProvider {
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
         .hasAnonymousConversations(hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOs))
-        .hasArchive(hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant))
+        .hasArchive(hasArchive(consultant))
         .build();
   }
 
@@ -95,11 +95,15 @@ public class ConsultantDataProvider {
         consultingTypeResponseDTO.getIsAnonymousConversationAllowed());
   }
 
+  private boolean hasArchive(Consultant consultant) {
+    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant) || consultant
+        .isTeamConsultant();
+  }
+
   private boolean hasAtLeastOneRegisteredSessionInProgressOrArchive(Consultant consultant) {
     Long count = sessionRepository.countByConsultantAndStatusInAndRegistrationType(consultant,
-        List.of(
-            SessionStatus.IN_PROGRESS, SessionStatus.IN_ARCHIVE), RegistrationType.REGISTERED);
-    return  nonNull(count) && count > 0L;
+        List.of(SessionStatus.IN_PROGRESS, SessionStatus.IN_ARCHIVE), RegistrationType.REGISTERED);
+    return nonNull(count) && count > 0L;
   }
 
 }
