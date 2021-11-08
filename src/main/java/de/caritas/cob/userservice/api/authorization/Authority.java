@@ -1,6 +1,19 @@
 package de.caritas.cob.userservice.api.authorization;
 
-import static java.util.Arrays.asList;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.CONSULTANT_DEFAULT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.CREATE_NEW_CHAT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.START_CHAT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.STOP_CHAT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.TECHNICAL_DEFAULT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.UPDATE_CHAT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.USER_DEFAULT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.USE_FEEDBACK;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -17,18 +30,16 @@ import lombok.Getter;
 @Getter
 public enum Authority {
 
-  ANONYMOUS(UserRole.ANONYMOUS, singletonList(AuthorityValue.ANONYMOUS_DEFAULT)),
-  USER(UserRole.USER, singletonList(AuthorityValue.USER_DEFAULT)),
-  CONSULTANT(UserRole.CONSULTANT, singletonList(AuthorityValue.CONSULTANT_DEFAULT)),
-  U25_CONSULTANT(UserRole.U25_CONSULTANT, singletonList(AuthorityValue.USE_FEEDBACK)),
-  U25_MAIN_CONSULTANT(UserRole.U25_MAIN_CONSULTANT, asList(
-      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      AuthorityValue.VIEW_AGENCY_CONSULTANTS)),
-  TECHNICAL(UserRole.TECHNICAL, singletonList(AuthorityValue.TECHNICAL_DEFAULT)),
-  GROUP_CHAT_CONSULTANT(UserRole.GROUP_CHAT_CONSULTANT, asList(
-      AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.CREATE_NEW_CHAT,
-      AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT)),
+  ANONYMOUS(UserRole.ANONYMOUS, singletonList(ANONYMOUS_DEFAULT)),
+  USER(UserRole.USER, singletonList(USER_DEFAULT)),
+  CONSULTANT(UserRole.CONSULTANT,
+      List.of(CONSULTANT_DEFAULT, ASSIGN_CONSULTANT_TO_SESSION, VIEW_AGENCY_CONSULTANTS)),
+  PEER_CONSULTANT(UserRole.PEER_CONSULTANT, singletonList(USE_FEEDBACK)),
+  MAIN_CONSULTANT(UserRole.MAIN_CONSULTANT,
+      List.of(VIEW_ALL_FEEDBACK_SESSIONS, VIEW_ALL_PEER_SESSIONS, ASSIGN_CONSULTANT_TO_ENQUIRY)),
+  TECHNICAL(UserRole.TECHNICAL, singletonList(TECHNICAL_DEFAULT)),
+  GROUP_CHAT_CONSULTANT(UserRole.GROUP_CHAT_CONSULTANT,
+      List.of(CONSULTANT_DEFAULT, CREATE_NEW_CHAT, START_CHAT, STOP_CHAT, UPDATE_CHAT)),
   USER_ADMIN(UserRole.USER_ADMIN, singletonList(AuthorityValue.USER_ADMIN));
 
   private final UserRole userRole;

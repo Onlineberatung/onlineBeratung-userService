@@ -1,5 +1,10 @@
 package de.caritas.cob.userservice.api.authorization;
 
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.CONSULTANT_DEFAULT;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -19,8 +24,9 @@ public class AuthorityTest {
     List<String> result = Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT);
 
     assertNotNull(result);
-    assertTrue(result.contains(AuthorityValue.CONSULTANT_DEFAULT));
-    assertEquals(1, result.size());
+    assertThat(result, containsInAnyOrder(CONSULTANT_DEFAULT, ASSIGN_CONSULTANT_TO_SESSION,
+        VIEW_AGENCY_CONSULTANTS));
+    assertEquals(3, result.size());
 
   }
 
@@ -45,9 +51,9 @@ public class AuthorityTest {
   }
 
   @Test
-  public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleU25Consultant() {
+  public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRolePeerConsultant() {
 
-    List<String> result = Authority.getAuthoritiesByUserRole(UserRole.U25_CONSULTANT);
+    List<String> result = Authority.getAuthoritiesByUserRole(UserRole.PEER_CONSULTANT);
 
     assertNotNull(result);
     assertTrue(result.contains(AuthorityValue.USE_FEEDBACK));
@@ -56,17 +62,15 @@ public class AuthorityTest {
   }
 
   @Test
-  public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleU25MainConsultant() {
+  public void getAuthoritiesByRoleName_Should_ReturnCorrectRoles_ForKeycloakRoleMainConsultant() {
 
-    List<String> result = Authority.getAuthoritiesByUserRole(UserRole.U25_MAIN_CONSULTANT);
+    List<String> result = Authority.getAuthoritiesByUserRole(UserRole.MAIN_CONSULTANT);
 
     assertNotNull(result);
     assertTrue(result.contains(AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS));
     assertTrue(result.contains(AuthorityValue.VIEW_ALL_PEER_SESSIONS));
-    assertTrue(result.contains(AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
     assertTrue(result.contains(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY));
-    assertTrue(result.contains(AuthorityValue.VIEW_AGENCY_CONSULTANTS));
-    assertEquals(5, result.size());
+    assertEquals(3, result.size());
 
   }
 
@@ -87,7 +91,7 @@ public class AuthorityTest {
     List<String> result = Authority.getAuthoritiesByUserRole(UserRole.GROUP_CHAT_CONSULTANT);
 
     assertNotNull(result);
-    assertTrue(result.contains(AuthorityValue.CONSULTANT_DEFAULT));
+    assertTrue(result.contains(CONSULTANT_DEFAULT));
     assertTrue(result.contains(AuthorityValue.CREATE_NEW_CHAT));
     assertTrue(result.contains(AuthorityValue.START_CHAT));
     assertTrue(result.contains(AuthorityValue.STOP_CHAT));

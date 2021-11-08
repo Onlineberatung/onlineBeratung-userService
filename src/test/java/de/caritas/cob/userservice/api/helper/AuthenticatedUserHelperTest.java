@@ -120,7 +120,7 @@ public class AuthenticatedUserHelperTest {
 
     boolean result =
         authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-            UserRole.CONSULTANT.getValue(), UserRole.U25_CONSULTANT.getValue());
+            UserRole.CONSULTANT.getValue(), UserRole.PEER_CONSULTANT.getValue());
 
     assertTrue(result);
   }
