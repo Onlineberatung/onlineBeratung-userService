@@ -130,6 +130,7 @@ public class ConsultantDataProviderTest {
   @Test
   public void retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasRegisteredSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setTeamConsultant(false);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
@@ -145,6 +146,7 @@ public class ConsultantDataProviderTest {
   @Test
   public void retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setTeamConsultant(false);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
@@ -155,6 +157,22 @@ public class ConsultantDataProviderTest {
     var result = consultantDataProvider.retrieveData(consultant);
 
     assertFalse(result.isHasArchive());
+  }
+
+  @Test
+  public void retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasNoRegisteredSessionsButIsTeamConsultant() {
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setTeamConsultant(true);
+    when(this.agencyService.getAgencies(any()))
+        .thenReturn(List.of(new AgencyDTO().consultingType(1)));
+    when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
+    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(),
+        any())).thenReturn(5L);
+
+    var result = consultantDataProvider.retrieveData(consultant);
+
+    assertTrue(result.isHasArchive());
   }
 
 }
