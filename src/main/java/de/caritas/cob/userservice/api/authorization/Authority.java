@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.authorization;
 
 import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
 import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY;
+import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION;
 import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
 import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.CONSULTANT_DEFAULT;
 import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.CREATE_NEW_CHAT;
@@ -36,7 +37,8 @@ public enum Authority {
       List.of(CONSULTANT_DEFAULT, ASSIGN_CONSULTANT_TO_SESSION, VIEW_AGENCY_CONSULTANTS)),
   PEER_CONSULTANT(UserRole.PEER_CONSULTANT, singletonList(USE_FEEDBACK)),
   MAIN_CONSULTANT(UserRole.MAIN_CONSULTANT,
-      List.of(VIEW_ALL_FEEDBACK_SESSIONS, VIEW_ALL_PEER_SESSIONS, ASSIGN_CONSULTANT_TO_ENQUIRY)),
+      List.of(VIEW_ALL_FEEDBACK_SESSIONS, VIEW_ALL_PEER_SESSIONS, ASSIGN_CONSULTANT_TO_ENQUIRY,
+          ASSIGN_CONSULTANT_TO_PEER_SESSION)),
   TECHNICAL(UserRole.TECHNICAL, singletonList(TECHNICAL_DEFAULT)),
   GROUP_CHAT_CONSULTANT(UserRole.GROUP_CHAT_CONSULTANT,
       List.of(CONSULTANT_DEFAULT, CREATE_NEW_CHAT, START_CHAT, STOP_CHAT, UPDATE_CHAT)),
@@ -70,6 +72,8 @@ public enum Authority {
         PREFIX + "ASSIGN_CONSULTANT_TO_SESSION";
     public static final String ASSIGN_CONSULTANT_TO_ENQUIRY =
         PREFIX + "ASSIGN_CONSULTANT_TO_ENQUIRY";
+    public static final String ASSIGN_CONSULTANT_TO_PEER_SESSION = PREFIX +
+        "ASSIGN_CONSULTANT_TO_PEER_SESSION";
     public static final String VIEW_AGENCY_CONSULTANTS = PREFIX + "VIEW_AGENCY_CONSULTANTS";
     public static final String TECHNICAL_DEFAULT = PREFIX + "TECHNICAL_DEFAULT";
     public static final String CREATE_NEW_CHAT = PREFIX + "CREATE_NEW_CHAT";

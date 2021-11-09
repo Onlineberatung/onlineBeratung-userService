@@ -70,7 +70,8 @@ public class AuthorityTest {
     assertTrue(result.contains(AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS));
     assertTrue(result.contains(AuthorityValue.VIEW_ALL_PEER_SESSIONS));
     assertTrue(result.contains(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY));
-    assertEquals(3, result.size());
+    assertTrue(result.contains(AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION));
+    assertEquals(4, result.size());
 
   }
 
