@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
@@ -30,7 +29,6 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -58,7 +56,6 @@ public class CreateEnquiryMessageFacade {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserService userService;
   private final RocketChatRoomNameGenerator rocketChatRoomNameGenerator = new RocketChatRoomNameGenerator();
@@ -92,7 +89,8 @@ public class CreateEnquiryMessageFacade {
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
-      String rcGroupId = createRocketChatRoomAndAddUsers(session, agencyList, rocketChatCredentials);
+      String rcGroupId = createRocketChatRoomAndAddUsers(session, agencyList,
+          rocketChatCredentials);
       String rcFeedbackGroupId = retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(session,
           rcGroupId, agencyList, extendedConsultingTypeResponseDTO);
 
@@ -314,11 +312,7 @@ public class CreateEnquiryMessageFacade {
       String rcFeedbackGroupId) throws RocketChatAddUserToGroupException {
 
     for (ConsultantAgency agency : agencyList) {
-      if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)) {
-        rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
-            rcFeedbackGroupId);
-      }
+      rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(), rcFeedbackGroupId);
     }
   }
 
