@@ -111,6 +111,10 @@ public class Session {
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean teamSession;
 
+  @Column(name = "is_peer_chat", nullable = false)
+  @Type(type = "org.hibernate.type.NumericBooleanType")
+  private boolean isPeerChat;
+
   @Column(name = "is_monitoring", nullable = false)
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean monitoring;

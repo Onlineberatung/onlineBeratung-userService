@@ -75,6 +75,7 @@ CREATE TABLE SESSION
     AGENCY_ID            bigint(21) DEFAULT NULL,
     RC_GROUP_ID          varchar(255) NULL,
     RC_FEEDBACK_GROUP_ID varchar(255) NULL,
+    IS_PEER_CHAT         tinyint(4) NOT NULL DEFAULT '0',
     STATUS               tinyint(4) NOT NULL,
     IS_TEAM_SESSION      tinyint(4) NOT NULL DEFAULT '0',
     IS_MONITORING        tinyint(4) NOT NULL,
