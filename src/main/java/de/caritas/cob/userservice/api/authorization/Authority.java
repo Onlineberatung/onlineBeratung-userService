@@ -72,8 +72,8 @@ public enum Authority {
         PREFIX + "ASSIGN_CONSULTANT_TO_SESSION";
     public static final String ASSIGN_CONSULTANT_TO_ENQUIRY =
         PREFIX + "ASSIGN_CONSULTANT_TO_ENQUIRY";
-    public static final String ASSIGN_CONSULTANT_TO_PEER_SESSION = PREFIX +
-        "ASSIGN_CONSULTANT_TO_PEER_SESSION";
+    public static final String ASSIGN_CONSULTANT_TO_PEER_SESSION =
+        PREFIX + "ASSIGN_CONSULTANT_TO_PEER_SESSION";
     public static final String VIEW_AGENCY_CONSULTANTS = PREFIX + "VIEW_AGENCY_CONSULTANTS";
     public static final String TECHNICAL_DEFAULT = PREFIX + "TECHNICAL_DEFAULT";
     public static final String CREATE_NEW_CHAT = PREFIX + "CREATE_NEW_CHAT";
