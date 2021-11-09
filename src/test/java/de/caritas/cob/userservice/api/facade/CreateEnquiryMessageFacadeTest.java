@@ -45,7 +45,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -73,7 +72,6 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -188,9 +186,6 @@ public class CreateEnquiryMessageFacadeTest {
 
   @Mock
   private ConsultingTypeManager consultingTypeManager;
-
-  @Mock
-  private KeycloakAdminClientService keycloakHelper;
 
   @Mock
   private UserHelper userHelper;
@@ -752,8 +747,6 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
-    when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     doThrow(RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION).when(rocketChatService)
         .removeSystemMessages(Mockito.eq(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId()),
             Mockito.any(), Mockito.any());
@@ -788,8 +781,6 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
-    when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     Mockito.doThrow(RC_ADD_USER_TO_GROUP_EXCEPTION).when(rocketChatService)
         .addUserToGroup(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getRocketChatId(),
             FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
