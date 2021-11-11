@@ -1422,6 +1422,7 @@ components:
         - "UPDATE_SESSION_DATA"
         - "FORWARD"
         - "VIDEOCALL"
+        - "FINISHED_CONVERSATION"
 
     ConsultantSessionDTO:
       type: object
