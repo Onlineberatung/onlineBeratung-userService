@@ -102,7 +102,7 @@ public class AssignEnquiryFacadeTest {
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(consultant)
                 && consultantSessionDTO.getSession().equals(session)));
-    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
+    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForEnquiryAssignment(
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(consultant)
                 && consultantSessionDTO.getSession().equals(session)));
