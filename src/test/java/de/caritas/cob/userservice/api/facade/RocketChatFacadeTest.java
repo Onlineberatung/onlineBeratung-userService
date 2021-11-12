@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -124,9 +126,7 @@ public class RocketChatFacadeTest {
       throws Exception {
     this.rocketChatFacade.removeUserFromGroup("user", "group");
 
-    verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
     verify(this.rocketChatService, times(1)).removeUserFromGroup("user", "group");
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -153,6 +153,13 @@ public class RocketChatFacadeTest {
         .getStandardMembersOfGroup(any());
 
     this.rocketChatFacade.getStandardMembersOfGroup("");
+  }
+
+  @Test
+  public void retrieveRocketChatMembers_Should_returnEmptyList_When_rcGroupIdIsNull() {
+    var result = this.rocketChatFacade.retrieveRocketChatMembers(null);
+
+    assertThat(result, hasSize(0));
   }
 
 }

@@ -173,7 +173,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.8.3</version>
+			<version>1.14.2</version>
 		</dependency>
 
 		<dependency>
@@ -250,6 +250,12 @@
       <artifactId>commons-collections4</artifactId>
       <version>4.1</version>
     </dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>4.1.0</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.fridujo</groupId>

@@ -11,6 +11,9 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.session.RegistrationType;
+import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
@@ -29,6 +32,7 @@ public class ConsultantDataProvider {
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull AgencyService agencyService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull SessionRepository sessionRepository;
 
   /**
    * Retrieve the user data of a consultant, e.g. agencies, absence-state, username, name, ...
@@ -73,6 +77,7 @@ public class ConsultantDataProvider {
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
         .hasAnonymousConversations(hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOs))
+        .hasArchive(hasArchive(consultant))
         .build();
   }
 
@@ -88,6 +93,17 @@ public class ConsultantDataProvider {
       ExtendedConsultingTypeResponseDTO consultingTypeResponseDTO) {
     return nonNull(consultingTypeResponseDTO) && isTrue(
         consultingTypeResponseDTO.getIsAnonymousConversationAllowed());
+  }
+
+  private boolean hasArchive(Consultant consultant) {
+    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant) || consultant
+        .isTeamConsultant();
+  }
+
+  private boolean hasAtLeastOneRegisteredSessionInProgressOrArchive(Consultant consultant) {
+    Long count = sessionRepository.countByConsultantAndStatusInAndRegistrationType(consultant,
+        List.of(SessionStatus.IN_PROGRESS, SessionStatus.IN_ARCHIVE), RegistrationType.REGISTERED);
+    return nonNull(count) && count > 0L;
   }
 
 }

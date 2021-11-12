@@ -84,7 +84,7 @@ public class AssignSessionFacadeTest {
     assignSessionFacade.assignSession(FEEDBACKSESSION_WITH_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verify(logService, times(1)).logInternalServerError(anyString(), any());
-    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
+    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForEnquiryAssignment(
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(CONSULTANT_WITH_AGENCY)
                 && consultantSessionDTO.getSession().equals(FEEDBACKSESSION_WITH_CONSULTANT)));
@@ -119,10 +119,8 @@ public class AssignSessionFacadeTest {
 
     this.assignSessionFacade.assignSession(session, consultant);
 
-    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
-        argThat(consultantSessionDTO ->
-            consultantSessionDTO.getConsultant().equals(consultant)
-                && consultantSessionDTO.getSession().equals(session)));
+    verify(sessionToConsultantVerifier, times(0)).verifyPreconditionsForEnquiryAssignment(
+        any());
     verify(this.rocketChatFacade, atLeastOnce())
         .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId());
     verify(this.rocketChatFacade, atLeastOnce())
@@ -160,10 +158,7 @@ public class AssignSessionFacadeTest {
 
     this.assignSessionFacade.assignSession(session, consultant);
 
-    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
-        argThat(consultantSessionDTO ->
-            consultantSessionDTO.getConsultant().equals(consultant)
-                && consultantSessionDTO.getSession().equals(session)));
+    verify(sessionToConsultantVerifier, times(0)).verifyPreconditionsForEnquiryAssignment(any());
     verify(this.rocketChatFacade, atLeastOnce())
         .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId());
     verify(this.rocketChatFacade, atLeastOnce())

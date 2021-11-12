@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.T
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_2;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static java.util.Arrays.asList;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -27,6 +29,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
@@ -35,11 +38,14 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Team
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
@@ -61,6 +67,9 @@ public class NewMessageEmailSupplierTest {
   private ConsultingTypeManager consultingTypeManager;
 
   @Mock
+  private ConsultantService consultantService;
+
+  @Mock
   private UserHelper userHelper;
 
   @Mock
@@ -76,6 +85,7 @@ public class NewMessageEmailSupplierTest {
         .userId(USER.getUserId())
         .consultantAgencyService(consultantAgencyService)
         .consultingTypeManager(consultingTypeManager)
+        .consultantService(consultantService)
         .applicationBaseUrl("app baseurl")
         .emailDummySuffix("dummySuffix")
         .build();
@@ -187,10 +197,11 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsConsultantAndSessionIsNotValid() {
+  public void generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsConsultantAndAskerHasNoMailAddress() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    when(session.getConsultant()).thenReturn(CONSULTANT);
-    when(session.getUser()).thenReturn(USER);
+    User user = Mockito.mock(User.class);
+    when(session.getUser()).thenReturn(user);
+    when(user.getEmail()).thenReturn(StringUtils.EMPTY);
 
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
@@ -201,10 +212,6 @@ public class NewMessageEmailSupplierTest {
   @Test
   public void generateEmails_Should_ReturnEmptyList_When_UserMailIsDummy() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
-    Consultant consultant = mock(Consultant.class);
-    when(consultant.getId()).thenReturn(USER.getUserId());
-    when(session.getConsultant()).thenReturn(consultant);
     User user = mock(User.class);
     when(user.getEmail()).thenReturn("email@dummySuffix");
     when(session.getUser()).thenReturn(user);
@@ -217,11 +224,10 @@ public class NewMessageEmailSupplierTest {
   @Test
   public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     Consultant consultant = mock(Consultant.class);
-    when(consultant.getId()).thenReturn(USER.getUserId());
     when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
     when(session.getConsultant()).thenReturn(consultant);
+    when(consultant.getId()).thenReturn(USER.getUserId());
     when(session.getUser()).thenReturn(USER);
 
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
@@ -239,5 +245,19 @@ public class NewMessageEmailSupplierTest {
     assertThat(templateData.get(2).getKey(), is("url"));
     assertThat(templateData.get(2).getValue(), is("app baseurl"));
   }
+
+  @Test(expected = InternalServerErrorException.class)
+  public void generateEmails_Should_ThrowInternalServerException_When_ConsultantIsNotFound() {
+    when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
+    Consultant consultant = mock(Consultant.class);
+    when(session.getConsultant()).thenReturn(consultant);
+    when(consultant.getId()).thenReturn(CONSULTANT_ID);
+    when(session.getUser()).thenReturn(USER);
+    when(consultantService.getConsultant(USER.getUserId()))
+        .thenReturn(Optional.empty());
+
+    this.newMessageEmailSupplier.generateEmails();
+  }
+
 
 }

@@ -71,7 +71,7 @@ public class SessionAdminServiceIT {
         .findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
-    assertThat(secondPage.getEmbedded(), hasSize(49));
+    assertThat(secondPage.getEmbedded(), hasSize(53));
   }
 
   @Test

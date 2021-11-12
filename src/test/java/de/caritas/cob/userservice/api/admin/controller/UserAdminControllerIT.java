@@ -51,9 +51,9 @@ public class UserAdminControllerIT {
   protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultants/";
   protected static final String DELETE_CONSULTANT_PATH = GET_CONSULTANT_PATH + "1234";
   protected static final String DELETE_ASKER_PATH = ROOT_PATH + "/askers/1234";
-  protected static final String CONSULTING_TYPE_PATH = ROOT_PATH + "/consultingtypes";
   protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultants/%s/agencies";
   protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultants/%s/agencies";
+  protected static final String AGENCY_CONSULTANT_PATH = ROOT_PATH + "/agencies/%s/consultants";
   protected static final String DELETE_CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultants/%s"
       + "/agencies/%s";
   protected static final String AGENCY_CHANGE_TYPE_PATH = ROOT_PATH + "/agency/1/changetype";
@@ -127,7 +127,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
-        .findConsultantAgencies(eq(consultantId));
+        .findConsultantAgencies(consultantId);
   }
 
   @Test
@@ -164,7 +164,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
-        .findConsultant(eq("consultantId"));
+        .findConsultant("consultantId");
   }
 
   @Test
@@ -239,7 +239,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isCreated());
 
     verify(this.consultantAdminFacade, times(1))
-        .createNewConsultantAgency(eq(consultantId), eq(createConsultantAgencyDTO));
+        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 
   @Test
@@ -265,7 +265,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
-        .markConsultantAgencyForDeletion(eq(consultantId), eq(agencyId));
+        .markConsultantAgencyForDeletion(consultantId, agencyId);
   }
 
   @Test
@@ -276,7 +276,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
-        .markConsultantForDeletion(eq("1234"));
+        .markConsultantForDeletion("1234");
   }
 
   @Test
@@ -287,7 +287,20 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     verify(this.userAdminFacade, times(1))
-        .markAskerForDeletion(eq("1234"));
+        .markAskerForDeletion("1234");
+  }
+
+  @Test
+  public void getAgencyConsultants_Should_returnOk_When_requiredAgencyIdParamIsGiven()
+      throws Exception {
+    var agencyId = "1";
+    var agencyConsultantsPath = String.format(AGENCY_CONSULTANT_PATH, agencyId);
+
+    this.mvc.perform(get(agencyConsultantsPath))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1))
+        .findConsultantsForAgency(agencyId);
   }
 
 }

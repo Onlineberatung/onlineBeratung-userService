@@ -55,7 +55,7 @@ class RocketChatOperationConditionProvider {
     return keycloakAdminClientService
         .userHasAuthority(this.consultant.getId(), AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
         || keycloakAdminClientService
-        .userHasRole(this.consultant.getId(), UserRole.U25_MAIN_CONSULTANT.name());
+        .userHasRole(this.consultant.getId(), UserRole.MAIN_CONSULTANT.name());
   }
 
   /**

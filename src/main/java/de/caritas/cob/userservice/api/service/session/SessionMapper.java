@@ -62,6 +62,7 @@ public class SessionMapper {
             ? session.getUser().getRcUserId() : null)
         .messageDate(toUnixTime(session.getEnquiryMessageDate()))
         .isTeamSession(session.isTeamSession())
+        .isPeerChat(session.isPeerChat())
         .monitoring(session.isMonitoring())
         .registrationType(session.getRegistrationType().name())
         .createDate(toIsoTime(session.getCreateDate()));
