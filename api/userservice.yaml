@@ -220,6 +220,70 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/{sessionId}/archive:
+    put:
+      tags:
+        - user-controller
+      summary: 'Put a session into the archive [Authorization: Role: consultant]'
+      operationId: archiveSession
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token or consultant
+            or consultant has no authorization for this session
+        404:
+          description: NOT FOUND - session not found
+        409:
+          description: CONFLICT - session is already in the archive or is not in progress
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/sessions/{sessionId}/dearchive:
+    put:
+      tags:
+        - user-controller
+      summary: 'Dearchive an archived session [Authorization: Role: consultant or user]'
+      operationId: dearchiveSession
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token or consultant
+            or consultant has no authorization for this session
+        404:
+          description: NOT FOUND - session not found
+        409:
+          description: CONFLICT - session is already in progress or not archived
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/consultants/absences:
     put:
       tags:
@@ -1298,6 +1362,9 @@ components:
           type: string
           example: 8ertjlasdKJA
           description: Rocket.Chat feedback room ID
+        isPeerChat:
+          type: boolean
+          example: false
         askerRcId:
           type: string
           example: 8ertjlasdKJA
@@ -1402,6 +1469,7 @@ components:
         - "UPDATE_SESSION_DATA"
         - "FORWARD"
         - "VIDEOCALL"
+        - "FINISHED_CONVERSATION"
 
     ConsultantSessionDTO:
       type: object
@@ -1660,6 +1728,10 @@ components:
           example: true
           description: "Is true if consultant has at least one consulting type containing
           anonymous conversations active"
+        hasArchive:
+          type: boolean
+          example: true
+          description: "Is true if consultant has access to archive"
 
     UpdateConsultantDTO:
       type: object

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.controller;
 
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.AGENCY_CHANGE_TYPE_PATH;
+import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.AGENCY_CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCIES_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.CONSULTANT_AGENCY_PATH;
 import static de.caritas.cob.userservice.api.admin.controller.UserAdminControllerIT.DELETE_ASKER_PATH;
@@ -624,6 +625,45 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(this.userAdminFacade, times(1)).markAskerForDeletion(any());
+  }
+
+  @Test
+  public void getAgencyConsultants_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+      throws Exception {
+    mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.CONSULTANT_DEFAULT,
+          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+          AuthorityValue.START_CHAT,
+          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+  public void getAgencyConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+      throws Exception {
+    mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  public void getAgencyConsultants_Should_ReturnOkAndCallUserAdminFacade_When_userAdminAuthority()
+      throws Exception {
+    mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1)).findConsultantsForAgency(any());
   }
 
 }

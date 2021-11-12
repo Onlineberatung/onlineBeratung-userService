@@ -62,10 +62,12 @@ abstract class RocketChatGroupOperation {
       List<Consultant> consultants) {
     List<String> groupMemberList = obtainRocketChatGroupMemberIds(rcGroupId);
 
+    rocketChatFacade.addTechnicalUserToGroup(rcGroupId);
     consultants.stream()
         .map(Consultant::getRocketChatId)
         .filter(groupMemberList::contains)
         .forEach(rcUserId -> rocketChatFacade.removeUserFromGroup(rcUserId, rcGroupId));
+    rocketChatFacade.removeTechnicalUserFromGroup(rcGroupId);
   }
 
   private List<String> obtainRocketChatGroupMemberIds(String groupId) {

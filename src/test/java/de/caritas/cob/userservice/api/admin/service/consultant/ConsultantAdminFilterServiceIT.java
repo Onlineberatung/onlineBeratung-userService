@@ -36,7 +36,7 @@ public class ConsultantAdminFilterServiceIT {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, new ConsultantFilter());
 
-    assertThat(consultants.getEmbedded(), hasSize(37));
+    assertThat(consultants.getEmbedded(), hasSize(38));
   }
 
   @Test
@@ -44,7 +44,7 @@ public class ConsultantAdminFilterServiceIT {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, null);
 
-    assertThat(consultants.getEmbedded(), hasSize(37));
+    assertThat(consultants.getEmbedded(), hasSize(38));
   }
 
   @Test
@@ -81,7 +81,7 @@ public class ConsultantAdminFilterServiceIT {
         .findFilteredConsultants(2, 30, new ConsultantFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(30));
-    assertThat(secondPage.getEmbedded(), hasSize(7));
+    assertThat(secondPage.getEmbedded(), hasSize(8));
   }
 
   @Test

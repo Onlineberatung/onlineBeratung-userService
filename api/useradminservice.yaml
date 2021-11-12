@@ -265,13 +265,42 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /useradmin/agencies/{agencyId}/consultants:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of consultants for a given agency Id. [Authorization: Role:
+            user-admin]'
+      operationId: getAgencyConsultants
+      parameters:
+        - name: agencyId
+          in: path
+          description: Agency Id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/AgencyConsultantResponseDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - agency with given id does not exist
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /useradmin/consultants/{consultantId}/agencies:
     get:
       tags:
         - admin-user-controller
-      summary: 'Returns the list of consultant-agency connections for a given consultant Id. [Authorization: Role:
+      summary: 'Returns the list of agencies for a given consultant Id. [Authorization: Role:
         user-admin]'
-      operationId: getConsultantAgency
+      operationId: getConsultantAgencies
       parameters:
         - name: consultantId
           in: path
@@ -285,9 +314,12 @@ paths:
           content:
             'application/hal+json':
               schema:
-                $ref: '#/components/schemas/ConsultantAgencyAdminResultDTO'
+                $ref: '#/components/schemas/ConsultantAgencyResponseDTO'
+
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - consultant with given id does not exist
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -668,60 +700,6 @@ components:
         absent:
           type: boolean
 
-    ConsultantAgencyAdminResultDTO:
-      type: object
-      properties:
-        _embedded:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConsultantAgencyAdminDTO'
-        _links:
-          $ref: '#/components/schemas/ConsultantAgencyAdminResultLinks'
-        total:
-          type: integer
-
-    ConsultantAgencyAdminResultLinks:
-      type: object
-      required:
-        - self
-      properties:
-        self:
-          $ref: '#/components/schemas/HalLink'
-
-    ConsultantAgencyAdminDTO:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 15
-        consultantId:
-          type: string
-          example: "aadc0ecf-c048-4bfc-857d-8c9b2e425500"
-        agencyId:
-          type: integer
-          format: int64
-          example: 15
-        createDate:
-          type: string
-          example: "2019-08-23T08:52:05"
-        updateDate:
-          type: string
-          example: "2019-08-23T08:52:05"
-        deleteDate:
-          type: string
-          example: "2019-08-23T08:52:05"
-        _links:
-          $ref: '#/components/schemas/ConsultantAgencyLinks'
-
-    ConsultantAgencyLinks:
-      type: object
-      required:
-        - delete
-      properties:
-        delete:
-          $ref: '#/components/schemas/HalLink'
-
     CreateConsultantAgencyDTO:
       type: object
       required:
@@ -736,6 +714,44 @@ components:
           type: string
           minLength: 1
           maxLength: 255
+
+    ConsultantAgencyResponseDTO:
+      type: object
+      required:
+        - _embedded
+        - _links
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminFullResponseDTO'
+        _links:
+          $ref: '#/components/schemas/ConsultantAgencyLinks'
+        total:
+          type: integer
+
+    ConsultantAgencyLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+
+    AgencyConsultantResponseDTO:
+      type: object
+      required:
+        - _embedded
+        - _links
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantAdminResponseDTO'
+        _links:
+          $ref: '#/components/schemas/ConsultantAgencyLinks'
+        total:
+          type: integer
 
     ViolationDTO:
       type: object

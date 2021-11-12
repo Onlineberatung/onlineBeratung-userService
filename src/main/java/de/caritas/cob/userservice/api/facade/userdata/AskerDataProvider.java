@@ -57,6 +57,7 @@ public class AskerDataProvider {
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
         .consultingTypes(getConsultingTypes(user))
         .hasAnonymousConversations(false)
+        .hasArchive(false)
         .build();
   }
 

@@ -174,6 +174,7 @@ public class SessionService {
         .agencyId(userDto.getAgencyId())
         .status(sessionStatus)
         .teamSession(isTeamSession)
+        .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
         .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
@@ -232,15 +233,7 @@ public class SessionService {
               consultantAgencyIds, consultant, SessionStatus.IN_PROGRESS, true);
     }
 
-    List<ConsultantSessionResponseDTO> sessionDTOs = null;
-
-    if (nonNull(sessions)) {
-      sessionDTOs = sessions.stream()
-          .map(session -> new SessionMapper().toConsultantSessionDto(session))
-          .collect(Collectors.toList());
-    }
-
-    return sessionDTOs;
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   /**
@@ -263,12 +256,8 @@ public class SessionService {
     List<Long> consultantAgencyIds = consultantAgencies.stream()
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toList());
-
     final List<Session> sessions = retrieveRegisteredSessions(consultantAgencyIds);
-
-    return sessions.stream()
-        .map(session -> new SessionMapper().toConsultantSessionDto(session))
-        .collect(Collectors.toList());
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   private List<Session> retrieveRegisteredSessions(List<Long> consultantAgencyIds) {
@@ -283,9 +272,10 @@ public class SessionService {
    * @param consultant the consultant
    * @return the related {@link ConsultantSessionResponseDTO}s
    */
-  public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(Consultant consultant) {
+  public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
+      Consultant consultant) {
     return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
@@ -447,5 +437,56 @@ public class SessionService {
   private boolean isConsultantAssignedToSessionAgency(Consultant consultant, Session session) {
     return consultant.getConsultantAgencies().stream()
         .anyMatch(consultantAgency -> consultantAgency.getAgencyId().equals(session.getAgencyId()));
+  }
+
+  /**
+   * Retrieves all archived sessions of given {@link Consultant}.
+   *
+   * @param consultant the consultant
+   * @return the related {@link ConsultantSessionResponseDTO}s
+   */
+  public List<ConsultantSessionResponseDTO> getArchivedSessionsForConsultant(
+      Consultant consultant) {
+    final List<Session> sessions = retrieveArchivedSessions(consultant);
+
+    return mapSessionsToConsultantSessionDto(sessions);
+  }
+
+  private List<Session> retrieveArchivedSessions(Consultant consultant) {
+    return this.sessionRepository
+        .findByConsultantAndStatusOrderByUpdateDateDesc(consultant, SessionStatus.IN_ARCHIVE);
+  }
+
+  /**
+   * Retrieves all archived team sessions of given {@link Consultant}.
+   *
+   * @param consultant the consultant
+   * @return the related {@link ConsultantSessionResponseDTO}s
+   */
+  public List<ConsultantSessionResponseDTO> getArchivedTeamSessionsForConsultant(
+      Consultant consultant) {
+    final List<Session> sessions = retrieveArchivedTeamSessionsForConsultant(consultant);
+    return mapSessionsToConsultantSessionDto(sessions);
+  }
+
+  private List<Session> retrieveArchivedTeamSessionsForConsultant(Consultant consultant) {
+    Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
+    if (isNotEmpty(consultantAgencies)) {
+      List<Long> consultantAgencyIds = consultantAgencies.stream()
+          .map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
+      return this.sessionRepository
+          .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
+              consultantAgencyIds, consultant, SessionStatus.IN_ARCHIVE);
+    }
+    return emptyList();
+  }
+
+  private List<ConsultantSessionResponseDTO> mapSessionsToConsultantSessionDto(List<Session> sessions) {
+    if (nonNull(sessions)) {
+      return sessions.stream()
+          .map(session -> new SessionMapper().toConsultantSessionDto(session))
+          .collect(Collectors.toList());
+    }
+    return emptyList();
   }
 }

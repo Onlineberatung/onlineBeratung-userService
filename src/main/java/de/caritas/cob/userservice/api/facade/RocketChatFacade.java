@@ -2,6 +2,8 @@ package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.helper.Helper.ONE_DAY_IN_HOURS;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
@@ -71,6 +73,9 @@ public class RocketChatFacade {
    * @return al members of the group
    */
   public List<GroupMemberDTO> retrieveRocketChatMembers(String rcGroupId) {
+    if (isBlank(rcGroupId)) {
+      return emptyList();
+    }
     try {
       addTechnicalUserToGroup(rcGroupId);
       List<GroupMemberDTO> memberList = rocketChatService.getMembersOfGroup(rcGroupId);
@@ -123,9 +128,7 @@ public class RocketChatFacade {
    */
   public void removeUserFromGroup(String rcUserId, String groupId) {
     try {
-      addTechnicalUserToGroup(groupId);
       this.rocketChatService.removeUserFromGroup(rcUserId, groupId);
-      removeTechnicalUserFromGroup(groupId);
     } catch (RocketChatRemoveUserFromGroupException e) {
       var message = String.format(
           "Could not remove user with id %s from Rocket.Chat group id %s", rcUserId, groupId);

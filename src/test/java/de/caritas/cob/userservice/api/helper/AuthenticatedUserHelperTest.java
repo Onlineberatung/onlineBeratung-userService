@@ -20,10 +20,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
+import java.util.HashSet;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -39,23 +42,20 @@ public class AuthenticatedUserHelperTest {
       USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null,
       null);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT,
-      REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(), null, null, null,
-      false, false, null, null);
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
+      null, null, null, false, false, false, nowInUtc(), null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID, SessionStatus.NEW, nowInUtc(), null, null, null,
-          false, false, null, null);
+          AGENCY_ID, SessionStatus.NEW, nowInUtc(), null, null, null, false, false, false,
+          nowInUtc(), null);
   private final Session TEAM_SESSION =
       new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
-          POSTCODE, AGENCY_ID,
-          SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
-          null, null);
+          POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null,
+          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(TEAM_SESSION_ID, null, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
-          IS_MONITORING,
-          null, null);
+          IS_MONITORING, false, nowInUtc(), null);
 
   @InjectMocks
   private AuthenticatedUserHelper authenticatedUserHelper;
@@ -107,6 +107,31 @@ public class AuthenticatedUserHelperTest {
         authenticatedUserHelper.hasPermissionForSession(TEAM_SESSION_WITH_DIFFERENT_CONSULTANT);
 
     assertTrue(result);
+  }
+
+  @Test
+  public void authenticatedUserRolesContainAnyRoleOf_Should_ReturnTrue_WhenAuthenticatedUserHasRole() {
+
+    when(authenticatedUser.getRoles()).thenReturn(
+        new HashSet<>(List.of(UserRole.CONSULTANT.getValue())));
+
+    boolean result =
+        authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
+            UserRole.CONSULTANT.getValue(), UserRole.PEER_CONSULTANT.getValue());
+
+    assertTrue(result);
+  }
+
+  @Test
+  public void authenticatedUserRolesContainAnyRoleOf_Should_ReturnTrue_WhenAuthenticatedUserHasNotRole() {
+
+    when(authenticatedUser.getRoles()).thenReturn(
+        new HashSet<>(List.of(UserRole.CONSULTANT.getValue())));
+
+    boolean result =
+        authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(UserRole.USER.toString());
+
+    assertFalse(result);
   }
 
 }

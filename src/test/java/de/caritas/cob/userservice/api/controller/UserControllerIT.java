@@ -4,8 +4,12 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -74,6 +78,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_MESSAG
 import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
+import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ROLE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
@@ -107,6 +112,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID_HEA
 import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.OTP_INFO_DTO;
 import static org.junit.Assert.assertEquals;
@@ -126,6 +133,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -193,6 +201,7 @@ import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
+import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -305,25 +314,23 @@ public class UserControllerIT {
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.IN_PROGRESS,
-      nowInUtc(), RC_GROUP_ID,
-      null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
+      null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-          IS_MONITORING, null, null);
+          IS_MONITORING, false, nowInUtc(), null);
   private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
   private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
       Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID,
-          SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, null, null);
+          AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null,
+          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID,
-          SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION, IS_MONITORING,
-          null, null);
+          AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
+          IS_MONITORING, false, nowInUtc(), null);
   private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
   private final Optional<Session> OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID =
       Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID);
@@ -338,8 +345,6 @@ public class UserControllerIT {
           + "\", \"lastName\": \"" + LAST_NAME + "\"}]";
   private final String VALID_PASSWORT_REQUEST_BODY =
       "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
-  private final String ACCESS_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
-  private final String REFRESH_TOKEN = "askdasd09SUIasdmw9-sdfk94r";
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
           AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
@@ -430,6 +435,8 @@ public class UserControllerIT {
   private UserService userService;
   @MockBean
   private SessionDataService sessionDataService;
+  @MockBean
+  private SessionArchiveService sessionArchiveService;
   @MockBean
   private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   @MockBean
@@ -1244,7 +1251,9 @@ public class UserControllerIT {
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().json(VALID_CONSULTANT_ROLE_RESULT));
+        .andExpect(jsonPath("$.userRoles", hasSize(3)))
+        .andExpect(jsonPath("$.userRoles", containsInAnyOrder(DUMMY_ROLE_A, DUMMY_ROLE_B,
+            CONSULTANT_ROLE)));
   }
 
   @Test
@@ -2311,6 +2320,40 @@ public class UserControllerIT {
             new UpdateConsultantDTO().email("invalid").firstname("firstname").lastname("lastname")))
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void archiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_ARCHIVE_SESSION_INVALID_PATH_VAR)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  public void archiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_ARCHIVE_SESSION))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void dearchiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+      throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(sessionArchiveService);
+  }
+
+  @Test
+  public void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_DEARCHIVE_SESSION))
+        .andExpect(status().isOk());
   }
 
   @Test

@@ -20,7 +20,7 @@ public class ConversationListResolver {
   private final @NonNull ConversationListProviderRegistry conversationListProviderRegistry;
 
   /**
-   * Resolves the requested converation list by given {@link ConversationListType}.
+   * Resolves the requested conversation list by given {@link ConversationListType}.
    *
    * @param offset the current offset
    * @param count the requested limit

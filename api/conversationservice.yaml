@@ -92,6 +92,94 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /conversations/consultants/mymessages/archive:
+    get:
+      tags:
+        - conversation-controller
+      summary: 'Returns all archived sessions for the currently authenticated consultant
+            [Authorization: Role: consultant]'
+      operationId: getArchivedSessions
+      parameters:
+        - name: offset
+          in: query
+          description: Number of items where to start in the query (0 = first item)
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+        - name: count
+          in: query
+          description: Number of items which are being returned
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/json:
+              schema:
+                $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /conversations/consultants/teamsessions/archive:
+    get:
+      tags:
+        - conversation-controller
+      summary: 'Returns all archived teams sessions for the currently authenticated consultant
+              [Authorization: Role: consultant]'
+      operationId: getArchivedTeamSessions
+      parameters:
+        - name: offset
+          in: query
+          description: Number of items where to start in the query (0 = first item)
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+        - name: count
+          in: query
+          description: Number of items which are being returned
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            application/json:
+              schema:
+                $ref: './userservice.yaml#/components/schemas/ConsultantSessionListResponseDTO'
+        204:
+          description: No content available but the request was ok
+        400:
+          description: BAD REQUEST - invalid/incomplete request, e.g. count or offset invalid or missing
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /conversations/askers/anonymous/new:
     post:
       tags:

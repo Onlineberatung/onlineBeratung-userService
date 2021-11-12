@@ -75,6 +75,7 @@ CREATE TABLE SESSION
     AGENCY_ID            bigint(21) DEFAULT NULL,
     RC_GROUP_ID          varchar(255) NULL,
     RC_FEEDBACK_GROUP_ID varchar(255) NULL,
+    IS_PEER_CHAT         tinyint(4) NOT NULL DEFAULT '0',
     STATUS               tinyint(4) NOT NULL,
     IS_TEAM_SESSION      tinyint(4) NOT NULL DEFAULT '0',
     IS_MONITORING        tinyint(4) NOT NULL,
@@ -704,6 +705,9 @@ VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b9', 'enc.MVWWSZ3SMF2GS33OFV2GKYLN', 
         '2020-10-08 08:54:15', '2020-10-08 08:54:15'),
        ('fb77d849-470f-4cec-89ca-6aa673bacb88', 'enc.ONSW42LPOJUXI6JNMRSWMYLVNR2A....', 'Default',
         'Consultant', 'seniority@consultant.de', 0, 0, NULL, 'pbb8Fw2juns6FFTks', 1, 0, NULL,
+        '2020-10-08 08:54:09', '2020-10-08 08:54:09'),
+       ('34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 'enc.AAAW42LPOJUXI6JNMRTFMYLVNR2A....', 'Default',
+        'Consultant', 'new@consultant.de', 0, 0, NULL, 'aaa8Fw2juns6FFTks', 1, 0, NULL,
         '2020-10-08 08:54:09', '2020-10-08 08:54:09');
 INSERT INTO CONSULTANT_AGENCY (`id`, `consultant_id`, `agency_id`, `create_date`, `update_date`)
 VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '2020-10-08 08:53:55'),
@@ -1263,7 +1267,19 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
         NULL, NULL, 0, 1, 1, '2018-05-01 09:04:32', '2018-05-01 09:04:32'),
        (1208, 'jurea0a1-c936-45ee-9141-d73dfc0a3000', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
         '2020-02-05 11:09:32', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
-        '2020-02-05 11:09:32', '2020-02-05 11:09:32');
+        '2020-02-05 11:09:32', '2020-02-05 11:09:32'),
+       (1209, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '75abe824-fb42-476d-a52a-66660113bdcc', 0,
+        '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 4, 0, 1,
+        '2020-10-08 09:03:47', '2020-10-08 09:03:48'),
+       (1210, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 0,
+        '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 4, 0, 1,
+        '2020-10-08 09:03:47', '2020-10-08 09:03:48'),
+       (1211, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 0,
+        '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 4, 0, 1,
+        '2020-10-08 09:03:47', '2020-10-08 09:03:48'),
+       (1212, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
+        '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 3, 0, 1,
+        '2020-10-08 09:03:47', '2020-10-08 09:03:48');
 INSERT INTO USER_AGENCY (`id`, `user_id`, `agency_id`, `create_date`, `update_date`)
 VALUES (0, 'opiti0a1-c936-45ee-9141-d73dfc0a3000', 777, '2020-02-05 11:09:32', '2020-02-05 11:09:32');
 
