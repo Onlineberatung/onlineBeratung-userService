@@ -95,4 +95,5 @@ public class PathConstants {
   public static final String PATH_ARCHIVE_SESSION_INVALID_PATH_VAR = "/users/sessions/xyz/archive";
   public static final String PATH_DEARCHIVE_SESSION = "/users/sessions/123/dearchive";
   public static final String PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR = "/users/sessions/xyz/dearchive";
+  public static final String PATH_PUT_ADD_MOBILE_TOKEN = "/users/mobile/app/token";
 }

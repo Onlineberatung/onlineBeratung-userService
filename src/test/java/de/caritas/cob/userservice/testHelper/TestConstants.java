@@ -315,13 +315,13 @@ public class TestConstants {
   public static final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME, FIRST_NAME, LAST_NAME, EMAIL,
           IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null, null,
-          null, null, null);
+          null, null, null, null);
   public static final Consultant CONSULTANT_2 = new Consultant(CONSULTANT_ID_2, ROCKETCHAT_ID,
       USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null,
-      null, null, null);
+      null, null, null, null);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
-          "last name", EMAIL, false, false, null, false, null, null, null, null, null, null);
+          "last name", EMAIL, false, false, null, false, null, null, null, null, null, null, null);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
@@ -333,11 +333,11 @@ public class TestConstants {
   public static final User USER = new User(USER_ID, null, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
   public static final User USER_WITH_RC_ID =
       new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null, null, null,
-          null);
+          null, null);
   public static final User USER_NO_RC_USER_ID =
-      new User(USER_ID, null, USERNAME, EMAIL, null, false, null, null, null, null);
+      new User(USER_ID, null, USERNAME, EMAIL, null, false, null, null, null, null, null);
   public static final User USER_NO_RC_USER_ID_2 =
-      new User(USER_ID_2, null, USERNAME, EMAIL, null, false, null, null, null, null);
+      new User(USER_ID_2, null, USERNAME, EMAIL, null, false, null, null, null, null, null);
   public static final String ACCESS_TOKEN = "DASDLAJS835u83hKSAJDF";
   public static final AuthenticatedUser AUTHENTICATED_USER =
       new AuthenticatedUser(USER_ID, USERNAME, null, ACCESS_TOKEN, null);
@@ -415,11 +415,10 @@ public class TestConstants {
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false,
-      null,
-      null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null, null);
+      null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null, null, null);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false, null,
-      null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)), null, null, null);
+      null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)), null, null, null, null);
   /**
    * UserAgency
    */
@@ -486,7 +485,7 @@ public class TestConstants {
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
   public static final User USER_WITH_SESSIONS =
       new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null,
-          null, null);
+          null, null, null);
   public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
