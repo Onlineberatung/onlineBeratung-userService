@@ -105,8 +105,8 @@ public class EmailNotificationFacadeTest {
           "consultant3@domain.de", false, false, null, false, 1L, null, null, null, null, null,
           null);
   private final Consultant CONSULTANT_NO_EMAIL = new Consultant(CONSULTANT_ID, "XXX", "consultant",
-      "consultant", "consultant", "", false, false, null, false, 1L, null, null, null, null, null
-      , null);
+      "consultant", "consultant", "", false, false, null, false, 1L, null, null, null, null, null,
+      null);
   private final Consultant ABSENT_CONSULTANT = new Consultant("XXX", "XXX", "consultant",
       "consultant", "consultant", "consultant@domain.de", true, false, null, false, 1L, null,
       null, null, null, null, null);
