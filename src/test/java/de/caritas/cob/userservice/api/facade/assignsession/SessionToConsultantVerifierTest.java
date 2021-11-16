@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SessionToConsultantVerifierTest {
+public class SessionToConsultantVerifierTest {
 
   @InjectMocks
   private SessionToConsultantVerifier sessionToConsultantVerifier;
@@ -33,7 +33,7 @@ class SessionToConsultantVerifierTest {
   private SessionToConsultantConditionProvider sessionToConsultantConditionProvider;
 
   @Test
-  void verifySessionIsNotInProgress_Should_throwConflict_When_SessionIsInProgress() {
+  public void verifySessionIsNotInProgress_Should_throwConflict_When_SessionIsInProgress() {
     when(sessionToConsultantConditionProvider.isSessionInProgress(any())).thenReturn(true);
 
     ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
@@ -46,7 +46,7 @@ class SessionToConsultantVerifierTest {
   }
 
   @Test
-  void verifyPreconditionsForAssignment_Should_throwException_When_sessionIsNew() {
+  public void verifyPreconditionsForAssignment_Should_throwException_When_sessionIsNew() {
     when(sessionToConsultantConditionProvider.isNewSession(any())).thenReturn(true);
     ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
         .consultant(mock(Consultant.class))
@@ -54,11 +54,11 @@ class SessionToConsultantVerifierTest {
         .build();
 
     assertThrows(ConflictException.class, () ->
-        sessionToConsultantVerifier.verifyPreconditionsForEnquiryAssignment(consultantSessionDTO));
+        sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 
   @Test
-  void verifyPreconditionsForAssignment_Should_throwException_When_sessionIsAlreadyAssignedToConsultant() {
+  public void verifyPreconditionsForAssignment_Should_throwException_When_sessionIsAlreadyAssignedToConsultant() {
     when(sessionToConsultantConditionProvider.isSessionAlreadyAssignedToConsultant(any(), any()))
         .thenReturn(true);
     ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
@@ -67,11 +67,11 @@ class SessionToConsultantVerifierTest {
         .build();
 
     assertThrows(ConflictException.class, () ->
-        sessionToConsultantVerifier.verifyPreconditionsForEnquiryAssignment(consultantSessionDTO));
+        sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 
   @Test
-  void verifyPreconditionsForAssignment_Should_throwException_When_consultantDoesNotHaveRocketChatIdInDb() {
+  public void verifyPreconditionsForAssignment_Should_throwException_When_consultantDoesNotHaveRocketChatIdInDb() {
     when(sessionToConsultantConditionProvider.hasConsultantNoRcId(any())).thenReturn(true);
     ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
         .consultant(mock(Consultant.class))
@@ -79,11 +79,11 @@ class SessionToConsultantVerifierTest {
         .build();
 
     assertThrows(InternalServerErrorException.class, () ->
-        sessionToConsultantVerifier.verifyPreconditionsForEnquiryAssignment(consultantSessionDTO));
+        sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 
   @Test
-  void verifyPreconditionsForAssignment_Should_throwException_When_sessionUserHasNoRocketChatId() {
+  public void verifyPreconditionsForAssignment_Should_throwException_When_sessionUserHasNoRocketChatId() {
     when(sessionToConsultantConditionProvider.hasSessionUserNoRcId(any())).thenReturn(true);
 
     Session sessionWithUser = mock(Session.class);
@@ -96,11 +96,11 @@ class SessionToConsultantVerifierTest {
         .build();
 
     assertThrows(InternalServerErrorException.class, () ->
-        sessionToConsultantVerifier.verifyPreconditionsForEnquiryAssignment(consultantSessionDTO));
+        sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 
   @Test
-  void verifyPreconditionsForAssignment_Should_notThrowException_When_anonymousSessionIsValid() {
+  public void verifyPreconditionsForAssignment_Should_notThrowException_When_anonymousSessionIsValid() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setConsultant(null);
     session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
@@ -116,11 +116,11 @@ class SessionToConsultantVerifierTest {
         .build();
 
     assertDoesNotThrow(() -> sessionToConsultantVerifier
-        .verifyPreconditionsForEnquiryAssignment(consultantSessionDTO));
+        .verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 
   @Test
-  void verifyPreconditionsForAssignment_Should_throwException_When_anonymousSessionHasNotConsultingType() {
+  public void verifyPreconditionsForAssignment_Should_throwException_When_anonymousSessionHasNotConsultingType() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setConsultant(null);
     session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
@@ -138,11 +138,11 @@ class SessionToConsultantVerifierTest {
         .build();
 
     assertThrows(ForbiddenException.class, () ->
-        sessionToConsultantVerifier.verifyPreconditionsForEnquiryAssignment(consultantSessionDTO));
+        sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 
   @Test
-  void verifyPreconditionsForAssignment_Should_throwException_When_consultantIsNotAssignedToCorrectAgency() {
+  public void verifyPreconditionsForAssignment_Should_throwException_When_consultantIsNotAssignedToCorrectAgency() {
     Session session = mock(Session.class);
     when(session.getRegistrationType()).thenReturn(RegistrationType.REGISTERED);
 
@@ -156,7 +156,7 @@ class SessionToConsultantVerifierTest {
         .build();
 
     assertThrows(ForbiddenException.class, () ->
-        sessionToConsultantVerifier.verifyPreconditionsForEnquiryAssignment(consultantSessionDTO));
+        sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
   }
 
 }
