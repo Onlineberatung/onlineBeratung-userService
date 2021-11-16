@@ -77,7 +77,7 @@ public class AssignEnquiryFacade {
         .session(session)
         .build();
     sessionToConsultantVerifier.verifySessionIsNotInProgress(consultantSessionDTO);
-    sessionToConsultantVerifier.verifyPreconditionsForEnquiryAssignment(consultantSessionDTO);
+    sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
   }
