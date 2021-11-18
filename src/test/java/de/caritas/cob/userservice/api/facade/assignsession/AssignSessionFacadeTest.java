@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import static de.caritas.cob.userservice.testHelper.AsyncVerification.verifyAsync;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.FEEDBACKSESSION_WITH_CONSULTANT;
 import static java.util.Arrays.asList;
@@ -154,18 +155,18 @@ public class AssignSessionFacadeTest {
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(consultant)
                 && consultantSessionDTO.getSession().equals(session)));
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId());
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId", session.getGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId", session.getFeedbackGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId2", session.getGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId2", session.getFeedbackGroupId());
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId", session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId", session.getFeedbackGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId2", session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId2", session.getFeedbackGroupId()));
     verify(this.emailNotificationFacade, times(1))
         .sendAssignEnquiryEmailNotification(any(), any(), any());
   }
