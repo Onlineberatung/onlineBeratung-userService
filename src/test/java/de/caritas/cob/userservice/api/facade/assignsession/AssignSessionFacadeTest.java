@@ -114,10 +114,10 @@ public class AssignSessionFacadeTest {
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(consultant)
                 && consultantSessionDTO.getSession().equals(session)));
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId());
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId());
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
     verify(this.emailNotificationFacade, times(1))
         .sendAssignEnquiryEmailNotification(any(), any(), any());
   }
