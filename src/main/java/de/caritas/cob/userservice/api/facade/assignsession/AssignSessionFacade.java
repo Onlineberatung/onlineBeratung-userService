@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
@@ -14,6 +16,7 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackServi
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -68,16 +71,10 @@ public class AssignSessionFacade {
 
   private void updateRocketChatRooms(Session session, Consultant consultant) {
     addConsultantToRocketChatGroup(session.getGroupId(), consultant);
-    var memberList =
-        rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
-    removeUnauthorizedMembersFromGroup(session, consultant, memberList);
-
     if (session.hasFeedbackChat()) {
       addConsultantToRocketChatGroup(session.getFeedbackGroupId(), consultant);
-      var feedbackMemberList =
-          rocketChatFacade.retrieveRocketChatMembers(session.getFeedbackGroupId());
-      removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList);
     }
+    supplyAsync(removeUnauthorizedMembersFromGroups(session, consultant));
   }
 
   private void addConsultantToRocketChatGroup(String rcGroupId, Consultant consultant) {
@@ -91,6 +88,21 @@ public class AssignSessionFacade {
         initialStatus == SessionStatus.NEW ? SessionStatus.IN_PROGRESS : initialStatus);
   }
 
+  private Supplier<Void> removeUnauthorizedMembersFromGroups(Session session,
+      Consultant consultant) {
+    return () -> {
+      var memberList = rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
+      removeUnauthorizedMembersFromGroup(session, consultant, memberList);
+
+      if (session.hasFeedbackChat()) {
+        var feedbackMemberList =
+            rocketChatFacade.retrieveRocketChatMembers(session.getFeedbackGroupId());
+        removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList);
+      }
+      return null;
+    };
+  }
+
   private void removeUnauthorizedMembersFromGroup(Session session, Consultant consultant,
       List<GroupMemberDTO> memberList) {
     List<Consultant> consultantsToRemoveFromRocketChat =
@@ -98,7 +110,8 @@ public class AssignSessionFacade {
             consultant, memberList);
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, this.consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
+            this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromGroupOrRollbackOnFailure();
   }
@@ -110,7 +123,8 @@ public class AssignSessionFacade {
             consultant, memberList);
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, this.consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
+            this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromFeedbackGroupOrRollbackOnFailure();
   }
