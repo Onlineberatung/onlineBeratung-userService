@@ -16,7 +16,7 @@ public class AsyncVerification {
   /**
    * Verifies if the passed verify function has been called during the given max timeout range.
    *
-   * @param verificationFunction the verify funktion to be checked
+   * @param verificationFunction the verify function to be checked
    */
   public static void verifyAsync(Consumer<Void> verificationFunction) {
     await()
