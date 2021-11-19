@@ -1721,7 +1721,7 @@ public class UserControllerIT {
   public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenConsultantIsNotFoundInDb()
       throws Exception {
 
-    when(accountProvider.retrieveValidatedConsultant())
+    when(accountProvider.retrieveValidatedConsultantById(anyString()))
         .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION)
@@ -1729,7 +1729,7 @@ public class UserControllerIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -1748,26 +1748,6 @@ public class UserControllerIT {
 
     verify(logger, atLeastOnce())
         .error(anyString(), anyString(), anyString());
-  }
-
-  @Test
-  public void assignSession_Should_ReturnForbiddenAndLogError_WhenCallerDoesNotHaveTheRightToAssignSessions()
-      throws Exception {
-
-    when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
-    when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
-    when(authenticatedUser.getGrantedAuthorities())
-        .thenReturn(AUTHORITY_ASSIGN_ENQUIRY);
-
-    mvc.perform(put(PATH_PUT_ASSIGN_SESSION)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
-
-    verify(logger, atLeastOnce())
-        .warn(anyString(), anyString(), anyString());
   }
 
   @Test
