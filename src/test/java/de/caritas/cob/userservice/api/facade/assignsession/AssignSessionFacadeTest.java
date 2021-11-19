@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import static de.caritas.cob.userservice.testHelper.AsyncVerification.verifyAsync;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.FEEDBACKSESSION_WITH_CONSULTANT;
 import static java.util.Arrays.asList;
@@ -74,7 +75,7 @@ public class AssignSessionFacadeTest {
     assignSessionFacade.assignSession(FEEDBACKSESSION_WITH_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
     verify(logService, times(1)).logInternalServerError(anyString(), any());
-    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForEnquiryAssignment(
+    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(CONSULTANT_WITH_AGENCY)
                 && consultantSessionDTO.getSession().equals(FEEDBACKSESSION_WITH_CONSULTANT)));
@@ -109,12 +110,14 @@ public class AssignSessionFacadeTest {
 
     this.assignSessionFacade.assignSession(session, consultant);
 
-    verify(sessionToConsultantVerifier, times(0)).verifyPreconditionsForEnquiryAssignment(
-        any());
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId());
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId());
+    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
+        argThat(consultantSessionDTO ->
+            consultantSessionDTO.getConsultant().equals(consultant)
+                && consultantSessionDTO.getSession().equals(session)));
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
     verify(this.emailNotificationFacade, times(1))
         .sendAssignEnquiryEmailNotification(any(), any(), any());
   }
@@ -148,19 +151,22 @@ public class AssignSessionFacadeTest {
 
     this.assignSessionFacade.assignSession(session, consultant);
 
-    verify(sessionToConsultantVerifier, times(0)).verifyPreconditionsForEnquiryAssignment(any());
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId());
-    verify(this.rocketChatFacade, atLeastOnce())
-        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId", session.getGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId", session.getFeedbackGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId2", session.getGroupId());
-    verify(this.rocketChatFacade, never())
-        .removeUserFromGroup("teamConsultantRcId2", session.getFeedbackGroupId());
+    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
+        argThat(consultantSessionDTO ->
+            consultantSessionDTO.getConsultant().equals(consultant)
+                && consultantSessionDTO.getSession().equals(session)));
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
+        .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId", session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId", session.getFeedbackGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId2", session.getGroupId()));
+    verifyAsync(a -> verify(this.rocketChatFacade, never())
+        .removeUserFromGroup("teamConsultantRcId2", session.getFeedbackGroupId()));
     verify(this.emailNotificationFacade, times(1))
         .sendAssignEnquiryEmailNotification(any(), any(), any());
   }
