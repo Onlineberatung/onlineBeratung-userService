@@ -111,11 +111,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     verify(rocketChatFacade, times(1))
-        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
-            eq(enquirySessionWithoutConsultant.getGroupId()));
+        .addUserToRocketChatGroup(consultant.getRocketChatId(),
+            enquirySessionWithoutConsultant.getGroupId());
     verify(rocketChatFacade, times(1))
-        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
-            eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
+        .addUserToRocketChatGroup(consultant.getRocketChatId(),
+            enquirySessionWithoutConsultant.getFeedbackGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -150,11 +150,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     verify(rocketChatFacade, times(1))
-        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
-            eq(enquirySessionWithoutConsultant.getGroupId()));
+        .addUserToRocketChatGroup(consultant.getRocketChatId(),
+            enquirySessionWithoutConsultant.getGroupId());
     verify(rocketChatFacade, times(1))
-        .addUserToRocketChatGroup(eq(consultant.getRocketChatId()),
-            eq(enquirySessionWithoutConsultant.getFeedbackGroupId()));
+        .addUserToRocketChatGroup(consultant.getRocketChatId(),
+            enquirySessionWithoutConsultant.getFeedbackGroupId());
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -169,6 +169,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     Consultant consultant = easyRandom.nextObject(Consultant.class);
     consultant.setConsultantAgencies(null);
     consultant.setSessions(null);
+    consultant.setConsultantMobileTokens(null);
     consultant.setRocketChatId("RocketChatId");
     consultant.setDeleteDate(null);
     return this.consultantRepository.save(consultant);
@@ -178,6 +179,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     User user = easyRandom.nextObject(User.class);
     user.setSessions(null);
+    user.setUserMobileTokens(null);
     user.setUserAgencies(null);
     this.userRepository.save(user);
 
@@ -275,8 +277,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .consultingType(15)
         .id(2L);
 
-    when(agencyService.getAgencyWithoutCaching(eq(1731L))).thenReturn(emigrationAgency);
-    when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
+    when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
+    when(agencyService.getAgencyWithoutCaching(2L)).thenReturn(agencyDTO);
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
     when(consultingTypeManager.isConsultantBoundedToAgency(15)).thenReturn(true);
 
