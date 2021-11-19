@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ public class AssignSessionFacade {
   private final @NonNull SessionService sessionService;
   private final @NonNull RocketChatFacade rocketChatFacade;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
-  private final @NonNull RocketChatRollbackService rocketChatRollbackService;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
@@ -51,41 +49,28 @@ public class AssignSessionFacade {
         .build();
     sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
-    var initialConsultant = session.getConsultant();
-    SessionStatus initialStatus = session.getStatus();
-    List<GroupMemberDTO> initialMembers =
-        this.rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
-    List<GroupMemberDTO> initialFeedbackGroupMembers =
-        this.rocketChatFacade.retrieveRocketChatMembers(session.getFeedbackGroupId());
-
-    try {
-      updateSessionInDatabase(session, consultant, initialStatus);
-      updateRocketChatRooms(session, consultant);
-    } catch (Exception exception) {
-      initiateRollback(session, initialConsultant, initialStatus, initialMembers,
-          initialFeedbackGroupMembers);
-      throw exception;
-    }
+    updateSessionInDatabase(session, consultant);
+    addNewConsultantToRocketChatGroup(session, consultant);
+    supplyAsync(removeUnauthorizedMembersFromGroups(session, consultant));
     sendEmailForConsultantChange(session, consultant);
   }
 
-  private void updateRocketChatRooms(Session session, Consultant consultant) {
+  private void updateSessionInDatabase(Session session, Consultant consultant) {
+    var initialStatus = session.getStatus();
+    sessionService.updateConsultantAndStatusForSession(session, consultant,
+        initialStatus == SessionStatus.NEW ? SessionStatus.IN_PROGRESS : initialStatus);
+  }
+
+  private void addNewConsultantToRocketChatGroup(Session session, Consultant consultant) {
     addConsultantToRocketChatGroup(session.getGroupId(), consultant);
     if (session.hasFeedbackChat()) {
       addConsultantToRocketChatGroup(session.getFeedbackGroupId(), consultant);
     }
-    supplyAsync(removeUnauthorizedMembersFromGroups(session, consultant));
   }
 
   private void addConsultantToRocketChatGroup(String rcGroupId, Consultant consultant) {
     rocketChatFacade.addUserToRocketChatGroup(consultant.getRocketChatId(), rcGroupId);
     rocketChatFacade.removeSystemMessagesFromRocketChatGroup(rcGroupId);
-  }
-
-  private void updateSessionInDatabase(Session session, Consultant consultant,
-      SessionStatus initialStatus) {
-    sessionService.updateConsultantAndStatusForSession(session, consultant,
-        initialStatus == SessionStatus.NEW ? SessionStatus.IN_PROGRESS : initialStatus);
   }
 
   private Supplier<Void> removeUnauthorizedMembersFromGroups(Session session,
@@ -105,7 +90,7 @@ public class AssignSessionFacade {
 
   private void removeUnauthorizedMembersFromGroup(Session session, Consultant consultant,
       List<GroupMemberDTO> memberList) {
-    List<Consultant> consultantsToRemoveFromRocketChat =
+    var consultantsToRemoveFromRocketChat =
         unauthorizedMembersProvider.obtainConsultantsToRemove(session.getGroupId(), session,
             consultant, memberList);
 
@@ -118,7 +103,7 @@ public class AssignSessionFacade {
 
   private void removeUnauthorizedMembersFromFeedbackGroup(Session session,
       Consultant consultant, List<GroupMemberDTO> memberList) {
-    List<Consultant> consultantsToRemoveFromRocketChat =
+    var consultantsToRemoveFromRocketChat =
         unauthorizedMembersProvider.obtainConsultantsToRemove(session.getFeedbackGroupId(), session,
             consultant, memberList);
 
@@ -127,18 +112,6 @@ public class AssignSessionFacade {
             this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromFeedbackGroupOrRollbackOnFailure();
-  }
-
-  private void initiateRollback(Session session, Consultant initialConsultant,
-      SessionStatus initialStatus, List<GroupMemberDTO> initialMembers,
-      List<GroupMemberDTO> initialFeedbackGroupMembers) {
-    this.rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(session.getGroupId(),
-        initialMembers);
-    this.rocketChatRollbackService
-        .rollbackRemoveUsersFromRocketChatGroup(session.getFeedbackGroupId(),
-            initialFeedbackGroupMembers);
-    this.sessionService
-        .updateConsultantAndStatusForSession(session, initialConsultant, initialStatus);
   }
 
   private void sendEmailForConsultantChange(Session session, Consultant consultant) {

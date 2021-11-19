@@ -95,8 +95,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/conversations/anonymous/{sessionId:[0-9]+}/finish")
         .hasAnyAuthority(CONSULTANT_DEFAULT, ANONYMOUS_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/consultant/{consultantId:[0-9A-Za-z-]+}")
-        .hasAnyAuthority(ASSIGN_CONSULTANT_TO_ENQUIRY,
-            ASSIGN_CONSULTANT_TO_SESSION)
+        .hasAnyAuthority(ASSIGN_CONSULTANT_TO_ENQUIRY, ASSIGN_CONSULTANT_TO_SESSION)
         .antMatchers("/users/consultants").hasAuthority(VIEW_AGENCY_CONSULTANTS)
         .antMatchers("/users/consultants/import", "/users/askers/import",
             "/users/askersWithoutSession/import")
