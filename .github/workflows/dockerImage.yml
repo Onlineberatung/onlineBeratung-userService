@@ -36,7 +36,7 @@ jobs:
           name: targetfiles
           path: target/*.jar
   push_to_registry:
-    needs: [ test ]
+    needs: [test]
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +51,7 @@ jobs:
           echo "DOCKER_IMAGE=$(echo "${{ github.repository }}" | awk -F / '{print tolower($2)}')" >> $GITHUB_ENV
         shell: bash
       - name: Push to GitHub Packages
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v1.1.1
         with:
           username: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
           password: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
