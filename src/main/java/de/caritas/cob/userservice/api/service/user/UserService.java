@@ -2,11 +2,15 @@ package de.caritas.cob.userservice.api.service.user;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
+import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileTokenRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final @NonNull UserRepository userRepository;
+  private final @NonNull UserMobileTokenRepository userMobileTokenRepository;
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   /**
@@ -120,4 +125,34 @@ public class UserService {
       saveUser(user);
     }
   }
+
+  /**
+   * Adds a mobile client token of the current authenticated user in database.
+   *
+   * @param userId the id of the user
+   * @param mobileToken the new mobile device identifier token
+   */
+  public void addMobileAppToken(String userId, String mobileToken) {
+    if (isNotBlank(mobileToken)) {
+      this.getUser(userId)
+          .ifPresent(user -> this.addUserToken(user, mobileToken));
+    }
+  }
+
+  private void addUserToken(User user, String mobileToken) {
+    verifyTokenDoesNotAlreadyExist(mobileToken);
+    var userMobileToken = new UserMobileToken();
+    userMobileToken.setUser(user);
+    userMobileToken.setMobileAppToken(mobileToken);
+    this.userMobileTokenRepository.save(userMobileToken);
+    user.getUserMobileTokens().add(userMobileToken);
+    this.saveUser(user);
+  }
+
+  private void verifyTokenDoesNotAlreadyExist(String mobileToken) {
+    if (this.userMobileTokenRepository.findByMobileAppToken(mobileToken).isPresent()) {
+      throw new ConflictException("Mobile Token already exists");
+    }
+  }
+
 }

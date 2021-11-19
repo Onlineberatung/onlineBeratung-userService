@@ -9,10 +9,8 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.PushMessageService;
-import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
 import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
@@ -35,8 +33,7 @@ public class LiveEventNotificationService {
   private final @NonNull LiveControllerApi liveControllerApi;
   private final @NonNull UserIdsProviderFactory userIdsProviderFactory;
   private final @NonNull AuthenticatedUser authenticatedUser;
-  private final @NonNull PushMessageService pushMessageService;
-  private final @NonNull UserService userService;
+  private final @NonNull MobilePushNotificationService mobilePushNotificationService;
 
   private static final String RC_GROUP_ID_MESSAGE_TEMPLATE = "Rocket.Chat group ID: %s";
   private static final String NEW_ANONYMOUS_ENQUIRY_MESSAGE_TEMPLATE =
@@ -78,13 +75,13 @@ public class LiveEventNotificationService {
    */
   public void sendLiveDirectMessageEventToUsers(String rcGroupId) {
     if (isNotBlank(rcGroupId)) {
-      List<String> userIds = this.userIdsProviderFactory.byRocketChatGroup(rcGroupId)
+      var userIds = this.userIdsProviderFactory.byRocketChatGroup(rcGroupId)
           .collectUserIds(rcGroupId).stream()
           .filter(this::notInitiatingUser)
           .collect(Collectors.toList());
 
       triggerDirectMessageLiveEvent(userIds, rcGroupId);
-      triggerMobilePushNotification(userIds);
+      this.mobilePushNotificationService.triggerMobilePushNotification(userIds);
     }
   }
 
@@ -109,21 +106,6 @@ public class LiveEventNotificationService {
       String withMessage) {
     return String.format("Unable to trigger %s live event message %s",
         triggeredLiveEventMessage.getEventType(), withMessage);
-  }
-
-  private void triggerMobilePushNotification(List<String> userIds) {
-    userIds.forEach(this::sendPushNotificationForUser);
-  }
-
-  private void sendPushNotificationForUser(String userId) {
-    this.userService.getUser(userId)
-        .ifPresent(this::sendPushNotificationIfUserHasMobileToken);
-  }
-
-  private void sendPushNotificationIfUserHasMobileToken(User user) {
-    if (isNotBlank(user.getMobileToken())) {
-      this.pushMessageService.pushNewMessageEvent(user.getMobileToken());
-    }
   }
 
   /**

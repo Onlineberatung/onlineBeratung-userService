@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.mobilepushmessage;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -7,9 +7,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import java.io.InputStream;
+import de.caritas.cob.userservice.api.service.LogService;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Service;
  * Push service to send new message notifications via firebase to mobile devices.
  */
 @Service
-public class PushMessageService {
+public class FirebasePushMessageService {
 
   @Value("${firebase.configuration.push-notifications.enabled}")
   private boolean isEnabled;
@@ -41,10 +40,10 @@ public class PushMessageService {
   @EventListener(ApplicationReadyEvent.class)
   public void initializeFirebase() {
     if (this.isEnabled) {
-      Path path = FileUtils.getFile(firebaseConfiguration).toPath();
-      InputStream inputStream = Files.newInputStream(path);
+      var path = FileUtils.getFile(firebaseConfiguration).toPath();
+      var inputStream = Files.newInputStream(path);
 
-      FirebaseOptions options = FirebaseOptions.builder()
+      var options = FirebaseOptions.builder()
           .setCredentials(GoogleCredentials.fromStream(inputStream))
           .build();
 
@@ -64,9 +63,9 @@ public class PushMessageService {
     if (!this.isEnabled) {
       return;
     }
-    Message message = Message.builder()
+    var message = Message.builder()
         .setNotification(Notification.builder()
-            .setBody(pushNotificationMessage)
+            .setBody(this.pushNotificationMessage)
             .build())
         .setToken(registrationToken)
         .build();

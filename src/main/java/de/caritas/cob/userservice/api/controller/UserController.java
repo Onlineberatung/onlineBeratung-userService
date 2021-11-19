@@ -753,6 +753,18 @@ public class  UserController implements UsersApi {
   }
 
   /**
+   * Adds a mobile client token for the current authenticated user.
+   *
+   * @param mobileTokenDTO (required) the mobile device identifier {@link MobileTokenDTO}
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> addMobileAppToken(@Valid MobileTokenDTO mobileTokenDTO) {
+    this.userAccountProvider.addMobileAppToken(mobileTokenDTO.getToken());
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
    * Updates the session data for the given session.
    *
    * @param sessionId       (required) session ID

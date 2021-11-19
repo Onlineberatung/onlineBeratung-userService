@@ -18,17 +18,14 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.PushMessageService;
-import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
 import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
 import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource.FinishConversationPhaseEnum;
 import java.util.List;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,10 +60,7 @@ public class LiveEventNotificationServiceTest {
   private AuthenticatedUser authenticatedUser;
 
   @Mock
-  private UserService userService;
-
-  @Mock
-  private PushMessageService pushMessageService;
+  private MobilePushNotificationService mobilePushNotificationService;
 
   @Mock
   private Logger logger;
@@ -94,7 +88,7 @@ public class LiveEventNotificationServiceTest {
 
     verifyNoInteractions(userIdsProviderFactory);
     verifyNoInteractions(liveControllerApi);
-    verifyNoInteractions(pushMessageService);
+    verifyNoInteractions(mobilePushNotificationService);
   }
 
   @Test
@@ -148,54 +142,6 @@ public class LiveEventNotificationServiceTest {
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
     verify(this.liveControllerApi, times(1)).sendLiveEvent(MESSAGE.userIds(userIds));
-  }
-
-  @Test
-  public void sendLiveDirectMessageEventToUsers_Should_sendPushMessage_When_usersHaveMobileToken() {
-    User user = new User();
-    user.setMobileToken("mobileToken");
-    when(this.bySessionProvider.collectUserIds(any())).thenReturn(asList("1", "2"));
-    when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
-    when(this.userService.getUser(anyString())).thenReturn(Optional.of(user));
-
-    this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("valid");
-
-    verify(this.pushMessageService, times(2)).pushNewMessageEvent("mobileToken");
-  }
-
-  @Test
-  public void sendLiveDirectMessageEventToUsers_Should_sendPushMessageOnlyToUsersWithMobileToken() {
-    User user = new User();
-    user.setMobileToken("mobileToken");
-    when(this.bySessionProvider.collectUserIds(any())).thenReturn(asList("1", "2"));
-    when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
-    when(this.userService.getUser("1")).thenReturn(Optional.of(user));
-    when(this.userService.getUser("2")).thenReturn(Optional.of(new User()));
-
-    this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("valid");
-
-    verify(this.pushMessageService, times(1)).pushNewMessageEvent("mobileToken");
-  }
-
-  @Test
-  public void sendLiveDirectMessageEventToUsers_Should_notSendPushMessage_When_noUserHasMobileToken() {
-    when(this.bySessionProvider.collectUserIds(any())).thenReturn(asList("1", "2"));
-    when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
-    when(this.userService.getUser(any())).thenReturn(Optional.of(new User()));
-
-    this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("valid");
-
-    verifyNoInteractions(this.pushMessageService);
-  }
-
-  @Test
-  public void sendLiveDirectMessageEventToUsers_Should_notSendPushMessage_When_userIdsAreEmpty() {
-    when(this.bySessionProvider.collectUserIds(any())).thenReturn(emptyList());
-    when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
-
-    this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("valid");
-
-    verifyNoInteractions(this.pushMessageService);
   }
 
   @Test

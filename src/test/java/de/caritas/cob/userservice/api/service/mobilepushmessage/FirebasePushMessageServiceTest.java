@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.service.mobilepushmessage;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,6 +14,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
+import de.caritas.cob.userservice.api.service.LogService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,10 +24,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PushMessageServiceTest {
+public class FirebasePushMessageServiceTest {
 
   @InjectMocks
-  private PushMessageService pushMessageService;
+  private FirebasePushMessageService firebasePushMessageService;
 
   @Mock
   private FirebaseMessaging firebaseMessaging;
@@ -36,31 +37,31 @@ public class PushMessageServiceTest {
 
   @Before
   public void setup() {
-    setField(pushMessageService, "firebaseMessaging", firebaseMessaging);
+    setField(firebasePushMessageService, "firebaseMessaging", firebaseMessaging);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @Test
   public void initializeFirebase_Should_notInitialiteFirebaseMessaging_When_firebaseIsDisabled() {
-    setField(this.pushMessageService, "isEnabled", false);
+    setField(this.firebasePushMessageService, "isEnabled", false);
 
-    assertDoesNotThrow(() -> this.pushMessageService.initializeFirebase());
+    assertDoesNotThrow(() -> this.firebasePushMessageService.initializeFirebase());
 
-    Object firebaseMessaging = getField(pushMessageService, "firebaseMessaging");
+    Object firebaseMessaging = getField(firebasePushMessageService, "firebaseMessaging");
     verify(this.logger, times(1)).info("Firebase push notifications are disabled");
   }
 
   @Test(expected = Exception.class)
   public void initializeFirebase_Should_throwException_When_configurationCanNotBeLoaded() {
-    setField(this.pushMessageService, "isEnabled", true);
-    this.pushMessageService.initializeFirebase();
+    setField(this.firebasePushMessageService, "isEnabled", true);
+    this.firebasePushMessageService.initializeFirebase();
   }
 
   @Test
   public void pushMessage_Should_pushFirebaseMessage() throws FirebaseMessagingException {
-    setField(this.pushMessageService, "isEnabled", true);
+    setField(this.firebasePushMessageService, "isEnabled", true);
 
-    this.pushMessageService.pushNewMessageEvent("registrationToken");
+    this.firebasePushMessageService.pushNewMessageEvent("registrationToken");
 
     verify(this.firebaseMessaging, times(1)).send(any());
     verifyNoMoreInteractions(logger);
@@ -68,11 +69,11 @@ public class PushMessageServiceTest {
 
   @Test
   public void pushMessage_Should_logWarning_When_sendFails() throws FirebaseMessagingException {
-    setField(this.pushMessageService, "isEnabled", true);
+    setField(this.firebasePushMessageService, "isEnabled", true);
     FirebaseMessagingException exception = mock(FirebaseMessagingException.class);
     when(this.firebaseMessaging.send(any())).thenThrow(exception);
 
-    this.pushMessageService.pushNewMessageEvent("registrationToken");
+    this.firebasePushMessageService.pushNewMessageEvent("registrationToken");
 
     verify(logger, times(1)).warn(anyString());
   }
@@ -80,9 +81,9 @@ public class PushMessageServiceTest {
   @Test
   public void pushMessage_Should_notSendNotification_When_firebaseIsDisabled()
       throws FirebaseMessagingException {
-    setField(this.pushMessageService, "isEnabled", false);
+    setField(this.firebasePushMessageService, "isEnabled", false);
 
-    this.pushMessageService.pushNewMessageEvent("registrationToken");
+    this.firebasePushMessageService.pushNewMessageEvent("registrationToken");
 
     verifyNoMoreInteractions(this.firebaseMessaging);
   }

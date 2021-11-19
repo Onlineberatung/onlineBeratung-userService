@@ -37,10 +37,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class AuthenticatedUserHelperTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME,
-      FIRST_NAME, LAST_NAME, EMAIL, false, false, null, false, null, null, null, null, null, null);
+      FIRST_NAME, LAST_NAME, EMAIL, false, false, null, false, null, null, null, null, null, null,
+      null);
   private final Consultant TEAM_CONSULTANT = new Consultant(TEAM_CONSULTANT_ID, ROCKETCHAT_ID,
       USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null, null, null,
-      null);
+      null, null);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, SessionStatus.NEW, nowInUtc(),
       null, null, null, false, false, false, nowInUtc(), null);

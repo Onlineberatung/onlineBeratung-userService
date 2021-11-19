@@ -35,6 +35,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_USER_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -236,7 +237,7 @@ public class UserControllerIT {
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
-          "consultant@cob.de", false, true, "", false, null, null, null, null, null, null);
+          "consultant@cob.de", false, true, "", false, null, null, null, null, null, null, null);
   private final Optional<Consultant> OPTIONAL_CONSULTANT = Optional.of(TEAM_CONSULTANT);
   private final String DUMMY_ROLE_A = "dummyRoleA";
   private final String DUMMY_ROLE_B = "dummyRoleB";
@@ -2312,6 +2313,21 @@ public class UserControllerIT {
   public void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void addMobileAppToken_Should_returnOk_When_RequestIsOk() throws Exception {
+    mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO()))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void addMobileAppToken_Should_returnBadRequest_When_RequestIsEmpty() throws Exception {
+    mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
 }
