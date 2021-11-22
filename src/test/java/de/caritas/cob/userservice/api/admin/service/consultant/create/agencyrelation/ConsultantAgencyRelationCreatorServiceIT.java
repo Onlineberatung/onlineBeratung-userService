@@ -36,6 +36,7 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -346,20 +347,16 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   }
 
   @Test
-  public void createNewConsultantAgency_Should_throwBadRequestException_When_ConsultantHasNotRequestedRole() {
-
-    final Consultant consultant = createConsultantWithoutAgencyAndSession();
-    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
-
+  public void createConsultantAgencyRelations_Should_throwBadRequestException_When_ConsultantHasNotRequestedRole() {
+    final var consultant = createConsultantWithoutAgencyAndSession();
     try {
       consultantAgencyRelationCreatorService
-          .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
+          .createConsultantAgencyRelations(consultant.getId(), Set.of(), Set.of(), null);
       fail("There was no BadRequestException");
     } catch (Exception e) {
       assertThat(e, instanceOf(BadRequestException.class));
       assertThat(e.getMessage(),
-          is("Consultant with id " + consultant.getId() + " does not have the role "
-              + "[null]"));
+          is("Consultant with id " + consultant.getId() + " does not have the role set []"));
     }
   }
 
