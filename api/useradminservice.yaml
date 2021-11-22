@@ -710,7 +710,7 @@ components:
           type: integer
           format: int64
           example: 15
-        role:
+        roleSet:
           type: string
           minLength: 1
           maxLength: 255

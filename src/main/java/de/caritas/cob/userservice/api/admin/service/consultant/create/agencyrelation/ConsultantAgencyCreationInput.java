@@ -12,7 +12,7 @@ public interface ConsultantAgencyCreationInput {
 
   String getConsultantId();
 
-  Set<String> getRoles();
+  Set<String> getRoleSetNames();
 
   Long getAgencyId();
 

@@ -19,8 +19,8 @@ public class CreateConsultantAgencyDTOInputAdapter implements ConsultantAgencyCr
   }
 
   @Override
-  public Set<String> getRoles() {
-    return asSet(this.createConsultantAgencyDTO.getRole());
+  public Set<String> getRoleSetNames() {
+    return asSet(this.createConsultantAgencyDTO.getRoleSet());
   }
 
   @Override

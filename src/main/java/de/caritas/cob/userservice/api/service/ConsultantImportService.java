@@ -121,7 +121,7 @@ public class ConsultantImportService {
           ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
               consultingTypeManager.getConsultingTypeSettings(agency.getConsultingType());
 
-          if (!extendedConsultingTypeResponseDTO.getRoles().getConsultant().getRoleNames()
+          if (!extendedConsultingTypeResponseDTO.getRoles().getConsultant().getRoleSets()
               .containsKey(agencyRoleArray[1])) {
             throw new ImportException(String.format(
                 "Consultant %s could not be imported: invalid role set %s for agency id %s and consulting type %s",
@@ -130,7 +130,7 @@ public class ConsultantImportService {
           }
 
           for (Map.Entry<String, List<String>> roleSet : extendedConsultingTypeResponseDTO.getRoles()
-              .getConsultant().getRoleNames().entrySet()) {
+              .getConsultant().getRoleSets().entrySet()) {
             if (roleSet.getKey().equals(agencyRoleArray[1])) {
               roles.addAll(roleSet.getValue());
               break;

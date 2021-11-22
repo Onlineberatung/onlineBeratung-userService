@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -94,7 +95,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRole("valid-role");
+    createConsultantAgencyDTO.setRoleSet("valid-role-set");
 
     when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
 
@@ -106,6 +107,9 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
         SessionStatus.NEW);
+
+    final var consultingTypeResponse = easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
+    when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(consultingTypeResponse);
 
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
@@ -130,7 +134,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRole("valid-role");
+    createConsultantAgencyDTO.setRoleSet("valid-role-set");
 
     when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
@@ -163,6 +167,56 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     assertThat(this.consultantRepository.findByIdAndDeleteDateIsNull(consultant.getId()).get()
             .isTeamConsultant(),
         is(true));
+  }
+
+  @Test
+  public void createNewConsultantAgency_Should_updateKeycloakRoles_When_ParamsAreValid() {
+    var roleSetName = "peer";
+    var createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
+    createConsultantAgencyDTO.setAgencyId(15L);
+    createConsultantAgencyDTO.setRoleSet(roleSetName);
+
+    int consultingType = 0;
+    var agencyDTO = new AgencyDTO();
+    agencyDTO.setId(15L);
+    agencyDTO.setTeamAgency(false);
+    agencyDTO.setConsultingType(consultingType);
+    when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+
+    var consultant = createConsultantWithoutAgencyAndSession();
+    when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
+    var roles = givenRoleSets(consultingType, roleSetName);
+
+    consultantAgencyRelationCreatorService
+        .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
+
+    roles.forEach(role ->
+        verify(keycloakAdminClientService).updateRole(eq(consultant.getId()), eq(role))
+    );
+    var result = consultantAgencyRepository
+        .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
+
+    assertThat(result, notNullValue());
+    assertThat(result, hasSize(1));
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private List<String> givenRoleSets(int consultingTypeId, String roleSetName) {
+    var roleSets = new LinkedHashMap<String, List<String>>();
+    var roles = List.of("consultant", "u25-consultant");
+    roleSets.put(roleSetName, roles);
+
+    var roleConsultant = new de.caritas.cob.userservice.api.manager.consultingtype.roles.Consultant();
+    roleConsultant.setRoleSets(roleSets);
+
+    var rolesDTO = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RolesDTO();
+    rolesDTO.setConsultant(roleConsultant);
+
+    final var consultingTypeResponse = easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
+    consultingTypeResponse.setRoles(rolesDTO);
+    when(consultingTypeManager.getConsultingTypeSettings(consultingTypeId)).thenReturn(consultingTypeResponse);
+
+    return roles;
   }
 
   private Consultant createConsultantWithoutAgencyAndSession() {
@@ -221,7 +275,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .role("valid role");
+        .roleSet("valid role set");
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
     when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(null);
 
@@ -234,7 +288,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .role("valid role");
+        .roleSet("valid role set");
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
     when(agencyService.getAgencyWithoutCaching(any()))
         .thenThrow(new InternalServerErrorException(""));
@@ -259,7 +313,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     when(consultingTypeManager.isConsultantBoundedToAgency(1)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .role("valid role")
+        .roleSet("valid role set")
         .agencyId(2L);
 
     String consultantIdWIthEmigrationAgency = "0b3b1cc6-be98-4787-aa56-212259d811b9";
@@ -283,7 +337,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     when(consultingTypeManager.isConsultantBoundedToAgency(15)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .role("valid role")
+        .roleSet("valid role set")
         .agencyId(2L);
 
     this.consultantAgencyRelationCreatorService
