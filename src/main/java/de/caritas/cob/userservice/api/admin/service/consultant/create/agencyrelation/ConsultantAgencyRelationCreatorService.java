@@ -83,7 +83,7 @@ public class ConsultantAgencyRelationCreatorService {
       this.verifyAllAssignedAgenciesHaveSameConsultingType(agency.getConsultingType(), consultant);
     }
 
-    setNecessaryRolesForConsultingType(input, agency);
+    ensureConsultingTypeRoles(input, agency);
     addConsultantToSessions(consultant, agency, logMethod);
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
@@ -94,7 +94,7 @@ public class ConsultantAgencyRelationCreatorService {
     consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
   }
 
-  private void setNecessaryRolesForConsultingType(ConsultantAgencyCreationInput input, AgencyDTO agency) {
+  private void ensureConsultingTypeRoles(ConsultantAgencyCreationInput input, AgencyDTO agency) {
     var roles = consultingTypeManager
         .getConsultingTypeSettings(agency.getConsultingType())
         .getRoles();
@@ -102,7 +102,7 @@ public class ConsultantAgencyRelationCreatorService {
       var roleSets = roles.getConsultant().getRoleSets();
       for (var roleSetName : input.getRoleSetNames()) {
         roleSets.getOrDefault(roleSetName, Collections.emptyList()).forEach(
-            roleName -> keycloakAdminClientService.updateRole(input.getConsultantId(), roleName));
+            roleName -> keycloakAdminClientService.ensureRole(input.getConsultantId(), roleName));
       }
     }
   }

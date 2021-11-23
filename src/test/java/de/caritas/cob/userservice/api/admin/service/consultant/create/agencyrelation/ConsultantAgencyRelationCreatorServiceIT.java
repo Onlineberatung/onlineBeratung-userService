@@ -192,7 +192,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     roles.forEach(role ->
-        verify(keycloakAdminClientService).updateRole(eq(consultant.getId()), eq(role))
+        verify(keycloakAdminClientService).ensureRole(eq(consultant.getId()), eq(role))
     );
     var result = consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
