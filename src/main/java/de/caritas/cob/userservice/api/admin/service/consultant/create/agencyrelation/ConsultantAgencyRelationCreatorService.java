@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportReco
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -100,7 +101,7 @@ public class ConsultantAgencyRelationCreatorService {
     if (nonNull(roles) && nonNull(roles.getConsultant())) {
       var roleSets = roles.getConsultant().getRoleSets();
       for (var roleSetName : input.getRoleSetNames()) {
-        roleSets.getOrDefault(roleSetName, List.of()).forEach(
+        roleSets.getOrDefault(roleSetName, Collections.emptyList()).forEach(
             roleName -> keycloakAdminClientService.updateRole(input.getConsultantId(), roleName));
       }
     }
