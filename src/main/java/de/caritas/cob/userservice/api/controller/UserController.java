@@ -85,7 +85,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
-public class  UserController implements UsersApi {
+public class UserController implements UsersApi {
 
   static final int MIN_OFFSET = 0;
   static final int MIN_COUNT = 1;
@@ -264,7 +264,7 @@ public class  UserController implements UsersApi {
   /**
    * Updates the data for the current logged in consultant.
    *
-   * @param updateConsultantDTO  (required) the request {@link UpdateConsultantDTO}
+   * @param updateConsultantDTO (required) the request {@link UpdateConsultantDTO}
    * @return {@link ResponseEntity}
    */
   @Override
@@ -767,8 +767,8 @@ public class  UserController implements UsersApi {
   /**
    * Updates the session data for the given session.
    *
-   * @param sessionId       (required) session ID
-   * @param sessionDataDTO  (required) {@link SessionDataDTO}
+   * @param sessionId      (required) session ID
+   * @param sessionDataDTO (required) {@link SessionDataDTO}
    * @return {@link ResponseEntity}
    */
   @Override

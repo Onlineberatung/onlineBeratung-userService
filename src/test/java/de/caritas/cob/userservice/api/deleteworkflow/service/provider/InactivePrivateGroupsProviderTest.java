@@ -59,7 +59,8 @@ public class InactivePrivateGroupsProviderTest {
       throws RocketChatGetGroupsListAllException {
 
     when(chatRepository.findAll()).thenReturn(IterableUtils.emptyIterable());
-    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException())).when(this.rocketChatService)
+    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException())).when(
+            this.rocketChatService)
         .fetchAllInactivePrivateGroupsSinceGivenDate(any());
 
     var result = inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap();
@@ -93,7 +94,8 @@ public class InactivePrivateGroupsProviderTest {
       throws RocketChatGetGroupsListAllException {
 
     when(chatRepository.findAll()).thenReturn(IterableUtils.emptyIterable());
-    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException())).when(this.rocketChatService)
+    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException())).when(
+            this.rocketChatService)
         .fetchAllInactivePrivateGroupsSinceGivenDate(any());
 
     inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap();
@@ -123,8 +125,10 @@ public class InactivePrivateGroupsProviderTest {
     assertThat(result.containsKey(RC_USER_ID), is(true));
     assertThat(result.containsKey(RC_USER_ID_2), is(true));
     assertThat(result.get(RC_USER_ID).size(), is(2));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)), is(true));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)), is(true));
+    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)),
+        is(true));
+    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)),
+        is(true));
     assertThat(result.get(RC_USER_ID_2).size(), is(1));
     assertThat(result.get(RC_USER_ID_2).get(0).equals(groupDTO1User2.getId()), is(true));
   }
@@ -153,8 +157,10 @@ public class InactivePrivateGroupsProviderTest {
     assertThat(result.containsKey(RC_USER_ID), is(true));
     assertThat(result.containsKey(RC_USER_ID_2), is(false));
     assertThat(result.get(RC_USER_ID).size(), is(2));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)), is(true));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)), is(true));
+    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)),
+        is(true));
+    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)),
+        is(true));
   }
 
 }

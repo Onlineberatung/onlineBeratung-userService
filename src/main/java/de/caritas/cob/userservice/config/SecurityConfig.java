@@ -162,7 +162,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * the web application context. Therefore, when running the Keycloak Spring Security adapter in a
    * Spring Boot environment, it may be necessary to add FilterRegistrationBeans to your security
    * configuration to prevent the Keycloak filters from being registered twice."
-   *
+   * <p>
    * https://github.com/keycloak/keycloak-documentation/blob/master/securing_apps/topics/oidc/java/spring-security-adapter.adoc
    *
    * @param filter {@link KeycloakAuthenticationProcessingFilter}

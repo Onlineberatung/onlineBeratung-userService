@@ -266,7 +266,8 @@ public class ConsultantImportService {
     importRecord.setIdOld(
         (record.get(1).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(1)));
     importRecord.setUsername(StringUtils.trim(record.get(2)));
-    importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(2))));
+    importRecord.setUsernameEncoded(
+        new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(2))));
     importRecord.setFirstName(StringUtils.trim(record.get(3)));
     importRecord.setLastName(StringUtils.trim(record.get(4)));
     String email = StringUtils.deleteWhitespace(record.get(5));

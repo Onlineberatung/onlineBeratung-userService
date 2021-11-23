@@ -110,7 +110,8 @@ public class SessionToConsultantVerifier {
     }
   }
 
-  private void verifyIfConsultantHasConsultingTypeOfSession(ConsultantSessionDTO consultantSessionDTO) {
+  private void verifyIfConsultantHasConsultingTypeOfSession(
+      ConsultantSessionDTO consultantSessionDTO) {
     if (this.conditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
         consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
       var message = String.format(

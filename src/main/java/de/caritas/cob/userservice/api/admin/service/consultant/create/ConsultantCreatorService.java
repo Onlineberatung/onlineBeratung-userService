@@ -57,7 +57,7 @@ public class ConsultantCreatorService {
    * chat.
    *
    * @param importRecord the input record from csv used by the importer service
-   * @param roles the roles to add to given {@link Consultant}
+   * @param roles        the roles to add to given {@link Consultant}
    * @return the generated {@link Consultant}
    */
   public Consultant createNewConsultant(ImportRecord importRecord, Set<String> roles) {

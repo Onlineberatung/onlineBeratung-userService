@@ -6,7 +6,7 @@ public class KeycloakException extends RuntimeException {
 
   /**
    * Keycloak 409 Conflict exception
-   * 
+   *
    * @param message
    */
   public KeycloakException(String message) {

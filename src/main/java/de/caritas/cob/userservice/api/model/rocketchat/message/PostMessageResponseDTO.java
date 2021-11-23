@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * 
- * Response object for Rocket.Chat API Call for posting a message
- * https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage/
- * 
+ * Response object for Rocket.Chat API Call for posting a message https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage/
  */
 @Setter
 @Getter

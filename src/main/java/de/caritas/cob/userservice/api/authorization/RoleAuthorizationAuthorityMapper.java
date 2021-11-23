@@ -10,9 +10,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.stereotype.Component;
 
 /**
- * 
  * Own implementation of the Spring GrantedAuthoritiesMapper.
- *
  */
 @Component
 public class RoleAuthorizationAuthorityMapper implements GrantedAuthoritiesMapper {

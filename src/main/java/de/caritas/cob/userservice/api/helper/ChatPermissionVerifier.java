@@ -64,7 +64,7 @@ public class ChatPermissionVerifier {
   /**
    * Checks if chat agencies contain consultant agency.
    *
-   * @param chat the chat
+   * @param chat       the chat
    * @param consultant the {@link Consultant}
    * @return true if agency of consultant is contained
    */

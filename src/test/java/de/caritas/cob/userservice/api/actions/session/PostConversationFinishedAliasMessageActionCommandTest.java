@@ -61,7 +61,8 @@ class PostConversationFinishedAliasMessageActionCommandTest {
     var keycloakLoginResponseDTO = new KeycloakLoginResponseDTO();
     keycloakLoginResponseDTO.setAccessToken("token");
     when(this.keycloakService.loginUser(any(), any())).thenReturn(keycloakLoginResponseDTO);
-    when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(any())).thenReturn(new HttpHeaders());
+    when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(any())).thenReturn(
+        new HttpHeaders());
     var session = new EasyRandom().nextObject(Session.class);
 
     this.actionCommand.execute(session);

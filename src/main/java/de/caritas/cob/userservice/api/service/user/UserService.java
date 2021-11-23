@@ -116,7 +116,7 @@ public class UserService {
   /**
    * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
    *
-   * @param user {@link User}
+   * @param user     {@link User}
    * @param rcUserId Rocket.Chat user ID
    */
   public void updateRocketChatIdInDatabase(User user, String rcUserId) {
@@ -129,7 +129,7 @@ public class UserService {
   /**
    * Adds a mobile client token of the current authenticated user in database.
    *
-   * @param userId the id of the user
+   * @param userId      the id of the user
    * @param mobileToken the new mobile device identifier token
    */
   public void addMobileAppToken(String userId, String mobileToken) {

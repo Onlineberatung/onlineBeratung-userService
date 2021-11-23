@@ -50,7 +50,8 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   @Test
   public void deleteUserAccounts_Should_performAskerDeletion_When_usersAreFoundWithoutRunningSession() {
 
-    when(this.userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(Mockito.any()))
+    when(this.userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
+        Mockito.any()))
         .thenReturn(Collections.singletonList(USER));
 
     this.deleteUsersRegisteredOnlyService.deleteUserAccounts();
@@ -64,7 +65,8 @@ public class DeleteUsersRegisteredOnlyServiceTest {
 
     DeletionWorkflowError deletionWorkflowError = mock(DeletionWorkflowError.class);
     var workflowErrors = Collections.singletonList(deletionWorkflowError);
-    when(this.userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(Mockito.any()))
+    when(this.userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
+        Mockito.any()))
         .thenReturn(Collections.singletonList(USER));
     when(deleteUserAccountService.performUserDeletion(USER)).thenReturn(workflowErrors);
 
@@ -76,7 +78,8 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   @Test
   public void deleteUserAccounts_ShouldNot_SendWorkflowErrorMail_When_NoWorkflowsErrorsOccurs() {
 
-    when(this.userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(Mockito.any()))
+    when(this.userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
+        Mockito.any()))
         .thenReturn(Collections.singletonList(USER));
     when(deleteUserAccountService.performUserDeletion(USER)).thenReturn(Collections.emptyList());
 
@@ -101,7 +104,8 @@ public class DeleteUsersRegisteredOnlyServiceTest {
 
     this.deleteUsersRegisteredOnlyService.deleteUserAccounts();
 
-    verify(userRepository, times(1)).findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateToCheck);
+    verify(userRepository,
+        times(1)).findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateToCheck);
 
   }
 }

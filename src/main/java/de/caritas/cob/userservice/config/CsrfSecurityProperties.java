@@ -20,6 +20,7 @@ public class CsrfSecurityProperties {
   @Getter
   @Setter
   public static class ConfigProperty {
+
     private String property;
 
     @Override
@@ -33,6 +34,7 @@ public class CsrfSecurityProperties {
   @Setter
   @Getter
   public static class Whitelist {
+
     private ConfigProperty header;
     private String[] adminUris;
     private String[] configUris;

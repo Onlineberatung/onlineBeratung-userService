@@ -22,8 +22,8 @@ public class ConversationListResolver {
   /**
    * Resolves the requested conversation list by given {@link ConversationListType}.
    *
-   * @param offset the current offset
-   * @param count the requested limit
+   * @param offset           the current offset
+   * @param count            the requested limit
    * @param conversationType the given {@link ConversationListType}
    * @return the relevant {@link ConsultantSessionListResponseDTO}
    */

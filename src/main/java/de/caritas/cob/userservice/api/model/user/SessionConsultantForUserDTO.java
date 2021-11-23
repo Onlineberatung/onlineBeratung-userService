@@ -12,7 +12,6 @@ import lombok.Setter;
 /**
  * Consultant object for a session representing the assigned consultant (for the user session list
  * call)
- *
  */
 @AllArgsConstructor
 @NoArgsConstructor

@@ -8,10 +8,12 @@ import java.time.LocalTime;
  */
 public class DateCalculator {
 
-  private DateCalculator() {}
+  private DateCalculator() {
+  }
 
   /**
-   * Calculates a {@link LocalDateTime} from now minus given days in the past. The time is midnight.
+   * Calculates a {@link LocalDateTime} from now minus given days in the past. The time is
+   * midnight.
    *
    * @param daysInThePast days in the past
    * @return a {@link LocalDateTime} instance

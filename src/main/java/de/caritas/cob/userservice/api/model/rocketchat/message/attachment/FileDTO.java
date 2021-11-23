@@ -9,7 +9,6 @@ import lombok.Setter;
 
 /**
  * Rocket.Chat file model (sub of MessagesDTO.lastMessage)
- * 
  */
 
 @Getter

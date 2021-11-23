@@ -499,7 +499,8 @@ public class AskerImportService {
 
         // Create an initial monitoring data set for the session
         if (extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile() != null
-            && !extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile().equals(StringUtils.EMPTY)) {
+            && !extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile()
+            .equals(StringUtils.EMPTY)) {
           MonitoringDTO monitoringDTO =
               monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
           if (monitoringDTO != null) {
@@ -574,7 +575,8 @@ public class AskerImportService {
     importRecord.setIdOld(
         (record.get(0).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(0)));
     importRecord.setUsername(StringUtils.trim(record.get(1)));
-    importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
+    importRecord.setUsernameEncoded(
+        new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
     String email = StringUtils.deleteWhitespace(
         record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
     if (!email.equals(StringUtils.EMPTY)
@@ -603,7 +605,8 @@ public class AskerImportService {
     importRecord.setIdOld(
         (record.get(0).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(0)));
     importRecord.setUsername(StringUtils.trim(record.get(1)));
-    importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
+    importRecord.setUsernameEncoded(
+        new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
     String email = StringUtils.deleteWhitespace(
         record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
     if (!email.equals(StringUtils.EMPTY)

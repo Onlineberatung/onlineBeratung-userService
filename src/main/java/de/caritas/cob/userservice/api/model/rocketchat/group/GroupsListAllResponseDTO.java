@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- *
  * Response wrapper object for Rocket.Chat API Call for retrieving all groups.
  * https://developer.rocket.chat/api/rest-api/endpoints/groups/listall.
- *
  */
 @Setter
 @Getter

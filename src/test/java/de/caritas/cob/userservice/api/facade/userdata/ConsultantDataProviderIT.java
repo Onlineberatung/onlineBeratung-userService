@@ -49,7 +49,9 @@ public class ConsultantDataProviderIT {
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
-        .thenReturn(new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
+        .thenReturn(
+            new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(
+                false));
 
     var result = consultantDataProvider.retrieveData(consultant);
 
@@ -63,7 +65,9 @@ public class ConsultantDataProviderIT {
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
-        .thenReturn(new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
+        .thenReturn(
+            new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(
+                false));
 
     var result = consultantDataProvider.retrieveData(consultant);
 

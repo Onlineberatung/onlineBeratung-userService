@@ -7,7 +7,6 @@ import lombok.Setter;
 
 /**
  * Rocket.Chat subscriptions.get DTO
- *
  */
 
 @Setter

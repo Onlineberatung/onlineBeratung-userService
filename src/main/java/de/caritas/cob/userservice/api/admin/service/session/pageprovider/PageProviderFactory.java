@@ -8,8 +8,8 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import java.util.List;
 
 /**
- * Factory class to decide which {@link SessionPageProvider} should be used for special
- * {@link SessionFilter}.
+ * Factory class to decide which {@link SessionPageProvider} should be used for special {@link
+ * SessionFilter}.
  */
 public class PageProviderFactory {
 

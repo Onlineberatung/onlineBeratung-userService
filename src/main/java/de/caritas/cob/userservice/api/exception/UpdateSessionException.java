@@ -6,7 +6,7 @@ public class UpdateSessionException extends Exception {
 
   /**
    * Exception when update of session fails
-   * 
+   *
    * @param exception
    */
   public UpdateSessionException(Exception exception) {

@@ -141,7 +141,7 @@ public class ConsultantService {
    * Adds a mobile client token of the current authenticated consultant in database.
    *
    * @param consultantId the id of the consultant
-   * @param mobileToken the new mobile device identifier token
+   * @param mobileToken  the new mobile device identifier token
    */
   public void addMobileAppToken(String consultantId, String mobileToken) {
     if (isNotBlank(mobileToken)) {

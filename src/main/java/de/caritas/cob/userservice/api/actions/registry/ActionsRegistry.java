@@ -21,8 +21,8 @@ public class ActionsRegistry {
   private final @NonNull ApplicationContext applicationContext;
 
   /**
-   * Builds an {@link ActionContainer} for all available {@link ActionCommand} beans with type
-   * of the given class.
+   * Builds an {@link ActionContainer} for all available {@link ActionCommand} beans with type of
+   * the given class.
    *
    * @return the {@link ActionContainer}
    */

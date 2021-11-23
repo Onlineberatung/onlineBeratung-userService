@@ -56,7 +56,6 @@ public class UserServiceApplication {
    * Returns the @KeycloakAuthenticationToken which represents the token for a Keycloak
    * authentication.
    *
-   *
    * @return KeycloakAuthenticationToken
    */
   @Bean
@@ -128,7 +127,6 @@ public class UserServiceApplication {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     authenticatedUser.setGrantedAuthorities(authentication.getAuthorities().stream()
         .map(authority -> authority.toString()).collect(Collectors.toSet()));
-
 
     return authenticatedUser;
   }

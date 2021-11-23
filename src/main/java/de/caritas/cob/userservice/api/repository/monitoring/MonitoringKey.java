@@ -8,7 +8,6 @@ import lombok.Setter;
 
 /**
  * Composite key for {@link Monitoring}
- *
  */
 
 @SuppressWarnings("serial")
