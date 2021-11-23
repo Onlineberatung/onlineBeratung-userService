@@ -104,7 +104,7 @@ public class ConsultantAdminFacade {
    */
   public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    this.consultantAgencyRelationCreatorService
+    consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
   }
 

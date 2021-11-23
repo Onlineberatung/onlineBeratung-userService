@@ -12,11 +12,11 @@ public class ImportRecordAgencyCreationInputAdapterTest {
   @Test
   public void getter_Should_returnExpectedValues_When_membersAreSet() {
     ConsultantAgencyCreationInput input = new ImportRecordAgencyCreationInputAdapter(
-        "consultantId", 1L, asSet("role"));
+        "consultantId", 1L, asSet("role set"));
 
     assertThat(input.getConsultantId(), is("consultantId"));
     assertThat(input.getAgencyId(), is(1L));
-    assertThat(input.getRoles().iterator().next(), is("role"));
+    assertThat(input.getRoleSetNames().iterator().next(), is("role set"));
     assertThat(input.getCreateDate(), notNullValue());
     assertThat(input.getUpdateDate(), notNullValue());
   }

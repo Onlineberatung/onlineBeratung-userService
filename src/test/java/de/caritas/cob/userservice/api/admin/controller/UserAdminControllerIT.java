@@ -231,7 +231,7 @@ public class UserAdminControllerIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRole("role");
+    createConsultantAgencyDTO.setRoleSetKey("role set");
 
     this.mvc.perform(post(consultantAgencyPath)
         .contentType(MediaType.APPLICATION_JSON)
