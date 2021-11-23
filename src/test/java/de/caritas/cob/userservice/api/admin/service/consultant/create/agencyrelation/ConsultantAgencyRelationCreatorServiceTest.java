@@ -63,7 +63,7 @@ public class ConsultantAgencyRelationCreatorServiceTest {
     when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .roleSet("valid role set")
+        .roleSetKey("valid role set")
         .agencyId(2L);
 
     final var response = easyRandom.nextObject(

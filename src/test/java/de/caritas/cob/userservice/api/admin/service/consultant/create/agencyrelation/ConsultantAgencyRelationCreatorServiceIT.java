@@ -96,7 +96,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRoleSet("valid-role-set");
+    createConsultantAgencyDTO.setRoleSetKey("valid-role-set");
 
     when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
 
@@ -135,7 +135,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRoleSet("valid-role-set");
+    createConsultantAgencyDTO.setRoleSetKey("valid-role-set");
 
     when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
@@ -175,7 +175,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     var roleSetName = "peer";
     var createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
     createConsultantAgencyDTO.setAgencyId(15L);
-    createConsultantAgencyDTO.setRoleSet(roleSetName);
+    createConsultantAgencyDTO.setRoleSetKey(roleSetName);
 
     int consultingType = 0;
     var agencyDTO = new AgencyDTO();
@@ -276,7 +276,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .roleSet("valid role set");
+        .roleSetKey("valid role set");
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
     when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(null);
 
@@ -289,7 +289,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .roleSet("valid role set");
+        .roleSetKey("valid role set");
     when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
     when(agencyService.getAgencyWithoutCaching(any()))
         .thenThrow(new InternalServerErrorException(""));
@@ -314,7 +314,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     when(consultingTypeManager.isConsultantBoundedToAgency(1)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .roleSet("valid role set")
+        .roleSetKey("valid role set")
         .agencyId(2L);
 
     String consultantIdWIthEmigrationAgency = "0b3b1cc6-be98-4787-aa56-212259d811b9";
@@ -338,7 +338,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     when(consultingTypeManager.isConsultantBoundedToAgency(15)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .roleSet("valid role set")
+        .roleSetKey("valid role set")
         .agencyId(2L);
 
     this.consultantAgencyRelationCreatorService
