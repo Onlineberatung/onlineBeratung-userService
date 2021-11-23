@@ -7,7 +7,6 @@ import lombok.Setter;
 
 /**
  * DataDTO for {@link LogoutResponseDTO}
- *
  */
 @Getter
 @Setter

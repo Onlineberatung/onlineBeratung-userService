@@ -28,7 +28,8 @@ public class DeleteUsersRegisteredOnlySchedulerTest {
   @Test
   public void performDeletionWorkflow_Should_executeDeleteInactiveSessionsAndUsers_WhenFeatureIsEnabled() {
 
-    setField(deleteUsersRegisteredOnlyScheduler, FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_ENABLED,
+    setField(deleteUsersRegisteredOnlyScheduler,
+        FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_ENABLED,
         true);
     deleteUsersRegisteredOnlyScheduler.performDeletionWorkflow();
     verify(this.deleteUsersRegisteredOnlyService, times(1)).deleteUserAccounts();
@@ -37,7 +38,8 @@ public class DeleteUsersRegisteredOnlySchedulerTest {
   @Test
   public void performDeletionWorkflow_ShouldNot_executeDeleteInactiveSessionsAndUsers_WhenFeatureIsDisabled() {
 
-    setField(deleteUsersRegisteredOnlyScheduler, FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_ENABLED,
+    setField(deleteUsersRegisteredOnlyScheduler,
+        FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_ENABLED,
         false);
     deleteUsersRegisteredOnlyScheduler.performDeletionWorkflow();
     verify(this.deleteUsersRegisteredOnlyService, never()).deleteUserAccounts();

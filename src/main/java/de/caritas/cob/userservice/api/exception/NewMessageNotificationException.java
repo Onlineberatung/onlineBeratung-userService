@@ -6,7 +6,7 @@ public class NewMessageNotificationException extends RuntimeException {
 
   /**
    * New message notification exception
-   * 
+   *
    * @param message
    */
   public NewMessageNotificationException(String message) {
@@ -15,7 +15,7 @@ public class NewMessageNotificationException extends RuntimeException {
 
   /**
    * New message notification exception
-   * 
+   *
    * @param message
    * @param ex
    */

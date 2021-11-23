@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 
 /*
-* Custom http header with X-Reason header.
+ * Custom http header with X-Reason header.
  */
 @RequiredArgsConstructor
 public class CustomHttpHeader {

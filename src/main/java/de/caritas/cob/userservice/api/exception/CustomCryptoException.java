@@ -6,6 +6,7 @@ public class CustomCryptoException extends Exception {
 
   /**
    * Exception when something with the encryption goes wrong
+   *
    * @param ex
    */
   public CustomCryptoException(Exception ex) {

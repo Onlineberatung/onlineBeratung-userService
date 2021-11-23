@@ -6,7 +6,7 @@ public class EmailNotificationException extends RuntimeException {
 
   /**
    * E-mail notification exception
-   * 
+   *
    * @param message
    */
   public EmailNotificationException(String message) {
@@ -15,7 +15,7 @@ public class EmailNotificationException extends RuntimeException {
 
   /**
    * E-mail notification exception
-   * 
+   *
    * @param message
    * @param ex
    */
@@ -25,7 +25,7 @@ public class EmailNotificationException extends RuntimeException {
 
   /**
    * E-mail notification exception
-   * 
+   *
    * @param ex
    */
   public EmailNotificationException(Exception ex) {

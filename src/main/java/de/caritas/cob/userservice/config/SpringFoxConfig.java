@@ -32,7 +32,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * Provides the SpringFox (API documentation generation) configuration.
- *
  */
 @Configuration
 @EnableSwagger2
@@ -83,7 +82,7 @@ public class SpringFoxConfig {
 
   /**
    * Returns the API protocols (for documentation)
-   * 
+   *
    * @return
    */
   private Set<String> protocols() {
@@ -104,7 +103,7 @@ public class SpringFoxConfig {
 
   /**
    * Returns the API information (defined in application.properties)
-   * 
+   *
    * @return
    */
   private ApiInfo getApiInfo() {

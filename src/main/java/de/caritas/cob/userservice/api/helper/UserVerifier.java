@@ -19,8 +19,8 @@ public class UserVerifier {
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
   /**
-   * Checks if the username of provided {@link UserDTO} is still available for registration.
-   * If not, throws {@link HttpStatusExceptionReason#USERNAME_NOT_AVAILABLE}.
+   * Checks if the username of provided {@link UserDTO} is still available for registration. If not,
+   * throws {@link HttpStatusExceptionReason#USERNAME_NOT_AVAILABLE}.
    *
    * @param userDTO {@link UserDTO}
    */

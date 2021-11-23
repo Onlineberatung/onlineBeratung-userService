@@ -32,10 +32,10 @@ public class MinValueValidator implements HandlerMethodArgumentResolver {
   /**
    * Resolves the argument and throws a {@link BadRequestException} if validation fails.
    *
-   * @param methodParameter the parameter to be resolved
+   * @param methodParameter       the parameter to be resolved
    * @param modelAndViewContainer the current container
-   * @param nativeWebRequest the current request
-   * @param webDataBinderFactory the current data factory
+   * @param nativeWebRequest      the current request
+   * @param webDataBinderFactory  the current data factory
    * @return the {@link Integer} value of the parameter
    */
   @Override

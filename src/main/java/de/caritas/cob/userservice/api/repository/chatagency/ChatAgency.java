@@ -18,7 +18,6 @@ import lombok.Setter;
 
 /**
  * Represents the relation between a {@link Chat} and an agency
- *
  */
 @Entity
 @Table(name = "chat_agency")

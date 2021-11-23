@@ -76,7 +76,7 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
   private ConsultantAgencyLinks buildConsultantAgencyLinks() {
     return new ConsultantAgencyLinks()
         .self(buildHalLink(methodOn(UseradminApi.class).getConsultantAgencies(this.consultantId),
-                MethodEnum.GET));
+            MethodEnum.GET));
   }
 
   private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> nonNullConsultantAgencies() {

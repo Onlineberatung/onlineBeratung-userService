@@ -42,7 +42,8 @@ public class LogService {
   public static final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
   public static final String CREATE_SESSION_FACADE_ERROR = "CreateSessionFacade error: ";
 
-  private LogService() {}
+  private LogService() {
+  }
 
   /**
    * Logs a database error.
@@ -56,7 +57,7 @@ public class LogService {
   /**
    * Logs a database error.
    *
-   * @param message the message
+   * @param message   the message
    * @param exception the exception
    */
   public static void logDatabaseError(String message, Exception exception) {
@@ -85,7 +86,7 @@ public class LogService {
   /**
    * Logs a Keycloak error.
    *
-   * @param message the message
+   * @param message   the message
    * @param exception the exception
    */
   public static void logKeycloakError(String message, Exception exception) {
@@ -105,7 +106,7 @@ public class LogService {
   /**
    * Logs a Keycloak info.
    *
-   * @param message the message
+   * @param message   the message
    * @param exception the exception
    */
   public static void logKeycloakInfo(String message, Exception exception) {
@@ -179,7 +180,7 @@ public class LogService {
   /**
    * Log internal server error.
    *
-   * @param message the message
+   * @param message   the message
    * @param exception the exception
    */
   public static void logInternalServerError(String message, Exception exception) {
@@ -218,8 +219,8 @@ public class LogService {
   /**
    * Rocket.Chat error.
    *
-   * @param message the message
-   * @param error the error
+   * @param message   the message
+   * @param error     the error
    * @param errorType the errorType
    */
   public static void logRocketChatError(String message, String error, String errorType) {
@@ -231,7 +232,7 @@ public class LogService {
    * Rocket.Chat Error with exception.
    *
    * @param exception the exception
-   * @param message the message
+   * @param message   the message
    */
   public static void logRocketChatError(String message, Exception exception) {
     LOGGER.error("{}{}", ROCKET_CHAT_ERROR_TEXT, message);
@@ -269,7 +270,7 @@ public class LogService {
    * Exception from AgencyServiceHelper.
    *
    * @param exception the exception
-   * @param message the message
+   * @param message   the message
    */
   public static void logAgencyServiceHelperException(String message, Exception exception) {
     LOGGER.error("{}{}", AGENCY_ERROR_TEXT, message);
@@ -288,7 +289,7 @@ public class LogService {
   /**
    * Exception from MailServiceHelperException.
    *
-   * @param message the message
+   * @param message   the message
    * @param exception the exception
    */
   public static void logMailServiceException(String message, Exception exception) {
@@ -308,7 +309,7 @@ public class LogService {
   /**
    * Error from EmailNotificationFacade.
    *
-   * @param message the message
+   * @param message   the message
    * @param exception the caused {@link Exception}
    */
   public static void logEmailNotificationFacadeError(String message, Exception exception) {
@@ -328,7 +329,7 @@ public class LogService {
   /**
    * Warning from EmailNotificationFacade.
    *
-   * @param message the message
+   * @param message   the message
    * @param exception the caused {@link Exception}
    */
   public static void logEmailNotificationFacadeWarning(String message, Exception exception) {
@@ -423,7 +424,7 @@ public class LogService {
    * Error while decrypting a message.
    *
    * @param exception the exception
-   * @param message the message
+   * @param message   the message
    */
   public static void logDecryptionError(String message, Exception exception) {
     LOGGER.error("{}{}", DECRYPTION_ERROR, message);
@@ -434,7 +435,7 @@ public class LogService {
    * Error while truncating a message.
    *
    * @param exception the exception
-   * @param message the message
+   * @param message   the message
    */
   public static void logTruncationError(String message, Exception exception) {
     LOGGER.error("{}{}", TRUNCATION_ERROR, message);
@@ -463,7 +464,7 @@ public class LogService {
   /**
    * Error while registering a new consulting type session.
    *
-   * @param message Error message
+   * @param message   Error message
    * @param exception Exception
    */
   public static void logCreateSessionFacadeError(String message, Exception exception) {
@@ -493,7 +494,7 @@ public class LogService {
    * Logs an warning message.
    *
    * @param httpStatus http status
-   * @param exception The exception
+   * @param exception  The exception
    */
   public static void logWarn(HttpStatus httpStatus, Exception exception) {
     LOGGER.warn("UserService API: {}: {}", httpStatus.getReasonPhrase(), getStackTrace(exception));

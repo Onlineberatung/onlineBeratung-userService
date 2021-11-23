@@ -1030,8 +1030,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_U25 =
@@ -1042,8 +1042,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION =
@@ -1054,8 +1054,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE =
@@ -1066,8 +1066,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE =
@@ -1078,8 +1078,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE =
@@ -1090,8 +1090,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(true).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE =
@@ -1102,8 +1102,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(true)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL =
@@ -1114,8 +1114,8 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING).monitoring(
-          new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
+              new MonitoringDTO().initializeMonitoring(true)
+                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(REGISTRATION_WITH_MANDATORY_FIELDS_NULL);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_PREGNANCY =
@@ -1159,7 +1159,7 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(null).monitoring(
-          new MonitoringDTO().initializeMonitoring(IS_MONITORING).monitoringTemplateFile(null))
+              new MonitoringDTO().initializeMonitoring(IS_MONITORING).monitoringTemplateFile(null))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(null);
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING =
@@ -1170,7 +1170,7 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
           .sessionDataInitializing(null).monitoring(
-          new MonitoringDTO().initializeMonitoring(IS_NOT_MONITORING).monitoringTemplateFile(null))
+              new MonitoringDTO().initializeMonitoring(IS_NOT_MONITORING).monitoringTemplateFile(null))
           .initializeFeedbackChat(false).notifications(null)
           .languageFormal(false).roles(null).registration(null);
   public static List<Long> AGENCY_ID_LIST = Arrays.asList(1L, 2L);

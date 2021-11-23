@@ -12,7 +12,6 @@ import lombok.Setter;
 
 /**
  * Role settings of the {@link ExtendedConsultingTypeResponseDTO} for consultants
- *
  */
 
 @AllArgsConstructor

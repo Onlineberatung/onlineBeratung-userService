@@ -76,12 +76,12 @@ public class ConversationControllerAuthorizationIT {
   public void getAnonymousEnquiries_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "10")
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "10")
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.conversationListResolver, times(1))
@@ -92,10 +92,10 @@ public class ConversationControllerAuthorizationIT {
   public void getAnonymousEnquiries_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(conversationListResolver);
@@ -112,10 +112,10 @@ public class ConversationControllerAuthorizationIT {
   public void getAnonymousEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(conversationListResolver);
@@ -126,8 +126,8 @@ public class ConversationControllerAuthorizationIT {
   public void getAnonymousEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(conversationListResolver);
@@ -138,12 +138,12 @@ public class ConversationControllerAuthorizationIT {
   public void getRegisteredEnquiries_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "10")
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "10")
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.conversationListResolver, times(1))
@@ -154,10 +154,10 @@ public class ConversationControllerAuthorizationIT {
   public void getRegisteredEnquiries_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(conversationListResolver);
@@ -174,10 +174,10 @@ public class ConversationControllerAuthorizationIT {
   public void getRegisteredEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(conversationListResolver);
@@ -188,8 +188,8 @@ public class ConversationControllerAuthorizationIT {
   public void getRegisteredEnquiries_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(conversationListResolver);
@@ -200,8 +200,8 @@ public class ConversationControllerAuthorizationIT {
   public void acceptAnonymousEnquirys_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(this.acceptAnonymousEnquiryFacade, times(1)).acceptAnonymousEnquiry(1L);
@@ -211,8 +211,8 @@ public class ConversationControllerAuthorizationIT {
   public void acceptAnonymousEnquiry_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(this.acceptAnonymousEnquiryFacade);
@@ -229,8 +229,8 @@ public class ConversationControllerAuthorizationIT {
   public void acceptAnonymousEnquiry_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(this.acceptAnonymousEnquiryFacade);
@@ -249,11 +249,11 @@ public class ConversationControllerAuthorizationIT {
   @Test
   public void createAnonymousEnquiry_Should_ReturnCreated_When_CsrfTokensMatch() throws Exception {
     this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .content(new ObjectMapper().writeValueAsString(new EasyRandom().nextObject(
-            CreateAnonymousEnquiryDTO.class)))
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .content(new ObjectMapper().writeValueAsString(new EasyRandom().nextObject(
+                CreateAnonymousEnquiryDTO.class)))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
 
     verify(this.createAnonymousEnquiryFacade, times(1))
@@ -264,8 +264,8 @@ public class ConversationControllerAuthorizationIT {
   public void createAnonymousEnquiry_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(createAnonymousEnquiryFacade);
@@ -286,9 +286,9 @@ public class ConversationControllerAuthorizationIT {
   public void finishAnonymousConversation_Should_ReturnOk_When_CsrfTokensMatchAndAnonymousDefaultAuthority()
       throws Exception {
     this.mvc.perform(put(FINISH_ANONYMOUS_CONVERSATION_PATH)
-        .cookie(csrfCookie)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(csrfCookie)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.finishAnonymousConversationFacade, times(1))
@@ -299,8 +299,8 @@ public class ConversationControllerAuthorizationIT {
   public void finishAnonymousConversation_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     this.mvc.perform(put(FINISH_ANONYMOUS_CONVERSATION_PATH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(finishAnonymousConversationFacade);

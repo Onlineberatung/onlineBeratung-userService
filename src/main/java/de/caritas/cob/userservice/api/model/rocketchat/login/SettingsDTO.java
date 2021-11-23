@@ -6,11 +6,11 @@ import lombok.Setter;
 
 /**
  * SettingsDTO for LoginResponseDTO
- *
  */
 @Getter
 @Setter
 @NoArgsConstructor
 public class SettingsDTO {
+
   private PreferencesDTO preferences;
 }

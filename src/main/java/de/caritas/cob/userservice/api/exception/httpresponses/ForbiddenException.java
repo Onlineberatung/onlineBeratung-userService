@@ -19,7 +19,7 @@ public class ForbiddenException extends CustomHttpStatusException {
   /**
    * Forbidden exception.
    *
-   * @param message an additional message
+   * @param message       an additional message
    * @param loggingMethod the method being used to log this exception
    */
   public ForbiddenException(String message, Consumer<Exception> loggingMethod) {

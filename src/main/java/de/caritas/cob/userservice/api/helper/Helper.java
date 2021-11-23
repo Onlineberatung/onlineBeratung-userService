@@ -11,9 +11,7 @@ import org.jsoup.safety.Whitelist;
 import org.springframework.stereotype.Component;
 
 /**
- * 
  * Helper class
- *
  */
 @Component
 public class Helper {
@@ -23,7 +21,7 @@ public class Helper {
 
   /**
    * Convert a date to a unix timestamp
-   * 
+   *
    * @param date
    * @return the unix timestamp for the given date
    */
@@ -32,9 +30,8 @@ public class Helper {
   }
 
   /**
-   * 
    * Remove HTML code from a text (XSS-Protection)
-   * 
+   *
    * @param text
    * @return the given text without html
    */
@@ -54,7 +51,7 @@ public class Helper {
 
   /**
    * Url decoding for a given string
-   * 
+   *
    * @param stringToDecode
    * @return the decoded string or null on error
    */

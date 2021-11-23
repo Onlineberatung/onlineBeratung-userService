@@ -14,7 +14,8 @@ import springfox.documentation.swagger2.web.Swagger2Controller;
 @RequestMapping(value = "${springfox.docuPath}")
 public class CustomSwaggerUIPathController extends Swagger2Controller {
 
-  public CustomSwaggerUIPathController(Environment environment, DocumentationCache documentationCache,
+  public CustomSwaggerUIPathController(Environment environment,
+      DocumentationCache documentationCache,
       ServiceModelToSwagger2Mapper mapper, JsonSerializer jsonSerializer) {
     super(environment, documentationCache, mapper, jsonSerializer);
   }

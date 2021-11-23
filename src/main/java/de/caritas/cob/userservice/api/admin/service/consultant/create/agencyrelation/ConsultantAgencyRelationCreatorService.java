@@ -70,7 +70,8 @@ public class ConsultantAgencyRelationCreatorService {
    */
   public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    var adapter = new CreateConsultantAgencyDTOInputAdapter(consultantId, createConsultantAgencyDTO);
+    var adapter = new CreateConsultantAgencyDTOInputAdapter(consultantId,
+        createConsultantAgencyDTO);
     createNewConsultantAgency(adapter, LogService::logInfo);
   }
 
@@ -150,7 +151,8 @@ public class ConsultantAgencyRelationCreatorService {
       Consumer<String> logMethod) {
     List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod, consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
+            consultingTypeManager)
         .onSessions(relevantSessions)
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();

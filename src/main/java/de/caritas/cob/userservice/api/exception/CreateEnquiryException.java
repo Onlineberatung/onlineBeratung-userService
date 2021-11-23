@@ -13,9 +13,9 @@ public class CreateEnquiryException extends Exception {
 
   /**
    * Exception when writing an enquiry message fails with errors
-   * 
-   * @param message Error Message
-   * @param exception Exception
+   *
+   * @param message              Error Message
+   * @param exception            Exception
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(String message, Exception exception,
@@ -26,8 +26,8 @@ public class CreateEnquiryException extends Exception {
 
   /**
    * Exception when writing an enquiry message fails with errors
-   * 
-   * @param message Error Message
+   *
+   * @param message              Error Message
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(String message,
@@ -38,8 +38,8 @@ public class CreateEnquiryException extends Exception {
 
   /**
    * Exception when writing an enquiry message fails with errors
-   * 
-   * @param exception Exception
+   *
+   * @param exception            Exception
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public CreateEnquiryException(Exception exception,

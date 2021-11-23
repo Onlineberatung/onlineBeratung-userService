@@ -66,7 +66,7 @@ public class DeleteUserAnonymousService {
       Set<Session> userSessions = session.getUser().getSessions();
       return CollectionUtils.isEmpty(userSessions)
           || (allSessionsAreDone(userSessions)
-            && allSessionsAreBeforeDeletionTime(deletionTime, userSessions));
+          && allSessionsAreBeforeDeletionTime(deletionTime, userSessions));
     };
   }
 

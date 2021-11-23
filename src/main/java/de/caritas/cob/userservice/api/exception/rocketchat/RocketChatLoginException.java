@@ -6,7 +6,7 @@ public class RocketChatLoginException extends Exception {
 
   /**
    * Exception when login for technical user in Rocket.Chat fails
-   * 
+   *
    * @param ex
    */
   public RocketChatLoginException(Exception ex) {

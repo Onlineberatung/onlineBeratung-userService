@@ -68,9 +68,9 @@ public class ConversationControllerIT {
   @Test
   public void getAnonymousEnquiries_Should_returnOk_When_requestParamsAreValid() throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "10"))
         .andExpect(status().isOk());
   }
 
@@ -78,16 +78,16 @@ public class ConversationControllerIT {
   public void getAnonymousEnquiries_Should_returnBadRequest_When_offsetIsMissing()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("count", "10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("count", "10"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void getAnonymousEnquiries_Should_returnBadRequest_When_countIsMissing() throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0"))
         .andExpect(status().isBadRequest());
   }
 
@@ -95,18 +95,18 @@ public class ConversationControllerIT {
   public void getAnonymousEnquiries_Should_returnBadRequest_When_offsetIsLowerThanZero()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "-10")
-        .param("count", "10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "-10")
+            .param("count", "10"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void getAnonymousEnquiries_Should_returnBadRequest_When_countIsZero() throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "0"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "0"))
         .andExpect(status().isBadRequest());
   }
 
@@ -114,18 +114,18 @@ public class ConversationControllerIT {
   public void getAnonymousEnquiries_Should_returnBadRequest_When_countIsLowerThanZero()
       throws Exception {
     this.mvc.perform(get(GET_ANONYMOUS_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "-10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "-10"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void getRegisteredEnquiries_Should_returnOk_When_requestParamsAreValid() throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "10"))
         .andExpect(status().isOk());
   }
 
@@ -133,8 +133,8 @@ public class ConversationControllerIT {
   public void getRegisteredEnquiries_Should_returnBadRequest_When_offsetIsMissing()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("count", "10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("count", "10"))
         .andExpect(status().isBadRequest());
   }
 
@@ -142,8 +142,8 @@ public class ConversationControllerIT {
   public void getRegisteredEnquiries_Should_returnBadRequest_When_countIsMissing()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0"))
         .andExpect(status().isBadRequest());
   }
 
@@ -151,18 +151,18 @@ public class ConversationControllerIT {
   public void getRegisteredEnquiries_Should_returnBadRequest_When_offsetIsLowerThanZero()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "-10")
-        .param("count", "10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "-10")
+            .param("count", "10"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void getRegisteredEnquiries_Should_returnBadRequest_When_countIsZero() throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "0"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "0"))
         .andExpect(status().isBadRequest());
   }
 
@@ -170,16 +170,16 @@ public class ConversationControllerIT {
   public void getRegisteredEnquiries_Should_returnBadRequest_When_countIsLowerThanZero()
       throws Exception {
     this.mvc.perform(get(GET_REGISTERED_ENQUIRIES_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-        .param("offset", "0")
-        .param("count", "-10"))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .param("offset", "0")
+            .param("count", "-10"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void acceptAnonymousEnquiry_Should_returnOk_When_requestParamsAreValid() throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH)
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
         .andExpect(status().isOk());
 
     verify(this.acceptAnonymousEnquiryFacade, times(1)).acceptAnonymousEnquiry(1L);
@@ -189,7 +189,7 @@ public class ConversationControllerIT {
   public void acceptAnonymousEnquiry_Should_returnBadRequest_When_sessionIdIsInvalid()
       throws Exception {
     this.mvc.perform(put(ACCEPT_ANONYMOUS_ENQUIRY_PATH.replace("1", "invalid"))
-        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(this.acceptAnonymousEnquiryFacade);
@@ -199,10 +199,10 @@ public class ConversationControllerIT {
   public void createAnonymousEnquiry_Should_ReturnCreated_WhenProvidedWithValidRequestBody()
       throws Exception {
     this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
-        .content(new ObjectMapper().writeValueAsString(new EasyRandom().nextObject(
-            CreateAnonymousEnquiryDTO.class)))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .content(new ObjectMapper().writeValueAsString(new EasyRandom().nextObject(
+                CreateAnonymousEnquiryDTO.class)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
   }
 
@@ -210,9 +210,9 @@ public class ConversationControllerIT {
   public void createAnonymousEnquiry_Should_ReturnBadRequest_WhenProvidedWithInvalidRequestBody()
       throws Exception {
     this.mvc.perform(post(POST_CREATE_ANONYMOUS_ENQUIRY_PATH)
-        .content(INVALID_USER_REQUEST_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .content(INVALID_USER_REQUEST_BODY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -220,8 +220,8 @@ public class ConversationControllerIT {
   public void finishAnonymousConversation_Should_ReturnBadRequest_WhenProvidedWithInvalidSessionId()
       throws Exception {
     this.mvc.perform(put(FINISH_ANONYMOUS_CONVERSATION_PATH.replace("1", "invalid"))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -229,8 +229,8 @@ public class ConversationControllerIT {
   public void finishAnonymousConversation_Should_ReturnOk_WhenProvidedWithValidSessionId()
       throws Exception {
     this.mvc.perform(put(FINISH_ANONYMOUS_CONVERSATION_PATH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 

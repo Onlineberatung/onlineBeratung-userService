@@ -8,7 +8,6 @@ import lombok.Setter;
 
 /**
  * {@link ExtendedConsultingTypeResponseDTO} for registration
- *
  */
 
 @AllArgsConstructor

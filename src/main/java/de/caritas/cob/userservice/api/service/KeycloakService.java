@@ -68,7 +68,8 @@ public class KeycloakService {
   }
 
   /**
-   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on success.
+   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on
+   * success.
    *
    * @param userName the username
    * @param password the password

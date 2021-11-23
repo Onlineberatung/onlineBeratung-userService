@@ -10,8 +10,8 @@ public class RocketChatAddSystemUserException extends CreateEnquiryException {
   /**
    * Exception when adding the system user to a Rocket.Chat group fails.
    *
-   * @param message Error Message
-   * @param exception Exception
+   * @param message              Error Message
+   * @param exception            Exception
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
   public RocketChatAddSystemUserException(String message, Exception exception,

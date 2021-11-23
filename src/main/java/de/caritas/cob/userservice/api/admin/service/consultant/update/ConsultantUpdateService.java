@@ -36,7 +36,8 @@ public class ConsultantUpdateService {
    * @param updateConsultantDTO the update input data
    * @return the updated persisted {@link Consultant}
    */
-  public Consultant updateConsultant(String consultantId, UpdateAdminConsultantDTO updateConsultantDTO) {
+  public Consultant updateConsultant(String consultantId,
+      UpdateAdminConsultantDTO updateConsultantDTO) {
     this.userAccountInputValidator
         .validateAbsence(new UpdateConsultantDTOAbsenceInputAdapter(updateConsultantDTO));
 

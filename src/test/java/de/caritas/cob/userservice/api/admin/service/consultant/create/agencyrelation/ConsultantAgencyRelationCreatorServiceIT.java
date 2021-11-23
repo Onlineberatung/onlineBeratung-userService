@@ -109,7 +109,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
         SessionStatus.NEW);
 
-    final var consultingTypeResponse = easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
+    final var consultingTypeResponse = easyRandom.nextObject(
+        ExtendedConsultingTypeResponseDTO.class);
     when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(consultingTypeResponse);
 
     this.consultantAgencyRelationCreatorService
@@ -213,9 +214,11 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     var rolesDTO = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RolesDTO();
     rolesDTO.setConsultant(roleConsultant);
 
-    final var consultingTypeResponse = easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
+    final var consultingTypeResponse = easyRandom.nextObject(
+        ExtendedConsultingTypeResponseDTO.class);
     consultingTypeResponse.setRoles(rolesDTO);
-    when(consultingTypeManager.getConsultingTypeSettings(consultingTypeId)).thenReturn(consultingTypeResponse);
+    when(consultingTypeManager.getConsultingTypeSettings(consultingTypeId)).thenReturn(
+        consultingTypeResponse);
 
     return roles;
   }

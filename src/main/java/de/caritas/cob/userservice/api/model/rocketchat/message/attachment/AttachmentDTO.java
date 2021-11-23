@@ -9,7 +9,6 @@ import lombok.Setter;
 
 /**
  * Rocket.Chat attachment model (sub of MessagesDTO)
- * 
  */
 
 @Getter

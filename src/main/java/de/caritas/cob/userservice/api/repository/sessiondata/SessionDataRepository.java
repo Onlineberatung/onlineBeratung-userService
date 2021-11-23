@@ -8,7 +8,7 @@ public interface SessionDataRepository extends CrudRepository<SessionData, Long>
 
   /**
    * Find the {@link SessionData} by {@link Session} ID
-   * 
+   *
    * @param sessionId the session ID
    * @return List of {@link SessionData}
    */
