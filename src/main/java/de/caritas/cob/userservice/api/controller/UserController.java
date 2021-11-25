@@ -8,7 +8,10 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
+import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
@@ -119,6 +122,7 @@ public class UserController implements UsersApi {
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
   private final @NotNull SessionArchiveService sessionArchiveService;
+  private final @NotNull DeleteSingleRoomAndSessionAction singleRoomAndSessionDeleter;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -208,6 +212,18 @@ public class UserController implements UsersApi {
         enquiryMessage.getMessage(), rocketChatCredentials);
 
     return new ResponseEntity<>(HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteSessionAndInactiveUser(@PathVariable Long sessionId) {
+    var session = sessionService.getSession(sessionId)
+        .orElseThrow(() -> new NotFoundException(
+            String.format("A session with an id %s does not exist.", sessionId)));
+
+    var workflow = new SessionDeletionWorkflowDTO(session, null);
+    singleRoomAndSessionDeleter.execute(workflow);
+
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
