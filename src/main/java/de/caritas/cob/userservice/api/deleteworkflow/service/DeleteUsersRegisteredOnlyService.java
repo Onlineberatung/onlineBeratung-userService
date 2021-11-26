@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,26 +40,28 @@ public class DeleteUsersRegisteredOnlyService {
   /**
    * Deletes all askers without running sessions.
    */
-  public void deleteUserAccounts() {
-
-    var workflowErrors = deleteAskersAndCollectPossibleErrors();
-
-    if (isNotEmpty(workflowErrors)) {
-      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
-    }
-
+  public void deleteUserAccountsTimeSensitive() {
+    var dateTimeToCheck = DateCalculator
+        .calculateDateInThePastAtMidnight(userRegisteredOnlyDeleteWorkflowCheckDays);
+    deleteUserAccountsBefore(dateTimeToCheck);
   }
 
-  private List<DeletionWorkflowError> deleteAskersAndCollectPossibleErrors() {
+  public void deleteUserAccountsTimeInsensitive() {
+    var startOfTomorrow = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(1);
+    deleteUserAccountsBefore(startOfTomorrow);
+  }
 
-    LocalDateTime dateTimeToCheck = DateCalculator
-        .calculateDateInThePastAtMidnight(userRegisteredOnlyDeleteWorkflowCheckDays);
-    return userRepository
+  private void deleteUserAccountsBefore(LocalDateTime dateTimeToCheck) {
+    var workflowErrors = userRepository
         .findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateTimeToCheck)
         .stream()
         .map(this::performUserDeletion)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
+
+    if (isNotEmpty(workflowErrors)) {
+      workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
+    }
   }
 
   private List<DeletionWorkflowError> performUserDeletion(User user) {
@@ -74,7 +77,7 @@ public class DeleteUsersRegisteredOnlyService {
               .timestamp(nowInUtc())
               .build());
     }
+
     return deleteUserAccountService.performUserDeletion(user);
   }
-
 }
