@@ -22,7 +22,8 @@ abstract class RocketChatGroupOperation {
 
   protected Consumer<String> logMethod = LogService::logInfo;
 
-  void addConsultantToGroupOfSession(Session session, Consultant consultant, ConsultingTypeManager consultingTypeManager) {
+  void addConsultantToGroupOfSession(Session session, Consultant consultant,
+      ConsultingTypeManager consultingTypeManager) {
     var operationConditionProvider =
         new RocketChatOperationConditionProvider(this.keycloakAdminClientService, session,
             consultant, consultingTypeManager);

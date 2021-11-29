@@ -8,7 +8,7 @@ public class MessageHelper {
 
   /**
    * Replaces the given username in the given message
-   * 
+   *
    * @param message
    * @param username
    * @return the message with the replaced placeholder for the username
@@ -21,7 +21,7 @@ public class MessageHelper {
 
   /**
    * Replaces all placeholders in a given message.
-   * 
+   *
    * @param message
    * @param placeholderMap
    * @return the message with the replaced placeholders

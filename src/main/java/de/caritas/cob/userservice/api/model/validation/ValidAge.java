@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 /**
  * Custom validation annotation for the age property of the registration {@link UserDTO}. The age is
  * optional by default but could be mandatory for specific consulting types (e.q. U25)
- *
  */
 
 @Documented

@@ -85,8 +85,8 @@ class MobilePushNotificationServiceTest {
   void sendLiveDirectMessageEventToUsers_Should_sendPushMessageToAllDevices_When_usersHaveMultipleMobileTokensIncludingU25MobileTOken() {
     var user = new EasyRandom().nextObject(User.class);
     var allUserMobileTokens = Stream.concat(Stream.of(user.getMobileToken()),
-        user.getUserMobileTokens().stream()
-            .map(UserMobileToken::getMobileAppToken))
+            user.getUserMobileTokens().stream()
+                .map(UserMobileToken::getMobileAppToken))
         .collect(Collectors.toList());
     when(this.userService.getUser(anyString())).thenReturn(Optional.of(user));
 
@@ -157,7 +157,8 @@ class MobilePushNotificationServiceTest {
 
     this.mobilePushNotificationService.triggerMobilePushNotification(List.of("consultant id"));
 
-    verify(this.firebasePushMessageService, times(allConsultantMobileTokens.size())).pushNewMessageEvent(
+    verify(this.firebasePushMessageService,
+        times(allConsultantMobileTokens.size())).pushNewMessageEvent(
         anyString());
   }
 

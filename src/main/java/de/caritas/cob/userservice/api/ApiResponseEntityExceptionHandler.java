@@ -42,7 +42,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * Custom BadRequest exception.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({BadRequestException.class})
   public ResponseEntity<Object> handleCustomBadRequest(final BadRequestException ex,
@@ -56,7 +56,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * Custom BadRequest exception with header reason.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({CustomValidationHttpStatusException.class})
   public ResponseEntity<Object> handleCustomBadRequest(final CustomValidationHttpStatusException ex,
@@ -71,7 +71,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * Constraint violations.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<Object> handleBadRequest(final RuntimeException ex,
@@ -85,7 +85,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * Incoming request body could not be deserialized.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @Override
   protected ResponseEntity<Object> handleHttpMessageNotReadable(
@@ -100,7 +100,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * On object fails validation.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -114,7 +114,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   /**
    * 401 - Unauthorized.
    *
-   * @param ex {@link UnauthorizedException}
+   * @param ex      {@link UnauthorizedException}
    * @param request {@link WebRequest}
    * @return {@link HttpStatus#UNAUTHORIZED} without body or detailed information
    */
@@ -130,7 +130,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 409 - Conflict.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({InvalidDataAccessApiUsageException.class})
   protected ResponseEntity<Object> handleConflict(final RuntimeException ex,
@@ -144,7 +144,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 409 - Conflict.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({ConflictException.class})
   protected ResponseEntity<Object> handleCustomConflict(final ConflictException ex,
@@ -158,7 +158,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 403 - Forbidden.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({ForbiddenException.class})
   public ResponseEntity<Object> handleForbidden(final ForbiddenException ex,
@@ -172,7 +172,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 404 - Not Found.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({NotFoundException.class})
   public ResponseEntity<Object> handleForbidden(final NotFoundException ex,
@@ -186,7 +186,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 500 - Internal Server Error.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class,
       IllegalStateException.class, KeycloakException.class, DataAccessException.class,
@@ -203,7 +203,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 500 - Custom Internal Server Error.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({InternalServerErrorException.class})
   public ResponseEntity<Object> handleInternal(final InternalServerErrorException ex,
@@ -218,7 +218,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 204 - No Content.
    *
    * @param request the invoking request
-   * @param ex the thrown exception
+   * @param ex      the thrown exception
    */
   @ExceptionHandler({NoContentException.class})
   public ResponseEntity<Object> handleInternal(final NoContentException ex,

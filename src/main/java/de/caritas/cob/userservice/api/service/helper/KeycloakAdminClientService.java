@@ -177,6 +177,12 @@ public class KeycloakAdminClientService {
     updateRole(userId, keycloakUserRole);
   }
 
+  public void ensureRole(final String userId, final String roleName) {
+    if (!userHasRole(userId, roleName)) {
+      updateRole(userId, roleName);
+    }
+  }
+
   /**
    * Assigns the given {@link UserRole} to the given user ID.
    *

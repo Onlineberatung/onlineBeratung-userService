@@ -56,7 +56,8 @@ public class AnonymousConversationCreatorService {
       session = sessionService.initializeSession(user, userDTO, false,
           RegistrationType.ANONYMOUS, SessionStatus.NEW);
       consultantAgencies = obtainConsultants(session.getConsultingTypeId());
-      String rcGroupId = createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(session, consultantAgencies,
+      String rcGroupId = createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(session,
+          consultantAgencies,
           credentials.getRocketChatCredentials());
       session.setGroupId(rcGroupId);
       sessionService.saveSession(session);

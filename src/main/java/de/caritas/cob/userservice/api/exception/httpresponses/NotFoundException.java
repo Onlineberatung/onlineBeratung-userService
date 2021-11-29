@@ -19,7 +19,7 @@ public class NotFoundException extends CustomHttpStatusException {
   /**
    * Not found exception.
    *
-   * @param message an additional message
+   * @param message       an additional message
    * @param loggingMethod the method being used to log this exception
    */
   public NotFoundException(String message, Consumer<Exception> loggingMethod) {

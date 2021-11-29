@@ -6,10 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * 
- * Body object for Rocket.Chat API Call for deleting an user
- * https://rocket.chat/docs/developer-guides/rest-api/users/delete/
- * 
+ * Body object for Rocket.Chat API Call for deleting an user https://rocket.chat/docs/developer-guides/rest-api/users/delete/
  */
 @Setter
 @Getter

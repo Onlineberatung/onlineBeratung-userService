@@ -21,7 +21,6 @@ import lombok.ToString;
 
 /**
  * Model for new consulting type registrations
- *
  */
 @AllArgsConstructor
 @NoArgsConstructor

@@ -11,8 +11,7 @@ import java.util.List;
 public interface EmailSupplier {
 
   /**
-   * Functionality to generate a list of {@link MailDTO} used in
-   * {@link EmailNotificationFacade}.
+   * Functionality to generate a list of {@link MailDTO} used in {@link EmailNotificationFacade}.
    *
    * @return the generated emails
    */

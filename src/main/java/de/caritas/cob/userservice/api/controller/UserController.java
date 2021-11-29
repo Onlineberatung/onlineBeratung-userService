@@ -8,7 +8,10 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
+import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
@@ -85,7 +88,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
-public class  UserController implements UsersApi {
+public class UserController implements UsersApi {
 
   static final int MIN_OFFSET = 0;
   static final int MIN_COUNT = 1;
@@ -119,6 +122,7 @@ public class  UserController implements UsersApi {
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
   private final @NotNull SessionArchiveService sessionArchiveService;
+  private final @NotNull DeleteSingleRoomAndSessionAction singleRoomAndSessionDeleter;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -210,6 +214,18 @@ public class  UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
+  @Override
+  public ResponseEntity<Void> deleteSessionAndInactiveUser(@PathVariable Long sessionId) {
+    var session = sessionService.getSession(sessionId)
+        .orElseThrow(() -> new NotFoundException(
+            String.format("A session with an id %s does not exist.", sessionId)));
+
+    var workflow = new SessionDeletionWorkflowDTO(session, null);
+    singleRoomAndSessionDeleter.execute(workflow);
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
   /**
    * Returns a list of sessions for the currently authenticated/logged in user.
    *
@@ -264,7 +280,7 @@ public class  UserController implements UsersApi {
   /**
    * Updates the data for the current logged in consultant.
    *
-   * @param updateConsultantDTO  (required) the request {@link UpdateConsultantDTO}
+   * @param updateConsultantDTO (required) the request {@link UpdateConsultantDTO}
    * @return {@link ResponseEntity}
    */
   @Override
@@ -767,8 +783,8 @@ public class  UserController implements UsersApi {
   /**
    * Updates the session data for the given session.
    *
-   * @param sessionId       (required) session ID
-   * @param sessionDataDTO  (required) {@link SessionDataDTO}
+   * @param sessionId      (required) session ID
+   * @param sessionDataDTO (required) {@link SessionDataDTO}
    * @return {@link ResponseEntity}
    */
   @Override

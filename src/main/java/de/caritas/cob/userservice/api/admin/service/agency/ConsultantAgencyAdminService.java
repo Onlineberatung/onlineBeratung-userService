@@ -170,8 +170,10 @@ public class ConsultantAgencyAdminService {
     var consultants = this.consultantAgencyRepository
         .findByAgencyIdAndDeleteDateIsNull(agencyId).stream()
         .map(ConsultantAgency::getConsultant)
-        .map(de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::getInstance)
-        .map(de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::buildResponseDTO)
+        .map(
+            de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::getInstance)
+        .map(
+            de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder::buildResponseDTO)
         .collect(Collectors.toList());
     return AgencyConsultantResponseDTOBuilder.getInstance(consultants)
         .withAgencyId(String.valueOf(agencyId))

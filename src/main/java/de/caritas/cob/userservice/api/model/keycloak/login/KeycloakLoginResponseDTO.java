@@ -8,13 +8,13 @@ import lombok.Setter;
 
 /**
  * Response body object for a Keycloak login call
- *
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class KeycloakLoginResponseDTO {
+
   @JsonProperty("access_token")
   private String accessToken;
 

@@ -69,7 +69,7 @@ public class DeleteInactiveSessionsAndUserService {
     Optional<User> user = userRepository
         .findByRcUserIdAndDeleteDateIsNull(userInactiveGroupEntry.getKey());
     user.ifPresentOrElse(u -> workflowErrors.addAll(
-        deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)),
+            deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)),
         () -> workflowErrors.add(DeletionWorkflowError.builder()
             .deletionSourceType(ASKER)
             .deletionTargetType(ALL)

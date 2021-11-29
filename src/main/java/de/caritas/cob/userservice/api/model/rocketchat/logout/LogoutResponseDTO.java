@@ -6,12 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Response body object for Rocket.Chat API Call logout
- * https://rocket.chat/docs/developer-guides/rest-api/authentication/logout/
- * 
+ * Response body object for Rocket.Chat API Call logout https://rocket.chat/docs/developer-guides/rest-api/authentication/logout/
+ * <p>
  * Please note: On error the LogoutResponseDTO.message property is set. On success the
  * LogoutResponseDTO.DataDTO.message property is set.
- *
  */
 @Getter
 @Setter

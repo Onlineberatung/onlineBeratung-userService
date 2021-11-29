@@ -7,7 +7,6 @@ import lombok.Setter;
 
 /**
  * Rocket.Chat group member DTO
- *
  */
 
 @Setter

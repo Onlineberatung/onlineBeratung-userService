@@ -33,9 +33,9 @@ public class ConsultantChatEnricher {
    * last message date - messages read
    *
    * @param consultantSessionResponseDTOs the session list to be enriched
-   * @param rcToken                      the Rocket.Chat authentiaction token of the current
-   *                                     consultant
-   * @param consultant                   the {@link Consultant}
+   * @param rcToken                       the Rocket.Chat authentiaction token of the current
+   *                                      consultant
+   * @param consultant                    the {@link Consultant}
    * @return the enriched {@link ConsultantSessionResponseDTO}s
    */
   public List<ConsultantSessionResponseDTO> updateRequiredConsultantChatValues(

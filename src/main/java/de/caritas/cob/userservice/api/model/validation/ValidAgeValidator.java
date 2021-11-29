@@ -12,8 +12,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Checks if the age in a {@link UserDTO} is valid (depending on value in
- * the consulting type).
+ * Checks if the age in a {@link UserDTO} is valid (depending on value in the consulting type).
  */
 @RequiredArgsConstructor
 public class ValidAgeValidator implements ConstraintValidator<ValidAge, UserDTO> {
@@ -21,7 +20,7 @@ public class ValidAgeValidator implements ConstraintValidator<ValidAge, UserDTO>
   private final @NonNull MandatoryFieldsProvider mandatoryFieldsProvider;
 
   /**
-   *  Checks if the age is valid in relation to the consulting type.
+   * Checks if the age is valid in relation to the consulting type.
    *
    * @param userDTO the {@link UserDTO} instance
    * @param context the {@link ConstraintValidatorContext}

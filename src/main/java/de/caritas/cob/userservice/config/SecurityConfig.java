@@ -41,7 +41,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
-  @SuppressWarnings("unused")
+  @SuppressWarnings({"unused", "FieldCanBeLocal"})
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
   private final CsrfSecurityProperties csrfSecurityProperties;
 
@@ -49,7 +49,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * Processes HTTP requests and checks for a valid spring security authentication for the
    * (Keycloak) principal (authorization header).
    */
-  public SecurityConfig(KeycloakClientRequestFactory keycloakClientRequestFactory,
+  public SecurityConfig(
+      @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+          KeycloakClientRequestFactory keycloakClientRequestFactory,
       CsrfSecurityProperties csrfSecurityProperties) {
     this.keycloakClientRequestFactory = keycloakClientRequestFactory;
     this.csrfSecurityProperties = csrfSecurityProperties;
@@ -117,9 +119,11 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(UPDATE_CHAT)
         .antMatchers("/useradmin", "/useradmin/**")
         .hasAuthority(USER_ADMIN)
-        .antMatchers("/users/consultants/sessions/{sessionId:[0-9]+}")
-        .hasAuthority(CONSULTANT_DEFAULT)
-        .antMatchers("/users/sessions/{sessionId:[0-9]+}/archive")
+        .antMatchers(
+            "/users/consultants/sessions/{sessionId:[0-9]+}",
+            "/users/sessions/{sessionId:[0-9]+}/archive",
+            "/users/sessions/{sessionId:[0-9]+}"
+        )
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
@@ -162,7 +166,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * the web application context. Therefore, when running the Keycloak Spring Security adapter in a
    * Spring Boot environment, it may be necessary to add FilterRegistrationBeans to your security
    * configuration to prevent the Keycloak filters from being registered twice."
-   *
+   * <p>
    * https://github.com/keycloak/keycloak-documentation/blob/master/securing_apps/topics/oidc/java/spring-security-adapter.adoc
    *
    * @param filter {@link KeycloakAuthenticationProcessingFilter}

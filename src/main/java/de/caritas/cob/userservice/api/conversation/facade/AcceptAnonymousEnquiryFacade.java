@@ -22,8 +22,8 @@ public class AcceptAnonymousEnquiryFacade {
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
 
   /**
-   * Accepts the anonymous enquiry with the given session id and assigns the session to the
-   * current authenticated consultant.
+   * Accepts the anonymous enquiry with the given session id and assigns the session to the current
+   * authenticated consultant.
    *
    * @param sessionId the id of the anonymous session
    */

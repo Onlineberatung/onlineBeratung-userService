@@ -13,7 +13,7 @@ public class RocketChatRoomNameGenerator {
   /**
    * Generates a unique name for the private Rocket.Chat group consisting of the session id and the
    * current time stamp.
-   * 
+   *
    * @param session the session
    * @return the group name
    */
@@ -24,7 +24,7 @@ public class RocketChatRoomNameGenerator {
   /**
    * Generates a unique name for the private Rocket.Chat group consisting of the session id, the
    * feedback identifier and the current time stamp.
-   * 
+   *
    * @param session the session
    * @return the group name
    */
@@ -35,7 +35,7 @@ public class RocketChatRoomNameGenerator {
   /**
    * Generates a unique name for the private Rocket.Chat group consisting of the chat id and the
    * current time stamp.
-   * 
+   *
    * @param chat the chat
    * @return the group name
    */
@@ -45,9 +45,9 @@ public class RocketChatRoomNameGenerator {
 
   /**
    * Generates a unique name for a private Rocket.Chat group with sessionId and suffix
-   * 
+   *
    * @param sessionId the session id
-   * @param suffix the suffix
+   * @param suffix    the suffix
    * @return the group name
    */
   private String generateName(Long sessionId, String suffix) {

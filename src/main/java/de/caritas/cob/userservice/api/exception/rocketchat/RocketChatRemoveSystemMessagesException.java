@@ -6,7 +6,7 @@ public class RocketChatRemoveSystemMessagesException extends Exception {
 
   /**
    * Exception, when a Rocket.Chat API call to remove system messages of a group fails
-   * 
+   *
    * @param ex
    */
   public RocketChatRemoveSystemMessagesException(Exception ex) {

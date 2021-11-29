@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
+import de.caritas.cob.userservice.localdatetime.CustomLocalDateTime;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -8,17 +9,19 @@ import java.time.LocalTime;
  */
 public class DateCalculator {
 
-  private DateCalculator() {}
+  private DateCalculator() {
+  }
 
   /**
-   * Calculates a {@link LocalDateTime} from now minus given days in the past. The time is midnight.
+   * Calculates a {@link LocalDateTime} from now minus given days in the past. The time is
+   * midnight.
    *
    * @param daysInThePast days in the past
    * @return a {@link LocalDateTime} instance
    */
   public static LocalDateTime calculateDateInThePastAtMidnight(int daysInThePast) {
-    return LocalDateTime
-        .now()
+    return CustomLocalDateTime
+        .nowInUtc()
         .with(LocalTime.MIDNIGHT)
         .minusDays(daysInThePast);
   }

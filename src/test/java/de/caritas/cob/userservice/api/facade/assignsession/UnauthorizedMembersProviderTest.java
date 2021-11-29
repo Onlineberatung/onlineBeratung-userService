@@ -98,7 +98,7 @@ public class UnauthorizedMembersProviderTest {
         new GroupMemberDTO("techUserRcId", null, "name", null, null)
     );
     List.of(newConsultant, normalConsultant, teamConsultant, teamConsultant2, mainConsultant,
-        mainConsultant2, peerConsultant, peerConsultant2)
+            mainConsultant2, peerConsultant, peerConsultant2)
         .forEach(consultant ->
             when(consultantService.getConsultantByRcUserId(consultant.getRocketChatId()))
                 .thenReturn(Optional.of(consultant)));

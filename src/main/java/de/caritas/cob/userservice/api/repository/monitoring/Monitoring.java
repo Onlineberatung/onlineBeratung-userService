@@ -20,7 +20,6 @@ import lombok.Setter;
 
 /**
  * Represents the monitoring of an asker
- *
  */
 
 @Entity

@@ -22,7 +22,6 @@ import lombok.ToString;
 
 /**
  * Represents a user
- * 
  */
 @Entity
 @Table(name = "user")

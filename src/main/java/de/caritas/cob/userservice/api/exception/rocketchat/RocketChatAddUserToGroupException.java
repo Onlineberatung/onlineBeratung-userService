@@ -6,7 +6,7 @@ public class RocketChatAddUserToGroupException extends Exception {
 
   /**
    * Exception, when a Rocket.Chat API call to add a user to a group fails
-   * 
+   *
    * @param ex
    */
   public RocketChatAddUserToGroupException(Exception ex) {

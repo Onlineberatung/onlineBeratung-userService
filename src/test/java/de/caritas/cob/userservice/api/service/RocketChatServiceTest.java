@@ -1022,7 +1022,8 @@ public class RocketChatServiceTest {
 
     this.rocketChatService.setRoomReadOnly(RC_GROUP_ID);
 
-    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(
+        HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
         eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
     assertThat(captor.getValue().getBody().isReadOnly(), is(true));
@@ -1053,7 +1054,8 @@ public class RocketChatServiceTest {
 
     this.rocketChatService.setRoomWriteable(RC_GROUP_ID);
 
-    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+    ArgumentCaptor<HttpEntity<SetRoomReadOnlyBodyDTO>> captor = ArgumentCaptor.forClass(
+        HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
         eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
     assertThat(captor.getValue().getBody().isReadOnly(), is(false));

@@ -8,7 +8,6 @@ import lombok.Setter;
 
 /**
  * Rocket.Chat users.info DTO
- *
  */
 
 @Setter

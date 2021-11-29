@@ -35,8 +35,8 @@ public class InactivePrivateGroupsProvider {
   private int sessionInactiveDeleteWorkflowCheckDays;
 
   /**
-   *  Get a map with users and their related inactive Rocket.Chat group ids.
-   *  Group chats are excluded.
+   * Get a map with users and their related inactive Rocket.Chat group ids. Group chats are
+   * excluded.
    *
    * @return a map with users and related inactive Rocket.Chat groups ids
    */

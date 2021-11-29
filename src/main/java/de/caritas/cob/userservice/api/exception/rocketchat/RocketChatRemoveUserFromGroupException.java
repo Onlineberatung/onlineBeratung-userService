@@ -6,7 +6,7 @@ public class RocketChatRemoveUserFromGroupException extends Exception {
 
   /**
    * Exception, when a Rocket.Chat API call to remove a user to a group fails
-   * 
+   *
    * @param ex
    */
   public RocketChatRemoveUserFromGroupException(Exception ex) {
