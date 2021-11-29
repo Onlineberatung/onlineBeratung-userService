@@ -107,7 +107,7 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   @Test
   public void deleteUserAccountsTimeInsensitive_Should_CheckUsersIgnoringTheDateSetting() {
     setField(deleteUsersRegisteredOnlyService, "userRegisteredOnlyDeleteWorkflowCheckDays", 30);
-    var dateToCheck = LocalDateTime.now().with(LocalTime.MIDNIGHT).minusDays(-1);
+    var dateToCheck = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(1);
 
     deleteUsersRegisteredOnlyService.deleteUserAccountsTimeInsensitive();
 

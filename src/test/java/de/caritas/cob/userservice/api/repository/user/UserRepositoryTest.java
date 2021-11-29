@@ -46,7 +46,7 @@ public class UserRepositoryTest {
 
   @Test
   public void findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThanShouldReturnAllUsersOnTomorrowAsDate() {
-    var startOfTomorrow = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(100);
+    var startOfTomorrow = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(1);
 
     var users = userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
         startOfTomorrow);
