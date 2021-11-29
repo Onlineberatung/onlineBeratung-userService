@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.13.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.12.1...v2.13.0) (2021-11-29)
+
+
+### Features
+
+* add auth for consultants only ([c1f5f7d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c1f5f7dbbb61fbdce1fca9dc2102974851c095f4))
+* added authority for main consultant to assign consultant to peer session ([3063f6c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3063f6c04ff1a414aa06d94ddd0895ab4c1ffea6))
+* added buildx setup ([1eac21c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1eac21cd654f63f25552b4d4458f3c89c10dd3ad))
+* adjust role authority mapping ([e28fa99](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e28fa99aa3c6587fc90aadcf7fc9a53eef5fc2ab))
+* check user search by tomorrow date ([3800fe2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3800fe2af429841a034c50eb6506c400d0c2935c))
+* define endpoint for session deletion ([46981d4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/46981d4b84228fcb9a5c0328ec8608eff57ba007))
+* delete users without sessions ([14dab47](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/14dab47cd5fa6481844c7e37ddc492378e26b7f4))
+* detail client error by not found ([d37c7a3](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d37c7a301dc5ef39fec00d833a25fd50dd925d0c))
+* extend push notification service to provide multiple mobile tokens ([85e0da7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/85e0da732ab30456b70dc49fe87f9dd9ace29423))
+* implement delete-session endpoint ([ca564c6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ca564c6695346a691ee611174f6ee58291e9351e))
+* provide attribute is peer chat for all sessions ([92a0b3d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/92a0b3d53492613446accfa4793e3afca6b65440))
+* provide endpoint to add mobile tokens for user accounts ([2982ab1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2982ab18827a7b96a07ee72a5340ffe868a7a2ba))
+* provide keycloak name migration for u25 main consultant and u25 consultant ([9204e72](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/9204e72bde00b012151a9225d67f3af96a207578))
+* provide mac m1 architecture ([82c0031](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/82c0031a980b1a196d74e85e8153260035c9427f))
+* provide multiple platforms ([7b7390a](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/7b7390a42d6fdef2176ea9189eb547d02d0b4d81))
+* remove rocket chat group members asynchron ([51e0fc9](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/51e0fc909f0be3267a03f39ae244524b94e311bb))
+* remove rollback remove users function ([e574e26](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e574e266a41c4953f49aa382f2538ffef3a26c4b))
+* respond with session id and rc-group id upon enquiry message creation ([ba5b892](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ba5b892efe9238fc07c89cde71edb5d3a9541d83))
+* revert dockerfile ([e735749](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e7357496d463e38fdbe95c7085586e103712b4c9))
+* set Keycloak roles for consultants ([f824580](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f824580fb56b615a6d8d52a1b5ddf17a74cad720))
+
+
+### Bug Fixes
+
+* add alias message type of finished conversations to prevent deserialization exceptions ([6196ec3](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6196ec3a5ed52cffb010374c1683fb354f5870aa))
+* add all consultants of agency to feedback group ([da683cd](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/da683cd9a8183d8d1906bf9efc5e9dc330261a0f))
+* change testing consultant has not requested role ([5489735](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/548973510200f7eb1bec2132d41fb59574a41f30))
+* prevent rocketchat operation for empty group id ([f239796](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f239796886539946bf6e50589b7c8d59d3f77c2a))
+* prevent verification of already assigned consultants ([f97e6eb](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f97e6eb3e1cadbc8098fe49494983d96a5f834ec))
+* rename role set key ([0313e66](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/0313e66a6134accde883944b13aa04704c3eb9db))
+* set has archive attribute also when consultant is team consultant ([2bb3e7e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2bb3e7e52294fdf7643b0da884da70497319ffb1))
+* use collection utils for empty list ([7b5a741](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/7b5a7412dfabcbf869f3ff74045948020d3214eb))
+* use UTC in existing time calculation ([6e1662d](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/6e1662d4b40394614d7babe8c35acee2d5bf9b84))
+* use UTC in time calculation ([ebe0bcf](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ebe0bcf9d569b1f3c05087019f101a73581912be))
+
 ### [2.12.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.12.0...v2.12.1) (2021-10-27)
 
 ## [2.12.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.11.0...v2.12.0) (2021-10-27)
