@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -72,7 +73,8 @@ public class CreateEnquiryMessageFacade {
    * @param message               enquiry message
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
-  public void createEnquiryMessage(User user, Long sessionId, String message,
+  public CreateEnquiryMessageResponseDTO createEnquiryMessage(User user, Long sessionId,
+      String message,
       RocketChatCredentials rocketChatCredentials) {
 
     try {
@@ -112,6 +114,10 @@ public class CreateEnquiryMessageFacade {
       updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
 
       emailNotificationFacade.sendNewEnquiryEmailNotification(session);
+
+      return new CreateEnquiryMessageResponseDTO()
+          .rcGroupId(rcGroupId)
+          .sessionId(sessionId);
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), rocketChatCredentials);

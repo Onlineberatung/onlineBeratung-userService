@@ -110,6 +110,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -168,6 +169,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
@@ -858,20 +860,27 @@ public class UserControllerIT {
 
   @Test
   public void createEnquiryMessage_Should_ReturnCreated_WhenMessageWasCreated() throws Exception {
-
     when(authenticatedUser.getUserId())
         .thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser())
         .thenReturn(USER);
+    when(createEnquiryMessageFacade.createEnquiryMessage(
+        any(User.class), eq(SESSION_ID), eq(MESSAGE), any(RocketChatCredentials.class))
+    ).thenReturn(
+        new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID)
+    );
 
-    mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE)
-            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-            .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
-            .content(VALID_ENQUIRY_MESSAGE_BODY)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.CREATED.value()));
-
+    mvc.perform(
+            post(PATH_CREATE_ENQUIRY_MESSAGE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+                .content(VALID_ENQUIRY_MESSAGE_BODY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().is(HttpStatus.CREATED.value()))
+        .andExpect(jsonPath("$.sessionId", is(SESSION_ID.intValue())))
+        .andExpect(jsonPath("$.rcGroupId", is(RC_GROUP_ID)));
   }
 
   @Test
