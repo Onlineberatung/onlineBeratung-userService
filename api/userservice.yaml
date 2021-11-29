@@ -1193,7 +1193,7 @@ paths:
         200:
           description: OK - successful operation
         400:
-          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+          description: BAD REQUEST - invalid/incomplete request
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
