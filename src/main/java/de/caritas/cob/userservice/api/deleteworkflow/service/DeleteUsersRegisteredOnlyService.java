@@ -38,7 +38,7 @@ public class DeleteUsersRegisteredOnlyService {
   private int userRegisteredOnlyDeleteWorkflowCheckDays;
 
   /**
-   * Deletes all askers without running sessions.
+   * Deletes all askers with no running sessions before the set date.
    */
   public void deleteUserAccountsTimeSensitive() {
     var dateTimeToCheck = DateCalculator
@@ -46,6 +46,9 @@ public class DeleteUsersRegisteredOnlyService {
     deleteUserAccountsBefore(dateTimeToCheck);
   }
 
+  /**
+   * Deletes all askers with no running sessions no matter when created.
+   */
   public void deleteUserAccountsTimeInsensitive() {
     var startOfTomorrow = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(1);
     deleteUserAccountsBefore(startOfTomorrow);
