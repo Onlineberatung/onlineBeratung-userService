@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.helper.DateCalculator;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.localdatetime.CustomLocalDateTime;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
@@ -50,7 +51,7 @@ public class DeleteUsersRegisteredOnlyService {
    * Deletes all askers with no running sessions no matter when created.
    */
   public void deleteUserAccountsTimeInsensitive() {
-    var startOfTomorrow = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(1);
+    var startOfTomorrow = CustomLocalDateTime.nowInUtc().with(LocalTime.MIDNIGHT).plusDays(1);
     deleteUserAccountsBefore(startOfTomorrow);
   }
 
