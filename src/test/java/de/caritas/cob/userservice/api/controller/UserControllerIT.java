@@ -113,6 +113,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -137,6 +138,8 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
+import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -207,6 +210,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.hibernate.service.spi.ServiceException;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -342,6 +346,8 @@ public class UserControllerIT {
   private final String VALID_MONITORING_RESPONSE_JSON =
       "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
 
+  private final EasyRandom easyRandom = new EasyRandom();
+
   @Autowired
   private MockMvc mvc;
 
@@ -423,6 +429,8 @@ public class UserControllerIT {
   private SessionDataService sessionDataService;
   @MockBean
   private SessionArchiveService sessionArchiveService;
+  @MockBean
+  private DeleteSingleRoomAndSessionAction singleRoomAndSessionDeleter;
 
   @Mock
   private Logger logger;
@@ -2193,6 +2201,37 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(keycloakService);
+  }
+
+  @Test
+  public void deleteSessionAndInactiveUser_Should_ReturnNotFound_When_SessionIdIsUnknown()
+      throws Exception {
+    var sessionId = easyRandom.nextLong();
+    var path = "/users/sessions/" + sessionId;
+
+    mvc.perform(
+            delete(path)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+    verify(sessionService).getSession(sessionId);
+    verifyNoMoreInteractions(singleRoomAndSessionDeleter);
+  }
+
+  @Test
+  public void deleteSessionAndInactiveUser_Should_ReturnOK_When_SessionIdIsKnown()
+      throws Exception {
+    var sessionId = easyRandom.nextLong();
+    var optionalSession = Optional.of(easyRandom.nextObject(Session.class));
+    when(sessionService.getSession(eq(sessionId))).thenReturn(optionalSession);
+
+    mvc.perform(
+            delete("/users/sessions/" + sessionId)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(sessionService).getSession(sessionId);
+    verify(singleRoomAndSessionDeleter).execute(any(SessionDeletionWorkflowDTO.class));
   }
 
   @Test
