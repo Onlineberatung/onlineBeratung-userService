@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.testConfig.ApiControllerTestConfig;
 import de.caritas.cob.userservice.testConfig.ConsultingTypeManagerTestConfig;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
@@ -48,6 +50,10 @@ class DeleteUserAnonymousSchedulerIT {
 
   @Autowired
   private UserService userService;
+
+  @MockBean
+  @SuppressWarnings("unused")
+  private RocketChatCredentialsProvider rcCredentialHelper;
 
   @Value("${user.anonymous.deleteworkflow.periodMinutes}")
   private long deletionPeriodInMinutes;

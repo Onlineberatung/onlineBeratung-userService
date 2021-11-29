@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
-import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.repository.session.ConsultingType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.testConfig.ApiControllerTestConfig;
 import de.caritas.cob.userservice.testConfig.KeycloakTestConfig;
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
@@ -44,8 +45,9 @@ class DeactivateAnonymousUserSchedulerIT {
   @Autowired
   private UserService userService;
 
-  @Autowired
-  private ActionsRegistry actionsRegistry;
+  @MockBean
+  @SuppressWarnings("unused")
+  private RocketChatCredentialsProvider rcCredentialHelper;
 
   @Value("${user.anonymous.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodInMinutes;
