@@ -36,6 +36,7 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
+import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
@@ -195,10 +196,11 @@ public class UserController implements UsersApi {
    * @param rcToken        Rocket.Chat token (required)
    * @param rcUserId       Rocket.Chat user ID (required)
    * @param enquiryMessage Enquiry message (required)
-   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   * @return {@link ResponseEntity} containing {@link CreateEnquiryMessageResponseDTO}
    */
   @Override
-  public ResponseEntity<Void> createEnquiryMessage(@PathVariable Long sessionId,
+  public ResponseEntity<CreateEnquiryMessageResponseDTO> createEnquiryMessage(
+      @PathVariable Long sessionId,
       @RequestHeader String rcToken, @RequestHeader String rcUserId,
       @RequestBody EnquiryMessageDTO enquiryMessage) {
 
@@ -208,10 +210,11 @@ public class UserController implements UsersApi {
         .rocketChatUserId(rcUserId)
         .build();
 
-    createEnquiryMessageFacade.createEnquiryMessage(user, sessionId,
-        enquiryMessage.getMessage(), rocketChatCredentials);
+    var response = createEnquiryMessageFacade.createEnquiryMessage(
+        user, sessionId, enquiryMessage.getMessage(), rocketChatCredentials
+    );
 
-    return new ResponseEntity<>(HttpStatus.CREATED);
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
   @Override
