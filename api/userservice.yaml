@@ -74,7 +74,7 @@ paths:
     post:
       tags:
         - user-controller
-      summary: 'Create enquiry message for an user [Authorization: Role: user]'
+      summary: 'Create enquiry message for a user [Authorization: Role: user]'
       operationId: createEnquiryMessage
       parameters:
         - name: sessionId
@@ -102,7 +102,11 @@ paths:
         required: true
       responses:
         201:
-          description: CREATED - enquriy message was successfully created
+          description: CREATED - enquiry message has been created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateEnquiryMessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -1676,6 +1680,16 @@ components:
         message:
           type: string
           example: Lorem ipsum dolor sit amet, consetetur...
+
+    CreateEnquiryMessageResponseDTO:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+          format: int64
+        rcGroupId:
+          type: string
+          example: fR2Rz7dmWmHdXE8uz
 
     AbsenceDTO:
       type: object
