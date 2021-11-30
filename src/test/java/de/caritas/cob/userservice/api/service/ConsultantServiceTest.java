@@ -10,30 +10,40 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
+import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileTokenRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(SpringRunner.class)
-public class ConsultantServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ConsultantServiceTest {
 
   @InjectMocks
   private ConsultantService consultantService;
@@ -42,17 +52,20 @@ public class ConsultantServiceTest {
   private ConsultantRepository consultantRepository;
 
   @Mock
+  private ConsultantMobileTokenRepository consultantMobileTokenRepository;
+
+  @Mock
   private ValidatedUserAccountProvider validatedUserAccountProvider;
 
   @Mock
   private AuthenticatedUser authenticatedUser;
 
   @Test
-  public void getConsultant_Should_ReturnConsultantWhenFound() {
+  void getConsultant_Should_ReturnConsultantWhenFound() {
     when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID))
         .thenReturn(Optional.of(CONSULTANT));
 
-    Optional<Consultant> result = consultantService.getConsultant(CONSULTANT_ID);
+    var result = consultantService.getConsultant(CONSULTANT_ID);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -60,11 +73,11 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantByRcUserId_Should_ReturnConsultantWhenFound() {
+  void getConsultantByRcUserId_Should_ReturnConsultantWhenFound() {
     when(consultantRepository.findByRocketChatIdAndDeleteDateIsNull(RC_USER_ID))
         .thenReturn(Optional.of(CONSULTANT));
 
-    Optional<Consultant> result = consultantService.getConsultantByRcUserId(RC_USER_ID);
+    var result = consultantService.getConsultantByRcUserId(RC_USER_ID);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -72,11 +85,11 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantByEmail_Should_ReturnConsultant_WhenFound() {
+  void getConsultantByEmail_Should_ReturnConsultant_WhenFound() {
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL))
         .thenReturn(Optional.of(CONSULTANT));
 
-    Optional<Consultant> result = consultantService.getConsultantByEmail(EMAIL);
+    var result = consultantService.getConsultantByEmail(EMAIL);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -84,11 +97,11 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantByUsername_Should_ReturnConsultant_WhenFound() {
+  void getConsultantByUsername_Should_ReturnConsultant_WhenFound() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME))
         .thenReturn(Optional.of(CONSULTANT));
 
-    Optional<Consultant> result = consultantService.getConsultantByUsername(USERNAME);
+    var result = consultantService.getConsultantByUsername(USERNAME);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -96,26 +109,23 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void findConsultantByUsernameOrEmail_Should_ReturnEmptyOptional_WhenConsultantIsNotFound() {
+  void findConsultantByUsernameOrEmail_Should_ReturnEmptyOptional_WhenConsultantIsNotFound() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.empty());
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
-    Optional<Consultant> result =
-        consultantService.findConsultantByUsernameOrEmail(USERNAME_DECODED, EMAIL);
+    var result = consultantService.findConsultantByUsernameOrEmail(USERNAME_DECODED, EMAIL);
 
     assertFalse(result.isPresent());
 
   }
 
   @Test
-  public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByDecodedUsername() {
+  void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByDecodedUsername() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.of(CONSULTANT));
-    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
-    Optional<Consultant> result =
-        consultantService.findConsultantByUsernameOrEmail(USERNAME_ENCODED, EMAIL);
+    var result = consultantService.findConsultantByUsernameOrEmail(USERNAME_ENCODED, EMAIL);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -123,15 +133,13 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEncodedUsername() {
+  void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEncodedUsername() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.empty());
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
         .thenReturn(Optional.of(CONSULTANT));
-    when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL)).thenReturn(Optional.empty());
 
-    Optional<Consultant> result =
-        consultantService.findConsultantByUsernameOrEmail(USERNAME_DECODED, EMAIL);
+    var result = consultantService.findConsultantByUsernameOrEmail(USERNAME_DECODED, EMAIL);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -139,7 +147,7 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEmail() {
+  void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEmail() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.empty());
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
@@ -147,8 +155,7 @@ public class ConsultantServiceTest {
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL))
         .thenReturn(Optional.of(CONSULTANT));
 
-    Optional<Consultant> result =
-        consultantService.findConsultantByUsernameOrEmail(USERNAME_ENCODED, EMAIL);
+    var result = consultantService.findConsultantByUsernameOrEmail(USERNAME_ENCODED, EMAIL);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -156,25 +163,24 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void getConsultantViaAuthenticatedUser_Should_returnEmptyOptional_When_ConsultantIsNotFound() {
+  void getConsultantViaAuthenticatedUser_Should_returnEmptyOptional_When_ConsultantIsNotFound() {
     when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID))
         .thenReturn(Optional.empty());
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
 
-    Optional<Consultant> viaAuthenticatedUser = consultantService
+    var viaAuthenticatedUser = consultantService
         .getConsultantViaAuthenticatedUser(authenticatedUser);
 
     assertThat(viaAuthenticatedUser, is(Optional.empty()));
   }
 
   @Test
-  public void getConsultantViaAuthenticatedUser_Should_ReturnConsultantOptional() {
+  void getConsultantViaAuthenticatedUser_Should_ReturnConsultantOptional() {
     when(consultantRepository.findByIdAndDeleteDateIsNull(CONSULTANT_ID))
         .thenReturn(Optional.of(CONSULTANT));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
 
-    Optional<Consultant> result =
-        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
+    var result = consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
@@ -182,11 +188,11 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void findConsultantsByAgencyIds_Should_ReturnListOfConsultants() {
+  void findConsultantsByAgencyIds_Should_ReturnListOfConsultants() {
     when(consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(anyList()))
         .thenReturn(Collections.singletonList(CONSULTANT));
 
-    List<Consultant> result = consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);
+    var result = consultantService.findConsultantsByAgencyIds(CHAT_AGENCIES);
 
     assertNotNull(result);
     assertEquals(1, result.size());
@@ -195,14 +201,60 @@ public class ConsultantServiceTest {
   }
 
   @Test
-  public void findConsultantsByAgencyId_Should_ReturnListOfConsultants() {
+  void findConsultantsByAgencyId_Should_ReturnListOfConsultants() {
     when(consultantRepository.findByConsultantAgenciesAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(Collections.singletonList(CONSULTANT));
 
-    List<Consultant> result = consultantService.findConsultantsByAgencyId(AGENCY_ID);
+    var result = consultantService.findConsultantsByAgencyId(AGENCY_ID);
 
     assertNotNull(result);
     assertEquals(1, result.size());
     assertEquals(CONSULTANT, result.get(0));
   }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  void addMobileAppToken_Should_callNoOtherMethods_When_mobileTokenIsNullOrEmpty(String token) {
+    this.consultantService.addMobileAppToken(null, token);
+
+    verifyNoMoreInteractions(this.consultantMobileTokenRepository);
+    verifyNoMoreInteractions(this.consultantRepository);
+  }
+
+  @Test
+  void addMobileAppToken_Should_callNoOtherMethods_When_consultantDoesNotExist() {
+    when(this.consultantRepository.findByIdAndDeleteDateIsNull(any())).thenReturn(Optional.empty());
+
+    this.consultantService.addMobileAppToken("id", "token");
+
+    verifyNoMoreInteractions(this.consultantMobileTokenRepository);
+    verifyNoMoreInteractions(this.consultantRepository);
+  }
+
+  @Test
+  void addMobileAppToken_Should_addMobileTokenToConsultant_When_consultantExists() {
+    var consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.getConsultantMobileTokens().clear();
+    when(this.consultantRepository.findByIdAndDeleteDateIsNull(any()))
+        .thenReturn(Optional.of(consultant));
+
+    this.consultantService.addMobileAppToken("id", "token");
+
+    verify(this.consultantMobileTokenRepository, times(1)).findByMobileAppToken("token");
+    verify(this.consultantMobileTokenRepository, times(1)).save(any());
+    assertThat(consultant.getConsultantMobileTokens(), hasSize(1));
+  }
+
+  @Test
+  void addMobileAppToken_Should_throwConflictException_When_tokenAlreadyExists() {
+    var consultant = new EasyRandom().nextObject(Consultant.class);
+    when(this.consultantRepository.findByIdAndDeleteDateIsNull(any()))
+        .thenReturn(Optional.of(consultant));
+    when(this.consultantMobileTokenRepository.findByMobileAppToken(any()))
+        .thenReturn(Optional.of(new ConsultantMobileToken()));
+
+    assertThrows(ConflictException.class, () ->
+        this.consultantService.addMobileAppToken("id", "token"));
+  }
+
 }

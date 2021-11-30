@@ -6,12 +6,12 @@ import lombok.Setter;
 
 /**
  * PreferencesDTO for LoginResponseDTO
- *
  */
 @Getter
 @Setter
 @NoArgsConstructor
 public class PreferencesDTO {
+
   private String sidebarViewMode;
   private String sidebarGroupByType;
   private String sidebarHideAvatar;

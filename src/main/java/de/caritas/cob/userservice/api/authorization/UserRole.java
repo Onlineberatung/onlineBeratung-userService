@@ -13,8 +13,8 @@ public enum UserRole {
   USER("user"),
   CONSULTANT("consultant"),
   TECHNICAL("technical"),
-  U25_CONSULTANT("u25-consultant"),
-  U25_MAIN_CONSULTANT("u25-main-consultant"),
+  PEER_CONSULTANT("peer-consultant"),
+  MAIN_CONSULTANT("main-consultant"),
   GROUP_CHAT_CONSULTANT("group-chat-consultant"),
   USER_ADMIN("user-admin");
 

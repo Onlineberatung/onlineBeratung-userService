@@ -234,6 +234,9 @@ components:
             initializeFeedbackChat:
               type: boolean
               example: true
+            isPeerChat:
+              type: boolean
+              example: true
             roles:
               $ref: '#/components/schemas/RolesDTO'
             notifications:

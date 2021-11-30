@@ -28,8 +28,8 @@ public class ConsultantAdminFilterService {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page the current requested page
-   * @param perPage the amount of items in one page
+   * @param page             the current requested page
+   * @param perPage          the amount of items in one page
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(final Integer page,

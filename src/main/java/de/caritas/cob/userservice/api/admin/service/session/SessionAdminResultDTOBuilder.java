@@ -30,7 +30,8 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
   private Integer perPage;
   private Page<Session> resultPage;
 
-  private SessionAdminResultDTOBuilder() {}
+  private SessionAdminResultDTOBuilder() {
+  }
 
   /**
    * Creates an {@link SessionAdminResultDTOBuilder} instance.
@@ -139,13 +140,16 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
     return buildHalLinkForParams(this.page, this.perPage, this.sessionFilter);
   }
 
-  private HalLink buildHalLinkForParams(Integer page, Integer perPage, SessionFilter sessionFilter) {
-    return buildHalLink(methodOn(UserAdminController.class).getSessions(page, perPage, sessionFilter),
+  private HalLink buildHalLinkForParams(Integer page, Integer perPage,
+      SessionFilter sessionFilter) {
+    return buildHalLink(
+        methodOn(UserAdminController.class).getSessions(page, perPage, sessionFilter),
         MethodEnum.GET);
   }
 
   private HalLink buildNextLink() {
-    return hasNextPage() ? buildHalLinkForParams(this.page + 1, this.perPage, this.sessionFilter) : null;
+    return hasNextPage() ? buildHalLinkForParams(this.page + 1, this.perPage, this.sessionFilter)
+        : null;
   }
 
   private boolean hasNextPage() {
@@ -153,7 +157,8 @@ public class SessionAdminResultDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildPreviousLink() {
-    return hasPreviousPage() ? buildHalLinkForParams(this.page - 1, this.perPage, this.sessionFilter) :
+    return hasPreviousPage() ? buildHalLinkForParams(this.page - 1, this.perPage,
+        this.sessionFilter) :
         null;
   }
 

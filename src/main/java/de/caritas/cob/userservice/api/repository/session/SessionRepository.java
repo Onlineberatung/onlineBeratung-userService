@@ -218,9 +218,9 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   /**
    * Count session by consultant, status and registration type.
    *
-   * @param consultant the {@link Consultant} to search for
-   * @param sessionStatusList  a {@link List} of {@link SessionStatus} to search for
-   * @param registrationType the {@link RegistrationType} to search for
+   * @param consultant        the {@link Consultant} to search for
+   * @param sessionStatusList a {@link List} of {@link SessionStatus} to search for
+   * @param registrationType  the {@link RegistrationType} to search for
    * @return the count
    */
   Long countByConsultantAndStatusInAndRegistrationType(Consultant consultant,

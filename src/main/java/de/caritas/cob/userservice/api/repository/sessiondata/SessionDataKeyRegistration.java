@@ -1,9 +1,7 @@
 package de.caritas.cob.userservice.api.repository.sessiondata;
 
 /**
- * 
  * Keys for registration values in session data
- * 
  */
 public enum SessionDataKeyRegistration {
 
@@ -18,7 +16,7 @@ public enum SessionDataKeyRegistration {
 
   /**
    * Get the key
-   * 
+   *
    * @return
    */
   public String getValue() {
@@ -27,7 +25,7 @@ public enum SessionDataKeyRegistration {
 
   /**
    * Returns true, if the enum contains the specific key
-   * 
+   *
    * @param key
    * @return true, if the enum contains the specific key
    */

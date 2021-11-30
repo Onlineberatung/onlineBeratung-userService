@@ -17,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Contains some general spring boot application configurations
- *
  */
 @Configuration
 @ComponentScan(basePackages = {"de.caritas.cob.userservice"})
@@ -26,7 +25,7 @@ public class AppConfig {
 
   /**
    * Activate the messages.properties for validation messages
-   * 
+   *
    * @param messageSource
    * @return
    */

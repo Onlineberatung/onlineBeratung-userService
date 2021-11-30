@@ -32,7 +32,6 @@ import lombok.Setter;
 
 /**
  * User model
- *
  */
 @AllArgsConstructor
 @NoArgsConstructor

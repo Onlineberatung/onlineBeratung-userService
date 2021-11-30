@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ConsultantSessionDTO {
+
   private Consultant consultant;
   private Session session;
 }

@@ -30,7 +30,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESP
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -45,7 +46,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -73,7 +73,6 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -111,12 +110,10 @@ public class CreateEnquiryMessageFacadeTest {
       new GroupResponseDTO(FEEDBACK_GROUP_DTO_2, true, null, null);
   private final Session SESSION_WITHOUT_ENQUIRY_MESSAGE = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", AGENCY_ID, SessionStatus.INITIAL, null, null,
-      null, null,
-      false, false, null, null);
+      null, null, false, false, false, nowInUtc(), null);
   private final Session SESSION_WITH_ENQUIRY_MESSAGE = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", AGENCY_ID, SessionStatus.INITIAL, nowInUtc(),
-      null, null, null,
-      false, false, null, null);
+      null, null, null, false, false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Collections
@@ -192,9 +189,6 @@ public class CreateEnquiryMessageFacadeTest {
   private ConsultingTypeManager consultingTypeManager;
 
   @Mock
-  private KeycloakAdminClientService keycloakHelper;
-
-  @Mock
   private UserHelper userHelper;
 
   @Mock
@@ -233,7 +227,7 @@ public class CreateEnquiryMessageFacadeTest {
     consultant.setId(USER_ID);
     consultant.setRocketChatId(RC_USER_ID);
     this.user = new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null,
-        null, null, null);
+        null, null, null, null);
     this.extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     this.extendedConsultingTypeResponseDTO.setWelcomeMessage(new WelcomeMessageDTO());
     this.userInfoResponseDTO = new UserInfoResponseDTO();
@@ -274,7 +268,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn(session.getId().toString());
 
-    createEnquiryMessageFacade
+    final var response = createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, rocketChatCredentials);
 
     verify(userService, atLeastOnce()).updateRocketChatIdInDatabase(any(), anyString());
@@ -285,6 +279,8 @@ public class CreateEnquiryMessageFacadeTest {
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(sessionService, atLeastOnce()).saveSession(any());
     verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any());
+    assertEquals(SESSION_ID, response.getSessionId());
+    assertEquals(RC_GROUP_ID, response.getRcGroupId());
   }
 
   @Test(expected = ConflictException.class)
@@ -754,8 +750,6 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
-    when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     doThrow(RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION).when(rocketChatService)
         .removeSystemMessages(Mockito.eq(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId()),
             Mockito.any(), Mockito.any());
@@ -790,8 +784,6 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(CONSULTANT_AGENCY_LIST);
     when(rocketChatService.createPrivateGroupWithSystemUser(Mockito.any()))
         .thenReturn(Optional.of(FEEDBACK_GROUP_RESPONSE_DTO_2));
-    when(keycloakHelper.userHasAuthority(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getId(),
-        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
     Mockito.doThrow(RC_ADD_USER_TO_GROUP_EXCEPTION).when(rocketChatService)
         .addUserToGroup(CONSULTANT_AGENCY_LIST.get(0).getConsultant().getRocketChatId(),
             FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());

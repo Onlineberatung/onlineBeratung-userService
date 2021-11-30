@@ -8,10 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- *
  * Response wrapper object for Rocket.Chat API Call for retrieving all users.
  * https://developer.rocket.chat/api/rest-api/endpoints/users/list
- *
  */
 @Setter
 @Getter

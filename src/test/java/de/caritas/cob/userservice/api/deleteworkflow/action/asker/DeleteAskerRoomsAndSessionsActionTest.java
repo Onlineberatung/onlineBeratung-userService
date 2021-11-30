@@ -108,7 +108,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
+        new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -128,7 +129,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
+        new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -144,7 +146,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     doThrow(new RocketChatDeleteGroupException(new RuntimeException())).when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
+        new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -168,7 +171,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
+        new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -187,7 +191,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
+        new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -206,7 +211,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
+        new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();

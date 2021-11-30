@@ -8,7 +8,6 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 
 /**
  * Helper class to check permissions, authorization, etc. of the currently authenticated user.
- *
  */
 
 @Component

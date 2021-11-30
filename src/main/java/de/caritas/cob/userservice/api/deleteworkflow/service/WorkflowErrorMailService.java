@@ -27,8 +27,8 @@ public class WorkflowErrorMailService {
   private String applicationBaseUrl;
 
   /**
-   * Builds an {@link ErrorMailDTO} containing a text with all workflow errors and sends it to
-   * the {@link MailService}.
+   * Builds an {@link ErrorMailDTO} containing a text with all workflow errors and sends it to the
+   * {@link MailService}.
    *
    * @param workflowErrors the {@link DeletionWorkflowError} objects
    */

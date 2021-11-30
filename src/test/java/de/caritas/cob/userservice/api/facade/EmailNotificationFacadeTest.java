@@ -91,21 +91,25 @@ public class EmailNotificationFacadeTest {
 
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, "XXX", USERNAME_CONSULTANT_ENCODED, "consultant", "consultant",
-          "consultant@domain.de", false, false, null, false, 1L, null, null, null, null, null);
+          "consultant@domain.de", false, false, null, false, 1L, null, null, null, null, null,
+          null);
   private final Consultant CONSULTANT_WITHOUT_MAIL = new Consultant(CONSULTANT_ID, "XXX",
       "consultant", "consultant", "consultant", "", false, false, null, false, 1L, null, null, null,
-      null, null);
+      null, null, null);
   private final Consultant CONSULTANT2 =
       new Consultant(CONSULTANT_ID_2, "XXX", "consultant2", "consultant2", "consultant2",
-          "consultant2@domain.de", false, false, null, false, 1L, null, null, null, null, null);
+          "consultant2@domain.de", false, false, null, false, 1L, null, null, null, null, null,
+          null);
   private final Consultant CONSULTANT3 =
       new Consultant(CONSULTANT_ID_3, "XXX", "consultant3", "consultant3", "consultant3",
-          "consultant3@domain.de", false, false, null, false, 1L, null, null, null, null, null);
+          "consultant3@domain.de", false, false, null, false, 1L, null, null, null, null, null,
+          null);
   private final Consultant CONSULTANT_NO_EMAIL = new Consultant(CONSULTANT_ID, "XXX", "consultant",
-      "consultant", "consultant", "", false, false, null, false, 1L, null, null, null, null, null);
+      "consultant", "consultant", "", false, false, null, false, 1L, null, null, null, null, null,
+      null);
   private final Consultant ABSENT_CONSULTANT = new Consultant("XXX", "XXX", "consultant",
       "consultant", "consultant", "consultant@domain.de", true, false, null, false, 1L, null,
-      null, null, null, null);
+      null, null, null, null, null);
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =
@@ -116,24 +120,24 @@ public class EmailNotificationFacadeTest {
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
   private final Session SESSION =
       new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045",
-          AGENCY_ID, SessionStatus.INITIAL,
-          nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+          AGENCY_ID, SessionStatus.INITIAL, nowInUtc(), RC_GROUP_ID, null, null,
+          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(1L, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING,
-          null, null);
+          false, nowInUtc(), null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
-      nowInUtc(),
-      RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, null, null);
+      nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
+      null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
       CONSULTANT_NO_EMAIL, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID,
       SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-      IS_MONITORING, null, null);
+      IS_MONITORING, false, nowInUtc(), null);
   private final Session TEAM_SESSION =
       new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "12345", AGENCY_ID,
           SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, null, null);
+          IS_MONITORING, false, nowInUtc(), null);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)

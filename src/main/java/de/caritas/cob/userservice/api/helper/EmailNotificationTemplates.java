@@ -5,7 +5,8 @@ package de.caritas.cob.userservice.api.helper;
  */
 public class EmailNotificationTemplates {
 
-  private EmailNotificationTemplates() {}
+  private EmailNotificationTemplates() {
+  }
 
   public static final String TEMPLATE_NEW_ENQUIRY_NOTIFICATION = "enquiry-notification-consultant";
   public static final String TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT =

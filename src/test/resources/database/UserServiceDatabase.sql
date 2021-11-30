@@ -1,15 +1,15 @@
 CREATE TABLE USER
 (
     USER_ID         varchar(36)  NOT NULL,
-    ID_OLD          bigint(21) NULL,
+    ID_OLD          bigint(21)   NULL,
     USERNAME        varchar(255) NOT NULL,
     EMAIL           varchar(255) NOT NULL,
     RC_USER_ID      varchar(255) NULL,
-    LANGUAGE_FORMAL tinyint(4) NOT NULL DEFAULT 0,
+    LANGUAGE_FORMAL tinyint(4)   NOT NULL DEFAULT 0,
     CREATE_DATE     datetime,
     UPDATE_DATE     datetime,
     DELETE_DATE     datetime,
-    MOBILE_TOKEN    longtext DEFAULT NULL,
+    MOBILE_TOKEN    longtext              DEFAULT NULL,
     PRIMARY KEY (USER_ID)
 );
 CREATE SEQUENCE SEQUENCE_USER
@@ -22,12 +22,12 @@ CREATE TABLE CONSULTANT
     FIRST_NAME         varchar(255) NOT NULL,
     LAST_NAME          varchar(255) NOT NULL,
     EMAIL              varchar(255) NOT NULL,
-    IS_TEAM_CONSULTANT tinyint(4) NOT NULL DEFAULT 0,
-    IS_ABSENT          tinyint(4) NOT NULL DEFAULT 0,
-    ABSENCE_MESSAGE    longtext DEFAULT NULL,
-    LANGUAGE_FORMAL    tinyint(4) NOT NULL DEFAULT 1,
+    IS_TEAM_CONSULTANT tinyint(4)   NOT NULL DEFAULT 0,
+    IS_ABSENT          tinyint(4)   NOT NULL DEFAULT 0,
+    ABSENCE_MESSAGE    longtext              DEFAULT NULL,
+    LANGUAGE_FORMAL    tinyint(4)   NOT NULL DEFAULT 1,
     RC_USER_ID         varchar(255) NULL,
-    ID_OLD             bigint(21) NULL,
+    ID_OLD             bigint(21)   NULL,
     CREATE_DATE        datetime,
     UPDATE_DATE        datetime,
     DELETE_DATE        datetime,
@@ -38,9 +38,9 @@ CREATE SEQUENCE SEQUENCE_CONSULTANT
     INCREMENT BY 1;
 CREATE TABLE CONSULTANT_AGENCY
 (
-    ID            bigint(21) NOT NULL,
+    ID            bigint(21)  NOT NULL,
     CONSULTANT_ID varchar(36) NOT NULL,
-    AGENCY_ID     bigint(21) NOT NULL,
+    AGENCY_ID     bigint(21)  NOT NULL,
     CREATE_DATE   datetime,
     UPDATE_DATE   datetime,
     DELETE_DATE   datetime,
@@ -52,9 +52,9 @@ CREATE SEQUENCE SEQUENCE_CONSULTANT_AGENCY
     INCREMENT BY 1;
 CREATE TABLE USER_AGENCY
 (
-    ID          bigint(21) NOT NULL,
+    ID          bigint(21)  NOT NULL,
     USER_ID     varchar(36) NOT NULL,
-    AGENCY_ID   bigint(21) NOT NULL,
+    AGENCY_ID   bigint(21)  NOT NULL,
     CREATE_DATE datetime,
     UPDATE_DATE datetime,
     PRIMARY KEY (ID),
@@ -65,19 +65,20 @@ CREATE SEQUENCE SEQUENCE_USER_AGENCY
     INCREMENT BY 1;
 CREATE TABLE SESSION
 (
-    ID                   bigint(21) NOT NULL,
-    USER_ID              varchar(36) NOT NULL,
+    ID                   bigint(21)   NOT NULL,
+    USER_ID              varchar(36)  NOT NULL,
     CONSULTANT_ID        varchar(36),
-    CONSULTING_TYPE      tinyint(4) NOT NULL,
+    CONSULTING_TYPE      tinyint(4)   NOT NULL,
     REGISTRATION_TYPE    varchar(255) NOT NULL DEFAULT 'REGISTERED',
-    MESSAGE_DATE         datetime DEFAULT NULL,
-    POSTCODE             varchar(5)  NOT NULL,
-    AGENCY_ID            bigint(21) DEFAULT NULL,
+    MESSAGE_DATE         datetime              DEFAULT NULL,
+    POSTCODE             varchar(5)   NOT NULL,
+    AGENCY_ID            bigint(21)            DEFAULT NULL,
     RC_GROUP_ID          varchar(255) NULL,
     RC_FEEDBACK_GROUP_ID varchar(255) NULL,
-    STATUS               tinyint(4) NOT NULL,
-    IS_TEAM_SESSION      tinyint(4) NOT NULL DEFAULT '0',
-    IS_MONITORING        tinyint(4) NOT NULL,
+    IS_PEER_CHAT         tinyint(4)   NOT NULL DEFAULT '0',
+    STATUS               tinyint(4)   NOT NULL,
+    IS_TEAM_SESSION      tinyint(4)   NOT NULL DEFAULT '0',
+    IS_MONITORING        tinyint(4)   NOT NULL,
     CREATE_DATE          datetime,
     UPDATE_DATE          datetime,
     PRIMARY KEY (ID),
@@ -89,9 +90,9 @@ CREATE SEQUENCE SEQUENCE_SESSION
     INCREMENT BY 1;
 CREATE TABLE SESSION_DATA
 (
-    ID          bigint(21) NOT NULL,
-    SESSION_ID  bigint(21) NOT NULL,
-    TYPE        tinyint(4) NOT NULL,
+    ID          bigint(21)   NOT NULL,
+    SESSION_ID  bigint(21)   NOT NULL,
+    TYPE        tinyint(4)   NOT NULL,
     KEY_NAME    varchar(255) NOT NULL,
     VALUE       varchar(255) DEFAULT NULL,
     CREATE_DATE datetime,
@@ -104,8 +105,8 @@ CREATE SEQUENCE SEQUENCE_SESSION_DATA
     INCREMENT BY 1;
 CREATE TABLE SESSION_MONITORING
 (
-    SESSION_ID  bigint(21) NOT NULL,
-    TYPE        tinyint(4) NOT NULL,
+    SESSION_ID  bigint(21)   NOT NULL,
+    TYPE        tinyint(4)   NOT NULL,
     KEY_NAME    varchar(255) NOT NULL,
     VALUE       tinyint(1) DEFAULT NULL,
     CREATE_DATE datetime,
@@ -117,8 +118,8 @@ CREATE SEQUENCE SEQUENCE_SESSION_MONITORING
     INCREMENT BY 1;
 CREATE TABLE SESSION_MONITORING_OPTION
 (
-    SESSION_ID          bigint(21) NOT NULL,
-    MONITORING_TYPE     tinyint(4) NOT NULL,
+    SESSION_ID          bigint(21)   NOT NULL,
+    MONITORING_TYPE     tinyint(4)   NOT NULL,
     MONITORING_KEY_NAME varchar(255) NOT NULL,
     KEY_NAME            varchar(255) NOT NULL,
     VALUE               tinyint(1) DEFAULT NULL,
@@ -129,6 +130,33 @@ CREATE TABLE SESSION_MONITORING_OPTION
 CREATE SEQUENCE SEQUENCE_SESSION_MONITORING_OPTION
     START WITH 100000
     INCREMENT BY 1;
+CREATE TABLE USER_MOBILE_TOKEN
+(
+    ID               bigint(21)  NOT NULL,
+    USER_ID          varchar(36) NOT NULL,
+    MOBILE_APP_TOKEN longtext    NOT NULL,
+    CREATE_DATE      datetime,
+    UPDATE_DATE      datetime,
+    PRIMARY KEY (ID),
+    FOREIGN KEY (USER_ID) REFERENCES USER (USER_ID)
+);
+CREATE SEQUENCE SEQUENCE_USER_MOBILE_TOKEN
+    INCREMENT BY 1
+    START WITH 0;
+
+CREATE TABLE CONSULTANT_MOBILE_TOKEN
+(
+    ID               bigint(21)  NOT NULL,
+    CONSULTANT_ID    varchar(36) NOT NULL,
+    MOBILE_APP_TOKEN longtext    NOT NULL,
+    CREATE_DATE      datetime,
+    UPDATE_DATE      datetime,
+    PRIMARY KEY (ID),
+    FOREIGN KEY (CONSULTANT_ID) REFERENCES CONSULTANT (CONSULTANT_ID)
+);
+CREATE SEQUENCE SEQUENCE_CONSULTANT_MOBILE_TOKEN
+    INCREMENT BY 1
+    START WITH 0;
 INSERT INTO USER (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
                   `language_formal`, `create_date`, `update_date`)
 VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS',
@@ -1280,6 +1308,7 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
         '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 3, 0, 1,
         '2020-10-08 09:03:47', '2020-10-08 09:03:48');
 INSERT INTO USER_AGENCY (`id`, `user_id`, `agency_id`, `create_date`, `update_date`)
-VALUES (0, 'opiti0a1-c936-45ee-9141-d73dfc0a3000', 777, '2020-02-05 11:09:32', '2020-02-05 11:09:32');
+VALUES (0, 'opiti0a1-c936-45ee-9141-d73dfc0a3000', 777, '2020-02-05 11:09:32',
+        '2020-02-05 11:09:32');
 
 

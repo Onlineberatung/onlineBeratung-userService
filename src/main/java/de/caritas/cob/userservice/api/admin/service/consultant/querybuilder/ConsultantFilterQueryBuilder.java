@@ -48,8 +48,8 @@ public class ConsultantFilterQueryBuilder {
   }
 
   /**
-   * Builds the filter query for hibernate search. If no filter is set in
-   * {@link ConsultantFilter}, a unfiltered query will be returned.
+   * Builds the filter query for hibernate search. If no filter is set in {@link ConsultantFilter},
+   * a unfiltered query will be returned.
    *
    * @return the created {@link Query}
    */

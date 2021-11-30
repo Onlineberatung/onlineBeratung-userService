@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
@@ -21,6 +20,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
@@ -30,7 +30,6 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -58,7 +57,6 @@ public class CreateEnquiryMessageFacade {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserService userService;
   private final RocketChatRoomNameGenerator rocketChatRoomNameGenerator = new RocketChatRoomNameGenerator();
@@ -75,7 +73,8 @@ public class CreateEnquiryMessageFacade {
    * @param message               enquiry message
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
-  public void createEnquiryMessage(User user, Long sessionId, String message,
+  public CreateEnquiryMessageResponseDTO createEnquiryMessage(User user, Long sessionId,
+      String message,
       RocketChatCredentials rocketChatCredentials) {
 
     try {
@@ -92,7 +91,8 @@ public class CreateEnquiryMessageFacade {
       List<ConsultantAgency> agencyList =
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
-      String rcGroupId = createRocketChatRoomAndAddUsers(session, agencyList, rocketChatCredentials);
+      String rcGroupId = createRocketChatRoomAndAddUsers(session, agencyList,
+          rocketChatCredentials);
       String rcFeedbackGroupId = retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(session,
           rcGroupId, agencyList, extendedConsultingTypeResponseDTO);
 
@@ -114,6 +114,10 @@ public class CreateEnquiryMessageFacade {
       updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
 
       emailNotificationFacade.sendNewEnquiryEmailNotification(session);
+
+      return new CreateEnquiryMessageResponseDTO()
+          .rcGroupId(rcGroupId)
+          .sessionId(sessionId);
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), rocketChatCredentials);
@@ -314,11 +318,7 @@ public class CreateEnquiryMessageFacade {
       String rcFeedbackGroupId) throws RocketChatAddUserToGroupException {
 
     for (ConsultantAgency agency : agencyList) {
-      if (keycloakAdminClientService.userHasAuthority(agency.getConsultant().getId(),
-          AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)) {
-        rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
-            rcFeedbackGroupId);
-      }
+      rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(), rcFeedbackGroupId);
     }
   }
 

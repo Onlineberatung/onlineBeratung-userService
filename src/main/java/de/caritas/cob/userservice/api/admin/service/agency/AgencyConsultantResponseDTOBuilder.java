@@ -11,8 +11,8 @@ import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import java.util.List;
 
 /**
- * Builder class to generate a {@link AgencyConsultantResponseDTO} containing available hal links and
- * result of {@link ConsultantAdminResponseDTO} elements.
+ * Builder class to generate a {@link AgencyConsultantResponseDTO} containing available hal links
+ * and result of {@link ConsultantAdminResponseDTO} elements.
  */
 public class AgencyConsultantResponseDTOBuilder implements HalLinkBuilder {
 
@@ -47,8 +47,8 @@ public class AgencyConsultantResponseDTOBuilder implements HalLinkBuilder {
   }
 
   /**
-   * Generates the {@link AgencyConsultantResponseDTO} containing the
-   * {@link ConsultantAdminResponseDTO} resources and hal self link.
+   * Generates the {@link AgencyConsultantResponseDTO} containing the {@link
+   * ConsultantAdminResponseDTO} resources and hal self link.
    *
    * @return the generated {@link ConsultantAdminResponseDTO}
    */

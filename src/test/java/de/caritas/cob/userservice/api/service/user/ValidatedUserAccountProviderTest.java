@@ -242,4 +242,15 @@ public class ValidatedUserAccountProviderTest {
     verify(this.userService, times(1)).saveUser(captor.capture());
     assertThat(captor.getValue().getMobileToken(), is(""));
   }
+
+  @Test
+  public void addMobileAppToken_Should_callUserServiceAndConsultantService() {
+    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+
+    this.accountProvider.addMobileAppToken("token");
+
+    verify(this.userService, times(1)).addMobileAppToken(USER_ID, "token");
+    verify(this.consultantService, times(1)).addMobileAppToken(USER_ID, "token");
+  }
+
 }

@@ -121,7 +121,7 @@ public class ConsultantImportService {
           ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
               consultingTypeManager.getConsultingTypeSettings(agency.getConsultingType());
 
-          if (!extendedConsultingTypeResponseDTO.getRoles().getConsultant().getRoleNames()
+          if (!extendedConsultingTypeResponseDTO.getRoles().getConsultant().getRoleSets()
               .containsKey(agencyRoleArray[1])) {
             throw new ImportException(String.format(
                 "Consultant %s could not be imported: invalid role set %s for agency id %s and consulting type %s",
@@ -130,7 +130,7 @@ public class ConsultantImportService {
           }
 
           for (Map.Entry<String, List<String>> roleSet : extendedConsultingTypeResponseDTO.getRoles()
-              .getConsultant().getRoleNames().entrySet()) {
+              .getConsultant().getRoleSets().entrySet()) {
             if (roleSet.getKey().equals(agencyRoleArray[1])) {
               roles.addAll(roleSet.getValue());
               break;
@@ -266,7 +266,8 @@ public class ConsultantImportService {
     importRecord.setIdOld(
         (record.get(1).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(1)));
     importRecord.setUsername(StringUtils.trim(record.get(2)));
-    importRecord.setUsernameEncoded(new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(2))));
+    importRecord.setUsernameEncoded(
+        new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(2))));
     importRecord.setFirstName(StringUtils.trim(record.get(3)));
     importRecord.setLastName(StringUtils.trim(record.get(4)));
     String email = StringUtils.deleteWhitespace(record.get(5));

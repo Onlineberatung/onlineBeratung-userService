@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.repository.consultant;
 import static de.caritas.cob.userservice.api.repository.consultant.Consultant.EMAIL_ANALYZER;
 
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -114,6 +115,9 @@ public class Consultant {
   @IndexedEmbedded
   @Where(clause = "delete_date IS NULL")
   private Set<ConsultantAgency> consultantAgencies;
+
+  @OneToMany(mappedBy = "consultant")
+  private Set<ConsultantMobileToken> consultantMobileTokens;
 
   @Column(name = "create_date")
   private LocalDateTime createDate;

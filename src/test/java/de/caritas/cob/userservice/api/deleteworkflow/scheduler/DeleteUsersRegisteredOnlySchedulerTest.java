@@ -1,12 +1,9 @@
 package de.caritas.cob.userservice.api.deleteworkflow.scheduler;
 
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.deleteworkflow.service.DeleteInactiveSessionsAndUserService;
 import de.caritas.cob.userservice.api.deleteworkflow.service.DeleteUsersRegisteredOnlyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,8 +14,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteUsersRegisteredOnlySchedulerTest {
 
-  private final String FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_ENABLED = "userRegisteredOnlyDeleteWorkflowEnabled";
-
   @InjectMocks
   DeleteUsersRegisteredOnlyScheduler deleteUsersRegisteredOnlyScheduler;
 
@@ -26,21 +21,32 @@ public class DeleteUsersRegisteredOnlySchedulerTest {
   DeleteUsersRegisteredOnlyService deleteUsersRegisteredOnlyService;
 
   @Test
-  public void performDeletionWorkflow_Should_executeDeleteInactiveSessionsAndUsers_WhenFeatureIsEnabled() {
-
-    setField(deleteUsersRegisteredOnlyScheduler, FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_ENABLED,
-        true);
+  public void performDeletionWorkflow_Should_executeDeleteUserAccountsTimeSensitive_WhenFeatureIsEnabled() {
+    setField(deleteUsersRegisteredOnlyScheduler, "userRegisteredOnlyDeleteWorkflowEnabled", true);
     deleteUsersRegisteredOnlyScheduler.performDeletionWorkflow();
-    verify(this.deleteUsersRegisteredOnlyService, times(1)).deleteUserAccounts();
+    verify(deleteUsersRegisteredOnlyService).deleteUserAccountsTimeSensitive();
   }
 
   @Test
-  public void performDeletionWorkflow_ShouldNot_executeDeleteInactiveSessionsAndUsers_WhenFeatureIsDisabled() {
-
-    setField(deleteUsersRegisteredOnlyScheduler, FIELD_NAME_USER_REGISTERED_ONLY_DELETE_WORKFLOW_ENABLED,
-        false);
+  public void performDeletionWorkflow_ShouldNot_executeDeleteUserAccountsTimeSensitive_WhenFeatureIsDisabled() {
+    setField(deleteUsersRegisteredOnlyScheduler, "userRegisteredOnlyDeleteWorkflowEnabled", false);
     deleteUsersRegisteredOnlyScheduler.performDeletionWorkflow();
-    verify(this.deleteUsersRegisteredOnlyService, never()).deleteUserAccounts();
+    verify(deleteUsersRegisteredOnlyService, never()).deleteUserAccountsTimeSensitive();
   }
 
+  @Test
+  public void performDeletionWorkflow_Should_executeDeleteUserAccountsTimeInsensitive_WhenFeatureIsEnabled() {
+    setField(deleteUsersRegisteredOnlyScheduler,
+        "userRegisteredOnlyDeleteWorkflowAfterSessionPurgeEnabled", true);
+    deleteUsersRegisteredOnlyScheduler.performDeletionWorkflow();
+    verify(deleteUsersRegisteredOnlyService).deleteUserAccountsTimeInsensitive();
+  }
+
+  @Test
+  public void performDeletionWorkflow_ShouldNot_executeDeleteUserAccountsTimeInsensitive_WhenFeatureIsDisabled() {
+    setField(deleteUsersRegisteredOnlyScheduler,
+        "userRegisteredOnlyDeleteWorkflowAfterSessionPurgeEnabled", false);
+    deleteUsersRegisteredOnlyScheduler.performDeletionWorkflow();
+    verify(deleteUsersRegisteredOnlyService, never()).deleteUserAccountsTimeInsensitive();
+  }
 }

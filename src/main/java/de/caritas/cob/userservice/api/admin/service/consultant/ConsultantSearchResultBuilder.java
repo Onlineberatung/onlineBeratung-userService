@@ -18,8 +18,8 @@ import java.util.stream.Stream;
 import org.hibernate.search.jpa.FullTextQuery;
 
 /**
- * Builder class to generate a {@link ConsultantSearchResultDTO} containing available hal links
- * and result of {@link ConsultantDTO} elements.
+ * Builder class to generate a {@link ConsultantSearchResultDTO} containing available hal links and
+ * result of {@link ConsultantDTO} elements.
  */
 public class ConsultantSearchResultBuilder implements HalLinkBuilder {
 

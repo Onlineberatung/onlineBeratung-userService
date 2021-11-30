@@ -17,10 +17,10 @@ public class DeleteSingleRoomAndSessionAction extends DeleteRoomsAndSessionActio
   /**
    * Constructor.
    *
-   * @param sessionRepository a {@link SessionRepository} instance
+   * @param sessionRepository     a {@link SessionRepository} instance
    * @param sessionDataRepository a {@link SessionDataRepository} instance
-   * @param monitoringRepository a {@link MonitoringRepository} instance
-   * @param rocketChatService a {@link RocketChatService} instance
+   * @param monitoringRepository  a {@link MonitoringRepository} instance
+   * @param rocketChatService     a {@link RocketChatService} instance
    */
   @Autowired
   public DeleteSingleRoomAndSessionAction(SessionRepository sessionRepository,
@@ -31,8 +31,8 @@ public class DeleteSingleRoomAndSessionAction extends DeleteRoomsAndSessionActio
   }
 
   /**
-   * Deletes the given {@link Session} in the database with the related Rocket.Chat
-   * room containing all messages and uploads.
+   * Deletes the given {@link Session} in the database with the related Rocket.Chat room containing
+   * all messages and uploads.
    *
    * @param actionTarget the {@link SessionDeletionWorkflowDTO} with the session to delete
    */

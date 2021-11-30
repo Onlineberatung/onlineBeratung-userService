@@ -174,6 +174,7 @@ public class SessionService {
         .agencyId(userDto.getAgencyId())
         .status(sessionStatus)
         .teamSession(isTeamSession)
+        .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
         .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
@@ -480,7 +481,8 @@ public class SessionService {
     return emptyList();
   }
 
-  private List<ConsultantSessionResponseDTO> mapSessionsToConsultantSessionDto(List<Session> sessions) {
+  private List<ConsultantSessionResponseDTO> mapSessionsToConsultantSessionDto(
+      List<Session> sessions) {
     if (nonNull(sessions)) {
       return sessions.stream()
           .map(session -> new SessionMapper().toConsultantSessionDto(session))

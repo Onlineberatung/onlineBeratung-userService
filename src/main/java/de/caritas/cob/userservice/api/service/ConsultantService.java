@@ -1,10 +1,15 @@
 package de.caritas.cob.userservice.api.service;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
+import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileTokenRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class ConsultantService {
 
   private final @NonNull ConsultantRepository consultantRepository;
+  private final @NonNull ConsultantMobileTokenRepository consultantMobileTokenRepository;
 
   /**
    * Save a {@link Consultant} to the database.
@@ -130,4 +136,34 @@ public class ConsultantService {
   public List<Consultant> findConsultantsByAgencyId(Long agencyId) {
     return consultantRepository.findByConsultantAgenciesAgencyIdAndDeleteDateIsNull(agencyId);
   }
+
+  /**
+   * Adds a mobile client token of the current authenticated consultant in database.
+   *
+   * @param consultantId the id of the consultant
+   * @param mobileToken  the new mobile device identifier token
+   */
+  public void addMobileAppToken(String consultantId, String mobileToken) {
+    if (isNotBlank(mobileToken)) {
+      this.getConsultant(consultantId)
+          .ifPresent(consultant -> this.addConsultantToken(consultant, mobileToken));
+    }
+  }
+
+  private void addConsultantToken(Consultant consultant, String mobileToken) {
+    verifyTokenDoesNotAlreadyExist(mobileToken);
+    var consultantMobileToken = new ConsultantMobileToken();
+    consultantMobileToken.setConsultant(consultant);
+    consultantMobileToken.setMobileAppToken(mobileToken);
+    this.consultantMobileTokenRepository.save(consultantMobileToken);
+    consultant.getConsultantMobileTokens().add(consultantMobileToken);
+    this.saveConsultant(consultant);
+  }
+
+  private void verifyTokenDoesNotAlreadyExist(String mobileToken) {
+    if (this.consultantMobileTokenRepository.findByMobileAppToken(mobileToken).isPresent()) {
+      throw new ConflictException("Mobile Token already exists");
+    }
+  }
+
 }

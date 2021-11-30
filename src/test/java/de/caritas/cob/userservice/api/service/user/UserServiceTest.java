@@ -9,99 +9,112 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_NO_RC_USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
+import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileTokenRepository;
 import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(SpringRunner.class)
-public class UserServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
 
   @InjectMocks
   private UserService userService;
+
   @Mock
   private UserRepository userRepository;
+
+  @Mock
+  private UserMobileTokenRepository userMobileTokenRepository;
+
   @Mock
   private UsernameTranscoder usernameTranscoder;
 
   @Test
-  public void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {
+  void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {
     when(userRepository.save(Mockito.any())).thenReturn(USER);
 
-    User result = userService.createUser(USER_ID, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
+    var result = userService.createUser(USER_ID, USERNAME, EMAIL, IS_LANGUAGE_FORMAL);
 
     assertNotNull(result);
     assertEquals(USER, result);
   }
 
   @Test
-  public void getUser_Should_ReturnUser_WhenRepositoryCallIsSuccessful() {
-
+  void getUser_Should_ReturnUser_WhenRepositoryCallIsSuccessful() {
     when(userRepository.findByUserIdAndDeleteDateIsNull(Mockito.anyString()))
         .thenReturn(Optional.of(USER));
 
-    Optional<User> result = userService.getUser(USER_ID);
+    var result = userService.getUser(USER_ID);
 
     assertTrue(result.isPresent());
     assertEquals(USER, result.get());
   }
 
   @Test
-  public void getUserViaAuthenticatedUser_Should_returnOptionalEmpty_When_UserWasNotFound() {
-    Optional<User> viaAuthenticatedUser = userService
+  void getUserViaAuthenticatedUser_Should_returnOptionalEmpty_When_UserWasNotFound() {
+    var viaAuthenticatedUser = userService
         .getUserViaAuthenticatedUser(AUTHENTICATED_USER);
 
     assertThat(viaAuthenticatedUser, is(Optional.empty()));
   }
 
   @Test
-  public void getUserViaAuthenticatedUser_Should_UserOptionalObject() {
+  void getUserViaAuthenticatedUser_Should_UserOptionalObject() {
     when(userRepository.findByUserIdAndDeleteDateIsNull(Mockito.any()))
         .thenReturn(Optional.of(USER));
 
-    Optional<User> result = userService.getUserViaAuthenticatedUser(AUTHENTICATED_USER);
+    var result = userService.getUserViaAuthenticatedUser(AUTHENTICATED_USER);
 
     assertTrue(result.isPresent());
     assertEquals(USER, result.get());
   }
 
   @Test
-  public void saveUser_Should_UserObject() {
+  void saveUser_Should_UserObject() {
     when(userRepository.save(Mockito.any())).thenReturn(USER);
 
-    User result = userService.saveUser(USER);
+    var result = userService.saveUser(USER);
 
     assertNotNull(result);
     assertEquals(USER, result);
   }
 
   @Test
-  public void deleteUser_Should_CallDeleteUserRepository() {
+  void deleteUser_Should_CallDeleteUserRepository() {
     userService.deleteUser(USER);
 
     verify(userRepository, times(1)).delete(Mockito.any());
   }
 
   @Test
-  public void findUserByRcUserId_Should_ReturnUser_WhenRepositoryCallIsSuccessful() {
+  void findUserByRcUserId_Should_ReturnUser_WhenRepositoryCallIsSuccessful() {
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(Mockito.anyString()))
         .thenReturn(Optional.of(USER));
 
@@ -112,30 +125,30 @@ public class UserServiceTest {
   }
 
   @Test
-  public void updateRocketChatIdInDatabase_Should_UpdateUserObjectAndSaveToDb() {
+  void updateRocketChatIdInDatabase_Should_UpdateUserObjectAndSaveToDb() {
     userService.updateRocketChatIdInDatabase(USER_NO_RC_USER_ID, RC_USER_ID);
 
-    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+    var captor = ArgumentCaptor.forClass(User.class);
     verify(userRepository, times(1)).save(captor.capture());
     assertEquals(RC_USER_ID, captor.getValue().getRcUserId());
   }
 
   @Test
-  public void updateRocketChatIdInDatabase_ShouldNot_UpdateUserObject_When_UserNotGiven() {
+  void updateRocketChatIdInDatabase_ShouldNot_UpdateUserObject_When_UserNotGiven() {
     userService.updateRocketChatIdInDatabase(null, RC_USER_ID);
 
     verifyNoInteractions(userRepository);
   }
 
   @Test
-  public void updateRocketChatIdInDatabase_ShouldNot_UpdateUserObject_When_UserIdNotGiven() {
+  void updateRocketChatIdInDatabase_ShouldNot_UpdateUserObject_When_UserIdNotGiven() {
     userService.updateRocketChatIdInDatabase(USER_NO_RC_USER_ID, "");
 
     verifyNoInteractions(userRepository);
   }
 
   @Test
-  public void findUserByUsername_Should_SearchForEncodedAndDecodedUsername() {
+  void findUserByUsername_Should_SearchForEncodedAndDecodedUsername() {
     setField(userService, "usernameTranscoder", usernameTranscoder);
     when(usernameTranscoder.decodeUsername(any())).thenReturn(USERNAME);
     when(usernameTranscoder.encodeUsername(any())).thenReturn(USERNAME);
@@ -144,5 +157,50 @@ public class UserServiceTest {
 
     verify(usernameTranscoder, times(1)).encodeUsername(USERNAME);
     verify(usernameTranscoder, times(1)).decodeUsername(USERNAME);
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  void addMobileAppToken_Should_callNoOtherMethods_When_mobileTokenIsNullOrEmpty(String token) {
+    this.userService.addMobileAppToken(null, token);
+
+    verifyNoMoreInteractions(this.userMobileTokenRepository);
+    verifyNoMoreInteractions(this.userRepository);
+  }
+
+  @Test
+  void addMobileAppToken_Should_callNoOtherMethods_When_consultantDoesNotExist() {
+    when(this.userRepository.findByUserIdAndDeleteDateIsNull(any())).thenReturn(Optional.empty());
+
+    this.userService.addMobileAppToken("id", "token");
+
+    verifyNoMoreInteractions(this.userMobileTokenRepository);
+    verifyNoMoreInteractions(this.userRepository);
+  }
+
+  @Test
+  void addMobileAppToken_Should_addMobileTokenToConsultant_When_consultantExists() {
+    var user = new EasyRandom().nextObject(User.class);
+    user.getUserMobileTokens().clear();
+    when(this.userRepository.findByUserIdAndDeleteDateIsNull(any()))
+        .thenReturn(Optional.of(user));
+
+    this.userService.addMobileAppToken("id", "token");
+
+    verify(this.userMobileTokenRepository, times(1)).findByMobileAppToken("token");
+    verify(this.userMobileTokenRepository, times(1)).save(any());
+    assertThat(user.getUserMobileTokens(), hasSize(1));
+  }
+
+  @Test
+  void addMobileAppToken_Should_throwConflictException_When_tokenAlreadyExists() {
+    var user = new EasyRandom().nextObject(User.class);
+    when(this.userRepository.findByUserIdAndDeleteDateIsNull(any()))
+        .thenReturn(Optional.of(user));
+    when(this.userMobileTokenRepository.findByMobileAppToken(any()))
+        .thenReturn(Optional.of(new UserMobileToken()));
+
+    assertThrows(ConflictException.class, () ->
+        this.userService.addMobileAppToken("id", "token"));
   }
 }

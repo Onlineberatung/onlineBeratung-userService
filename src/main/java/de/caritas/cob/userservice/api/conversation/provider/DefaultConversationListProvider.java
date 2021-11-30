@@ -26,7 +26,8 @@ public abstract class DefaultConversationListProvider implements ConversationLis
       Consultant consultant,
       List<ConsultantSessionResponseDTO> sessionList) {
 
-    PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(sessionList);
+    PagedListHolder<ConsultantSessionResponseDTO> enquiriesForConsultant = new PagedListHolder<>(
+        sessionList);
 
     enquiriesForConsultant.setPage(obtainPageByOffsetAndCount(pageableListRequest));
     enquiriesForConsultant.setPageSize(pageableListRequest.getCount());

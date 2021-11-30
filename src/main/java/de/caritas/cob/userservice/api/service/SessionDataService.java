@@ -38,7 +38,7 @@ public class SessionDataService {
   /**
    * Saves additional registration information in session data for the given session.
    *
-   * @param session the {@link Session}
+   * @param session     the {@link Session}
    * @param sessionData {@link SessionData}
    */
   public void saveSessionData(Session session, SessionDataDTO sessionData) {

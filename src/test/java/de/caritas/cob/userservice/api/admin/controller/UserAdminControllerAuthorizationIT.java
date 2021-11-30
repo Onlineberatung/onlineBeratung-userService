@@ -81,8 +81,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(SESSION_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(sessionAdminService);
@@ -101,8 +101,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(SESSION_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(sessionAdminService);
@@ -114,10 +114,10 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(SESSION_PATH)
-        .param(PAGE_PARAM, "0")
-        .param(PER_PAGE_PARAM, "1")
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .param(PAGE_PARAM, "0")
+            .param(PER_PAGE_PARAM, "1")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(sessionAdminService, times(1)).findSessions(any(), anyInt(), any());
@@ -128,8 +128,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(REPORT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(violationReportGenerator);
@@ -148,8 +148,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(REPORT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(violationReportGenerator);
@@ -161,8 +161,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(REPORT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(violationReportGenerator, times(1)).generateReport();
@@ -173,8 +173,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(FILTERED_CONSULTANTS_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -193,8 +193,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(FILTERED_CONSULTANTS_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -206,10 +206,10 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(FILTERED_CONSULTANTS_PATH)
-        .param(PAGE_PARAM, "0")
-        .param(PER_PAGE_PARAM, "1")
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .param(PAGE_PARAM, "0")
+            .param(PER_PAGE_PARAM, "1")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findFilteredConsultants(any(), anyInt(), any());
@@ -220,8 +220,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -240,8 +240,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -253,8 +253,8 @@ public class UserAdminControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(GET_CONSULTANT_PATH + "consultantId")
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findConsultant(any());
@@ -267,8 +267,8 @@ public class UserAdminControllerAuthorizationIT {
         .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
 
     mvc.perform(get(consultantAgencyPath)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -289,8 +289,8 @@ public class UserAdminControllerAuthorizationIT {
         .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
 
     mvc.perform(get(consultantAgencyPath)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -305,8 +305,8 @@ public class UserAdminControllerAuthorizationIT {
     String consultantAgencyPath = String.format(CONSULTANT_AGENCIES_PATH, consultantId);
 
     mvc.perform(get(consultantAgencyPath)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findConsultantAgencies(consultantId);
@@ -316,8 +316,8 @@ public class UserAdminControllerAuthorizationIT {
   public void createConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(post(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -335,8 +335,8 @@ public class UserAdminControllerAuthorizationIT {
   public void createConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(post(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -350,10 +350,10 @@ public class UserAdminControllerAuthorizationIT {
         new EasyRandom().nextObject(CreateConsultantDTO.class);
 
     mvc.perform(post(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(createConsultantDTO)))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(createConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).createNewConsultant(any());
@@ -363,8 +363,8 @@ public class UserAdminControllerAuthorizationIT {
   public void updateConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(put(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -382,8 +382,8 @@ public class UserAdminControllerAuthorizationIT {
   public void updateConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(put(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -397,10 +397,10 @@ public class UserAdminControllerAuthorizationIT {
         new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
 
     mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(updateConsultantDTO)))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(updateConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).updateConsultant(anyString(), any());
@@ -410,8 +410,8 @@ public class UserAdminControllerAuthorizationIT {
   public void createConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -429,8 +429,8 @@ public class UserAdminControllerAuthorizationIT {
   public void createConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -444,10 +444,10 @@ public class UserAdminControllerAuthorizationIT {
         new EasyRandom().nextObject(CreateConsultantAgencyDTO.class);
 
     mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(createConsultantAgencyDTO)))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(createConsultantAgencyDTO)))
         .andExpect(status().isCreated());
 
     verify(consultantAdminFacade, times(1)).createNewConsultantAgency(anyString(), any());
@@ -457,9 +457,9 @@ public class UserAdminControllerAuthorizationIT {
   public void changeAgencyType_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -477,9 +477,9 @@ public class UserAdminControllerAuthorizationIT {
   public void changeAgencyType_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -490,9 +490,9 @@ public class UserAdminControllerAuthorizationIT {
   public void changeAgencyType_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
       throws Exception {
     mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).changeAgencyType(any(), any());
@@ -502,9 +502,9 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -522,9 +522,9 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -535,9 +535,9 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteConsultantAgency_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
       throws Exception {
     mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).markConsultantAgencyForDeletion(any(), any());
@@ -547,9 +547,9 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(delete(DELETE_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -567,9 +567,9 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(delete(DELETE_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -580,9 +580,9 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteConsultant_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
       throws Exception {
     mvc.perform(delete(DELETE_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion(any());
@@ -592,7 +592,7 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteAsker_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(delete(DELETE_ASKER_PATH)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(userAdminFacade);
@@ -610,7 +610,7 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteAsker_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(delete(DELETE_ASKER_PATH)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(userAdminFacade);
@@ -621,7 +621,7 @@ public class UserAdminControllerAuthorizationIT {
   public void deleteAsker_Should_ReturnOkAndCallUserAdminFacade_When_userAdminAuthority()
       throws Exception {
     mvc.perform(delete(DELETE_ASKER_PATH)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.userAdminFacade, times(1)).markAskerForDeletion(any());
@@ -631,7 +631,7 @@ public class UserAdminControllerAuthorizationIT {
   public void getAgencyConsultants_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -649,7 +649,7 @@ public class UserAdminControllerAuthorizationIT {
   public void getAgencyConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
     mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -660,7 +660,7 @@ public class UserAdminControllerAuthorizationIT {
   public void getAgencyConsultants_Should_ReturnOkAndCallUserAdminFacade_When_userAdminAuthority()
       throws Exception {
     mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).findConsultantsForAgency(any());

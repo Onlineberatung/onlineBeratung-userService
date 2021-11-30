@@ -67,6 +67,7 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
 
   @RequiredArgsConstructor
   private static final class DefaultRequiresCsrfMatcher implements RequestMatcher {
+
     private final Pattern allowedMethods = Pattern.compile("^(HEAD|TRACE|OPTIONS)$");
     private final @NonNull CsrfSecurityProperties csrfSecurityProperties;
 

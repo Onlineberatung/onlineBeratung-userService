@@ -176,7 +176,7 @@ public class ConsultantSessionListServiceTest {
 
     assertEquals(0, result.size());
   }
-  
+
   private SessionListQueryParameter createStandardSessionListQueryParameterObject(
       int sessionStatus) {
     return SessionListQueryParameter.builder()

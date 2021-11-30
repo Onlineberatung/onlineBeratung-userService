@@ -6,7 +6,7 @@ public class RocketChatCreateGroupException extends Exception {
 
   /**
    * Exception, when a Rocket.Chat API call for group creation fails
-   * 
+   *
    * @param ex
    */
   public RocketChatCreateGroupException(Exception ex) {
@@ -15,7 +15,7 @@ public class RocketChatCreateGroupException extends Exception {
 
   /**
    * Exception, when a Rocket.Chat API call for group creation fails
-   * 
+   *
    * @param message
    */
   public RocketChatCreateGroupException(String message) {
