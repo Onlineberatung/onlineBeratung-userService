@@ -110,7 +110,8 @@ public class AnonymousUserCreatorServiceTest {
 
     assertThat(credentials, instanceOf(AnonymousUserCredentials.class));
     assertThat(credentials.getExpiresIn(), is(keycloakLoginResponseDTO.getExpiresIn()));
-    assertThat(credentials.getRefreshExpiresIn(), is(keycloakLoginResponseDTO.getRefreshExpiresIn()));
+    assertThat(credentials.getRefreshExpiresIn(),
+        is(keycloakLoginResponseDTO.getRefreshExpiresIn()));
     assertThat(credentials.getAccessToken(), is(keycloakLoginResponseDTO.getAccessToken()));
     assertThat(credentials.getRefreshToken(), is(keycloakLoginResponseDTO.getRefreshToken()));
     verifyNoInteractions(rollbackFacade);

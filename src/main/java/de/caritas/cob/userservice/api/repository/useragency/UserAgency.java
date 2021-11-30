@@ -18,7 +18,6 @@ import lombok.Setter;
 
 /**
  * Represents a the relation between user and agency
- *
  */
 @Entity
 @Table(name = "user_agency")

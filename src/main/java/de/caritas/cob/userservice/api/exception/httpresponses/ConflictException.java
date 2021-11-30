@@ -9,7 +9,7 @@ public class ConflictException extends CustomHttpStatusException {
 
   /**
    * Conflict exception.
-   * 
+   *
    * @param message the message
    */
   public ConflictException(String message) {
@@ -19,7 +19,7 @@ public class ConflictException extends CustomHttpStatusException {
   /**
    * Conflict exception.
    *
-   * @param message an additional message
+   * @param message       an additional message
    * @param loggingMethod the method being used to log this exception
    */
   public ConflictException(String message, Consumer<Exception> loggingMethod) {

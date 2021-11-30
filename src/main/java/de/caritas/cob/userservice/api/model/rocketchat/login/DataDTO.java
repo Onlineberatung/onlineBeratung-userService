@@ -7,13 +7,13 @@ import lombok.Setter;
 
 /**
  * DataDTO for LoginResponseDTO
- *
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataDTO {
+
   private String userId;
   private String authToken;
   private MeDTO me;

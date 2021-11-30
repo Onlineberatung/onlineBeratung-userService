@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -17,6 +16,7 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,6 +25,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantAgencyRelationCreatorServiceTest {
+
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @InjectMocks
   private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
@@ -59,11 +61,14 @@ public class ConsultantAgencyRelationCreatorServiceTest {
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))
         .thenReturn(Optional.of(new Consultant()));
     when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
-    when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .role("valid role")
+        .roleSetKey("valid role set")
         .agencyId(2L);
+
+    final var response = easyRandom.nextObject(
+        de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO.class);
+    when(consultingTypeManager.getConsultingTypeSettings(1)).thenReturn(response);
 
     assertDoesNotThrow(() -> this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency("consultant Id", createConsultantAgencyDTO));

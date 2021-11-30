@@ -39,7 +39,8 @@ public class ConsultantResponseDTOBuilderTest {
     assertThat(resultDTO, notNullValue());
     assertThat(resultDTO.getEmbedded(), hasSize(0));
     assertThat(resultDTO.getTotal(), is(0));
-    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/consultants/{consultantId}/agencies"));
+    assertThat(resultDTO.getLinks().getSelf().getHref(),
+        is("/useradmin/consultants/{consultantId}/agencies"));
     assertThat(resultDTO.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
   }
 
@@ -52,7 +53,8 @@ public class ConsultantResponseDTOBuilderTest {
     assertThat(resultDTO, notNullValue());
     assertThat(resultDTO.getEmbedded(), hasSize(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
     assertThat(resultDTO.getTotal(), is(MOCKED_CONSULTANT_AGENCY_LIST_SIZE));
-    assertThat(resultDTO.getLinks().getSelf().getHref(), is("/useradmin/consultants/{consultantId}/agencies"));
+    assertThat(resultDTO.getLinks().getSelf().getHref(),
+        is("/useradmin/consultants/{consultantId}/agencies"));
     assertThat(resultDTO.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
   }
 

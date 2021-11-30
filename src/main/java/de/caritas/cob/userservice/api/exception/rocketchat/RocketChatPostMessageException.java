@@ -9,8 +9,8 @@ public class RocketChatPostMessageException extends CreateEnquiryException {
 
   /**
    * Exception when posting a message to a Rocket.Chat group fails
-   * 
-   * @param message Message
+   *
+   * @param message   Message
    * @param exception Exception
    */
   public RocketChatPostMessageException(String message, Exception exception,
@@ -20,7 +20,7 @@ public class RocketChatPostMessageException extends CreateEnquiryException {
 
   /**
    * Exception when posting a message to a Rocket.Chat group fails
-   * 
+   *
    * @param message Message
    */
   public RocketChatPostMessageException(String message,

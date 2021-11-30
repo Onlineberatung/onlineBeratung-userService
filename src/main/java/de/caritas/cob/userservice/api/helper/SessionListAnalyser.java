@@ -84,7 +84,7 @@ public class SessionListAnalyser {
   /**
    * Get a {@link SessionAttachmentDTO} from the Rocket.Chat room info.
    *
-   * @param rcUserId the Rocket.Chat user id
+   * @param rcUserId            the Rocket.Chat user id
    * @param roomsLastMessageDto the Rocket.Chat room info
    * @return a {@link SessionAttachmentDTO} instance
    */

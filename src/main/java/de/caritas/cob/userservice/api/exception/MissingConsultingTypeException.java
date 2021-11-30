@@ -6,7 +6,7 @@ public class MissingConsultingTypeException extends RuntimeException {
 
   /**
    * Exception, when settings for an requested consulting type are missing
-   * 
+   *
    * @param message
    */
   public MissingConsultingTypeException(String message) {

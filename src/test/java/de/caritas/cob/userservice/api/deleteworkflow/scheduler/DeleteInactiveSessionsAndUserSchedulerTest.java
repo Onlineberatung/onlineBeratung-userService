@@ -26,7 +26,8 @@ public class DeleteInactiveSessionsAndUserSchedulerTest {
   @Test
   public void performDeletionWorkflow_Should_executeDeleteInactiveSessionsAndUsers_WhenFeatureIsEnabled() {
 
-    setField(deleteInactiveSessionsAndUserScheduler, FIELD_NAME_SESSION_INACTIVE_DELETE_WORKFLOW_ENABLED,
+    setField(deleteInactiveSessionsAndUserScheduler,
+        FIELD_NAME_SESSION_INACTIVE_DELETE_WORKFLOW_ENABLED,
         true);
     deleteInactiveSessionsAndUserScheduler.performDeletionWorkflow();
     verify(this.deleteInactiveSessionsAndUserService, times(1)).deleteInactiveSessionsAndUsers();
@@ -35,7 +36,8 @@ public class DeleteInactiveSessionsAndUserSchedulerTest {
   @Test
   public void performDeletionWorkflow_ShouldNot_executeDeleteInactiveSessionsAndUsers_WhenFeatureIsDisabled() {
 
-    setField(deleteInactiveSessionsAndUserScheduler, FIELD_NAME_SESSION_INACTIVE_DELETE_WORKFLOW_ENABLED,
+    setField(deleteInactiveSessionsAndUserScheduler,
+        FIELD_NAME_SESSION_INACTIVE_DELETE_WORKFLOW_ENABLED,
         false);
     deleteInactiveSessionsAndUserScheduler.performDeletionWorkflow();
     verify(this.deleteInactiveSessionsAndUserService, never()).deleteInactiveSessionsAndUsers();

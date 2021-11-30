@@ -15,7 +15,6 @@ import lombok.Setter;
 
 /**
  * Rocket.Chat last message DTO for rooms get
- *
  */
 
 @Setter

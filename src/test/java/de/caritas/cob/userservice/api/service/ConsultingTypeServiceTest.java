@@ -43,7 +43,7 @@ public class ConsultingTypeServiceTest {
 
     assertEquals(consultingTypeIds.size(), size);
     assertEquals(randomBasicConsultingTypeResponseDTOList.stream().map(
-        BasicConsultingTypeResponseDTO::getId)
+            BasicConsultingTypeResponseDTO::getId)
         .collect(Collectors.toList()), consultingTypeIds);
   }
 

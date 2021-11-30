@@ -12,7 +12,6 @@ import lombok.Setter;
 
 /**
  * Role settings of the {@link ExtendedConsultingTypeResponseDTO} for consultants
- *
  */
 
 @AllArgsConstructor
@@ -21,19 +20,19 @@ import lombok.Setter;
 @Setter
 public class Consultant {
 
-  private LinkedHashMap<String, List<String>> roleNames;
+  private LinkedHashMap<String, List<String>> roleSets;
 
   @JsonAnyGetter
-  public Map<String, List<String>> getRoleNames() {
-    return roleNames;
+  public Map<String, List<String>> getRoleSets() {
+    return roleSets;
   }
 
   @JsonAnySetter
   public void addRoleNames(String key, List<String> value) {
-    if (this.roleNames == null) {
-      this.roleNames = new LinkedHashMap<>();
+    if (this.roleSets == null) {
+      this.roleSets = new LinkedHashMap<>();
     }
 
-    this.roleNames.put(key, value);
+    this.roleSets.put(key, value);
   }
 }

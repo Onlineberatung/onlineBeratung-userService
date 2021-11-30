@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade.assignsession;
 
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NEW;
+import static de.caritas.cob.userservice.testHelper.AsyncVerification.verifyAsync;
 import static de.caritas.cob.userservice.testHelper.TestConstants.ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.FEEDBACKSESSION_WITHOUT_CONSULTANT;
@@ -68,7 +69,6 @@ public class AssignEnquiryFacadeTest {
 
   static final RocketChatAddUserToGroupException RC_ADD_USER_TO_GROUP_EXC =
       new RocketChatAddUserToGroupException(new Exception());
-  private static final int MAX_TIMEOUT = 5;
 
   @InjectMocks
   AssignEnquiryFacade assignEnquiryFacade;
@@ -134,7 +134,7 @@ public class AssignEnquiryFacadeTest {
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(consultant)
                 && consultantSessionDTO.getSession().equals(session)));
-    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForEnquiryAssignment(
+    verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(consultant)
                 && consultantSessionDTO.getSession().equals(session)));
@@ -380,16 +380,4 @@ public class AssignEnquiryFacadeTest {
         .updateConsultantAndStatusForSession(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, null, NEW);
   }
 
-  private void verifyAsync(Consumer<Void> verificationFunction) {
-    await()
-        .atMost(MAX_TIMEOUT, SECONDS)
-        .until(verification(verificationFunction));
-  }
-
-  private Callable<Boolean> verification(Consumer<Void> verificationFunction) {
-    return () -> {
-      verificationFunction.accept(null);
-      return true;
-    };
-  }
 }

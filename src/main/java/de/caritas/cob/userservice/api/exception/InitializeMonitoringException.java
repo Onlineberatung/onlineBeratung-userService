@@ -6,7 +6,7 @@ public class InitializeMonitoringException extends RuntimeException {
 
   /**
    * Exception, when the initialization of the monitoring data fails
-   * 
+   *
    * @param ex
    */
   public InitializeMonitoringException(Exception ex) {

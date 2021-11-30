@@ -9,7 +9,7 @@ public class ImportRecordAgencyCreationInputAdapter implements ConsultantAgencyC
 
   private final @NonNull String consultantID;
   private final @NonNull Long agencyId;
-  private final @NonNull Set<String> roles;
+  private final @NonNull Set<String> roleSetNames;
 
   @Override
   public String getConsultantId() {
@@ -17,8 +17,8 @@ public class ImportRecordAgencyCreationInputAdapter implements ConsultantAgencyC
   }
 
   @Override
-  public Set<String> getRoles() {
-    return this.roles;
+  public Set<String> getRoleSetNames() {
+    return this.roleSetNames;
   }
 
   @Override

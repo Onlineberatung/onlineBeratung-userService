@@ -169,4 +169,14 @@ public class ValidatedUserAccountProvider {
     this.userService.saveUser(user);
   }
 
+  /**
+   * Adds a mobile client token of the current authenticated user in database.
+   *
+   * @param mobileToken the mobile device identifier token to be added
+   */
+  public void addMobileAppToken(String mobileToken) {
+    this.userService.addMobileAppToken(this.authenticatedUser.getUserId(), mobileToken);
+    this.consultantService.addMobileAppToken(this.authenticatedUser.getUserId(), mobileToken);
+  }
+
 }

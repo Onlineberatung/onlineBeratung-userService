@@ -30,7 +30,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESP
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -226,7 +227,7 @@ public class CreateEnquiryMessageFacadeTest {
     consultant.setId(USER_ID);
     consultant.setRocketChatId(RC_USER_ID);
     this.user = new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null,
-        null, null, null);
+        null, null, null, null);
     this.extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     this.extendedConsultingTypeResponseDTO.setWelcomeMessage(new WelcomeMessageDTO());
     this.userInfoResponseDTO = new UserInfoResponseDTO();
@@ -267,7 +268,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn(session.getId().toString());
 
-    createEnquiryMessageFacade
+    final var response = createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, rocketChatCredentials);
 
     verify(userService, atLeastOnce()).updateRocketChatIdInDatabase(any(), anyString());
@@ -278,6 +279,8 @@ public class CreateEnquiryMessageFacadeTest {
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(sessionService, atLeastOnce()).saveSession(any());
     verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any());
+    assertEquals(SESSION_ID, response.getSessionId());
+    assertEquals(RC_GROUP_ID, response.getRcGroupId());
   }
 
   @Test(expected = ConflictException.class)

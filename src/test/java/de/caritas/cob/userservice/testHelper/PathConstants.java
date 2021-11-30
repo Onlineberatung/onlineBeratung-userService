@@ -95,6 +95,7 @@ public class PathConstants {
   public static final String PATH_ARCHIVE_SESSION_INVALID_PATH_VAR = "/users/sessions/xyz/archive";
   public static final String PATH_DEARCHIVE_SESSION = "/users/sessions/123/dearchive";
   public static final String PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR = "/users/sessions/xyz/dearchive";
+  public static final String PATH_PUT_ADD_MOBILE_TOKEN = "/users/mobile/app/token";
   public static final String PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH = "/users/twoFactorAuth";
   public static final String PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH = "/users/twoFactorAuth";
 }

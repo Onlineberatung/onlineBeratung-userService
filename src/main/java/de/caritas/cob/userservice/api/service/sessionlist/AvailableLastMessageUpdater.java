@@ -25,10 +25,10 @@ public class AvailableLastMessageUpdater {
    * Updates the given session with further Rocket.Chat last message information.
    *
    * @param rocketChatRoomInformation the {@link RocketChatRoomInformation}
-   * @param rcUserId the Rocket.Chat user id
-   * @param latestMessageSetter the function to set the latest message timestamp
-   * @param session the session to be updated
-   * @param groupId the Rocket.Chat group id
+   * @param rcUserId                  the Rocket.Chat user id
+   * @param latestMessageSetter       the function to set the latest message timestamp
+   * @param session                   the session to be updated
+   * @param groupId                   the Rocket.Chat group id
    */
   void updateSessionWithAvailableLastMessage(
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,

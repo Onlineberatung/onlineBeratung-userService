@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportReco
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -54,6 +55,7 @@ public class ConsultantAgencyRelationCreatorService {
    */
   public void createConsultantAgencyRelations(String consultantId, Set<Long> agencyIds,
       Set<String> roles, Consumer<String> logMethod) {
+    checkConsultantHasRoleSet(roles, consultantId);
     agencyIds.stream()
         .map(agencyId -> new ImportRecordAgencyCreationInputAdapter(consultantId, agencyId, roles))
         .forEach(input -> createNewConsultantAgency(input, logMethod));
@@ -68,8 +70,8 @@ public class ConsultantAgencyRelationCreatorService {
    */
   public void createNewConsultantAgency(String consultantId,
       CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    ConsultantAgencyCreationInput adapter = new CreateConsultantAgencyDTOInputAdapter(
-        consultantId, createConsultantAgencyDTO);
+    var adapter = new CreateConsultantAgencyDTOInputAdapter(consultantId,
+        createConsultantAgencyDTO);
     createNewConsultantAgency(adapter, LogService::logInfo);
   }
 
@@ -77,15 +79,13 @@ public class ConsultantAgencyRelationCreatorService {
       Consumer<String> logMethod) {
     var consultant = this.retrieveConsultant(input.getConsultantId());
 
-    this.checkConsultantHasRole(input);
-
-    AgencyDTO agency = retrieveAgency(input.getAgencyId());
-
+    var agency = retrieveAgency(input.getAgencyId());
     if (consultingTypeManager.isConsultantBoundedToAgency(agency.getConsultingType())) {
       this.verifyAllAssignedAgenciesHaveSameConsultingType(agency.getConsultingType(), consultant);
     }
 
-    this.addConsultantToSessions(consultant, agency, logMethod);
+    ensureConsultingTypeRoles(input, agency);
+    addConsultantToSessions(consultant, agency, logMethod);
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
       consultant.setTeamConsultant(true);
@@ -95,20 +95,33 @@ public class ConsultantAgencyRelationCreatorService {
     consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
   }
 
+  private void ensureConsultingTypeRoles(ConsultantAgencyCreationInput input, AgencyDTO agency) {
+    var roles = consultingTypeManager
+        .getConsultingTypeSettings(agency.getConsultingType())
+        .getRoles();
+    if (nonNull(roles) && nonNull(roles.getConsultant())) {
+      var roleSets = roles.getConsultant().getRoleSets();
+      for (var roleSetName : input.getRoleSetNames()) {
+        roleSets.getOrDefault(roleSetName, Collections.emptyList()).forEach(
+            roleName -> keycloakAdminClientService.ensureRole(input.getConsultantId(), roleName));
+      }
+    }
+  }
+
   private Consultant retrieveConsultant(String consultantId) {
     return this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
         .orElseThrow(() -> new BadRequestException(
             String.format("Consultant with id %s does not exist", consultantId)));
   }
 
-  private void checkConsultantHasRole(ConsultantAgencyCreationInput input) {
-    input.getRoles().stream()
-        .filter(role -> keycloakAdminClientService.userHasRole(input.getConsultantId(), role))
+  private void checkConsultantHasRoleSet(Set<String> roles, String consultantId) {
+    roles.stream()
+        .filter(role -> keycloakAdminClientService.userHasRole(consultantId, role))
         .findAny()
         .orElseThrow(() -> new BadRequestException(
             String
-                .format("Consultant with id %s does not have the role %s", input.getConsultantId(),
-                    input.getRoles())));
+                .format("Consultant with id %s does not have the role set %s", consultantId,
+                    roles)));
   }
 
   private AgencyDTO retrieveAgency(Long agencyId) {
@@ -138,7 +151,8 @@ public class ConsultantAgencyRelationCreatorService {
       Consumer<String> logMethod) {
     List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod, consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
+            consultingTypeManager)
         .onSessions(relevantSessions)
         .withConsultant(consultant)
         .addToGroupsOrRollbackOnFailure();

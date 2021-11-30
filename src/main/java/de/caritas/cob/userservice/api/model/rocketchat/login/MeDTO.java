@@ -7,12 +7,12 @@ import lombok.Setter;
 
 /**
  * MeDTO for LoginResponseDTO
- *
  */
 @Getter
 @Setter
 @NoArgsConstructor
 public class MeDTO {
+
   private String username;
   private String _id;
   private String status;

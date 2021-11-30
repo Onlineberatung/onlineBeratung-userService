@@ -8,6 +8,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Controller
 @ApiIgnore
 public class CustomSwaggerUIController {
+
   @Value("${springfox.docuPath}")
   private String docuPath;
 

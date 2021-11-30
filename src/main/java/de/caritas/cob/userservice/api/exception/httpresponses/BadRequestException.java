@@ -10,7 +10,7 @@ public class BadRequestException extends CustomHttpStatusException {
   /**
    * BadRequest exception.
    *
-   * @param message an additional message
+   * @param message       an additional message
    * @param loggingMethod the method being used to log this exception
    */
   public BadRequestException(String message, Consumer<Exception> loggingMethod) {

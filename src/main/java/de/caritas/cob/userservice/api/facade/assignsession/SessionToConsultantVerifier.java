@@ -38,17 +38,10 @@ public class SessionToConsultantVerifier {
   }
 
   /**
-   * verifies necessary input data of {@link Session} and {@link Consultant} for a enquiry.
-   */
-  public void verifyPreconditionsForEnquiryAssignment(ConsultantSessionDTO consultantSessionDTO) {
-    verifyIfSessionIsAlreadyAssignedToConsultant(consultantSessionDTO);
-    verifyPreconditionsForAssignment(consultantSessionDTO);
-  }
-
-  /**
    * verifies necessary input data of {@link Session} and {@link Consultant}.
    */
   public void verifyPreconditionsForAssignment(ConsultantSessionDTO consultantSessionDTO) {
+    verifyIfSessionIsAlreadyAssignedToConsultant(consultantSessionDTO);
     verifyUserAndConsultantHaveRocketChatId(consultantSessionDTO);
     if (REGISTERED.equals(consultantSessionDTO.getSession().getRegistrationType())) {
       verifyIfConsultantIsAssignedToAgency(consultantSessionDTO);
@@ -117,7 +110,8 @@ public class SessionToConsultantVerifier {
     }
   }
 
-  private void verifyIfConsultantHasConsultingTypeOfSession(ConsultantSessionDTO consultantSessionDTO) {
+  private void verifyIfConsultantHasConsultingTypeOfSession(
+      ConsultantSessionDTO consultantSessionDTO) {
     if (this.conditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
         consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
       var message = String.format(

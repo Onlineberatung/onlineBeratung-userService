@@ -147,7 +147,7 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
 
     ConsultantAgency consultantAgency = buildConsultantAgency(consultant);
     consultantAgencyRepository.save(consultantAgency);
-    ConsultantAgency consultantAgency2  = buildConsultantAgency(consultant2);
+    ConsultantAgency consultantAgency2 = buildConsultantAgency(consultant2);
     consultantAgencyRepository.save(consultantAgency2);
 
     List<Session> sessions = new EasyRandom().objects(Session.class, amount + 5)

@@ -11,7 +11,9 @@ import de.caritas.cob.userservice.api.helper.DateCalculator;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.localdatetime.CustomLocalDateTime;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -37,28 +39,33 @@ public class DeleteUsersRegisteredOnlyService {
   private int userRegisteredOnlyDeleteWorkflowCheckDays;
 
   /**
-   * Deletes all askers without running sessions.
+   * Deletes all askers with no running sessions before the set date.
    */
-  public void deleteUserAccounts() {
-
-    var workflowErrors = deleteAskersAndCollectPossibleErrors();
-
-    if (isNotEmpty(workflowErrors)) {
-      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
-    }
-
+  public void deleteUserAccountsTimeSensitive() {
+    var dateTimeToCheck = DateCalculator
+        .calculateDateInThePastAtMidnight(userRegisteredOnlyDeleteWorkflowCheckDays);
+    deleteUserAccountsBefore(dateTimeToCheck);
   }
 
-  private List<DeletionWorkflowError> deleteAskersAndCollectPossibleErrors() {
+  /**
+   * Deletes all askers with no running sessions no matter when created.
+   */
+  public void deleteUserAccountsTimeInsensitive() {
+    var startOfTomorrow = CustomLocalDateTime.nowInUtc().with(LocalTime.MIDNIGHT).plusDays(1);
+    deleteUserAccountsBefore(startOfTomorrow);
+  }
 
-    LocalDateTime dateTimeToCheck = DateCalculator
-        .calculateDateInThePastAtMidnight(userRegisteredOnlyDeleteWorkflowCheckDays);
-    return userRepository
+  private void deleteUserAccountsBefore(LocalDateTime dateTimeToCheck) {
+    var workflowErrors = userRepository
         .findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateTimeToCheck)
         .stream()
         .map(this::performUserDeletion)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
+
+    if (isNotEmpty(workflowErrors)) {
+      workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
+    }
   }
 
   private List<DeletionWorkflowError> performUserDeletion(User user) {
@@ -74,7 +81,7 @@ public class DeleteUsersRegisteredOnlyService {
               .timestamp(nowInUtc())
               .build());
     }
+
     return deleteUserAccountService.performUserDeletion(user);
   }
-
 }

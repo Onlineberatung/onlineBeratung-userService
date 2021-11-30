@@ -74,7 +74,7 @@ paths:
     post:
       tags:
         - user-controller
-      summary: 'Create enquiry message for an user [Authorization: Role: user]'
+      summary: 'Create enquiry message for a user [Authorization: Role: user]'
       operationId: createEnquiryMessage
       parameters:
         - name: sessionId
@@ -102,7 +102,11 @@ paths:
         required: true
       responses:
         201:
-          description: CREATED - enquriy message was successfully created
+          description: CREATED - enquiry message has been created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateEnquiryMessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -393,9 +397,9 @@ paths:
     put:
       tags:
         - user-controller
-      summary: 'Sets or updates the mobile registration token of the authorized asker account.
-      This token is used to send push notifications to native mobile applications on android and
-      ios. [Authorization: Role: asker]'
+      summary: 'Sets or updates the mobile registration token of the authorized asker account for
+       the u25 app. This token is used to send push notifications to native mobile applications
+       on android and ios. [Authorization: Role: asker]'
       operationId: updateMobileToken
       requestBody:
         content:
@@ -412,6 +416,35 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/mobile/app/token:
+    put:
+      tags:
+        - user-controller
+      summary: 'Adds a mobile registration token of the authorized user account.
+        This token is used to send push notifications to native mobile applications on android and
+        ios. [Authorization: Roles: asker, consultant]'
+      operationId: addMobileAppToken
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MobileTokenDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successfull operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization
+        409:
+          description: CONFLICT - token is already set to user
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -1144,6 +1177,37 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/{sessionId}:
+    delete:
+      tags:
+        - user-controller
+      summary: 'Deletes a session. [Authorization: Role: consultant]'
+      description: 'If the user has no other sessions, the account will be deleted, too, unless the
+       system''s setting prevents it.'
+      operationId: deleteSessionAndInactiveUser
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        404:
+          description: NOT FOUND - a session with such an ID does not exist
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/twoFactorAuth:
     put:
       tags:
@@ -1663,6 +1727,16 @@ components:
         message:
           type: string
           example: Lorem ipsum dolor sit amet, consetetur...
+
+    CreateEnquiryMessageResponseDTO:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+          format: int64
+        rcGroupId:
+          type: string
+          example: fR2Rz7dmWmHdXE8uz
 
     AbsenceDTO:
       type: object

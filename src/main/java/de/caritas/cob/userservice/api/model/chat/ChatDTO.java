@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_MAX_DURATION
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_MIN_DURATION;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_TOPIC_MAX_LENGTH;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_TOPIC_MIN_LENGTH;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import javax.validation.constraints.Max;
@@ -23,7 +24,6 @@ import lombok.Setter;
 
 /**
  * Create new chat model
- *
  */
 @AllArgsConstructor
 @NoArgsConstructor

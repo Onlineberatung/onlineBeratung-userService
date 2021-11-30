@@ -90,7 +90,7 @@ class SessionServiceTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
       "first name", "last name", "consultant@cob.de", false, false, null, false, null, null, null,
-      nowInUtc(), null, null);
+      null, nowInUtc(), null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
       REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
@@ -638,7 +638,8 @@ class SessionServiceTest {
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
   @NullSource
-  void initializeSession_Should_initializePeerChat_When_consultingTypeSettingsHasPeerChat(Boolean isPeerChat) {
+  void initializeSession_Should_initializePeerChat_When_consultingTypeSettingsHasPeerChat(
+      Boolean isPeerChat) {
     var consultingTypeResponse = new EasyRandom()
         .nextObject(ExtendedConsultingTypeResponseDTO.class);
     consultingTypeResponse.setIsPeerChat(isPeerChat);

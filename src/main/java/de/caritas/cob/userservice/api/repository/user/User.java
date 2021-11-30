@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.user;
 
+import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -21,7 +22,6 @@ import lombok.ToString;
 
 /**
  * Represents a user
- * 
  */
 @Entity
 @Table(name = "user")
@@ -66,6 +66,9 @@ public class User {
 
   @Column(name = "mobile_token")
   private String mobileToken;
+
+  @OneToMany(mappedBy = "user")
+  private Set<UserMobileToken> userMobileTokens;
 
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;

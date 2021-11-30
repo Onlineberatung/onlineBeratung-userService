@@ -34,7 +34,7 @@ public class UserSessionListService {
   /**
    * Returns a list of {@link UserSessionResponseDTO} for the specified user ID.
    *
-   * @param userId Keycloak/MariaDB user ID
+   * @param userId                Keycloak/MariaDB user ID
    * @param rocketChatCredentials the rocket chat credentials
    * @return {@link UserSessionResponseDTO}
    */
