@@ -141,7 +141,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -176,7 +176,7 @@ paths:
             type: string
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -207,7 +207,7 @@ paths:
             type: string
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
           content:
             'application/json':
               schema:
@@ -240,7 +240,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -272,7 +272,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -303,7 +303,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -323,7 +323,7 @@ paths:
       operationId: getUserData
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
           content:
             'application/json':
               schema:
@@ -352,7 +352,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -380,7 +380,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -409,7 +409,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -436,7 +436,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -684,7 +684,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -754,7 +754,7 @@ paths:
             type: string
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -783,7 +783,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -941,7 +941,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
           content:
             'application/json':
               schema:
@@ -973,7 +973,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -1005,7 +1005,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -1036,7 +1036,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
           content:
             'application/json':
               schema:
@@ -1069,7 +1069,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -1101,7 +1101,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
           content:
             'application/json':
               schema:
@@ -1136,7 +1136,7 @@ paths:
             format: int64
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -1166,7 +1166,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
         401:
@@ -1222,7 +1222,7 @@ paths:
         required: true
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
         401:
@@ -1243,7 +1243,7 @@ paths:
       operationId: deleteTwoFactorAuthForUser
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
         401:
@@ -1270,7 +1270,7 @@ paths:
             type: string
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or query object
         403:

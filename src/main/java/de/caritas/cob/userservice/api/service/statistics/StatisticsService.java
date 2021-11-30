@@ -20,7 +20,7 @@ public class StatisticsService {
   private final @NotNull AmqpTemplate amqpTemplate;
 
   @Value("${statistics.enabled}")
-  private boolean statisticsEnabled;
+  private Boolean statisticsEnabled;
 
   @Value("${statistics.rabbitmq.exchange.name}")
   private String rabbitMqExchangeName;

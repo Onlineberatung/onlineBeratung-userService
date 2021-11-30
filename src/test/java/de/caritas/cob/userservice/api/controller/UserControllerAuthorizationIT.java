@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.controller;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -24,8 +24,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_IMPO
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_START;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_STOP;
@@ -44,7 +44,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -82,8 +81,8 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -1989,7 +1988,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.consultantDataFacade, times(1)).updateConsultantData(any());
+    verify(this.consultantDataFacade).updateConsultantData(any());
   }
 
   @Test
@@ -2008,7 +2007,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.userDataFacade, times(1)).buildUserDataByRole();
+    verify(this.userDataFacade).buildUserDataByRole();
   }
 
   @Test
@@ -2037,7 +2036,7 @@ public class UserControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(this.sessionArchiveService, times(1)).archiveSession(any());
+    verify(this.sessionArchiveService).archiveSession(any());
   }
 
   @Test
@@ -2089,7 +2088,7 @@ public class UserControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(this.sessionArchiveService, times(1)).dearchiveSession(any());
+    verify(this.sessionArchiveService).dearchiveSession(any());
   }
 
   @Test
@@ -2142,7 +2141,7 @@ public class UserControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(this.validatedUserAccountProvider, times(1)).addMobileAppToken("test");
+    verify(this.validatedUserAccountProvider).addMobileAppToken("test");
   }
 
   @Test
@@ -2253,18 +2252,19 @@ public class UserControllerAuthorizationIT {
 
     verify(sessionService).getSession(sessionId);
   }
+
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(csrfCookie)
+        .cookie(CSRF_COOKIE)
         .header(CSRF_HEADER, CSRF_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
+    verify(this.keycloakTwoFactorAuthService).deleteOtpCredential(any());
   }
 
   @Test
@@ -2301,7 +2301,7 @@ public class UserControllerAuthorizationIT {
   public void activateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(csrfCookie)
+        .cookie(CSRF_COOKIE)
         .header(CSRF_HEADER, CSRF_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(
@@ -2309,7 +2309,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService, times(1)).setUpOtpCredential(any(), any());
+    verify(this.keycloakTwoFactorAuthService).setUpOtpCredential(any(), any());
   }
 
   @Test
@@ -2317,7 +2317,7 @@ public class UserControllerAuthorizationIT {
   public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
       throws Exception {
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(csrfCookie)
+        .cookie(CSRF_COOKIE)
         .header(CSRF_HEADER, CSRF_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
