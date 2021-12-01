@@ -28,7 +28,7 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
       - name: Maven Package
-        run: mvn -B -Pprod  clean package -DskipTests
+        run: mvn -B -Pprod  clean package -DskipTests=true
       - name: Maven Verify
         run: mvn -B -Pprod clean verify
       - uses: actions/upload-artifact@v2
