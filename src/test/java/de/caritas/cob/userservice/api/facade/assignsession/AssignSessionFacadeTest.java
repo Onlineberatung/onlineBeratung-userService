@@ -115,8 +115,7 @@ public class AssignSessionFacadeTest {
     Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
-        .thenReturn(List.of(consultantToRemove));
+    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any())).thenReturn(List.of(consultantToRemove));
 
     this.assignSessionFacade.assignSession(session, consultant);
 
@@ -183,7 +182,6 @@ public class AssignSessionFacadeTest {
 
   @Test
   public void assignSession_Should_FireAssignSessionStatisticsEvent() {
-
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
@@ -206,8 +204,6 @@ public class AssignSessionFacadeTest {
     Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
-        .thenReturn(List.of(consultantToRemove));
 
     this.assignSessionFacade.assignSession(session, consultant);
 
