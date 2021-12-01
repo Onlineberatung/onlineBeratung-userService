@@ -1,0 +1,71 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+paths:
+  /userstatistics/sessions:
+    get:
+      tags:
+        - user-statistics-controller
+      summary: 'Returns session informationen for statistics. [Authorization: none]'
+      operationId: getSession
+      parameters:
+        - name: sessionId
+          in: query
+          description: 'The id of the session.'
+          schema:
+            type: integer
+            format: int64
+        - name: rcGroupId
+          in: query
+          description: 'The rc group id of the session. if the session id is also passed, the query is done via it.'
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/SessionStatisticsResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - Session not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+
+components:
+  schemas:
+
+    SessionStatisticsResultDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 94
+        rcGroupId:
+          type: string
+          example: y77uzd
+        consultingType:
+          type: integer
+          example: 1
+        agencyId:
+          type: integer
+          format: int64
+          example: 1
+        isTeamSession:
+          type: boolean
+        postcode:
+          type: string
+          example: 88999
+        messageDate:
+          type: string
+        createDate:
+          type: string
+
+

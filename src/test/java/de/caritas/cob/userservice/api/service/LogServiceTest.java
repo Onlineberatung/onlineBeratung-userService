@@ -16,6 +16,8 @@ import static de.caritas.cob.userservice.api.service.LogService.INTERNAL_SERVER_
 import static de.caritas.cob.userservice.api.service.LogService.KEYCLOAK_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.MAIL_SERVICE_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.ROCKET_CHAT_ERROR_TEXT;
+import static de.caritas.cob.userservice.api.service.LogService.STATISTICS_EVENT_PROCESSING_ERROR;
+import static de.caritas.cob.userservice.api.service.LogService.STATISTICS_EVENT_PROCESSING_WARNING;
 import static de.caritas.cob.userservice.api.service.LogService.TRUNCATION_ERROR;
 import static de.caritas.cob.userservice.api.service.LogService.UNAUTHORIZED_WARNING_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.VALIDATION_ERROR;
@@ -423,4 +425,21 @@ public class LogServiceTest {
     verify(logger, times(1))
         .warn(anyString(), eq(HttpStatus.BAD_REQUEST.getReasonPhrase()), anyString());
   }
+
+  @Test
+  public void logStatisticEventError_Should_LogExceptionStackTraceAndErrorMessage() {
+
+    LogService.logStatisticsEventError(EXCEPTION);
+    verify(logger, times(1))
+        .error(anyString(), eq(STATISTICS_EVENT_PROCESSING_ERROR), eq(getStackTrace(EXCEPTION)));
+  }
+
+  @Test
+  public void logStatisticEventWarning_Should_LogErrorMessageAsWarning() {
+
+    LogService.logStatisticsEventWarning(ERROR_MESSAGE);
+    verify(logger, times(1))
+        .warn(anyString(), eq(STATISTICS_EVENT_PROCESSING_WARNING), eq(ERROR_MESSAGE));
+  }
+
 }

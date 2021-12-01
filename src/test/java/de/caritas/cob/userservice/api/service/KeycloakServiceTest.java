@@ -73,12 +73,12 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void changePassword_Should_ReturnTrue_WhenKeycloakPasswordChangeWasSuccessful() {
+  public void changePassword_Should_ReturnTrue_When_KeycloakPasswordChangeWasSuccessful() {
     assertTrue(keycloakService.changePassword(USER_ID, NEW_PW));
   }
 
   @Test
-  public void changePassword_Should_ReturnFalseAndLogError_WhenKeycloakPasswordChangeFailsWithException() {
+  public void changePassword_Should_ReturnFalseAndLogError_When_KeycloakPasswordChangeFailsWithException() {
     Exception exception = new RuntimeException();
     doThrow(exception).when(keycloakAdminClientService).updatePassword(USER_ID, NEW_PW);
 
@@ -114,7 +114,7 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void logoutUser_Should_ReturnTrue_WhenKeycloakLoginWasSuccessful() {
+  public void logoutUser_Should_ReturnTrue_When_KeycloakLoginWasSuccessful() {
     when(restTemplate
         .postForEntity(ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<Void>>any()))
         .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
@@ -135,7 +135,7 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  public void logoutUser_Should_ReturnFalseAndLogError_WhenKeycloakLogoutFails() {
+  public void logoutUser_Should_ReturnFalseAndLogError_When_KeycloakLogoutFails() {
     when(restTemplate
         .postForEntity(ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<Void>>any()))
         .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));

@@ -4,6 +4,8 @@ import static de.caritas.cob.userservice.testHelper.AsyncVerification.verifyAsyn
 import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.testHelper.TestConstants.FEEDBACKSESSION_WITH_CONSULTANT;
 import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,13 +33,19 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
+import java.util.Objects;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignSessionFacadeTest {
@@ -66,6 +74,8 @@ public class AssignSessionFacadeTest {
   SessionToConsultantVerifier sessionToConsultantVerifier;
   @Mock
   UnauthorizedMembersProvider unauthorizedMembersProvider;
+  @Mock
+  StatisticsService statisticsService;
 
   @Test(expected = InternalServerErrorException.class)
   public void assignSession_Should_ReturnInternalServerErrorAndLogErrorAndDoARollback_WhenAddConsultantToRcGroupFails_WhenSessionIsNoEnquiry() {
@@ -170,4 +180,51 @@ public class AssignSessionFacadeTest {
     verify(this.emailNotificationFacade, times(1))
         .sendAssignEnquiryEmailNotification(any(), any(), any());
   }
+
+  @Test
+  public void assignSession_Should_FireAssignSessionStatisticsEvent() {
+
+    Session session = new EasyRandom().nextObject(Session.class);
+    session.setTeamSession(false);
+    session.setStatus(SessionStatus.NEW);
+    session.setConsultant(null);
+    session.getUser().setRcUserId("userRcId");
+    session.setRegistrationType(RegistrationType.REGISTERED);
+    session.setAgencyId(1L);
+    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
+    consultantAgency.setAgencyId(1L);
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setConsultantAgencies(asSet(consultantAgency));
+    consultant.setRocketChatId("newConsultantRcId");
+    when(this.rocketChatFacade.retrieveRocketChatMembers(anyString())).thenReturn(asList(
+        new GroupMemberDTO("userRcId", null, "name", null, null),
+        new GroupMemberDTO("newConsultantRcId", null, "name", null, null),
+        new GroupMemberDTO("otherRcId", null, "name", null, null),
+        new GroupMemberDTO("teamConsultantRcId", null, "name", null, null),
+        new GroupMemberDTO("teamConsultantRcId2", null, "name", null, null)
+    ));
+    Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
+    consultantToRemove.setRocketChatId("otherRcId");
+    when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
+    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
+        .thenReturn(List.of(consultantToRemove));
+
+    this.assignSessionFacade.assignSession(session, consultant);
+
+    verify(statisticsService, times(1)).fireEvent(any(AssignSessionStatisticsEvent.class));
+
+    ArgumentCaptor<AssignSessionStatisticsEvent> captor = ArgumentCaptor.forClass(
+        AssignSessionStatisticsEvent.class);
+    verify(statisticsService, times(1)).fireEvent(captor.capture());
+    String userId = Objects.requireNonNull(
+        ReflectionTestUtils.getField(captor.getValue(), "userId")).toString();
+    assertThat(userId, is(consultant.getId()));
+    String userRole = Objects.requireNonNull(
+        ReflectionTestUtils.getField(captor.getValue(), "userRole")).toString();
+    assertThat(userRole, is(UserRole.CONSULTANT.toString()));
+    Long sessionId = Long.valueOf(Objects.requireNonNull(
+        ReflectionTestUtils.getField(captor.getValue(), "sessionId").toString()));
+    assertThat(sessionId, is(session.getId()));
+  }
+
 }

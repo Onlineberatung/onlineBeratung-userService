@@ -80,7 +80,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
             "/users/chat/{chatId:[0-9]+}/join", "/users/chat/{chatId:[0-9]+}/members",
-            "/users/chat/{chatId:[0-9]+}/leave", "/users/mobile/app/token")
+            "/users/chat/{chatId:[0-9]+}/leave", "/users/twoFactorAuth", "/users/mobile/app/token")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
             "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken",
@@ -127,6 +127,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers("/userstatistics", "/userstatistics/**")
+        .hasAuthority(CONSULTANT_DEFAULT)
         .anyRequest().denyAll();
   }
 
