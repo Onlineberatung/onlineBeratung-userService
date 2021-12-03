@@ -19,7 +19,6 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -260,13 +259,8 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   private void whenConsultantIsMain(boolean returnValue) {
-    var mainConsultant = UserRole.MAIN_CONSULTANT.getValue();
-    var randomCaseMainConsultant = EASY_RANDOM.nextBoolean()
-        ? mainConsultant.toLowerCase()
-        : mainConsultant.toUpperCase();
-
     when(
-        keycloakAdminClientService.userHasRole(anyString(), eq(randomCaseMainConsultant))
+        keycloakAdminClientService.userHasRole(anyString(), eq("main-consultant"))
     ).thenReturn(returnValue);
   }
 }
