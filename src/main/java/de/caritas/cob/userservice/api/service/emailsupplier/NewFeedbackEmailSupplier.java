@@ -140,7 +140,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
         session.getConsultant().getRocketChatId()
     );
     var isMainConsultant = keycloakAdminClientService.userHasRole(
-        consultant.getId(), UserRole.MAIN_CONSULTANT.name()
+        consultant.getId(), UserRole.MAIN_CONSULTANT.getValue()
     );
 
     return isAssignedToSession || isMainConsultant;

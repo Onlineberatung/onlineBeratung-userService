@@ -32,6 +32,7 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDT
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 public class NewFeedbackEmailSupplierTest {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final EasyRandom EASY_RANDOM = new EasyRandom();
 
   private NewFeedbackEmailSupplier newFeedbackEmailSupplier;
 
@@ -257,8 +259,14 @@ public class NewFeedbackEmailSupplierTest {
     return MAPPER.readValue(content, Consultant.class);
   }
 
-  private void whenConsultantIsMain(boolean b) {
-    when(keycloakAdminClientService.userHasRole(anyString(), eq(UserRole.MAIN_CONSULTANT.name())))
-        .thenReturn(b);
+  private void whenConsultantIsMain(boolean returnValue) {
+    var mainConsultant = UserRole.MAIN_CONSULTANT.getValue();
+    var randomCaseMainConsultant = EASY_RANDOM.nextBoolean()
+        ? mainConsultant.toLowerCase()
+        : mainConsultant.toUpperCase();
+
+    when(
+        keycloakAdminClientService.userHasRole(anyString(), eq(randomCaseMainConsultant))
+    ).thenReturn(returnValue);
   }
 }
