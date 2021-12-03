@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.repository.consultant;
 
 import static de.caritas.cob.userservice.api.repository.consultant.Consultant.EMAIL_ANALYZER;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -128,6 +129,7 @@ public class Consultant {
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
 
+  @JsonIgnore
   public String getFullName() {
     return (this.firstName + " " + this.lastName).trim();
   }

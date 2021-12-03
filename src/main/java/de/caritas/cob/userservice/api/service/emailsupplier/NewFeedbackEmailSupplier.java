@@ -8,6 +8,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
@@ -15,6 +16,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -37,6 +39,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
   private final ConsultantService consultantService;
   private final RocketChatService rocketChatService;
   private final String rocketChatSystemUserId;
+  private final KeycloakAdminClientService keycloakAdminClientService;
 
   /**
    * Generates feedback message notification mails sent to regarding consultants.
@@ -100,7 +103,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
       throws RocketChatGetGroupMembersException {
     List<GroupMemberDTO> groupMembers = rocketChatService.getMembersOfGroup(rcFeedbackGroupId);
     if (isNotEmpty(groupMembers)) {
-      return buildMailsForAllConsultantsExceptSystemUser(sendingConsultant, groupMembers);
+      return buildMailsForAllDueConsultants(sendingConsultant, groupMembers);
     }
 
     LogService.logEmailNotificationFacadeError(String.format(
@@ -108,13 +111,14 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return emptyList();
   }
 
-  private List<MailDTO> buildMailsForAllConsultantsExceptSystemUser(Consultant sendingConsultant,
+  private List<MailDTO> buildMailsForAllDueConsultants(Consultant sendingConsultant,
       List<GroupMemberDTO> groupMembers) {
     return groupMembers.stream()
         .filter(groupMemberDTO -> !rocketChatSystemUserId.equals(groupMemberDTO.get_id()))
         .map(this::toValidatedConsultant)
         .filter(Objects::nonNull)
         .filter(this::notHimselfAndNotAbsent)
+        .filter(this::isMainConsultantOrAssignedToSession)
         .map(consultant -> buildMailForAssignedConsultant(sendingConsultant, consultant))
         .collect(Collectors.toList());
   }
@@ -129,6 +133,17 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
         "Consultant with rc user id %s not found. Why is this consultant in the rc room with the id %s?",
         groupMemberDTO.get_id(), rcFeedbackGroupId));
     return null;
+  }
+
+  private boolean isMainConsultantOrAssignedToSession(Consultant consultant) {
+    var isAssignedToSession = consultant.getRocketChatId().equals(
+        session.getConsultant().getRocketChatId()
+    );
+    var isMainConsultant = keycloakAdminClientService.userHasRole(
+        consultant.getId(), UserRole.MAIN_CONSULTANT.name()
+    );
+
+    return isAssignedToSession || isMainConsultant;
   }
 
   private boolean notHimselfAndNotAbsent(Consultant consultant) {
