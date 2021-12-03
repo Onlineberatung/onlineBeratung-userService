@@ -128,7 +128,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/userstatistics", "/userstatistics/**")
-        .hasAuthority(CONSULTANT_DEFAULT)
+        .permitAll()
         .anyRequest().denyAll();
   }
 
