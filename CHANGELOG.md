@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.13.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.0...v2.13.1) (2021-12-03)
+
+
+### Bug Fixes
+
+* case issue on user role value ([d8c978e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d8c978ea35de66839f9994613f02aa34469ac46b))
+* email only consultants who are assigned to the session or main ([bad1bba](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/bad1bbaff491de6d988e28b7d5a401a3f3ca6631))
+
 ## [2.13.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.12.1...v2.13.0) (2021-11-29)
 
 
