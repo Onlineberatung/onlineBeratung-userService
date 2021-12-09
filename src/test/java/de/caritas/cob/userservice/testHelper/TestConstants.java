@@ -12,6 +12,8 @@ import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
+import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.SessionAttachmentDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
@@ -56,9 +58,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.keycloak.common.util.RandomString;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -1205,4 +1209,10 @@ public class TestConstants {
   // Authorization
   public static final String GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT = "AUTHORIZATION_CONSULTANT_DEFAULT";
   public static final String GRANTED_AUTHORIZATION_USER = "AUTHORIZATION_USER";
+
+  public static final OtpInfoDTO OTP_INFO_DTO = new OtpInfoDTO().otpSecret("secret").otpSecretQrCode("QrCode").otpSetup(false);
+  public static final Optional<OtpInfoDTO> OPTIONAL_OTP_INFO_DTO = Optional.of(OTP_INFO_DTO);
+  public static final OtpSetupDTO VALID_OTP_SETUP_DTO = new OtpSetupDTO().initialCode("111111").secret(new RandomString(32).nextString());
+  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_CODE = new OtpSetupDTO().initialCode("1").secret(new RandomString(32).nextString());
+  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_SECRET = new OtpSetupDTO().initialCode("111111").secret("secret");
 }

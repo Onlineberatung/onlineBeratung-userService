@@ -7,6 +7,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_EN
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
@@ -36,6 +37,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -88,6 +90,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.DECODED_PASSWO
 import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.FIRST_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INACTIVE_CHAT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_CODE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_SECRET;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_SESSION;
@@ -99,6 +103,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.MASTER_KEY_DTO
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
+import static de.caritas.cob.userservice.testHelper.TestConstants.OPTIONAL_OTP_INFO_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
@@ -111,6 +116,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
+import static de.caritas.cob.userservice.testHelper.TestConstants.OTP_INFO_DTO;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -141,6 +148,7 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -164,6 +172,7 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
+import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
@@ -193,6 +202,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
@@ -211,12 +221,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -433,6 +448,10 @@ public class UserControllerIT {
   private SessionArchiveService sessionArchiveService;
   @MockBean
   private DeleteSingleRoomAndSessionAction singleRoomAndSessionDeleter;
+  @MockBean
+  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  @MockBean
+  private TwoFactorAuthValidator twoFactorAuthValidator;
 
   @Mock
   private Logger logger;
@@ -1190,6 +1209,7 @@ public class UserControllerIT {
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
@@ -1242,6 +1262,8 @@ public class UserControllerIT {
 
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
+
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2361,6 +2383,60 @@ public class UserControllerIT {
   public void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void deactivateTwoFactorAuthForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
+      throws Exception {
+
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
+  }
+
+  @Test
+  public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
+      throws Exception {
+    Mockito.doThrow(new InternalServerErrorException("Fail test case")).when(keycloakTwoFactorAuthService).deleteOtpCredential(null);
+
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+
+    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
+  }
+
+  @Test
+  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
+      throws Exception {
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_SECRET);
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            INVALID_OTP_SETUP_DTO_WRONG_SECRET))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(keycloakTwoFactorAuthService);
+  }
+
+  @Test
+  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
+      throws Exception {
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_CODE);
+
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            INVALID_OTP_SETUP_DTO_WRONG_CODE))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(this.keycloakTwoFactorAuthService, times(0)).deleteOtpCredential(any());
   }
 
   @Test
