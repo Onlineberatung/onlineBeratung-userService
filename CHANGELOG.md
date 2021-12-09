@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.13.3](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.2...v2.13.3) (2021-12-09)
+
+
+### Bug Fixes
+
+* remove async remocval of rocket chat members ([2495897](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/249589788e748e6b0cc1854efaadb257aea4c827))
+
 ### [2.13.2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.1...v2.13.2) (2021-12-03)
 
 
