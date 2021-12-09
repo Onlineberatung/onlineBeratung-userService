@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.13.3](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.2...v2.13.3) (2021-12-09)
+
+
+### Bug Fixes
+
+* remove async remocval of rocket chat members ([2495897](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/249589788e748e6b0cc1854efaadb257aea4c827))
+
+### [2.13.2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.1...v2.13.2) (2021-12-03)
+
+
+### Bug Fixes
+
+* mock only lowercase main consultants in test ([a09a963](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a09a963b5db44db8a986a8cf9ec9056a6c5eb42b))
+
+### [2.13.1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.0...v2.13.1) (2021-12-03)
+
+
+### Bug Fixes
+
+* case issue on user role value ([d8c978e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d8c978ea35de66839f9994613f02aa34469ac46b))
+* email only consultants who are assigned to the session or main ([bad1bba](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/bad1bbaff491de6d988e28b7d5a401a3f3ca6631))
+
 ## [2.13.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.12.1...v2.13.0) (2021-11-29)
 
 

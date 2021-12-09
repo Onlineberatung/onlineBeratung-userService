@@ -6,20 +6,20 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -58,7 +58,7 @@ public class EmailNotificationFacade {
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull UserHelper userHelper;
+  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
@@ -142,7 +142,7 @@ public class EmailNotificationFacade {
       Session session = sessionService.getSessionByFeedbackGroupId(rcFeedbackGroupId);
       EmailSupplier newFeedbackMessages = new NewFeedbackEmailSupplier(session,
           rcFeedbackGroupId, userId, applicationBaseUrl, consultantService, rocketChatService,
-          rocketChatSystemUserId);
+          rocketChatSystemUserId, keycloakAdminClientService);
       sendMailTasksToMailService(newFeedbackMessages);
     } catch (Exception e) {
       LogService.logEmailNotificationFacadeError(String.format(
