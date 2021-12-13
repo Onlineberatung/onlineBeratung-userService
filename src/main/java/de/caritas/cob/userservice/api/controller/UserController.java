@@ -4,6 +4,8 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -59,6 +61,7 @@ import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -128,7 +131,7 @@ public class UserController implements UsersApi {
   private final @NotNull SessionArchiveService sessionArchiveService;
   private final @NotNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   private final @NotNull TwoFactorAuthValidator twoFactorAuthValidator;
-  private final @NotNull DeleteSingleRoomAndSessionAction singleRoomAndSessionDeleter;
+  private final @NotNull ActionsRegistry actionsRegistry;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -228,8 +231,17 @@ public class UserController implements UsersApi {
         .orElseThrow(() -> new NotFoundException(
             String.format("A session with an id %s does not exist.", sessionId)));
 
-    var workflow = new SessionDeletionWorkflowDTO(session, null);
-    singleRoomAndSessionDeleter.execute(workflow);
+    var user = session.getUser();
+    if (user.getSessions().size() == 1) {
+      actionsRegistry.buildContainerForType(User.class)
+          .addActionToExecute(DeactivateKeycloakUserActionCommand.class)
+          .executeActions(user);
+    }
+
+    var deleteSession = new SessionDeletionWorkflowDTO(session, null);
+    actionsRegistry.buildContainerForType(SessionDeletionWorkflowDTO.class)
+        .addActionToExecute(DeleteSingleRoomAndSessionAction.class)
+        .executeActions(deleteSession);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
