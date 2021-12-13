@@ -7,9 +7,9 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_EN
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -36,8 +36,8 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_USER_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -116,8 +116,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.OTP_INFO_DTO;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -141,6 +139,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
@@ -202,8 +203,8 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -221,17 +222,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -447,7 +443,7 @@ public class UserControllerIT {
   @MockBean
   private SessionArchiveService sessionArchiveService;
   @MockBean
-  private DeleteSingleRoomAndSessionAction singleRoomAndSessionDeleter;
+  private ActionsRegistry actionsRegistry;
   @MockBean
   private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   @MockBean
@@ -2238,31 +2234,50 @@ public class UserControllerIT {
   public void deleteSessionAndInactiveUser_Should_ReturnNotFound_When_SessionIdIsUnknown()
       throws Exception {
     var sessionId = easyRandom.nextLong();
-    var path = "/users/sessions/" + sessionId;
 
     mvc.perform(
-            delete(path)
+            delete("/users/sessions/{sessionId}", sessionId)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
 
     verify(sessionService).getSession(sessionId);
-    verifyNoMoreInteractions(singleRoomAndSessionDeleter);
+    verifyNoMoreInteractions(actionsRegistry);
   }
 
   @Test
   public void deleteSessionAndInactiveUser_Should_ReturnOK_When_SessionIdIsKnown()
       throws Exception {
-    var sessionId = easyRandom.nextLong();
-    var optionalSession = Optional.of(easyRandom.nextObject(Session.class));
-    when(sessionService.getSession(eq(sessionId))).thenReturn(optionalSession);
+    var sessionId = givenAPresentSession(false);
+    var actionContainer = givenActionRegistryDeletesSession();
 
     mvc.perform(
-            delete("/users/sessions/" + sessionId)
+            delete("/users/sessions/{sessionId}", sessionId)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(sessionService).getSession(sessionId);
-    verify(singleRoomAndSessionDeleter).execute(any(SessionDeletionWorkflowDTO.class));
+    verify(actionContainer).executeActions(any(SessionDeletionWorkflowDTO.class));
+    verify(actionsRegistry).buildContainerForType(SessionDeletionWorkflowDTO.class);
+    verifyNoMoreInteractions(actionsRegistry);
+  }
+
+  @Test
+  public void deleteSessionAndInactiveUser_Should_DeactivateKeycloakUser_When_OnlySession()
+      throws Exception {
+    var sessionId = givenAPresentSession(true);
+    var actionContainerDelete = givenActionRegistryDeletesSession();
+    var actionContainerDeactivate = givenActionRegistryDeactivatesKeycloakUser();
+
+    mvc.perform(
+            delete("/users/sessions/{sessionId}", sessionId)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(sessionService).getSession(sessionId);
+    verify(actionContainerDelete).executeActions(any(SessionDeletionWorkflowDTO.class));
+    verify(actionContainerDeactivate).executeActions(any(User.class));
+    verify(actionsRegistry).buildContainerForType(SessionDeletionWorkflowDTO.class);
+    verify(actionsRegistry).buildContainerForType(User.class);
   }
 
   @Test
@@ -2454,4 +2469,38 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
   }
 
+  private long givenAPresentSession(boolean isOnlySession) {
+    var sessionId = easyRandom.nextLong();
+    var session = easyRandom.nextObject(Session.class);
+    if (isOnlySession) {
+      session.getUser().setSessions(Set.of(session));
+    }
+
+    when(sessionService.getSession(eq(sessionId)))
+        .thenReturn(Optional.of(session));
+
+    return sessionId;
+  }
+
+  private ActionContainer<SessionDeletionWorkflowDTO> givenActionRegistryDeletesSession() {
+    @SuppressWarnings("unchecked")
+    var actionContainer = (ActionContainer<SessionDeletionWorkflowDTO>) mock(ActionContainer.class);
+    when(actionContainer.addActionToExecute(DeleteSingleRoomAndSessionAction.class))
+        .thenReturn(actionContainer);
+    when(actionsRegistry.buildContainerForType(eq(SessionDeletionWorkflowDTO.class)))
+        .thenReturn(actionContainer);
+
+    return actionContainer;
+  }
+
+  private ActionContainer<User> givenActionRegistryDeactivatesKeycloakUser() {
+    @SuppressWarnings("unchecked")
+    var actionContainer = (ActionContainer<User>) mock(ActionContainer.class);
+    when(actionContainer.addActionToExecute(DeactivateKeycloakUserActionCommand.class))
+        .thenReturn(actionContainer);
+    when(actionsRegistry.buildContainerForType(eq(User.class)))
+        .thenReturn(actionContainer);
+
+    return actionContainer;
+  }
 }
