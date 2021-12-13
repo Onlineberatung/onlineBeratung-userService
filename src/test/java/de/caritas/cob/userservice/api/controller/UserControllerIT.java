@@ -157,7 +157,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
-import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
@@ -193,9 +192,7 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.AskerImportService;
@@ -211,7 +208,6 @@ import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -369,20 +365,20 @@ public class UserControllerIT {
   @MockBean
   private SessionService sessionService;
   @MockBean
-  private SessionRepository sessionRepository;
-  @MockBean
   private AuthenticatedUser authenticatedUser;
   @MockBean
   private CreateEnquiryMessageFacade createEnquiryMessageFacade;
   @MockBean
   private UserDataFacade userDataFacade;
   @MockBean
+  @SuppressWarnings("unused")
   private ConsultantImportService consultantImportService;
   @MockBean
   private EmailNotificationFacade emailNotificationFacade;
   @MockBean
   private MonitoringService monitoringService;
   @MockBean
+  @SuppressWarnings("unused")
   private AskerImportService askerImportService;
   @MockBean
   private SessionListFacade sessionListFacade;
@@ -419,16 +415,14 @@ public class UserControllerIT {
   @MockBean
   private StopChatFacade stopChatFacade;
   @MockBean
-  private ConsultantRepository consultantRepository;
-  @MockBean
   private GetChatMembersFacade getChatMembersFacade;
   @MockBean
   private CreateUserFacade createUserFacade;
   @MockBean
-  private CreateSessionFacade createSessionFacade;
-  @MockBean
+  @SuppressWarnings("unused")
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
   @MockBean
+  @SuppressWarnings("unused")
   private LinkDiscoverers linkDiscoverers;
   @MockBean
   private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
@@ -436,8 +430,6 @@ public class UserControllerIT {
   private MandatoryFieldsProvider mandatoryFieldsProvider;
   @MockBean
   private ConsultantDataFacade consultantDataFacade;
-  @MockBean
-  private UserService userService;
   @MockBean
   private SessionDataService sessionDataService;
   @MockBean
