@@ -9,6 +9,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_S
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -35,6 +36,7 @@ import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_USER_
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
+import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
@@ -88,6 +90,8 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.DECODED_PASSWO
 import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.userservice.testHelper.TestConstants.FIRST_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.INACTIVE_CHAT;
+import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_CODE;
+import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_SECRET;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_SESSION;
@@ -99,6 +103,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.MASTER_KEY_DTO
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
+import static de.caritas.cob.userservice.testHelper.TestConstants.OPTIONAL_OTP_INFO_DTO;
 import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
@@ -134,6 +139,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
+import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
@@ -141,6 +149,7 @@ import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -148,7 +157,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
-import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
@@ -164,6 +172,7 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
+import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
@@ -183,9 +192,7 @@ import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.AskerImportService;
@@ -194,13 +201,13 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -358,20 +365,20 @@ public class UserControllerIT {
   @MockBean
   private SessionService sessionService;
   @MockBean
-  private SessionRepository sessionRepository;
-  @MockBean
   private AuthenticatedUser authenticatedUser;
   @MockBean
   private CreateEnquiryMessageFacade createEnquiryMessageFacade;
   @MockBean
   private UserDataFacade userDataFacade;
   @MockBean
+  @SuppressWarnings("unused")
   private ConsultantImportService consultantImportService;
   @MockBean
   private EmailNotificationFacade emailNotificationFacade;
   @MockBean
   private MonitoringService monitoringService;
   @MockBean
+  @SuppressWarnings("unused")
   private AskerImportService askerImportService;
   @MockBean
   private SessionListFacade sessionListFacade;
@@ -408,16 +415,14 @@ public class UserControllerIT {
   @MockBean
   private StopChatFacade stopChatFacade;
   @MockBean
-  private ConsultantRepository consultantRepository;
-  @MockBean
   private GetChatMembersFacade getChatMembersFacade;
   @MockBean
   private CreateUserFacade createUserFacade;
   @MockBean
-  private CreateSessionFacade createSessionFacade;
-  @MockBean
+  @SuppressWarnings("unused")
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
   @MockBean
+  @SuppressWarnings("unused")
   private LinkDiscoverers linkDiscoverers;
   @MockBean
   private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
@@ -426,13 +431,15 @@ public class UserControllerIT {
   @MockBean
   private ConsultantDataFacade consultantDataFacade;
   @MockBean
-  private UserService userService;
-  @MockBean
   private SessionDataService sessionDataService;
   @MockBean
   private SessionArchiveService sessionArchiveService;
   @MockBean
-  private DeleteSingleRoomAndSessionAction singleRoomAndSessionDeleter;
+  private ActionsRegistry actionsRegistry;
+  @MockBean
+  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  @MockBean
+  private TwoFactorAuthValidator twoFactorAuthValidator;
 
   @Mock
   private Logger logger;
@@ -1190,6 +1197,7 @@ public class UserControllerIT {
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
@@ -1242,6 +1250,8 @@ public class UserControllerIT {
 
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
+
+    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2216,31 +2226,50 @@ public class UserControllerIT {
   public void deleteSessionAndInactiveUser_Should_ReturnNotFound_When_SessionIdIsUnknown()
       throws Exception {
     var sessionId = easyRandom.nextLong();
-    var path = "/users/sessions/" + sessionId;
 
     mvc.perform(
-            delete(path)
+            delete("/users/sessions/{sessionId}", sessionId)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
 
     verify(sessionService).getSession(sessionId);
-    verifyNoMoreInteractions(singleRoomAndSessionDeleter);
+    verifyNoMoreInteractions(actionsRegistry);
   }
 
   @Test
   public void deleteSessionAndInactiveUser_Should_ReturnOK_When_SessionIdIsKnown()
       throws Exception {
-    var sessionId = easyRandom.nextLong();
-    var optionalSession = Optional.of(easyRandom.nextObject(Session.class));
-    when(sessionService.getSession(eq(sessionId))).thenReturn(optionalSession);
+    var sessionId = givenAPresentSession(false);
+    var actionContainer = givenActionRegistryDeletesSession();
 
     mvc.perform(
-            delete("/users/sessions/" + sessionId)
+            delete("/users/sessions/{sessionId}", sessionId)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(sessionService).getSession(sessionId);
-    verify(singleRoomAndSessionDeleter).execute(any(SessionDeletionWorkflowDTO.class));
+    verify(actionContainer).executeActions(any(SessionDeletionWorkflowDTO.class));
+    verify(actionsRegistry).buildContainerForType(SessionDeletionWorkflowDTO.class);
+    verifyNoMoreInteractions(actionsRegistry);
+  }
+
+  @Test
+  public void deleteSessionAndInactiveUser_Should_DeactivateKeycloakUser_When_OnlySession()
+      throws Exception {
+    var sessionId = givenAPresentSession(true);
+    var actionContainerDelete = givenActionRegistryDeletesSession();
+    var actionContainerDeactivate = givenActionRegistryDeactivatesKeycloakUser();
+
+    mvc.perform(
+            delete("/users/sessions/{sessionId}", sessionId)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(sessionService).getSession(sessionId);
+    verify(actionContainerDelete).executeActions(any(SessionDeletionWorkflowDTO.class));
+    verify(actionContainerDeactivate).executeActions(any(User.class));
+    verify(actionsRegistry).buildContainerForType(SessionDeletionWorkflowDTO.class);
+    verify(actionsRegistry).buildContainerForType(User.class);
   }
 
   @Test
@@ -2364,6 +2393,60 @@ public class UserControllerIT {
   }
 
   @Test
+  public void deactivateTwoFactorAuthForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
+      throws Exception {
+
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
+  }
+
+  @Test
+  public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
+      throws Exception {
+    Mockito.doThrow(new InternalServerErrorException("Fail test case")).when(keycloakTwoFactorAuthService).deleteOtpCredential(null);
+
+    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+
+    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
+  }
+
+  @Test
+  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
+      throws Exception {
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_SECRET);
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            INVALID_OTP_SETUP_DTO_WRONG_SECRET))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(keycloakTwoFactorAuthService);
+  }
+
+  @Test
+  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
+      throws Exception {
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_CODE);
+
+    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(
+            INVALID_OTP_SETUP_DTO_WRONG_CODE))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(this.keycloakTwoFactorAuthService, times(0)).deleteOtpCredential(any());
+  }
+
+  @Test
   public void addMobileAppToken_Should_returnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)
             .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO()))
@@ -2378,4 +2461,38 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
   }
 
+  private long givenAPresentSession(boolean isOnlySession) {
+    var sessionId = easyRandom.nextLong();
+    var session = easyRandom.nextObject(Session.class);
+    if (isOnlySession) {
+      session.getUser().setSessions(Set.of(session));
+    }
+
+    when(sessionService.getSession(eq(sessionId)))
+        .thenReturn(Optional.of(session));
+
+    return sessionId;
+  }
+
+  private ActionContainer<SessionDeletionWorkflowDTO> givenActionRegistryDeletesSession() {
+    @SuppressWarnings("unchecked")
+    var actionContainer = (ActionContainer<SessionDeletionWorkflowDTO>) mock(ActionContainer.class);
+    when(actionContainer.addActionToExecute(DeleteSingleRoomAndSessionAction.class))
+        .thenReturn(actionContainer);
+    when(actionsRegistry.buildContainerForType(eq(SessionDeletionWorkflowDTO.class)))
+        .thenReturn(actionContainer);
+
+    return actionContainer;
+  }
+
+  private ActionContainer<User> givenActionRegistryDeactivatesKeycloakUser() {
+    @SuppressWarnings("unchecked")
+    var actionContainer = (ActionContainer<User>) mock(ActionContainer.class);
+    when(actionContainer.addActionToExecute(DeactivateKeycloakUserActionCommand.class))
+        .thenReturn(actionContainer);
+    when(actionsRegistry.buildContainerForType(eq(User.class)))
+        .thenReturn(actionContainer);
+
+    return actionContainer;
+  }
 }

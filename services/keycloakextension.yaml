@@ -1,0 +1,135 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+paths:
+  /otp-config/fetch-otp-setup-info/{username}:
+    get:
+      summary: 'Returns if the otp credential is set. If not otp secret and qr code is also returned'
+      operationId: getOtpSetupInfo
+      parameters:
+        - name: username
+          in: path
+          description: the username
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/OtpInfoDTO'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /otp-config/setup-otp/{username}:
+    put:
+      summary: 'Creates the otp credential if not created'
+      operationId: setupOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpSetupDTO'
+      parameters:
+        - name: username
+          in: path
+          description: the username
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: otp was already created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        201:
+          description: otp created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: the code was not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /otp-config/delete-otp/{username}:
+    get:
+      summary: 'Deletes the otp credential if set'
+      operationId: deleteOtp
+      parameters:
+        - name: username
+          in: path
+          description: the username
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    OtpInfoDTO:
+      type: object
+      properties:
+        otpSetup:
+          type: boolean
+          example: true
+        otpSecret:
+          type: string
+          description: is only set when otpSetup if false
+        otpSecretQrCode:
+          type: string
+          description: is only set when otpSetup if false
+
+    OtpSetupDTO:
+      type: object
+      properties:
+        secret:
+          type: string
+        initialCode:
+          type: string
+
+    Success:
+      type: object
+      properties:
+        info:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string

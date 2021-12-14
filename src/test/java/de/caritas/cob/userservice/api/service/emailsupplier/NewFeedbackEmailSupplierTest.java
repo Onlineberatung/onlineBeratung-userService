@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,16 +17,21 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +42,13 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class NewFeedbackEmailSupplierTest {
 
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final EasyRandom EASY_RANDOM = new EasyRandom();
+
   private NewFeedbackEmailSupplier newFeedbackEmailSupplier;
 
   @Mock
   private Session session;
-
-  @Mock
-  private UserHelper userHelper;
 
   @Mock
   private ConsultantService consultantService;
@@ -51,13 +57,16 @@ public class NewFeedbackEmailSupplierTest {
   private RocketChatService rocketChatService;
 
   @Mock
+  private KeycloakAdminClientService keycloakAdminClientService;
+
+  @Mock
   private Logger logger;
 
   @Before
   public void setup() {
     this.newFeedbackEmailSupplier = new NewFeedbackEmailSupplier(session, "feedbackGroupId",
         "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId");
+        "rocketChatSystemUserId", keycloakAdminClientService);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -66,7 +75,7 @@ public class NewFeedbackEmailSupplierTest {
       throws RocketChatGetGroupMembersException {
     List<MailDTO> generatedMails = new NewFeedbackEmailSupplier(null, "feedbackGroupId",
         "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId").generateEmails();
+        "rocketChatSystemUserId", keycloakAdminClientService).generateEmails();
 
     assertThat(generatedMails, hasSize(0));
     verify(logger, times(1)).error(anyString(), anyString(), anyString());
@@ -187,4 +196,71 @@ public class NewFeedbackEmailSupplierTest {
     assertThat(templateData.get(3).getValue(), is("applicationBaseUrl"));
   }
 
+
+  @Test
+  public void generateEmails_Should_FilterNonMainConsultantsNorSessionAssignees() throws Exception {
+    var consultant = givenAConsultant();
+    consultant.setRocketChatId(RandomStringUtils.random(17));
+
+    whenConsultantIsMain(false);
+    when(session.getConsultant()).thenReturn(consultant);
+    setField(newFeedbackEmailSupplier, "userId", consultant.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
+    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(CONSULTANT_2));
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(0));
+  }
+
+  @Test
+  public void generateEmails_Should_NotFilter_WhenConsultantsAreMain() throws Exception {
+    var consultant = givenAConsultant();
+    consultant.setRocketChatId(RandomStringUtils.random(17));
+
+    whenConsultantIsMain(true);
+    when(session.getUser()).thenReturn(USER);
+    when(session.getConsultant()).thenReturn(consultant);
+    setField(newFeedbackEmailSupplier, "userId", consultant.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
+    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(CONSULTANT_2));
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(4));
+  }
+
+  @Test
+  public void generateEmails_Should_NotFilter_WhenConsultantsAreSessionAssigned() throws Exception {
+    var consultant = givenAConsultant();
+
+    whenConsultantIsMain(false);
+    when(session.getUser()).thenReturn(USER);
+    when(session.getConsultant()).thenReturn(consultant);
+    setField(newFeedbackEmailSupplier, "userId", consultant.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
+    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(CONSULTANT_2));
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(4));
+  }
+
+  private Consultant givenAConsultant() throws JsonProcessingException {
+    var content = MAPPER.writeValueAsString(CONSULTANT);
+
+    return MAPPER.readValue(content, Consultant.class);
+  }
+
+  private void whenConsultantIsMain(boolean returnValue) {
+    when(
+        keycloakAdminClientService.userHasRole(anyString(), eq("main-consultant"))
+    ).thenReturn(returnValue);
+  }
 }

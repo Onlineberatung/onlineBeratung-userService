@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import static java.util.concurrent.CompletableFuture.supplyAsync;
-
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
@@ -13,9 +11,11 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,11 +36,15 @@ public class AssignSessionFacade {
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull UnauthorizedMembersProvider unauthorizedMembersProvider;
+  private final @NonNull StatisticsService statisticsService;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
    * consultants from the Rocket.Chat group which don't have the right to view this session anymore.
    * Furthermore add the given {@link Consultant} to the feedback group if needed.
+   *
+   * <p>If the statistics function is enabled, the assignment of the session is processed as a
+   * statistical event.
    */
   public void assignSession(Session session, Consultant consultant) {
     var consultantSessionDTO = ConsultantSessionDTO.builder()
@@ -51,8 +55,11 @@ public class AssignSessionFacade {
 
     updateSessionInDatabase(session, consultant);
     addNewConsultantToRocketChatGroup(session, consultant);
-    supplyAsync(removeUnauthorizedMembersFromGroups(session, consultant));
+    removeUnauthorizedMembersFromGroups(session, consultant);
     sendEmailForConsultantChange(session, consultant);
+
+    statisticsService.fireEvent(
+        new AssignSessionStatisticsEvent(consultant.getId(), UserRole.CONSULTANT, session.getId()));
   }
 
   private void updateSessionInDatabase(Session session, Consultant consultant) {
@@ -73,19 +80,15 @@ public class AssignSessionFacade {
     rocketChatFacade.removeSystemMessagesFromRocketChatGroup(rcGroupId);
   }
 
-  private Supplier<Void> removeUnauthorizedMembersFromGroups(Session session,
-      Consultant consultant) {
-    return () -> {
-      var memberList = rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
-      removeUnauthorizedMembersFromGroup(session, consultant, memberList);
+  private void removeUnauthorizedMembersFromGroups(Session session, Consultant consultant) {
+    var memberList = rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
+    removeUnauthorizedMembersFromGroup(session, consultant, memberList);
 
-      if (session.hasFeedbackChat()) {
-        var feedbackMemberList =
-            rocketChatFacade.retrieveRocketChatMembers(session.getFeedbackGroupId());
-        removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList);
-      }
-      return null;
-    };
+    if (session.hasFeedbackChat()) {
+      var feedbackMemberList = rocketChatFacade
+          .retrieveRocketChatMembers(session.getFeedbackGroupId());
+      removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList);
+    }
   }
 
   private void removeUnauthorizedMembersFromGroup(Session session, Consultant consultant,
