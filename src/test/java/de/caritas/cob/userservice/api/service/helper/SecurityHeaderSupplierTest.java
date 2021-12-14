@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.util.reflection.FieldSetter.setField;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
@@ -22,8 +22,6 @@ import org.springframework.http.MediaType;
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityHeaderSupplierTest {
 
-  private final String FIELD_NAME_CSRF_TOKEN_HEADER_PROPERTY = "csrfHeaderProperty";
-  private final String FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY = "csrfCookieProperty";
   private final String CSRF_TOKEN_HEADER_VALUE = "X-CSRF-TOKEN";
   private final String CSRF_TOKEN_COOKIE_VALUE = "CSRF-TOKEN";
   private final String BEARER_TOKEN = "sadifsdfj)(JWifa";
@@ -35,12 +33,8 @@ public class SecurityHeaderSupplierTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    setField(securityHeaderSupplier,
-        securityHeaderSupplier.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_HEADER_PROPERTY),
-        CSRF_TOKEN_HEADER_VALUE);
-    setField(securityHeaderSupplier,
-        securityHeaderSupplier.getClass().getDeclaredField(FIELD_NAME_CSRF_TOKEN_COOKIE_PROPERTY),
-        CSRF_TOKEN_COOKIE_VALUE);
+    setField(securityHeaderSupplier, "csrfHeaderProperty", CSRF_TOKEN_HEADER_VALUE);
+    setField(securityHeaderSupplier, "csrfCookieProperty", CSRF_TOKEN_COOKIE_VALUE);
   }
 
   @Test
