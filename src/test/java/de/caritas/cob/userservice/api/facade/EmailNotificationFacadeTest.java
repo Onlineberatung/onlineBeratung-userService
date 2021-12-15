@@ -82,9 +82,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmailNotificationFacadeTest {
@@ -222,14 +222,11 @@ public class EmailNotificationFacadeTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    FieldSetter.setField(emailNotificationFacade,
-        emailNotificationFacade.getClass().getDeclaredField(FIELD_NAME_EMAIL_DUMMY_SUFFIX),
+    ReflectionTestUtils.setField(emailNotificationFacade, FIELD_NAME_EMAIL_DUMMY_SUFFIX,
         FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
-    FieldSetter.setField(emailNotificationFacade,
-        emailNotificationFacade.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID),
+    ReflectionTestUtils.setField(emailNotificationFacade, FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID,
         FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID);
-    FieldSetter.setField(emailNotificationFacade,
-        emailNotificationFacade.getClass().getDeclaredField(APPLICATION_BASE_URL_FIELD_NAME),
+    ReflectionTestUtils.setField(emailNotificationFacade, APPLICATION_BASE_URL_FIELD_NAME,
         APPLICATION_BASE_URL);
     setInternalState(LogService.class, "LOGGER", logger);
   }

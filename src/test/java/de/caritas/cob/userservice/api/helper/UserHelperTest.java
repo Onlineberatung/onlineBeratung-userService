@@ -18,7 +18,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import org.junit.Before;
@@ -27,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserHelperTest {
@@ -39,11 +39,9 @@ public class UserHelperTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    setField(userHelper,
-        userHelper.getClass().getDeclaredField(FIELD_NAME_EMAIL_DUMMY_SUFFIX),
+    ReflectionTestUtils.setField(userHelper, FIELD_NAME_EMAIL_DUMMY_SUFFIX,
         FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
-    setField(userHelper,
-        userHelper.getClass().getDeclaredField(FIELD_NAME_HOST_BASE_URL), HOST_BASE_URL);
+    ReflectionTestUtils.setField(userHelper, FIELD_NAME_HOST_BASE_URL, HOST_BASE_URL);
   }
 
   @Test
