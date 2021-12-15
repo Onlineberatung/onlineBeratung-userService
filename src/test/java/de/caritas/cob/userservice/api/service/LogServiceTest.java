@@ -80,26 +80,10 @@ public class LogServiceTest {
   }
 
   @Test
-  public void logKeycloakInfo_Should_LogExceptionStackTraceAndErrorMessage() {
-
-    LogService.logKeycloakInfo(ERROR_MESSAGE, exception);
-    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
-    verify(logger, times(1)).info(anyString(), eq(KEYCLOAK_ERROR_TEXT), eq(ERROR_MESSAGE));
-
-  }
-
-  @Test
   public void logBadRequestException_Should_LogExceptionStackTrace() {
 
     LogService.logBadRequestException(badRequestException);
     verify(badRequestException, atLeastOnce()).printStackTrace(any(PrintWriter.class));
-  }
-
-  @Test
-  public void logBadRequest_Should_LogErrorMessage() {
-
-    LogService.logBadRequest(ERROR_MESSAGE);
-    verify(logger, times(1)).warn(anyString(), eq(BAD_REQUEST_ERROR_TEXT), eq(ERROR_MESSAGE));
   }
 
   @Test

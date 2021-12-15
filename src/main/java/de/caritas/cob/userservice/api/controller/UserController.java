@@ -80,6 +80,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,6 +93,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for user api requests
  */
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
@@ -473,15 +475,16 @@ public class UserController implements UsersApi {
     // Check if session exists
     var session = sessionService.getSession(sessionId);
     if (session.isEmpty()) {
-      LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
+      log.warn("Bad request: Session with id {} not found", sessionId);
+
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     // Check if consultant has the right to access the session
     if (!authenticatedUserHelper.hasPermissionForSession(session.get())) {
-      LogService.logBadRequest(
-          String.format("Consultant with id %s has no permission to access session with id %s",
-              authenticatedUser.getUserId(), sessionId));
+      log.warn("Bad request: Consultant with id {} has no permission to access session with id {}",
+          authenticatedUser.getUserId(), sessionId);
+
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
@@ -524,7 +527,8 @@ public class UserController implements UsersApi {
       }
 
     } else {
-      LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
+      log.warn("Bad request: Session with id {} not found", sessionId);
+
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
   }

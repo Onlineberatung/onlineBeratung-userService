@@ -67,32 +67,12 @@ public class LogService {
   }
 
   /**
-   * Logs a Keycloak info.
-   *
-   * @param message   the message
-   * @param exception the exception
-   */
-  public static void logKeycloakInfo(String message, Exception exception) {
-    LOGGER.info("{}{}", KEYCLOAK_ERROR_TEXT, message);
-    LOGGER.info("{}{}", KEYCLOAK_EXCEPTION_TEXT, getStackTrace(exception));
-  }
-
-  /**
    * Bad Request Exception.
    *
    * @param exception the exception
    */
   public static void logBadRequestException(Exception exception) {
     LOGGER.warn("{}{}", BAD_REQUEST_ERROR_TEXT, getStackTrace(exception));
-  }
-
-  /**
-   * Bad Request error.
-   *
-   * @param message the message
-   */
-  public static void logBadRequest(String message) {
-    LOGGER.warn("{}{}", BAD_REQUEST_ERROR_TEXT, message);
   }
 
   /**
