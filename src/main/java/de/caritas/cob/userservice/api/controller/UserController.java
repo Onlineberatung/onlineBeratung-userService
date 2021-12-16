@@ -767,6 +767,11 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Sets the user's email address to its default.
+   *
+   * @return {@link ResponseEntity}
+   */
   @Override
   public ResponseEntity<Void> deleteEmailAddress() {
     userAccountProvider.changeUserAccountEmailAddress(
