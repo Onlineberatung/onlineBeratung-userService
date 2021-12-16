@@ -69,6 +69,7 @@ public class KeycloakServiceTest {
     setField(keycloakService, "keycloakLogoutUrl",
         "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout");
     setField(keycloakService, "keycloakClientId", "app");
+    setInternalState(KeycloakService.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -83,7 +84,7 @@ public class KeycloakServiceTest {
     doThrow(exception).when(keycloakAdminClientService).updatePassword(USER_ID, NEW_PW);
 
     assertFalse(keycloakService.changePassword(USER_ID, NEW_PW));
-    verify(logger, atLeastOnce()).info(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).info(anyString(), any(Object.class));
   }
 
   @Test

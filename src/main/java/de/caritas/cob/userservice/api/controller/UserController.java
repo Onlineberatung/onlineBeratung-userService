@@ -520,9 +520,10 @@ public class UserController implements UsersApi {
         return new ResponseEntity<>(HttpStatus.OK);
 
       } else {
-        LogService.logUnauthorized(String.format(
-            "Consultant with id %s is not authorized to update monitoring of session %s",
-            authenticatedUser.getUserId(), sessionId));
+        log.warn(
+            "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}",
+            authenticatedUser.getUserId(), sessionId
+        );
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
 

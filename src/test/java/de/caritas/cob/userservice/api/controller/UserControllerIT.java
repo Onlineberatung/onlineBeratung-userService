@@ -454,6 +454,7 @@ public class UserControllerIT {
     HashMap<String, Object> addictiveDrugsMap = new HashMap<>();
     addictiveDrugsMap.put("drugs", drugsMap);
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
+    setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -1459,8 +1460,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(logger, times(1))
-        .warn(anyString(), anyString(), anyString());
+    verify(logger).warn(anyString(), any(Object.class));
   }
 
   @Test
@@ -1488,8 +1488,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(logger, times(1))
-        .warn(anyString(), anyString(), anyString());
+    verify(logger).warn(anyString(), eq(null), any(Object.class));
   }
 
   @Test
@@ -1608,8 +1607,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 
-    verify(logger, atLeastOnce())
-        .warn(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), any(Object.class), any(Object.class));
   }
 
   @Test
@@ -1629,8 +1627,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 
-    verify(logger, atLeastOnce())
-        .warn(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), any(Object.class), any(Object.class));
   }
 
   @Test
@@ -1645,8 +1642,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(logger, atLeastOnce())
-        .warn(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), any(Object.class));
   }
 
   /**
