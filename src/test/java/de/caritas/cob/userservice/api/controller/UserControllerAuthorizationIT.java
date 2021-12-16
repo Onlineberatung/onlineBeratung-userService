@@ -1748,7 +1748,7 @@ public class UserControllerAuthorizationIT {
   public void deleteEmailAddress_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
       throws Exception {
 
-    mvc.perform(delete(PATH_PUT_UPDATE_EMAIL)
+    mvc.perform(delete("/users/email")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .accept(MediaType.APPLICATION_JSON))
@@ -1768,7 +1768,7 @@ public class UserControllerAuthorizationIT {
   public void deleteEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
       throws Exception {
 
-    mvc.perform(delete(PATH_PUT_UPDATE_EMAIL)
+    mvc.perform(delete("/users/email")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .accept(MediaType.APPLICATION_JSON))
@@ -1782,7 +1782,7 @@ public class UserControllerAuthorizationIT {
   public void deleteEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
       throws Exception {
 
-    mvc.perform(delete(PATH_PUT_UPDATE_EMAIL)
+    mvc.perform(delete("/users/email")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
@@ -1794,7 +1794,7 @@ public class UserControllerAuthorizationIT {
   public void deleteEmailAddress_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
       throws Exception {
 
-    mvc.perform(delete(PATH_PUT_UPDATE_EMAIL)
+    mvc.perform(delete("/users/email")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .accept(MediaType.APPLICATION_JSON))
