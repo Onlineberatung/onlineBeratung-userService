@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -156,5 +157,15 @@ public class KeycloakServiceTest {
     verify(this.userAccountInputValidator, times(1)).validateEmailAddress(email);
     verify(this.authenticatedUser, times(1)).getUserId();
     verify(this.keycloakAdminClientService, times(1)).updateEmail("userId", email);
+  }
+
+  @Test
+  public void deleteEmailAddress_Should_useServicesCorrectly() {
+    var userId = RandomStringUtils.random(16);
+    when(authenticatedUser.getUserId()).thenReturn(userId);
+
+    keycloakService.deleteEmailAddress();
+
+    verify(keycloakAdminClientService).updateDummyEmail(userId);
   }
 }

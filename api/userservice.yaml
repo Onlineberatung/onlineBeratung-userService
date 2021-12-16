@@ -393,6 +393,25 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+    delete:
+      tags:
+        - user-controller
+      summary: 'Deletes the email address of the authorized user account [Authorization:
+          Role: asker/consultant]'
+      operationId: deleteEmailAddress
+      responses:
+        200:
+          description: OK - successful operation
+        400:
+          description: BAD REQUEST - invalid request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/mobiletoken:
     put:
       tags:

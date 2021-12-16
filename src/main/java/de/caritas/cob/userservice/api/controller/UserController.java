@@ -77,6 +77,7 @@ import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -759,7 +760,19 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
-    this.userAccountProvider.changeUserAccountEmailAddress(emailAddress);
+    userAccountProvider.changeUserAccountEmailAddress(
+        Optional.of(emailAddress)
+    );
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteEmailAddress() {
+    userAccountProvider.changeUserAccountEmailAddress(
+        Optional.empty()
+    );
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

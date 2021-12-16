@@ -264,6 +264,15 @@ public class KeycloakAdminClientService {
   }
 
   /**
+   * Sets a user's dummy email
+   *
+   * @param userId user ID
+   */
+  public void updateDummyEmail(String userId) {
+    updateEmail(userId, userHelper.getDummyEmail(userId));
+  }
+
+  /**
    * Updates first name, last name and email address of user with given id in keycloak.
    *
    * @param userId    Keycloak user ID

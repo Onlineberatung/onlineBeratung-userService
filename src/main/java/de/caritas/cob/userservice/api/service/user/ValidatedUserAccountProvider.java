@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
@@ -16,6 +17,7 @@ import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,7 @@ public class ValidatedUserAccountProvider {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull UserAccountValidator userAccountValidator;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull UserHelper userHelper;
 
   /**
    * Tries to retrieve the user of the current {@link AuthenticatedUser} and throws an 500 - Server
@@ -90,16 +93,22 @@ public class ValidatedUserAccountProvider {
   /**
    * Updates the email address of current authenticated user in Keycloak, Rocket.Chat and database.
    *
-   * @param email the new email address
+   * @param optionalEmail the new email address, potentially empty
    */
-  public void changeUserAccountEmailAddress(String email) {
-    this.keycloakService.changeEmailAddress(email);
+  public void changeUserAccountEmailAddress(Optional<String> optionalEmail) {
+    optionalEmail.ifPresentOrElse(
+        keycloakService::changeEmailAddress,
+        keycloakService::deleteEmailAddress
+    );
 
-    this.consultantService.getConsultant(this.authenticatedUser.getUserId())
-        .ifPresent(consultant -> updateConsultantEmail(consultant, email));
-
-    this.userService.getUser(this.authenticatedUser.getUserId())
-        .ifPresent(user -> updateUserEmail(user, email));
+    var userId = authenticatedUser.getUserId();
+    var email = optionalEmail.orElseGet(() -> userHelper.getDummyEmail(userId));
+    consultantService.getConsultant(userId).ifPresent(consultant ->
+        updateConsultantEmail(consultant, email)
+    );
+    userService.getUser(userId).ifPresent(user ->
+        updateUserEmail(user, email)
+    );
   }
 
   private void updateConsultantEmail(Consultant consultant, String email) {

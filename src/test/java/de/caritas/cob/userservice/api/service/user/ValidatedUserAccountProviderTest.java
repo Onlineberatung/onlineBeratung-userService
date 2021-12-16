@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -21,6 +22,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
@@ -34,6 +36,7 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +47,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValidatedUserAccountProviderTest {
+
+  private static final EasyRandom EASY_RANDOM = new EasyRandom();
 
   @InjectMocks
   private ValidatedUserAccountProvider accountProvider;
@@ -63,6 +68,8 @@ public class ValidatedUserAccountProviderTest {
   private KeycloakAdminClientService keycloakAdminClientService;
   @Mock
   private UserRepository userRepository;
+  @Mock
+  private UserHelper userHelper;
 
   @Test
   public void retrieveValidatedUser_Should_ReturnUser_When_UserIsPresent() {
@@ -118,12 +125,12 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
-    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+  public void changeUserAccountEmailAddress_Should_changeNonEmptyAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
+    Consultant consultant = EASY_RANDOM.nextObject(Consultant.class);
     when(this.authenticatedUser.getUserId()).thenReturn("consultant");
     when(this.consultantService.getConsultant("consultant")).thenReturn(Optional.of(consultant));
 
-    this.accountProvider.changeUserAccountEmailAddress("newMail");
+    this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
     verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
@@ -136,15 +143,16 @@ public class ValidatedUserAccountProviderTest {
     verifyNoMoreInteractions(this.rocketChatService);
     verify(this.userService, times(1)).getUser(any());
     verifyNoMoreInteractions(this.userService);
+    verifyNoInteractions(userHelper);
   }
 
   @Test
-  public void changeUserAccountEmailAddress_Should_changeAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
-    User user = new EasyRandom().nextObject(User.class);
+  public void changeUserAccountEmailAddress_Should_changeNonEmptyAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
+    User user = EASY_RANDOM.nextObject(User.class);
     when(this.authenticatedUser.getUserId()).thenReturn("user");
     when(this.userService.getUser("user")).thenReturn(Optional.of(user));
 
-    this.accountProvider.changeUserAccountEmailAddress("newMail");
+    this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
     verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
@@ -156,19 +164,68 @@ public class ValidatedUserAccountProviderTest {
     verifyNoMoreInteractions(this.rocketChatService);
     verify(this.consultantService, times(1)).getConsultant(any());
     verifyNoMoreInteractions(this.consultantService);
+    verifyNoInteractions(userHelper);
+  }
+
+  @Test
+  public void changeUserAccountEmailAddress_Should_changeEmptyAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
+    var consultant = EASY_RANDOM.nextObject(Consultant.class);
+    var consultantId = RandomStringUtils.randomAlphabetic(16);
+    var dummyEmail = RandomStringUtils.randomAlphabetic(16);
+    when(authenticatedUser.getUserId()).thenReturn(consultantId);
+    when(consultantService.getConsultant(consultantId)).thenReturn(Optional.of(consultant));
+    when(userHelper.getDummyEmail(consultantId)).thenReturn(dummyEmail);
+
+    accountProvider.changeUserAccountEmailAddress(Optional.empty());
+
+    verify(keycloakService).deleteEmailAddress();
+    verify(keycloakService, never()).changeEmailAddress(anyString());
+    verify(rocketChatService)
+        .updateUser(
+            new UserUpdateRequestDTO(
+                consultant.getRocketChatId(),
+                new UserUpdateDataDTO(dummyEmail, consultant.getFullName())));
+    consultant.setEmail(dummyEmail);
+    verify(consultantService).saveConsultant(consultant);
+    verifyNoMoreInteractions(rocketChatService);
+    verify(userService).getUser(any());
+    verifyNoMoreInteractions(userService);
+  }
+
+  @Test
+  public void changeUserAccountEmailAddress_Should_changeEmptyAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
+    var user = EASY_RANDOM.nextObject(User.class);
+    var userId = RandomStringUtils.randomAlphabetic(16);
+    var dummyEmail = RandomStringUtils.randomAlphabetic(16);
+    when(authenticatedUser.getUserId()).thenReturn(userId);
+    when(userService.getUser(userId)).thenReturn(Optional.of(user));
+    when(userHelper.getDummyEmail(userId)).thenReturn(dummyEmail);
+
+    accountProvider.changeUserAccountEmailAddress(Optional.empty());
+
+    verify(keycloakService).deleteEmailAddress();
+    verify(keycloakService, never()).changeEmailAddress(anyString());
+    verify(rocketChatService)
+        .updateUser(
+            new UserUpdateRequestDTO(
+                user.getRcUserId(), new UserUpdateDataDTO(dummyEmail, user.getUsername())));
+    user.setEmail(dummyEmail);
+    verify(userService).saveUser(user);
+    verifyNoMoreInteractions(rocketChatService);
+    verify(consultantService).getConsultant(any());
+    verifyNoMoreInteractions(consultantService);
   }
 
   @Test(expected = InternalServerErrorException.class)
   public void changePassword_Should_ThrowInternalServerErrorException_When_KeycloakPwChangeCallFails() {
-    PasswordDTO passwordDTO = new EasyRandom().nextObject(PasswordDTO.class);
+    PasswordDTO passwordDTO = EASY_RANDOM.nextObject(PasswordDTO.class);
 
     this.accountProvider.changePassword(passwordDTO);
   }
 
   @Test
   public void changePassword_Should_CallKeycloakAdminClientServiceToUpdateThePassword() {
-    EasyRandom random = new EasyRandom();
-    PasswordDTO passwordDTO = random.nextObject(PasswordDTO.class);
+    PasswordDTO passwordDTO = EASY_RANDOM.nextObject(PasswordDTO.class);
     when(keycloakService.changePassword(any(), any())).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
 
@@ -184,7 +241,7 @@ public class ValidatedUserAccountProviderTest {
     doThrow(new BadRequestException(MESSAGE)).when(userAccountValidator)
         .checkPasswordValidity(anyString(), anyString());
 
-    DeleteUserAccountDTO deleteUserAccountDTO = new EasyRandom()
+    DeleteUserAccountDTO deleteUserAccountDTO = EASY_RANDOM
         .nextObject(DeleteUserAccountDTO.class);
     this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
 
@@ -198,7 +255,7 @@ public class ValidatedUserAccountProviderTest {
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
     DeleteUserAccountDTO deleteUserAccountDTO =
-        new EasyRandom().nextObject(DeleteUserAccountDTO.class);
+        EASY_RANDOM.nextObject(DeleteUserAccountDTO.class);
     this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
 
     verify(keycloakAdminClientService, times(1)).deactivateUser(USER.getUserId());
