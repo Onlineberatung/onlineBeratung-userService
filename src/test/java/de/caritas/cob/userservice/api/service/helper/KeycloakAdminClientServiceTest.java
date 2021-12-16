@@ -328,7 +328,7 @@ public class KeycloakAdminClientServiceTest {
   }
 
   @Test
-  public void updateDummyMail_Should_callServicesCorrectly() {
+  public void updateDummyMail_id_dto_Should_callServicesCorrectly() {
     UserResource userResource = mock(UserResource.class);
     UsersResource usersResource = mock(UsersResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
@@ -339,6 +339,23 @@ public class KeycloakAdminClientServiceTest {
 
     verify(userResource, times(1)).update(any());
     assertThat(dummyMail, is("dummy"));
+  }
+
+  @Test
+  public void updateDummyMail_id_Should_callServicesCorrectly() {
+    var userRepresentation = mock(UserRepresentation.class);
+    var userResource = mock(UserResource.class);
+    var usersResource = mock(UsersResource.class);
+
+    when(userRepresentation.getEmail()).thenReturn("email");
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    when(usersResource.get("userId")).thenReturn(userResource);
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    when(userHelper.getDummyEmail(anyString())).thenReturn("dummy");
+
+    keycloakAdminClientService.updateDummyEmail("userId");
+
+    verify(userResource).update(any());
   }
 
   @Test
