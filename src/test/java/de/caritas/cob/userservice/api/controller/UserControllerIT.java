@@ -2177,7 +2177,17 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(accountProvider, times(1)).changeUserAccountEmailAddress("email");
+    verify(accountProvider).changeUserAccountEmailAddress(Optional.of("email"));
+  }
+
+  @Test
+  public void deleteEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
+    mvc.perform(
+        delete("/users/email")
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+
+    verify(accountProvider).changeUserAccountEmailAddress(Optional.empty());
   }
 
   @Test

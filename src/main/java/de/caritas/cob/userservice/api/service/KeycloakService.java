@@ -141,4 +141,7 @@ public class KeycloakService {
     this.keycloakAdminClientService.updateEmail(userId, emailAddress);
   }
 
+  public void deleteEmailAddress() {
+    keycloakAdminClientService.updateDummyEmail(authenticatedUser.getUserId());
+  }
 }
