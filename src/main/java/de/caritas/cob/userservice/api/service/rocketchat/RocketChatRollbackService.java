@@ -4,11 +4,12 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGr
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class RocketChatRollbackService {
 
@@ -39,9 +40,8 @@ public class RocketChatRollbackService {
           try {
             rocketChatService.addTechnicalUserToGroup(groupId);
           } catch (RocketChatAddUserToGroupException e) {
-            LogService.logInternalServerError(String.format(
-                "Could not add techical user from Rocket.Chat group id %s during roll back.",
-                groupId));
+            log.error("Internal Server Error: Could not add technical user from Rocket.Chat group "
+                + "id {} during roll back.", groupId);
             return;
           }
         }
@@ -58,15 +58,13 @@ public class RocketChatRollbackService {
         try {
           rocketChatService.removeTechnicalUserFromGroup(groupId);
         } catch (RocketChatRemoveUserFromGroupException e) {
-          LogService.logInternalServerError(String.format(
-              "Could not remove techical user from Rocket.Chat group id %s during roll back.",
-              groupId));
+          log.error("Internal Server Error: Could not remove technical user from Rocket.Chat group "
+              + "id {} during roll back.", groupId);
         }
 
       } catch (Exception ex) {
-        LogService.logInternalServerError(String.format(
-            "Error during rollback while adding back the users to the Rocket.Chat group with id %s",
-            groupId), ex);
+        log.error("Internal Server Error: Error during rollback while adding back the users to the "
+            + "Rocket.Chat group with id {}", groupId, ex);
       }
     }
   }

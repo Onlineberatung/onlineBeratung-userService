@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.EventType;
@@ -67,7 +66,7 @@ public class LiveEventNotificationServiceTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(LiveEventNotificationService.class, "log", logger);
   }
 
   @Test
@@ -107,7 +106,7 @@ public class LiveEventNotificationServiceTest {
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), any(RestClientException.class));
   }
 
   @Test

@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Facade for capsuling the mail notification via the MailService
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailNotificationFacade {
@@ -74,8 +75,10 @@ public class EmailNotificationFacade {
           consultantAgencyRepository, agencyService, applicationBaseUrl);
       sendMailTasksToMailService(newEnquiryMail);
     } catch (Exception ex) {
-      LogService.logEmailNotificationFacadeError(String.format(
-          "Failed to send new enquiry notification for session %s.", session.getId()), ex);
+      log.error(
+          "EmailNotificationFacade error: Failed to send new enquiry notification for session {}.",
+          session.getId(), ex
+      );
     }
   }
 
@@ -118,13 +121,13 @@ public class EmailNotificationFacade {
       sendMailTasksToMailService(newMessageMails);
 
     } catch (NotFoundException | ForbiddenException | BadRequestException getSessionException) {
-      LogService.logEmailNotificationFacadeWarning(String.format(
-          "Failed to get session for new message notification with Rocket.Chat group ID %s and user ID %s.",
-          rcGroupId, userId), getSessionException);
+      log.warn(
+          "EmailNotificationFacade warning: Failed to get session for new message notification with Rocket.Chat group ID {} and user ID {}.",
+          rcGroupId, userId, getSessionException);
     } catch (Exception ex) {
-      LogService.logEmailNotificationFacadeError(String.format(
-          "Failed to send new message notification with Rocket.Chat group ID %s and user ID %s.",
-          rcGroupId, userId), ex);
+      log.error(
+          "EmailNotificationFacade warning: Failed to send new message notification with Rocket.Chat group ID {} and user ID {}.",
+          rcGroupId, userId, ex);
     }
   }
 
@@ -145,8 +148,10 @@ public class EmailNotificationFacade {
           rocketChatSystemUserId, keycloakAdminClientService);
       sendMailTasksToMailService(newFeedbackMessages);
     } catch (Exception e) {
-      LogService.logEmailNotificationFacadeError(String.format(
-          "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId), e);
+      log.error(
+          "EmailNotificationFacade error: List of members for rocket chat feedback group id {} is empty.",
+          rcFeedbackGroupId, e
+      );
     }
   }
 
@@ -167,7 +172,7 @@ public class EmailNotificationFacade {
     try {
       sendMailTasksToMailService(assignEnquiryMails);
     } catch (Exception exception) {
-      LogService.logEmailNotificationFacadeError(exception);
+      log.error("EmailNotificationFacade error: ", exception);
     }
   }
 

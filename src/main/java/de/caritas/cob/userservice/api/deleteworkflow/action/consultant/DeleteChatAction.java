@@ -15,18 +15,19 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroup
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Action to delete chats owned by a {@link Consultant}.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeleteChatAction implements ActionCommand<ConsultantDeletionWorkflowDTO> {
@@ -58,7 +59,7 @@ public class DeleteChatAction implements ActionCommand<ConsultantDeletionWorkflo
     try {
       this.rocketChatService.deleteGroupAsTechnicalUser(rcGroupId);
     } catch (RocketChatDeleteGroupException e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       return singletonList(
           DeletionWorkflowError.builder()
               .deletionSourceType(CONSULTANT)
@@ -78,7 +79,7 @@ public class DeleteChatAction implements ActionCommand<ConsultantDeletionWorkflo
       try {
         this.chatRepository.deleteAll(chatsByChatOwner);
       } catch (Exception e) {
-        LogService.logDeleteWorkflowError(e);
+        log.error("UserService delete workflow error: ", e);
         workflowErrors.add(
             DeletionWorkflowError.builder()
                 .deletionSourceType(CONSULTANT)

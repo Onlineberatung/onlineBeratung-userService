@@ -118,6 +118,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -761,8 +762,7 @@ public class UserControllerIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyLong());
   }
 
   @Test
@@ -783,8 +783,7 @@ public class UserControllerIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyLong());
   }
 
   @Test
@@ -1752,7 +1751,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyLong());
   }
 
   @Test
@@ -1769,8 +1768,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyLong());
   }
 
   @Test

@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.CustomCryptoException;
+import de.caritas.cob.userservice.api.exception.NoMasterKeyException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,12 +10,11 @@ import java.util.Base64;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.exception.CustomCryptoException;
-import de.caritas.cob.userservice.api.exception.NoMasterKeyException;
 
+@Slf4j
 @Service
 public class DecryptionService {
 
@@ -100,10 +101,10 @@ public class DecryptionService {
       cipher.init(Cipher.DECRYPT_MODE, keySpec);
       return new String(cipher.doFinal(Base64.getDecoder().decode(messageToDecrypt)));
     } catch (BadPaddingException e) {
-      LogService.logEncryptionPossibleBadKeyError(e);
+      log.error("Encryption service error - possible bad key error: ", e);
       throw new CustomCryptoException(e);
     } catch (Exception e) {
-      LogService.logEncryptionServiceError(e);
+      log.error("Encryption service error: ", e);
       throw new CustomCryptoException(e);
     }
   }

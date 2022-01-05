@@ -10,14 +10,15 @@ import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.service.LogService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Deletes a {@link ConsultantAgency} in database.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeleteDatabaseConsultantAgencyAction implements
@@ -38,7 +39,7 @@ public class DeleteDatabaseConsultantAgencyAction implements
           .findByConsultantId(actionTarget.getConsultant().getId());
       this.consultantAgencyRepository.deleteAll(consultantAgencies);
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(CONSULTANT)

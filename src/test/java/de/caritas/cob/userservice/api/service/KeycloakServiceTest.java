@@ -71,7 +71,6 @@ public class KeycloakServiceTest {
         "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout");
     setField(keycloakService, "keycloakClientId", "app");
     setInternalState(KeycloakService.class, "log", logger);
-    setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @Test
@@ -133,7 +132,7 @@ public class KeycloakServiceTest {
     boolean response = keycloakService.logoutUser(REFRESH_TOKEN);
 
     assertFalse(response);
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), any(Exception.class));
   }
 
   @Test
@@ -145,7 +144,7 @@ public class KeycloakServiceTest {
     boolean response = keycloakService.logoutUser(REFRESH_TOKEN);
 
     assertFalse(response);
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test

@@ -185,13 +185,11 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> acceptEnquiry(@PathVariable Long sessionId,
       @RequestHeader String rcUserId) {
-
     var session = sessionService.getSession(sessionId);
 
     if (session.isEmpty() || isNull(session.get().getGroupId())) {
-      LogService.logInternalServerError(String.format(
-          "Session id %s is invalid, session not found or has no Rocket.Chat groupId assigned.",
-          sessionId));
+      log.error("Internal Server Error: Session id {} is invalid, session not found or has no "
+          + "Rocket.Chat groupId assigned.", sessionId);
 
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -564,9 +562,9 @@ public class UserController implements UsersApi {
       @PathVariable String consultantId) {
 
     var session = sessionService.getSession(sessionId);
-
     if (session.isEmpty()) {
-      LogService.logInternalServerError(String.format("Session with id %s not found.", sessionId));
+      log.error("Internal Server Error: Session with id {} not found.", sessionId);
+
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

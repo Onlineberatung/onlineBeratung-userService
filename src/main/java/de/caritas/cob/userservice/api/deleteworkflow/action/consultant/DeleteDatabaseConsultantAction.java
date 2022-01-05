@@ -12,11 +12,13 @@ import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository
 import de.caritas.cob.userservice.api.service.LogService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Deletes a {@link Consultant} in database.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeleteDatabaseConsultantAction implements
@@ -35,7 +37,7 @@ public class DeleteDatabaseConsultantAction implements
     try {
       this.consultantRepository.delete(actionTarget.getConsultant());
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(CONSULTANT)

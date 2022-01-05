@@ -8,14 +8,15 @@ import de.caritas.cob.userservice.api.actions.ActionCommand;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;
 import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.service.LogService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Deletes a registry id by username.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeleteAnonymousRegistryIdAction implements ActionCommand<AskerDeletionWorkflowDTO> {
@@ -32,7 +33,7 @@ public class DeleteAnonymousRegistryIdAction implements ActionCommand<AskerDelet
     try {
       anonymousUsernameRegistry.removeRegistryIdByUsername(actionTarget.getUser().getUsername());
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)

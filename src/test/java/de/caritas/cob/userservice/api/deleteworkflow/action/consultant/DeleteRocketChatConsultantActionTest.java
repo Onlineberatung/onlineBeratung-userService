@@ -19,7 +19,6 @@ import de.caritas.cob.userservice.api.deleteworkflow.model.ConsultantDeletionWor
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class DeleteRocketChatConsultantActionTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(DeleteRocketChatConsultantAction.class, "log", logger);
   }
 
   @Test
@@ -76,7 +75,7 @@ public class DeleteRocketChatConsultantActionTest {
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_consultantDeletionFailes()
+  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_consultantDeletionFails()
       throws RocketChatDeleteUserException {
     Consultant consultant = new Consultant();
     consultant.setRocketChatId("consultantId");
@@ -93,7 +92,7 @@ public class DeleteRocketChatConsultantActionTest {
     assertThat(workflowErrors.get(0).getIdentifier(), is("consultantId"));
     assertThat(workflowErrors.get(0).getReason(), is("Unable to delete Rocket.Chat user account"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
 }

@@ -17,7 +17,9 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 abstract class DeleteRoomsAndSessionAction {
 
@@ -32,7 +34,7 @@ abstract class DeleteRoomsAndSessionAction {
       try {
         this.rocketChatService.deleteGroupAsTechnicalUser(rcGroupId);
       } catch (RocketChatDeleteGroupException e) {
-        LogService.logDeleteWorkflowError(e);
+        log.error("UserService delete workflow error: ", e);
         workflowErrors.add(
             DeletionWorkflowError.builder()
                 .deletionSourceType(ASKER)
@@ -51,7 +53,7 @@ abstract class DeleteRoomsAndSessionAction {
       var monitorings = this.monitoringRepository.findBySessionId(session.getId());
       this.monitoringRepository.deleteAll(monitorings);
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       workflowErrors.add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)
@@ -69,7 +71,7 @@ abstract class DeleteRoomsAndSessionAction {
       var sessionData = this.sessionDataRepository.findBySessionId(session.getId());
       this.sessionDataRepository.deleteAll(sessionData);
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       workflowErrors.add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)
@@ -86,7 +88,7 @@ abstract class DeleteRoomsAndSessionAction {
     try {
       this.sessionRepository.delete(session);
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       workflowErrors.add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)

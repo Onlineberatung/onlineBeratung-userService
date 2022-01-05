@@ -115,16 +115,16 @@ public class KeycloakService {
           Void.class);
       return wasLogoutSuccessful(response, refreshToken);
     } catch (Exception ex) {
-      LogService.logKeycloakError(
-          String.format("Could not log out user with refresh token %s", refreshToken), ex);
+      log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken, ex);
+
       return false;
     }
   }
 
   private boolean wasLogoutSuccessful(ResponseEntity<Void> responseEntity, String refreshToken) {
     if (!responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
-      LogService.logKeycloakError(
-          String.format("Could not log out user with refresh token %s", refreshToken));
+      log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken);
+
       return false;
     }
     return true;

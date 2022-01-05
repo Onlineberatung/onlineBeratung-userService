@@ -67,6 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -111,7 +112,6 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsPr
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
@@ -240,7 +240,7 @@ public class RocketChatServiceTest {
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY,
         RC_URL_GROUPS_SET_READ_ONLY);
 
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(RocketChatService.class, "log", logger);
   }
 
   /**
@@ -312,8 +312,7 @@ public class RocketChatServiceTest {
 
     assertFalse(result);
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString(), anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -328,7 +327,7 @@ public class RocketChatServiceTest {
     rocketChatService.rollbackGroup(GROUP_ID, RC_CREDENTIALS);
 
     verify(logger, atLeastOnce())
-        .error(anyString(), anyString(), anyString(), anyString(), anyString());
+        .error(anyString(), anyString(), any(Exception.class));
   }
 
   /**
@@ -1042,7 +1041,7 @@ public class RocketChatServiceTest {
 
     this.rocketChatService.setRoomReadOnly("");
 
-    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), nullable(String.class));
   }
 
   @Test
@@ -1074,7 +1073,7 @@ public class RocketChatServiceTest {
 
     this.rocketChatService.setRoomWriteable("");
 
-    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), nullable(String.class));
   }
 
   @Test

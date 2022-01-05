@@ -57,6 +57,7 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -73,6 +74,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Service for Rocket.Chat functionalities.
  */
+@Slf4j
 @Getter
 @Service
 @RequiredArgsConstructor
@@ -235,13 +237,20 @@ public class RocketChatService {
           GroupDeleteResponseDTO.class);
 
     } catch (Exception ex) {
-      LogService.logRocketChatError(String.format(ERROR_MESSAGE, groupId), ex);
+      log.error(
+          "Rocket.Chat Error: Error during rollback: Rocket.Chat group with id {} could not be "
+              + "deleted", groupId, ex
+      );
     }
 
     if (response != null && response.isSuccess()) {
       return true;
     } else {
-      LogService.logRocketChatError(String.format(ERROR_MESSAGE, groupId), "unknown", "unknown");
+      log.error(
+          "Rocket.Chat Error: Error during rollback: Rocket.Chat group with id {} could not be "
+              + "deleted (Error: unknown / ErrorType: unknown)", groupId
+      );
+
       return false;
     }
 
@@ -337,8 +346,10 @@ public class RocketChatService {
       return response.getStatusCode() == HttpStatus.OK;
 
     } catch (Exception ex) {
-      LogService.logRocketChatError(String.format("Could not log out user id (%s) from Rocket.Chat",
-          rocketChatCredentials.getRocketChatUserId()), ex);
+      log.error(
+          "Rocket.Chat Error: Could not log out user id ({}) from Rocket.Chat",
+          rocketChatCredentials.getRocketChatUserId(), ex
+      );
 
       return false;
     }
@@ -792,8 +803,10 @@ public class RocketChatService {
 
     GroupResponseDTO responseBody = response.getBody();
     if (nonNull(responseBody) && !responseBody.isSuccess()) {
-      LogService.logRocketChatError(String.format("Mark group with id %s as read only failed "
-          + "with reason %s", rcRoomId, responseBody.getError()));
+      log.error(
+          "Rocket.Chat Error: Mark group with id {} as read only failed with reason {}",
+          rcRoomId, responseBody.getError()
+      );
     }
   }
 

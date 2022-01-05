@@ -1,24 +1,23 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
-import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.ErrorMailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 /**
  * Service class to communicate with the MailService.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
-
-  private static final String MAIL_SERVICE_ERROR_MESSAGE = "Error while calling the MailService";
 
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull MailsControllerApi mailsControllerApi;
@@ -33,7 +32,7 @@ public class MailService {
     try {
       this.mailsControllerApi.sendMails(mailsDTO);
     } catch (Exception e) {
-      LogService.logMailServiceException(MAIL_SERVICE_ERROR_MESSAGE, e);
+      log.error("MailServiceHelper error: Error while calling the MailService", e);
     }
   }
 
@@ -53,7 +52,7 @@ public class MailService {
     try {
       this.mailsControllerApi.sendErrorMail(errorMailDTO);
     } catch (Exception e) {
-      LogService.logMailServiceException(MAIL_SERVICE_ERROR_MESSAGE, e);
+      log.error("MailServiceHelper error: Error while calling the MailService", e);
     }
   }
 

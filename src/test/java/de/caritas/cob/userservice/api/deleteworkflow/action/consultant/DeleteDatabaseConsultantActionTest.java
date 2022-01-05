@@ -10,7 +10,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -19,7 +18,6 @@ import de.caritas.cob.userservice.api.deleteworkflow.model.ConsultantDeletionWor
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -44,7 +42,7 @@ public class DeleteDatabaseConsultantActionTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(DeleteDatabaseConsultantAction.class, "log", logger);
   }
 
   @Test
@@ -76,7 +74,7 @@ public class DeleteDatabaseConsultantActionTest {
     assertThat(workflowErrors.get(0).getIdentifier(), is("consultantId"));
     assertThat(workflowErrors.get(0).getReason(), is("Unable to delete consultant in database"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
 }
