@@ -30,7 +30,7 @@
 		<springfox.version>2.9.2</springfox.version>
 		<powermock.version>2.0.2</powermock.version>
 		<!-- force at least version 2.16 due to https://logging.apache.org/log4j/2.x/security.html -->
-		<log4j.version>2.16.0</log4j.version>
+		<log4j.version>2.17.1</log4j.version>
 	</properties>
 
 	<dependencies>
