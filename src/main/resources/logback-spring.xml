@@ -13,12 +13,12 @@
               {
               "serviceName": "users",
               "request": {
-              "correlationId": "%mdc{X-Correlation-Id:-}",
+              "correlationId": "%mdc{CID:-}",
               "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}"
               },
               "log": {
               "level": "%level",
-              "level_value": "#asLong{%relative}",
+              "levelValue": "#asLong{%relative}",
               "logger": "%logger",
               "message": "%message",
               "thread": "%thread",
