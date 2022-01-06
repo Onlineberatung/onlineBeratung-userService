@@ -1,8 +1,35 @@
 <configuration>
 
   <springProfile name="!testing">
+    <conversionRule
+      conversionWord="stacktrace"
+      converterClass="net.logstash.logback.stacktrace.ShortenedThrowableConverter"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-      <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+      <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+        <providers>
+          <mdc/>
+          <pattern>
+            <pattern>
+              {
+              "serviceName": "users",
+              "request": {
+              "correlationId": "%mdc{X-Correlation-Id:-}",
+              "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}"
+              },
+              "log": {
+              "level": "%level",
+              "level_value": "#asLong{%relative}",
+              "logger": "%logger",
+              "message": "%message",
+              "thread": "%thread",
+              "stack": "%stacktrace{5,20,1024,rootFirst}",
+              "exception": "%exception"
+              }
+              }
+            </pattern>
+          </pattern>
+        </providers>
+      </encoder>
     </appender>
     <root level="INFO">
       <appender-ref ref="STDOUT"/>
@@ -12,9 +39,7 @@
   <springProfile name="testing">
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
       <encoder>
-        <pattern>%date{ISO8601} %highlight(%-5level) [%X{X-Correlation-Id}] [%thread]
-          %cyan(%logger[%method:%line]) - %msg %n
-        </pattern>
+        <pattern>%date{ISO8601} %highlight(%-5level) [%X{X-Correlation-Id}] [%thread] %cyan(%logger[%method:%line]) - %msg %n</pattern>
       </encoder>
     </appender>
     <root level="INFO">
