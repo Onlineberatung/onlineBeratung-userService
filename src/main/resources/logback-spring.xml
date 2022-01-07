@@ -1,9 +1,6 @@
 <configuration>
 
   <springProfile name="!testing">
-    <conversionRule
-      conversionWord="stacktrace"
-      converterClass="net.logstash.logback.stacktrace.ShortenedThrowableConverter"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
       <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
         <providers>
@@ -11,20 +8,20 @@
           <pattern>
             <pattern>
               {
-              "serviceName": "users",
-              "request": {
-              "correlationId": "%mdc{CID:-}",
-              "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}"
-              },
-              "log": {
-              "level": "%level",
-              "levelValue": "#asLong{%relative}",
-              "logger": "%logger",
-              "message": "%message",
-              "thread": "%thread",
-              "stack": "%stacktrace{5,20,1024,rootFirst}",
-              "exception": "%exception"
-              }
+                "serviceName": "users",
+                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
+                "request": {
+                  "correlationId": "%mdc{CID:-null}",
+                  "timestamp": "null"
+                },
+                "log": {
+                  "level": "%level",
+                  "levelValue": "#asLong{%relative}",
+                  "logger": "%logger",
+                  "message": "%message",
+                  "thread": "%thread",
+                  "stack": "%replace((%replace(%rEx){'\n','\\\\n'}){'\t','\\\\t'}"
+                }
               }
             </pattern>
           </pattern>
