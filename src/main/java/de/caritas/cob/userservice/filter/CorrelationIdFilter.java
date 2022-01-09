@@ -34,18 +34,16 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 
       correlationId = UUID.randomUUID().toString();
       log.debug("Set correlation id '{}' in response header '{}'.", correlationId, HEADER_NAME);
-
       response.addHeader(HEADER_NAME, correlationId);
-      MDC.put(MDC_NAME, correlationId);
-
-      try {
-        chain.doFilter(request, response);
-      } finally {
-        MDC.remove(MDC_NAME);
-      }
     } else {
       log.debug("Correlation-id header '{}' with value '{}' found.", HEADER_NAME, correlationId);
-      MDC.put(MDC_NAME, correlationId);
+    }
+
+    MDC.put(MDC_NAME, correlationId);
+    try {
+      chain.doFilter(request, response);
+    } finally {
+      MDC.clear();
     }
   }
 }
