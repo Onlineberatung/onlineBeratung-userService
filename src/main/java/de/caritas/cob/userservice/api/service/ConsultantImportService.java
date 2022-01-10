@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.ImportException;
@@ -14,6 +13,7 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -34,7 +34,6 @@ import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +69,7 @@ public class ConsultantImportService {
     Reader in;
     List<CSVRecord> records;
     String logMessage;
-    Consultant consultant = null;
+    Consultant consultant;
 
     try {
       in = new FileReader(importFilename);
@@ -275,7 +274,7 @@ public class ConsultantImportService {
     if (email.contains(DELIMITER)) {
       email = email.substring(0, email.indexOf(DELIMITER)).trim();
     }
-    if (!EmailValidator.getInstance().isValid(email)) {
+    if (!userHelper.isValidEmail(email)) {
       throw new ImportException(
           String.format("Consultant %s could not be imported: Invalid email address",
               importRecord.getUsername()));
