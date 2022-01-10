@@ -92,12 +92,10 @@ public class AssignSessionFacadeTest {
     );
 
     assertEquals(exception.getMessage(), thrown.getMessage());
-    //TODO: check internal server error log
     verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(CONSULTANT_WITH_AGENCY)
                 && consultantSessionDTO.getSession().equals(FEEDBACKSESSION_WITH_CONSULTANT)));
-    //TODO: verify(rocketChatRollbackService).rollbackRemoveUsersFromRocketChatGroup(anyString(), any());
   }
 
   @Test
