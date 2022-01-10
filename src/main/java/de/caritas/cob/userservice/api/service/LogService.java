@@ -21,7 +21,6 @@ public class LogService {
   public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
   public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
   public static final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
-  public static final String STATISTICS_EVENT_PROCESSING_ERROR = "StatisticsEventProcessing error: ";
 
   private LogService() {
   }
@@ -157,14 +156,4 @@ public class LogService {
   public static void logWarn(Exception exception) {
     LOGGER.warn(getStackTrace(exception));
   }
-
-  /**
-   * Error while processing statistics event.
-   *
-   * @param exception Exception
-   */
-  public static void logStatisticsEventError(Exception exception) {
-    LOGGER.error("{}{}", STATISTICS_EVENT_PROCESSING_ERROR, getStackTrace(exception));
-  }
-
 }
