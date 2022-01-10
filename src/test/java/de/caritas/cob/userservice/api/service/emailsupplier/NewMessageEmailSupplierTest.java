@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -30,7 +29,6 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
@@ -89,7 +87,7 @@ public class NewMessageEmailSupplierTest {
         .applicationBaseUrl("app baseurl")
         .emailDummySuffix("dummySuffix")
         .build();
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(NewMessageEmailSupplier.class, "log", logger);
   }
 
   @Test
@@ -110,7 +108,7 @@ public class NewMessageEmailSupplierTest {
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), anyString());
   }
 
   @Test
@@ -206,7 +204,7 @@ public class NewMessageEmailSupplierTest {
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), anyString());
   }
 
   @Test

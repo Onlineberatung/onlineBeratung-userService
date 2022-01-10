@@ -11,11 +11,13 @@ import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Action to delete a user account in keycloak.
  */
+@Slf4j
 @Component
 public class DeleteKeycloakAskerAction extends DeleteKeycloakUserAction implements
     ActionCommand<AskerDeletionWorkflowDTO> {
@@ -34,7 +36,7 @@ public class DeleteKeycloakAskerAction extends DeleteKeycloakUserAction implemen
     try {
       this.deleteUserWithId(actionTarget.getUser().getUserId());
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)

@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import java.net.UnknownHostException;
 import javax.validation.ConstraintViolationException;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -33,6 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * Customizes API error/exception handling to hide information and/or possible security
  * vulnerabilities.
  */
+@Slf4j
 @NoArgsConstructor
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -91,7 +93,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   protected ResponseEntity<Object> handleHttpMessageNotReadable(
       final HttpMessageNotReadableException ex, final HttpHeaders headers, final HttpStatus status,
       final WebRequest request) {
-    LogService.logWarn(status, ex);
+    log.warn("UserService API: {}: {}", status.getReasonPhrase(), ex.getStackTrace());
 
     return handleExceptionInternal(null, null, headers, status, request);
   }
@@ -106,7 +108,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
       final MethodArgumentNotValidException ex, final HttpHeaders headers, final HttpStatus status,
       final WebRequest request) {
-    LogService.logWarn(status, ex);
+    log.warn("UserService API: {}: {}", status.getReasonPhrase(), ex.getStackTrace());
 
     return handleExceptionInternal(null, null, headers, status, request);
   }
@@ -135,7 +137,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({InvalidDataAccessApiUsageException.class})
   protected ResponseEntity<Object> handleConflict(final RuntimeException ex,
       final WebRequest request) {
-    LogService.logWarn(HttpStatus.CONFLICT, ex);
+    log.warn("UserService API: {}: {}", HttpStatus.CONFLICT, ex.getStackTrace());
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
   }

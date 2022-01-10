@@ -31,7 +31,6 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCOD
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -56,8 +55,10 @@ import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -228,7 +229,10 @@ public class EmailNotificationFacadeTest {
         FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID);
     ReflectionTestUtils.setField(emailNotificationFacade, APPLICATION_BASE_URL_FIELD_NAME,
         APPLICATION_BASE_URL);
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(EmailNotificationFacade.class, "log", logger);
+    setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
+    setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
+    setInternalState(NewMessageEmailSupplier.class, "log", logger);
   }
 
   /**
@@ -304,7 +308,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
-    verify(logger, times(2)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), any(), any(Exception.class));
   }
 
   /**
@@ -363,7 +367,8 @@ public class EmailNotificationFacadeTest {
         .thenThrow(serviceException);
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID);
-    verify(logger, times(2)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), anyString(),
+        any(InternalServerErrorException.class));
   }
 
   @Test
@@ -423,7 +428,7 @@ public class EmailNotificationFacadeTest {
 
     verify(mailService, times(0))
         .sendEmailNotification(Mockito.any(MailsDTO.class));
-    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString(), any(Exception.class));
   }
 
   @Test
@@ -437,7 +442,8 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(),
+        any(NullPointerException.class));
   }
 
   @Test
@@ -531,7 +537,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
 
   }
 
@@ -543,7 +549,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
 
   }
 
@@ -556,7 +562,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
 
   }
 
@@ -576,7 +582,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(null, CONSULTANT_ID_2, USERNAME);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -585,7 +591,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT_WITHOUT_MAIL,
         CONSULTANT_ID_2, USERNAME);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -596,7 +602,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -620,7 +626,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME);
 
-    verify(logger, times(1)).error(anyString(), anyString(), contains("unexpected"));
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
   @Test
@@ -629,7 +635,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), any(Exception.class));
   }
 
 }

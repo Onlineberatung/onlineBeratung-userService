@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Service for Keycloak 2FA calls.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KeycloakTwoFactorAuthService {
@@ -58,7 +60,7 @@ public class KeycloakTwoFactorAuthService {
           .exchange(requestUrl, HttpMethod.GET, request, OtpInfoDTO.class);
       return Optional.ofNullable(response.getBody());
     } catch (RestClientException ex) {
-      LogService.logKeycloakError("Could not fetch otp credential info", ex);
+      log.error("Keycloak error: Could not fetch otp credential info", ex);
     }
 
     return Optional.empty();

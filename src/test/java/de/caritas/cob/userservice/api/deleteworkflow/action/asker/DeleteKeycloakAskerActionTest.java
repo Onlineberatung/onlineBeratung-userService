@@ -17,7 +17,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,7 @@ public class DeleteKeycloakAskerActionTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(DeleteKeycloakAskerAction.class, "log", logger);
   }
 
   @Test
@@ -73,7 +72,7 @@ public class DeleteKeycloakAskerActionTest {
     assertThat(workflowErrors.get(0).getIdentifier(), is("userId"));
     assertThat(workflowErrors.get(0).getReason(), is("Unable to delete keycloak user account"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
 }

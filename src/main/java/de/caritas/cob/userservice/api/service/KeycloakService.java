@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponse
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
  * Service for Keycloak REST API calls.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class KeycloakService {
 
@@ -55,12 +57,12 @@ public class KeycloakService {
   public boolean changePassword(final String userId, final String password) {
     try {
       keycloakAdminClientService.updatePassword(userId, password);
-      return true;
     } catch (Exception ex) {
-      LogService.logKeycloakInfo(
-          String.format("Could not change password for user with id %s", userId), ex);
+      log.info("Could not change password for user with id {}", userId);
       return false;
     }
+
+    return true;
   }
 
   /**
@@ -113,16 +115,16 @@ public class KeycloakService {
           Void.class);
       return wasLogoutSuccessful(response, refreshToken);
     } catch (Exception ex) {
-      LogService.logKeycloakError(
-          String.format("Could not log out user with refresh token %s", refreshToken), ex);
+      log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken, ex);
+
       return false;
     }
   }
 
   private boolean wasLogoutSuccessful(ResponseEntity<Void> responseEntity, String refreshToken) {
     if (!responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
-      LogService.logKeycloakError(
-          String.format("Could not log out user with refresh token %s", refreshToken));
+      log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken);
+
       return false;
     }
     return true;

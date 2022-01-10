@@ -13,11 +13,13 @@ import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository
 import de.caritas.cob.userservice.api.service.LogService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Deletes a {@link UserAgency} in database.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeleteDatabaseAskerAgencyAction implements ActionCommand<AskerDeletionWorkflowDTO> {
@@ -35,7 +37,7 @@ public class DeleteDatabaseAskerAgencyAction implements ActionCommand<AskerDelet
       var userAgencies = this.userAgencyRepository.findByUser(actionTarget.getUser());
       this.userAgencyRepository.deleteAll(userAgencies);
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)

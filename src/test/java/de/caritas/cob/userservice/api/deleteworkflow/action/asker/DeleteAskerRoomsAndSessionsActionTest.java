@@ -26,7 +26,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +62,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(DeleteAskerRoomsAndSessionsAction.class, "log", logger);
   }
 
   @Test
@@ -115,7 +114,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(5));
-    verify(this.logger, times(5)).error(anyString(), anyString());
+    verify(logger, times(5)).error(anyString(), any(Exception.class));
   }
 
   @Test
@@ -136,7 +135,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(15));
-    verify(this.logger, times(15)).error(anyString(), anyString());
+    verify(logger, times(15)).error(anyString(), any(Exception.class));
   }
 
   @Test
@@ -153,7 +152,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(2));
-    verify(this.logger, times(2)).error(anyString(), anyString());
+    verify(logger, times(2)).error(anyString(), any(Exception.class));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(ROCKET_CHAT));
     assertThat(workflowErrors.get(0).getIdentifier(), is(session.getGroupId()));
@@ -178,7 +177,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(1));
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
     assertThat(workflowErrors.get(0).getIdentifier(), is(session.getId().toString()));
@@ -198,7 +197,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(1));
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
     assertThat(workflowErrors.get(0).getIdentifier(), is(session.getId().toString()));
@@ -218,7 +217,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(1));
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(Exception.class));
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
     assertThat(workflowErrors.get(0).getIdentifier(), is(session.getId().toString()));

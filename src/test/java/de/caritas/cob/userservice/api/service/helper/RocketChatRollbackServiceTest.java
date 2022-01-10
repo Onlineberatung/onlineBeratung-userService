@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.helper;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
@@ -11,7 +12,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -37,7 +37,7 @@ public class RocketChatRollbackServiceTest {
   private final String GROUP_ID = "xxxYYY";
   private final GroupMemberDTO GROUP_MEMBER_DTO =
       new GroupMemberDTO(MEMBER_ID, STATUS, USERNAME, NAME, UTC_OFFSET);
-  private final List<GroupMemberDTO> GROUP_MEMBER_DTO_LIST = Arrays.asList(GROUP_MEMBER_DTO);
+  private final List<GroupMemberDTO> GROUP_MEMBER_DTO_LIST = List.of(GROUP_MEMBER_DTO);
   private final GroupMemberDTO GROUP_MEMBER_DTO_2 =
       new GroupMemberDTO(MEMBER_ID + "2", STATUS, USERNAME + "2", NAME + "2", UTC_OFFSET);
   private final List<GroupMemberDTO> CURRENT_GROUP_MEMBER_DTO_LIST =
@@ -57,7 +57,7 @@ public class RocketChatRollbackServiceTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(RocketChatRollbackService.class, "log", logger);
   }
 
   /**
@@ -78,7 +78,7 @@ public class RocketChatRollbackServiceTest {
     rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -95,7 +95,7 @@ public class RocketChatRollbackServiceTest {
     rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -112,7 +112,7 @@ public class RocketChatRollbackServiceTest {
     rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -129,6 +129,6 @@ public class RocketChatRollbackServiceTest {
     rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
         GROUP_MEMBER_DTO_LIST);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), any(Exception.class));
   }
 }

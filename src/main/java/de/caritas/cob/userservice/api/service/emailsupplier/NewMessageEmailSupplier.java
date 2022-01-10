@@ -21,7 +21,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -30,10 +29,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Supplier to provide mails to be sent when a new message has been written.
  */
+@Slf4j
 @AllArgsConstructor
 @Builder
 public class NewMessageEmailSupplier implements EmailSupplier {
@@ -73,9 +74,11 @@ public class NewMessageEmailSupplier implements EmailSupplier {
       return buildMailsForSession();
     }
     if (isNotTheFirstMessage()) {
-      LogService.logEmailNotificationFacadeError(String.format(
-          "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s or the session does not belong to the user.",
-          rcGroupId, userId));
+      log.error(
+          "EmailNotificationFacade error: No currently running (SessionStatus = IN_PROGRESS) "
+              + "session found for Rocket.Chat group id {} and user id {} or the session does not "
+              + "belong to the user.",
+          rcGroupId, userId);
     }
     return emptyList();
   }
@@ -145,13 +148,14 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   }
 
   private List<MailDTO> buildMailForAsker() {
-
     if (isSessionAndUserValid()) {
       return buildMailForAskerList();
     } else if (isNotADummyMail()) {
-      LogService.logEmailNotificationFacadeError(String.format(
-          "No currently running (SessionStatus = IN_PROGRESS) session found for Rocket.Chat group id %s and user id %s or asker has not provided a e-mail address.",
-          rcGroupId, userId));
+      log.error(
+          "EmailNotificationFacade error: No currently running (SessionStatus = IN_PROGRESS) "
+              + "session found for Rocket.Chat group id {} and user id {} or asker has not provided"
+              + " a e-mail address.", rcGroupId, userId
+      );
     }
 
     return emptyList();

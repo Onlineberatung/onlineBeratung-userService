@@ -19,7 +19,6 @@ import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflow
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class DeleteRocketChatAskerActionTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(DeleteRocketChatAskerAction.class, "log", logger);
   }
 
   @Test
@@ -90,7 +89,7 @@ public class DeleteRocketChatAskerActionTest {
     assertThat(workflowErrors.get(0).getIdentifier(), is("userId"));
     assertThat(workflowErrors.get(0).getReason(), is("Unable to delete Rocket.Chat user account"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
 }

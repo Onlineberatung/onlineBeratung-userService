@@ -24,7 +24,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroup
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public class DeleteChatActionTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(DeleteChatAction.class, "log", logger);
   }
 
   @Test
@@ -108,7 +107,7 @@ public class DeleteChatActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(6));
-    verify(this.logger, times(6)).error(anyString(), anyString());
+    verify(logger, times(6)).error(anyString(), any(Exception.class));
   }
 
   @Test
@@ -136,7 +135,7 @@ public class DeleteChatActionTest {
     assertThat(workflowErrors.get(1).getIdentifier(), is(chat.getChatOwner().getId()));
     assertThat(workflowErrors.get(1).getReason(), is("Unable to delete chats in database"));
     assertThat(workflowErrors.get(1).getTimestamp(), notNullValue());
-    verify(this.logger, times(2)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
 }

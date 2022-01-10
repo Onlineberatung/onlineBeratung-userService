@@ -26,7 +26,6 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
 import javax.ws.rs.core.Response;
 import org.jeasy.random.EasyRandom;
@@ -73,7 +72,7 @@ public class KeycloakAdminClientServiceTest {
   @Before
   public void setup() {
     setField(keycloakAdminClientService, "usernameTranscoder", usernameTranscoder);
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(KeycloakAdminClientService.class, "log", logger);
   }
 
   @Test
@@ -439,7 +438,7 @@ public class KeycloakAdminClientServiceTest {
 
     this.keycloakAdminClientService.rollBackUser("userId");
 
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString());
   }
 
   @Test

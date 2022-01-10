@@ -40,12 +40,14 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /*
  * Facade for capsuling the steps for saving the enquiry message.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateEnquiryMessageFacade {
@@ -368,9 +370,8 @@ public class CreateEnquiryMessageFacade {
       RocketChatCredentials rocketChatCredentials) {
     if (nonNull(rcGroupId) && nonNull(rocketChatCredentials) && !rocketChatService
         .rollbackGroup(rcGroupId, rocketChatCredentials)) {
-      LogService.logInternalServerError(String.format(
-          "Error during rollback of group while saving enquiry message. Group with id %s could not be deleted.",
-          rcGroupId));
+      log.error("Internal Server Error: Error during rollback of group while saving enquiry "
+          + "message. Group with id {} could not be deleted.", rcGroupId);
     }
   }
 
@@ -379,10 +380,8 @@ public class CreateEnquiryMessageFacade {
       return;
     }
     if (!rocketChatService.deleteGroupAsSystemUser(rcGroupId)) {
-      LogService.logInternalServerError(String.format(
-          "Error during rollback of feedback group while saving enquiry message. Group with id %s could not be deleted.",
-          rcGroupId));
+      log.error("Internal Server Error: Error during rollback of feedback group while saving "
+          + "enquiry message. Group with id {} could not be deleted.", rcGroupId);
     }
   }
-
 }

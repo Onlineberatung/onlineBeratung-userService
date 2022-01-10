@@ -12,11 +12,13 @@ import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.LogService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Action to delete a {@link User} in database.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeleteDatabaseAskerAction implements ActionCommand<AskerDeletionWorkflowDTO> {
@@ -33,7 +35,7 @@ public class DeleteDatabaseAskerAction implements ActionCommand<AskerDeletionWor
     try {
       this.userRepository.delete(actionTarget.getUser());
     } catch (Exception e) {
-      LogService.logDeleteWorkflowError(e);
+      log.error("UserService delete workflow error: ", e);
       actionTarget.getDeletionWorkflowErrors().add(
           DeletionWorkflowError.builder()
               .deletionSourceType(ASKER)

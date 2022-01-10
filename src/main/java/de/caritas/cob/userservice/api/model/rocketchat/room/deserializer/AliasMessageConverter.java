@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.model.rocketchat.room.deserializer;
 
-import static de.caritas.cob.userservice.api.service.LogService.logInternalServerError;
 import static java.net.URLDecoder.decode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.empty;
@@ -11,10 +10,12 @@ import de.caritas.cob.userservice.api.model.AliasMessageDTO;
 import de.caritas.cob.userservice.api.model.ForwardMessageDTO;
 import java.io.IOException;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Converter to transform json string values into alias objects.
  */
+@Slf4j
 public class AliasMessageConverter {
 
   /**
@@ -48,7 +49,9 @@ public class AliasMessageConverter {
               AliasMessageDTO.class));
 
     } catch (IOException jsonParseEx) {
-      logInternalServerError("Could not convert alias String to AliasMessageDTO", jsonParseEx);
+      log.error("Internal Server Error: Could not convert alias String to AliasMessageDTO",
+          jsonParseEx);
+
       return empty();
     }
   }

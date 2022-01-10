@@ -19,7 +19,6 @@ import de.caritas.cob.userservice.api.deleteworkflow.model.AskerDeletionWorkflow
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -44,7 +43,7 @@ public class DeleteDatabaseAskerActionTest {
 
   @Before
   public void setup() {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(DeleteDatabaseAskerAction.class, "log", logger);
   }
 
   @Test
@@ -75,7 +74,7 @@ public class DeleteDatabaseAskerActionTest {
     assertThat(workflowErrors.get(0).getIdentifier(), is("user id"));
     assertThat(workflowErrors.get(0).getReason(), is("Unable to delete user"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
-    verify(this.logger, times(1)).error(anyString(), anyString());
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
 }

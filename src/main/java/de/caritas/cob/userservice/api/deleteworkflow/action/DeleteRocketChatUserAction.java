@@ -7,16 +7,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionSourceType;
 import de.caritas.cob.userservice.api.deleteworkflow.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Action to delete a user account in Rocker.Chat.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public abstract class DeleteRocketChatUserAction {
@@ -33,7 +34,7 @@ public abstract class DeleteRocketChatUserAction {
 
   protected void appendErrorsForSourceType(List<DeletionWorkflowError> workflowErrors,
       DeletionSourceType deletionSourceType, String rcUserId, Exception e) {
-    LogService.logDeleteWorkflowError(e);
+    log.error("UserService delete workflow error: ", e);
     workflowErrors.add(
         DeletionWorkflowError.builder()
             .deletionSourceType(deletionSourceType)

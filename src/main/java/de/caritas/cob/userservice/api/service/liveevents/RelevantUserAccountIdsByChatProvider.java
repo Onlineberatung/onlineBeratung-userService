@@ -15,11 +15,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Provider to observe all assigned chat user ids instead of initiator.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RelevantUserAccountIdsByChatProvider implements UserIdsProvider {
@@ -39,8 +41,7 @@ public class RelevantUserAccountIdsByChatProvider implements UserIdsProvider {
     try {
       return extractDependentUserIds(rcGroupId);
     } catch (RocketChatGetGroupMembersException e) {
-      LogService.logRocketChatError(
-          String.format("Unable to collect rc members for group id %s", rcGroupId));
+      log.error("Rocket.Chat Error: Unable to collect rc members for group id {}", rcGroupId);
     }
     return emptyList();
   }
