@@ -14,12 +14,15 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCOD
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_LONG;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_TOO_SHORT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import java.util.List;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +33,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserHelperTest {
+
+  private static final EasyRandom easyRandom = new EasyRandom();
 
   @InjectMocks
   private UserHelper userHelper;
@@ -52,6 +57,29 @@ public class UserHelperTest {
   @Test
   public void isUsernameValid_Should_ReturnFalse_WhenUsernameIsTooLong() {
     assertFalse(userHelper.isUsernameValid(USERNAME_TOO_LONG));
+  }
+
+  @Test
+  public void isValidEmailShouldReturnTrueOnValidAddress() {
+    var emailAddress = givenARandomEmail();
+
+    assertTrue(userHelper.isValidEmail(emailAddress));
+  }
+
+  @Test
+  public void isValidEmailShouldReturnTrueOnAddressWithUmlaut() {
+    var emailAddress = givenARandomEmailWithAnUmlaut();
+
+    assertTrue(userHelper.isValidEmail(emailAddress));
+  }
+
+  @Test
+  public void isValidEmailShouldReturnFalseOnEmptyAddress() {
+    assertFalse(userHelper.isValidEmail(null));
+    assertFalse(userHelper.isValidEmail(""));
+    assertFalse(userHelper.isValidEmail("@"));
+    assertFalse(userHelper.isValidEmail("@.de"));
+    assertFalse(userHelper.isValidEmail("@sld.de"));
   }
 
   @Test
@@ -94,5 +122,18 @@ public class UserHelperTest {
   @Test
   public void doUsernamesMatch_Should_ReturnTrue_WhenEncodedAndDecodedUsernamesMatch() {
     assertTrue(userHelper.doUsernamesMatch(USERNAME_ENCODED, USERNAME_DECODED));
+  }
+
+  private String givenARandomEmail() {
+    return randomAlphabetic(16) + "@" + randomAlphabetic(8)
+        + "." + (easyRandom.nextBoolean() ? "de" : "com");
+  }
+
+  private String givenARandomEmailWithAnUmlaut() {
+    var umlauts = List.of("ä", "ö", "ü");
+
+    return randomAlphabetic(8)
+        + umlauts.get(easyRandom.nextInt(umlauts.size())) + randomAlphabetic(8) + "@"
+        + randomAlphabetic(8) + "." + (easyRandom.nextBoolean() ? "de" : "com");
   }
 }
