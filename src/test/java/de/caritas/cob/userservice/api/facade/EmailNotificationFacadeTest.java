@@ -229,7 +229,6 @@ public class EmailNotificationFacadeTest {
         FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID);
     ReflectionTestUtils.setField(emailNotificationFacade, APPLICATION_BASE_URL_FIELD_NAME,
         APPLICATION_BASE_URL);
-    //setInternalState(LogService.class, "LOGGER", logger);
     setInternalState(EmailNotificationFacade.class, "log", logger);
     setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
     setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
