@@ -16,7 +16,6 @@ public class LogService {
   public static final String ROCKET_CHAT_ERROR_TEXT = "Rocket.Chat Error: ";
   public static final String DB_ERROR_TEXT = "Database error: ";
   public static final String BAD_REQUEST_ERROR_TEXT = "Bad Request: ";
-  public static final String UNAUTHORIZED_WARNING_TEXT = "Unauthorized: ";
   public static final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
   public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
   public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
@@ -41,24 +40,6 @@ public class LogService {
    */
   public static void logBadRequestException(Exception exception) {
     LOGGER.warn("{}{}", BAD_REQUEST_ERROR_TEXT, getStackTrace(exception));
-  }
-
-  /**
-   * Unauthorized warning.
-   *
-   * @param message the message
-   */
-  public static void logUnauthorized(String message) {
-    LOGGER.warn("{}{}", UNAUTHORIZED_WARNING_TEXT, message);
-  }
-
-  /**
-   * Unauthorized warning.
-   *
-   * @param exception the exception
-   */
-  public static void logUnauthorized(Exception exception) {
-    LOGGER.warn("{}", getStackTrace(exception));
   }
 
   /**

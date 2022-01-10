@@ -64,6 +64,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -77,7 +78,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
@@ -658,12 +659,12 @@ public class RocketChatServiceTest {
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
         .thenThrow(HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION);
 
-    try {
-      rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: UnauthorizedException");
-    } catch (UnauthorizedException ex) {
-      assertTrue("Excepted UnauthorizedException thrown", true);
-    }
+    var thrown = assertThrows(RocketChatUnauthorizedException.class,
+        () -> rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS)
+    );
+
+    var prefix = "Could not get Rocket.Chat subscriptions for user ID";
+    assertTrue(thrown.getMessage().startsWith(prefix));
   }
 
   @Test

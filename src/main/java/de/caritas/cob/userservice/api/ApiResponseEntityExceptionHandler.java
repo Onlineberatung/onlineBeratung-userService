@@ -9,13 +9,14 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.net.UnknownHostException;
 import javax.validation.ConstraintViolationException;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -116,14 +117,14 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   /**
    * 401 - Unauthorized.
    *
-   * @param ex      {@link UnauthorizedException}
+   * @param ex      {@link RocketChatUnauthorizedException}
    * @param request {@link WebRequest}
    * @return {@link HttpStatus#UNAUTHORIZED} without body or detailed information
    */
-  @ExceptionHandler(UnauthorizedException.class)
-  public ResponseEntity<Object> handleUnauthorized(final UnauthorizedException ex,
+  @ExceptionHandler(RocketChatUnauthorizedException.class)
+  public ResponseEntity<Object> handleUnauthorized(final RocketChatUnauthorizedException ex,
       final WebRequest request) {
-    ex.executeLogging();
+    log.warn(ExceptionUtils.getStackTrace(ex));
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
   }

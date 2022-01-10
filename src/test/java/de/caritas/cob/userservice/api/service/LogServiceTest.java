@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.service;
 import static de.caritas.cob.userservice.api.service.LogService.ASSIGN_SESSION_FACADE_ERROR_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.ASSIGN_SESSION_FACADE_WARNING_TEXT;
 import static de.caritas.cob.userservice.api.service.LogService.FORBIDDEN_WARNING_TEXT;
-import static de.caritas.cob.userservice.api.service.LogService.UNAUTHORIZED_WARNING_TEXT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,14 +54,6 @@ public class LogServiceTest {
 
     LogService.logBadRequestException(badRequestException);
     verify(badRequestException, atLeastOnce()).printStackTrace(any(PrintWriter.class));
-  }
-
-  @Test
-  public void logUnauthorized_Should_LogErrorMessage() {
-
-    LogService.logUnauthorized(ERROR_MESSAGE);
-    verify(logger, times(1))
-        .warn(anyString(), eq(UNAUTHORIZED_WARNING_TEXT), eq(ERROR_MESSAGE));
   }
 
   @Test
@@ -128,13 +119,6 @@ public class LogServiceTest {
   public void logForbidden_Should_LogExceptionStackTrace() {
 
     LogService.logForbidden(exception);
-    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
-  }
-
-  @Test
-  public void logUnauthorized_Should_LogExceptionStackTrace() {
-
-    LogService.logUnauthorized(exception);
     verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
   }
 }

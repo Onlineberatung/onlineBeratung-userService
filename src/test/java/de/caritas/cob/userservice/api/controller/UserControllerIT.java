@@ -117,6 +117,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -140,6 +141,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.ApiResponseEntityExceptionHandler;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -155,6 +157,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
@@ -219,6 +222,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -457,6 +461,7 @@ public class UserControllerIT {
     MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
     setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(ApiResponseEntityExceptionHandler.class, "log", logger);
   }
 
   /**
@@ -1049,6 +1054,30 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService);
+  }
+
+  @Test
+  public void getSessionsForAuthenticatedConsultant_Should_ReturnUnauthorized_WhenUnauthorizedExceptionIsRaised()
+      throws Exception {
+    var runtimeException = easyRandom.nextObject(RuntimeException.class);
+    var unauthorizedException = new RocketChatUnauthorizedException("userId", runtimeException);
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenThrow(unauthorizedException);
+
+    mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    var stackTrace = ExceptionUtils.getStackTrace(unauthorizedException);
+    verify(logger).warn(eq(stackTrace));
+    assertTrue(stackTrace.contains(
+        "Could not get Rocket.Chat subscriptions for user ID userId: Token is not active (401 Unauthorized)"
+    ));
+    assertTrue(stackTrace.startsWith(
+        "de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException:"
+    ));
   }
 
   @Test
