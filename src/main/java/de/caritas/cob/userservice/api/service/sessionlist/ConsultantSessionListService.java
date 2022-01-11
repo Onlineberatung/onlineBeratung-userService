@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -71,7 +70,7 @@ public class ConsultantSessionListService {
   private SessionStatus getVerifiedSessionStatus(Integer status) {
     return SessionStatus.valueOf(status)
         .orElseThrow(() -> new BadRequestException(String.format(
-            "Invalid session status %s ", status), LogService::logBadRequestException));
+            "Invalid session status %s ", status)));
   }
 
   /**

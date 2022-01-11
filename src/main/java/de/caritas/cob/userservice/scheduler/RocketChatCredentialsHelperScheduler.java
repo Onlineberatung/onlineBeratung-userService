@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.scheduler;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import javax.annotation.PostConstruct;
 import lombok.NonNull;
@@ -25,7 +24,7 @@ public class RocketChatCredentialsHelperScheduler {
     try {
       rocketChatCredentialsProvider.updateCredentials();
     } catch (RocketChatLoginException e) {
-      LogService.logUnauthorized(e.getMessage());
+      log.warn("Unauthorized: {}", e.getMessage());
     }
   }
 
@@ -35,7 +34,7 @@ public class RocketChatCredentialsHelperScheduler {
     try {
       rocketChatCredentialsProvider.updateCredentials();
     } catch (RocketChatLoginException e) {
-      LogService.logUnauthorized(e.getMessage());
+      log.warn("Unauthorized: {}", e.getMessage());
     }
   }
 

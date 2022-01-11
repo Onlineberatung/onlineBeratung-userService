@@ -15,13 +15,9 @@ public class LogService {
 
   public static final String ROCKET_CHAT_ERROR_TEXT = "Rocket.Chat Error: ";
   public static final String DB_ERROR_TEXT = "Database error: ";
-  public static final String BAD_REQUEST_ERROR_TEXT = "Bad Request: ";
-  public static final String UNAUTHORIZED_WARNING_TEXT = "Unauthorized: ";
   public static final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
   public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
   public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
-  public static final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
-  public static final String STATISTICS_EVENT_PROCESSING_ERROR = "StatisticsEventProcessing error: ";
 
   private LogService() {
   }
@@ -33,33 +29,6 @@ public class LogService {
    */
   public static void logDatabaseError(Exception exception) {
     LOGGER.error("{}{}", DB_ERROR_TEXT, getStackTrace(exception));
-  }
-
-  /**
-   * Bad Request Exception.
-   *
-   * @param exception the exception
-   */
-  public static void logBadRequestException(Exception exception) {
-    LOGGER.warn("{}{}", BAD_REQUEST_ERROR_TEXT, getStackTrace(exception));
-  }
-
-  /**
-   * Unauthorized warning.
-   *
-   * @param message the message
-   */
-  public static void logUnauthorized(String message) {
-    LOGGER.warn("{}{}", UNAUTHORIZED_WARNING_TEXT, message);
-  }
-
-  /**
-   * Unauthorized warning.
-   *
-   * @param exception the exception
-   */
-  public static void logUnauthorized(Exception exception) {
-    LOGGER.warn("{}", getStackTrace(exception));
   }
 
   /**
@@ -141,15 +110,6 @@ public class LogService {
   }
 
   /**
-   * Logs the exception message from creating the enquiry message
-   *
-   * @param exception the exception
-   */
-  public static void logCreateEnquiryMessageException(Exception exception) {
-    LOGGER.error("{}{}", CREATE_ENQUIRY_MESSAGE_ERROR, getStackTrace(exception));
-  }
-
-  /**
    * Logs an warning message.
    *
    * @param exception The exception
@@ -157,14 +117,4 @@ public class LogService {
   public static void logWarn(Exception exception) {
     LOGGER.warn(getStackTrace(exception));
   }
-
-  /**
-   * Error while processing statistics event.
-   *
-   * @param exception Exception
-   */
-  public static void logStatisticsEventError(Exception exception) {
-    LOGGER.error("{}{}", STATISTICS_EVENT_PROCESSING_ERROR, getStackTrace(exception));
-  }
-
 }

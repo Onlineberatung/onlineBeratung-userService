@@ -4,18 +4,20 @@ import de.caritas.cob.userservice.api.exception.CustomCryptoException;
 import de.caritas.cob.userservice.api.exception.NoMasterKeyException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CreateEnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.net.UnknownHostException;
 import javax.validation.ConstraintViolationException;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -40,6 +42,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+  @ExceptionHandler({CreateEnquiryMessageException.class})
+  public ResponseEntity<Object> handleCreateEnquiryMessageException(
+      final CreateEnquiryMessageException ex,
+      final WebRequest request) {
+    log.error("Bad Request: ", ex);
+
+    return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+  }
+
   /**
    * Custom BadRequest exception.
    *
@@ -49,7 +60,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({BadRequestException.class})
   public ResponseEntity<Object> handleCustomBadRequest(final BadRequestException ex,
       final WebRequest request) {
-    ex.executeLogging();
+    log.warn("Bad Request: ", ex);
 
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
@@ -116,14 +127,14 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   /**
    * 401 - Unauthorized.
    *
-   * @param ex      {@link UnauthorizedException}
+   * @param ex      {@link RocketChatUnauthorizedException}
    * @param request {@link WebRequest}
    * @return {@link HttpStatus#UNAUTHORIZED} without body or detailed information
    */
-  @ExceptionHandler(UnauthorizedException.class)
-  public ResponseEntity<Object> handleUnauthorized(final UnauthorizedException ex,
+  @ExceptionHandler(RocketChatUnauthorizedException.class)
+  public ResponseEntity<Object> handleUnauthorized(final RocketChatUnauthorizedException ex,
       final WebRequest request) {
-    ex.executeLogging();
+    log.warn(ExceptionUtils.getStackTrace(ex));
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
   }

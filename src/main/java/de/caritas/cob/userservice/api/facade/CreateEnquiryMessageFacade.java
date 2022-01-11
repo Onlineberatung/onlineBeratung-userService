@@ -8,8 +8,8 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CreateEnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddSystemUserException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
@@ -28,7 +28,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -123,8 +122,8 @@ public class CreateEnquiryMessageFacade {
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), rocketChatCredentials);
-      throw new InternalServerErrorException(exception.getMessage(), exception,
-          LogService::logCreateEnquiryMessageException);
+      log.error("CreateEnquiryMessageFacade error: ", exception);
+      throw new InternalServerErrorException(exception.getMessage(), exception);
     }
 
   }
@@ -134,9 +133,9 @@ public class CreateEnquiryMessageFacade {
     UserInfoResponseDTO rcUserInfoDTO = rocketChatService.getUserInfo(rcUserId);
 
     if (!userHelper.doUsernamesMatch(rcUserInfoDTO.getUser().getUsername(), user.getUsername())) {
-      throw new BadRequestException(String.format(
+      throw new CreateEnquiryMessageException(String.format(
           "Enquiry message check: User with username %s does not match user with Rocket.Chat ID %s",
-          user.getUsername(), rcUserId), LogService::logCreateEnquiryMessageException);
+          user.getUsername(), rcUserId));
     }
   }
 
@@ -147,24 +146,22 @@ public class CreateEnquiryMessageFacade {
     if (session.isPresent() && session.get().getUser().getUserId().equals(user.getUserId())) {
       return session.get();
     }
-    throw new BadRequestException(
-        String.format("Session %s not found for user %s", sessionId, user.getUserId()),
-        LogService::logCreateEnquiryMessageException);
+    throw new CreateEnquiryMessageException(
+        String.format("Session %s not found for user %s", sessionId, user.getUserId()));
   }
 
   private void checkIfNotAnonymousEnquiry(Session session) {
     if (session.getRegistrationType().equals(ANONYMOUS)) {
-      throw new BadRequestException(
+      throw new CreateEnquiryMessageException(
           String.format("Session %s is anonymous and therefore can't have an enquiry message.",
-              session.getId()), LogService::logCreateEnquiryMessageException);
+              session.getId()));
     }
   }
 
   private void checkIfEnquiryMessageIsAlreadyWrittenForSession(Session session) {
     if (nonNull(session.getEnquiryMessageDate())) {
       throw new ConflictException(
-          String.format("Enquiry message already written for session %s", session.getId()),
-          LogService::logCreateEnquiryMessageException);
+          String.format("Enquiry message already written for session %s", session.getId()));
     }
   }
 
@@ -219,8 +216,7 @@ public class CreateEnquiryMessageFacade {
       throw new InternalServerErrorException(
           String
               .format("Could not create Rocket.Chat room for session %s and Rocket.Chat user %s",
-                  session.getId(), rocketChatCredentials.getRocketChatUserId()),
-          LogService::logCreateEnquiryMessageException);
+                  session.getId(), rocketChatCredentials.getRocketChatUserId()));
     }
 
   }
@@ -229,8 +225,7 @@ public class CreateEnquiryMessageFacade {
       long sessionId, String rocketChatUserId) {
     return groupResponseDTO.orElseThrow(() -> new InternalServerErrorException(
         String.format("Could not create Rocket.Chat room for session %s and Rocket.Chat user %s",
-            sessionId, rocketChatUserId),
-        LogService::logCreateEnquiryMessageException));
+            sessionId, rocketChatUserId)));
   }
 
   private void addSystemUserToGroup(String rcGroupId)

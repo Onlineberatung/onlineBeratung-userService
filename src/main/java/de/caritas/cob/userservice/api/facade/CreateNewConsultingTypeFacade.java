@@ -11,7 +11,6 @@ import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.registration.UserRegistrationDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +46,7 @@ public class CreateNewConsultingTypeFacade {
       return createSessionOrChat(userRegistrationDTO, user,
           extendedConsultingTypeResponseDTO, rocketChatCredentials);
     } catch (MissingConsultingTypeException | IllegalArgumentException e) {
-      throw new BadRequestException(e.getMessage(), LogService::logInternalServerError);
+      throw new BadRequestException(e.getMessage(), e);
     }
   }
 

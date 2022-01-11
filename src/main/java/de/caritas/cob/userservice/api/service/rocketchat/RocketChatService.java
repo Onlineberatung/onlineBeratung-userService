@@ -9,7 +9,7 @@ import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
@@ -604,9 +604,7 @@ public class RocketChatService {
 
     } catch (HttpStatusCodeException ex) {
       if (ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-        throw new UnauthorizedException(String.format(
-            "Could not get Rocket.Chat subscriptions for user ID %s: Token is not active (401 Unauthorized)",
-            rocketChatCredentials.getRocketChatUserId()));
+        throw new RocketChatUnauthorizedException(rocketChatCredentials.getRocketChatUserId(), ex);
       }
       throw new InternalServerErrorException(ex.getMessage(), LogService::logRocketChatError);
     }
