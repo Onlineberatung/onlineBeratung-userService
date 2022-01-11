@@ -48,8 +48,8 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
+import de.caritas.cob.userservice.api.exception.httpresponses.CreateEnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
@@ -293,8 +293,8 @@ public class CreateEnquiryMessageFacadeTest {
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void createEnquiryMessage_Should_ThrowBadRequestException_When_SessionNotFoundForUser() {
+  @Test(expected = CreateEnquiryMessageException.class)
+  public void createEnquiryMessage_Should_ThrowCreateEnquiryMessageException_When_SessionNotFoundForUser() {
 
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -302,8 +302,8 @@ public class CreateEnquiryMessageFacadeTest {
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, RC_CREDENTIALS);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void createEnquiryMessage_Should_ThrowBadRequestException_When_SessionIsAnonymous() {
+  @Test(expected = CreateEnquiryMessageException.class)
+  public void createEnquiryMessage_Should_ThrowCreateEnquiryMessageException_When_SessionIsAnonymous() {
     Session anonymousSession = new EasyRandom().nextObject(Session.class);
     anonymousSession.setRegistrationType(ANONYMOUS);
     anonymousSession.getUser().setUserId(USER.getUserId());
@@ -480,8 +480,8 @@ public class CreateEnquiryMessageFacadeTest {
     verify(rocketChatService, times(1)).rollbackGroup(RC_GROUP_ID, RC_CREDENTIALS);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void createEnquiryMessage_Should_ThrowBadRequest_When_KeycloakAndRocketChatUsersDontMatch() {
+  @Test(expected = CreateEnquiryMessageException.class)
+  public void createEnquiryMessage_Should_ThrowCreateEnquiryMessageException_When_KeycloakAndRocketChatUsersDontMatch() {
 
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO_2);
 

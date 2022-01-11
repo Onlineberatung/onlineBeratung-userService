@@ -15,11 +15,9 @@ public class LogService {
 
   public static final String ROCKET_CHAT_ERROR_TEXT = "Rocket.Chat Error: ";
   public static final String DB_ERROR_TEXT = "Database error: ";
-  public static final String BAD_REQUEST_ERROR_TEXT = "Bad Request: ";
   public static final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
   public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
   public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
-  public static final String CREATE_ENQUIRY_MESSAGE_ERROR = "CreateEnquiryMessageFacade error: ";
 
   private LogService() {
   }
@@ -31,15 +29,6 @@ public class LogService {
    */
   public static void logDatabaseError(Exception exception) {
     LOGGER.error("{}{}", DB_ERROR_TEXT, getStackTrace(exception));
-  }
-
-  /**
-   * Bad Request Exception.
-   *
-   * @param exception the exception
-   */
-  public static void logBadRequestException(Exception exception) {
-    LOGGER.warn("{}{}", BAD_REQUEST_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
@@ -118,15 +107,6 @@ public class LogService {
    */
   public static void logInfo(Exception exception) {
     LOGGER.info(getStackTrace(exception));
-  }
-
-  /**
-   * Logs the exception message from creating the enquiry message
-   *
-   * @param exception the exception
-   */
-  public static void logCreateEnquiryMessageException(Exception exception) {
-    LOGGER.error("{}{}", CREATE_ENQUIRY_MESSAGE_ERROR, getStackTrace(exception));
   }
 
   /**

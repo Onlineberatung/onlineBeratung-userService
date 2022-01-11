@@ -88,7 +88,7 @@ public class KeycloakService {
 
     } catch (RestClientResponseException exception) {
       throw new BadRequestException(String.format("Could not log in user %s into Keycloak: %s",
-          userName, exception.getMessage()));
+          userName, exception.getMessage()), exception);
     }
   }
 

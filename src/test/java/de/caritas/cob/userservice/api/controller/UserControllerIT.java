@@ -121,6 +121,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
@@ -1967,6 +1968,21 @@ public class UserControllerIT {
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void startChat_Should_ReturnBadRequest_When_StartChatThrowsBadRequest() throws Exception {
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
+    when(chatService.getChat(Mockito.any()))
+        .thenReturn(Optional.empty());
+
+    mvc.perform(put(PATH_PUT_CHAT_START)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(logger).warn(contains("BadRequestException: Chat with id"), any(Throwable.class));
   }
 
   @Test

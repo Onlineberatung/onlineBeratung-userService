@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import java.io.PrintWriter;
-import javax.ws.rs.BadRequestException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,9 +30,6 @@ public class LogServiceTest {
   Exception exception;
 
   @Mock
-  BadRequestException badRequestException;
-
-  @Mock
   private Logger logger;
 
   @Before
@@ -47,13 +43,6 @@ public class LogServiceTest {
     LogService.logDatabaseError(exception);
     verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
 
-  }
-
-  @Test
-  public void logBadRequestException_Should_LogExceptionStackTrace() {
-
-    LogService.logBadRequestException(badRequestException);
-    verify(badRequestException, atLeastOnce()).printStackTrace(any(PrintWriter.class));
   }
 
   @Test
@@ -81,13 +70,6 @@ public class LogServiceTest {
   @Test
   public void logInfo_Should_LogExceptionStackTrace() {
     LogService.logInfo(exception);
-    verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
-  }
-
-  @Test
-  public void logCreateEnquiryMessageException_Should_LogExceptionStackTrace() {
-
-    LogService.logCreateEnquiryMessageException(exception);
     verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
   }
 
