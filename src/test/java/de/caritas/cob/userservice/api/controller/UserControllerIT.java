@@ -1982,7 +1982,8 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verify(logger).warn(contains("BadRequestException: Chat with id"), any(Throwable.class));
+    //prints stack trace
+    verify(logger).warn(contains("Bad Request:"), any(BadRequestException.class));
   }
 
   @Test
@@ -2446,8 +2447,8 @@ public class UserControllerIT {
       throws Exception {
 
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
@@ -2456,11 +2457,12 @@ public class UserControllerIT {
   @Test
   public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
       throws Exception {
-    Mockito.doThrow(new InternalServerErrorException("Fail test case")).when(keycloakTwoFactorAuthService).deleteOtpCredential(null);
+    Mockito.doThrow(new InternalServerErrorException("Fail test case"))
+        .when(keycloakTwoFactorAuthService).deleteOtpCredential(null);
 
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError());
 
     verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
@@ -2469,12 +2471,13 @@ public class UserControllerIT {
   @Test
   public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
       throws Exception {
-    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_SECRET);
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator)
+        .checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_SECRET);
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(
-            INVALID_OTP_SETUP_DTO_WRONG_SECRET))
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(
+                INVALID_OTP_SETUP_DTO_WRONG_SECRET))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(keycloakTwoFactorAuthService);
@@ -2483,13 +2486,14 @@ public class UserControllerIT {
   @Test
   public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
       throws Exception {
-    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator).checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_CODE);
+    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator)
+        .checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_CODE);
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(
-            INVALID_OTP_SETUP_DTO_WRONG_CODE))
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(
+                INVALID_OTP_SETUP_DTO_WRONG_CODE))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     verify(this.keycloakTwoFactorAuthService, times(0)).deleteOtpCredential(any());
