@@ -251,13 +251,10 @@ import org.springframework.test.web.servlet.MockMvc;
 public class UserControllerIT {
 
   private final String VALID_ENQUIRY_MESSAGE_BODY = "{\"message\": \"" + MESSAGE + "\"}";
-  private final String VALID_ABSENT_MESSAGE_BODY =
-      "{\"absent\": true, \"message\": \"" + MESSAGE + "\"}";
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null, null, null);
-  private final Optional<Consultant> OPTIONAL_CONSULTANT = Optional.of(TEAM_CONSULTANT);
   private final String DUMMY_ROLE_A = "dummyRoleA";
   private final String DUMMY_ROLE_B = "dummyRoleB";
   private final Set<String> ROLES_WITH_USER =
@@ -267,10 +264,6 @@ public class UserControllerIT {
   private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\""
       + UserRole.USER.getValue() + "\",\"" + DUMMY_ROLE_B + "\"],\"grantedAuthorities\": [\""
       + AuthorityValue.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
-  private final String VALID_CONSULTANT_ROLE_RESULT =
-      "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\"" + UserRole.CONSULTANT.getValue() + "\",\""
-          + DUMMY_ROLE_B + "\"], \"grantedAuthorities\": [ \"" + AuthorityValue.CONSULTANT_DEFAULT
-          + "\" ], \"inTeamAgency\":true}";
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
@@ -311,7 +304,6 @@ public class UserControllerIT {
   private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = UserDataResponseDTO.builder()
       .userId(USER_ID).userName(NAME).isAbsent(false).isFormalLanguage(false).isInTeamAgency(false)
       .consultingTypes(SESSION_DATA).hasAnonymousConversations(false).build();
-  private final String VALID_NEW_MESSAGE_REQUEST_BODY = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
   private final String PATH_PUT_SESSIONS_MONITORING = "/users/sessions/monitoring/" + SESSION_ID;
   private final String PATH_GET_MONITORING = "/users/sessions/" + SESSION_ID + "/monitoring";
   private final String VALID_SESSION_MONITORING_REQUEST_BODY = "{\"addictiveDrugs\": { \"drugs\":"
@@ -325,9 +317,6 @@ public class UserControllerIT {
       new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, false, nowInUtc(), null);
-  private final Optional<Session> OPTIONAL_SESSION = Optional.of(SESSION);
-  private final Optional<Session> OPTIONAL_SESSION_WITHOUT_CONSULTANT =
-      Optional.of(SESSION_WITHOUT_CONSULTANT);
   private final Session TEAM_SESSION =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null,
@@ -336,30 +325,18 @@ public class UserControllerIT {
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
           IS_MONITORING, false, nowInUtc(), null);
-  private final Optional<Session> OPTIONAL_TEAM_SESSION = Optional.of(TEAM_SESSION);
-  private final Optional<Session> OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID =
-      Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID);
   private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO = new ConsultantResponseDTO()
       .consultantId(CONSULTANT_ID)
       .firstName(FIRST_NAME)
       .lastName(LAST_NAME);
   private final List<ConsultantResponseDTO> CONSULTANT_RESPONSE_DTO_LIST =
       Collections.singletonList(CONSULTANT_RESPONSE_DTO);
-  private final String VALID_CONSULTANT_RESPONSE_DTO_RESULT =
-      "[{\"consultantId\": \"" + CONSULTANT_ID + "\", \"firstName\": \"" + FIRST_NAME
-          + "\", \"lastName\": \"" + LAST_NAME + "\"}]";
-  private final String VALID_PASSWORT_REQUEST_BODY =
-      "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
   private final Set<String> AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY = new HashSet<>(Arrays
       .asList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
           AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
   private final Set<String> AUTHORITY_ASSIGN_SESSION =
       new HashSet<>(Collections.singletonList(AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION));
-  private final Set<String> AUTHORITY_ASSIGN_ENQUIRY =
-      new HashSet<>(Collections.singletonList(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY));
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
-  private final String VALID_MONITORING_RESPONSE_JSON =
-      "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -734,7 +711,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID))
-        .thenReturn(OPTIONAL_SESSION);
+        .thenReturn(Optional.of(SESSION));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
@@ -759,7 +736,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
 
     mvc.perform(
             put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
@@ -776,11 +753,11 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID))
-        .thenReturn(OPTIONAL_TEAM_SESSION_WITHOUT_GROUP_ID);
+        .thenReturn(Optional.of(TEAM_SESSION_WITHOUT_GROUP_ID));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
 
     mvc.perform(
             put(PATH_ACCEPT_ENQUIRY + SESSION_ID)
@@ -796,7 +773,7 @@ public class UserControllerIT {
   public void acceptEnquiry_Should_ReturnSuccess_WhenAcceptEnquiryIsSuccessfull() throws Exception {
 
     when(sessionService.getSession(SESSION_ID))
-        .thenReturn(OPTIONAL_TEAM_SESSION);
+        .thenReturn(Optional.of(TEAM_SESSION));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
@@ -814,7 +791,7 @@ public class UserControllerIT {
   public void acceptEnquiry_Should_ReturnConflict_WhenEnquiryIsAlreadyAssigned() throws Exception {
 
     when(sessionService.getSession(SESSION_ID))
-        .thenReturn(OPTIONAL_TEAM_SESSION);
+        .thenReturn(Optional.of(TEAM_SESSION));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
@@ -1028,7 +1005,8 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedTeamConsultant()).thenReturn(TEAM_CONSULTANT);
 
-    mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).content(VALID_ABSENT_MESSAGE_BODY)
+    var validAbsentMessageBody = "{\"absent\": true, \"message\": \"" + MESSAGE + "\"}";
+    mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).content(validAbsentMessageBody)
             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
@@ -1205,7 +1183,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER)
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -1446,7 +1424,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER)
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -1463,8 +1441,9 @@ public class UserControllerIT {
   public void sendNewMessageNotification_Should_CallEmailNotificationFacadeAndReturn2xxSuccessful_WhenCalled()
       throws Exception {
 
+    var validNewMessageRequestBody = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
     mvc.perform(post(PATH_SEND_NEW_MESSAGE_NOTIFICATION)
-            .content(VALID_NEW_MESSAGE_REQUEST_BODY)
+            .content(validNewMessageRequestBody)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is2xxSuccessful());
@@ -1509,8 +1488,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
-    when(authenticatedUserHelper.hasPermissionForSession(OPTIONAL_SESSION.get()))
+        .thenReturn(Optional.of(SESSION));
+    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
         .thenReturn(false);
 
     mvc.perform(get(PATH_GET_MONITORING)
@@ -1524,16 +1503,18 @@ public class UserControllerIT {
   public void getMonitoring_Should_ReturnOKAndMonitoring() throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
-    when(authenticatedUserHelper.hasPermissionForSession(OPTIONAL_SESSION.get()))
+        .thenReturn(Optional.of(SESSION));
+    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
         .thenReturn(true);
-    when(monitoringService.getMonitoring(OPTIONAL_SESSION.get()))
+    when(monitoringService.getMonitoring(SESSION))
         .thenReturn(MONITORING_DTO);
 
+    var validMonitoringResponseJson =
+        "{\"addictiveDrugs\": { \"drugs\": {" + "\"others\": false } } }";
     mvc.perform(get(PATH_GET_MONITORING)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.OK.value()))
-        .andExpect(content().json(VALID_MONITORING_RESPONSE_JSON));
+        .andExpect(content().json(validMonitoringResponseJson));
   }
 
   @Test
@@ -1541,10 +1522,10 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
-    when(authenticatedUserHelper.hasPermissionForSession(OPTIONAL_SESSION.get()))
+        .thenReturn(Optional.of(SESSION));
+    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
         .thenReturn(true);
-    when(monitoringService.getMonitoring(OPTIONAL_SESSION.get()))
+    when(monitoringService.getMonitoring(SESSION))
         .thenReturn(null);
 
     mvc.perform(get(PATH_GET_MONITORING)
@@ -1575,8 +1556,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
-    when(authenticatedUserHelper.hasPermissionForSession(OPTIONAL_SESSION.get()))
+        .thenReturn(Optional.of(SESSION));
+    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
         .thenReturn(true);
     doThrow(new ServiceException(ERROR))
         .when(monitoringService).updateMonitoring(Mockito.any(),
@@ -1594,8 +1575,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
-    when(authenticatedUserHelper.hasPermissionForSession(OPTIONAL_SESSION.get()))
+        .thenReturn(Optional.of(SESSION));
+    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
         .thenReturn(true);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
@@ -1610,8 +1591,8 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_TEAM_SESSION);
-    when(authenticatedUserHelper.hasPermissionForSession(OPTIONAL_TEAM_SESSION.get()))
+        .thenReturn(Optional.of(TEAM_SESSION));
+    when(authenticatedUserHelper.hasPermissionForSession(TEAM_SESSION))
         .thenReturn(true);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
@@ -1626,7 +1607,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
+        .thenReturn(Optional.of(SESSION));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID + "notAssignedToAgency");
 
@@ -1644,7 +1625,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_TEAM_SESSION);
+        .thenReturn(Optional.of(TEAM_SESSION));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID))
@@ -1716,11 +1697,14 @@ public class UserControllerIT {
     when(consultantAgencyService.getConsultantsOfAgency(Mockito.anyLong()))
         .thenReturn(CONSULTANT_RESPONSE_DTO_LIST);
 
+    var validConsultantResponseDtoResult =
+        "[{\"consultantId\": \"" + CONSULTANT_ID + "\", \"firstName\": \"" + FIRST_NAME
+            + "\", \"lastName\": \"" + LAST_NAME + "\"}]";
     mvc.perform(get(PATH_GET_CONSULTANTS_FOR_AGENCY)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().json(VALID_CONSULTANT_RESPONSE_DTO_RESULT));
+        .andExpect(content().json(validConsultantResponseDtoResult));
   }
 
   /**
@@ -1755,13 +1739,13 @@ public class UserControllerIT {
   public void assignSession_Should_ReturnHttpStatusOfAssignSessionFacade() throws Exception {
 
     when(accountProvider.retrieveValidatedConsultantById(any()))
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION);
+        .thenReturn(Optional.of(SESSION));
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY);
     doThrow(new ConflictException(""))
-        .when(assignSessionFacade).assignSession(OPTIONAL_SESSION.get(), OPTIONAL_CONSULTANT.get());
+        .when(assignSessionFacade).assignSession(SESSION, TEAM_CONSULTANT);
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION)
             .contentType(MediaType.APPLICATION_JSON)
@@ -1789,7 +1773,7 @@ public class UserControllerIT {
       throws Exception {
 
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.empty());
 
@@ -1806,9 +1790,9 @@ public class UserControllerIT {
       throws Exception {
 
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(OPTIONAL_SESSION_WITHOUT_CONSULTANT);
+        .thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(AUTHORITY_ASSIGN_SESSION);
 
@@ -1859,7 +1843,9 @@ public class UserControllerIT {
   @Test
   public void updatePassword_Should_ReturnOK_When_UpdatingThePasswordWasSuccessful()
       throws Exception {
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(VALID_PASSWORT_REQUEST_BODY)
+    var validPasswortRequestBody =
+        "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
+    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(validPasswortRequestBody)
             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.OK.value()));
   }
@@ -1909,7 +1895,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
         .thenThrow(new InternalServerErrorException(""));
 
@@ -1926,7 +1912,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
         .thenReturn(CREATE_CHAT_RESPONSE_DTO);
 
@@ -1960,7 +1946,7 @@ public class UserControllerIT {
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(chatService.getChat(Mockito.any()))
         .thenReturn(Optional.of(INACTIVE_CHAT));
 
@@ -2092,7 +2078,7 @@ public class UserControllerIT {
   public void stopChat_Should_ReturnBadRequest_When_ChatNotFound() throws Exception {
 
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(chatService.getChat(Mockito.anyLong()))
         .thenReturn(Optional.empty());
 
@@ -2105,7 +2091,7 @@ public class UserControllerIT {
   public void stopChat_Should_ReturnOk_When_ChatWasStopped() throws Exception {
 
     when(accountProvider.retrieveValidatedConsultant())
-        .thenReturn(OPTIONAL_CONSULTANT.get());
+        .thenReturn(TEAM_CONSULTANT);
     when(chatService.getChat(Mockito.anyLong()))
         .thenReturn(Optional.of(chat));
 
