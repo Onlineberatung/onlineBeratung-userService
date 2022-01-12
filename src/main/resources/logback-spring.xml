@@ -20,7 +20,7 @@
                   "logger": "%logger",
                   "message": "%message",
                   "thread": "%thread",
-                  "stack": "%replace((%replace(%rEx){'\n','\\\\n'}){'\t','\\\\t'}"
+                  "stack": "%replace(%replace(%rEx){'\n','\\\\n'}){'\t','\\\\t'}"
                 }
               }
             </pattern>
