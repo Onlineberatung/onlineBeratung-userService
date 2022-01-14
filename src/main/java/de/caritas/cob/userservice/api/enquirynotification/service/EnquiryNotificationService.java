@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.T
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.enquirynotification.model.EnquiriesNotificationMailContent;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -65,9 +66,9 @@ public class EnquiryNotificationService {
     var enquiryMessageDate = session.getEnquiryMessageDate();
 
     if (nonNull(enquiryMessageDate)) {
-      return enquiryMessageDate
-          .plusHours(openEnquiryCheckHours)
-          .isAfter(rightNow);
+      return rightNow
+          .minusHours(openEnquiryCheckHours)
+          .isAfter(enquiryMessageDate);
     }
     return false;
   }
@@ -110,8 +111,10 @@ public class EnquiryNotificationService {
   }
 
   private void buildAndSendNotificationEmail(List<MailDTO> mailsToSend) {
-    var mailsDTO = new MailsDTO().mails(mailsToSend);
-    mailService.sendEmailNotification(mailsDTO);
+    if (isNotEmpty(mailsToSend)) {
+      var mailsDTO = new MailsDTO().mails(mailsToSend);
+      mailService.sendEmailNotification(mailsDTO);
+    }
   }
 
 }

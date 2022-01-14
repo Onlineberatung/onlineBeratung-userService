@@ -13,7 +13,7 @@ public class EnquiriesNotificationMailContent {
   @Override
   public String toString() {
     return String
-        .format("Ihre Beratungsstelle hat aktuell %s offene Erstanfragen.", amountOfOpenEnquiries);
+        .format("Eine Ihrer Beratungsstellen hat aktuell %s offene Erstanfrage-/n.", amountOfOpenEnquiries);
   }
 
 }
