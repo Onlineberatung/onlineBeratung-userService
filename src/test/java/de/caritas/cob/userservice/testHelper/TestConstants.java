@@ -318,14 +318,15 @@ public class TestConstants {
   public static final String INVALID_STATE = "xxx";
   public static final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME, FIRST_NAME, LAST_NAME, EMAIL,
-          IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null, null,
-          null, null, null, null);
+          IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null,
+          null, null, null, null, null, null);
   public static final Consultant CONSULTANT_2 = new Consultant(CONSULTANT_ID_2, ROCKETCHAT_ID,
-      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null, null,
-      null, null, null, null);
+      USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null,
+      null, null, null, null, null, null);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
-          "last name", EMAIL, false, false, null, false, null, null, null, null, null, null, null);
+          "last name", EMAIL, false, false, null, false, null, null, null, null, null,
+          null, null, null);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
@@ -419,10 +420,12 @@ public class TestConstants {
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false,
-      null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null, null, null);
+      null, null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null,
+      null, null);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
-      ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false, null,
-      null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)), null, null, null, null);
+      ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false,
+      null, null, null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)),
+      null, null, null, null);
   /**
    * UserAgency
    */
@@ -1210,9 +1213,13 @@ public class TestConstants {
   public static final String GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT = "AUTHORIZATION_CONSULTANT_DEFAULT";
   public static final String GRANTED_AUTHORIZATION_USER = "AUTHORIZATION_USER";
 
-  public static final OtpInfoDTO OTP_INFO_DTO = new OtpInfoDTO().otpSecret("secret").otpSecretQrCode("QrCode").otpSetup(false);
+  public static final OtpInfoDTO OTP_INFO_DTO = new OtpInfoDTO().otpSecret("secret")
+      .otpSecretQrCode("QrCode").otpSetup(false);
   public static final Optional<OtpInfoDTO> OPTIONAL_OTP_INFO_DTO = Optional.of(OTP_INFO_DTO);
-  public static final OtpSetupDTO VALID_OTP_SETUP_DTO = new OtpSetupDTO().initialCode("111111").secret(new RandomString(32).nextString());
-  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_CODE = new OtpSetupDTO().initialCode("1").secret(new RandomString(32).nextString());
-  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_SECRET = new OtpSetupDTO().initialCode("111111").secret("secret");
+  public static final OtpSetupDTO VALID_OTP_SETUP_DTO = new OtpSetupDTO().initialCode("111111")
+      .secret(new RandomString(32).nextString());
+  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_CODE = new OtpSetupDTO().initialCode(
+      "1").secret(new RandomString(32).nextString());
+  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_SECRET = new OtpSetupDTO().initialCode(
+      "111111").secret("secret");
 }
