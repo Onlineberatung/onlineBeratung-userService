@@ -256,16 +256,12 @@ public class UserControllerIT {
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
           null, null, null);
-  @SuppressWarnings("all") // https://youtrack.jetbrains.com/issue/DBE-8397
-  private final String DUMMY_ROLE_A = "dummyRoleA";
-  @SuppressWarnings("all")
-  private final String DUMMY_ROLE_B = "dummyRoleB";
   private final Set<String> ROLES_WITH_USER =
-      new HashSet<>(Arrays.asList(DUMMY_ROLE_A, UserRole.USER.getValue(), DUMMY_ROLE_B));
+      new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final Set<String> ROLES_WITH_CONSULTANT =
-      new HashSet<>(Arrays.asList(DUMMY_ROLE_A, UserRole.CONSULTANT.getValue(), DUMMY_ROLE_B));
-  private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\""
-      + UserRole.USER.getValue() + "\",\"" + DUMMY_ROLE_B + "\"],\"grantedAuthorities\": [\""
+      new HashSet<>(Arrays.asList("dummyRoleA", UserRole.CONSULTANT.getValue(), "dummyRoleB"));
+  private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + "dummyRoleA" + "\",\""
+      + UserRole.USER.getValue() + "\",\"" + "dummyRoleB" + "\"],\"grantedAuthorities\": [\""
       + AuthorityValue.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
@@ -1275,7 +1271,7 @@ public class UserControllerIT {
         .andExpect(jsonPath("$.userRoles", hasSize(3)))
         .andExpect(
             jsonPath("$.userRoles",
-                containsInAnyOrder(DUMMY_ROLE_A, DUMMY_ROLE_B, CONSULTANT_ROLE)
+                containsInAnyOrder("dummyRoleA", "dummyRoleB", CONSULTANT_ROLE)
             )
         );
   }
