@@ -1,14 +1,17 @@
 package de.caritas.cob.userservice.api.repository.consultant;
 
 import static de.caritas.cob.userservice.api.repository.consultant.Consultant.EMAIL_ANALYZER;
+import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -105,6 +108,9 @@ public class Consultant {
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean languageFormal;
 
+  @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL)
+  private Set<Language> languages;
+
   @Column(name = "id_old", updatable = false, nullable = true)
   @Nullable
   private Long idOld;
@@ -132,6 +138,20 @@ public class Consultant {
   @JsonIgnore
   public String getFullName() {
     return (this.firstName + " " + this.lastName).trim();
+  }
+
+  @JsonIgnore
+  public Set<Language> getLanguages() {
+    if (isNull(languages) || languages.isEmpty()) {
+      var defaultLanguage = new Language();
+      defaultLanguage.setConsultant(this);
+      defaultLanguage.setLanguageCode(LanguageCode.de);
+
+      return Set.of(defaultLanguage);
+    } else {
+
+      return languages;
+    }
   }
 
   @Override
