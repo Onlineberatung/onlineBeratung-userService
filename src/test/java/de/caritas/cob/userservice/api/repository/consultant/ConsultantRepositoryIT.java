@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.consultant;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +40,7 @@ public class ConsultantRepositoryIT {
 
   @Test
   public void saveShouldSaveConsultantWithDefaultLanguage() {
-    givenAnExistingConsultantWithNoSetLanguage();
+    givenAnExistingConsultantSpeaking();
 
     var languages = consultant.getLanguages();
     assertNotNull(languages);
@@ -49,7 +50,7 @@ public class ConsultantRepositoryIT {
 
   @Test
   public void saveShouldSaveConsultantWithOneLanguage() {
-    givenAnExistingConsultantSpeakingEnglishOnly();
+    givenAnExistingConsultantSpeaking(LanguageCode.en);
 
     var optionalConsultant = underTest.findById(consultant.getId());
 
@@ -62,7 +63,7 @@ public class ConsultantRepositoryIT {
 
   @Test
   public void saveShouldSaveConsultantWithMultipleLanguages() {
-    givenAnExistingConsultantSpeakingEnglishAndTurkish();
+    givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
 
@@ -80,7 +81,7 @@ public class ConsultantRepositoryIT {
 
   @Test
   public void saveShouldSaveLessLanguages() {
-    givenAnExistingConsultantSpeakingEnglishAndTurkish();
+    givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
     assertTrue(optionalConsultant.isPresent());
@@ -97,7 +98,7 @@ public class ConsultantRepositoryIT {
 
   @Test
   public void saveShouldEmptyLanguagesToDefault() {
-    givenAnExistingConsultantSpeakingEnglishAndTurkish();
+    givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
     assertTrue(optionalConsultant.isPresent());
@@ -116,7 +117,7 @@ public class ConsultantRepositoryIT {
 
   @Test
   public void saveShouldNotChangeTheDefaultBehaviourOnManualSettingDefault() {
-    givenAnExistingConsultantWithNoSetLanguage();
+    givenAnExistingConsultantSpeaking();
 
     var optionalConsultant = underTest.findById(consultant.getId());
     assertTrue(optionalConsultant.isPresent());
@@ -147,33 +148,18 @@ public class ConsultantRepositoryIT {
     assertEquals(LanguageCode.de, languagesThen.iterator().next().getLanguageCode());
   }
 
-  private void givenAnExistingConsultantWithNoSetLanguage() {
+  private void givenAnExistingConsultantSpeaking(LanguageCode... languageCodes) {
     consultant = underTest.findAll().iterator().next();
-  }
 
-  private void givenAnExistingConsultantSpeakingEnglishOnly() {
-    givenAnExistingConsultantWithNoSetLanguage();
-
-    var english = new Language();
-    english.setConsultant(consultant);
-    english.setLanguageCode(LanguageCode.en);
-    var languages = new HashSet<Language>();
-    languages.add(english);
-    consultant.setLanguages(languages);
-    underTest.save(consultant);
-  }
-
-  private void givenAnExistingConsultantSpeakingEnglishAndTurkish() {
-    givenAnExistingConsultantWithNoSetLanguage();
-
-    var languages = new HashSet<Language>();
-    var english = new Language(consultant, LanguageCode.en);
-    languages.add(english);
-    var turkish = new Language(consultant, LanguageCode.tr);
-    languages.add(turkish);
-
-    consultant.setLanguages(languages);
-    underTest.save(consultant);
+    if (nonNull(languageCodes) && languageCodes.length > 0) {
+      var languages = new HashSet<Language>();
+      for (var languageCode : languageCodes) {
+        var language = new Language(consultant, languageCode);
+        languages.add(language);
+      }
+      consultant.setLanguages(languages);
+      underTest.save(consultant);
+    }
   }
 }
 
