@@ -114,6 +114,39 @@ public class ConsultantRepositoryIT {
     assertEquals(LanguageCode.de, languages.iterator().next().getLanguageCode());
   }
 
+  @Test
+  public void saveShouldNotChangeTheDefaultBehaviourOnManualSettingDefault() {
+    givenAnExistingConsultantWithNoSetLanguage();
+
+    var optionalConsultant = underTest.findById(consultant.getId());
+    assertTrue(optionalConsultant.isPresent());
+    var consultantToChange = optionalConsultant.get();
+    assertEquals(1, consultantToChange.getLanguages().size());
+
+    var german = new Language();
+    german.setConsultant(consultant);
+    german.setLanguageCode(LanguageCode.de);
+    var languages = new HashSet<Language>();
+    languages.add(german);
+    consultantToChange.setLanguages(languages);
+    underTest.save(consultantToChange);
+
+    var consultantAfter = underTest.findById(consultant.getId());
+    assertTrue(consultantAfter.isPresent());
+    var languagesFound = consultantAfter.get().getLanguages();
+    assertEquals(1, languagesFound.size());
+    assertEquals(LanguageCode.de, languagesFound.iterator().next().getLanguageCode());
+
+    consultantToChange.getLanguages().clear();
+    underTest.save(consultantToChange);
+
+    var consultantLater = underTest.findById(consultant.getId());
+    assertTrue(consultantLater.isPresent());
+    var languagesThen = consultantAfter.get().getLanguages();
+    assertEquals(1, languagesThen.size());
+    assertEquals(LanguageCode.de, languagesThen.iterator().next().getLanguageCode());
+  }
+
   private void givenAnExistingConsultantWithNoSetLanguage() {
     consultant = underTest.findAll().iterator().next();
   }
