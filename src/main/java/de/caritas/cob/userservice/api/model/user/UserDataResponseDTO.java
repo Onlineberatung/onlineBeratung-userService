@@ -25,29 +25,44 @@ public class UserDataResponseDTO {
 
   @ApiModelProperty(example = "ajsd89-sdf9-sadk-as8j-asdf8jo")
   private String userId;
+
   @ApiModelProperty(example = "max.muster", position = 1)
   @JsonSerialize(using = DecodeUsernameJsonSerializer.class)
   private String userName;
+
   @ApiModelProperty(example = "Max", position = 2)
   private String firstName;
+
   @ApiModelProperty(example = "Mustermann", position = 3)
   private String lastName;
+
   @ApiModelProperty(example = "maxmuster@mann.com", position = 4)
   private String email;
+
   @ApiModelProperty(example = "true", position = 5)
   private boolean isAbsent;
+
   @ApiModelProperty(example = "true", position = 6)
   private boolean isFormalLanguage;
-  @ApiModelProperty(example = "Bin mal weg...", position = 7)
+
+  @ApiModelProperty(position = 7)
+  private Set<String> languages;
+
+  @ApiModelProperty(example = "Bin mal weg...", position = 8)
   private String absenceMessage;
-  @ApiModelProperty(example = "true", position = 8)
+
+  @ApiModelProperty(example = "true", position = 9)
   private boolean isInTeamAgency;
-  @ApiModelProperty(position = 9)
-  private List<AgencyDTO> agencies;
+
   @ApiModelProperty(position = 10)
-  private Set<String> userRoles;
+  private List<AgencyDTO> agencies;
+
   @ApiModelProperty(position = 11)
+  private Set<String> userRoles;
+
+  @ApiModelProperty(position = 12)
   private Set<String> grantedAuthorities;
+
   private LinkedHashMap<String, Object> consultingTypes;
   private boolean hasAnonymousConversations;
   private boolean hasArchive;

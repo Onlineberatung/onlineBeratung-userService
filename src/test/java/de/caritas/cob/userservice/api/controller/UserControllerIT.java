@@ -256,14 +256,12 @@ public class UserControllerIT {
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
           null, null, null);
-  private final String DUMMY_ROLE_A = "dummyRoleA";
-  private final String DUMMY_ROLE_B = "dummyRoleB";
   private final Set<String> ROLES_WITH_USER =
-      new HashSet<>(Arrays.asList(DUMMY_ROLE_A, UserRole.USER.getValue(), DUMMY_ROLE_B));
+      new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final Set<String> ROLES_WITH_CONSULTANT =
-      new HashSet<>(Arrays.asList(DUMMY_ROLE_A, UserRole.CONSULTANT.getValue(), DUMMY_ROLE_B));
-  private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + DUMMY_ROLE_A + "\",\""
-      + UserRole.USER.getValue() + "\",\"" + DUMMY_ROLE_B + "\"],\"grantedAuthorities\": [\""
+      new HashSet<>(Arrays.asList("dummyRoleA", UserRole.CONSULTANT.getValue(), "dummyRoleB"));
+  private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + "dummyRoleA" + "\",\""
+      + UserRole.USER.getValue() + "\",\"" + "dummyRoleB" + "\"],\"grantedAuthorities\": [\""
       + AuthorityValue.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
@@ -1254,6 +1252,7 @@ public class UserControllerIT {
 
     UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
+    responseDto.setLanguages(Set.of("de", "en"));
     responseDto.setGrantedAuthorities(
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
 
@@ -1262,13 +1261,19 @@ public class UserControllerIT {
 
     when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(
+            get(PATH_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        )
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.languages", containsInAnyOrder("de", "en")))
         .andExpect(jsonPath("$.userRoles", hasSize(3)))
-        .andExpect(jsonPath("$.userRoles", containsInAnyOrder(DUMMY_ROLE_A, DUMMY_ROLE_B,
-            CONSULTANT_ROLE)));
+        .andExpect(
+            jsonPath("$.userRoles",
+                containsInAnyOrder("dummyRoleA", "dummyRoleB", CONSULTANT_ROLE)
+            )
+        );
   }
 
   @Test
