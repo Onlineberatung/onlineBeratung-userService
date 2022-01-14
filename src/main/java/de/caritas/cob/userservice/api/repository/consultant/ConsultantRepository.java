@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
-public interface ConsultantRepository extends CrudRepository<Consultant, Long> {
+public interface ConsultantRepository extends CrudRepository<Consultant, String> {
 
   Optional<Consultant> findByIdAndDeleteDateIsNull(String id);
 

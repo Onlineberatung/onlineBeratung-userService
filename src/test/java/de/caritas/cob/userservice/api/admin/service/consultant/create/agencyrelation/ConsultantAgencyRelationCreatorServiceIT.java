@@ -230,6 +230,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     consultant.setConsultantMobileTokens(null);
     consultant.setRocketChatId("RocketChatId");
     consultant.setDeleteDate(null);
+    consultant.setLanguages(null);
     return this.consultantRepository.save(consultant);
   }
 
