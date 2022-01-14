@@ -1794,6 +1794,13 @@ components:
         isFormalLanguage:
           type: boolean
           example: true
+        languages:
+          type: array
+          items:
+            type: string
+            description: each an ISO 639-1 code
+            default: de
+            example: de, en
         absenceMessage:
           type: string
           example: Bin mal weg...
