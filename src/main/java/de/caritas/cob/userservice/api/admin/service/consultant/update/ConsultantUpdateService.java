@@ -1,7 +1,9 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static java.util.Objects.isNull;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UpdateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -10,9 +12,12 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultant.Language;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -79,10 +84,21 @@ public class ConsultantUpdateService {
     consultant.setLastName(updateConsultantDTO.getLastname());
     consultant.setEmail(updateConsultantDTO.getEmail());
     consultant.setLanguageFormal(updateConsultantDTO.getFormalLanguage());
+    consultant.setLanguages(languagesOf(updateConsultantDTO, consultant));
     consultant.setAbsent(updateConsultantDTO.getAbsent());
     consultant.setAbsenceMessage(updateConsultantDTO.getAbsenceMessage());
     consultant.setUpdateDate(nowInUtc());
 
     return this.consultantService.saveConsultant(consultant);
+  }
+
+  private Set<Language> languagesOf(UpdateAdminConsultantDTO updateConsultantDTO,
+      Consultant consultant) {
+    var languages = updateConsultantDTO.getLanguages();
+
+    return isNull(languages) ? Set.of() : languages.stream()
+        .map(LanguageCode::getByCode)
+        .map(languageCode -> new Language(consultant, languageCode))
+        .collect(Collectors.toSet());
   }
 }

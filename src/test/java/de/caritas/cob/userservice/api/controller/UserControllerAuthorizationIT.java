@@ -45,6 +45,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -56,6 +57,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
@@ -75,6 +77,7 @@ import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
@@ -82,6 +85,7 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
@@ -93,8 +97,10 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import java.util.Optional;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,6 +124,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class UserControllerAuthorizationIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
@@ -184,6 +191,10 @@ public class UserControllerAuthorizationIT {
   private SessionArchiveService sessionArchiveService;
   @MockBean
   private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  @MockBean
+  private ConsultantUpdateService consultantUpdateService;
+  @MockBean
+  private ConsultantService consultantService;
 
   /**
    * POST on /users/askers/new
@@ -2037,17 +2048,17 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateUserData_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
-    mvc.perform(put(PATH_GET_USER_DATA)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(
-            new UpdateConsultantDTO().email("mail@mail.de").firstname("firstname").lastname(
-                "lastname")))
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+    var consultant = givenAValidConsultant();
+    var updateConsultantDTO = givenAMinimalUpdateConsultantDto(consultant.getEmail());
+    when(consultantUpdateService.updateConsultant(anyString(), any())).thenReturn(consultant);
 
-    verify(this.consultantDataFacade).updateConsultantData(any());
+    mvc.perform(put(PATH_GET_USER_DATA)
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updateConsultantDTO))
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -2317,10 +2328,10 @@ public class UserControllerAuthorizationIT {
   public void deactivateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.keycloakTwoFactorAuthService).deleteOtpCredential(any());
@@ -2337,8 +2348,8 @@ public class UserControllerAuthorizationIT {
   public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
@@ -2349,8 +2360,8 @@ public class UserControllerAuthorizationIT {
   public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
@@ -2361,12 +2372,12 @@ public class UserControllerAuthorizationIT {
   public void activateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(
-            VALID_OTP_SETUP_DTO))
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(
+                VALID_OTP_SETUP_DTO))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.keycloakTwoFactorAuthService).setUpOtpCredential(any(), any());
@@ -2377,10 +2388,10 @@ public class UserControllerAuthorizationIT {
   public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
       throws Exception {
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
@@ -2397,8 +2408,8 @@ public class UserControllerAuthorizationIT {
   public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
@@ -2409,8 +2420,8 @@ public class UserControllerAuthorizationIT {
   public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
@@ -2442,4 +2453,18 @@ public class UserControllerAuthorizationIT {
     verify(consultantAgencyService).getAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
   }
 
+  private UpdateConsultantDTO givenAMinimalUpdateConsultantDto(String email) {
+    return new UpdateConsultantDTO()
+        .email(email).firstname("firstname").lastname("lastname");
+  }
+
+  private Consultant givenAValidConsultant() {
+    var consultant = easyRandom.nextObject(Consultant.class);
+    consultant.setEmail(
+        RandomStringUtils.randomAlphabetic(8) + "@" + RandomStringUtils.randomAlphabetic(8) + ".com"
+    );
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
+
+    return consultant;
+  }
 }

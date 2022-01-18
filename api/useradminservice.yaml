@@ -599,6 +599,12 @@ components:
           example: "I am absent until..."
           minLength: 1
           maxLength: 10000
+        languages:
+          type: array
+          items:
+            type: string
+            description: each an ISO 639-1 code
+            example: de, en
 
     ConsultantDTO:
       type: object

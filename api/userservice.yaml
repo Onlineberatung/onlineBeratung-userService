@@ -1887,6 +1887,12 @@ components:
           type: string
           format: email
           example: "maxmuster@mann.com"
+        languages:
+          type: array
+          items:
+            type: string
+            description: each an ISO 639-1 code
+            example: de, en
 
     ConsultingTypeMap:
       type: object

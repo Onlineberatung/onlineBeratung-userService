@@ -140,12 +140,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.ApiResponseEntityExceptionHandler;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
+import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.authorization.Authority;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
@@ -187,6 +187,7 @@ import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
+import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
@@ -204,6 +205,7 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
@@ -223,6 +225,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
@@ -237,6 +240,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -339,6 +343,7 @@ public class UserControllerIT {
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
   private final EasyRandom easyRandom = new EasyRandom();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired
   private MockMvc mvc;
@@ -423,6 +428,13 @@ public class UserControllerIT {
   private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   @MockBean
   private TwoFactorAuthValidator twoFactorAuthValidator;
+  @MockBean
+  private ConsultantUpdateService consultantUpdateService;
+  @SpyBean
+  @SuppressWarnings("unused")
+  private ConsultantDtoMapper consultantDtoMapper;
+  @MockBean
+  private ConsultantService consultantService;
 
   @Mock
   private Logger logger;
@@ -904,7 +916,7 @@ public class UserControllerIT {
     sessions.add(USER_SESSION_RESPONSE_DTO);
     UserSessionListResponseDTO response = new UserSessionListResponseDTO()
         .sessions(sessions);
-    String sessionsJson = convertObjectToJson(response);
+    var sessionsJson = objectMapper.writeValueAsString(response);
 
     when(authenticatedUser.getUserId())
         .thenReturn(USER_ID);
@@ -2201,11 +2213,6 @@ public class UserControllerIT {
 
   }
 
-  private String convertObjectToJson(Object object) throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    return mapper.writeValueAsString(object);
-  }
-
   @Test
   public void updateEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
@@ -2242,7 +2249,7 @@ public class UserControllerIT {
       throws Exception {
 
     DeleteUserAccountDTO deleteUserAccountDTO = new DeleteUserAccountDTO().password("p@ssword");
-    String bodyPayload = new ObjectMapper().writeValueAsString(deleteUserAccountDTO);
+    String bodyPayload = objectMapper.writeValueAsString(deleteUserAccountDTO);
 
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2319,7 +2326,7 @@ public class UserControllerIT {
   public void updateMobileToken_Should_ReturnOk_When_RequestOk() throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token("token")))
+            .content(objectMapper.writeValueAsString(new MobileTokenDTO().token("token")))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
@@ -2360,10 +2367,27 @@ public class UserControllerIT {
   @Test
   public void updateSessionData_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
-            .content(new ObjectMapper().writeValueAsString(new SessionDTO()))
+            .content(objectMapper.writeValueAsString(new SessionDTO()))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void updateUserData_Should_ReturnNotFound_When_ConsultantDoesNotExist()
+      throws Exception {
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.empty());
+    var updateConsultant = objectMapper.writeValueAsString(
+        givenAMinimalUpdateConsultantDto(givenAValidEmail())
+    );
+
+    mvc.perform(put(PATH_GET_USER_DATA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(updateConsultant)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+    verifyNoMoreInteractions(consultantDataFacade);
   }
 
   @Test
@@ -2379,24 +2403,35 @@ public class UserControllerIT {
 
   @Test
   public void updateUserData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+    var consultant = givenAValidConsultant();
+    var updateConsultantDTO = givenAMinimalUpdateConsultantDto(consultant.getEmail());
+
     mvc.perform(put(PATH_GET_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(
-                new UpdateConsultantDTO().email("mail@mail.de").firstname("firstname").lastname(
-                    "lastname")))
+            .content(objectMapper.writeValueAsString(updateConsultantDTO))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.consultantDataFacade, times(1)).updateConsultantData(any());
+    var captor = ArgumentCaptor.forClass(UpdateAdminConsultantDTO.class);
+    verify(consultantUpdateService).updateConsultant(any(), captor.capture());
+
+    var updateAdminConsultantDTO = captor.getValue();
+    assertEquals(updateConsultantDTO.getEmail(), updateAdminConsultantDTO.getEmail());
+    assertEquals(updateConsultantDTO.getFirstname(), updateAdminConsultantDTO.getFirstname());
+    assertEquals(updateConsultantDTO.getLastname(), updateAdminConsultantDTO.getLastname());
+    assertEquals(consultant.isAbsent(), updateAdminConsultantDTO.getAbsent());
+    assertEquals(consultant.isLanguageFormal(), updateAdminConsultantDTO.getFormalLanguage());
+    assertEquals(consultant.getAbsenceMessage(), updateAdminConsultantDTO.getAbsenceMessage());
   }
 
   @Test
   public void updateUserData_Should_ReturnBadRequest_When_emailAddressIsNotValid()
       throws Exception {
+    var updateConsultantDto = givenAMinimalUpdateConsultantDto("invalid");
+
     mvc.perform(put(PATH_GET_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(
-                new UpdateConsultantDTO().email("invalid").firstname("firstname").lastname("lastname")))
+            .content(objectMapper.writeValueAsString(updateConsultantDto))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -2468,7 +2503,7 @@ public class UserControllerIT {
         .checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_SECRET);
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(
+            .content(objectMapper.writeValueAsString(
                 INVALID_OTP_SETUP_DTO_WRONG_SECRET))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -2484,7 +2519,7 @@ public class UserControllerIT {
 
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(
+            .content(objectMapper.writeValueAsString(
                 INVALID_OTP_SETUP_DTO_WRONG_CODE))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -2495,7 +2530,7 @@ public class UserControllerIT {
   @Test
   public void addMobileAppToken_Should_returnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)
-            .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO()))
+            .content(objectMapper.writeValueAsString(new MobileTokenDTO()))
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
@@ -2550,5 +2585,24 @@ public class UserControllerIT {
         .thenReturn(actionContainer);
 
     return actionContainer;
+  }
+
+  private UpdateConsultantDTO givenAMinimalUpdateConsultantDto(String email) {
+    return new UpdateConsultantDTO()
+        .email(email).firstname("firstname").lastname("lastname");
+  }
+
+  private Consultant givenAValidConsultant() {
+    var consultant = easyRandom.nextObject(Consultant.class);
+    consultant.setEmail(givenAValidEmail());
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
+
+    return consultant;
+  }
+
+  private String givenAValidEmail() {
+    return RandomStringUtils.randomAlphabetic(8)
+        + "@" + RandomStringUtils.randomAlphabetic(8)
+        + ".com";
   }
 }
