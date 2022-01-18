@@ -122,6 +122,7 @@ public class ConsultantCreatorService {
         .teamConsultant(consultantCreationInput.isTeamConsultant())
         .rocketChatId(rocketChatUserId)
         .languageFormal(consultantCreationInput.isLanguageFormal())
+        .languages(Set.of())
         .createDate(consultantCreationInput.getCreateDate())
         .updateDate(consultantCreationInput.getUpdateDate())
         .build();

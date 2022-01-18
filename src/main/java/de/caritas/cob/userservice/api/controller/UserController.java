@@ -6,6 +6,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
+import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -66,6 +67,7 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -80,6 +82,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
@@ -135,6 +138,9 @@ public class UserController implements UsersApi {
   private final @NotNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   private final @NotNull TwoFactorAuthValidator twoFactorAuthValidator;
   private final @NotNull ActionsRegistry actionsRegistry;
+  private final @NonNull UserDtoMapper userDtoMapper;
+  private final @NonNull ConsultantService consultantService;
+  private final @NonNull ConsultantUpdateService consultantUpdateService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -306,7 +312,17 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateConsultantData(UpdateConsultantDTO updateConsultantDTO) {
-    this.consultantDataFacade.updateConsultantData(updateConsultantDTO);
+    var consultantId = authenticatedUser.getUserId();
+    var consultant = consultantService.getConsultant(consultantId)
+        .orElseThrow(() ->
+            new NotFoundException(String.format("Consultant with id %s not found", consultantId))
+        );
+
+    var updateAdminConsultantDTO = userDtoMapper.updateAdminConsultantOf(
+        updateConsultantDTO, consultant
+    );
+    consultantUpdateService.updateConsultant(consultantId, updateAdminConsultantDTO);
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

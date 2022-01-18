@@ -108,7 +108,7 @@ public class Consultant {
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean languageFormal;
 
-  @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<Language> languages;
 
   @Column(name = "id_old", updatable = false, nullable = true)
