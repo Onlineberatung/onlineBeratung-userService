@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
@@ -68,6 +69,11 @@ public class CreateNewConsultingTypeFacade {
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       RocketChatCredentials rocketChatCredentials) {
 
+    if (isNotBlank(userRegistrationDTO.getConsultantId())) {
+      return createSessionFacade.createDirectUserSession(userRegistrationDTO.getConsultantId(),
+          fromUserRegistrationDTO(userRegistrationDTO), user, extendedConsultingTypeResponseDTO);
+    }
+
     Long sessionId = null;
 
     var groupChat = extendedConsultingTypeResponseDTO.getGroupChat();
@@ -75,7 +81,6 @@ public class CreateNewConsultingTypeFacade {
       createUserChatRelationFacade
           .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
               rocketChatCredentials);
-
     } else {
       sessionId = createSessionFacade
           .createUserSession(fromUserRegistrationDTO(userRegistrationDTO), user,

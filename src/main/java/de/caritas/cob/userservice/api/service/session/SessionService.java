@@ -153,6 +153,20 @@ public class SessionService {
   }
 
   /**
+   * Initialize a {@link Session} and assign given consultant directly.
+   *
+   * @param user    the user
+   * @param userDto the dto of the user
+   * @return the initialized session
+   */
+  public Session initializeDirectSession(Consultant consultant, User user, UserDTO userDto, boolean isTeamSession) {
+    var session =  initializeSession(user, userDto, isTeamSession, RegistrationType.REGISTERED,
+        SessionStatus.INITIAL);
+    session.setConsultant(consultant);
+    return saveSession(session);
+  }
+
+  /**
    * Initialize a {@link Session}.
    *
    * @param user             {@link User}

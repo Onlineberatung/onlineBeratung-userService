@@ -19,6 +19,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import lombok.NonNull;
@@ -38,6 +39,7 @@ public class CreateSessionFacade {
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull SessionDataService sessionDataService;
   private final @NonNull RollbackFacade rollbackFacade;
+  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
 
   /**
    * Creates a new session for the provided user.
@@ -53,6 +55,31 @@ public class CreateSessionFacade {
     var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
     var session = initializeSession(userDTO, user, agencyDTO);
     initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
+
+    return session.getId();
+  }
+
+  /**
+   * Creates a new session for the provided user and assignes it to given consultant.
+   *
+   * @param userDTO                           {@link UserDTO}
+   * @param user                              {@link User}
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
+   */
+  public Long createDirectUserSession(String consultantId, UserDTO userDTO, User user,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    var consultant = userAccountProvider.retrieveValidatedConsultantById(consultantId);
+
+    // TODO Validation if a session with consultant and user already exists -> {
+    // conflict with response data containing the sessions rc_group_id }
+    // Therefore the {@link NewRegistrationResponseDto} can be used to set session id, rc_group_id
+    // and the reqponse http status (CONFLICT if session exists, CREATED for newly created session)
+
+    var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
+    var session = initializeSession(userDTO, user, agencyDTO);
+    initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
+    session.setConsultant(consultant);
+    sessionService.saveSession(session);
 
     return session.getId();
   }
