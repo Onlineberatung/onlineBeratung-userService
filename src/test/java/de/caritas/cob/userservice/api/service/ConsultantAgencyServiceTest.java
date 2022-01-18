@@ -1,24 +1,33 @@
 package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +66,8 @@ public class ConsultantAgencyServiceTest {
   private ConsultantAgencyRepository consultantAgencyRepository;
   @Mock
   private Logger logger;
+  @Mock
+  private AgencyService agencyService;
 
   @Before
   public void setup() {
@@ -155,4 +166,58 @@ public class ConsultantAgencyServiceTest {
     assertThat(consultantAgencyService.getConsultantsOfAgency(AGENCY_ID),
         everyItem(instanceOf(ConsultantResponseDTO.class)));
   }
+
+  @Test
+  public void getAgenciesOfConsultant_Should_returnEmptyList_When_consultantDoesNotExist() {
+    when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(emptyList());
+
+    var agencies = consultantAgencyService.getAgenciesOfConsultant("invalid");
+
+    assertThat(agencies, hasSize(0));
+  }
+
+  @Test
+  public void getAgenciesOfConsultant_Should_returnEmptyList_When_agencyForConsultantDoesNotExist() {
+    var consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
+    when(consultantAgencyRepository.findByConsultantId(any()))
+        .thenReturn(singletonList(consultantAgency));
+
+    var agencies = consultantAgencyService.getAgenciesOfConsultant("valid");
+
+    assertThat(agencies, hasSize(0));
+  }
+
+  @Test
+  public void getAgenciesOfConsultant_Should_returnExpectedAgencies_When_consultantAgenciesExists() {
+    var consultantAgencies = new EasyRandom().objects(ConsultantAgency.class, 10)
+        .collect(Collectors.toList());
+    when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(consultantAgencies);
+    var agencyIds = consultantAgencies.stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+    when(agencyService.getAgencies(agencyIds)).thenReturn(mockAgenciesForIds(agencyIds));
+
+    var resultAgencies = consultantAgencyService.getAgenciesOfConsultant("valid");
+
+    assertThat(resultAgencies, hasSize(10));
+    resultAgencies.forEach(agency -> {
+      assertTrue(agencyIds.contains(agency.getId()));
+      assertNotNull(agency.getConsultingType());
+      assertNotNull(agency.getName());
+      assertNotNull(agency.getCity());
+      assertNotNull(agency.getDescription());
+      assertNotNull(agency.getPostcode());
+    });
+  }
+
+  private List<AgencyDTO> mockAgenciesForIds(List<Long> agencyIds) {
+    return agencyIds.stream()
+        .map(agencyId -> {
+          var agencyDTO = new EasyRandom().nextObject(AgencyDTO.class);
+          agencyDTO.setId(agencyId);
+          return agencyDTO;
+        })
+        .collect(Collectors.toList());
+  }
+
 }

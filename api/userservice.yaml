@@ -64,8 +64,11 @@ paths:
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
         409:
-          description: CONFLICT - user is already registered for provided consulting
-            type
+          description: CONFLICT - user is already registered for provided consulting type or to given consultant
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NewRegistrationResponseDto'
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -750,6 +753,36 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/consultants/{consultantId}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns registration relevant data of a consultant [Authorization: none]'
+      operationId: getConsultantPublicData
+      parameters:
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - invalid/unavailable username
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /users/sessions/{sessionId}/consultant/{consultantId}:
     put:
       tags:
@@ -2053,6 +2086,9 @@ components:
         consultingType:
           type: string
           example: 1
+        consultantId:
+          type: string
+          description: used for direct consultant registration
 
     NewRegistrationResponseDto:
       type: object
@@ -2060,6 +2096,8 @@ components:
         sessionId:
           type: integer
           format: int64
+        rcGroupId:
+          type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
 

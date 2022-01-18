@@ -5,9 +5,12 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class ConsultantAgencyService {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
+  private final @NonNull AgencyService agencyService;
 
   /**
    * Save a {@link ConsultantAgency} to the database.
@@ -117,5 +121,33 @@ public class ConsultantAgencyService {
               agency.getAgencyId()),
           LogService::logDatabaseError);
     }
+  }
+
+  /**
+   * Returns all agencies of given consultant.
+   *
+   * @param consultantId the id of the consultant
+   * @return the related agencies
+   */
+  public List<AgencyResponseDTO> getAgenciesOfConsultant(String consultantId) {
+    var agencyIds = consultantAgencyRepository.findByConsultantId(consultantId).stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+
+    return agencyService.getAgencies(agencyIds).stream()
+        .map(this::toAgencyResponseDTO)
+        .collect(Collectors.toList());
+  }
+
+  private AgencyResponseDTO toAgencyResponseDTO(AgencyDTO agencyDTO) {
+    return new AgencyResponseDTO()
+        .id(agencyDTO.getId())
+        .city(agencyDTO.getCity())
+        .consultingType(agencyDTO.getConsultingType())
+        .postcode(agencyDTO.getPostcode())
+        .name(agencyDTO.getName())
+        .description(agencyDTO.getDescription())
+        .teamAgency(agencyDTO.getTeamAgency())
+        .offline(agencyDTO.getOffline());
   }
 }

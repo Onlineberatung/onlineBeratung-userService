@@ -309,6 +309,7 @@ public class UserControllerIT {
       .consultingTypes(SESSION_DATA).hasAnonymousConversations(false).build();
   private final String PATH_PUT_SESSIONS_MONITORING = "/users/sessions/monitoring/" + SESSION_ID;
   private final String PATH_GET_MONITORING = "/users/sessions/" + SESSION_ID + "/monitoring";
+  protected static final String PATH_GET_PUBLIC_CONSULTANT_DATA = "/users/consultants/65c1095e-b977-493a-a34f-064b729d1d6c";
   private final String VALID_SESSION_MONITORING_REQUEST_BODY = "{\"addictiveDrugs\": { \"drugs\":"
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
@@ -2540,6 +2541,16 @@ public class UserControllerIT {
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  public void getConsultantPublicData_Should_returnOk_When_consultantIdIsGiven() throws Exception {
+    mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(consultantAgencyService).getAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
+  }
+
 
   private long givenAPresentSession(boolean isOnlySession) {
     var sessionId = easyRandom.nextLong();

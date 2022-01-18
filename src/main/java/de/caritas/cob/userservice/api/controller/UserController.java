@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
+import de.caritas.cob.userservice.api.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
@@ -900,5 +901,17 @@ public class UserController implements UsersApi {
   public ResponseEntity<Void> deleteTwoFactorAuthForUser() {
     keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Returns all agencies of given consultant.
+   *
+   * @param consultantId Consultant Id (required)
+   * @return {@link ResponseEntity} containing all agencies of consultant
+   */
+  @Override
+  public ResponseEntity<List<AgencyResponseDTO>> getConsultantPublicData(String consultantId) {
+    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId);
+    return new ResponseEntity<>(agencies, HttpStatus.OK);
   }
 }
