@@ -774,7 +774,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ConsultantPublicResponseDTO'
+                  $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         403:
@@ -1954,14 +1954,6 @@ components:
         lastName:
           type: string
           example: Mustermann
-
-    ConsultantPublicResponseDTO:
-      type: object
-      properties:
-        agencies:
-          type: array
-          items:
-            $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
 
     PasswordDTO:
       type: object
