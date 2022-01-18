@@ -133,10 +133,7 @@ public class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateUserDataShouldCascadeLanguageDeletionAndRespondWithOk() throws Exception {
-    givenAValidConsultant();
-    consultant.setLanguages(Set.of(new Language(consultant, LanguageCode.tr)));
-    consultant = consultantRepository.save(consultant);
-
+    givenAValidConsultantSpeaking(easyRandom.nextObject(LanguageCode.class));
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenAValidRocketChatResponse();
 
@@ -163,6 +160,12 @@ public class UserControllerE2EIT {
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
   }
 
+  private void givenAValidConsultantSpeaking(LanguageCode languageCode) {
+    givenAValidConsultant();
+    consultant.setLanguages(Set.of(new Language(consultant, languageCode)));
+    consultant = consultantRepository.save(consultant);
+  }
+
   private void givenAMinimalUpdateConsultantDto(String email) {
     updateConsultantDTO = new UpdateConsultantDTO()
         .email(email)
@@ -171,17 +174,14 @@ public class UserControllerE2EIT {
   }
 
   private void givenAnUpdateConsultantDtoWithLanguages(String email) {
+    givenAMinimalUpdateConsultantDto(email);
+
     var languages = List.of(
         easyRandom.nextObject(LanguageCode.class).toString(),
         easyRandom.nextObject(LanguageCode.class).toString(),
         easyRandom.nextObject(LanguageCode.class).toString()
     );
-
-    updateConsultantDTO = new UpdateConsultantDTO()
-        .email(email)
-        .firstname(RandomStringUtils.randomAlphabetic(8))
-        .lastname(RandomStringUtils.randomAlphabetic(12))
-        .languages(languages);
+    updateConsultantDTO.languages(languages);
   }
 
   private void givenAValidRocketChatResponse() throws RocketChatUserNotInitializedException {
