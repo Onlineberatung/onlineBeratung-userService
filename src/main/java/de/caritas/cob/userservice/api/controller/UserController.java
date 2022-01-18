@@ -138,7 +138,7 @@ public class UserController implements UsersApi {
   private final @NotNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   private final @NotNull TwoFactorAuthValidator twoFactorAuthValidator;
   private final @NotNull ActionsRegistry actionsRegistry;
-  private final @NonNull UserDtoMapper userDtoMapper;
+  private final @NonNull ConsultantDtoMapper consultantDtoMapper;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
 
@@ -318,7 +318,7 @@ public class UserController implements UsersApi {
             new NotFoundException(String.format("Consultant with id %s not found", consultantId))
         );
 
-    var updateAdminConsultantDTO = userDtoMapper.updateAdminConsultantOf(
+    var updateAdminConsultantDTO = consultantDtoMapper.updateAdminConsultantOf(
         updateConsultantDTO, consultant
     );
     consultantUpdateService.updateConsultant(consultantId, updateAdminConsultantDTO);

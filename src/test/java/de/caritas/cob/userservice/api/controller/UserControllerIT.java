@@ -431,7 +431,7 @@ public class UserControllerIT {
   private ConsultantUpdateService consultantUpdateService;
   @SpyBean
   @SuppressWarnings("unused")
-  private UserDtoMapper userDtoMapper;
+  private ConsultantDtoMapper consultantDtoMapper;
   @MockBean
   private ConsultantService consultantService;
 

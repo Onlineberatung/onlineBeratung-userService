@@ -6,7 +6,7 @@ import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserDtoMapper {
+public class ConsultantDtoMapper {
 
   public UpdateAdminConsultantDTO updateAdminConsultantOf(UpdateConsultantDTO updateConsultantDTO,
       Consultant consultant) {
