@@ -223,6 +223,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -2402,6 +2403,19 @@ public class UserControllerIT {
   }
 
   @Test
+  public void updateUserData_Should_ReturnBadRequest_When_LanguageIsInvalid() throws Exception {
+    var updateConsultantDTO = givenAnUpdateConsultantDtoWithInvalidLanguage();
+
+    mvc.perform(put(PATH_GET_USER_DATA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updateConsultantDTO))
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(authenticatedUser);
+  }
+
+  @Test
   public void updateUserData_Should_ReturnOk_When_RequestIsOk() throws Exception {
     var consultant = givenAValidConsultant();
     var updateConsultantDTO = givenAMinimalUpdateConsultantDto(consultant.getEmail());
@@ -2545,7 +2559,7 @@ public class UserControllerIT {
   @Test
   public void getConsultantPublicData_Should_returnOk_When_consultantIdIsGiven() throws Exception {
     mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(consultantAgencyService).getAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
@@ -2585,6 +2599,15 @@ public class UserControllerIT {
         .thenReturn(actionContainer);
 
     return actionContainer;
+  }
+
+  private Map<String, Object> givenAnUpdateConsultantDtoWithInvalidLanguage() {
+    return Map.of(
+        "firstname", "firstname",
+        "lastname", "lastname",
+        "email", givenAValidEmail(),
+        "languages", List.of("de", "xx")
+    );
   }
 
   private UpdateConsultantDTO givenAMinimalUpdateConsultantDto(String email) {

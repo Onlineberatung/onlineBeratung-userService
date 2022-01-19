@@ -16,6 +16,7 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO.LanguagesEnum;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -125,7 +126,9 @@ public class UserControllerE2EIT {
     var savedLanguages = savedConsultant.get().getLanguages();
     assertEquals(3, savedLanguages.size());
     savedLanguages.forEach(language -> assertTrue(
-            updateConsultantDTO.getLanguages().contains(language.getLanguageCode().toString())
+            updateConsultantDTO.getLanguages().contains(
+                LanguagesEnum.fromValue(language.getLanguageCode().toString())
+            )
         )
     );
   }
@@ -150,7 +153,9 @@ public class UserControllerE2EIT {
     var savedLanguages = savedConsultant.get().getLanguages();
     assertEquals(3, savedLanguages.size());
     savedLanguages.forEach(language -> assertTrue(
-            updateConsultantDTO.getLanguages().contains(language.getLanguageCode().toString())
+            updateConsultantDTO.getLanguages().contains(
+                LanguagesEnum.fromValue(language.getLanguageCode().toString())
+            )
         )
     );
   }
@@ -177,9 +182,9 @@ public class UserControllerE2EIT {
     givenAMinimalUpdateConsultantDto(email);
 
     var languages = List.of(
-        easyRandom.nextObject(LanguageCode.class).toString(),
-        easyRandom.nextObject(LanguageCode.class).toString(),
-        easyRandom.nextObject(LanguageCode.class).toString()
+        easyRandom.nextObject(LanguagesEnum.class),
+        easyRandom.nextObject(LanguagesEnum.class),
+        easyRandom.nextObject(LanguagesEnum.class)
     );
     updateConsultantDTO.languages(languages);
   }
