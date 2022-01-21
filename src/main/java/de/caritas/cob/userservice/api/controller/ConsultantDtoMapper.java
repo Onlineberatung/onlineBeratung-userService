@@ -35,16 +35,22 @@ public class ConsultantDtoMapper {
   }
 
   public ConsultantResponseDTO consultantResponseDtoOf(Consultant consultant,
-      List<AgencyDTO> agencies) {
+      List<AgencyDTO> agencies, boolean mapNames) {
     var agencyDtoList = agencies.stream()
         .map(this::agencyResponseDtoOf)
         .collect(Collectors.toList());
 
-    return new ConsultantResponseDTO()
+    var consultantResponseDto = new ConsultantResponseDTO()
         .consultantId(consultant.getId())
-        .firstName(consultant.getFirstName())
-        .lastName(consultant.getLastName())
         .agencies(agencyDtoList);
+
+    if (mapNames) {
+      consultantResponseDto
+          .firstName(consultant.getFirstName())
+          .lastName(consultant.getLastName());
+    }
+
+    return consultantResponseDto;
   }
 
   public AgencyResponseDTO agencyResponseDtoOf(AgencyDTO agencyDTO) {
