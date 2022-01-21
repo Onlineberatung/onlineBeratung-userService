@@ -1966,11 +1966,9 @@ components:
         firstName:
           type: string
           example: Max
-          nullable: true
         lastName:
           type: string
           example: Mustermann
-          nullable: true
         agencies:
           type: array
           items:
