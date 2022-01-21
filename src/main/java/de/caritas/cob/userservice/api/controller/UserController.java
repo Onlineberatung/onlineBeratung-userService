@@ -34,7 +34,6 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
-import de.caritas.cob.userservice.api.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
@@ -910,8 +909,14 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing all agencies of consultant
    */
   @Override
-  public ResponseEntity<List<AgencyResponseDTO>> getConsultantPublicData(String consultantId) {
+  public ResponseEntity<ConsultantResponseDTO> getConsultantPublicData(String consultantId) {
+    var consultant = consultantService.getConsultant(consultantId)
+        .orElseThrow(() ->
+            new NotFoundException(String.format("Consultant with id %s not found", consultantId))
+        );
     var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId);
-    return new ResponseEntity<>(agencies, HttpStatus.OK);
+    var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies);
+
+    return new ResponseEntity<>(consultantDto, HttpStatus.OK);
   }
 }

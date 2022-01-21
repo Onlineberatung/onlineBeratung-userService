@@ -5,9 +5,14 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.FullAgencyResponseDTO;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.jeasy.random.EasyRandom;
 import org.springframework.web.client.RestClientException;
 
 public class TestAgencyControllerApi extends AgencyControllerApi {
+
+  private static final EasyRandom easyRandom = new EasyRandom();
 
   public TestAgencyControllerApi(ApiClient apiClient) {
     super(apiClient);
@@ -28,6 +33,14 @@ public class TestAgencyControllerApi extends AgencyControllerApi {
   @Override
   public List<AgencyResponseDTO> getAgenciesByIds(List<Long> agencyIds)
       throws RestClientException {
-    return List.of(new AgencyResponseDTO());
+    if (Objects.isNull(agencyIds)) {
+      return List.of(new AgencyResponseDTO());
+    }
+
+    return agencyIds.stream().map(id -> {
+      var agencyResponseDto = easyRandom.nextObject(AgencyResponseDTO.class);
+      agencyResponseDto.setId(id);
+      return agencyResponseDto;
+    }).collect(Collectors.toList());
   }
 }

@@ -2442,6 +2442,7 @@ public class UserControllerAuthorizationIT {
   @Test
   public void getConsultantPublicData_Should_ReturnOk_When_CsrfTokensAreGiven()
       throws Exception {
+    givenAValidConsultant();
 
     mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA)
         .contentType(MediaType.APPLICATION_JSON)

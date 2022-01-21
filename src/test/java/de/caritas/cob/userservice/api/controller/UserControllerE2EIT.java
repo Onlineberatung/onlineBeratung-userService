@@ -1,13 +1,18 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,6 +90,35 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser
+  public void getConsultantPublicDataShouldRespondWithOk() throws Exception {
+    givenAConsultantWithMultipleAgencies();
+
+    mockMvc.perform(
+            get("/users/consultants/{consultantId}", consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("consultantId", is(consultant.getId())))
+        .andExpect(jsonPath("firstName", is("Multiple")))
+        .andExpect(jsonPath("lastName", is("BS")))
+        .andExpect(jsonPath("agencies", hasSize(24)))
+        .andExpect(jsonPath("agencies[0].id", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())));
+
+    assertEquals(24, consultant.getConsultantAgencies().size());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
     givenAValidConsultant();
@@ -158,6 +192,11 @@ public class UserControllerE2EIT {
             )
         )
     );
+  }
+
+  private void givenAConsultantWithMultipleAgencies() {
+    consultant = consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe")
+        .orElseThrow();
   }
 
   private void givenAValidConsultant() {
