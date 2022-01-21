@@ -2558,6 +2558,8 @@ public class UserControllerIT {
 
   @Test
   public void getConsultantPublicData_Should_returnOk_When_consultantIdIsGiven() throws Exception {
+    givenAValidConsultant();
+
     mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
