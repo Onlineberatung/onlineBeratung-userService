@@ -27,7 +27,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
    */
   @Query(
       value = "SELECT u.user_id, u.id_old, u.username, u.email, u.rc_user_id, "
-          + "u.language_formal, u.mobile_token, u.delete_date "
+          + "u.language_formal, u.mobile_token, u.delete_date, tenant_id "
           + "FROM user u "
           + "WHERE u.delete_date IS NULL "
           + "AND create_date < :create_date "
