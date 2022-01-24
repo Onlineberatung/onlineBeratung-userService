@@ -186,6 +186,7 @@ import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
+import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
@@ -703,7 +704,7 @@ public class UserControllerIT {
         .thenReturn(USER);
     when(createNewConsultingTypeFacade
         .initializeNewConsultingType(any(), any(), any(RocketChatCredentials.class)))
-        .thenReturn(1L);
+        .thenReturn(new NewRegistrationResponseDto().sessionId(1L).status(HttpStatus.CREATED));
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 

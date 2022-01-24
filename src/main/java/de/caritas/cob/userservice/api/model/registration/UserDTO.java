@@ -98,6 +98,9 @@ public class UserDTO implements UserRegistrationDTO {
   @JsonProperty("consultingType")
   private String consultingType;
 
+  @JsonProperty("consultantId")
+  private String consultantId;
+
   private boolean newUserAccount;
 
   public UserDTO(String email) {

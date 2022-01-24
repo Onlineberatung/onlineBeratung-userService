@@ -75,8 +75,7 @@ public class CreateEnquiryMessageFacade {
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
   public CreateEnquiryMessageResponseDTO createEnquiryMessage(User user, Long sessionId,
-      String message,
-      RocketChatCredentials rocketChatCredentials) {
+      String message, RocketChatCredentials rocketChatCredentials) {
 
     try {
 
@@ -341,6 +340,7 @@ public class CreateEnquiryMessageFacade {
       session.setFeedbackGroupId(rcFeedbackGroupId);
       session.setStatus(SessionStatus.NEW);
       session.setEnquiryMessageDate(nowInUtc());
+      setSessionStatusInProgressIfConsultantIsAlreadyAssigned(session);
       sessionService.saveSession(session);
     } catch (InternalServerErrorException exception) {
       throw new CreateEnquiryException(String
@@ -349,6 +349,12 @@ public class CreateEnquiryMessageFacade {
           exception, createEnquiryExceptionInformation);
     }
 
+  }
+
+  private void setSessionStatusInProgressIfConsultantIsAlreadyAssigned(Session session) {
+    if (nonNull(session.getConsultant())) {
+      session.setStatus(SessionStatus.IN_PROGRESS);
+    }
   }
 
   private void doRollback(CreateEnquiryExceptionInformation createEnquiryExceptionInformation,
