@@ -7,6 +7,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -172,6 +173,7 @@ public class SessionService {
         .registrationType(registrationType)
         .postcode(userDto.getPostcode())
         .agencyId(userDto.getAgencyId())
+        .languageCode(LanguageCode.de)
         .status(sessionStatus)
         .teamSession(isTeamSession)
         .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
