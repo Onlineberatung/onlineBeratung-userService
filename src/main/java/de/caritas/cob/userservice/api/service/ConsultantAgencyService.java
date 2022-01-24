@@ -6,7 +6,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
@@ -129,25 +128,11 @@ public class ConsultantAgencyService {
    * @param consultantId the id of the consultant
    * @return the related agencies
    */
-  public List<AgencyResponseDTO> getAgenciesOfConsultant(String consultantId) {
+  public List<AgencyDTO> getAgenciesOfConsultant(String consultantId) {
     var agencyIds = consultantAgencyRepository.findByConsultantId(consultantId).stream()
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toList());
 
-    return agencyService.getAgencies(agencyIds).stream()
-        .map(this::toAgencyResponseDTO)
-        .collect(Collectors.toList());
-  }
-
-  private AgencyResponseDTO toAgencyResponseDTO(AgencyDTO agencyDTO) {
-    return new AgencyResponseDTO()
-        .id(agencyDTO.getId())
-        .city(agencyDTO.getCity())
-        .consultingType(agencyDTO.getConsultingType())
-        .postcode(agencyDTO.getPostcode())
-        .name(agencyDTO.getName())
-        .description(agencyDTO.getDescription())
-        .teamAgency(agencyDTO.getTeamAgency())
-        .offline(agencyDTO.getOffline());
+    return agencyService.getAgencies(agencyIds);
   }
 }

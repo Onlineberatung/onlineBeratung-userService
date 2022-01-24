@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgen
 import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -141,13 +142,28 @@ public class Consultant {
   }
 
   @JsonIgnore
+  public void setLanguages(Set<Language> languages) {
+    if (isNull(this.languages)) {
+      this.languages = languages;
+    } else {
+      this.languages.clear();
+      if (!isNull(languages)) {
+        this.languages.addAll(languages);
+      }
+    }
+  }
+
+  @JsonIgnore
   public Set<Language> getLanguages() {
     if (isNull(languages) || languages.isEmpty()) {
       var defaultLanguage = new Language();
       defaultLanguage.setConsultant(this);
       defaultLanguage.setLanguageCode(LanguageCode.de);
 
-      return Set.of(defaultLanguage);
+      var set = new HashSet<Language>();
+      set.add(defaultLanguage);
+
+      return set;
     } else {
 
       return languages;

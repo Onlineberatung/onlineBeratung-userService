@@ -1,13 +1,18 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +21,7 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO.LanguagesEnum;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
@@ -84,6 +90,35 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser
+  public void getConsultantPublicDataShouldRespondWithOk() throws Exception {
+    givenAConsultantWithMultipleAgencies();
+
+    mockMvc.perform(
+            get("/users/consultants/{consultantId}", consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("consultantId", is(consultant.getId())))
+        .andExpect(jsonPath("firstName").doesNotExist())
+        .andExpect(jsonPath("lastName").doesNotExist())
+        .andExpect(jsonPath("agencies", hasSize(24)))
+        .andExpect(jsonPath("agencies[0].id", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())));
+
+    assertEquals(24, consultant.getConsultantAgencies().size());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
     givenAValidConsultant();
@@ -125,7 +160,9 @@ public class UserControllerE2EIT {
     var savedLanguages = savedConsultant.get().getLanguages();
     assertEquals(3, savedLanguages.size());
     savedLanguages.forEach(language -> assertTrue(
-            updateConsultantDTO.getLanguages().contains(language.getLanguageCode().toString())
+            updateConsultantDTO.getLanguages().contains(
+                LanguagesEnum.fromValue(language.getLanguageCode().toString())
+            )
         )
     );
   }
@@ -150,9 +187,16 @@ public class UserControllerE2EIT {
     var savedLanguages = savedConsultant.get().getLanguages();
     assertEquals(3, savedLanguages.size());
     savedLanguages.forEach(language -> assertTrue(
-            updateConsultantDTO.getLanguages().contains(language.getLanguageCode().toString())
+            updateConsultantDTO.getLanguages().contains(
+                LanguagesEnum.fromValue(language.getLanguageCode().toString())
+            )
         )
     );
+  }
+
+  private void givenAConsultantWithMultipleAgencies() {
+    consultant = consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe")
+        .orElseThrow();
   }
 
   private void givenAValidConsultant() {
@@ -177,9 +221,9 @@ public class UserControllerE2EIT {
     givenAMinimalUpdateConsultantDto(email);
 
     var languages = List.of(
-        easyRandom.nextObject(LanguageCode.class).toString(),
-        easyRandom.nextObject(LanguageCode.class).toString(),
-        easyRandom.nextObject(LanguageCode.class).toString()
+        easyRandom.nextObject(LanguagesEnum.class),
+        easyRandom.nextObject(LanguagesEnum.class),
+        easyRandom.nextObject(LanguagesEnum.class)
     );
     updateConsultantDTO.languages(languages);
   }
