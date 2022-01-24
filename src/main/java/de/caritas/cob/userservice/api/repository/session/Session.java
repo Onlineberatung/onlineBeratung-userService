@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.repository.session;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -46,7 +47,7 @@ import org.springframework.lang.Nullable;
 @Getter
 @Setter
 @ToString
-public class Session {
+public class Session implements TenantAware {
 
   public Session(User user, int consultingTypeId, String postcode, Long agencyId,
       SessionStatus status, boolean teamSession, boolean monitoring) {
@@ -128,6 +129,9 @@ public class Session {
 
   @Column(name = "update_date")
   private LocalDateTime updateDate;
+
+  @Column(name = "tenant_id")
+  private Long tenantId;
 
   @Override
   public boolean equals(Object o) {

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.user;
 
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -19,6 +20,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.search.annotations.Field;
 
 /**
  * Represents a user
@@ -30,7 +32,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class User {
+public class User implements TenantAware {
 
   @Id
   @Column(name = "user_id", updatable = false, nullable = false)
@@ -72,6 +74,9 @@ public class User {
 
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
+
+  @Column(name = "tenant_id")
+  private Long tenantId;
 
   public User(@Size(max = 36) String userId, Long oldId, @Size(max = 255) String username,
       @Size(max = 255) String email, boolean languageFormal) {

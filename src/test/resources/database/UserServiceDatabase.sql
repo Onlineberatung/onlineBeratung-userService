@@ -1,6 +1,7 @@
 CREATE TABLE USER
 (
     USER_ID         varchar(36)  NOT NULL,
+    TENANT_ID       bigint(21)   DEFAULT NULL,
     ID_OLD          bigint(21)   NULL,
     USERNAME        varchar(255) NOT NULL,
     EMAIL           varchar(255) NOT NULL,
@@ -18,6 +19,7 @@ CREATE SEQUENCE SEQUENCE_USER
 CREATE TABLE CONSULTANT
 (
     CONSULTANT_ID      varchar(36)  NOT NULL,
+    TENANT_ID          bigint(21)   DEFAULT NULL,
     USERNAME           varchar(255) NOT NULL,
     FIRST_NAME         varchar(255) NOT NULL,
     LAST_NAME          varchar(255) NOT NULL,
@@ -66,6 +68,7 @@ CREATE SEQUENCE SEQUENCE_USER_AGENCY
 CREATE TABLE SESSION
 (
     ID                   bigint(21)   NOT NULL,
+    TENANT_ID            bigint(21)   DEFAULT NULL,
     USER_ID              varchar(36)  NOT NULL,
     CONSULTANT_ID        varchar(36),
     CONSULTING_TYPE      tinyint(4)   NOT NULL,
