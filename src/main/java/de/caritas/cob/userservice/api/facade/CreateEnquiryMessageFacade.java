@@ -75,8 +75,7 @@ public class CreateEnquiryMessageFacade {
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
   public CreateEnquiryMessageResponseDTO createEnquiryMessage(User user, Long sessionId,
-      String message,
-      RocketChatCredentials rocketChatCredentials) {
+      String message, RocketChatCredentials rocketChatCredentials) {
 
     try {
 

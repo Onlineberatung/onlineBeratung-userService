@@ -175,12 +175,10 @@ public class UserController implements UsersApi {
         .rocketChatUserId(rcUserId)
         .build();
 
-    var registrationResponse = new NewRegistrationResponseDto()
-        .sessionId(createNewConsultingTypeFacade
-            .initializeNewConsultingType(newRegistrationDto, user, rocketChatCredentials))
-        .status(HttpStatus.CREATED);
+    var registrationResponse = createNewConsultingTypeFacade
+        .initializeNewConsultingType(newRegistrationDto, user, rocketChatCredentials);
 
-    return new ResponseEntity<>(registrationResponse, HttpStatus.CREATED);
+    return new ResponseEntity<>(registrationResponse, registrationResponse.getStatus());
   }
 
   /**
