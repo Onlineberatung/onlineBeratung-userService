@@ -141,6 +141,21 @@ public class SessionService {
   }
 
   /**
+   * Initialize a {@link Session} and assign given consultant directly.
+   *
+   * @param user    the user
+   * @param userDto the dto of the user
+   * @return the initialized session
+   */
+  public Session initializeDirectSession(Consultant consultant, User user, UserDTO userDto,
+      boolean isTeamSession) {
+    var session = initializeSession(user, userDto, isTeamSession, RegistrationType.REGISTERED,
+        SessionStatus.INITIAL);
+    session.setConsultant(consultant);
+    return saveSession(session);
+  }
+
+  /**
    * Initialize a {@link Session} as initial registered enquiry.
    *
    * @param user    the user
@@ -275,7 +290,7 @@ public class SessionService {
   public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
       Consultant consultant) {
     return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
@@ -490,4 +505,19 @@ public class SessionService {
     }
     return emptyList();
   }
+
+  /**
+   * Find one session by assigned consultant and user.
+   *
+   * @param consultant the consultant
+   * @param user       the user
+   * @return an {@link Optional} of the result
+   */
+  public Optional<Session> findSessionByConsultantAndUser(Consultant consultant, User user) {
+    if (nonNull(consultant) && nonNull(user)) {
+      return sessionRepository.findByConsultantAndUser(consultant, user);
+    }
+    return Optional.empty();
+  }
+
 }

@@ -16,12 +16,17 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_SUCHT
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_SUCHT;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,17 +38,24 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -61,6 +73,8 @@ public class CreateSessionFacadeTest {
   private SessionDataService sessionDataService;
   @Mock
   private RollbackFacade rollbackFacade;
+  @Mock
+  private ValidatedUserAccountProvider userAccountProvider;
   @Mock
   private Logger logger;
 
@@ -221,4 +235,34 @@ public class CreateSessionFacadeTest {
     assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
     verify(monitoringService, times(0)).updateMonitoring(any(), any());
   }
+
+  @Test
+  public void createDirectUserSession_Should_returnConflictWithExistingSession_When_userHasAlreadyASessionWithConsultant() {
+    var session = new EasyRandom().nextObject(Session.class);
+    when(sessionService.findSessionByConsultantAndUser(any(), any()))
+        .thenReturn(Optional.of(session));
+
+    var result = createSessionFacade.createDirectUserSession(null, null, null, null);
+
+    assertThat(result.getStatus(), is(HttpStatus.CONFLICT));
+    assertThat(result.getSessionId(), is(session.getId()));
+    assertThat(result.getRcGroupId(), is(session.getGroupId()));
+  }
+
+  @Test
+  public void createDirectUserSession_Should_returnCreatedWithNewSession_When_userConsultantRelationIsNew() {
+    var agencyDTO = new EasyRandom().nextObject(AgencyDTO.class);
+    var session = new EasyRandom().nextObject(Session.class);
+    when(agencyVerifier.getVerifiedAgency(anyLong(), anyInt())).thenReturn(agencyDTO);
+    when(sessionService.findSessionByConsultantAndUser(any(), any())).thenReturn(Optional.empty());
+    when(sessionService.initializeDirectSession(any(), any(), any(), anyBoolean()))
+        .thenReturn(session);
+
+    var result = createSessionFacade.createDirectUserSession(null, mock(UserDTO.class), null, mock(
+        ExtendedConsultingTypeResponseDTO.class));
+
+    assertThat(result.getStatus(), is(HttpStatus.CREATED));
+    assertThat(result.getSessionId(), is(session.getId()));
+  }
+
 }
