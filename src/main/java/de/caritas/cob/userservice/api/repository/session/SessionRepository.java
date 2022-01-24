@@ -230,7 +230,7 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    * Find one session by assigned consultant and user.
    *
    * @param consultant the consultant
-   * @param user the user
+   * @param user       the user
    * @return an {@link Optional} of the result
    */
   Optional<Session> findByConsultantAndUser(Consultant consultant, User user);

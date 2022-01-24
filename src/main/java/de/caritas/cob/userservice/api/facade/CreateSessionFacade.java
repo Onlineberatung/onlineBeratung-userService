@@ -88,7 +88,8 @@ public class CreateSessionFacade {
   private NewRegistrationResponseDto initializeNewDirectSession(UserDTO userDTO, User user,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, Consultant consultant) {
     var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
-    var session = sessionService.initializeDirectSession(consultant, user, userDTO, agencyDTO.getTeamAgency());
+    var session = sessionService
+        .initializeDirectSession(consultant, user, userDTO, agencyDTO.getTeamAgency());
     sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
     initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
     session.setConsultant(consultant);
