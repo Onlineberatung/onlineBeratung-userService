@@ -41,6 +41,7 @@ CREATE SEQUENCE SEQUENCE_CONSULTANT
 CREATE TABLE CONSULTANT_AGENCY
 (
     ID            bigint(21)  NOT NULL,
+    TENANT_ID          bigint(21)   DEFAULT NULL,
     CONSULTANT_ID varchar(36) NOT NULL,
     AGENCY_ID     bigint(21)  NOT NULL,
     CREATE_DATE   datetime,

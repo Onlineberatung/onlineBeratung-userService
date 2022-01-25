@@ -97,7 +97,7 @@ public class KeycloakAdminClientServiceTest {
 
   @Test
   public void createKeycloakUser_Should_createExpectedTenantAwareUser_When_keycloakReturnsCreated() {
-    TenantContext.setCurrentTenant(1l);
+    TenantContext.setCurrentTenant(1L);
     setField(keycloakAdminClientService, "multitenancy", true);
 
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
@@ -118,7 +118,7 @@ public class KeycloakAdminClientServiceTest {
     verify(usersResource, times(1)).create(argumentCaptor.capture());
 
     Assertions.assertEquals(argumentCaptor.getValue().getAttributes().get("tenantId").get(0),
-        TenantContext.getCurrentTenant());
+        TenantContext.getCurrentTenant().toString());
 
     TenantContext.clear();
   }

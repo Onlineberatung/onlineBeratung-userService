@@ -12,7 +12,7 @@ public class SubdomainExtractorTest {
 
     SubdomainExtractor extractor = new SubdomainExtractor();
     Optional<String> s = extractor
-        .extractSubdomain("http://tenant1.onlineberatung.local/something");
+        .extractSubdomain("tenant1.onlineberatung.local/something");
 
     assertEquals(s.get(), "tenant1");
 

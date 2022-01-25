@@ -15,10 +15,8 @@ import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityVa
 import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
-import de.caritas.cob.userservice.api.tenant.TenantResolver;
 import de.caritas.cob.userservice.filter.HttpTenantFilter;
 import de.caritas.cob.userservice.filter.StatelessCsrfFilter;
-import de.caritas.cob.userservice.filter.SubdomainExtractor;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -32,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -50,7 +49,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   private final CsrfSecurityProperties csrfSecurityProperties;
   @Value("${multitenancy.enabled}")
   private boolean multitenancy;
-  private TenantResolver tenantResolver;
+  private HttpTenantFilter tenantFilter;
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
@@ -59,9 +58,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   public SecurityConfig(
       @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
           KeycloakClientRequestFactory keycloakClientRequestFactory,
-      CsrfSecurityProperties csrfSecurityProperties, TenantResolver tenantResolver) {
+      CsrfSecurityProperties csrfSecurityProperties, @Nullable HttpTenantFilter tenantFilter) {
     this.keycloakClientRequestFactory = keycloakClientRequestFactory;
     this.csrfSecurityProperties = csrfSecurityProperties;
+    this.tenantFilter = tenantFilter;
   }
 
   /**
@@ -151,8 +151,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   private HttpSecurity enableTenantFilterIfMultitenancyEnabled(HttpSecurity httpSecurity) {
     if (multitenancy) {
       httpSecurity = httpSecurity
-          .addFilterAfter(new HttpTenantFilter(this.tenantResolver),
-              KeycloakAuthenticatedActionsFilter.class);
+          .addFilterAfter(this.tenantFilter, KeycloakAuthenticatedActionsFilter.class);
     }
     return httpSecurity;
   }

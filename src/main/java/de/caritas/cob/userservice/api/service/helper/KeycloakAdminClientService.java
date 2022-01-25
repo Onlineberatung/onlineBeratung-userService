@@ -168,7 +168,7 @@ public class KeycloakAdminClientService {
   }
 
   private void updateTenantId(UserRepresentation kcUser) {
-    if(multitenancy){
+    if (multitenancy) {
       Map<String, List<String>> attributes = new HashMap<>();
       var list = new ArrayList<String>();
       list.add(TenantContext.getCurrentTenant().toString());

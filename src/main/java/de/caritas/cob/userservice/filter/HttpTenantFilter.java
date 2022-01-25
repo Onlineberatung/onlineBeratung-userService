@@ -7,9 +7,9 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,7 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class HttpTenantFilter extends OncePerRequestFilter {
 
-  private final @NonNull TenantResolver tenantResolver;
+  private final @Nullable TenantResolver tenantResolver;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
