@@ -851,7 +851,7 @@ public class UserControllerIT {
     doThrow(new ConflictException(ERROR))
         .when(createEnquiryMessageFacade)
         .createEnquiryMessage(Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any());
+            Mockito.any(), Mockito.any(), Mockito.any());
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE)
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -869,7 +869,7 @@ public class UserControllerIT {
     when(accountProvider.retrieveValidatedUser())
         .thenReturn(USER);
     when(createEnquiryMessageFacade.createEnquiryMessage(
-        any(User.class), eq(SESSION_ID), eq(MESSAGE), any(RocketChatCredentials.class))
+        any(User.class), eq(SESSION_ID), eq(MESSAGE), any(), any(RocketChatCredentials.class))
     ).thenReturn(
         new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID)
     );

@@ -21,7 +21,7 @@ public class ConsultantDtoMapper {
 
     var languages = updateConsultantDTO.getLanguages();
     var languageStrings = isNull(languages) ? null : languages.stream()
-        .map(LanguageCode::getValue)
+        .map(this::languageOf)
         .collect(Collectors.toList());
 
     return new UpdateAdminConsultantDTO()
@@ -51,6 +51,10 @@ public class ConsultantDtoMapper {
     }
 
     return consultantResponseDto;
+  }
+
+  public String languageOf(LanguageCode languageCode) {
+    return isNull(languageCode) ? null : languageCode.getValue();
   }
 
   public AgencyResponseDTO agencyResponseDtoOf(AgencyDTO agencyDTO) {
