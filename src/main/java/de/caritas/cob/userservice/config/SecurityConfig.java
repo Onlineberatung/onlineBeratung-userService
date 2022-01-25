@@ -15,7 +15,10 @@ import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityVa
 import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 
 import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
+import de.caritas.cob.userservice.api.tenant.TenantResolver;
+import de.caritas.cob.userservice.filter.HttpTenantFilter;
 import de.caritas.cob.userservice.filter.StatelessCsrfFilter;
+import de.caritas.cob.userservice.filter.SubdomainExtractor;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -26,6 +29,7 @@ import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcess
 import org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter;
 import org.keycloak.adapters.springsecurity.filter.KeycloakSecurityContextRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -44,6 +48,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @SuppressWarnings({"unused", "FieldCanBeLocal"})
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
   private final CsrfSecurityProperties csrfSecurityProperties;
+  @Value("${multitenancy.enabled}")
+  private boolean multitenancy;
+  private TenantResolver tenantResolver;
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
@@ -52,7 +59,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   public SecurityConfig(
       @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
           KeycloakClientRequestFactory keycloakClientRequestFactory,
-      CsrfSecurityProperties csrfSecurityProperties) {
+      CsrfSecurityProperties csrfSecurityProperties, TenantResolver tenantResolver) {
     this.keycloakClientRequestFactory = keycloakClientRequestFactory;
     this.csrfSecurityProperties = csrfSecurityProperties;
   }
@@ -65,9 +72,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     super.configure(http);
-    http.csrf().disable()
-        .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class)
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    var httpSecurity = http.csrf().disable()
+        .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class);
+
+    httpSecurity = enableTenantFilterIfMultitenancyEnabled(httpSecurity);
+
+    httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
         .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris())
         .permitAll()
@@ -130,6 +140,21 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/userstatistics", "/userstatistics/**")
         .permitAll()
         .anyRequest().denyAll();
+  }
+
+  /**
+   * Adds additional filter for tenant feature if enabled that sets tenant_id into current thread.
+   *
+   * @param httpSecurity
+   * @return
+   */
+  private HttpSecurity enableTenantFilterIfMultitenancyEnabled(HttpSecurity httpSecurity) {
+    if (multitenancy) {
+      httpSecurity = httpSecurity
+          .addFilterAfter(new HttpTenantFilter(this.tenantResolver),
+              KeycloakAuthenticatedActionsFilter.class);
+    }
+    return httpSecurity;
   }
 
   /**

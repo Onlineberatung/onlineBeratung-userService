@@ -15,10 +15,14 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.ws.rs.core.Response;
@@ -54,6 +58,9 @@ public class KeycloakAdminClientService {
 
   @Value("${keycloakApi.error.email}")
   private String keycloakErrorEmail;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multitenancy;
 
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
@@ -156,7 +163,18 @@ public class KeycloakAdminClientService {
     }
     kcUser.setEnabled(true);
 
+    updateTenantId(kcUser);
     return kcUser;
+  }
+
+  private void updateTenantId(UserRepresentation kcUser) {
+    if(multitenancy){
+      Map<String, List<String>> attributes = new HashMap<>();
+      var list = new ArrayList<String>();
+      list.add(TenantContext.getCurrentTenant().toString());
+      attributes.put("tenantId", list);
+      kcUser.setAttributes(attributes);
+    }
   }
 
   private String getCreatedUserId(final URI location) {

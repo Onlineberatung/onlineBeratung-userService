@@ -33,6 +33,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.Type;
 import org.springframework.lang.Nullable;
 
@@ -47,6 +50,8 @@ import org.springframework.lang.Nullable;
 @Getter
 @Setter
 @ToString
+@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class Session implements TenantAware {
 
   public Session(User user, int consultingTypeId, String postcode, Long agencyId,

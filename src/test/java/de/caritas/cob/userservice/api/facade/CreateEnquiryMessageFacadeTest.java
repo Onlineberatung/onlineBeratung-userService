@@ -115,7 +115,7 @@ public class CreateEnquiryMessageFacadeTest {
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", AGENCY_ID, SessionStatus.INITIAL, nowInUtc(),
       null, null, null, false, false, false, nowInUtc(), null, null);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc());
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null);
   private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Collections
       .singletonList(CONSULTANT_AGENCY);
   private final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "rocketChatSystemUserId";

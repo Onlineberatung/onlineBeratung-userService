@@ -24,6 +24,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.standard.ClassicTokenizerFactory;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
 import org.hibernate.search.annotations.Analyzer;
@@ -51,6 +54,8 @@ import org.springframework.lang.Nullable;
     filters = {
         @TokenFilterDef(factory = LowerCaseFilterFactory.class),
     })
+@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class Consultant implements TenantAware {
 
   protected static final String EMAIL_ANALYZER = "emailAnalyzer";
