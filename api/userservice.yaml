@@ -1468,6 +1468,8 @@ components:
           minLength: 1
           maxLength: 5
           example: 79098
+        language:
+          $ref: '#/components/schemas/LanguageCode'
         groupId:
           type: string
           example: xGklslk2JJKK

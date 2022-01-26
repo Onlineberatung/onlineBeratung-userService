@@ -45,6 +45,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -100,11 +101,11 @@ class SessionServiceTest {
       REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
       false, nowInUtc(), null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null,
-      null, null, false, false, false, nowInUtc(), null);
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, LanguageCode.de, SessionStatus.NEW,
+      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null,
-      null, null, false, false, false, nowInUtc(), null);
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, LanguageCode.de, SessionStatus.NEW,
+      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
