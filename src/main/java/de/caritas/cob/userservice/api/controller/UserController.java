@@ -175,10 +175,10 @@ public class UserController implements UsersApi {
         .rocketChatUserId(rcUserId)
         .build();
 
-    return new ResponseEntity<>(new NewRegistrationResponseDto()
-        .sessionId(createNewConsultingTypeFacade
-            .initializeNewConsultingType(newRegistrationDto, user, rocketChatCredentials))
-        .status(HttpStatus.CREATED), HttpStatus.CREATED);
+    var registrationResponse = createNewConsultingTypeFacade
+        .initializeNewConsultingType(newRegistrationDto, user, rocketChatCredentials);
+
+    return new ResponseEntity<>(registrationResponse, registrationResponse.getStatus());
   }
 
   /**
@@ -224,9 +224,10 @@ public class UserController implements UsersApi {
         .rocketChatToken(rcToken)
         .rocketChatUserId(rcUserId)
         .build();
+    var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(
-        user, sessionId, enquiryMessage.getMessage(), rocketChatCredentials
+        user, sessionId, enquiryMessage.getMessage(), language, rocketChatCredentials
     );
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);

@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.repository.session;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -90,6 +91,10 @@ public class Session {
 
   @Column(name = "agency_id")
   private Long agencyId;
+
+  @Enumerated(EnumType.STRING)
+  @Column(columnDefinition = "varchar(2) not null default 'de'", length = 2, nullable = false)
+  private LanguageCode languageCode;
 
   @NonNull
   private SessionStatus status;

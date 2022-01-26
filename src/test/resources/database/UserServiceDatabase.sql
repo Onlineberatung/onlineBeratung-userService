@@ -82,6 +82,7 @@ CREATE TABLE SESSION
     MESSAGE_DATE         datetime              DEFAULT NULL,
     POSTCODE             varchar(5)   NOT NULL,
     AGENCY_ID            bigint(21)            DEFAULT NULL,
+    LANGUAGE_CODE        VARCHAR(2)   NOT NULL DEFAULT 'de',
     RC_GROUP_ID          varchar(255) NULL,
     RC_FEEDBACK_GROUP_ID varchar(255) NULL,
     IS_PEER_CHAT         tinyint(4)   NOT NULL DEFAULT '0',

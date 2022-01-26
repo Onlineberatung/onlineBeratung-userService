@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowIn
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
@@ -75,8 +76,7 @@ public class CreateEnquiryMessageFacade {
    * @param rocketChatCredentials {@link RocketChatCredentials}
    */
   public CreateEnquiryMessageResponseDTO createEnquiryMessage(User user, Long sessionId,
-      String message,
-      RocketChatCredentials rocketChatCredentials) {
+      String message, String language, RocketChatCredentials rocketChatCredentials) {
 
     try {
 
@@ -112,7 +112,8 @@ public class CreateEnquiryMessageFacade {
       messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(rcGroupId,
           extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
 
-      updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
+      updateSession(session, language, rcGroupId, rcFeedbackGroupId,
+          createEnquiryExceptionInformation);
 
       emailNotificationFacade.sendNewEnquiryEmailNotification(session);
 
@@ -332,8 +333,8 @@ public class CreateEnquiryMessageFacade {
     }
   }
 
-  private void updateSession(Session session, String rcGroupId, String rcFeedbackGroupId,
-      CreateEnquiryExceptionInformation createEnquiryExceptionInformation)
+  private void updateSession(Session session, String language, String rcGroupId,
+      String rcFeedbackGroupId, CreateEnquiryExceptionInformation createEnquiryExceptionInformation)
       throws CreateEnquiryException {
 
     try {
@@ -341,6 +342,10 @@ public class CreateEnquiryMessageFacade {
       session.setFeedbackGroupId(rcFeedbackGroupId);
       session.setStatus(SessionStatus.NEW);
       session.setEnquiryMessageDate(nowInUtc());
+      if (nonNull(language)) {
+        session.setLanguageCode(LanguageCode.getByCode(language));
+      }
+      setSessionStatusInProgressIfConsultantIsAlreadyAssigned(session);
       sessionService.saveSession(session);
     } catch (InternalServerErrorException exception) {
       throw new CreateEnquiryException(String
@@ -349,6 +354,12 @@ public class CreateEnquiryMessageFacade {
           exception, createEnquiryExceptionInformation);
     }
 
+  }
+
+  private void setSessionStatusInProgressIfConsultantIsAlreadyAssigned(Session session) {
+    if (nonNull(session.getConsultant())) {
+      session.setStatus(SessionStatus.IN_PROGRESS);
+    }
   }
 
   private void doRollback(CreateEnquiryExceptionInformation createEnquiryExceptionInformation,

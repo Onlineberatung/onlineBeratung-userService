@@ -5,9 +5,9 @@ import static java.util.Objects.isNull;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.model.LanguageCode;
 import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO.LanguagesEnum;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ public class ConsultantDtoMapper {
 
     var languages = updateConsultantDTO.getLanguages();
     var languageStrings = isNull(languages) ? null : languages.stream()
-        .map(LanguagesEnum::getValue)
+        .map(this::languageOf)
         .collect(Collectors.toList());
 
     return new UpdateAdminConsultantDTO()
@@ -51,6 +51,10 @@ public class ConsultantDtoMapper {
     }
 
     return consultantResponseDto;
+  }
+
+  public String languageOf(LanguageCode languageCode) {
+    return isNull(languageCode) ? null : languageCode.getValue();
   }
 
   public AgencyResponseDTO agencyResponseDtoOf(AgencyDTO agencyDTO) {

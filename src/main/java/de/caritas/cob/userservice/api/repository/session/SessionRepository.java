@@ -226,4 +226,12 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   Long countByConsultantAndStatusInAndRegistrationType(Consultant consultant,
       List<SessionStatus> sessionStatusList, RegistrationType registrationType);
 
+  /**
+   * Find one session by assigned consultant and user.
+   *
+   * @param consultant the consultant
+   * @param user       the user
+   * @return an {@link Optional} of the result
+   */
+  Optional<Session> findByConsultantAndUser(Consultant consultant, User user);
 }
