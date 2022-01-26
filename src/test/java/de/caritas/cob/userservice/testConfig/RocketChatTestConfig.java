@@ -18,6 +18,9 @@ import org.springframework.web.client.RestTemplate;
 @TestConfiguration
 public class RocketChatTestConfig {
 
+  public static final String AUTH_TOKEN =
+      "auth-token configured in " + RocketChatTestConfig.class.getName();
+
   @Bean
   public RocketChatService rocketChatService(RestTemplate restTemplate,
       RocketChatCredentialsProvider rocketChatCredentialsProvider) {
@@ -28,7 +31,7 @@ public class RocketChatTestConfig {
         loginResponseDTO.setStatus("ok");
         var dataDTO = new DataDTO();
         dataDTO.setUserId("user-id configured in " + RocketChatTestConfig.class.getName());
-        dataDTO.setAuthToken("auth-token configured in " + RocketChatTestConfig.class.getName());
+        dataDTO.setAuthToken(AUTH_TOKEN);
         var meDTO = new MeDTO();
         dataDTO.setMe(meDTO);
 
@@ -41,7 +44,11 @@ public class RocketChatTestConfig {
           RocketChatCredentials rocketChatCredentials) {
         var groupResponseDTO = new GroupResponseDTO();
         groupResponseDTO.setSuccess(true);
-        groupResponseDTO.setGroup(new GroupDTO());
+        var group = new GroupDTO();
+        if (!rocketChatCredentials.getRocketChatToken().equals(AUTH_TOKEN)) {
+          group.setId("rcGroupId");
+        }
+        groupResponseDTO.setGroup(group);
         return Optional.of(groupResponseDTO);
       }
 

@@ -94,17 +94,17 @@ class SessionServiceTest {
       null, nowInUtc(), null, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
-      REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
+      REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
       false, nowInUtc(), null);
   private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, CONSULTING_TYPE_ID_SUCHT,
-      REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
+      REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
       false, nowInUtc(), null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
-      null, false, false, false, nowInUtc(), null);
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null,
+      null, null, false, false, false, nowInUtc(), null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, SessionStatus.NEW, nowInUtc(), null, null,
-      null, false, false, false, nowInUtc(), null);
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null,
+      null, null, false, false, false, nowInUtc(), null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc());
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();

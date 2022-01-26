@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -254,6 +255,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     session.setConsultant(null);
     session.setUser(user);
     session.setAgencyId(agencyId);
+    session.setLanguageCode(LanguageCode.de);
     session.setTeamSession(true);
     return this.sessionRepository.save(session);
   }

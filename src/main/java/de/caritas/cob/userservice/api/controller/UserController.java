@@ -224,9 +224,10 @@ public class UserController implements UsersApi {
         .rocketChatToken(rcToken)
         .rocketChatUserId(rcUserId)
         .build();
+    var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(
-        user, sessionId, enquiryMessage.getMessage(), rocketChatCredentials
+        user, sessionId, enquiryMessage.getMessage(), language, rocketChatCredentials
     );
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
