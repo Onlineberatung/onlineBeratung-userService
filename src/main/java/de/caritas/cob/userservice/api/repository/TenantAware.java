@@ -10,4 +10,6 @@ public interface TenantAware {
    * @param tenantId
    */
   void setTenantId(Long tenantId);
+
+  Long getTenantId();
 }

@@ -112,4 +112,14 @@ public class ImportRecordCreationInputAdapter implements ConsultantCreationInput
     return this.importRecord.isFormalLanguage();
   }
 
+  /**
+   * Provides the tenantId.
+   *
+   * @return the tenant id
+   */
+  @Override
+  public Long getTenantId() {
+    return this.importRecord.getTenantId();
+  }
+
 }

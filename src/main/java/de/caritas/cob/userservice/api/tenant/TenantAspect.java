@@ -21,6 +21,11 @@ public class TenantAspect {
 
   @Before("execution(* de.caritas.cob.userservice.api.repository..*(..)))")
   public void beforeQueryAspect() {
+
+    if (Long.valueOf(0L).equals(TenantContext.getCurrentTenant())) {
+      return;
+    }
+
     Filter filter = entityManager.unwrap(Session.class)
         .enableFilter("tenantFilter");
     filter.setParameter("tenantId", TenantContext.getCurrentTenant());

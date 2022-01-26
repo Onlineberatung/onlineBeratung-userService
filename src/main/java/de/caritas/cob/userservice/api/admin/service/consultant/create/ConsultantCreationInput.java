@@ -37,4 +37,7 @@ interface ConsultantCreationInput {
     return nowInUtc();
   }
 
+  Long getTenantId();
+
+
 }

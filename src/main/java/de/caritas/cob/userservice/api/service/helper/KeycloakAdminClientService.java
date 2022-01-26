@@ -163,15 +163,19 @@ public class KeycloakAdminClientService {
     }
     kcUser.setEnabled(true);
 
-    updateTenantId(kcUser);
+    updateTenantId(user, kcUser);
     return kcUser;
   }
 
-  private void updateTenantId(UserRepresentation kcUser) {
+  private void updateTenantId(UserDTO userDTO, UserRepresentation kcUser) {
     if (multitenancy) {
       Map<String, List<String>> attributes = new HashMap<>();
       var list = new ArrayList<String>();
-      list.add(TenantContext.getCurrentTenant().toString());
+      if (userDTO.getTenantId() != null) {
+        list.add(userDTO.getTenantId().toString());
+      } else {
+        list.add(TenantContext.getCurrentTenant().toString());
+      }
       attributes.put("tenantId", list);
       kcUser.setAttributes(attributes);
     }

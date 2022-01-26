@@ -563,6 +563,9 @@ components:
           example: "I am absent until..."
           minLength: 1
           maxLength: 10000
+        tenantId:
+          type: long
+          example: "1"
 
     UpdateAdminConsultantDTO:
       type: object
