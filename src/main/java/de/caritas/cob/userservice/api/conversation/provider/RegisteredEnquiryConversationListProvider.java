@@ -33,13 +33,11 @@ public class RegisteredEnquiryConversationListProvider extends DefaultConversati
    * {@inheritDoc}
    */
   @Override
-  public ConsultantSessionListResponseDTO buildConversations(
-      PageableListRequest pageableListRequest) {
+  public ConsultantSessionListResponseDTO buildConversations(PageableListRequest request) {
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var registeredEnquiries = sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
-    return buildConversations(pageableListRequest,
-        consultant,
-        sessionService.getRegisteredEnquiriesForConsultant(consultant));
+    return buildConversations(request, consultant, registeredEnquiries);
   }
 
   /**
