@@ -43,6 +43,7 @@ import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
@@ -325,6 +326,14 @@ public class UserController implements UsersApi {
     consultantUpdateService.updateConsultant(consultantId, updateAdminConsultantDTO);
 
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<LanguageResponseDTO> getLanguages(Long agencyId) {
+    var languageCodes = consultantAgencyService.getLanguageCodesOfAgency(agencyId);
+    var languageResponseDTO = consultantDtoMapper.languageResponseDtoOf(languageCodes);
+
+    return new ResponseEntity<>(languageResponseDTO, HttpStatus.OK);
   }
 
   /**

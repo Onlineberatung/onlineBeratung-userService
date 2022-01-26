@@ -72,7 +72,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris())
         .permitAll()
         .antMatchers("/users/askers/new", "/conversations/askers/anonymous/new",
-            "/users/consultants/{consultantId:\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b}")
+            "/users/consultants/{consultantId:\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b}",
+            "/users/consultants/languages"
+        )
         .permitAll()
         .antMatchers("/users/data")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)

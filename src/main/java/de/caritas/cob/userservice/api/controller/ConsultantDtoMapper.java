@@ -6,10 +6,12 @@ import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.LanguageCode;
+import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +21,12 @@ public class ConsultantDtoMapper {
   public UpdateAdminConsultantDTO updateAdminConsultantOf(UpdateConsultantDTO updateConsultantDTO,
       Consultant consultant) {
 
-    var languages = updateConsultantDTO.getLanguages();
-    var languageStrings = isNull(languages) ? null : languages.stream()
-        .map(this::languageOf)
-        .collect(Collectors.toList());
-
     return new UpdateAdminConsultantDTO()
         .email(updateConsultantDTO.getEmail())
         .firstname(updateConsultantDTO.getFirstname())
         .lastname(updateConsultantDTO.getLastname())
         .formalLanguage(consultant.isLanguageFormal())
-        .languages(languageStrings)
+        .languages(languageStringsOf(updateConsultantDTO.getLanguages()))
         .absent(consultant.isAbsent())
         .absenceMessage(consultant.getAbsenceMessage());
   }
@@ -57,6 +54,12 @@ public class ConsultantDtoMapper {
     return isNull(languageCode) ? null : languageCode.getValue();
   }
 
+  public List<String> languageStringsOf(List<LanguageCode> languages) {
+    return isNull(languages) ? null : languages.stream()
+        .map(this::languageOf)
+        .collect(Collectors.toList());
+  }
+
   public AgencyResponseDTO agencyResponseDtoOf(AgencyDTO agencyDTO) {
     return new AgencyResponseDTO()
         .id(agencyDTO.getId())
@@ -67,5 +70,17 @@ public class ConsultantDtoMapper {
         .description(agencyDTO.getDescription())
         .teamAgency(agencyDTO.getTeamAgency())
         .offline(agencyDTO.getOffline());
+  }
+
+  public LanguageResponseDTO languageResponseDtoOf(Set<String> languageCodes) {
+    var languages = languageCodes.stream()
+        .sorted()
+        .map(LanguageCode::fromValue)
+        .collect(Collectors.toList());
+
+    var dto = new LanguageResponseDTO();
+    dto.setLanguages(languages);
+
+    return dto;
   }
 }
