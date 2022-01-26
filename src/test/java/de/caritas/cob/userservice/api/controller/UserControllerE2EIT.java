@@ -200,6 +200,19 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser
+  public void getLanguagesShouldRespondWithBadRequestIfAgencyIdIsNotGiven() throws Exception {
+    mockMvc.perform(
+            get("/users/consultants/languages")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser
   public void getLanguagesShouldRespondWithDefaultLanguageAndOkWhenOnlyDefaultInDatabase()
       throws Exception {
     var agencyId = givenAnAgencyIdWithDefaultLanguageOnly();
