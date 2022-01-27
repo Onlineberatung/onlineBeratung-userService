@@ -9,11 +9,6 @@ public class EnquiriesNotificationMailContent {
 
   private Long amountOfOpenEnquiries;
   private Long agencyId;
-
-  @Override
-  public String toString() {
-    return String
-        .format("Eine Ihrer Beratungsstellen hat aktuell %s offene Erstanfrage-/n.", amountOfOpenEnquiries);
-  }
+  private String agencyName;
 
 }
