@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
-import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 

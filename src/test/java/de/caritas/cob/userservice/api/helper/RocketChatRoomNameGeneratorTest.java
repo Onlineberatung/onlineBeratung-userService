@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;

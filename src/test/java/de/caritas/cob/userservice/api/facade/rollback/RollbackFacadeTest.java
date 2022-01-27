@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade.rollback;
 
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 

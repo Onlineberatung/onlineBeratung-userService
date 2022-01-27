@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.conversation.provider;
 
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_OFFENDER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_OFFENDER;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,7 +14,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
@@ -29,7 +29,7 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
-import de.caritas.cob.userservice.testConfig.ConsultingTypeManagerTestConfig;
+import de.caritas.cob.userservice.api.testConfig.ConsultingTypeManagerTestConfig;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.PeekingIterator;

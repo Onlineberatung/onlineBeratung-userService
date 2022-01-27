@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.model.jsondeserializer;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.PASSWORD;
-import static de.caritas.cob.userservice.testHelper.TestConstants.PASSWORD_URL_ENCODED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.PASSWORD;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.PASSWORD_URL_ENCODED;
 import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.core.JsonParseException;

@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyRespon
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
-import de.caritas.cob.userservice.config.CacheManagerConfig;
+import de.caritas.cob.userservice.api.config.CacheManagerConfig;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.service.user;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_LANGUAGE_FORMAL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_NO_RC_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.EMAIL;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_LANGUAGE_FORMAL;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_NO_RC_USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;

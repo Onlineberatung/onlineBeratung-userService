@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.controller;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;

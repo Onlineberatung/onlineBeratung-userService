@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_SECRET;
-import static de.caritas.cob.userservice.testHelper.TestConstants.OPTIONAL_OTP_INFO_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_SECRET;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.OPTIONAL_OTP_INFO_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;

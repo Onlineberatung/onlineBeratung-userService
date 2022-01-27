@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.helper.Helper.ONE_DAY_IN_HOURS;
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 

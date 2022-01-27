@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
-import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
+import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;

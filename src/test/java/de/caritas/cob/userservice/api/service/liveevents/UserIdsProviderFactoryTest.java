@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;

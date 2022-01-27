@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toIsoTime;
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toUnixTime;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toIsoTime;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toUnixTime;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;

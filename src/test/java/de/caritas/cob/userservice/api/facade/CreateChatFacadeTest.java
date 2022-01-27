@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_AGENCY_SET;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_CHAT_NAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_KREUZBUND;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_AGENCY_SET;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_CHAT_NAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;

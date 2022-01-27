@@ -1,15 +1,15 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_USER_3;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_USER_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.INACTIVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER_3;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.INACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
