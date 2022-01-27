@@ -4,13 +4,18 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultant.Language;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -88,6 +93,18 @@ public class ConsultantAgencyService {
     }
 
     return emptyList();
+  }
+
+  public Set<String> getLanguageCodesOfAgency(long agencyId) {
+    var consultantAgencies = findConsultantsByAgencyId(agencyId);
+
+    return consultantAgencies.stream()
+        .map(ConsultantAgency::getConsultant)
+        .map(Consultant::getLanguages)
+        .flatMap(Collection::stream)
+        .map(Language::getLanguageCode)
+        .map(LanguageCode::name)
+        .collect(Collectors.toSet());
   }
 
   private ConsultantResponseDTO convertToConsultantResponseDTO(ConsultantAgency agency) {

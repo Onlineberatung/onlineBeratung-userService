@@ -30,18 +30,21 @@ import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Language;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.Cookie;
@@ -86,6 +89,9 @@ public class UserControllerE2EIT {
   private ConsultantRepository consultantRepository;
 
   @Autowired
+  private ConsultantAgencyRepository consultantAgencyRepository;
+
+  @Autowired
   private UserRepository userRepository;
 
   @Autowired
@@ -110,13 +116,23 @@ public class UserControllerE2EIT {
 
   private EnquiryMessageDTO enquiryMessageDTO;
 
+  private Set<de.caritas.cob.userservice.api.model.LanguageCode> allLanguages = new HashSet<>();
+
+  private Set<Consultant> consultantsToReset = new HashSet<>();
+
   @AfterEach
-  public void deleteObjects() {
+  public void reset() {
     user = null;
     session = null;
     consultant = null;
     updateConsultantDTO = null;
     enquiryMessageDTO = null;
+    allLanguages = new HashSet<>();
+    consultantsToReset.forEach(consultantToReset -> {
+      consultantToReset.setLanguages(null);
+      consultantRepository.save(consultantToReset);
+    });
+    consultantsToReset = new HashSet<>();
   }
 
   @Test
@@ -180,6 +196,60 @@ public class UserControllerE2EIT {
     assertEquals(LanguageCode.de, savedSession.get().getLanguageCode());
 
     restoreSession();
+  }
+
+  @Test
+  @WithMockUser
+  public void getLanguagesShouldRespondWithBadRequestIfAgencyIdIsNotGiven() throws Exception {
+    mockMvc.perform(
+            get("/users/consultants/languages")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser
+  public void getLanguagesShouldRespondWithDefaultLanguageAndOkWhenOnlyDefaultInDatabase()
+      throws Exception {
+    var agencyId = givenAnAgencyIdWithDefaultLanguageOnly();
+
+    mockMvc.perform(
+            get("/users/consultants/languages")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("agencyId", String.valueOf(agencyId))
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("languages", hasSize(1)))
+        .andExpect(jsonPath("languages[0]", is("de")));
+  }
+
+  @Test
+  @WithMockUser
+  public void getLanguagesShouldRespondWithMultipleLanguageAndOkWhenMultipleLanguagesInDatabase()
+      throws Exception {
+    var agencyId = givenAnAgencyWithMultipleLanguages();
+
+    var response = mockMvc.perform(
+            get("/users/consultants/languages")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("agencyId", String.valueOf(agencyId))
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("languages", hasSize(allLanguages.size())))
+        .andReturn().getResponse();
+
+    var dto = objectMapper.readValue(response.getContentAsByteArray(), LanguageResponseDTO.class);
+    assertEquals(allLanguages, new HashSet<>(dto.getLanguages()));
   }
 
   @Test
@@ -298,6 +368,37 @@ public class UserControllerE2EIT {
     givenAValidConsultant();
     consultant.setLanguages(Set.of(new Language(consultant, languageCode)));
     consultant = consultantRepository.save(consultant);
+  }
+
+  private long givenAnAgencyIdWithDefaultLanguageOnly() {
+    return 121;
+  }
+
+  private long givenAnAgencyWithMultipleLanguages() {
+    var agencyId = 0L;
+
+    consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNull(agencyId)
+        .forEach(consultantAgency -> {
+          var consultant = consultantAgency.getConsultant();
+          var language1 = new Language(consultant, easyRandom.nextObject(LanguageCode.class));
+          var language2 = new Language(consultant, easyRandom.nextObject(LanguageCode.class));
+          allLanguages.add(mapLanguageCode(language1));
+          allLanguages.add(mapLanguageCode(language2));
+          var languages = Set.of(language1, language2);
+          consultant.setLanguages(languages);
+          consultantRepository.save(consultant);
+
+          consultantsToReset.add(consultant);
+        });
+
+    return agencyId;
+  }
+
+  private de.caritas.cob.userservice.api.model.LanguageCode mapLanguageCode(Language language) {
+    return de.caritas.cob.userservice.api.model.LanguageCode.fromValue(
+        language.getLanguageCode().name()
+    );
   }
 
   private void givenAMinimalUpdateConsultantDto(String email) {

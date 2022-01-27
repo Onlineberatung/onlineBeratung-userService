@@ -949,6 +949,17 @@ public class UserControllerAuthorizationIT {
     verifyNoMoreInteractions(askerImportService);
   }
 
+  @Test
+  public void getLanguages_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
+      throws Exception {
+    mvc.perform(
+        post("/users/consultants/languages")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAgencyService);
+  }
 
   /**
    * GET on /users/consultants (authority: VIEW_AGENCY_CONSULTANTS)

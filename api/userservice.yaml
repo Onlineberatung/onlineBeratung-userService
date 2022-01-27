@@ -317,6 +317,35 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/consultants/languages:
+    get:
+      tags:
+        - user-controller
+      summary: 'Get the languages of all consultants who work for the given agency
+       [Authorization: none]'
+      operationId: getLanguages
+      parameters:
+        - name: agencyId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/LanguageResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        404:
+          description: NOT FOUND - Agency not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /users/data:
     get:
       tags:
@@ -1909,6 +1938,14 @@ components:
           so, sq, sr, ss, st, su, sv, sw, ta, te, tg, th, ti, tk, tl, tn, to, tr, ts, tt, tw,
           ty, ug, uk, ur, uz, ve, vi, vo, wa, wo, xh, yi, yo, za, zh, zu
       ]
+
+    LanguageResponseDTO:
+      type: object
+      properties:
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageCode'
 
     ConsultingTypeMap:
       type: object
