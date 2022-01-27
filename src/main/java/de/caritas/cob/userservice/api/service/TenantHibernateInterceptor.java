@@ -13,13 +13,19 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TenantHibernateInterceptor extends EmptyInterceptor {
 
+  private final Long TECHNICAL_TENANT_ID = 0L;
+
   @Override
   public void preFlush(Iterator entities) {
     Object entity;
     while (entities.hasNext()) {
       entity = entities.next();
       if (entity instanceof TenantAware) {
-        ((TenantAware) entity).setTenantId(TenantContext.getCurrentTenant());
+        var tenantAware = (TenantAware) entity;
+        if (tenantAware.getTenantId() == null && !Long.valueOf(TECHNICAL_TENANT_ID)
+            .equals(TenantContext.getCurrentTenant())) {
+          ((TenantAware) entity).setTenantId(TenantContext.getCurrentTenant());
+        }
       }
     }
 

@@ -16,11 +16,18 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("${multitenancy.enabled:true}")
 public class TenantAspect {
 
+  private final Long TECHNICAL_TENANT_ID = 0L;
+
   @PersistenceContext
   public EntityManager entityManager;
 
   @Before("execution(* de.caritas.cob.userservice.api.repository..*(..)))")
   public void beforeQueryAspect() {
+
+    if (Long.valueOf(TECHNICAL_TENANT_ID).equals(TenantContext.getCurrentTenant())) {
+      return;
+    }
+
     Filter filter = entityManager.unwrap(Session.class)
         .enableFilter("tenantFilter");
     filter.setParameter("tenantId", TenantContext.getCurrentTenant());
