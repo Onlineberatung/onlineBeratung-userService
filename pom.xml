@@ -29,7 +29,7 @@
 		<keycloak.version>13.0.1</keycloak.version>
 		<springfox.version>2.9.2</springfox.version>
 		<powermock.version>2.0.2</powermock.version>
-		<!-- force at least version 2.16 due to https://logging.apache.org/log4j/2.x/security.html -->
+		<!-- force safe version due to https://logging.apache.org/log4j/2.x/security.html -->
 		<log4j.version>2.17.1</log4j.version>
 	</properties>
 
@@ -66,7 +66,6 @@
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>6.2.0.Final</version>
 		</dependency>
 
 		<!-- Search dependency -->
@@ -139,7 +138,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
 		</dependency>
 
 		<!-- Apache Commons Text -->
@@ -160,13 +158,12 @@
 		<dependency>
 		    <groupId>commons-codec</groupId>
 		    <artifactId>commons-codec</artifactId>
-		    <version>1.15</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-maven-plugin</artifactId>
-			<version>4.6.1</version>
+			<version>4.6.2</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
@@ -222,12 +219,10 @@
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
-			<version>2.10.9.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
-			<version>5.3.13</version>
 		</dependency>
 
 		<!-- Push notification firebase dependency -->
@@ -285,7 +280,6 @@
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>4.1.1</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -356,7 +350,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
