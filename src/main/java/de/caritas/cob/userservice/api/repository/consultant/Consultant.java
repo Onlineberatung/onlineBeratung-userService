@@ -64,7 +64,7 @@ public class Consultant {
   @NonNull
   private String id;
 
-  @Column(name = "rc_user_id", updatable = false, nullable = false)
+  @Column(name = "rc_user_id", updatable = false)
   @Size(max = 17)
   @NonNull
   private String rocketChatId;

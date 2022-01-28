@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.useragency;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,6 +41,11 @@ public class UserAgency {
   @Column(name = "agency_id", updatable = true, nullable = true)
   private Long agencyId;
 
+  @Column(name = "create_date", columnDefinition = "datetime")
+  private LocalDateTime createDate;
+
+  @Column(name = "update_date", columnDefinition = "datetime")
+  private LocalDateTime updateDate;
 
   public UserAgency(User user, Long agencyId) {
     this.user = user;
