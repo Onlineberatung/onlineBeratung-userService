@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-class ConsultantServiceIT extends ConsultantServiceITBase{
+class ConsultantServiceIT extends ConsultantServiceITBase {
 
   @BeforeEach
   void clearTokens() {
@@ -23,7 +23,7 @@ class ConsultantServiceIT extends ConsultantServiceITBase{
 
   @Test
   void addMobileTokensToConsultant_Should_persistMobileTokens_When_tokensAreUnique() {
-   super.addMobileTokensToConsultant_Should_persistMobileTokens_When_tokensAreUnique();
+    super.addMobileTokensToConsultant_Should_persistMobileTokens_When_tokensAreUnique();
   }
 
   @Test

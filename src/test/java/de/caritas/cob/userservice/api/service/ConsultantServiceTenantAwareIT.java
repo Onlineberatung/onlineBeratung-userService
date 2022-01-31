@@ -55,7 +55,7 @@ class ConsultantServiceTenantAwareIT extends ConsultantServiceITBase {
   @Test
   void addMobileTokensToConsultant_Should_throwConflictException_When_tokenAlreadyExists() {
     TenantContext.setCurrentTenant(1L);
-   super.addMobileTokensToConsultant_Should_throwConflictException_When_tokenAlreadyExists();
+    super.addMobileTokensToConsultant_Should_throwConflictException_When_tokenAlreadyExists();
   }
 
 }
