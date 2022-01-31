@@ -1,0 +1,2 @@
+INSERT INTO CONSULTANT (`consultant_id`, `tenant_id`, `username`,`first_name`,`last_name`,`email`)
+VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b8', '1', 'enc.MVWWSZ3SMF2GS33OFV2GKYRR', 'test', 'test', 'test');
