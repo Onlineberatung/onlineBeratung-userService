@@ -101,6 +101,7 @@ public class KeycloakAdminClientServiceTest {
     setField(keycloakAdminClientService, "multitenancy", true);
 
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
+    userDTO.setTenantId(1L);
     UsersResource usersResource = mock(UsersResource.class);
     Response response = mock(Response.class);
     when(response.getStatus()).thenReturn(HttpStatus.CREATED.value());
