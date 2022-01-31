@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.tenant;
 
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 import de.caritas.cob.userservice.filter.SubdomainExtractor;
 import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
@@ -44,7 +45,6 @@ public class TenantResolver {
 
   private Long resolveForAuthenticatedUser(HttpServletRequest request) {
     Optional<Long> tenantId = resolveTenantIdFromTokenClaims(request);
-
     Optional<Long> tenantIdFromSubdomain = resolveTenantFromSubdomain();
     if (tenantId.isPresent() && tenantIdFromSubdomain.isPresent()) {
       if (tenantId.get().equals(tenantIdFromSubdomain.get())) {
@@ -58,7 +58,7 @@ public class TenantResolver {
   private Optional<Long> resolveTenantFromSubdomain() {
     Optional<String> currentSubdomain = subdomainExtractor.getCurrentSubdomain();
     if (currentSubdomain.isPresent()) {
-      return Optional.of(getTenantIdBySubdomain(currentSubdomain.get()));
+      return of(getTenantIdBySubdomain(currentSubdomain.get()));
     } else {
       return empty();
     }
@@ -71,7 +71,7 @@ public class TenantResolver {
   private Optional<Long> getUserAttribute(Map<String, Object> claimMap, String claim) {
     if (claimMap.containsKey(claim)) {
       String userAttribute = (String) claimMap.get(claim);
-      return Optional.of(Long.parseLong(userAttribute));
+      return of(Long.parseLong(userAttribute));
     } else {
       return Optional.empty();
     }
