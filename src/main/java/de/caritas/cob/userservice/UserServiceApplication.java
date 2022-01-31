@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
@@ -35,7 +34,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @EnableAsync
 @EnableScheduling
 @EnableConfigurationProperties({CsrfSecurityProperties.class})
-@Slf4j
 public class UserServiceApplication {
 
   @Value("${thread.executor.corePoolSize}")
@@ -51,7 +49,6 @@ public class UserServiceApplication {
   private final String claimNameUsername = "username";
 
   public static void main(String[] args) {
-    log.info("starting v1");
     SpringApplication.run(UserServiceApplication.class, args);
   }
 

@@ -18,7 +18,7 @@ jobs:
       - name: Setup JVM
         uses: actions/setup-java@v1
         with:
-          java-version: 11.0.10
+          java-version: 11.0.14
           java-package: jdk
           architecture: x64
 
