@@ -34,4 +34,4 @@ jobs:
         run: mvn -B -Pprod clean package -Dskip.unit-tests=true -Dskip.integration-tests=true
 
       - name: Maven Verify
-        run: mvn -B -Pprod clean verify -X
+        run: mvn -B -Pprod clean verify -DtrimStackTrace=false
