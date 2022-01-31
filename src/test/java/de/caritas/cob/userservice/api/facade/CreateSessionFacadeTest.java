@@ -237,12 +237,15 @@ public class CreateSessionFacadeTest {
   }
 
   @Test
-  public void createDirectUserSession_Should_returnConflictWithExistingSession_When_userHasAlreadyASessionWithConsultant() {
+  public void createDirectUserSession_Should_returnConflictWithExistingSession_When_userHasAlreadyASessionWithConsultantInConsultingType() {
     var session = new EasyRandom().nextObject(Session.class);
-    when(sessionService.findSessionByConsultantAndUser(any(), any()))
+    when(sessionService.findSessionByConsultantAndUserAndConsultingType(any(), any(), any()))
         .thenReturn(Optional.of(session));
+    var consultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    consultingTypeResponseDTO.id(session.getConsultingTypeId());
 
-    var result = createSessionFacade.createDirectUserSession(null, null, null, null);
+    var result = createSessionFacade
+        .createDirectUserSession(null, null, null, consultingTypeResponseDTO);
 
     assertThat(result.getStatus(), is(HttpStatus.CONFLICT));
     assertThat(result.getSessionId(), is(session.getId()));
@@ -254,12 +257,32 @@ public class CreateSessionFacadeTest {
     var agencyDTO = new EasyRandom().nextObject(AgencyDTO.class);
     var session = new EasyRandom().nextObject(Session.class);
     when(agencyVerifier.getVerifiedAgency(anyLong(), anyInt())).thenReturn(agencyDTO);
-    when(sessionService.findSessionByConsultantAndUser(any(), any())).thenReturn(Optional.empty());
+    when(sessionService.findSessionByConsultantAndUserAndConsultingType(any(), any(), any()))
+        .thenReturn(Optional.empty());
     when(sessionService.initializeDirectSession(any(), any(), any(), anyBoolean()))
         .thenReturn(session);
 
     var result = createSessionFacade.createDirectUserSession(null, mock(UserDTO.class), null, mock(
         ExtendedConsultingTypeResponseDTO.class));
+
+    assertThat(result.getStatus(), is(HttpStatus.CREATED));
+    assertThat(result.getSessionId(), is(session.getId()));
+  }
+
+  @Test
+  public void createDirectUserSession_Should_returnCreatedWithNewSession_When_userConsultantRelationIsWithOtherConsultingType() {
+    var agencyDTO = new EasyRandom().nextObject(AgencyDTO.class);
+    var session = new EasyRandom().nextObject(Session.class);
+    when(agencyVerifier.getVerifiedAgency(anyLong(), anyInt())).thenReturn(agencyDTO);
+    when(sessionService.findSessionByConsultantAndUserAndConsultingType(any(), any(), any()))
+        .thenReturn(Optional.empty());
+    when(sessionService.initializeDirectSession(any(), any(), any(), anyBoolean()))
+        .thenReturn(session);
+    var consultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    consultingTypeResponseDTO.id(session.getConsultingTypeId() + 1);
+
+    var result = createSessionFacade
+        .createDirectUserSession(null, mock(UserDTO.class), null, consultingTypeResponseDTO);
 
     assertThat(result.getStatus(), is(HttpStatus.CREATED));
     assertThat(result.getSessionId(), is(session.getId()));
