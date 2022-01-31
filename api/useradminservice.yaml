@@ -564,7 +564,7 @@ components:
           minLength: 1
           maxLength: 10000
         tenantId:
-          type: long
+          type: integer
           example: "1"
 
     UpdateAdminConsultantDTO:
