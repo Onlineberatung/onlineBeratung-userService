@@ -6,23 +6,39 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import de.caritas.cob.userservice.api.config.JpaAuditingConfiguration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 @DataJpaTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
+@Import(JpaAuditingConfiguration.class)
 public class UserRepositoryIT {
+
+  private User user;
 
   @Autowired
   private UserRepository userRepository;
+
+  @AfterEach
+  public void reset() {
+    if (Objects.nonNull(user)) {
+      userRepository.delete(user);
+    }
+  }
 
   @Test
   public void findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThanShouldReturnUserSubsetOnPastDate() {
@@ -50,5 +66,26 @@ public class UserRepositoryIT {
 
     assertNotNull(users);
     assertEquals(12, users.size());
+  }
+
+  @Test
+  public void saveShouldWriteAuditingData() {
+    givenPersistedUser();
+
+    assertNotNull(user.getCreateDate());
+    assertNotNull(user.getUpdateDate());
+    assertEquals(user.getCreateDate(), user.getUpdateDate());
+  }
+
+  private void givenPersistedUser() {
+    var user = new User(
+        UUID.randomUUID().toString(), 0L,
+        RandomStringUtils.randomAlphabetic(255),
+        RandomStringUtils.randomAlphabetic(255),
+        false
+    );
+    user.setCreateDate(null);
+    user.setUpdateDate(null);
+    this.user = userRepository.save(user);
   }
 }

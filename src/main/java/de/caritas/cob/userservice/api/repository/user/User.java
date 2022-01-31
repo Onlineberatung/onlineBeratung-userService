@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,6 +20,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Represents a user
@@ -30,6 +34,7 @@ import org.hibernate.annotations.Type;
 @Getter
 @Setter
 @ToString
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
   @Id
@@ -73,9 +78,11 @@ public class User {
   @Column(name = "delete_date", columnDefinition = "datetime")
   private LocalDateTime deleteDate;
 
+  @CreatedDate
   @Column(name = "create_date", columnDefinition = "datetime")
   private LocalDateTime createDate;
 
+  @LastModifiedDate
   @Column(name = "update_date", columnDefinition = "datetime")
   private LocalDateTime updateDate;
 

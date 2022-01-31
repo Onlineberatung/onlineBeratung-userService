@@ -40,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.auditing.AuditingHandler;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -55,6 +56,10 @@ class UserServiceTest {
 
   @Mock
   private UsernameTranscoder usernameTranscoder;
+
+  @Mock
+  @SuppressWarnings("unused")
+  private AuditingHandler auditingHandler;
 
   @Test
   void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {
