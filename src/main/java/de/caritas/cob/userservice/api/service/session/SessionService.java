@@ -511,13 +511,16 @@ public class SessionService {
   /**
    * Find one session by assigned consultant and user.
    *
-   * @param consultant the consultant
-   * @param user       the user
+   * @param consultant       the consultant
+   * @param user             the user
+   * @param consultingTypeId the id of the consulting type
    * @return an {@link Optional} of the result
    */
-  public Optional<Session> findSessionByConsultantAndUser(Consultant consultant, User user) {
+  public Optional<Session> findSessionByConsultantAndUserAndConsultingType(Consultant consultant,
+      User user, Integer consultingTypeId) {
     if (nonNull(consultant) && nonNull(user)) {
-      return sessionRepository.findByConsultantAndUser(consultant, user);
+      return sessionRepository
+          .findByConsultantAndUserAndConsultingTypeId(consultant, user, consultingTypeId);
     }
     return Optional.empty();
   }
