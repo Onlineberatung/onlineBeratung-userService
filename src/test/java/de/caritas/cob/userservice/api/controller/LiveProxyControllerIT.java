@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import de.caritas.cob.userservice.api.authorization.RoleAuthorizationAuthorityMapper;
+import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import org.junit.Test;
 import org.junit.runner.RunWith;

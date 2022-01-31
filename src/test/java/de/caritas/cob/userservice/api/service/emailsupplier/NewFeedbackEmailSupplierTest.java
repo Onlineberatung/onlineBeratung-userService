@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;

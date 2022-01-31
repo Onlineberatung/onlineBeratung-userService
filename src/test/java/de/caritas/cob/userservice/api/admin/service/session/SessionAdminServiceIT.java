@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.model.SessionAdminDTO;
 import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.model.SessionFilter;

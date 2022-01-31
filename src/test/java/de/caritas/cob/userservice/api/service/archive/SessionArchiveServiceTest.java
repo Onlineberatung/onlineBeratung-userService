@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service.archive;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

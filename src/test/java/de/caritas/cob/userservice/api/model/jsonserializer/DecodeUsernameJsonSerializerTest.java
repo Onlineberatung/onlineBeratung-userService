@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.model.jsonserializer;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_DECODED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 

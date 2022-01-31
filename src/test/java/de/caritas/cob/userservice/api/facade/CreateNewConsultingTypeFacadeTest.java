@@ -1,11 +1,11 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.INVALID_CONSULTING_TYPE_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.UNKNOWN_CONSULTING_TYPE_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_KREUZBUND;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.INVALID_CONSULTING_TYPE_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.UNKNOWN_CONSULTING_TYPE_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;

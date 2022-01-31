@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;

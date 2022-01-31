@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;

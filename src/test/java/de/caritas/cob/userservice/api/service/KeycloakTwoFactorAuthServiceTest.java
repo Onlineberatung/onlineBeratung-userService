@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.OTP_INFO_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.OTP_INFO_DTO;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -8,7 +8,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;

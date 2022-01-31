@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID_LIST;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
