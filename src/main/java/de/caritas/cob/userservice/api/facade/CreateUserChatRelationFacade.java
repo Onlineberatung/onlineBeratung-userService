@@ -23,6 +23,7 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class CreateUserChatRelationFacade {
   private final @NonNull UserService userService;
   private final @NonNull UserAgencyService userAgencyService;
   private final @NonNull RollbackFacade rollbackFacade;
+  private final AuditingHandler auditingHandler;
 
   /**
    * Creates an user-chat/agency relation for the provided {@link User}. Either provide username and
@@ -152,6 +154,7 @@ public class CreateUserChatRelationFacade {
     checkIfAlreadyAssignedToAgency(user, userAgency);
 
     try {
+      auditingHandler.markCreated(userAgency);
       userAgencyService.saveUserAgency(userAgency);
 
     } catch (InternalServerErrorException serviceException) {

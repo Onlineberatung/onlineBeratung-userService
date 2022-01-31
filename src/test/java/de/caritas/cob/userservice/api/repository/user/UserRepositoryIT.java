@@ -84,8 +84,6 @@ public class UserRepositoryIT {
         RandomStringUtils.randomAlphabetic(255),
         false
     );
-    user.setCreateDate(null);
-    user.setUpdateDate(null);
     this.user = userRepository.save(user);
   }
 }
