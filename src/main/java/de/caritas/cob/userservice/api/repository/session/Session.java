@@ -72,14 +72,14 @@ public class Session {
   private User user;
 
   @ManyToOne
-  @JoinColumn(name = "consultant_id", nullable = false)
+  @JoinColumn(name = "consultant_id")
   @Fetch(FetchMode.SELECT)
   private Consultant consultant;
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
   private int consultingTypeId;
 
-  @Column(name = "registration_type", updatable = false, nullable = false)
+  @Column(name = "registration_type", updatable = false, nullable = false, columnDefinition = "varchar(20) not null default 'REGISTERED'")
   @Enumerated(EnumType.STRING)
   @NonNull
   private RegistrationType registrationType;
@@ -116,7 +116,7 @@ public class Session {
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean teamSession;
 
-  @Column(name = "is_peer_chat", nullable = false)
+  @Column(name = "is_peer_chat", nullable = false, columnDefinition = "tinyint(4) unsigned default 0 not null")
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean isPeerChat;
 
@@ -128,10 +128,10 @@ public class Session {
     return isNotBlank(feedbackGroupId);
   }
 
-  @Column(name = "create_date")
+  @Column(name = "create_date", columnDefinition = "datetime")
   private LocalDateTime createDate;
 
-  @Column(name = "update_date")
+  @Column(name = "update_date", columnDefinition = "datetime")
   private LocalDateTime updateDate;
 
   @Override
