@@ -97,8 +97,9 @@ public class ChatPermissionVerifierTest {
 
   @Test
   public void isChatAgenciesContainUserAgency_Should_ReturnTrue_WhenChatAgenciesContainUserAgency() {
-    UserAgency[] userAgencyArray = new UserAgency[]{new UserAgency(AGENCY_ID, user, AGENCY_ID),
-        new UserAgency(AGENCY_ID_2, user, AGENCY_ID_2)};
+    UserAgency[] userAgencyArray = new UserAgency[]{
+        new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
+        new UserAgency(AGENCY_ID_2, user, AGENCY_ID_2, null, null)};
     Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
@@ -108,8 +109,9 @@ public class ChatPermissionVerifierTest {
 
   @Test
   public void isChatAgenciesContainUserAgency_Should_ReturnFalse_WhenChatAgenciesNotContainUserAgency() {
-    UserAgency[] userAgencyArray = new UserAgency[]{new UserAgency(AGENCY_ID, user, AGENCY_ID),
-        new UserAgency(AGENCY_ID_3, user, AGENCY_ID_3)};
+    UserAgency[] userAgencyArray = new UserAgency[]{
+        new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
+        new UserAgency(AGENCY_ID_3, user, AGENCY_ID_3, null, null)};
     Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
