@@ -28,6 +28,7 @@ import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,8 +74,13 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
   private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
 
   @Before
-  public void clearTokens() {
+  public void beforeTests() {
     TenantContext.setCurrentTenant(1L);
+  }
+
+  @After
+  public void afterTests() {
+    TenantContext.clear();
   }
 
   @Test
