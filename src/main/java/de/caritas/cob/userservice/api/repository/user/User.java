@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
@@ -19,7 +20,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -59,8 +59,7 @@ public class User {
   @Column(name = "rc_user_id")
   private String rcUserId;
 
-  @Column(name = "language_formal", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Column(name = "language_formal", nullable = false, columnDefinition = "tinyint")
   private boolean languageFormal;
 
   @OneToMany(mappedBy = "user")
@@ -70,6 +69,7 @@ public class User {
   private Set<UserAgency> userAgencies;
 
   @Column(name = "mobile_token")
+  @Lob
   private String mobileToken;
 
   @OneToMany(mappedBy = "user")

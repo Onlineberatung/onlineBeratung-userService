@@ -2,6 +2,8 @@ package de.caritas.cob.userservice.api.repository.chat;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
+import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -18,17 +20,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import lombok.ToString;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Type;
-import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
 
 /**
  * Representation of a chat.
@@ -55,6 +55,7 @@ public class Chat {
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
   @NonNull
+  @Type(type = "org.hibernate.type.ByteType")
   private Integer consultingTypeId;
 
   @Column(name = "initial_start_date", updatable = true, nullable = false)
@@ -65,11 +66,10 @@ public class Chat {
   @NonNull
   private LocalDateTime startDate;
 
-  @Column(name = "duration", updatable = true, nullable = false)
+  @Column(name = "duration", updatable = true, nullable = false, columnDefinition = "smallint")
   private int duration;
 
   @Column(name = "is_repetitive", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean repetitive;
 
   @Enumerated(EnumType.STRING)
@@ -77,10 +77,10 @@ public class Chat {
   private ChatInterval chatInterval;
 
   @Column(name = "is_active", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean active;
 
   @Column(name = "max_participants", updatable = true, nullable = true)
+  @Type(type = "org.hibernate.type.ByteType")
   private Integer maxParticipants;
 
   @Column(name = "rc_group_id", updatable = true, nullable = true)
