@@ -37,6 +37,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,6 +60,12 @@ public class ConsultantSessionEnricherTest {
 
   @Mock
   private ConsultingTypeManager consultingTypeManager;
+
+  @Mock
+  private AvailableLastMessageUpdater availableLastMessageUpdater;
+
+  @Mock
+  private MessageServiceProvider messageServiceProvider;
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnValidSessionListWithMessagesReadTrue_WhenThereAreNoUnreadMessages() {
@@ -112,6 +119,9 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_SetCorrectMessageDate() {
+    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
+        rocketChatRoomInformationProvider, consultingTypeManager,
+        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
@@ -141,6 +151,9 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnFalseAsAttachmentReceivedStatus_WhenCallingConsultantIsSenderOfTheAttachment() {
+    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
+        rocketChatRoomInformationProvider, consultingTypeManager,
+        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -168,6 +181,9 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnTrueAsAttachmentReceivedStatus_WhenCallingConsultantIsNotSenderOfTheAttachment() {
+    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
+        rocketChatRoomInformationProvider, consultingTypeManager,
+        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -262,6 +278,9 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnCorrectFileTypeAndImagePreviewForSession() {
+    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
+        rocketChatRoomInformationProvider, consultingTypeManager,
+        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)

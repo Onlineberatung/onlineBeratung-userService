@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.ChatService;
+import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +58,10 @@ public class UserSessionListServiceTest {
   private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   @Mock
   private SessionListAnalyser sessionListAnalyser;
+  @Mock
+  private AvailableLastMessageUpdater availableLastMessageUpdater;
+  @Mock
+  private MessageServiceProvider messageServiceProvider;
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadTrue_WhenThereAreNoUnreadMessages() {
@@ -178,7 +183,10 @@ public class UserSessionListServiceTest {
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_SetCorrectSessionMessageDate() {
-
+    userSessionListService = new UserSessionListService(sessionService, chatService,
+        rocketChatRoomInformationProvider,
+        sessionListAnalyser,
+        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
@@ -202,7 +210,10 @@ public class UserSessionListServiceTest {
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForSession() {
-
+    userSessionListService = new UserSessionListService(sessionService, chatService,
+        rocketChatRoomInformationProvider,
+        sessionListAnalyser,
+        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =

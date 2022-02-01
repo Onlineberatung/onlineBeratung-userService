@@ -29,6 +29,7 @@ public class ConsultantSessionEnricher {
   private final @NonNull SessionListAnalyser sessionListAnalyser;
   private final @NonNull RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull AvailableLastMessageUpdater availableLastMessageUpdater;
 
   /**
    * Enriches the given session with the following information from Rocket.Chat: "last message",
@@ -44,35 +45,34 @@ public class ConsultantSessionEnricher {
       List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs, String rcToken,
       Consultant consultant) {
 
-    var rocketChatRoomInformation = this.rocketChatRoomInformationProvider
-        .retrieveRocketChatInformation(RocketChatCredentials.builder()
-            .rocketChatToken(rcToken)
-            .rocketChatUserId(consultant.getRocketChatId())
-            .build());
+    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+        .rocketChatToken(rcToken)
+        .rocketChatUserId(consultant.getRocketChatId())
+        .build();
 
     consultantSessionResponseDTOs.forEach(consultantSessionResponseDTO -> this
-        .enrichConsultantSession(consultantSessionResponseDTO, rocketChatRoomInformation,
-            consultant));
+        .enrichConsultantSession(consultantSessionResponseDTO, rocketChatCredentials
+        ));
 
     return consultantSessionResponseDTOs;
   }
 
   private void enrichConsultantSession(ConsultantSessionResponseDTO consultantSessionResponseDTO,
-      RocketChatRoomInformation rocketChatRoomInformation, Consultant consultant) {
+      RocketChatCredentials rocketChatCredentials) {
     SessionDTO session = consultantSessionResponseDTO.getSession();
     String groupId = session.getGroupId();
-
     session.setMonitoring(getMonitoringProperty(session));
 
+    var rocketChatRoomInformation = this.rocketChatRoomInformationProvider
+        .retrieveRocketChatInformation(rocketChatCredentials);
     session.setMessagesRead(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         rocketChatRoomInformation.getReadMessages(), groupId));
 
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      new AvailableLastMessageUpdater(this.sessionListAnalyser)
+      availableLastMessageUpdater
           .updateSessionWithAvailableLastMessage(rocketChatRoomInformation,
-              consultant.getRocketChatId(), consultantSessionResponseDTO::setLatestMessage, session,
-              groupId);
+              consultantSessionResponseDTO::setLatestMessage, session, rocketChatCredentials);
     } else {
       setFallbackDate(consultantSessionResponseDTO, session);
     }
