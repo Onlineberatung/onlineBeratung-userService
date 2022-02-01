@@ -36,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.auditing.AuditingHandler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateUserChatRelationFacadeTest {
@@ -50,6 +51,10 @@ public class CreateUserChatRelationFacadeTest {
   private UserAgencyService userAgencyService;
   @Mock
   private RollbackFacade rollbackFacade;
+
+  @Mock
+  @SuppressWarnings("unused")
+  private AuditingHandler auditingHandler;
 
   @Test
   public void initializeUserChatAgencyRelation_Should_CreateUserChatAgencyRelation_ForNewUserAccountCreation()
