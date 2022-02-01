@@ -1396,6 +1396,9 @@ components:
         consultingType:
           type: string
           example: 3
+        consultantId:
+          type: string
+          description: UUID
 
     SessionDataDTO:
       allOf:
