@@ -136,6 +136,7 @@ public class Consultant implements TenantAware {
   private LocalDateTime deleteDate;
 
   @Column(name = "tenant_id")
+  @Field
   private Long tenantId;
 
   @JsonIgnore

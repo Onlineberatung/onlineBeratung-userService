@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -8,12 +11,26 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantAdminFilterServiceIT extends ConsultantAdminFilterServiceBase  {
+@TestPropertySource(properties = "multitenancy.enabled=true")
+@TestPropertySource(properties = "spring.datasource.schema=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@Transactional
+public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
+
+  @Before
+  public void beforeTests() {
+    TenantContext.setCurrentTenant(1L);
+  }
+
+  @After
+  public void afterTests() {
+    TenantContext.clear();
+  }
 
   @Test
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven() {
@@ -77,12 +94,14 @@ public class ConsultantAdminFilterServiceIT extends ConsultantAdminFilterService
 
   @Test
   public void findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast() {
-    super.findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast();
+    super
+        .findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast();
   }
 
   @Test
   public void findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst() {
-    super.findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst();
+    super
+        .findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst();
   }
 
 }

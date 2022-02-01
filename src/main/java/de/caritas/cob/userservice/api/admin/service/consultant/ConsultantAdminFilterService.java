@@ -1,8 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.querybuilder.ConsultantFilterQueryBuilder;
-import de.caritas.cob.userservice.api.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import javax.persistence.EntityManagerFactory;
 import lombok.NonNull;
@@ -52,7 +50,7 @@ public class ConsultantAdminFilterService {
     return searchResultDTO;
   }
 
-  private FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
+  protected FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
       FullTextEntityManager fullTextEntityManager) {
 
     QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory()
