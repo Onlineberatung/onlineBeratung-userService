@@ -49,8 +49,8 @@ import org.springframework.lang.Nullable;
 @ToString
 public class Session {
 
-  public Session(User user, int consultingTypeId, String postcode, Long agencyId,
-      SessionStatus status, boolean teamSession, boolean monitoring) {
+  public Session(User user, int consultingTypeId, @NonNull String postcode, Long agencyId,
+      @NonNull SessionStatus status, boolean teamSession, boolean monitoring) {
     this.user = user;
     this.consultingTypeId = consultingTypeId;
     this.postcode = postcode;

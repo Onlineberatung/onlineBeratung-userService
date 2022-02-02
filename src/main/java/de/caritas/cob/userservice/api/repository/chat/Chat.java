@@ -99,8 +99,8 @@ public class Chat {
   @Column(name = "update_date")
   private LocalDateTime updateDate;
 
-  public Chat(String topic, int consultingTypeId, LocalDateTime initialStartDate,
-      LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
+  public Chat(@NonNull String topic, int consultingTypeId, @NonNull LocalDateTime initialStartDate,
+      @NonNull LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
       Consultant chatOwner) {
     this.topic = topic;
     this.consultingTypeId = consultingTypeId;

@@ -32,8 +32,8 @@ import org.hibernate.annotations.Type;
 @Setter
 public class Monitoring {
 
-  public Monitoring(Long sessionId, MonitoringType monitoringType, @Size(max = 255) String key,
-      Boolean value) {
+  public Monitoring(@NonNull Long sessionId, @NonNull MonitoringType monitoringType,
+      @Size(max = 255) @NonNull String key, Boolean value) {
     this.sessionId = sessionId;
     this.monitoringType = monitoringType;
     this.key = key;
