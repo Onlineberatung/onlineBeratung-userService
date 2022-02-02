@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetMessagesStreamException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
@@ -241,5 +242,28 @@ public class MessageServiceProviderTest {
 
     verify(messageControllerApi, times(1)).saveAliasOnlyMessage(any(), captor.capture());
     assertThat(captor.getValue().getMessageType(), is(MessageType.UPDATE_SESSION_DATA));
+  }
+
+  @Test
+  public void getMessageStream_should_call_messages_api()
+      throws RocketChatGetMessagesStreamException {
+    HttpHeaders headers = mock(HttpHeaders.class);
+    when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
+
+    this.messageServiceProvider.getMessages(RC_CREDENTIALS, RC_GROUP_ID);
+
+    verify(messageControllerApi, times(1)).getMessageStream(eq(RC_CREDENTIALS.getRocketChatToken()),
+        eq(RC_CREDENTIALS.getRocketChatUserId()), eq(RC_GROUP_ID));
+  }
+
+  @Test(expected = RocketChatGetMessagesStreamException.class)
+  public void getMessageStream_should_fail_with_message_stream_exception()
+      throws RocketChatGetMessagesStreamException {
+    HttpHeaders headers = mock(HttpHeaders.class);
+    when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
+    doThrow(restClientException).when(
+        messageControllerApi).getMessageStream(anyString(), anyString(), anyString());
+
+    this.messageServiceProvider.getMessages(RC_CREDENTIALS, RC_GROUP_ID);
   }
 }
