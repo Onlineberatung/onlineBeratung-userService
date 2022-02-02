@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
@@ -38,9 +39,9 @@ import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -48,7 +49,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UserSessionListServiceTest {
 
-  @InjectMocks
   private UserSessionListService userSessionListService;
   @Mock
   private SessionService sessionService;
@@ -59,9 +59,17 @@ public class UserSessionListServiceTest {
   @Mock
   private SessionListAnalyser sessionListAnalyser;
   @Mock
-  private AvailableLastMessageUpdater availableLastMessageUpdater;
-  @Mock
   private MessageServiceProvider messageServiceProvider;
+
+  @Before
+  public void setUp() throws Exception {
+    AvailableLastMessageUpdater availableLastMessageUpdater = new AvailableLastMessageUpdater(
+        sessionListAnalyser, messageServiceProvider);
+    setField(availableLastMessageUpdater, "rocketChatSystemUserId", "some-id");
+    userSessionListService = new UserSessionListService(sessionService, chatService,
+        rocketChatRoomInformationProvider, sessionListAnalyser,
+        availableLastMessageUpdater);
+  }
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadTrue_WhenThereAreNoUnreadMessages() {
@@ -183,10 +191,7 @@ public class UserSessionListServiceTest {
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_SetCorrectSessionMessageDate() {
-    userSessionListService = new UserSessionListService(sessionService, chatService,
-        rocketChatRoomInformationProvider,
-        sessionListAnalyser,
-        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
+
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =
@@ -210,10 +215,7 @@ public class UserSessionListServiceTest {
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_ReturnCorrectFileTypeAndImagePreviewForSession() {
-    userSessionListService = new UserSessionListService(sessionService, chatService,
-        rocketChatRoomInformationProvider,
-        sessionListAnalyser,
-        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
+
     when(chatService.getChatsForUserId(USER_ID)).thenReturn(Collections.emptyList());
     when(sessionService.getSessionsForUserId(USER_ID)).thenReturn(USER_SESSION_RESPONSE_DTO_LIST);
     RocketChatRoomInformation rocketChatRoomInformation =

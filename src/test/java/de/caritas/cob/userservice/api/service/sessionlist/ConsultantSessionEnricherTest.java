@@ -30,6 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
@@ -39,9 +40,9 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import org.jeasy.random.EasyRandom;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -49,7 +50,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantSessionEnricherTest {
 
-  @InjectMocks
   private ConsultantSessionEnricher consultantSessionEnricher;
 
   @Mock
@@ -62,10 +62,16 @@ public class ConsultantSessionEnricherTest {
   private ConsultingTypeManager consultingTypeManager;
 
   @Mock
-  private AvailableLastMessageUpdater availableLastMessageUpdater;
-
-  @Mock
   private MessageServiceProvider messageServiceProvider;
+
+  @Before
+  public void setUp() throws Exception {
+    AvailableLastMessageUpdater availableLastMessageUpdater = new AvailableLastMessageUpdater(
+        sessionListAnalyser, messageServiceProvider);
+    setField(availableLastMessageUpdater, "rocketChatSystemUserId", "some-id");
+    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
+        rocketChatRoomInformationProvider, consultingTypeManager, availableLastMessageUpdater);
+  }
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnValidSessionListWithMessagesReadTrue_WhenThereAreNoUnreadMessages() {
@@ -119,9 +125,6 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_SetCorrectMessageDate() {
-    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
-        rocketChatRoomInformationProvider, consultingTypeManager,
-        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
@@ -151,9 +154,6 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnFalseAsAttachmentReceivedStatus_WhenCallingConsultantIsSenderOfTheAttachment() {
-    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
-        rocketChatRoomInformationProvider, consultingTypeManager,
-        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -181,9 +181,6 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnTrueAsAttachmentReceivedStatus_WhenCallingConsultantIsNotSenderOfTheAttachment() {
-    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
-        rocketChatRoomInformationProvider, consultingTypeManager,
-        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -278,9 +275,6 @@ public class ConsultantSessionEnricherTest {
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnCorrectFileTypeAndImagePreviewForSession() {
-    consultantSessionEnricher = new ConsultantSessionEnricher(sessionListAnalyser,
-        rocketChatRoomInformationProvider, consultingTypeManager,
-        new AvailableLastMessageUpdater(sessionListAnalyser, messageServiceProvider, ""));
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)

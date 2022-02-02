@@ -45,14 +45,14 @@ public class ConsultantSessionEnricher {
       List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs, String rcToken,
       Consultant consultant) {
 
-    RocketChatCredentials rocketChatCredentials = RocketChatCredentials.builder()
+    var rocketChatCredentials = RocketChatCredentials.builder()
         .rocketChatToken(rcToken)
         .rocketChatUserId(consultant.getRocketChatId())
         .build();
 
-    consultantSessionResponseDTOs.forEach(consultantSessionResponseDTO -> this
-        .enrichConsultantSession(consultantSessionResponseDTO, rocketChatCredentials
-        ));
+    consultantSessionResponseDTOs.forEach(
+        consultantSessionResponseDTO -> this.enrichConsultantSession(consultantSessionResponseDTO,
+            rocketChatCredentials));
 
     return consultantSessionResponseDTOs;
   }
@@ -63,16 +63,15 @@ public class ConsultantSessionEnricher {
     String groupId = session.getGroupId();
     session.setMonitoring(getMonitoringProperty(session));
 
-    var rocketChatRoomInformation = this.rocketChatRoomInformationProvider
-        .retrieveRocketChatInformation(rocketChatCredentials);
+    var rocketChatRoomInformation = this.rocketChatRoomInformationProvider.retrieveRocketChatInformation(
+        rocketChatCredentials);
     session.setMessagesRead(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         rocketChatRoomInformation.getReadMessages(), groupId));
 
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      availableLastMessageUpdater
-          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation,
-              consultantSessionResponseDTO::setLatestMessage, session, rocketChatCredentials);
+      availableLastMessageUpdater.updateSessionWithAvailableLastMessage(rocketChatRoomInformation,
+          consultantSessionResponseDTO::setLatestMessage, session, rocketChatCredentials);
     } else {
       setFallbackDate(consultantSessionResponseDTO, session);
     }
@@ -89,9 +88,8 @@ public class ConsultantSessionEnricher {
   }
 
   private boolean getMonitoringProperty(SessionDTO session) {
-
-    var extendedConsultingTypeResponseDTO = consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingType());
+    var extendedConsultingTypeResponseDTO = consultingTypeManager.getConsultingTypeSettings(
+        session.getConsultingType());
 
     return nonNull(extendedConsultingTypeResponseDTO) && nonNull(
         extendedConsultingTypeResponseDTO.getMonitoring()) && isTrue(
