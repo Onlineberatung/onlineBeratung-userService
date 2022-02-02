@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -70,6 +70,10 @@ public class AgencySecurityHeaderSupplierTest {
     when(this.securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
   }
 
+  private void resetRequestAttributes() {
+    RequestContextHolder.setRequestAttributes(null);
+  }
+
   @SneakyThrows
   private AgencyResponseDTO toAgencyResponseDTO(AgencyDTO agencyDTO) {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -84,6 +88,7 @@ public class AgencySecurityHeaderSupplierTest {
         .thenReturn(this.agencyResponseDTOS);
 
     assertThat(agencyService.getAgencies(AGENCY_ID_LIST).get(0), instanceOf(AgencyDTO.class));
+    resetRequestAttributes();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -108,6 +113,7 @@ public class AgencySecurityHeaderSupplierTest {
         .thenReturn(this.agencyResponseDTOS);
 
     assertThat(agencyService.getAgency(AGENCY_ID), instanceOf(AgencyDTO.class));
+    resetRequestAttributes();
   }
 
   private void givenRequestContextIsSet() {
@@ -128,6 +134,7 @@ public class AgencySecurityHeaderSupplierTest {
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);
 
     assertNotNull(annotation);
+    resetRequestAttributes();
   }
 
   @Test
