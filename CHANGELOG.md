@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.16.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.15.1...v2.16.0) (2022-02-02)
+
+
+### Features
+
+* add language code to session ([d590a62](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d590a62e29a45dc8aeaec6deadc97795a83586f2))
+* add language codes to enquiry message ([b2b9714](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/b2b9714ce18e68081ee13e7cfa43d39c0193c664))
+* allow new session creation for new consultingtypes ([51d3b0f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/51d3b0f65ba8245e592adeafa9f7b5385134ccfa))
+* connect enquiry message language and session in database ([1d65703](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1d657033651facaa9883090b3e9dc5923ecf6073))
+* expose all languages of the consultants who work for a given agency ([26390c2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/26390c2070b38794ff5c29d49f8aeb40845c925e))
+* expose set session language in registered enquiries endpoint ([3bd8d54](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3bd8d54a1d07040f182c2146fa4a0370dcf2f441))
+* integrated validation for already registered direct conversation ([42c5b37](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/42c5b375b030d62ccb2a6bbab200e7be69da853c))
+* provide technical solution for direct registration ([1f1ce8c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1f1ce8c32800834e929d292d1111bf2e056f8666))
+
+
+### Bug Fixes
+
+* add user create date and modified date automatically ([83f20d4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/83f20d4123a4eaf4400b2f5684fd0df4641b179d))
+* audit user agencies ([ad1464e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ad1464e555ef619ba9387b2a4ef89a23f75f9ae6))
+* fetch additional messages for session if last message is system alias message ([4777eea](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4777eea955124da46bc390e25d70024834b3f8d0))
+* fix checkstyle warnings ([c209f33](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c209f3345fb3cf6d19f5e8087fad13bec38f979e))
+* impl. review requested changes, formatting ([e03bc3e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e03bc3e78910accf48320606f744255ecf6c2393))
+
 ## [2.15.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.3...v2.15.0) (2021-12-14)
 
 
