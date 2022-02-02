@@ -62,7 +62,7 @@ public class Monitoring {
   @Size(max = 255)
   private String key;
 
-  @Column(name = "value", updatable = true, nullable = true)
+  @Column(name = "value")
   private Boolean value;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "monitoring")

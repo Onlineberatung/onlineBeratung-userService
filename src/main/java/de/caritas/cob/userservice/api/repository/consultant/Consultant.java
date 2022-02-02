@@ -100,17 +100,17 @@ public class Consultant {
   @Column(name = "is_team_consultant", nullable = false, columnDefinition = "tinyint")
   private boolean teamConsultant;
 
-  @Column(name = "absence_message", updatable = true, nullable = true)
+  @Column(name = "absence_message")
   @Lob
   private String absenceMessage;
 
-  @Column(name = "language_formal", updatable = true, nullable = false, columnDefinition = "tinyint")
+  @Column(name = "language_formal", nullable = false, columnDefinition = "tinyint")
   private boolean languageFormal;
 
   @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<Language> languages;
 
-  @Column(name = "id_old", updatable = false, nullable = true)
+  @Column(name = "id_old", updatable = false)
   @Nullable
   private Long idOld;
 

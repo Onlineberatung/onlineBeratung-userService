@@ -48,7 +48,7 @@ public class Chat {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @Column(name = "topic", updatable = true, nullable = false)
+  @Column(name = "topic", nullable = false)
   @Size(max = 255)
   @NonNull
   private String topic;
@@ -58,35 +58,35 @@ public class Chat {
   @Type(type = "org.hibernate.type.ByteType")
   private Integer consultingTypeId;
 
-  @Column(name = "initial_start_date", updatable = true, nullable = false)
+  @Column(name = "initial_start_date", nullable = false)
   @NonNull
   private LocalDateTime initialStartDate;
 
-  @Column(name = "start_date", updatable = true, nullable = false)
+  @Column(name = "start_date", nullable = false)
   @NonNull
   private LocalDateTime startDate;
 
-  @Column(name = "duration", updatable = true, nullable = false, columnDefinition = "smallint")
+  @Column(name = "duration", nullable = false, columnDefinition = "smallint")
   private int duration;
 
   @Column(name = "is_repetitive", nullable = false)
   private boolean repetitive;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "chat_interval", updatable = true, nullable = true)
+  @Column(name = "chat_interval")
   private ChatInterval chatInterval;
 
   @Column(name = "is_active", nullable = false)
   private boolean active;
 
-  @Column(name = "max_participants", updatable = true, nullable = true)
+  @Column(name = "max_participants")
   @Type(type = "org.hibernate.type.ByteType")
   private Integer maxParticipants;
 
-  @Column(name = "rc_group_id", updatable = true, nullable = true)
+  @Column(name = "rc_group_id")
   private String groupId;
 
-  @ManyToOne(optional = true)
+  @ManyToOne
   @JoinColumn(name = "consultant_id_owner", nullable = false)
   @Fetch(FetchMode.SELECT)
   private Consultant chatOwner;
