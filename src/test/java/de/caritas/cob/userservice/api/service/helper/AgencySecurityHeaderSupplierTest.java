@@ -35,7 +35,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class AgencySecurityHeaderSupplierTest {
 
   private final String GET_AGENCY_METHOD_NAME = "getAgency";
