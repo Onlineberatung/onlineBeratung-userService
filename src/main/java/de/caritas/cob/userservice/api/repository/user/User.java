@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.ToString.Exclude;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -63,9 +64,11 @@ public class User {
   private boolean languageFormal;
 
   @OneToMany(mappedBy = "user")
+  @Exclude
   private Set<Session> sessions;
 
   @OneToMany(mappedBy = "user")
+  @Exclude
   private Set<UserAgency> userAgencies;
 
   @Column(name = "mobile_token")
@@ -73,6 +76,7 @@ public class User {
   private String mobileToken;
 
   @OneToMany(mappedBy = "user")
+  @Exclude
   private Set<UserMobileToken> userMobileTokens;
 
   @Column(name = "delete_date", columnDefinition = "datetime")

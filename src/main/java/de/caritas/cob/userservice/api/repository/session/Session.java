@@ -31,6 +31,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.ToString.Exclude;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.lang.Nullable;
@@ -110,6 +111,7 @@ public class Session {
   private String feedbackGroupId;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "session")
+  @Exclude
   private List<SessionData> sessionData;
 
   @Column(name = "is_team_session", columnDefinition = "tinyint(4) default '0'")

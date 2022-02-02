@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.ToString.Exclude;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
@@ -92,6 +93,7 @@ public class Chat {
   private Consultant chatOwner;
 
   @OneToMany(mappedBy = "chat", orphanRemoval = true)
+  @Exclude
   private Set<ChatAgency> chatAgencies;
 
   @Column(name = "update_date")
