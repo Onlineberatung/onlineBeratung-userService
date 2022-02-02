@@ -139,10 +139,12 @@ public class AgencySecurityHeaderSupplierTest {
 
   @Test
   public void getAgencyWithoutCaching_Should_ReturnAgencyDTO_WhenProvidedWithValidAgencyId() {
+    givenRequestContextIsSet();
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
 
     assertThat(agencyService.getAgencyWithoutCaching(AGENCY_ID), instanceOf(AgencyDTO.class));
+    resetRequestAttributes();
   }
 
 }
