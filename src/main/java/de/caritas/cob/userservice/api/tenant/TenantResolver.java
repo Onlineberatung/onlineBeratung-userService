@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.AccessToken.Access;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 public class TenantResolver {
 
   private static final String TENANT_ID = "tenantId";
+  private static final long TECHNICAL_TENANT_ID = 0L;
   private @NonNull SubdomainExtractor subdomainExtractor;
   private @NonNull TenantControllerApi tenantControllerApi;
 
@@ -44,6 +47,10 @@ public class TenantResolver {
   }
 
   private Long resolveForAuthenticatedUser(HttpServletRequest request) {
+    return isTechnicalUserRole(request) ? TECHNICAL_TENANT_ID : resolveForAuthenticatedNonTechnicalUser(request);
+  }
+
+  private Long resolveForAuthenticatedNonTechnicalUser(HttpServletRequest request) {
     Optional<Long> tenantId = resolveTenantIdFromTokenClaims(request);
     Optional<Long> tenantIdFromSubdomain = resolveTenantFromSubdomain();
     if (tenantId.isPresent() && tenantIdFromSubdomain.isPresent()) {
@@ -81,6 +88,17 @@ public class TenantResolver {
     Map<String, Object> claimMap = getClaimMap(request);
     log.debug("Found tenantId in claim : " + claimMap.toString());
     return getUserAttribute(claimMap, TENANT_ID);
+  }
+
+  private boolean isTechnicalUserRole(HttpServletRequest request) {
+    AccessToken token = ((KeycloakAuthenticationToken) request.getUserPrincipal()).getAccount()
+        .getKeycloakSecurityContext().getToken();
+    var accountResourceAccess = token.getResourceAccess("account");
+    return hasRoles(accountResourceAccess) && accountResourceAccess.getRoles().contains("technical");
+  }
+
+  private boolean hasRoles(Access accountResourceAccess) {
+    return accountResourceAccess != null && accountResourceAccess.getRoles() != null;
   }
 
   private boolean userIsAuthenticated(HttpServletRequest request) {
