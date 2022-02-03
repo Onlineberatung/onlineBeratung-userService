@@ -893,7 +893,7 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> activateTwoFactorAuthForUser(
+  public ResponseEntity<Void> activateTwoFactorAuthForUser(String twoFactorAuthOr2fa,
       ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO) {
 
     var otpSetupDTO = new OtpSetupDTO();
@@ -913,7 +913,7 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> deleteTwoFactorAuthForUser() {
+  public ResponseEntity<Void> deleteTwoFactorAuthForUser(String twoFactorAuthOr2fa) {
     keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
     return new ResponseEntity<>(HttpStatus.OK);
   }

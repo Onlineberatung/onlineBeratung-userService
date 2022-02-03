@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEP
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -25,7 +24,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_USER;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -2339,7 +2337,21 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(delete("/users/twoFactorAuth")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloakTwoFactorAuthService).deleteOtpCredential(any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  public void deactivate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    mvc.perform(delete("/users/2fa")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2359,7 +2371,7 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(delete("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -2371,7 +2383,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(delete("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -2381,11 +2393,28 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    var payload = givenAValidActivate2faDto();
+
+    mvc.perform(put("/users/2fa")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(payload))
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.keycloakTwoFactorAuthService).setUpOtpCredential(any(), any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     var payload = givenAValidActivate2faDto();
 
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(put("/users/twoFactorAuth")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2400,7 +2429,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
       throws Exception {
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(put("/users/twoFactorAuth")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2420,7 +2449,7 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(put("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -2432,7 +2461,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(put("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
