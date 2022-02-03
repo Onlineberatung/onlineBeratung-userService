@@ -43,7 +43,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_UPDAT
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -72,6 +71,7 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
@@ -104,6 +104,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.common.util.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -2382,12 +2383,13 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
+    var payload = givenAValidActivate2faDto();
+
     mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(
-                VALID_OTP_SETUP_DTO))
+            .content(objectMapper.writeValueAsString(payload))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
@@ -2459,7 +2461,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON)
         .cookie(CSRF_COOKIE)
         .header(CSRF_HEADER, CSRF_VALUE)
-        .accept(MediaType.APPLICATION_JSON))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(consultantAgencyService).getAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
@@ -2468,6 +2470,11 @@ public class UserControllerAuthorizationIT {
   private UpdateConsultantDTO givenAMinimalUpdateConsultantDto(String email) {
     return new UpdateConsultantDTO()
         .email(email).firstname("firstname").lastname("lastname");
+  }
+
+  private ActivateTwoFactorAuthUserDTO givenAValidActivate2faDto() {
+    return new ActivateTwoFactorAuthUserDTO().otp("111111")
+        .secret(new RandomString(32).nextString());
   }
 
   private Consultant givenAValidConsultant() {

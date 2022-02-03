@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
+import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -888,11 +889,16 @@ public class UserController implements UsersApi {
   /**
    * Activates 2FA for the calling user.
    *
-   * @param otpSetupDTO (required) {@link OtpSetupDTO}
+   * @param activateTwoFactorAuthUserDTO (required) {@link ActivateTwoFactorAuthUserDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> activateTwoFactorAuthForUser(OtpSetupDTO otpSetupDTO) {
+  public ResponseEntity<Void> activateTwoFactorAuthForUser(
+      ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO) {
+
+    var otpSetupDTO = new OtpSetupDTO();
+    otpSetupDTO.setSecret(activateTwoFactorAuthUserDTO.getSecret());
+    otpSetupDTO.setInitialCode(activateTwoFactorAuthUserDTO.getOtp());
 
     twoFactorAuthValidator.checkRequestParameterForTwoFactorAuthActivations(otpSetupDTO);
     twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
