@@ -60,7 +60,7 @@ public class KeycloakAdminClientService {
   private String keycloakErrorEmail;
 
   @Value("${multitenancy.enabled}")
-  private boolean multitenancy;
+  private boolean multiTenancyEnabled;
 
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
@@ -168,7 +168,7 @@ public class KeycloakAdminClientService {
   }
 
   private void updateTenantId(UserDTO userDTO, UserRepresentation kcUser) {
-    if (multitenancy) {
+    if (multiTenancyEnabled) {
       Map<String, List<String>> attributes = new HashMap<>();
       var list = new ArrayList<String>();
       if (userDTO.getTenantId() != null) {
