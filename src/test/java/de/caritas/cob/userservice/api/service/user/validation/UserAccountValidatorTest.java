@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service.user.validation;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
-import static de.caritas.cob.userservice.testHelper.TestConstants.PASSWORD;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.PASSWORD;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

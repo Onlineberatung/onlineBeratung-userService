@@ -1,8 +1,10 @@
 package de.caritas.cob.userservice.api.repository.useragency;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,6 +17,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Represents a the relation between user and agency
@@ -25,6 +30,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class UserAgency {
 
   @Id
@@ -40,6 +46,13 @@ public class UserAgency {
   @Column(name = "agency_id", updatable = true, nullable = true)
   private Long agencyId;
 
+  @CreatedDate
+  @Column(name = "create_date", columnDefinition = "datetime")
+  private LocalDateTime createDate;
+
+  @LastModifiedDate
+  @Column(name = "update_date", columnDefinition = "datetime")
+  private LocalDateTime updateDate;
 
   public UserAgency(User user, Long agencyId) {
     this.user = user;

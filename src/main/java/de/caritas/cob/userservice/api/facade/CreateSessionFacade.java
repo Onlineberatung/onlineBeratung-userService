@@ -73,7 +73,9 @@ public class CreateSessionFacade {
       User user, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
     var consultant = userAccountProvider.retrieveValidatedConsultantById(consultantId);
 
-    var existingSession = sessionService.findSessionByConsultantAndUser(consultant, user);
+    var existingSession = sessionService
+        .findSessionByConsultantAndUserAndConsultingType(consultant, user,
+            extendedConsultingTypeResponseDTO.getId());
     if (existingSession.isPresent()) {
       var session = existingSession.get();
       return new NewRegistrationResponseDto()

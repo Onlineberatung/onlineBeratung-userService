@@ -389,15 +389,6 @@
 							<output>target/generated-sources</output>
 							<importMappings>
 								<importMapping>
-									ActivateTwoFactorAuthUserDTO=OtpSetupDTO
-								</importMapping>
-								<importMapping>
-									OtpSetupDTO=${project.groupId}.${project.artifactId}.api.model.OtpSetupDTO
-								</importMapping>
-								<importMapping>
-									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
-								</importMapping>
-								<importMapping>
 									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
 								</importMapping>
 								<importMapping>
@@ -428,6 +419,9 @@
 								</importMapping>
 							</importMappings>
 							<typeMappings>
+								<typeMapping>
+									ActivateTwoFactorAuthUserDTO=${project.groupId}.${project.artifactId}.api.model.ActivateTwoFactorAuthUserDTO
+								</typeMapping>
 								<typeMapping>
 									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
 								</typeMapping>

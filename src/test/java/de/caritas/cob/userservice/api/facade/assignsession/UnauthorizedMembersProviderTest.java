@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
-import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_SYSTEM_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_WITH_ASKER_AND_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.TEAM_SESSION_WITH_ASKER_AND_CONSULTANT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKET_CHAT_SYSTEM_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_WITH_ASKER_AND_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.TEAM_SESSION_WITH_ASKER_AND_CONSULTANT;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;

@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.service.statistics.event;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import de.caritas.cob.userservice.offsetdatetime.CustomOffsetDateTime;
+import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.Optional;

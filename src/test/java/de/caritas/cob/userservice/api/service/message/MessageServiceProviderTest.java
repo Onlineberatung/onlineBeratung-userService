@@ -1,16 +1,16 @@
 package de.caritas.cob.userservice.api.service.message;
 
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
-import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_FURTHER_STEPS__AND_SAVE_SESSION_DATA_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_WELCOME_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_UPDATE_SESSION_DATA_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetMessagesStreamException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
@@ -241,5 +242,28 @@ public class MessageServiceProviderTest {
 
     verify(messageControllerApi, times(1)).saveAliasOnlyMessage(any(), captor.capture());
     assertThat(captor.getValue().getMessageType(), is(MessageType.UPDATE_SESSION_DATA));
+  }
+
+  @Test
+  public void getMessageStream_should_call_messages_api()
+      throws RocketChatGetMessagesStreamException {
+    HttpHeaders headers = mock(HttpHeaders.class);
+    when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
+
+    this.messageServiceProvider.getMessages(RC_CREDENTIALS, RC_GROUP_ID);
+
+    verify(messageControllerApi, times(1)).getMessageStream(eq(RC_CREDENTIALS.getRocketChatToken()),
+        eq(RC_CREDENTIALS.getRocketChatUserId()), eq(RC_GROUP_ID));
+  }
+
+  @Test(expected = RocketChatGetMessagesStreamException.class)
+  public void getMessageStream_should_fail_with_message_stream_exception()
+      throws RocketChatGetMessagesStreamException {
+    HttpHeaders headers = mock(HttpHeaders.class);
+    when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
+    doThrow(restClientException).when(
+        messageControllerApi).getMessageStream(anyString(), anyString(), anyString());
+
+    this.messageServiceProvider.getMessages(RC_CREDENTIALS, RC_GROUP_ID);
   }
 }

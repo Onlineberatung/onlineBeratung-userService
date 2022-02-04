@@ -1,25 +1,25 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ATTACHMENT_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.FILE_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGES_READ_MAP_WITHOUT_UNREADS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGES_READ_MAP_WITH_UNREADS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID_3;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID_4;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID_5;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROOMS_LAST_MESSAGE_DTO_MAP;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROOMS_UPDATE_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_RECEIVED;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERS_EMPTY_ROOMS_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERS_ROOMS_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_CHAT_RESPONSE_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ATTACHMENT_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.FILE_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGES_READ_MAP_WITHOUT_UNREADS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGES_READ_MAP_WITH_UNREADS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID_3;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID_4;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID_5;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROOMS_LAST_MESSAGE_DTO_MAP;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROOMS_UPDATE_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_RECEIVED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERS_EMPTY_ROOMS_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERS_ROOMS_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_CHAT_RESPONSE_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST;
 import static java.util.Objects.nonNull;
 import static org.jsoup.helper.Validate.fail;
 import static org.junit.Assert.assertEquals;
@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
@@ -34,12 +35,13 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.ChatService;
+import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -47,7 +49,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UserSessionListServiceTest {
 
-  @InjectMocks
   private UserSessionListService userSessionListService;
   @Mock
   private SessionService sessionService;
@@ -57,6 +58,18 @@ public class UserSessionListServiceTest {
   private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   @Mock
   private SessionListAnalyser sessionListAnalyser;
+  @Mock
+  private MessageServiceProvider messageServiceProvider;
+
+  @Before
+  public void setUp() throws Exception {
+    AvailableLastMessageUpdater availableLastMessageUpdater = new AvailableLastMessageUpdater(
+        sessionListAnalyser, messageServiceProvider);
+    setField(availableLastMessageUpdater, "rocketChatSystemUserId", "some-id");
+    userSessionListService = new UserSessionListService(sessionService, chatService,
+        rocketChatRoomInformationProvider, sessionListAnalyser,
+        availableLastMessageUpdater);
+  }
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_ReturnValidSessionListWithSessionMessagesReadTrue_WhenThereAreNoUnreadMessages() {

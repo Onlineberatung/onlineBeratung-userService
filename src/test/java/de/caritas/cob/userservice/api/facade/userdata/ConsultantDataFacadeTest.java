@@ -1,11 +1,11 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO_WITH_EMPTY_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO_WITH_HTML_AND_JS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ABSENCE_DTO_WITH_NULL_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_DTO_WITH_EMPTY_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_DTO_WITH_HTML_AND_JS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_DTO_WITH_NULL_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;

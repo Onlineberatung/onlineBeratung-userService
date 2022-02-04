@@ -7,12 +7,13 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
-import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
-import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
+import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
+import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
@@ -888,11 +889,16 @@ public class UserController implements UsersApi {
   /**
    * Activates 2FA for the calling user.
    *
-   * @param otpSetupDTO (required) {@link OtpSetupDTO}
+   * @param activateTwoFactorAuthUserDTO (required) {@link ActivateTwoFactorAuthUserDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> activateTwoFactorAuthForUser(OtpSetupDTO otpSetupDTO) {
+  public ResponseEntity<Void> activateTwoFactorAuthForUser(String twoFactorAuthOr2fa,
+      ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO) {
+
+    var otpSetupDTO = new OtpSetupDTO();
+    otpSetupDTO.setSecret(activateTwoFactorAuthUserDTO.getSecret());
+    otpSetupDTO.setInitialCode(activateTwoFactorAuthUserDTO.getOtp());
 
     twoFactorAuthValidator.checkRequestParameterForTwoFactorAuthActivations(otpSetupDTO);
     twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
@@ -907,7 +913,7 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> deleteTwoFactorAuthForUser() {
+  public ResponseEntity<Void> deleteTwoFactorAuthForUser(String twoFactorAuthOr2fa) {
     keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
     return new ResponseEntity<>(HttpStatus.OK);
   }

@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static de.caritas.cob.userservice.api.authorization.UserRole.ANONYMOUS;
-import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
-import static de.caritas.cob.userservice.api.authorization.UserRole.USER;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.ANONYMOUS;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.USER;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;

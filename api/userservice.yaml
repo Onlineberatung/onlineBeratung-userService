@@ -1287,7 +1287,15 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/twoFactorAuth:
+  /users/{twoFactorAuthOr2fa}:
+    parameters:
+      - name: twoFactorAuthOr2fa
+        in: path
+        required: true
+        description: twoFactorAuth deprecated
+        schema:
+          type: string
+          enum: [ twoFactorAuth, 2fa ]
     put:
       tags:
         - user-controller
@@ -1396,6 +1404,9 @@ components:
         consultingType:
           type: string
           example: 3
+        consultantId:
+          type: string
+          description: UUID
 
     SessionDataDTO:
       allOf:

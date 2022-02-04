@@ -1,24 +1,28 @@
 package de.caritas.cob.userservice.api.repository.user;
 
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Represents a user
@@ -30,6 +34,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
   @Id
@@ -70,8 +75,16 @@ public class User {
   @OneToMany(mappedBy = "user")
   private Set<UserMobileToken> userMobileTokens;
 
-  @Column(name = "delete_date")
+  @Column(name = "delete_date", columnDefinition = "datetime")
   private LocalDateTime deleteDate;
+
+  @CreatedDate
+  @Column(name = "create_date", columnDefinition = "datetime")
+  private LocalDateTime createDate;
+
+  @LastModifiedDate
+  @Column(name = "update_date", columnDefinition = "datetime")
+  private LocalDateTime updateDate;
 
   public User(@Size(max = 36) String userId, Long oldId, @Size(max = 255) String username,
       @Size(max = 255) String email, boolean languageFormal) {

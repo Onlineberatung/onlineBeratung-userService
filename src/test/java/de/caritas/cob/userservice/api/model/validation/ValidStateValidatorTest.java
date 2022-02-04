@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.model.validation;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITHOUT_CONSULTING_TYPE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITHOUT_MANDATORY_STATE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITH_INVALID_STATE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_WITH_STATE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_STATE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_STATE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_WITHOUT_CONSULTING_TYPE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_WITHOUT_MANDATORY_STATE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_WITH_INVALID_STATE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_WITH_STATE;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;

@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.LOGIN_RESPONSE_ENTITY_OK;
-import static de.caritas.cob.userservice.testHelper.TestConstants.LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_RC_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.LOGIN_RESPONSE_ENTITY_OK;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_WITH_RC_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -36,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.auditing.AuditingHandler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateUserChatRelationFacadeTest {
@@ -50,6 +51,10 @@ public class CreateUserChatRelationFacadeTest {
   private UserAgencyService userAgencyService;
   @Mock
   private RollbackFacade rollbackFacade;
+
+  @Mock
+  @SuppressWarnings("unused")
+  private AuditingHandler auditingHandler;
 
   @Test
   public void initializeUserChatAgencyRelation_Should_CreateUserChatAgencyRelation_ForNewUserAccountCreation()

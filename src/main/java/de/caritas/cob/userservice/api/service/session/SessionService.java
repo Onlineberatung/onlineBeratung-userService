@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -8,7 +8,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -511,13 +511,16 @@ public class SessionService {
   /**
    * Find one session by assigned consultant and user.
    *
-   * @param consultant the consultant
-   * @param user       the user
+   * @param consultant       the consultant
+   * @param user             the user
+   * @param consultingTypeId the id of the consulting type
    * @return an {@link Optional} of the result
    */
-  public Optional<Session> findSessionByConsultantAndUser(Consultant consultant, User user) {
+  public Optional<Session> findSessionByConsultantAndUserAndConsultingType(Consultant consultant,
+      User user, Integer consultingTypeId) {
     if (nonNull(consultant) && nonNull(user)) {
-      return sessionRepository.findByConsultantAndUser(consultant, user);
+      return sessionRepository
+          .findByConsultantAndUserAndConsultingTypeId(consultant, user, consultingTypeId);
     }
     return Optional.empty();
   }
