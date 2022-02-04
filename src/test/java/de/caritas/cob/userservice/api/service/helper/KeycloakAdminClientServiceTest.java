@@ -98,7 +98,7 @@ public class KeycloakAdminClientServiceTest {
   @Test
   public void createKeycloakUser_Should_createExpectedTenantAwareUser_When_keycloakReturnsCreated() {
     TenantContext.setCurrentTenant(1L);
-    setField(keycloakAdminClientService, "multitenancy", true);
+    setField(keycloakAdminClientService, "multiTenancyEnabled", true);
 
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     userDTO.setTenantId(1L);
