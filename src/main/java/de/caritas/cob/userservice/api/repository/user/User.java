@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.user;
 
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -11,6 +12,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.Type;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
@@ -19,6 +23,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.search.annotations.Field;
 
 /**
  * Represents a user
@@ -30,7 +35,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class User {
+@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
+public class User implements TenantAware {
 
   @Id
   @Column(name = "user_id", updatable = false, nullable = false)
@@ -72,6 +79,9 @@ public class User {
 
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
+
+  @Column(name = "tenant_id")
+  private Long tenantId;
 
   public User(@Size(max = 36) String userId, Long oldId, @Size(max = 255) String username,
       @Size(max = 255) String email, boolean languageFormal) {

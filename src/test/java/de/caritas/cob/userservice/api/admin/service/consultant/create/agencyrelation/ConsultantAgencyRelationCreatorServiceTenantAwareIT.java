@@ -1,0 +1,182 @@
+package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.facade.RocketChatFacade;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.List;
+import org.jeasy.random.EasyRandom;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = UserServiceApplication.class)
+@TestPropertySource(properties = "spring.profiles.active=testing")
+@AutoConfigureTestDatabase(replace = Replace.ANY)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestPropertySource(properties = "multitenancy.enabled=true")
+@Transactional(propagation = Propagation.NEVER)
+public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
+
+  private final EasyRandom easyRandom = new EasyRandom();
+
+  @Autowired
+  private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
+
+  @Autowired
+  private ConsultantRepository consultantRepository;
+
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
+  private UserAgencyRepository userAgencyRepository;
+
+  @Autowired
+  private ConsultantAgencyRepository consultantAgencyRepository;
+
+  @Autowired
+  private SessionRepository sessionRepository;
+
+  @MockBean
+  private AgencyService agencyService;
+
+  @MockBean
+  private KeycloakAdminClientService keycloakAdminClientService;
+
+  @MockBean
+  private RocketChatFacade rocketChatFacade;
+
+  @MockBean
+  private ConsultingTypeManager consultingTypeManager;
+
+  @Before
+  public void beforeTests() {
+    TenantContext.setCurrentTenant(1L);
+  }
+
+  @After
+  public void afterTests() {
+    TenantContext.clear();
+  }
+
+  @Test
+  public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValidAndMultitenancyEnabled() {
+
+    Consultant consultant = createConsultantWithoutAgencyAndSession();
+
+    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
+    createConsultantAgencyDTO.setAgencyId(15L);
+    createConsultantAgencyDTO.setRoleSetKey("valid-role-set");
+
+    when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
+
+    AgencyDTO agencyDTO = new AgencyDTO();
+    agencyDTO.setId(15L);
+    agencyDTO.setTeamAgency(false);
+    agencyDTO.setConsultingType(0);
+    when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
+
+    Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
+        SessionStatus.NEW);
+
+    final var consultingTypeResponse = easyRandom.nextObject(
+        ExtendedConsultingTypeResponseDTO.class);
+    when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(consultingTypeResponse);
+
+    this.consultantAgencyRelationCreatorService
+        .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
+
+    verify(rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(consultant.getRocketChatId(),
+            enquirySessionWithoutConsultant.getGroupId());
+    verify(rocketChatFacade, times(1))
+        .addUserToRocketChatGroup(consultant.getRocketChatId(),
+            enquirySessionWithoutConsultant.getFeedbackGroupId());
+    List<ConsultantAgency> result = this.consultantAgencyRepository
+        .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
+
+    assertThat(result, notNullValue());
+    assertThat(result, hasSize(1));
+    assertEquals(enquirySessionWithoutConsultant.getTenantId(), 1);
+
+    List<ConsultantAgency> agenciesForConsultant = this.consultantAgencyRepository
+        .findByConsultantId(consultant.getId());
+    assertEquals(agenciesForConsultant.get(0).getTenantId(), 1);
+  }
+
+  private Consultant createConsultantWithoutAgencyAndSession() {
+    Consultant consultant = easyRandom.nextObject(Consultant.class);
+    consultant.setTenantId(1L);
+    consultant.setConsultantAgencies(null);
+    consultant.setSessions(null);
+    consultant.setConsultantMobileTokens(null);
+    consultant.setRocketChatId("RocketChatId");
+    consultant.setDeleteDate(null);
+    return this.consultantRepository.save(consultant);
+  }
+
+  private Session createSessionWithoutConsultant(Long agencyId, SessionStatus sessionStatus) {
+    User user = easyRandom.nextObject(User.class);
+    user.setSessions(null);
+    user.setUserMobileTokens(null);
+    user.setUserAgencies(null);
+    this.userRepository.save(user);
+
+    UserAgency userAgency = new UserAgency();
+    userAgency.setAgencyId(agencyId);
+    userAgency.setUser(user);
+    this.userAgencyRepository.save(userAgency);
+
+    Session session = new Session();
+    session.setStatus(sessionStatus);
+    session.setPostcode("12345");
+    session.setId(1L);
+    session.setConsultant(null);
+    session.setUser(user);
+    session.setAgencyId(agencyId);
+    session.setTeamSession(true);
+    return this.sessionRepository.save(session);
+  }
+
+
+}

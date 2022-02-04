@@ -200,9 +200,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(2L, consultant, 2L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc())
+        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(2L, consultant, 2L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null)
     ));
     boolean result = sessionToConsultantConditionProvider
         .isSessionsAgencyNotAvailableInConsultantAgencies(consultant, session);
@@ -214,9 +214,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnFalse_When_ConsultantAgenciesContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(2L, consultant, 99L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc())
+        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(2L, consultant, 99L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null)
     ));
     boolean result = sessionToConsultantConditionProvider
         .isSessionsAgencyNotAvailableInConsultantAgencies(consultant, session);

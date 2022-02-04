@@ -52,7 +52,7 @@ public class ConsultantAdminFilterService {
     return searchResultDTO;
   }
 
-  private FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
+  protected FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
       FullTextEntityManager fullTextEntityManager) {
 
     QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory()

@@ -83,7 +83,7 @@ public class ConsultantCreatorService {
 
   private String createKeycloakUser(ConsultantCreationInput consultantCreationInput) {
     UserDTO userDto = buildUserDTO(consultantCreationInput.getUserName(),
-        consultantCreationInput.getEmail());
+        consultantCreationInput.getEmail(), consultantCreationInput.getTenantId());
 
     this.userAccountInputValidator.validateUserDTO(userDto);
 
@@ -124,13 +124,15 @@ public class ConsultantCreatorService {
         .languageFormal(consultantCreationInput.isLanguageFormal())
         .createDate(consultantCreationInput.getCreateDate())
         .updateDate(consultantCreationInput.getUpdateDate())
+        .tenantId(consultantCreationInput.getTenantId())
         .build();
   }
 
-  private UserDTO buildUserDTO(String username, String email) {
+  private UserDTO buildUserDTO(String username, String email, Long tenantId) {
     UserDTO userDto = new UserDTO();
     userDto.setUsername(new UsernameTranscoder().encodeUsername(username));
     userDto.setEmail(email);
+    userDto.setTenantId(tenantId);
     return userDto;
   }
 
