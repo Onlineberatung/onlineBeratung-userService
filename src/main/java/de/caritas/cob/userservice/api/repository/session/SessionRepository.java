@@ -195,13 +195,13 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   /**
    * Find the {@link Session}s by consulting type, registration type and pageable.
    *
-   * @param consultingTypes  the {@link ConsultingType}s to search for
-   * @param registrationType the {@link RegistrationType} to search for
-   * @param pageable         the pagination object
+   * @param consultingTypeIds the consulting type IDs to search for
+   * @param registrationType  the {@link RegistrationType} to search for
+   * @param pageable          the pagination object
    * @return the result {@link Page}
    */
   Page<Session> findByConsultingTypeIdInAndRegistrationTypeAndStatusOrderByCreateDateAsc(
-      Set<Integer> consultingTypes, RegistrationType registrationType,
+      Set<Integer> consultingTypeIds, RegistrationType registrationType,
       SessionStatus sessionStatus, Pageable pageable);
 
   /**

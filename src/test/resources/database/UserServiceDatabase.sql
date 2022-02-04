@@ -1,6 +1,6 @@
-ALTER SEQUENCE SEQUENCE_SESSION RESTART WITH 100000;
-ALTER SEQUENCE SEQUENCE_CONSULTANT_AGENCY RESTART WITH 100000;
-INSERT INTO USER (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
+ALTER SEQUENCE sequence_session RESTART WITH 100000;
+ALTER SEQUENCE sequence_consultant_agency RESTART WITH 100000;
+INSERT INTO user (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
                   `language_formal`, `create_date`, `update_date`)
 VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS',
         '015d013d-95e7-4e91-85b5-12cdb3d317f3@beratungcaritas.de', 'dciScSDa9Qm8vmEBB', 1,
@@ -462,7 +462,7 @@ VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMU
        ('opiti0a1-c936-45ee-9141-d73dfc0a3000', 0, NULL, 'enc.ODDAEZGDCHOJDAT5AUWGC43DMAZF2MJQ',
         'opiti0a1-c936-45ee-9141-d73dfc0a3000@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
         '2018-01-01 11:09:32', '2018-01-01 11:09:32');
-INSERT INTO CONSULTANT (`consultant_id`, `username`, `first_name`, `last_name`, `email`,
+INSERT INTO consultant (`consultant_id`, `username`, `first_name`, `last_name`, `email`,
                         `is_team_consultant`, `is_absent`, `absence_message`, `rc_user_id`,
                         `language_formal`, `id_old`, `delete_date`, `create_date`, `update_date`)
 VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b9', 'enc.MVWWSZ3SMF2GS33OFV2GKYLN', 'Emiration',
@@ -579,7 +579,7 @@ VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b9', 'enc.MVWWSZ3SMF2GS33OFV2GKYLN', 
        ('34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 'enc.AAAW42LPOJUXI6JNMRTFMYLVNR2A....', 'Default',
         'Consultant', 'new@consultant.de', 0, 0, NULL, 'aaa8Fw2juns6FFTks', 1, 0, NULL,
         '2020-10-08 08:54:09', '2020-10-08 08:54:09');
-INSERT INTO CONSULTANT_AGENCY (`id`, `consultant_id`, `agency_id`, `create_date`, `update_date`)
+INSERT INTO consultant_agency (`id`, `consultant_id`, `agency_id`, `create_date`, `update_date`)
 VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '2020-10-08 08:53:55'),
        (1, '88613f5d-0d40-47e0-b323-e792e7fba3ed', 1, '2020-10-08 08:53:56', '2020-10-08 08:53:56'),
        (2, '75abe824-fb42-476d-a52a-66660113bdcc', 0, '2020-10-08 08:53:57', '2020-10-08 08:53:57'),
@@ -702,7 +702,7 @@ VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '20
         '2020-10-08 08:57:45'),
        (62, '66794732-8751-4a06-a786-4849375e8999', 1733, '2020-10-08 08:57:45',
         '2020-10-08 08:57:45');
-INSERT INTO SESSION (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
+INSERT INTO session (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
                      `postcode`, `agency_id`, `rc_group_id`, `rc_feedback_group_id`, `status`,
                      `is_team_session`, `is_monitoring`, `create_date`, `update_date`)
 VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb636a5b399', 0,
@@ -1150,8 +1150,3 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
        (1212, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
         '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 3, 0, 1,
         '2020-10-08 09:03:47', '2020-10-08 09:03:48');
-INSERT INTO USER_AGENCY (`id`, `user_id`, `agency_id`, `create_date`, `update_date`)
-VALUES (0, 'opiti0a1-c936-45ee-9141-d73dfc0a3000', 777, '2020-02-05 11:09:32',
-        '2020-02-05 11:09:32');
-
-

@@ -421,9 +421,6 @@
 								</importMapping>
 								<importMapping>Date=java.util.Date</importMapping>
 								<importMapping>HttpStatus=org.springframework.http.HttpStatus</importMapping>
-								<importMapping>
-									ConsultingType=${project.groupId}.${project.artifactId}.api.repository.session.ConsultingType
-								</importMapping>
 							</importMappings>
 							<typeMappings>
 								<typeMapping>
