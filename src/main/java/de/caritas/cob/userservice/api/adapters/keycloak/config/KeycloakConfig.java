@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class KeycloakConfig {
 
   @Bean
-  public KeycloakRestTemplate createOpenBankingRestTemplate(
+  public KeycloakRestTemplate createKeycloakRestTemplate(
       RestTemplateBuilder restTemplateBuilder) {
     var restTemplate = restTemplateBuilder.build();
 

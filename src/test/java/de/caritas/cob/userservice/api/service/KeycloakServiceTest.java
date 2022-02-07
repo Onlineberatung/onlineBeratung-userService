@@ -22,11 +22,11 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakRestTemplate;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
-import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.Optional;
@@ -70,7 +70,7 @@ public class KeycloakServiceTest {
   @Mock
   private UserAccountInputValidator userAccountInputValidator;
   @Mock
-  private IdentityConfig identityConfig;
+  private IdentityClientConfig identityClientConfig;
   @Mock
   private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
   @Mock
@@ -216,13 +216,13 @@ public class KeycloakServiceTest {
   }
 
   private void givenAKeycloakLoginUrl() {
-    when(identityConfig.getLoginUrl()).thenReturn(
+    when(identityClientConfig.getLoginUrl()).thenReturn(
         "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token"
     );
   }
 
   private void givenAKeycloakLogoutUrl() {
-    when(identityConfig.getLogoutUrl()).thenReturn(
+    when(identityClientConfig.getLogoutUrl()).thenReturn(
         "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout"
     );
   }

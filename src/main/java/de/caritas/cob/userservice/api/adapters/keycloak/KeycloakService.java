@@ -4,14 +4,14 @@ import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedH
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakRestTemplate;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
-import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class KeycloakService implements IdentityClient {
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
-  private final @NonNull IdentityConfig identityConfig;
+  private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
   private final @NonNull KeycloakRestTemplate keycloakRestTemplate;
 
@@ -93,7 +93,8 @@ public class KeycloakService implements IdentityClient {
 
     try {
       return restTemplate
-          .postForEntity(identityConfig.getLoginUrl(), request, KeycloakLoginResponseDTO.class)
+          .postForEntity(identityClientConfig.getLoginUrl(), request,
+              KeycloakLoginResponseDTO.class)
           .getBody();
 
     } catch (RestClientResponseException exception) {
@@ -121,7 +122,8 @@ public class KeycloakService implements IdentityClient {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, httpHeaders);
 
     try {
-      var response = restTemplate.postForEntity(identityConfig.getLogoutUrl(), request, Void.class);
+      var response = restTemplate.postForEntity(identityClientConfig.getLogoutUrl(), request,
+          Void.class);
       return wasLogoutSuccessful(response, refreshToken);
     } catch (Exception ex) {
       log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken, ex);
@@ -157,7 +159,7 @@ public class KeycloakService implements IdentityClient {
   @Override
   public Optional<OtpInfoDTO> getOtpCredential(String userName) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
-    var requestUrl = identityConfig.getOtpInfoUrl() + userName;
+    var requestUrl = identityClientConfig.getOtpInfoUrl() + userName;
     try {
       var response = keycloakRestTemplate.get(bearerToken, requestUrl, OtpInfoDTO.class);
       return Optional.ofNullable(response.getBody());
@@ -170,14 +172,14 @@ public class KeycloakService implements IdentityClient {
   @Override
   public void setUpOtpCredential(String userName, OtpSetupDTO otpSetupDTO) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
-    var requestUrl = identityConfig.getOtpSetupUrl() + userName;
+    var requestUrl = identityClientConfig.getOtpSetupUrl() + userName;
     keycloakRestTemplate.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
   }
 
   @Override
   public void deleteOtpCredential(String userName) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
-    var requestUrl = identityConfig.getOtpTeardownUrl() + userName;
+    var requestUrl = identityClientConfig.getOtpTeardownUrl() + userName;
     keycloakRestTemplate.delete(bearerToken, requestUrl, Void.class);
   }
 }

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.config.auth;
 
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -12,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Configuration
 @ConfigurationProperties(prefix = "identity")
-public class IdentityConfig {
+public class IdentityConfig implements IdentityClientConfig {
 
   @NotBlank
   private String errorMessageDuplicatedEmail;

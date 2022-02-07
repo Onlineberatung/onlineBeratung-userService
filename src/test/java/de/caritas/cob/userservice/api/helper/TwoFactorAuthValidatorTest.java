@@ -8,12 +8,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -42,7 +42,7 @@ public class TwoFactorAuthValidatorTest {
   private IdentityClient identityClient;
 
   @Mock
-  private IdentityConfig identityConfig;
+  private IdentityClientConfig identityClientConfig;
 
   static Stream<Arguments> twoFactorAuthEnabledRoleArguments() {
     return Stream.of(
@@ -68,9 +68,9 @@ public class TwoFactorAuthValidatorTest {
       String requestRole) {
     var authenticatedUser = new AuthenticatedUser();
     authenticatedUser.setRoles(Set.of(requestRole));
-    lenient().when(identityConfig.getOtpAllowedForUsers())
+    lenient().when(identityClientConfig.getOtpAllowedForUsers())
         .thenReturn(isUserTwoFactorAuthEnabled);
-    lenient().when(identityConfig.getOtpAllowedForConsultants())
+    lenient().when(identityClientConfig.getOtpAllowedForConsultants())
         .thenReturn(isConsultantTwoFactorAuthEnabled);
     twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
 
@@ -84,9 +84,9 @@ public class TwoFactorAuthValidatorTest {
       String requestRole) {
     var authenticatedUser = new AuthenticatedUser();
     authenticatedUser.setRoles(Set.of(requestRole));
-    lenient().when(identityConfig.getOtpAllowedForUsers())
+    lenient().when(identityClientConfig.getOtpAllowedForUsers())
         .thenReturn(isUserTwoFactorAuthEnabled);
-    lenient().when(identityConfig.getOtpAllowedForConsultants())
+    lenient().when(identityClientConfig.getOtpAllowedForConsultants())
         .thenReturn(isConsultantTwoFactorAuthEnabled);
     Assert.assertThrows(ConflictException.class,
         () -> twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser));
@@ -114,7 +114,7 @@ public class TwoFactorAuthValidatorTest {
     var authenticatedUser = new AuthenticatedUser();
     authenticatedUser.setRoles(Set.of(UserRole.USER.getValue()));
     authenticatedUser.setUsername("test");
-    when(identityConfig.getOtpAllowedForUsers()).thenReturn(true);
+    when(identityClientConfig.getOtpAllowedForUsers()).thenReturn(true);
     when(identityClient.getOtpCredential("test"))
         .thenReturn(OPTIONAL_OTP_INFO_DTO);
 
@@ -131,7 +131,7 @@ public class TwoFactorAuthValidatorTest {
     var authenticatedUser = new AuthenticatedUser();
     authenticatedUser.setRoles(Set.of(UserRole.USER.getValue()));
     authenticatedUser.setUsername("test");
-    when(identityConfig.getOtpAllowedForUsers()).thenReturn(true);
+    when(identityClientConfig.getOtpAllowedForUsers()).thenReturn(true);
     when(identityClient.getOtpCredential("test"))
         .thenReturn(Optional.empty());
 
@@ -147,7 +147,7 @@ public class TwoFactorAuthValidatorTest {
     var authenticatedUser = new AuthenticatedUser();
     authenticatedUser.setRoles(Set.of(UserRole.USER.getValue()));
     authenticatedUser.setUsername("test");
-    when(identityConfig.getOtpAllowedForUsers()).thenReturn(false);
+    when(identityClientConfig.getOtpAllowedForUsers()).thenReturn(false);
 
     var twoFactorAuthDTO = new TwoFactorAuthDTO().isEnabled(false);
 
