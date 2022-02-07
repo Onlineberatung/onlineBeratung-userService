@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 
+import de.caritas.cob.userservice.api.config.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
@@ -29,17 +30,12 @@ public class KeycloakTwoFactorAuthService {
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private final IdentityConfig identityConfig;
 
   @Value("${twoFactorAuth.user.enabled}")
   private Boolean isUserTwoFactorAuthEnabled;
   @Value("${twoFactorAuth.consultant.enabled}")
   private Boolean isConsultantTwoFactorAuthEnabled;
-  @Value("${keycloakApi.otp.setup.info}")
-  private String keycloakOtpSetupInfo;
-  @Value("${keycloakApi.otp.setup}")
-  private String keycloakOtpSetup;
-  @Value("${keycloakApi.otp.delete}")
-  private String keycloakOtpDelete;
 
   /**
    * Performs a Keycloak request to get the {@link OtpInfoDTO} for the 2FA.
@@ -52,7 +48,7 @@ public class KeycloakTwoFactorAuthService {
     var httpHeaders =
         getAuthorizedHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken(),
             MediaType.APPLICATION_FORM_URLENCODED);
-    var requestUrl = keycloakOtpSetupInfo + userName;
+    var requestUrl = identityConfig.getOtpInfoUrl() + userName;
     var request = new HttpEntity<>(httpHeaders);
 
     try {
@@ -77,7 +73,7 @@ public class KeycloakTwoFactorAuthService {
     var httpHeaders =
         getAuthorizedHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken(),
             MediaType.APPLICATION_JSON);
-    var requestUrl = keycloakOtpSetup + userName;
+    var requestUrl = identityConfig.getOtpSetupUrl() + userName;
     var request = new HttpEntity<>(otpSetupDTO, httpHeaders);
 
     try {
@@ -97,7 +93,7 @@ public class KeycloakTwoFactorAuthService {
     var httpHeaders =
         getAuthorizedHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken(),
             MediaType.APPLICATION_FORM_URLENCODED);
-    var requestUrl = keycloakOtpDelete + userName;
+    var requestUrl = identityConfig.getOtpTeardownUrl() + userName;
     var request = new HttpEntity<>(httpHeaders);
 
     try {

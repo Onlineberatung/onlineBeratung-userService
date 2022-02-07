@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.config.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -50,16 +51,11 @@ public class KeycloakAdminClientService {
   @Value("${api.error.keycloakError}")
   private String keycloakError;
 
-  @Value("${keycloakApi.error.username}")
-  private String keycloakErrorUsername;
-
-  @Value("${keycloakApi.error.email}")
-  private String keycloakErrorEmail;
-
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   private final @NonNull UserHelper userHelper;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private final IdentityConfig identityConfig;
 
   /**
    * Creates a user in Keycloak and returns its Keycloak user ID.
@@ -96,10 +92,10 @@ public class KeycloakAdminClientService {
 
   private void handleCreateKeycloakUserError(Response response) {
     String errorMsg = response.readEntity(ErrorRepresentation.class).getErrorMessage();
-    if (errorMsg.equals(keycloakErrorEmail)) {
+    if (errorMsg.equals(identityConfig.getErrorMessageDuplicatedEmail())) {
       throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
-    if (errorMsg.equals(keycloakErrorUsername)) {
+    if (errorMsg.equals(identityConfig.getErrorMessageDuplicatedUsername())) {
       throw new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
   }

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.config.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -28,6 +29,7 @@ import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseD
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import java.util.List;
 import javax.ws.rs.core.Response;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +49,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KeycloakAdminClientServiceTest {
@@ -63,6 +64,9 @@ public class KeycloakAdminClientServiceTest {
 
   @Mock
   private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+
+  @Mock
+  private IdentityConfig identityConfig;
 
   @Mock
   private Logger logger;
@@ -93,8 +97,7 @@ public class KeycloakAdminClientServiceTest {
 
   @Test
   public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
-    String emailError = "emailError";
-    ReflectionTestUtils.setField(keycloakAdminClientService, "keycloakErrorEmail", emailError);
+    var emailError = givenADuplicatedEmailErrorMessage();
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
@@ -114,9 +117,7 @@ public class KeycloakAdminClientServiceTest {
 
   @Test
   public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasUsernameErrorMessage() {
-    String keycloakErrorUsername = "keycloakErrorUsername";
-    ReflectionTestUtils
-        .setField(keycloakAdminClientService, "keycloakErrorUsername", keycloakErrorUsername);
+    var keycloakErrorUsername = givenADuplicatedUserErrorMessage();
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
@@ -136,9 +137,7 @@ public class KeycloakAdminClientServiceTest {
 
   @Test
   public void createKeycloakUser_Should_throwExpectedResponseException_When_keycloakMailUpdateFails() {
-    String keycloakErrorUsername = "keycloakErrorUsername";
-    ReflectionTestUtils
-        .setField(keycloakAdminClientService, "keycloakErrorUsername", keycloakErrorUsername);
+    var keycloakErrorUsername = givenADuplicatedUserErrorMessage();
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     UsersResource usersResource = mock(UsersResource.class);
     ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
@@ -532,4 +531,17 @@ public class KeycloakAdminClientServiceTest {
     verify(userResource, times(1)).update(any());
   }
 
+  private String givenADuplicatedEmailErrorMessage() {
+    var emailError = RandomStringUtils.random(32);
+    when(identityConfig.getErrorMessageDuplicatedEmail()).thenReturn(emailError);
+
+    return emailError;
+  }
+
+  private String givenADuplicatedUserErrorMessage() {
+    var userError = RandomStringUtils.random(32);
+    when(identityConfig.getErrorMessageDuplicatedUsername()).thenReturn(userError);
+
+    return userError;
+  }
 }

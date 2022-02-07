@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedH
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.config.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
@@ -40,10 +41,8 @@ public class KeycloakService {
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
-  @Value("${keycloakApi.login}")
-  private String keycloakLoginUrl;
-  @Value("${keycloakApi.logout}")
-  private String keycloakLogoutUrl;
+  private final IdentityConfig identityConfig;
+
   @Value("${keycloakService.app.clientId}")
   private String keycloakClientId;
 
@@ -84,7 +83,8 @@ public class KeycloakService {
 
     try {
       return restTemplate
-          .postForEntity(keycloakLoginUrl, request, KeycloakLoginResponseDTO.class).getBody();
+          .postForEntity(identityConfig.getLoginUrl(), request, KeycloakLoginResponseDTO.class)
+          .getBody();
 
     } catch (RestClientResponseException exception) {
       throw new BadRequestException(String.format("Could not log in user %s into Keycloak: %s",
@@ -111,8 +111,7 @@ public class KeycloakService {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, httpHeaders);
 
     try {
-      ResponseEntity<Void> response = restTemplate.postForEntity(keycloakLogoutUrl, request,
-          Void.class);
+      var response = restTemplate.postForEntity(identityConfig.getLogoutUrl(), request, Void.class);
       return wasLogoutSuccessful(response, refreshToken);
     } catch (Exception ex) {
       log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken, ex);

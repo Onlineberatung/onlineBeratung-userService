@@ -8,11 +8,13 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.config.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -36,6 +38,15 @@ public class KeycloakTwoFactorAuthServiceTest {
   private RestTemplate restTemplate;
   @Mock
   private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  @Mock
+  private IdentityConfig identityConfig;
+
+  @Before
+  public void setup() {
+    givenAKeycloakOtpInfoUrl();
+    givenAKeycloakOtpSetupUrl();
+    givenAKeycloakOtpTeardownUrl();
+  }
 
   @Test
   public void getOtpCredential_Should_Return_ResponseAsOptional_When_RequestWasSuccessfully() {
@@ -91,4 +102,21 @@ public class KeycloakTwoFactorAuthServiceTest {
         .deleteOtpCredential(USERNAME));
   }
 
+  private void givenAKeycloakOtpInfoUrl() {
+    when(identityConfig.getOtpInfoUrl()).thenReturn(
+        "https://caritas.local/auth/realms/caritas-online-beratung/otp-config/fetch-otp-setup-info/"
+    );
+  }
+
+  private void givenAKeycloakOtpSetupUrl() {
+    when(identityConfig.getOtpSetupUrl()).thenReturn(
+        "https://caritas.local/auth/realms/caritas-online-beratung/otp-config/setup-otp/"
+    );
+  }
+
+  private void givenAKeycloakOtpTeardownUrl() {
+    when(identityConfig.getOtpTeardownUrl()).thenReturn(
+        "https://caritas.local/auth/realms/caritas-online-beratung/otp-config/delete-otp/"
+    );
+  }
 }
