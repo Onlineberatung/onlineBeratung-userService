@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -27,6 +28,7 @@ public class TwoFactorAuthValidator {
   private static final int OTP_SECRET_LENGTH = 32;
 
   private final @NonNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  private final IdentityConfig identityConfig;
 
   /**
    * Checks if the parameters of the request have the correct length.
@@ -63,12 +65,11 @@ public class TwoFactorAuthValidator {
 
   private boolean isConsultantRoleAnd2FaIsDisabled(Set<String> roles) {
     return roles.contains(UserRole.CONSULTANT.getValue())
-        && isFalse(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled());
+        && !identityConfig.getOtpAllowedForConsultants();
   }
 
   private boolean isUserRoleAnd2FaIsDisabled(Set<String> roles) {
-    return roles.contains(UserRole.USER.getValue())
-        && isFalse(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled());
+    return roles.contains(UserRole.USER.getValue()) && !identityConfig.getOtpAllowedForUsers();
   }
 
   /**
@@ -110,9 +111,9 @@ public class TwoFactorAuthValidator {
 
   private Boolean isTwoFactorAuthEnabled(AuthenticatedUser authenticatedUser) {
     if (authenticatedUser.getRoles().contains(UserRole.USER.getValue())) {
-      return keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled();
+      return identityConfig.getOtpAllowedForUsers();
     } else if (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue())) {
-      return keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled();
+      return identityConfig.getOtpAllowedForConsultants();
     }
     return Boolean.FALSE;
   }

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.testConfig;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -20,8 +21,8 @@ public class KeycloakTestConfig {
 
   @Bean
   public KeycloakAdminClientService keycloakAdminClientService(UserHelper userHelper,
-      KeycloakAdminClientAccessor keycloakAdminClientAccessor) {
-    return new KeycloakAdminClientService(userHelper, keycloakAdminClientAccessor) {
+      KeycloakAdminClientAccessor keycloakAdminClientAccessor, IdentityConfig identityConfig) {
+    return new KeycloakAdminClientService(userHelper, keycloakAdminClientAccessor, identityConfig) {
       @Override
       public KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO user) {
         KeycloakCreateUserResponseDTO keycloakUserDTO = new KeycloakCreateUserResponseDTO();
@@ -79,11 +80,11 @@ public class KeycloakTestConfig {
 
   @Bean
   public KeycloakService keycloakService(RestTemplate restTemplate,
-      AuthenticatedUser authenticatedUser,
-      KeycloakAdminClientService keycloakAdminClientService,
-      UserAccountInputValidator userAccountInputValidator) {
+      AuthenticatedUser authenticatedUser, KeycloakAdminClientService keycloakAdminClientService,
+      UserAccountInputValidator userAccountInputValidator, IdentityConfig identityConfig) {
+
     return new KeycloakService(restTemplate, authenticatedUser, keycloakAdminClientService,
-        userAccountInputValidator) {
+        userAccountInputValidator, identityConfig) {
       @Override
       public boolean changePassword(String userId, String password) {
         return super.changePassword(userId, password);
