@@ -1,14 +1,20 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.adapters.keycloak;
 
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakRestTemplate;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,7 +36,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class KeycloakService {
+public class KeycloakService implements IdentityClient {
 
   private static final String KEYCLOAK_GRANT_TYPE_PW = "password";
   private static final String KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
@@ -37,11 +44,14 @@ public class KeycloakService {
   private static final String BODY_KEY_PASSWORD = "password";
   private static final String BODY_KEY_CLIENT_ID = "client_id";
   private static final String BODY_KEY_GRANT_TYPE = "grant_type";
+
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
-  private final IdentityConfig identityConfig;
+  private final @NonNull IdentityConfig identityConfig;
+  private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private final @NonNull KeycloakRestTemplate keycloakRestTemplate;
 
   @Value("${keycloakService.app.clientId}")
   private String keycloakClientId;
@@ -142,5 +152,32 @@ public class KeycloakService {
 
   public void deleteEmailAddress() {
     keycloakAdminClientService.updateDummyEmail(authenticatedUser.getUserId());
+  }
+
+  @Override
+  public Optional<OtpInfoDTO> getOtpCredential(String userName) {
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityConfig.getOtpInfoUrl() + userName;
+    try {
+      var response = keycloakRestTemplate.get(bearerToken, requestUrl, OtpInfoDTO.class);
+      return Optional.ofNullable(response.getBody());
+    } catch (RestClientException restClientException) {
+      log.error("Keycloak cannot be accessed", restClientException);
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public void setUpOtpCredential(String userName, OtpSetupDTO otpSetupDTO) {
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityConfig.getOtpSetupUrl() + userName;
+    keycloakRestTemplate.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
+  }
+
+  @Override
+  public void deleteOtpCredential(String userName) {
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityConfig.getOtpTeardownUrl() + userName;
+    keycloakRestTemplate.delete(bearerToken, requestUrl, Void.class);
   }
 }

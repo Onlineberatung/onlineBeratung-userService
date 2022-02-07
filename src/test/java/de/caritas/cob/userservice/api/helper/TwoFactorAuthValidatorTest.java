@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -39,7 +39,7 @@ public class TwoFactorAuthValidatorTest {
   private TwoFactorAuthValidator twoFactorAuthValidator;
 
   @Mock
-  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  private IdentityClient identityClient;
 
   @Mock
   private IdentityConfig identityConfig;
@@ -115,7 +115,7 @@ public class TwoFactorAuthValidatorTest {
     authenticatedUser.setRoles(Set.of(UserRole.USER.getValue()));
     authenticatedUser.setUsername("test");
     when(identityConfig.getOtpAllowedForUsers()).thenReturn(true);
-    when(keycloakTwoFactorAuthService.getOtpCredential("test"))
+    when(identityClient.getOtpCredential("test"))
         .thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     var twoFactorAuthDTO = new TwoFactorAuthDTO()
@@ -132,7 +132,7 @@ public class TwoFactorAuthValidatorTest {
     authenticatedUser.setRoles(Set.of(UserRole.USER.getValue()));
     authenticatedUser.setUsername("test");
     when(identityConfig.getOtpAllowedForUsers()).thenReturn(true);
-    when(keycloakTwoFactorAuthService.getOtpCredential("test"))
+    when(identityClient.getOtpCredential("test"))
         .thenReturn(Optional.empty());
 
     var twoFactorAuthDTO = new TwoFactorAuthDTO().isEnabled(false);
@@ -154,7 +154,7 @@ public class TwoFactorAuthValidatorTest {
     Assertions
         .assertEquals(twoFactorAuthValidator.createAndValidateTwoFactorAuthDTO(authenticatedUser),
             twoFactorAuthDTO);
-    verify(keycloakTwoFactorAuthService, times(0))
+    verify(identityClient, times(0))
         .getOtpCredential(Mockito.any());
   }
 

@@ -1,14 +1,15 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakRestTemplate;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -81,10 +82,13 @@ public class KeycloakTestConfig {
   @Bean
   public KeycloakService keycloakService(RestTemplate restTemplate,
       AuthenticatedUser authenticatedUser, KeycloakAdminClientService keycloakAdminClientService,
-      UserAccountInputValidator userAccountInputValidator, IdentityConfig identityConfig) {
+      UserAccountInputValidator userAccountInputValidator, IdentityConfig identityConfig,
+      KeycloakAdminClientAccessor keycloakAdminClientAccessor,
+      KeycloakRestTemplate keycloakRestTemplate) {
 
     return new KeycloakService(restTemplate, authenticatedUser, keycloakAdminClientService,
-        userAccountInputValidator, identityConfig) {
+        userAccountInputValidator, identityConfig, keycloakAdminClientAccessor,
+        keycloakRestTemplate) {
       @Override
       public boolean changePassword(String userId, String password) {
         return super.changePassword(userId, password);
