@@ -17,7 +17,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;

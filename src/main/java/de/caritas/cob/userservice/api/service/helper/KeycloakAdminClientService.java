@@ -5,7 +5,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;

@@ -4,7 +4,7 @@ import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedH
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;

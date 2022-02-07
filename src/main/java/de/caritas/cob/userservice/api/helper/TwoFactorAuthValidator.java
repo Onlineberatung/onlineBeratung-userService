@@ -4,7 +4,7 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;

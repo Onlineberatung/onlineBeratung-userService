@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;

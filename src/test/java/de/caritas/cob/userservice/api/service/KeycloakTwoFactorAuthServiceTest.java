@@ -8,7 +8,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;

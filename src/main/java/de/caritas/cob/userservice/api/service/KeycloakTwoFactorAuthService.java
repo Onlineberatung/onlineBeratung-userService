@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;

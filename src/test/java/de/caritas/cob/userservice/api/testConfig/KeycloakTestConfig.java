@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.testConfig;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
-import de.caritas.cob.userservice.api.config.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;

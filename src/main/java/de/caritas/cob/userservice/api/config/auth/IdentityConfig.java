@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.config;
+package de.caritas.cob.userservice.api.config.auth;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
