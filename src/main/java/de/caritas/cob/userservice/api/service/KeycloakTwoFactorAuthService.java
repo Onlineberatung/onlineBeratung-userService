@@ -11,7 +11,6 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -31,11 +30,6 @@ public class KeycloakTwoFactorAuthService {
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
   private final IdentityConfig identityConfig;
-
-  @Value("${twoFactorAuth.user.enabled}")
-  private Boolean isUserTwoFactorAuthEnabled;
-  @Value("${twoFactorAuth.consultant.enabled}")
-  private Boolean isConsultantTwoFactorAuthEnabled;
 
   /**
    * Performs a Keycloak request to get the {@link OtpInfoDTO} for the 2FA.
@@ -102,23 +96,5 @@ public class KeycloakTwoFactorAuthService {
       throw new InternalServerErrorException(ex.getMessage(), ex,
           LogService::logInternalServerError);
     }
-  }
-
-  /**
-   * Returns if if 2fa is enabled for users (askers).
-   *
-   * @return true, if 2fa is enabled for users (askers)
-   */
-  public Boolean getUserTwoFactorAuthEnabled() {
-    return isUserTwoFactorAuthEnabled;
-  }
-
-  /**
-   * Returns if if 2fa is enabled for consultants.
-   *
-   * @return true, if 2fa is enabled for consultants
-   */
-  public Boolean getConsultantTwoFactorAuthEnabled() {
-    return isConsultantTwoFactorAuthEnabled;
   }
 }
