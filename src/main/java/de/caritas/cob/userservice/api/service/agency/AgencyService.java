@@ -124,7 +124,7 @@ public class AgencyService {
 
     return Collections.list(request.getHeaderNames())
         .stream()
-        .collect(Collectors.toMap(h -> h, request::getHeader)).get("origin");
+        .collect(Collectors.toMap(h -> h, request::getHeader)).get("host");
   }
 
   private AgencyDTO fromOriginalAgency(AgencyResponseDTO agencyResponseDTO) {
