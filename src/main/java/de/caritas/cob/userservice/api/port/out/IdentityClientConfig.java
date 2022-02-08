@@ -6,15 +6,17 @@ public interface IdentityClientConfig {
 
   String getErrorMessageDuplicatedUsername();
 
-  String getLoginUrl();
+  String getOpenidConnectUrl();
 
-  String getLogoutUrl();
+  String getOpenIdConnectUrl(String path);
 
-  String getOtpInfoUrl();
+  String getOpenIdConnectUrl(String path, String arg);
 
-  String getOtpSetupUrl();
+  String getOtpUrl();
 
-  String getOtpTeardownUrl();
+  String getOtpUrl(String path);
+
+  String getOtpUrl(String path, String arg);
 
   Boolean getOtpAllowedForUsers();
 

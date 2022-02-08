@@ -44,6 +44,11 @@ public class KeycloakService implements IdentityClient {
   private static final String BODY_KEY_PASSWORD = "password";
   private static final String BODY_KEY_CLIENT_ID = "client_id";
   private static final String BODY_KEY_GRANT_TYPE = "grant_type";
+  private static final String ENDPOINT_OPENID_CONNECT_LOGIN = "/token";
+  private static final String ENDPOINT_OPENID_CONNECT_LOGOUT = "/logout";
+  private static final String ENDPOINT_OTP_INFO = "/fetch-otp-setup-info/{username}";
+  private static final String ENDPOINT_OTP_SETUP = "/setup-otp/{username}";
+  private static final String ENDPOINT_OTP_TEARDOWN = "/delete-otp/{username}";
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -93,8 +98,10 @@ public class KeycloakService implements IdentityClient {
 
     try {
       return restTemplate
-          .postForEntity(identityClientConfig.getLoginUrl(), request,
-              KeycloakLoginResponseDTO.class)
+          .postForEntity(
+              identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGIN),
+              request, KeycloakLoginResponseDTO.class
+          )
           .getBody();
 
     } catch (RestClientResponseException exception) {
@@ -122,8 +129,10 @@ public class KeycloakService implements IdentityClient {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, httpHeaders);
 
     try {
-      var response = restTemplate.postForEntity(identityClientConfig.getLogoutUrl(), request,
-          Void.class);
+      var response = restTemplate.postForEntity(
+          identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGOUT),
+          request, Void.class
+      );
       return wasLogoutSuccessful(response, refreshToken);
     } catch (Exception ex) {
       log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken, ex);
@@ -159,7 +168,7 @@ public class KeycloakService implements IdentityClient {
   @Override
   public Optional<OtpInfoDTO> getOtpCredential(String userName) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
-    var requestUrl = identityClientConfig.getOtpInfoUrl() + userName;
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_INFO, userName);
     try {
       var response = keycloakRestTemplate.get(bearerToken, requestUrl, OtpInfoDTO.class);
       return Optional.ofNullable(response.getBody());
@@ -172,14 +181,14 @@ public class KeycloakService implements IdentityClient {
   @Override
   public void setUpOtpCredential(String userName, OtpSetupDTO otpSetupDTO) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
-    var requestUrl = identityClientConfig.getOtpSetupUrl() + userName;
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_SETUP, userName);
     keycloakRestTemplate.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
   }
 
   @Override
   public void deleteOtpCredential(String userName) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
-    var requestUrl = identityClientConfig.getOtpTeardownUrl() + userName;
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_TEARDOWN, userName);
     keycloakRestTemplate.delete(bearerToken, requestUrl, Void.class);
   }
 }
