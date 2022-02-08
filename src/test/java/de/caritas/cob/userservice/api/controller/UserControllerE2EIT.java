@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -70,12 +71,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -436,6 +439,52 @@ public class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void deleteTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+
+    mockMvc.perform(
+            delete("/users/twoFactorAuth")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    var urlSuffix = "/auth/realms/test/otp-config/delete-otp/" + consultant.getUsername();
+    verify(keycloakRestTemplate).exchange(
+        endsWith(urlSuffix), eq(HttpMethod.DELETE), any(HttpEntity.class), eq(Void.class)
+    );
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void deleteTwoFactorAuthForUserShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
+      throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+    givenKeycloakIsDown();
+
+    mockMvc.perform(
+            delete("/users/twoFactorAuth")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+  }
+
+  private void givenKeycloakIsDown() {
+    var urlSuffix = "/auth/realms/test/otp-config/delete-otp/" + consultant.getUsername();
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.DELETE), any(HttpEntity.class), eq(Void.class))
+    ).thenThrow(new RestClientException("Keycloak down"));
   }
 
   private void givenAnActivate2faViaAppWithAnInvalidOtp() {
