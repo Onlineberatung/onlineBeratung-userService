@@ -21,4 +21,9 @@ public class IdentityManager implements IdentityManaging {
     var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, secret);
     keycloakService.setUpOtpCredential(username, otpSetupDTO);
   }
+
+  @Override
+  public void deleteOneTimePassword(String username) {
+    keycloakService.deleteOtpCredential(username);
+  }
 }

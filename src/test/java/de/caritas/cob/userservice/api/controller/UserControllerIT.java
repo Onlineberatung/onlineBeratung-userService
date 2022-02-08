@@ -9,7 +9,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHI
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -2482,32 +2481,6 @@ public class UserControllerIT {
   public void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION))
         .andExpect(status().isOk());
-  }
-
-  @Test
-  public void deactivateTwoFactorAuthForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
-      throws Exception {
-
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(identityClient).deleteOtpCredential(any());
-  }
-
-  @Test
-  public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
-      throws Exception {
-    Mockito.doThrow(new InternalServerErrorException("Fail test case"))
-        .when(identityClient).deleteOtpCredential(null);
-
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError());
-
-    verify(identityClient).deleteOtpCredential(any());
   }
 
   @Test

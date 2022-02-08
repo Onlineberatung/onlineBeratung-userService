@@ -920,7 +920,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> deleteTwoFactorAuthForUser(String twoFactorAuthOr2fa) {
-    identityClient.deleteOtpCredential(authenticatedUser.getUsername());
+    identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
