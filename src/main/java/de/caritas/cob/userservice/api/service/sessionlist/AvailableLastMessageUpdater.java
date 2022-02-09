@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
+import static de.caritas.cob.userservice.api.model.MessageType.FURTHER_STEPS;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AvailableLastMessageUpdater {
 
+  private static final String FURTHER_STEPS_MESSAGE = "So geht es weiter";
+
   private final @NonNull SessionListAnalyser sessionListAnalyser;
 
   /**
@@ -33,10 +36,10 @@ public class AvailableLastMessageUpdater {
   void updateSessionWithAvailableLastMessage(
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
       Consumer<Date> latestMessageSetter, SessionDTO session, String groupId) {
-    RoomsLastMessageDTO roomsLastMessage =
-        rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
-    session.setLastMessage(isNotBlank(roomsLastMessage.getMessage()) ? sessionListAnalyser
-        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
+
+    var roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
+    session.setLastMessage(extractLastMessageFrom(roomsLastMessage, groupId));
+
     session.setMessageDate(Helper.getUnixTimestampFromDate(
         rocketChatRoomInformation.getLastMessagesRoom().get(groupId).getTimestamp()));
     latestMessageSetter.accept(roomsLastMessage.getTimestamp());
@@ -45,6 +48,27 @@ public class AvailableLastMessageUpdater {
     if (nonNull(roomsLastMessage.getAlias())) {
       session.setVideoCallMessageDTO(roomsLastMessage.getAlias().getVideoCallMessageDTO());
     }
+  }
+
+  private String extractLastMessageFrom(RoomsLastMessageDTO roomsLastMessageDTO, String groupId) {
+    if (isNotBlank(roomsLastMessageDTO.getMessage())) {
+      return sessionListAnalyser
+          .prepareMessageForSessionList(roomsLastMessageDTO.getMessage(), groupId);
+    } else {
+      return possibleFurtherStepsMessage(roomsLastMessageDTO);
+    }
+  }
+
+  private String possibleFurtherStepsMessage(RoomsLastMessageDTO roomsLastMessageDTO) {
+    if (lastMessageIsFurtherStepsAlias(roomsLastMessageDTO)) {
+      return FURTHER_STEPS_MESSAGE;
+    }
+    return null;
+  }
+
+  private boolean lastMessageIsFurtherStepsAlias(RoomsLastMessageDTO roomsLastMessageDTO) {
+    return nonNull(roomsLastMessageDTO.getAlias()) && FURTHER_STEPS
+        .equals(roomsLastMessageDTO.getAlias().getMessageType());
   }
 
 }
