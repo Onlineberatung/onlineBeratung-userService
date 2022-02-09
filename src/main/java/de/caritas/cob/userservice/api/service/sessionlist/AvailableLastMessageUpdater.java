@@ -67,8 +67,9 @@ public class AvailableLastMessageUpdater {
   }
 
   private boolean lastMessageIsFurtherStepsAlias(RoomsLastMessageDTO roomsLastMessageDTO) {
-    return nonNull(roomsLastMessageDTO.getAlias()) && FURTHER_STEPS
-        .equals(roomsLastMessageDTO.getAlias().getMessageType());
+    var alias = roomsLastMessageDTO.getAlias();
+    return nonNull(alias) && nonNull(alias.getMessageType()) && FURTHER_STEPS.name()
+        .equals(roomsLastMessageDTO.getAlias().getMessageType().name());
   }
 
 }
