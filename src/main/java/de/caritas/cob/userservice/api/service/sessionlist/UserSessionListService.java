@@ -30,7 +30,6 @@ public class UserSessionListService {
   private final @NonNull ChatService chatService;
   private final @NonNull RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   private final @NonNull SessionListAnalyser sessionListAnalyser;
-  private final @NonNull AvailableLastMessageUpdater availableLastMessageUpdater;
 
   /**
    * Returns a list of {@link UserSessionResponseDTO} for the specified user ID.
@@ -57,7 +56,7 @@ public class UserSessionListService {
 
     List<UserSessionResponseDTO> allSessions = new ArrayList<>();
     allSessions.addAll(updateUserSessionValues(sessions, rocketChatRoomInformation,
-        rocketChatCredentials));
+        rocketChatCredentials.getRocketChatUserId()));
     allSessions.addAll(updateUserChatValues(chats, rocketChatRoomInformation,
         rocketChatCredentials.getRocketChatUserId()));
 
@@ -66,18 +65,16 @@ public class UserSessionListService {
 
   private List<UserSessionResponseDTO> updateUserSessionValues(
       List<UserSessionResponseDTO> sessions, RocketChatRoomInformation rocketChatRoomInformation,
-      RocketChatCredentials rocketChatCredentials) {
+      String rcUserId) {
 
     return sessions.stream()
-        .map(sessionDTO -> updateRequiredUserSessionValues(rocketChatRoomInformation,
-            rocketChatCredentials,
+        .map(sessionDTO -> updateRequiredUserSessionValues(rocketChatRoomInformation, rcUserId,
             sessionDTO))
         .collect(Collectors.toList());
   }
 
   private UserSessionResponseDTO updateRequiredUserSessionValues(
-      RocketChatRoomInformation rocketChatRoomInformation,
-      RocketChatCredentials rocketChatCredentials,
+      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
       UserSessionResponseDTO userSessionDTO) {
 
     SessionDTO session = userSessionDTO.getSession();
@@ -87,9 +84,9 @@ public class UserSessionListService {
         rocketChatRoomInformation.getReadMessages(), groupId));
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      availableLastMessageUpdater
-          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation,
-              userSessionDTO::setLatestMessage, session, rocketChatCredentials);
+      new AvailableLastMessageUpdater(this.sessionListAnalyser)
+          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
+              userSessionDTO::setLatestMessage, session, groupId);
     } else {
       userSessionDTO.setLatestMessage(Helper.UNIXTIME_0);
     }
