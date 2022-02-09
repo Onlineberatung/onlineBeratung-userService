@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
@@ -10,7 +11,6 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -29,17 +29,7 @@ public class KeycloakTwoFactorAuthService {
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
-
-  @Value("${twoFactorAuth.user.enabled}")
-  private Boolean isUserTwoFactorAuthEnabled;
-  @Value("${twoFactorAuth.consultant.enabled}")
-  private Boolean isConsultantTwoFactorAuthEnabled;
-  @Value("${keycloakApi.otp.setup.info}")
-  private String keycloakOtpSetupInfo;
-  @Value("${keycloakApi.otp.setup}")
-  private String keycloakOtpSetup;
-  @Value("${keycloakApi.otp.delete}")
-  private String keycloakOtpDelete;
+  private final IdentityConfig identityConfig;
 
   /**
    * Performs a Keycloak request to get the {@link OtpInfoDTO} for the 2FA.
@@ -52,7 +42,7 @@ public class KeycloakTwoFactorAuthService {
     var httpHeaders =
         getAuthorizedHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken(),
             MediaType.APPLICATION_FORM_URLENCODED);
-    var requestUrl = keycloakOtpSetupInfo + userName;
+    var requestUrl = identityConfig.getOtpInfoUrl() + userName;
     var request = new HttpEntity<>(httpHeaders);
 
     try {
@@ -77,7 +67,7 @@ public class KeycloakTwoFactorAuthService {
     var httpHeaders =
         getAuthorizedHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken(),
             MediaType.APPLICATION_JSON);
-    var requestUrl = keycloakOtpSetup + userName;
+    var requestUrl = identityConfig.getOtpSetupUrl() + userName;
     var request = new HttpEntity<>(otpSetupDTO, httpHeaders);
 
     try {
@@ -97,7 +87,7 @@ public class KeycloakTwoFactorAuthService {
     var httpHeaders =
         getAuthorizedHttpHeaders(this.keycloakAdminClientAccessor.getBearerToken(),
             MediaType.APPLICATION_FORM_URLENCODED);
-    var requestUrl = keycloakOtpDelete + userName;
+    var requestUrl = identityConfig.getOtpTeardownUrl() + userName;
     var request = new HttpEntity<>(httpHeaders);
 
     try {
@@ -106,23 +96,5 @@ public class KeycloakTwoFactorAuthService {
       throw new InternalServerErrorException(ex.getMessage(), ex,
           LogService::logInternalServerError);
     }
-  }
-
-  /**
-   * Returns if if 2fa is enabled for users (askers).
-   *
-   * @return true, if 2fa is enabled for users (askers)
-   */
-  public Boolean getUserTwoFactorAuthEnabled() {
-    return isUserTwoFactorAuthEnabled;
-  }
-
-  /**
-   * Returns if if 2fa is enabled for consultants.
-   *
-   * @return true, if 2fa is enabled for consultants
-   */
-  public Boolean getConsultantTwoFactorAuthEnabled() {
-    return isConsultantTwoFactorAuthEnabled;
   }
 }

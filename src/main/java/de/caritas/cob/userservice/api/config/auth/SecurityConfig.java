@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.config;
+package de.caritas.cob.userservice.api.config.auth;
 
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY;
@@ -14,7 +14,7 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USE_FEEDBACK;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 
-import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
+import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import de.caritas.cob.userservice.api.controller.interceptor.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;

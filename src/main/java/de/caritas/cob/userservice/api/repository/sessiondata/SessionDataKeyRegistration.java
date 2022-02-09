@@ -8,7 +8,7 @@ public enum SessionDataKeyRegistration {
   ADDICTIVE_DRUGS("addictiveDrugs"), RELATION("relation"), AGE("age"), GENDER("gender"), STATE(
       "state");
 
-  private String key;
+  private final String key;
 
   SessionDataKeyRegistration(String key) {
     this.key = key;
@@ -17,7 +17,7 @@ public enum SessionDataKeyRegistration {
   /**
    * Get the key
    *
-   * @return
+   * @return key
    */
   public String getValue() {
     return this.key;
@@ -26,7 +26,7 @@ public enum SessionDataKeyRegistration {
   /**
    * Returns true, if the enum contains the specific key
    *
-   * @param key
+   * @param key key
    * @return true, if the enum contains the specific key
    */
   public static boolean containsKey(String key) {

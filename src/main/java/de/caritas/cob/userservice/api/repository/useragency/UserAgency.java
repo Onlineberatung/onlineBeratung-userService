@@ -43,7 +43,7 @@ public class UserAgency {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Column(name = "agency_id", updatable = true, nullable = true)
+  @Column(name = "agency_id")
   private Long agencyId;
 
   @CreatedDate

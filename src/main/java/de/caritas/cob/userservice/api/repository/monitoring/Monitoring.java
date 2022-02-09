@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 /**
  * Represents the monitoring of an asker
@@ -31,8 +32,8 @@ import lombok.Setter;
 @Setter
 public class Monitoring {
 
-  public Monitoring(Long sessionId, MonitoringType monitoringType, @Size(max = 255) String key,
-      Boolean value) {
+  public Monitoring(@NonNull Long sessionId, @NonNull MonitoringType monitoringType,
+      @Size(max = 255) @NonNull String key, Boolean value) {
     this.sessionId = sessionId;
     this.monitoringType = monitoringType;
     this.key = key;
@@ -52,6 +53,7 @@ public class Monitoring {
   @Id
   @Column(name = "type", updatable = false, nullable = false)
   @NonNull
+  @Type(type = "org.hibernate.type.ByteType")
   private MonitoringType monitoringType;
 
   @Id
@@ -60,7 +62,7 @@ public class Monitoring {
   @Size(max = 255)
   private String key;
 
-  @Column(name = "value", updatable = true, nullable = true)
+  @Column(name = "value")
   private Boolean value;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "monitoring")

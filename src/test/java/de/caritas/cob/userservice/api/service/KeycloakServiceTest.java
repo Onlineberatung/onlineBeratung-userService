@@ -17,6 +17,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
@@ -63,12 +64,13 @@ public class KeycloakServiceTest {
   @Mock
   private UserAccountInputValidator userAccountInputValidator;
 
+  @Mock
+  private IdentityConfig identityConfig;
+
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    setField(keycloakService, "keycloakLoginUrl",
-        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token");
-    setField(keycloakService, "keycloakLogoutUrl",
-        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout");
+    givenAKeycloakLoginUrl();
+    givenAKeycloakLogoutUrl();
     setField(keycloakService, "keycloakClientId", "app");
     setInternalState(KeycloakService.class, "log", logger);
   }
@@ -167,5 +169,17 @@ public class KeycloakServiceTest {
     keycloakService.deleteEmailAddress();
 
     verify(keycloakAdminClientService).updateDummyEmail(userId);
+  }
+
+  private void givenAKeycloakLoginUrl() {
+    when(identityConfig.getLoginUrl()).thenReturn(
+        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token"
+    );
+  }
+
+  private void givenAKeycloakLogoutUrl() {
+    when(identityConfig.getLogoutUrl()).thenReturn(
+        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout"
+    );
   }
 }
