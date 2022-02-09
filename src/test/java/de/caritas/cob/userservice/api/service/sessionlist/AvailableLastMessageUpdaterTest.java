@@ -119,7 +119,7 @@ public class AvailableLastMessageUpdaterTest {
     assertThat(sessionDTO.getVideoCallMessageDTO().getInitiatorRcUserId(), is("user id"));
   }
 
-  private List<MessagesDTO> createMessageStreamWithSystemAndUserMessage(String encryptedMessage) {
+  private List<MessagesDTO> createMessageStreamWithSystemAndUserMessage(String encrypted_message) {
     MessagesDTO emptyAliasMessageBySystem = new MessagesDTO();
     emptyAliasMessageBySystem.setMsg("");
     emptyAliasMessageBySystem.setAlias(
@@ -129,7 +129,7 @@ public class AvailableLastMessageUpdaterTest {
     emptyAliasMessageBySystem.setU(system);
 
     MessagesDTO firstMessageByUser = new MessagesDTO();
-    firstMessageByUser.setMsg(encryptedMessage);
+    firstMessageByUser.setMsg(encrypted_message);
     UserDTO user = new UserDTO();
     user.setId("userId");
     firstMessageByUser.setU(user);
