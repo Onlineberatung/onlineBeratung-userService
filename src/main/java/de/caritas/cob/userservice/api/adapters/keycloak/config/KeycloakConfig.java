@@ -4,16 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @RequiredArgsConstructor
 public class KeycloakConfig {
 
-  @Bean
-  public KeycloakRestTemplate createKeycloakRestTemplate(
-      RestTemplateBuilder restTemplateBuilder) {
-    var restTemplate = restTemplateBuilder.build();
-
-    return new KeycloakRestTemplate(restTemplate);
+  @Bean("keycloakRestTemplate")
+  public RestTemplate keycloakRestTemplate(RestTemplateBuilder restTemplateBuilder) {
+    return restTemplateBuilder.build();
   }
 }

@@ -9,7 +9,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHI
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
@@ -36,7 +35,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_U
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_USER;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
@@ -90,8 +88,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.DECODED_PA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.DESCRIPTION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.FIRST_NAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INACTIVE_CHAT;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_CODE;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.INVALID_OTP_SETUP_DTO_WRONG_SECRET;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_SESSION;
@@ -175,7 +171,6 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
-import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
@@ -195,7 +190,9 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -426,7 +423,11 @@ public class UserControllerIT {
   @MockBean
   private ActionsRegistry actionsRegistry;
   @MockBean
-  private TwoFactorAuthValidator twoFactorAuthValidator;
+  @SuppressWarnings("unused")
+  private IdentityClientConfig identityClientConfig;
+  @MockBean
+  @SuppressWarnings("unused")
+  private IdentityManaging identityManager;
   @MockBean
   private ConsultantUpdateService consultantUpdateService;
   @SpyBean
@@ -2480,63 +2481,6 @@ public class UserControllerIT {
   public void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION))
         .andExpect(status().isOk());
-  }
-
-  @Test
-  public void deactivateTwoFactorAuthForUser_Should_ReturnOk_When_Keycloak_Call_Is_Successfully()
-      throws Exception {
-
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(identityClient).deleteOtpCredential(any());
-  }
-
-  @Test
-  public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
-      throws Exception {
-    Mockito.doThrow(new InternalServerErrorException("Fail test case"))
-        .when(identityClient).deleteOtpCredential(null);
-
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError());
-
-    verify(identityClient).deleteOtpCredential(any());
-  }
-
-  @Test
-  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Secret_is_Wrong()
-      throws Exception {
-    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator)
-        .checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_SECRET);
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                INVALID_OTP_SETUP_DTO_WRONG_SECRET))
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-
-    verifyNoMoreInteractions(identityClient);
-  }
-
-  @Test
-  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_Otp_Code_is_Wrong()
-      throws Exception {
-    Mockito.doThrow(new BadRequestException("Fail test case")).when(twoFactorAuthValidator)
-        .checkRequestParameterForTwoFactorAuthActivations(INVALID_OTP_SETUP_DTO_WRONG_CODE);
-
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                INVALID_OTP_SETUP_DTO_WRONG_CODE))
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-
-    verify(identityClient, times(0)).deleteOtpCredential(any());
   }
 
   @Test
