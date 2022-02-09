@@ -74,6 +74,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -150,6 +151,8 @@ public class UserControllerE2EIT {
   private ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO;
 
   private EmailDTO emailDTO;
+
+  private String tan;
 
   @AfterEach
   public void reset() {
@@ -392,7 +395,7 @@ public class UserControllerE2EIT {
     givenAValidConsultant();
     givenAValidEmailDTO();
     givenABearerToken();
-    givenAValidKeycloakResponse();
+    givenAValidKeycloakVerifyEmailResponse();
 
     mockMvc.perform(
             put("/users/2fa/email")
@@ -449,7 +452,7 @@ public class UserControllerE2EIT {
     givenAValidConsultant();
     givenAValidEmailDTO();
     givenABearerToken();
-    givenAKeycloakErrorResponse();
+    givenAKeycloakVerifyEmailErrorResponse();
 
     mockMvc.perform(
             put("/users/2fa/email")
@@ -459,6 +462,33 @@ public class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(emailDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
+    givenAValidConsultant();
+    givenAValidEmailDTO();
+    givenABearerToken();
+    givenAValidTan();
+    givenAValidKeycloakSetupEmailResponse();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    verify(keycloakRestTemplate).postForEntity(endsWith(urlSuffix), captor.capture(), eq(
+        OtpResponse.class));
+
+    var otpSetupDTO = captor.getValue().getBody();
+    assertNotNull(otpSetupDTO);
+    assertEquals(emailDTO.getEmail(), otpSetupDTO.getEmail());
   }
 
   @Test
@@ -586,7 +616,18 @@ public class UserControllerE2EIT {
     activateTwoFactorAuthUserDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
   }
 
-  private void givenAValidKeycloakResponse() {
+  private void givenAValidKeycloakSetupEmailResponse() {
+    var urlSuffix =
+        "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    var otpResponse = new OtpResponse();
+    otpResponse.setSuccess(true);
+
+    when(keycloakRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(OtpResponse.class)
+    )).thenReturn(new ResponseEntity<>(otpResponse, HttpStatus.CREATED));
+  }
+
+  private void givenAValidKeycloakVerifyEmailResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
     var otpResponse = new OtpResponse();
@@ -597,7 +638,7 @@ public class UserControllerE2EIT {
     )).thenReturn(ResponseEntity.ok(otpResponse));
   }
 
-  private void givenAKeycloakErrorResponse() {
+  private void givenAKeycloakVerifyEmailErrorResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
     var otpResponse = new OtpResponse();
@@ -629,6 +670,10 @@ public class UserControllerE2EIT {
   private void givenABearerToken() {
     when(keycloakAdminClientAccessor.getBearerToken()).thenReturn(
         RandomStringUtils.randomAlphanumeric(255));
+  }
+
+  private void givenAValidTan() {
+    tan = RandomStringUtils.randomNumeric(6);
   }
 
   private void givenAConsultantWithMultipleAgencies() {

@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api;
 
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,16 @@ public class IdentityManager implements IdentityManaging {
   @Override
   public void setUpOneTimePassword(String username, String initialCode, String secret) {
     keycloakService.setUpOtpCredential(username, initialCode, secret);
+  }
+
+  @Override
+  public Map<String, Boolean> validateOneTimePassword(String username, String email, String code) {
+    var verificationResult = keycloakService.finishEmailVerification(username, email, code);
+    if (verificationResult.get("created")) {
+      keycloakService.changeEmailAddress(email);
+    }
+
+    return verificationResult;
   }
 
   @Override

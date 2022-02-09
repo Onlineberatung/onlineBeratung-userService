@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.adapters.keycloak;
 
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,5 +15,12 @@ public class KeycloakMapper {
     otpSetupDTO.setEmail(email);
 
     return otpSetupDTO;
+  }
+
+  public Map<String, Boolean> mapOf(HttpStatus statusCode) {
+    return Map.of(
+        "created", statusCode.equals(HttpStatus.CREATED),
+        "attemptsLeft", !statusCode.equals(HttpStatus.TOO_MANY_REQUESTS)
+    );
   }
 }

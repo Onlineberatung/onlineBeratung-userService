@@ -900,6 +900,23 @@ public class UserController implements UsersApi {
     return ResponseEntity.noContent().build();
   }
 
+  @Override
+  public ResponseEntity<Void> finishTwoFactorAuthByEmailSetup(String tan, EmailDTO emailDTO) {
+    var username = authenticatedUser.getUsername();
+    var verificationResult = identityManager.validateOneTimePassword(
+        username, emailDTO.getEmail(), tan
+    );
+
+    if (verificationResult.get("created")) {
+      return ResponseEntity.noContent().build();
+    }
+    if (verificationResult.get("attemptsLeft")) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+  }
+
   /**
    * Activates 2FA for the calling user.
    *

@@ -13,12 +13,14 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 
 @TestConfiguration
+@Slf4j
 public class KeycloakTestConfig {
 
   @Bean
@@ -110,6 +112,7 @@ public class KeycloakTestConfig {
 
       @Override
       public void changeEmailAddress(String emailAddress) {
+        log.debug("KeycloakService.changeEmailAddress called");
       }
     };
   }

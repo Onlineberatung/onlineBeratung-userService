@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Map;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ public class KeycloakService implements IdentityClient {
   private static final String ENDPOINT_OTP_SETUP = "/setup-otp/{username}";
   private static final String ENDPOINT_OTP_TEARDOWN = "/delete-otp/{username}";
   private static final String ENDPOINT_OTP_VERIFY_EMAIL = "/send-verification-mail/{username}";
+  private static final String ENDPOINT_OTP_FINISH_EMAIL = "/setup-otp-mail/{username}";
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -210,5 +212,18 @@ public class KeycloakService implements IdentityClient {
     }
 
     return Optional.empty();
+  }
+
+  @Override
+  public Map<String, Boolean> finishEmailVerification(String username, String email,
+      String initialCode) {
+    var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, null, email);
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_FINISH_EMAIL, username);
+
+    var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
+        OtpResponse.class);
+
+    return keycloakMapper.mapOf(response.getStatusCode());
   }
 }
