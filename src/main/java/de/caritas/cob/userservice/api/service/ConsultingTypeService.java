@@ -48,7 +48,7 @@ public class ConsultingTypeService {
    *
    * @return list with consulting type ids
    */
-  @Cacheable(cacheNames = CacheManagerConfig.CONSULTING_TYPE_CACHE)
+  //TODO: chaching disabled. we need to find another solution
   public List<Integer> getAllConsultingTypeIds() {
     addDefaultHeaders(this.consultingTypeControllerApi.getApiClient());
     return this.consultingTypeControllerApi.getBasicConsultingTypeList().stream()
