@@ -5,8 +5,8 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
@@ -25,7 +25,7 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
 
   private final @NonNull MessageControllerApi messageControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final @NonNull IdentityClient identityClient;
+  private final @NonNull KeycloakService keycloakService;
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -48,9 +48,8 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
-    var keycloakLoginResponseDTO = identityClient.loginUser(
-        keycloakTechnicalUsername, keycloakTechnicalPassword
-    );
+    var keycloakLoginResponseDTO = this.keycloakService
+        .loginUser(this.keycloakTechnicalUsername, this.keycloakTechnicalPassword);
     var headers = this.securityHeaderSupplier
         .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));

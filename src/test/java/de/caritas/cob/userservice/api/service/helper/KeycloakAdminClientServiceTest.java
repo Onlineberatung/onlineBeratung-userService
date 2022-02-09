@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -24,9 +25,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.util.List;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -66,7 +66,7 @@ public class KeycloakAdminClientServiceTest {
   private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
 
   @Mock
-  private IdentityClientConfig identityClientConfig;
+  private IdentityConfig identityConfig;
 
   @Mock
   private Logger logger;
@@ -533,14 +533,14 @@ public class KeycloakAdminClientServiceTest {
 
   private String givenADuplicatedEmailErrorMessage() {
     var emailError = RandomStringUtils.random(32);
-    when(identityClientConfig.getErrorMessageDuplicatedEmail()).thenReturn(emailError);
+    when(identityConfig.getErrorMessageDuplicatedEmail()).thenReturn(emailError);
 
     return emailError;
   }
 
   private String givenADuplicatedUserErrorMessage() {
     var userError = RandomStringUtils.random(32);
-    when(identityClientConfig.getErrorMessageDuplicatedUsername()).thenReturn(userError);
+    when(identityConfig.getErrorMessageDuplicatedUsername()).thenReturn(userError);
 
     return userError;
   }
