@@ -10,10 +10,10 @@ import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
@@ -32,7 +32,7 @@ public class ValidatedUserAccountProvider {
   private final @NonNull UserService userService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull AuthenticatedUser authenticatedUser;
-  private final @NonNull KeycloakService keycloakService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull UserAccountValidator userAccountValidator;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
@@ -97,8 +97,8 @@ public class ValidatedUserAccountProvider {
    */
   public void changeUserAccountEmailAddress(Optional<String> optionalEmail) {
     optionalEmail.ifPresentOrElse(
-        keycloakService::changeEmailAddress,
-        keycloakService::deleteEmailAddress
+        identityClient::changeEmailAddress,
+        identityClient::deleteEmailAddress
     );
 
     var userId = authenticatedUser.getUserId();
@@ -141,8 +141,8 @@ public class ValidatedUserAccountProvider {
     userAccountValidator
         .checkPasswordValidity(authenticatedUser.getUsername(), passwordDTO.getOldPassword());
 
-    if (!keycloakService
-        .changePassword(authenticatedUser.getUserId(), passwordDTO.getNewPassword())) {
+    if (!identityClient.changePassword(authenticatedUser.getUserId(),
+        passwordDTO.getNewPassword())) {
       throw new InternalServerErrorException(
           String.format("Could not update password of user %s", authenticatedUser.getUserId()));
     }

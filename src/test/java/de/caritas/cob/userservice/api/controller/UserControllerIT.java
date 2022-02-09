@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION_INVALID_PATH_VAR;
@@ -151,8 +151,6 @@ import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapp
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.controller.interceptor.ApiResponseEntityExceptionHandler;
-import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
-import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -197,6 +195,7 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.validation.MandatoryFieldsProvider;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -208,8 +207,6 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -217,6 +214,8 @@ import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
+import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -379,7 +378,7 @@ public class UserControllerIT {
   @MockBean
   private AssignEnquiryFacade assignEnquiryFacade;
   @MockBean
-  private KeycloakService keycloakService;
+  private IdentityClient identityClient;
   @MockBean
   private DecryptionService encryptionService;
   @MockBean
@@ -426,8 +425,6 @@ public class UserControllerIT {
   private SessionArchiveService sessionArchiveService;
   @MockBean
   private ActionsRegistry actionsRegistry;
-  @MockBean
-  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   @MockBean
   private TwoFactorAuthValidator twoFactorAuthValidator;
   @MockBean
@@ -1219,7 +1216,7 @@ public class UserControllerIT {
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
-    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
+    when(identityClient.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
@@ -1274,7 +1271,7 @@ public class UserControllerIT {
     when(userDataFacade.buildUserDataByRole())
         .thenReturn(responseDto);
 
-    when(keycloakTwoFactorAuthService.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
+    when(identityClient.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
 
     mvc.perform(
             get(PATH_USER_DATA)
@@ -1858,7 +1855,7 @@ public class UserControllerIT {
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-    verify(keycloakService, times(0)).changePassword(anyString(), anyString());
+    verify(identityClient, times(0)).changePassword(anyString(), anyString());
   }
 
   @Test
@@ -2271,7 +2268,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2494,21 +2491,21 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
+    verify(identityClient).deleteOtpCredential(any());
   }
 
   @Test
   public void deactivateTwoFactorAuthForUser_Should_ReturnServerError_When_Keycloak_Call_Is_Not_Successfully()
       throws Exception {
     Mockito.doThrow(new InternalServerErrorException("Fail test case"))
-        .when(keycloakTwoFactorAuthService).deleteOtpCredential(null);
+        .when(identityClient).deleteOtpCredential(null);
 
     mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError());
 
-    verify(this.keycloakTwoFactorAuthService, times(1)).deleteOtpCredential(any());
+    verify(identityClient).deleteOtpCredential(any());
   }
 
   @Test
@@ -2523,7 +2520,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verifyNoMoreInteractions(keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2539,7 +2536,7 @@ public class UserControllerIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verify(this.keycloakTwoFactorAuthService, times(0)).deleteOtpCredential(any());
+    verify(identityClient, times(0)).deleteOtpCredential(any());
   }
 
   @Test
