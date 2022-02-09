@@ -51,22 +51,17 @@ public class AvailableLastMessageUpdater {
   }
 
   private String extractLastMessageFrom(RoomsLastMessageDTO roomsLastMessageDTO, String groupId) {
+    if (isLastMessageFurtherStepsAlias(roomsLastMessageDTO)) {
+      return FURTHER_STEPS_MESSAGE;
+    }
     if (isNotBlank(roomsLastMessageDTO.getMessage())) {
       return sessionListAnalyser
           .prepareMessageForSessionList(roomsLastMessageDTO.getMessage(), groupId);
-    } else {
-      return possibleFurtherStepsMessage(roomsLastMessageDTO);
-    }
-  }
-
-  private String possibleFurtherStepsMessage(RoomsLastMessageDTO roomsLastMessageDTO) {
-    if (lastMessageIsFurtherStepsAlias(roomsLastMessageDTO)) {
-      return FURTHER_STEPS_MESSAGE;
     }
     return null;
   }
 
-  private boolean lastMessageIsFurtherStepsAlias(RoomsLastMessageDTO roomsLastMessageDTO) {
+  private boolean isLastMessageFurtherStepsAlias(RoomsLastMessageDTO roomsLastMessageDTO) {
     var alias = roomsLastMessageDTO.getAlias();
     return nonNull(alias) && nonNull(alias.getMessageType()) && FURTHER_STEPS.name()
         .equals(roomsLastMessageDTO.getAlias().getMessageType().name());
