@@ -216,13 +216,13 @@ public class KeycloakServiceTest {
   }
 
   private void givenAKeycloakLoginUrl() {
-    when(identityClientConfig.getLoginUrl()).thenReturn(
+    when(identityClientConfig.getOpenIdConnectUrl(anyString())).thenReturn(
         "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token"
     );
   }
 
   private void givenAKeycloakLogoutUrl() {
-    when(identityClientConfig.getLogoutUrl()).thenReturn(
+    when(identityClientConfig.getOpenIdConnectUrl(anyString())).thenReturn(
         "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout"
     );
   }
