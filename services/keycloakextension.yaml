@@ -120,19 +120,19 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/Success'
+                $ref: '#/components/schemas/OtpResponse'
         400:
           description: invalid parameter
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/OtpResponse'
         401:
           description: unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/OtpResponse'
 
   /otp-config/setup-otp-mail/{username}:
     post:
@@ -213,6 +213,18 @@ components:
     Error:
       type: object
       properties:
+        error:
+          type: string
+        error_description:
+          type: string
+
+    OtpResponse:
+      type: object
+      properties:
+        info:
+          type: string
+        success:
+          type: boolean
         error:
           type: string
         error_description:
