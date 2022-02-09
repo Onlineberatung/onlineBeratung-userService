@@ -34,9 +34,11 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
+import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import de.caritas.cob.userservice.api.model.OtpResponse;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
@@ -146,6 +148,8 @@ public class UserControllerE2EIT {
   private Set<Consultant> consultantsToReset = new HashSet<>();
 
   private ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO;
+
+  private EmailDTO emailDTO;
 
   @AfterEach
   public void reset() {
@@ -384,6 +388,81 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
+    givenAValidConsultant();
+    givenAValidEmailDTO();
+    givenABearerToken();
+    givenAValidKeycloakResponse();
+
+    mockMvc.perform(
+            put("/users/2fa/email")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    var urlSuffix =
+        "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
+    verify(keycloakRestTemplate).postForEntity(endsWith(urlSuffix), captor.capture(), eq(
+        OtpResponse.class));
+
+    var otpSetupDTO = captor.getValue().getBody();
+    assertNotNull(otpSetupDTO);
+    assertEquals(emailDTO.getEmail(), otpSetupDTO.getEmail());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTheEmailFormatIsInvalid()
+      throws Exception {
+    givenAnInvalidEmailDTO();
+
+    mockMvc.perform(
+            put("/users/2fa/email")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfNoPayloadIsGiven()
+      throws Exception {
+    mockMvc.perform(
+            put("/users/2fa/email")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithError()
+      throws Exception {
+    givenAValidConsultant();
+    givenAValidEmailDTO();
+    givenABearerToken();
+    givenAKeycloakErrorResponse();
+
+    mockMvc.perform(
+            put("/users/2fa/email")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
     givenAValidConsultant();
     givenAValidActivate2faUserDTO();
@@ -505,6 +584,46 @@ public class UserControllerE2EIT {
     activateTwoFactorAuthUserDTO = new ActivateTwoFactorAuthUserDTO();
     activateTwoFactorAuthUserDTO.setOtp(RandomStringUtils.randomNumeric(6));
     activateTwoFactorAuthUserDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
+  }
+
+  private void givenAValidKeycloakResponse() {
+    var urlSuffix =
+        "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
+    var otpResponse = new OtpResponse();
+    otpResponse.setSuccess(true);
+
+    when(keycloakRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(OtpResponse.class)
+    )).thenReturn(ResponseEntity.ok(otpResponse));
+  }
+
+  private void givenAKeycloakErrorResponse() {
+    var urlSuffix =
+        "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
+    var otpResponse = new OtpResponse();
+    otpResponse.setSuccess(false);
+
+    when(keycloakRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(OtpResponse.class)
+    )).thenReturn(ResponseEntity.badRequest().body(otpResponse));
+  }
+
+  private void givenAValidEmailDTO() {
+    var email = RandomStringUtils.randomAlphabetic(8)
+        + "@" + RandomStringUtils.randomAlphabetic(8)
+        + ".com";
+
+    emailDTO = new EmailDTO();
+    emailDTO.setEmail(email);
+  }
+
+  private void givenAnInvalidEmailDTO() {
+    var email = RandomStringUtils.randomAlphabetic(8)
+        + RandomStringUtils.randomAlphabetic(8)
+        + ".com";
+
+    emailDTO = new EmailDTO();
+    emailDTO.setEmail(email);
   }
 
   private void givenABearerToken() {

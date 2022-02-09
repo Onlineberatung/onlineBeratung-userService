@@ -1287,6 +1287,31 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/2fa/email:
+    put:
+      tags:
+        - user-controller
+      summary: 'Starts 2FA activation process by email [authorities: consultant or user]'
+      operationId: startTwoFactorAuthByEmailSetup
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/EmailDTO'
+        required: true
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/{twoFactorAuthOr2fa}:
     parameters:
       - name: twoFactorAuthOr2fa
@@ -2199,6 +2224,16 @@ components:
         password:
           type: string
           example: p@ssw0rd
+
+    EmailDTO:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: max.mustermann@domain.de
 
     ActivateTwoFactorAuthUserDTO:
       type: object

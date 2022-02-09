@@ -40,6 +40,17 @@ public class KeycloakClient {
     restTemplate.put(url, entity, responseType);
   }
 
+  public <T> ResponseEntity<T> postForEntity(String bearerToken, String url,
+      @Nullable Object request,
+      Class<T> responseType) throws RestClientException {
+    var httpHeaders = headersWithBearerToken(bearerToken);
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+    var entity = new HttpEntity<>(request, httpHeaders);
+
+    return restTemplate.postForEntity(url, entity, responseType);
+  }
+
   public <T> ResponseEntity<T> delete(String bearerToken, String url, Class<T> responseType) {
     var httpHeaders = headersWithBearerToken(bearerToken);
     httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
