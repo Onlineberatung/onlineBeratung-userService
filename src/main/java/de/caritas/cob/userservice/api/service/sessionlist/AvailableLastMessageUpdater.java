@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetMessages
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.model.SessionDTO;
+import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessagesDTO;
@@ -17,9 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,13 +28,21 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class AvailableLastMessageUpdater {
 
-  private final @NonNull SessionListAnalyser sessionListAnalyser;
-  private final @NonNull MessageServiceProvider messageServiceProvider;
-  @Value("${rocket.systemuser.id}")
-  private String rocketChatSystemUserId;
+  private final SessionListAnalyser sessionListAnalyser;
+  private final MessageServiceProvider messageServiceProvider;
+  private final String rocketChatSystemUserId;
+
+  @Autowired
+  public AvailableLastMessageUpdater(
+      SessionListAnalyser sessionListAnalyser,
+      MessageServiceProvider messageServiceProvider,
+      @Value("${rocket.systemuser.id}") String rocketChatSystemUserId) {
+    this.sessionListAnalyser = sessionListAnalyser;
+    this.messageServiceProvider = messageServiceProvider;
+    this.rocketChatSystemUserId = rocketChatSystemUserId;
+  }
 
   /**
    * Updates the given session with further Rocket.Chat last message information.
@@ -44,30 +52,32 @@ public class AvailableLastMessageUpdater {
    * @param session                   the session to be updated
    * @param rocketChatCredentials     the {@link RocketChatCredentials}
    */
-  void updateSessionWithAvailableLastMessage(RocketChatRoomInformation rocketChatRoomInformation,
+  void updateSessionWithAvailableLastMessage(
+      RocketChatRoomInformation rocketChatRoomInformation,
       Consumer<Date> latestMessageSetter, SessionDTO session,
       RocketChatCredentials rocketChatCredentials) {
 
     var groupId = session.getGroupId();
     var roomsLastMessage = getLastMessageOfRoom(rocketChatRoomInformation, rocketChatCredentials,
         groupId);
-    session.setLastMessage(isNotBlank(roomsLastMessage.getMessage())
-        ? sessionListAnalyser.prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId)
-        : null);
+    session.setLastMessage(isNotBlank(roomsLastMessage.getMessage()) ? sessionListAnalyser
+        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
     session.setMessageDate(Helper.getUnixTimestampFromDate(
         rocketChatRoomInformation.getLastMessagesRoom().get(groupId).getTimestamp()));
     latestMessageSetter.accept(roomsLastMessage.getTimestamp());
-    session.setAttachment(sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(
-        rocketChatCredentials.getRocketChatUserId(), roomsLastMessage));
+    session.setAttachment(sessionListAnalyser
+        .getAttachmentFromRocketChatMessageIfAvailable(rocketChatCredentials.getRocketChatUserId(),
+            roomsLastMessage));
     if (nonNull(roomsLastMessage.getAlias())) {
       session.setVideoCallMessageDTO(roomsLastMessage.getAlias().getVideoCallMessageDTO());
     }
   }
 
   private RoomsLastMessageDTO getLastMessageOfRoom(
-      RocketChatRoomInformation rocketChatRoomInformation, RocketChatCredentials credentials,
+      RocketChatRoomInformation rocketChatRoomInformation,
+      RocketChatCredentials credentials,
       String groupId) {
-    var lastMessageOfRoom = rocketChatRoomInformation.getLastMessagesRoom()
+    RoomsLastMessageDTO lastMessageOfRoom = rocketChatRoomInformation.getLastMessagesRoom()
         .get(groupId);
 
     if (lastMessageIsAliasFromSystem(lastMessageOfRoom)) {
@@ -77,7 +87,7 @@ public class AvailableLastMessageUpdater {
   }
 
   private boolean lastMessageIsAliasFromSystem(RoomsLastMessageDTO roomsLastMessage) {
-    var chatUser = roomsLastMessage.getUser();
+    RocketChatUserDTO chatUser = roomsLastMessage.getUser();
     return nonNull(chatUser) && rocketChatSystemUserId.equals(chatUser.getId()) && nonNull(
         roomsLastMessage.getAlias());
   }
@@ -87,8 +97,8 @@ public class AvailableLastMessageUpdater {
     List<MessagesDTO> messages = new ArrayList<>();
     try {
       messages = messageServiceProvider.getMessages(rocketChatCredentials, groupId).stream()
-          .filter(message -> nonNull(message.getU()))
-          .filter(message -> !rocketChatSystemUserId.equals(message.getU().getId()))
+          .filter(m -> nonNull(m.getU()))
+          .filter(m -> !m.getU().getId().equals(rocketChatSystemUserId))
           .collect(Collectors.toList());
     } catch (RocketChatGetMessagesStreamException e) {
       log.error("failed to load last non system message", e);
@@ -96,7 +106,7 @@ public class AvailableLastMessageUpdater {
     if (messages.isEmpty()) {
       return "";
     }
-    var lastMessage = messages.get(messages.size() - 1);
+    MessagesDTO lastMessage = messages.get(messages.size() - 1);
     return lastMessage.getMsg();
   }
 

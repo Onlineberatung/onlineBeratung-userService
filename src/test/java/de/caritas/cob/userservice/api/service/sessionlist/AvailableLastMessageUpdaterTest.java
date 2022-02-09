@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetMessagesStreamException;
@@ -30,6 +29,7 @@ import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -40,6 +40,7 @@ public class AvailableLastMessageUpdaterTest {
   private static final String GROUP_ID = "GroupId";
   private static final String ROCKET_SYSTEM_USER_ID = "D6A2C592-FA4A-475D-9404-FA848D75E5E2";
 
+  @InjectMocks
   private AvailableLastMessageUpdater availableLastMessageUpdater;
 
   @Mock
@@ -59,9 +60,8 @@ public class AvailableLastMessageUpdaterTest {
     Map<String, RoomsLastMessageDTO> rooms = new HashMap<>();
     rooms.put(GROUP_ID, roomsLastMessageDTO);
     when(rocketChatRoomInformation.getLastMessagesRoom()).thenReturn(rooms);
-    availableLastMessageUpdater = new AvailableLastMessageUpdater(sessionListAnalyser,
-        messageServiceProvider);
-    setField(availableLastMessageUpdater, "rocketChatSystemUserId", ROCKET_SYSTEM_USER_ID);
+    ReflectionTestUtils.setField(availableLastMessageUpdater, "rocketChatSystemUserId",
+        ROCKET_SYSTEM_USER_ID);
   }
 
   @Test
