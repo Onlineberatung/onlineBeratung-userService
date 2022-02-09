@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.adapters.keycloak.dto;
+package de.caritas.cob.userservice.api.model.keycloak;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

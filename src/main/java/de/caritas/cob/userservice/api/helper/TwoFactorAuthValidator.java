@@ -4,15 +4,16 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
+import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import java.util.Set;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +27,8 @@ public class TwoFactorAuthValidator {
   private static final int OTP_INITIAL_CODE_LENGTH = 6;
   private static final int OTP_SECRET_LENGTH = 32;
 
-  private final IdentityClient identityClient;
-  private final IdentityClientConfig identityClientConfig;
+  private final @NonNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  private final IdentityConfig identityConfig;
 
   /**
    * Checks if the parameters of the request have the correct length.
@@ -64,12 +65,11 @@ public class TwoFactorAuthValidator {
 
   private boolean isConsultantRoleAnd2FaIsDisabled(Set<String> roles) {
     return roles.contains(UserRole.CONSULTANT.getValue())
-        && !identityClientConfig.getOtpAllowedForConsultants();
+        && !identityConfig.getOtpAllowedForConsultants();
   }
 
   private boolean isUserRoleAnd2FaIsDisabled(Set<String> roles) {
-    return roles.contains(UserRole.USER.getValue())
-        && !identityClientConfig.getOtpAllowedForUsers();
+    return roles.contains(UserRole.USER.getValue()) && !identityConfig.getOtpAllowedForUsers();
   }
 
   /**
@@ -92,9 +92,9 @@ public class TwoFactorAuthValidator {
 
   private TwoFactorAuthDTO updateDtoWith2FaInformationFromKeycloak(
       AuthenticatedUser authenticatedUser, TwoFactorAuthDTO twoFactorAuthDTO) {
-    var username = authenticatedUser.getUsername();
-
-    return identityClient.getOtpCredential(username)
+    var optionalOtpInfoDTO = keycloakTwoFactorAuthService
+        .getOtpCredential(authenticatedUser.getUsername());
+    return optionalOtpInfoDTO
         .map(otpInfoDTO -> fillInTwoFactorAuth(twoFactorAuthDTO, otpInfoDTO))
         .orElseGet(() -> twoFactorAuthDTO.isEnabled(false));
   }
@@ -111,9 +111,9 @@ public class TwoFactorAuthValidator {
 
   private Boolean isTwoFactorAuthEnabled(AuthenticatedUser authenticatedUser) {
     if (authenticatedUser.getRoles().contains(UserRole.USER.getValue())) {
-      return identityClientConfig.getOtpAllowedForUsers();
+      return identityConfig.getOtpAllowedForUsers();
     } else if (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue())) {
-      return identityClientConfig.getOtpAllowedForConsultants();
+      return identityConfig.getOtpAllowedForConsultants();
     }
     return Boolean.FALSE;
   }

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.adapters.keycloak.dto;
+package de.caritas.cob.userservice.api.model.keycloak.login;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

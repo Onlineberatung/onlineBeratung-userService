@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.testHelper;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import java.util.ArrayList;
 import java.util.List;
 import org.keycloak.representations.idm.UserRepresentation;
