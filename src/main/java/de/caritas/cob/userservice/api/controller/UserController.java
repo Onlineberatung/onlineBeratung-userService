@@ -11,10 +11,8 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
-import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
-import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
-import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
@@ -33,8 +31,8 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
+import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
@@ -49,7 +47,6 @@ import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
@@ -60,6 +57,9 @@ import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
@@ -71,13 +71,14 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
+import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -137,8 +138,9 @@ public class UserController implements UsersApi {
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
   private final @NotNull SessionArchiveService sessionArchiveService;
-  private final @NotNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
-  private final @NotNull TwoFactorAuthValidator twoFactorAuthValidator;
+  private final @NotNull IdentityClient identityClient;
+  private final @NonNull IdentityClientConfig identityClientConfig;
+  private final @NonNull IdentityManaging identityManager;
   private final @NotNull ActionsRegistry actionsRegistry;
   private final @NonNull ConsultantDtoMapper consultantDtoMapper;
   private final @NonNull ConsultantService consultantService;
@@ -895,14 +897,18 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthForUser(String twoFactorAuthOr2fa,
       ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO) {
+    if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
+      throw new ConflictException("2FA is disabled for user role");
+    }
+    if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
+      throw new ConflictException("2FA is disabled for consultant role");
+    }
 
-    var otpSetupDTO = new OtpSetupDTO();
-    otpSetupDTO.setSecret(activateTwoFactorAuthUserDTO.getSecret());
-    otpSetupDTO.setInitialCode(activateTwoFactorAuthUserDTO.getOtp());
-
-    twoFactorAuthValidator.checkRequestParameterForTwoFactorAuthActivations(otpSetupDTO);
-    twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
-    keycloakTwoFactorAuthService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
+    identityManager.setUpOneTimePassword(
+        authenticatedUser.getUsername(),
+        activateTwoFactorAuthUserDTO.getOtp(),
+        activateTwoFactorAuthUserDTO.getSecret()
+    );
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -914,7 +920,8 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> deleteTwoFactorAuthForUser(String twoFactorAuthOr2fa) {
-    keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
+    identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

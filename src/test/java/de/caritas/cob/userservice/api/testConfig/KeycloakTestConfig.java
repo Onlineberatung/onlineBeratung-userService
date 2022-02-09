@@ -1,14 +1,15 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
-import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -21,8 +22,10 @@ public class KeycloakTestConfig {
 
   @Bean
   public KeycloakAdminClientService keycloakAdminClientService(UserHelper userHelper,
-      KeycloakAdminClientAccessor keycloakAdminClientAccessor, IdentityConfig identityConfig) {
-    return new KeycloakAdminClientService(userHelper, keycloakAdminClientAccessor, identityConfig) {
+      KeycloakAdminClientAccessor keycloakAdminClientAccessor,
+      IdentityClientConfig identityClientConfig) {
+    return new KeycloakAdminClientService(userHelper, keycloakAdminClientAccessor,
+        identityClientConfig) {
       @Override
       public KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO user) {
         KeycloakCreateUserResponseDTO keycloakUserDTO = new KeycloakCreateUserResponseDTO();
@@ -81,10 +84,14 @@ public class KeycloakTestConfig {
   @Bean
   public KeycloakService keycloakService(RestTemplate restTemplate,
       AuthenticatedUser authenticatedUser, KeycloakAdminClientService keycloakAdminClientService,
-      UserAccountInputValidator userAccountInputValidator, IdentityConfig identityConfig) {
+      UserAccountInputValidator userAccountInputValidator,
+      IdentityClientConfig identityClientConfig,
+      KeycloakAdminClientAccessor keycloakAdminClientAccessor,
+      KeycloakClient keycloakClient) {
 
     return new KeycloakService(restTemplate, authenticatedUser, keycloakAdminClientService,
-        userAccountInputValidator, identityConfig) {
+        userAccountInputValidator, identityClientConfig, keycloakAdminClientAccessor,
+        keycloakClient) {
       @Override
       public boolean changePassword(String userId, String password) {
         return super.changePassword(userId, password);
