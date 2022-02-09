@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toDate;
+import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -29,7 +29,6 @@ public class ConsultantSessionEnricher {
   private final @NonNull SessionListAnalyser sessionListAnalyser;
   private final @NonNull RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-  private final @NonNull AvailableLastMessageUpdater availableLastMessageUpdater;
 
   /**
    * Enriches the given session with the following information from Rocket.Chat: "last message",
@@ -45,33 +44,35 @@ public class ConsultantSessionEnricher {
       List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs, String rcToken,
       Consultant consultant) {
 
-    var rocketChatCredentials = RocketChatCredentials.builder()
-        .rocketChatToken(rcToken)
-        .rocketChatUserId(consultant.getRocketChatId())
-        .build();
+    var rocketChatRoomInformation = this.rocketChatRoomInformationProvider
+        .retrieveRocketChatInformation(RocketChatCredentials.builder()
+            .rocketChatToken(rcToken)
+            .rocketChatUserId(consultant.getRocketChatId())
+            .build());
 
-    consultantSessionResponseDTOs.forEach(
-        consultantSessionResponseDTO -> this.enrichConsultantSession(consultantSessionResponseDTO,
-            rocketChatCredentials));
+    consultantSessionResponseDTOs.forEach(consultantSessionResponseDTO -> this
+        .enrichConsultantSession(consultantSessionResponseDTO, rocketChatRoomInformation,
+            consultant));
 
     return consultantSessionResponseDTOs;
   }
 
   private void enrichConsultantSession(ConsultantSessionResponseDTO consultantSessionResponseDTO,
-      RocketChatCredentials rocketChatCredentials) {
+      RocketChatRoomInformation rocketChatRoomInformation, Consultant consultant) {
     SessionDTO session = consultantSessionResponseDTO.getSession();
     String groupId = session.getGroupId();
+
     session.setMonitoring(getMonitoringProperty(session));
 
-    var rocketChatRoomInformation = this.rocketChatRoomInformationProvider.retrieveRocketChatInformation(
-        rocketChatCredentials);
     session.setMessagesRead(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         rocketChatRoomInformation.getReadMessages(), groupId));
 
     if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
         rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      availableLastMessageUpdater.updateSessionWithAvailableLastMessage(rocketChatRoomInformation,
-          consultantSessionResponseDTO::setLatestMessage, session, rocketChatCredentials);
+      new AvailableLastMessageUpdater(this.sessionListAnalyser)
+          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation,
+              consultant.getRocketChatId(), consultantSessionResponseDTO::setLatestMessage, session,
+              groupId);
     } else {
       setFallbackDate(consultantSessionResponseDTO, session);
     }
@@ -88,8 +89,9 @@ public class ConsultantSessionEnricher {
   }
 
   private boolean getMonitoringProperty(SessionDTO session) {
-    var extendedConsultingTypeResponseDTO = consultingTypeManager.getConsultingTypeSettings(
-        session.getConsultingType());
+
+    var extendedConsultingTypeResponseDTO = consultingTypeManager
+        .getConsultingTypeSettings(session.getConsultingType());
 
     return nonNull(extendedConsultingTypeResponseDTO) && nonNull(
         extendedConsultingTypeResponseDTO.getMonitoring()) && isTrue(

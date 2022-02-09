@@ -1,13 +1,11 @@
 package de.caritas.cob.userservice.api.service.message;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetMessagesStreamException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
@@ -22,11 +20,7 @@ import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
-import de.caritas.cob.userservice.messageservice.generated.web.model.MessageStreamDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
-import de.caritas.cob.userservice.messageservice.generated.web.model.MessagesDTO;
-import java.util.Collection;
-import java.util.Collections;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -155,27 +149,5 @@ public class MessageServiceProvider {
   private void addDefaultHeaders(ApiClient apiClient) {
     var headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
-  }
-
-  /**
-   * Gets the messages of the provided Rocket.Chat group ID.
-   *
-   * @param rcCredentials {@link RocketChatCredentials}
-   * @param rcGroupId     Rocket.Chat group ID
-   * @return List of MessagesDTO
-   * @throws RocketChatGetMessagesStreamException exception when message fetching fails
-   */
-  public Collection<MessagesDTO> getMessages(RocketChatCredentials rcCredentials, String rcGroupId)
-      throws RocketChatGetMessagesStreamException {
-    addDefaultHeaders(this.messageControllerApi.getApiClient());
-    try {
-      MessageStreamDTO messageStream = this.messageControllerApi.getMessageStream(
-          rcCredentials.getRocketChatToken(),
-          rcCredentials.getRocketChatUserId(), rcGroupId);
-      return nonNull(messageStream) ? messageStream.getMessages() : Collections.emptyList();
-    } catch (RestClientException e) {
-      throw new RocketChatGetMessagesStreamException(String
-          .format("Failed to get message stream of Rocket.Chat group with id %s", rcGroupId), e);
-    }
   }
 }
