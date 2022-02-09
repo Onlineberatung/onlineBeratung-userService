@@ -157,19 +157,25 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/Success'
+                $ref: '#/components/schemas/OtpResponse'
         400:
           description: invalid parameter
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/OtpResponse'
         401:
           description: the code was not valid
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/OtpResponse'
+        429:
+          description: too many attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpResponse'
 
 components:
   schemas:
