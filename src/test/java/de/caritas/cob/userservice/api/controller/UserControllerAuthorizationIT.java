@@ -75,6 +75,7 @@ import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -85,8 +86,6 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -157,7 +156,7 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private ConsultantAgencyService consultantAgencyService;
   @MockBean
-  private KeycloakService keycloakService;
+  private IdentityClient identityClient;
   @MockBean
   private DecryptionService encryptionService;
   @MockBean
@@ -188,8 +187,6 @@ public class UserControllerAuthorizationIT {
   private UserDataFacade userDataFacade;
   @MockBean
   private SessionArchiveService sessionArchiveService;
-  @MockBean
-  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
   @MockBean
   private ConsultantUpdateService consultantUpdateService;
   @MockBean
@@ -1044,7 +1041,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService, authenticatedUser);
+    verifyNoMoreInteractions(identityClient, authenticatedUser);
   }
 
   @Test
@@ -1063,7 +1060,7 @@ public class UserControllerAuthorizationIT {
         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService, authenticatedUser);
+    verifyNoMoreInteractions(identityClient, authenticatedUser);
   }
 
   @Test
@@ -1075,7 +1072,7 @@ public class UserControllerAuthorizationIT {
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService, authenticatedUser);
+    verifyNoMoreInteractions(identityClient, authenticatedUser);
   }
 
   /**
@@ -1716,7 +1713,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1737,7 +1734,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1750,7 +1747,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1777,7 +1774,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1797,7 +1794,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1809,7 +1806,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1835,7 +1832,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1857,7 +1854,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1870,7 +1867,7 @@ public class UserControllerAuthorizationIT {
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2276,7 +2273,7 @@ public class UserControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE)
     ).andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2290,7 +2287,7 @@ public class UserControllerAuthorizationIT {
         delete(path)
     ).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2314,7 +2311,7 @@ public class UserControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE)
     ).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2344,7 +2341,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService).deleteOtpCredential(any());
+    verify(identityClient).deleteOtpCredential(any());
   }
 
   @Test
@@ -2358,7 +2355,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService).deleteOtpCredential(any());
+    verify(identityClient).deleteOtpCredential(any());
   }
 
   @Test
@@ -2376,7 +2373,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2388,7 +2385,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2405,7 +2402,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService).setUpOtpCredential(any(), any());
+    verify(identityClient).setUpOtpCredential(any(), any());
   }
 
   @Test
@@ -2422,7 +2419,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService).setUpOtpCredential(any(), any());
+    verify(identityClient).setUpOtpCredential(any(), any());
   }
 
   @Test
@@ -2436,7 +2433,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2454,7 +2451,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2466,7 +2463,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
