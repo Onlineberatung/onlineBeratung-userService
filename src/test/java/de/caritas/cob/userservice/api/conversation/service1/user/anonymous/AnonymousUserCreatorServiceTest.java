@@ -20,12 +20,12 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -47,9 +47,10 @@ public class AnonymousUserCreatorServiceTest {
   @Mock
   private KeycloakAdminClientService keycloakAdminClientService;
   @Mock
+  @SuppressWarnings("unused")
   private CreateUserFacade createUserFacade;
   @Mock
-  private KeycloakService keycloakService;
+  private IdentityClient identityClient;
   @Mock
   private RocketChatService rocketChatService;
   @Mock
@@ -64,7 +65,7 @@ public class AnonymousUserCreatorServiceTest {
     KeycloakCreateUserResponseDTO responseDTO = easyRandom
         .nextObject(KeycloakCreateUserResponseDTO.class);
     when(keycloakAdminClientService.createKeycloakUser(any())).thenReturn(responseDTO);
-    when(keycloakService.loginUser(anyString(), anyString()))
+    when(identityClient.loginUser(anyString(), anyString()))
         .thenThrow(new BadRequestException(ERROR));
 
     anonymousUserCreatorService.createAnonymousUser(USER_DTO_SUCHT);
@@ -97,7 +98,7 @@ public class AnonymousUserCreatorServiceTest {
     when(keycloakAdminClientService.createKeycloakUser(any())).thenReturn(responseDTO);
     KeycloakLoginResponseDTO keycloakLoginResponseDTO = easyRandom
         .nextObject(KeycloakLoginResponseDTO.class);
-    when(keycloakService.loginUser(anyString(), anyString())).thenReturn(keycloakLoginResponseDTO);
+    when(identityClient.loginUser(anyString(), anyString())).thenReturn(keycloakLoginResponseDTO);
     LoginResponseDTO loginResponseDTO = easyRandom.nextObject(LoginResponseDTO.class);
     ResponseEntity<LoginResponseDTO> responseEntity = new ResponseEntity<>(loginResponseDTO,
         HttpStatus.OK);
@@ -126,7 +127,7 @@ public class AnonymousUserCreatorServiceTest {
     when(keycloakAdminClientService.createKeycloakUser(any())).thenReturn(responseDTO);
     KeycloakLoginResponseDTO keycloakLoginResponseDTO = easyRandom
         .nextObject(KeycloakLoginResponseDTO.class);
-    when(keycloakService.loginUser(anyString(), anyString())).thenReturn(keycloakLoginResponseDTO);
+    when(identityClient.loginUser(anyString(), anyString())).thenReturn(keycloakLoginResponseDTO);
     LoginResponseDTO loginResponseDTO = easyRandom.nextObject(LoginResponseDTO.class);
     ResponseEntity<LoginResponseDTO> responseEntity = new ResponseEntity<>(loginResponseDTO,
         HttpStatus.OK);
