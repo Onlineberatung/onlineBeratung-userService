@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "session_data")
@@ -45,6 +46,7 @@ public class SessionData {
 
   @Column(name = "type", updatable = false, nullable = false)
   @NonNull
+  @Type(type = "org.hibernate.type.ByteType")
   private SessionDataType sessionDataType;
 
   @Column(name = "key_name")

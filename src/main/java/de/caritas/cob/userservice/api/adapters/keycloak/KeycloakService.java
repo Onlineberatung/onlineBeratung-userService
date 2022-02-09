@@ -1,13 +1,20 @@
-package de.caritas.cob.userservice.api.service;
+package de.caritas.cob.userservice.api.adapters.keycloak;
 
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,7 +36,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class KeycloakService {
+public class KeycloakService implements IdentityClient {
 
   private static final String KEYCLOAK_GRANT_TYPE_PW = "password";
   private static final String KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
@@ -36,14 +44,20 @@ public class KeycloakService {
   private static final String BODY_KEY_PASSWORD = "password";
   private static final String BODY_KEY_CLIENT_ID = "client_id";
   private static final String BODY_KEY_GRANT_TYPE = "grant_type";
+  private static final String ENDPOINT_OPENID_CONNECT_LOGIN = "/token";
+  private static final String ENDPOINT_OPENID_CONNECT_LOGOUT = "/logout";
+  private static final String ENDPOINT_OTP_INFO = "/fetch-otp-setup-info/{username}";
+  private static final String ENDPOINT_OTP_SETUP = "/setup-otp/{username}";
+  private static final String ENDPOINT_OTP_TEARDOWN = "/delete-otp/{username}";
+
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
-  @Value("${keycloakApi.login}")
-  private String keycloakLoginUrl;
-  @Value("${keycloakApi.logout}")
-  private String keycloakLogoutUrl;
+  private final @NonNull IdentityClientConfig identityClientConfig;
+  private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private final @NonNull KeycloakClient keycloakClient;
+
   @Value("${keycloakService.app.clientId}")
   private String keycloakClientId;
 
@@ -84,7 +98,11 @@ public class KeycloakService {
 
     try {
       return restTemplate
-          .postForEntity(keycloakLoginUrl, request, KeycloakLoginResponseDTO.class).getBody();
+          .postForEntity(
+              identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGIN),
+              request, KeycloakLoginResponseDTO.class
+          )
+          .getBody();
 
     } catch (RestClientResponseException exception) {
       throw new BadRequestException(String.format("Could not log in user %s into Keycloak: %s",
@@ -111,8 +129,10 @@ public class KeycloakService {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, httpHeaders);
 
     try {
-      ResponseEntity<Void> response = restTemplate.postForEntity(keycloakLogoutUrl, request,
-          Void.class);
+      var response = restTemplate.postForEntity(
+          identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGOUT),
+          request, Void.class
+      );
       return wasLogoutSuccessful(response, refreshToken);
     } catch (Exception ex) {
       log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken, ex);
@@ -143,5 +163,32 @@ public class KeycloakService {
 
   public void deleteEmailAddress() {
     keycloakAdminClientService.updateDummyEmail(authenticatedUser.getUserId());
+  }
+
+  @Override
+  public Optional<OtpInfoDTO> getOtpCredential(String userName) {
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_INFO, userName);
+    try {
+      var response = keycloakClient.get(bearerToken, requestUrl, OtpInfoDTO.class);
+      return Optional.ofNullable(response.getBody());
+    } catch (RestClientException restClientException) {
+      log.error("Keycloak cannot be accessed", restClientException);
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public void setUpOtpCredential(String userName, OtpSetupDTO otpSetupDTO) {
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_SETUP, userName);
+    keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
+  }
+
+  @Override
+  public void deleteOtpCredential(String userName) {
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_TEARDOWN, userName);
+    keycloakClient.delete(bearerToken, requestUrl, Void.class);
   }
 }

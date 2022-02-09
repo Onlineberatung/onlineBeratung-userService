@@ -9,8 +9,8 @@ public interface MonitoringRepository extends CrudRepository<Monitoring, Long> {
   /**
    * Find a {@link Monitoring} by a {@link Session} id
    *
-   * @param sessionId
-   * @return
+   * @param sessionId session ID
+   * @return monitoring list
    */
   List<Monitoring> findBySessionId(Long sessionId);
 }

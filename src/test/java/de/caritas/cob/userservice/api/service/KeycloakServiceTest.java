@@ -1,10 +1,13 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.OTP_INFO_DTO;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -16,11 +19,17 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
+import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -44,31 +53,33 @@ public class KeycloakServiceTest {
   private final String OLD_PW = "oldP@66w0rd!";
   private final String NEW_PW = "newP@66w0rd!";
   private final String REFRESH_TOKEN = "s09djf0w9ejf09wsejf09wjef";
+  private static final String BEARER_TOKEN = "token";
+  private static final String USERNAME = "testuser";
 
   @InjectMocks
   private KeycloakService keycloakService;
 
   @Mock
   private RestTemplate restTemplate;
-
   @Mock
   private Logger logger;
-
   @Mock
   private AuthenticatedUser authenticatedUser;
-
   @Mock
   private KeycloakAdminClientService keycloakAdminClientService;
-
   @Mock
   private UserAccountInputValidator userAccountInputValidator;
+  @Mock
+  private IdentityClientConfig identityClientConfig;
+  @Mock
+  private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  @Mock
+  private KeycloakClient keycloakClient;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    setField(keycloakService, "keycloakLoginUrl",
-        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token");
-    setField(keycloakService, "keycloakLogoutUrl",
-        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout");
+    givenAKeycloakLoginUrl();
+    givenAKeycloakLogoutUrl();
     setField(keycloakService, "keycloakClientId", "app");
     setInternalState(KeycloakService.class, "log", logger);
   }
@@ -167,5 +178,52 @@ public class KeycloakServiceTest {
     keycloakService.deleteEmailAddress();
 
     verify(keycloakAdminClientService).updateDummyEmail(userId);
+  }
+
+  @Test
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public void getOtpCredential_Should_Return_ResponseAsOptional_When_RequestWasSuccessfully() {
+    when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
+    var entity = new ResponseEntity(OTP_INFO_DTO, HttpStatus.OK);
+    when(this.keycloakClient.get(anyString(), any(), any()))
+        .thenReturn(entity);
+
+    assertEquals(Optional.of(OTP_INFO_DTO), keycloakService.getOtpCredential(USERNAME));
+  }
+
+  @Test
+  public void getOtpCredential_Should_Return_Empty_Optional_When_RequestHasAnError() {
+    when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
+    when(this.keycloakClient.get(anyString(), any(), any()))
+        .thenThrow(new RestClientException("Fail test case"));
+
+    assertEquals(Optional.empty(), keycloakService.getOtpCredential(USERNAME));
+  }
+
+  @Test
+  public void setUpOtpCredential_ShouldNot_ThrowInternalServerErrorException_When_RequestWasSuccessfully() {
+    when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
+
+    assertDoesNotThrow(() -> keycloakService
+        .setUpOtpCredential(USERNAME, new EasyRandom().nextObject(OtpSetupDTO.class)));
+  }
+
+  @Test
+  public void deleteOtpCredential_Should_Not_ThrowBadRequestException_When_RequestWasSuccessfully() {
+    when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
+
+    assertDoesNotThrow(() -> keycloakService.deleteOtpCredential(USERNAME));
+  }
+
+  private void givenAKeycloakLoginUrl() {
+    when(identityClientConfig.getOpenIdConnectUrl(anyString())).thenReturn(
+        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/token"
+    );
+  }
+
+  private void givenAKeycloakLogoutUrl() {
+    when(identityClientConfig.getOpenIdConnectUrl(anyString())).thenReturn(
+        "https://caritas.local/auth/realms/caritas-online-beratung/protocol/openid-connect/logout"
+    );
   }
 }

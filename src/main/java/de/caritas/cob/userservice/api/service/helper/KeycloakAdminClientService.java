@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -12,8 +13,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -50,16 +51,11 @@ public class KeycloakAdminClientService {
   @Value("${api.error.keycloakError}")
   private String keycloakError;
 
-  @Value("${keycloakApi.error.username}")
-  private String keycloakErrorUsername;
-
-  @Value("${keycloakApi.error.email}")
-  private String keycloakErrorEmail;
-
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   private final @NonNull UserHelper userHelper;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private final IdentityClientConfig identityClientConfig;
 
   /**
    * Creates a user in Keycloak and returns its Keycloak user ID.
@@ -96,10 +92,10 @@ public class KeycloakAdminClientService {
 
   private void handleCreateKeycloakUserError(Response response) {
     String errorMsg = response.readEntity(ErrorRepresentation.class).getErrorMessage();
-    if (errorMsg.equals(keycloakErrorEmail)) {
+    if (errorMsg.equals(identityClientConfig.getErrorMessageDuplicatedEmail())) {
       throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
-    if (errorMsg.equals(keycloakErrorUsername)) {
+    if (errorMsg.equals(identityClientConfig.getErrorMessageDuplicatedUsername())) {
       throw new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
   }

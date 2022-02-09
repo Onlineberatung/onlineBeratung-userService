@@ -1,18 +1,13 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
-import java.util.Set;
-import lombok.NonNull;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,53 +18,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TwoFactorAuthValidator {
 
-  private static final int OTP_INITIAL_CODE_LENGTH = 6;
-  private static final int OTP_SECRET_LENGTH = 32;
-
-  private final @NonNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
-
-  /**
-   * Checks if the parameters of the request have the correct length.
-   *
-   * @param otpSetupDTO {@link OtpSetupDTO}
-   */
-  public void checkRequestParameterForTwoFactorAuthActivations(OtpSetupDTO otpSetupDTO) {
-    if (isInitialCodeInvalid(otpSetupDTO) || isSecretInvalid(otpSetupDTO)) {
-      throw new BadRequestException("Invalid request secret and/or initial code parameter");
-    }
-  }
-
-  private boolean isInitialCodeInvalid(OtpSetupDTO otpSetupDTO) {
-    return isNull(otpSetupDTO.getInitialCode())
-        || otpSetupDTO.getInitialCode().length() != OTP_INITIAL_CODE_LENGTH;
-  }
-
-  private boolean isSecretInvalid(OtpSetupDTO otpSetupDTO) {
-    return isNull(otpSetupDTO.getSecret())
-        || otpSetupDTO.getSecret().length() != OTP_SECRET_LENGTH;
-  }
-
-  /**
-   * Checks if 2FA is disabled for user role.
-   *
-   * @param authenticatedUser {@link AuthenticatedUser}
-   */
-  public void checkIfRoleHasTwoFactorAuthEnabled(AuthenticatedUser authenticatedUser) {
-    var roles = authenticatedUser.getRoles();
-    if (isUserRoleAnd2FaIsDisabled(roles) || isConsultantRoleAnd2FaIsDisabled(roles)) {
-      throw new ConflictException("Two factor auth disabled for user role");
-    }
-  }
-
-  private boolean isConsultantRoleAnd2FaIsDisabled(Set<String> roles) {
-    return roles.contains(UserRole.CONSULTANT.getValue())
-        && isFalse(keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled());
-  }
-
-  private boolean isUserRoleAnd2FaIsDisabled(Set<String> roles) {
-    return roles.contains(UserRole.USER.getValue())
-        && isFalse(keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled());
-  }
+  private final IdentityClient identityClient;
+  private final IdentityClientConfig identityClientConfig;
 
   /**
    * Checks if user role has two factor authentication enabled. if yes it fetches the {@link
@@ -91,9 +41,9 @@ public class TwoFactorAuthValidator {
 
   private TwoFactorAuthDTO updateDtoWith2FaInformationFromKeycloak(
       AuthenticatedUser authenticatedUser, TwoFactorAuthDTO twoFactorAuthDTO) {
-    var optionalOtpInfoDTO = keycloakTwoFactorAuthService
-        .getOtpCredential(authenticatedUser.getUsername());
-    return optionalOtpInfoDTO
+    var username = authenticatedUser.getUsername();
+
+    return identityClient.getOtpCredential(username)
         .map(otpInfoDTO -> fillInTwoFactorAuth(twoFactorAuthDTO, otpInfoDTO))
         .orElseGet(() -> twoFactorAuthDTO.isEnabled(false));
   }
@@ -110,9 +60,9 @@ public class TwoFactorAuthValidator {
 
   private Boolean isTwoFactorAuthEnabled(AuthenticatedUser authenticatedUser) {
     if (authenticatedUser.getRoles().contains(UserRole.USER.getValue())) {
-      return keycloakTwoFactorAuthService.getUserTwoFactorAuthEnabled();
+      return identityClientConfig.getOtpAllowedForUsers();
     } else if (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue())) {
-      return keycloakTwoFactorAuthService.getConsultantTwoFactorAuthEnabled();
+      return identityClientConfig.getOtpAllowedForConsultants();
     }
     return Boolean.FALSE;
   }

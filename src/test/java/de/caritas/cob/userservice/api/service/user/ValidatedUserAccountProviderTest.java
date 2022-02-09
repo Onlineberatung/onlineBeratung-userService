@@ -27,11 +27,11 @@ import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
@@ -59,7 +59,7 @@ public class ValidatedUserAccountProviderTest {
   @Mock
   private AuthenticatedUser authenticatedUser;
   @Mock
-  private KeycloakService keycloakService;
+  private IdentityClient identityClient;
   @Mock
   private RocketChatService rocketChatService;
   @Mock
@@ -132,7 +132,7 @@ public class ValidatedUserAccountProviderTest {
 
     this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
-    verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
+    verify(identityClient).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
@@ -154,7 +154,7 @@ public class ValidatedUserAccountProviderTest {
 
     this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
-    verify(this.keycloakService, times(1)).changeEmailAddress("newMail");
+    verify(identityClient).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
@@ -178,8 +178,8 @@ public class ValidatedUserAccountProviderTest {
 
     accountProvider.changeUserAccountEmailAddress(Optional.empty());
 
-    verify(keycloakService).deleteEmailAddress();
-    verify(keycloakService, never()).changeEmailAddress(anyString());
+    verify(identityClient).deleteEmailAddress();
+    verify(identityClient, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
@@ -203,8 +203,8 @@ public class ValidatedUserAccountProviderTest {
 
     accountProvider.changeUserAccountEmailAddress(Optional.empty());
 
-    verify(keycloakService).deleteEmailAddress();
-    verify(keycloakService, never()).changeEmailAddress(anyString());
+    verify(identityClient).deleteEmailAddress();
+    verify(identityClient, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
@@ -226,12 +226,12 @@ public class ValidatedUserAccountProviderTest {
   @Test
   public void changePassword_Should_CallKeycloakAdminClientServiceToUpdateThePassword() {
     PasswordDTO passwordDTO = EASY_RANDOM.nextObject(PasswordDTO.class);
-    when(keycloakService.changePassword(any(), any())).thenReturn(true);
+    when(identityClient.changePassword(any(), any())).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
 
     this.accountProvider.changePassword(passwordDTO);
 
-    verify(keycloakService, times(1)).changePassword(any(), any());
+    verify(identityClient, times(1)).changePassword(any(), any());
   }
 
   @Test(expected = BadRequestException.class)

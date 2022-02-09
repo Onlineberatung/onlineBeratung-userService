@@ -22,7 +22,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;

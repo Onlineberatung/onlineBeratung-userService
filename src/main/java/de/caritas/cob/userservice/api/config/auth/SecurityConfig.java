@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.config;
+package de.caritas.cob.userservice.api.config.auth;
 
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY;
@@ -14,7 +14,7 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USE_FEEDBACK;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 
-import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
+import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import de.caritas.cob.userservice.api.controller.interceptor.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
@@ -83,7 +83,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
             "/users/chat/{chatId:[0-9]+}/join", "/users/chat/{chatId:[0-9]+}/members",
-            "/users/chat/{chatId:[0-9]+}/leave", "/users/twoFactorAuth", "/users/mobile/app/token")
+            "/users/chat/{chatId:[0-9]+}/leave", "/users/twoFactorAuth", "/users/2fa",
+            "/users/mobile/app/token"
+        )
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
             "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken",
