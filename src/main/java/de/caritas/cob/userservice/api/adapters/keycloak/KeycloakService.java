@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.adapters.keycloak;
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
 
-import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakRestTemplate;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -56,7 +56,7 @@ public class KeycloakService implements IdentityClient {
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
   private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
-  private final @NonNull KeycloakClient keycloakClient;
+  private final @NonNull KeycloakRestTemplate keycloakRestTemplate;
 
   @Value("${keycloakService.app.clientId}")
   private String keycloakClientId;
@@ -170,7 +170,7 @@ public class KeycloakService implements IdentityClient {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_INFO, userName);
     try {
-      var response = keycloakClient.get(bearerToken, requestUrl, OtpInfoDTO.class);
+      var response = keycloakRestTemplate.get(bearerToken, requestUrl, OtpInfoDTO.class);
       return Optional.ofNullable(response.getBody());
     } catch (RestClientException restClientException) {
       log.error("Keycloak cannot be accessed", restClientException);
@@ -182,13 +182,13 @@ public class KeycloakService implements IdentityClient {
   public void setUpOtpCredential(String userName, OtpSetupDTO otpSetupDTO) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_SETUP, userName);
-    keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
+    keycloakRestTemplate.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
   }
 
   @Override
   public void deleteOtpCredential(String userName) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_TEARDOWN, userName);
-    keycloakClient.delete(bearerToken, requestUrl, Void.class);
+    keycloakRestTemplate.delete(bearerToken, requestUrl, Void.class);
   }
 }

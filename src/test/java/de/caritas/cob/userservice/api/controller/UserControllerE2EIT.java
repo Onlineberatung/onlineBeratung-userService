@@ -11,17 +11,13 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -33,11 +29,8 @@ import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
-import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
@@ -49,7 +42,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import java.net.URI;
 import java.util.HashSet;
@@ -60,25 +52,19 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -118,18 +104,7 @@ public class UserControllerE2EIT {
   private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @MockBean
-  @Qualifier("restTemplate")
   private RestTemplate restTemplate;
-
-  @MockBean
-  @Qualifier("keycloakRestTemplate")
-  private RestTemplate keycloakRestTemplate;
-
-  @MockBean
-  private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
-
-  @Captor
-  private ArgumentCaptor<HttpEntity<OtpSetupDTO>> captor;
 
   private User user;
 
@@ -145,8 +120,6 @@ public class UserControllerE2EIT {
 
   private Set<Consultant> consultantsToReset = new HashSet<>();
 
-  private ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO;
-
   @AfterEach
   public void reset() {
     user = null;
@@ -160,7 +133,6 @@ public class UserControllerE2EIT {
       consultantRepository.save(consultantToReset);
     });
     consultantsToReset = new HashSet<>();
-    activateTwoFactorAuthUserDTO = null;
   }
 
   @Test
@@ -382,136 +354,6 @@ public class UserControllerE2EIT {
     )));
   }
 
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
-    givenAValidConsultant();
-    givenAValidActivate2faUserDTO();
-    givenABearerToken();
-
-    mockMvc.perform(
-            put("/users/twoFactorAuth")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    var urlSuffix = "/auth/realms/test/otp-config/setup-otp/" + consultant.getUsername();
-    verify(keycloakRestTemplate).put(endsWith(urlSuffix), captor.capture(), eq(OtpInfoDTO.class));
-
-    var otpSetupDTO = captor.getValue().getBody();
-    assertNotNull(otpSetupDTO);
-    assertEquals(activateTwoFactorAuthUserDTO.getOtp(), otpSetupDTO.getInitialCode());
-    assertEquals(activateTwoFactorAuthUserDTO.getSecret(), otpSetupDTO.getSecret());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenOtpHasWrongLength()
-      throws Exception {
-    givenAValidConsultant();
-    givenAnActivate2faViaAppWithAnInvalidOtp();
-
-    mockMvc.perform(
-            put("/users/twoFactorAuth")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenSecretHasWrongLength()
-      throws Exception {
-    givenAValidConsultant();
-    givenAnActivate2faViaAppWithAnInvalidSecret();
-
-    mockMvc.perform(
-            put("/users/twoFactorAuth")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void deleteTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
-    givenAValidConsultant();
-    givenABearerToken();
-
-    mockMvc.perform(
-            delete("/users/twoFactorAuth")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    var urlSuffix = "/auth/realms/test/otp-config/delete-otp/" + consultant.getUsername();
-    verify(keycloakRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.DELETE), any(HttpEntity.class), eq(Void.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void deleteTwoFactorAuthForUserShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
-      throws Exception {
-    givenAValidConsultant();
-    givenABearerToken();
-    givenKeycloakIsDown();
-
-    mockMvc.perform(
-            delete("/users/twoFactorAuth")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError());
-  }
-
-  private void givenKeycloakIsDown() {
-    var urlSuffix = "/auth/realms/test/otp-config/delete-otp/" + consultant.getUsername();
-    when(keycloakRestTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.DELETE), any(HttpEntity.class), eq(Void.class))
-    ).thenThrow(new RestClientException("Keycloak down"));
-  }
-
-  private void givenAnActivate2faViaAppWithAnInvalidOtp() {
-    givenAValidActivate2faUserDTO();
-    while (activateTwoFactorAuthUserDTO.getOtp().length() == 6) {
-      activateTwoFactorAuthUserDTO.setOtp(RandomStringUtils.randomNumeric(1, 32));
-    }
-  }
-
-  private void givenAnActivate2faViaAppWithAnInvalidSecret() {
-    givenAValidActivate2faUserDTO();
-    while (activateTwoFactorAuthUserDTO.getSecret().length() == 32) {
-      activateTwoFactorAuthUserDTO.setSecret(RandomStringUtils.randomNumeric(1, 64));
-    }
-  }
-
-  private void givenAValidActivate2faUserDTO() {
-    activateTwoFactorAuthUserDTO = new ActivateTwoFactorAuthUserDTO();
-    activateTwoFactorAuthUserDTO.setOtp(RandomStringUtils.randomNumeric(6));
-    activateTwoFactorAuthUserDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
-  }
-
-  private void givenABearerToken() {
-    when(keycloakAdminClientAccessor.getBearerToken()).thenReturn(
-        RandomStringUtils.randomAlphanumeric(255));
-  }
-
   private void givenAConsultantWithMultipleAgencies() {
     consultant = consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe")
         .orElseThrow();
@@ -520,9 +362,6 @@ public class UserControllerE2EIT {
   private void givenAValidConsultant() {
     consultant = consultantRepository.findAll().iterator().next();
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
-    when(authenticatedUser.isUser()).thenReturn(false);
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-    when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
   }
 
   private void givenAValidConsultantSpeaking(LanguageCode languageCode) {

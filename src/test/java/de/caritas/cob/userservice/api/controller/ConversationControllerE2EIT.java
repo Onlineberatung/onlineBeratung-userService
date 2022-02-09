@@ -29,7 +29,6 @@ import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -65,7 +64,6 @@ public class ConversationControllerE2EIT {
   private AuthenticatedUser authenticatedUser;
 
   @MockBean
-  @Qualifier("restTemplate")
   private RestTemplate restTemplate;
 
   private Consultant consultant;

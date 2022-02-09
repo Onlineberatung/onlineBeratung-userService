@@ -1,9 +1,5 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static java.util.Objects.nonNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.caritas.cob.userservice.api.config.auth.UserRole;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,14 +28,4 @@ public class AuthenticatedUser {
   private String accessToken;
 
   private Set<String> grantedAuthorities;
-
-  @JsonIgnore
-  public boolean isUser() {
-    return nonNull(roles) && roles.contains(UserRole.USER.getValue());
-  }
-
-  @JsonIgnore
-  public boolean isConsultant() {
-    return nonNull(roles) && roles.contains(UserRole.CONSULTANT.getValue());
-  }
 }

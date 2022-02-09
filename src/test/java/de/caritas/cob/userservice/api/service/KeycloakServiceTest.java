@@ -20,7 +20,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
-import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakRestTemplate;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -74,7 +74,7 @@ public class KeycloakServiceTest {
   @Mock
   private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
   @Mock
-  private KeycloakClient keycloakClient;
+  private KeycloakRestTemplate keycloakRestTemplate;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -185,7 +185,7 @@ public class KeycloakServiceTest {
   public void getOtpCredential_Should_Return_ResponseAsOptional_When_RequestWasSuccessfully() {
     when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
     var entity = new ResponseEntity(OTP_INFO_DTO, HttpStatus.OK);
-    when(this.keycloakClient.get(anyString(), any(), any()))
+    when(this.keycloakRestTemplate.get(anyString(), any(), any()))
         .thenReturn(entity);
 
     assertEquals(Optional.of(OTP_INFO_DTO), keycloakService.getOtpCredential(USERNAME));
@@ -194,7 +194,7 @@ public class KeycloakServiceTest {
   @Test
   public void getOtpCredential_Should_Return_Empty_Optional_When_RequestHasAnError() {
     when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
-    when(this.keycloakClient.get(anyString(), any(), any()))
+    when(this.keycloakRestTemplate.get(anyString(), any(), any()))
         .thenThrow(new RestClientException("Fail test case"));
 
     assertEquals(Optional.empty(), keycloakService.getOtpCredential(USERNAME));
