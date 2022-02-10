@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAc
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.model.OtpResponse;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
@@ -49,6 +49,7 @@ public class KeycloakService implements IdentityClient {
   private static final String ENDPOINT_OTP_INFO = "/fetch-otp-setup-info/{username}";
   private static final String ENDPOINT_OTP_SETUP = "/setup-otp/{username}";
   private static final String ENDPOINT_OTP_TEARDOWN = "/delete-otp/{username}";
+  private static final String ENDPOINT_OTP_VERIFY_EMAIL = "/send-verification-mail/{username}";
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -57,6 +58,7 @@ public class KeycloakService implements IdentityClient {
   private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
   private final @NonNull KeycloakClient keycloakClient;
+  private final @NonNull KeycloakMapper keycloakMapper;
 
   @Value("${keycloakService.app.clientId}")
   private String keycloakClientId;
@@ -179,9 +181,11 @@ public class KeycloakService implements IdentityClient {
   }
 
   @Override
-  public void setUpOtpCredential(String userName, OtpSetupDTO otpSetupDTO) {
+  public void setUpOtpCredential(String userName, String initialCode, String secret) {
+    var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, secret, null);
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_SETUP, userName);
+
     keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
   }
 
@@ -190,5 +194,21 @@ public class KeycloakService implements IdentityClient {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_TEARDOWN, userName);
     keycloakClient.delete(bearerToken, requestUrl, Void.class);
+  }
+
+  @Override
+  public Optional<String> initiateEmailVerification(String username, String email) {
+    var otpSetupDTO = keycloakMapper.otpSetupDtoOf(null, null, email);
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_VERIFY_EMAIL, username);
+
+    var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
+        OtpResponse.class);
+
+    if (response.getStatusCode().isError()) {
+      return Optional.of("Keycloak responded with " + response.getStatusCode());
+    }
+
+    return Optional.empty();
   }
 }

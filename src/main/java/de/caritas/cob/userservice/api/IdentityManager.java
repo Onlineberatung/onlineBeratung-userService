@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api;
 
-import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakMapper;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,14 +12,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class IdentityManager implements IdentityManaging {
 
-  private final KeycloakMapper keycloakMapper;
-
   private final IdentityClient keycloakService;
 
   @Override
+  public Optional<String> setUpOneTimePassword(String username, String email) {
+    return keycloakService.initiateEmailVerification(username, email);
+  }
+
+  @Override
   public void setUpOneTimePassword(String username, String initialCode, String secret) {
-    var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, secret);
-    keycloakService.setUpOtpCredential(username, otpSetupDTO);
+    keycloakService.setUpOtpCredential(username, initialCode, secret);
   }
 
   @Override

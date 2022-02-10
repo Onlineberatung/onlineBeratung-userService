@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.OTP_INFO_DTO;
+import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertFalse;
@@ -19,18 +21,17 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.Optional;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +76,9 @@ public class KeycloakServiceTest {
   private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
   @Mock
   private KeycloakClient keycloakClient;
+  @Mock
+  @SuppressWarnings("unused")
+  private KeycloakMapper keycloakMapper;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -172,7 +176,7 @@ public class KeycloakServiceTest {
 
   @Test
   public void deleteEmailAddress_Should_useServicesCorrectly() {
-    var userId = RandomStringUtils.random(16);
+    var userId = random(16);
     when(authenticatedUser.getUserId()).thenReturn(userId);
 
     keycloakService.deleteEmailAddress();
@@ -204,8 +208,9 @@ public class KeycloakServiceTest {
   public void setUpOtpCredential_ShouldNot_ThrowInternalServerErrorException_When_RequestWasSuccessfully() {
     when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
 
-    assertDoesNotThrow(() -> keycloakService
-        .setUpOtpCredential(USERNAME, new EasyRandom().nextObject(OtpSetupDTO.class)));
+    assertDoesNotThrow(() -> keycloakService.setUpOtpCredential(
+        USERNAME, randomAlphabetic(8), randomAlphabetic(8))
+    );
   }
 
   @Test

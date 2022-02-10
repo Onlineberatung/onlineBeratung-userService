@@ -41,6 +41,7 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
@@ -85,6 +86,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.InternalServerErrorException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -886,6 +888,16 @@ public class UserController implements UsersApi {
   public ResponseEntity<Void> dearchiveSession(@PathVariable Long sessionId) {
     this.sessionArchiveService.dearchiveSession(sessionId);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> startTwoFactorAuthByEmailSetup(EmailDTO emailDTO) {
+    var username = authenticatedUser.getUsername();
+    identityManager.setUpOneTimePassword(username, emailDTO.getEmail()).ifPresent(message -> {
+      throw new InternalServerErrorException(message);
+    });
+
+    return ResponseEntity.noContent().build();
   }
 
   /**

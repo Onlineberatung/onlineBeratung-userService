@@ -54,6 +54,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.IdentityManager;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -71,6 +72,7 @@ import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
@@ -157,6 +159,8 @@ public class UserControllerAuthorizationIT {
   private ConsultantAgencyService consultantAgencyService;
   @MockBean
   private IdentityClient identityClient;
+  @MockBean
+  private IdentityManager identityManager;
   @MockBean
   private DecryptionService encryptionService;
   @MockBean
@@ -2341,7 +2345,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(identityClient).deleteOtpCredential(any());
+    verify(identityManager).deleteOneTimePassword(any());
   }
 
   @Test
@@ -2355,7 +2359,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(identityClient).deleteOtpCredential(any());
+    verify(identityManager).deleteOneTimePassword(any());
   }
 
   @Test
@@ -2390,6 +2394,59 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetup_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    var payload = givenAValidEmailDTO();
+
+    mvc.perform(put("/users/2fa/email")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(payload))
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetup_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    var payload = givenAValidEmailDTO();
+
+    mvc.perform(put("/users/2fa/email")
+            .content(objectMapper.writeValueAsString(payload))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  public void startTwoFactorAuthByEmailSetup_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+      throws Exception {
+    var payload = givenAValidEmailDTO();
+
+    mvc.perform(put("/users/2fa/email")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(payload))
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     var payload = givenAValidActivate2faDto();
@@ -2402,7 +2459,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(identityClient).setUpOtpCredential(any(), any());
+    verify(identityManager).setUpOneTimePassword(any(), any(), any());
   }
 
   @Test
@@ -2419,7 +2476,7 @@ public class UserControllerAuthorizationIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(identityClient).setUpOtpCredential(any(), any());
+    verify(identityManager).setUpOneTimePassword(any(), any(), any());
   }
 
   @Test
@@ -2511,5 +2568,16 @@ public class UserControllerAuthorizationIT {
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
 
     return consultant;
+  }
+
+  private EmailDTO givenAValidEmailDTO() {
+    var email = RandomStringUtils.randomAlphabetic(8)
+        + "@" + RandomStringUtils.randomAlphabetic(8)
+        + ".com";
+
+    var emailDTO = new EmailDTO();
+    emailDTO.setEmail(email);
+
+    return emailDTO;
   }
 }

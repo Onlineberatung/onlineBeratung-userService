@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
@@ -87,11 +88,11 @@ public class KeycloakTestConfig {
       UserAccountInputValidator userAccountInputValidator,
       IdentityClientConfig identityClientConfig,
       KeycloakAdminClientAccessor keycloakAdminClientAccessor,
-      KeycloakClient keycloakClient) {
+      KeycloakClient keycloakClient, KeycloakMapper keycloakMapper) {
 
     return new KeycloakService(restTemplate, authenticatedUser, keycloakAdminClientService,
         userAccountInputValidator, identityClientConfig, keycloakAdminClientAccessor,
-        keycloakClient) {
+        keycloakClient, keycloakMapper) {
       @Override
       public boolean changePassword(String userId, String password) {
         return super.changePassword(userId, password);
