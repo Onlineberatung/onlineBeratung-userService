@@ -25,5 +25,5 @@ public interface IdentityClient {
 
   Optional<String> initiateEmailVerification(final String username, final String email);
 
-  Map<String, Boolean> finishEmailVerification(final String username, final String email, final String initialCode);
+  Map<String, String> finishEmailVerification(final String username, final String initialCode);
 }

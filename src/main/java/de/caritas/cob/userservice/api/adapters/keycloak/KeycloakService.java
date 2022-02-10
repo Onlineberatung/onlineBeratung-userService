@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpResponse;
+import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
@@ -215,15 +216,14 @@ public class KeycloakService implements IdentityClient {
   }
 
   @Override
-  public Map<String, Boolean> finishEmailVerification(String username, String email,
-      String initialCode) {
-    var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, null, email);
+  public Map<String, String> finishEmailVerification(String username, String initialCode) {
+    var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, null, null);
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_FINISH_EMAIL, username);
 
     var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
-        OtpResponse.class);
+        SuccessWithEmail.class);
 
-    return keycloakMapper.mapOf(response.getStatusCode());
+    return keycloakMapper.mapOf(response);
   }
 }

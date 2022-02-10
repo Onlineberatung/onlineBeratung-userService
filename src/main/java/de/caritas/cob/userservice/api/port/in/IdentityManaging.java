@@ -9,7 +9,7 @@ public interface IdentityManaging {
 
   void setUpOneTimePassword(String username, String initialCode, String secret);
 
-  Map<String, Boolean> validateOneTimePassword(String username, String email, String code);
+  Map<String, String> validateOneTimePassword(String username, String code);
 
   void deleteOneTimePassword(String username);
 }

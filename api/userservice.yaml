@@ -1325,12 +1325,6 @@ paths:
           schema:
             type: string
             pattern: "[0-9]{6}"
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/EmailDTO'
-        required: true
       responses:
         204:
           description: NO CONTENT - successful operation

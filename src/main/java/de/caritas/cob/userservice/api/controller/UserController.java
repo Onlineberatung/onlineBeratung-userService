@@ -901,16 +901,14 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> finishTwoFactorAuthByEmailSetup(String tan, EmailDTO emailDTO) {
+  public ResponseEntity<Void> finishTwoFactorAuthByEmailSetup(String tan) {
     var username = authenticatedUser.getUsername();
-    var verificationResult = identityManager.validateOneTimePassword(
-        username, emailDTO.getEmail(), tan
-    );
+    var validationResult = identityManager.validateOneTimePassword(username, tan);
 
-    if (verificationResult.get("created")) {
+    if (Boolean.parseBoolean(validationResult.get("created"))) {
       return ResponseEntity.noContent().build();
     }
-    if (verificationResult.get("attemptsLeft")) {
+    if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
       return ResponseEntity.badRequest().build();
     }
 

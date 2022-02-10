@@ -40,6 +40,7 @@ import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpResponse;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
@@ -58,6 +59,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -468,7 +470,6 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void finishTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant();
-    givenAValidEmailDTO();
     givenABearerToken();
     givenAValidTan();
     givenAValidKeycloakSetupEmailResponse();
@@ -477,18 +478,18 @@ public class UserControllerE2EIT {
             post("/users/2fa/email/validate/{tan}", tan)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(emailDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
-    verify(keycloakRestTemplate).postForEntity(endsWith(urlSuffix), captor.capture(), eq(
-        OtpResponse.class));
+    verify(keycloakRestTemplate)
+        .postForEntity(
+            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+        );
 
     var otpSetupDTO = captor.getValue().getBody();
     assertNotNull(otpSetupDTO);
-    assertEquals(emailDTO.getEmail(), otpSetupDTO.getEmail());
+    assertEquals(tan, otpSetupDTO.getInitialCode());
   }
 
   @Test
@@ -619,12 +620,12 @@ public class UserControllerE2EIT {
   private void givenAValidKeycloakSetupEmailResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
-    var otpResponse = new OtpResponse();
-    otpResponse.setSuccess(true);
+    var successWithEmail = new SuccessWithEmail();
+    successWithEmail.setEmail(givenAValidEmail());
 
     when(keycloakRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(OtpResponse.class)
-    )).thenReturn(new ResponseEntity<>(otpResponse, HttpStatus.CREATED));
+        endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
+    )).thenReturn(new ResponseEntity<>(successWithEmail, HttpStatus.CREATED));
   }
 
   private void givenAValidKeycloakVerifyEmailResponse() {
@@ -650,18 +651,20 @@ public class UserControllerE2EIT {
   }
 
   private void givenAValidEmailDTO() {
-    var email = RandomStringUtils.randomAlphabetic(8)
-        + "@" + RandomStringUtils.randomAlphabetic(8)
-        + ".com";
-
+    var email = givenAValidEmail();
     emailDTO = new EmailDTO();
     emailDTO.setEmail(email);
   }
 
-  private void givenAnInvalidEmailDTO() {
-    var email = RandomStringUtils.randomAlphabetic(8)
-        + RandomStringUtils.randomAlphabetic(8)
+  @NonNull
+  private String givenAValidEmail() {
+    return RandomStringUtils.randomAlphabetic(8)
+        + "@" + RandomStringUtils.randomAlphabetic(8)
         + ".com";
+  }
+
+  private void givenAnInvalidEmailDTO() {
+    var email = RandomStringUtils.randomAlphabetic(16) + ".com";
 
     emailDTO = new EmailDTO();
     emailDTO.setEmail(email);

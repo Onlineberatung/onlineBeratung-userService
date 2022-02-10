@@ -157,7 +157,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/OtpResponse'
+                $ref: '#/components/schemas/SuccessWithEmail'
         400:
           description: invalid parameter
           content:
@@ -215,6 +215,13 @@ components:
       properties:
         info:
           type: string
+
+    SuccessWithEmail:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
 
     Error:
       type: object

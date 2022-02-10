@@ -26,10 +26,10 @@ public class IdentityManager implements IdentityManaging {
   }
 
   @Override
-  public Map<String, Boolean> validateOneTimePassword(String username, String email, String code) {
-    var verificationResult = keycloakService.finishEmailVerification(username, email, code);
-    if (verificationResult.get("created")) {
-      keycloakService.changeEmailAddress(email);
+  public Map<String, String> validateOneTimePassword(String username, String code) {
+    var verificationResult = keycloakService.finishEmailVerification(username, code);
+    if (verificationResult.get("created").equals("true")) {
+      keycloakService.changeEmailAddress(verificationResult.get("email"));
     }
 
     return verificationResult;
