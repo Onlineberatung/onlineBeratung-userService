@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -21,7 +21,8 @@ public class KeycloakClient {
     this.restTemplate = restTemplate;
   }
 
-  public <T> ResponseEntity<T> get(String bearerToken, String url, Class<T> responseType) {
+  public <T> ResponseEntity<T> get(String bearerToken, String url, Class<T> responseType)
+      throws HttpClientErrorException {
     var httpHeaders = headersWithBearerToken(bearerToken);
     httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -30,19 +31,18 @@ public class KeycloakClient {
     return restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
   }
 
-  public <T> void putForEntity(String bearerToken, String url, @Nullable Object request,
-      Class<T> responseType) throws RestClientException {
+  public <T> ResponseEntity<T> putForEntity(String bearerToken, String url,
+      @Nullable Object request, Class<T> responseType) throws HttpClientErrorException {
     var httpHeaders = headersWithBearerToken(bearerToken);
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
     var entity = new HttpEntity<>(request, httpHeaders);
 
-    restTemplate.put(url, entity, responseType);
+    return restTemplate.exchange(url, HttpMethod.PUT, entity, responseType);
   }
 
   public <T> ResponseEntity<T> postForEntity(String bearerToken, String url,
-      @Nullable Object request,
-      Class<T> responseType) throws RestClientException {
+      @Nullable Object request, Class<T> responseType) throws HttpClientErrorException {
     var httpHeaders = headersWithBearerToken(bearerToken);
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
@@ -51,7 +51,8 @@ public class KeycloakClient {
     return restTemplate.postForEntity(url, entity, responseType);
   }
 
-  public <T> ResponseEntity<T> delete(String bearerToken, String url, Class<T> responseType) {
+  public <T> ResponseEntity<T> delete(String bearerToken, String url, Class<T> responseType)
+      throws HttpClientErrorException {
     var httpHeaders = headersWithBearerToken(bearerToken);
     httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 

@@ -38,8 +38,8 @@ import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpResponse;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
@@ -83,6 +83,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
@@ -170,6 +171,8 @@ public class UserControllerE2EIT {
     });
     consultantsToReset = new HashSet<>();
     activateTwoFactorAuthUserDTO = null;
+    emailDTO = null;
+    tan = null;
   }
 
   @Test
@@ -408,10 +411,10 @@ public class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    var urlSuffix =
-        "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
-    verify(keycloakRestTemplate).postForEntity(endsWith(urlSuffix), captor.capture(), eq(
-        OtpResponse.class));
+    var urlSuffix = "/auth/realms/test/otp-config/send-verification-mail/"
+        + consultant.getUsername();
+    verify(keycloakRestTemplate)
+        .exchange(endsWith(urlSuffix), eq(HttpMethod.PUT), captor.capture(), eq(Success.class));
 
     var otpSetupDTO = captor.getValue().getBody();
     assertNotNull(otpSetupDTO);
@@ -471,7 +474,7 @@ public class UserControllerE2EIT {
   public void finishTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant();
     givenABearerToken();
-    givenAValidTan();
+    givenACorrectlyFormattedTan();
     givenAValidKeycloakSetupEmailResponse();
 
     mockMvc.perform(
@@ -480,6 +483,102 @@ public class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
+
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    verify(keycloakRestTemplate)
+        .postForEntity(
+            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+        );
+
+    var otpSetupDTO = captor.getValue().getBody();
+    assertNotNull(otpSetupDTO);
+    assertEquals(tan, otpSetupDTO.getInitialCode());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTanLengthIsWrong()
+      throws Exception {
+    givenAWronglyFormattedTan();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTanHasLetters()
+      throws Exception {
+    givenATanWithLetters();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithNotFoundIfTanIsEmpty()
+      throws Exception {
+    givenATanWithLetters();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTheTanIsInvalid()
+      throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+    givenACorrectlyFormattedTan();
+    givenAKeycloakSetupEmailInvalidCodeResponse();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    verify(keycloakRestTemplate)
+        .postForEntity(
+            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+        );
+
+    var otpSetupDTO = captor.getValue().getBody();
+    assertNotNull(otpSetupDTO);
+    assertEquals(tan, otpSetupDTO.getInitialCode());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithTooManyRequestsIfTooManyTanAttempts()
+      throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+    givenACorrectlyFormattedTan();
+    givenAKeycloakSetupEmailTooManyRequestsResponse();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isTooManyRequests());
 
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
     verify(keycloakRestTemplate)
@@ -509,7 +608,8 @@ public class UserControllerE2EIT {
         .andExpect(status().isOk());
 
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp/" + consultant.getUsername();
-    verify(keycloakRestTemplate).put(endsWith(urlSuffix), captor.capture(), eq(OtpInfoDTO.class));
+    verify(keycloakRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.PUT), captor.capture(),
+        eq(OtpInfoDTO.class));
 
     var otpSetupDTO = captor.getValue().getBody();
     assertNotNull(otpSetupDTO);
@@ -628,26 +728,47 @@ public class UserControllerE2EIT {
     )).thenReturn(new ResponseEntity<>(successWithEmail, HttpStatus.CREATED));
   }
 
+  private void givenAKeycloakSetupEmailInvalidCodeResponse() {
+    var urlSuffix =
+        "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    var codeInvalid = new HttpClientErrorException(HttpStatus.UNAUTHORIZED,
+        "the code was not valid", null, null);
+
+    when(keycloakRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
+    )).thenThrow(codeInvalid);
+  }
+
+  private void givenAKeycloakSetupEmailTooManyRequestsResponse() {
+    var urlSuffix =
+        "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    var tooManyAttempts = new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS,
+        "too many attempts", null, null);
+
+    when(keycloakRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
+    )).thenThrow(tooManyAttempts);
+  }
+
   private void givenAValidKeycloakVerifyEmailResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
-    var otpResponse = new OtpResponse();
-    otpResponse.setSuccess(true);
+    var success = easyRandom.nextObject(Success.class);
 
-    when(keycloakRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(OtpResponse.class)
-    )).thenReturn(ResponseEntity.ok(otpResponse));
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Success.class)
+    )).thenReturn(ResponseEntity.ok(success));
   }
 
   private void givenAKeycloakVerifyEmailErrorResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
-    var otpResponse = new OtpResponse();
-    otpResponse.setSuccess(false);
+    var invalidParameter = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "invalid parameter",
+        null, null);
 
-    when(keycloakRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(OtpResponse.class)
-    )).thenReturn(ResponseEntity.badRequest().body(otpResponse));
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Success.class)
+    )).thenThrow(invalidParameter);
   }
 
   private void givenAValidEmailDTO() {
@@ -675,8 +796,18 @@ public class UserControllerE2EIT {
         RandomStringUtils.randomAlphanumeric(255));
   }
 
-  private void givenAValidTan() {
+  private void givenACorrectlyFormattedTan() {
     tan = RandomStringUtils.randomNumeric(6);
+  }
+
+  private void givenAWronglyFormattedTan() {
+    while (isNull(tan) || tan.length() == 6) {
+      tan = RandomStringUtils.randomNumeric(1, 32);
+    }
+  }
+
+  private void givenATanWithLetters() {
+    tan = RandomStringUtils.randomAlphabetic(6);
   }
 
   private void givenAConsultantWithMultipleAgencies() {

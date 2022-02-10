@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAc
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpResponse;
+import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -205,14 +206,12 @@ public class KeycloakService implements IdentityClient {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_VERIFY_EMAIL, username);
 
-    var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
-        OtpResponse.class);
-
-    if (response.getStatusCode().isError()) {
-      return Optional.of("Keycloak responded with " + response.getStatusCode());
+    try {
+      keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, Success.class);
+      return Optional.empty();
+    } catch (RestClientException exception) {
+      return Optional.of(exception.getMessage());
     }
-
-    return Optional.empty();
   }
 
   @Override
@@ -221,9 +220,12 @@ public class KeycloakService implements IdentityClient {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_FINISH_EMAIL, username);
 
-    var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
-        SuccessWithEmail.class);
-
-    return keycloakMapper.mapOf(response);
+    try {
+      var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
+          SuccessWithEmail.class);
+      return keycloakMapper.mapOf(response);
+    } catch (HttpClientErrorException exception) {
+      return keycloakMapper.mapOf(exception);
+    }
   }
 }

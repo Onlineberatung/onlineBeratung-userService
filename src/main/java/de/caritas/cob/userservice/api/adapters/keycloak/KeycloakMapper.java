@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class KeycloakMapper {
@@ -28,6 +29,17 @@ public class KeycloakMapper {
         "created", String.valueOf(isCreated),
         "attemptsLeft", String.valueOf(status.equals(HttpStatus.TOO_MANY_REQUESTS) || isCreated),
         "email", Objects.requireNonNull(responseEntity.getBody()).getEmail()
+    );
+  }
+
+
+  public Map<String, String> mapOf(HttpClientErrorException exception) {
+    var status = exception.getStatusCode();
+
+    return Map.of(
+        "created", "false",
+        "attemptsLeft", String.valueOf(!status.equals(HttpStatus.TOO_MANY_REQUESTS)),
+        "email", "null"
     );
   }
 }
