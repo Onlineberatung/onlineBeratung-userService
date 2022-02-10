@@ -54,7 +54,7 @@ public class ConsultingTypeServiceTest {
         .thenReturn(randomBasicConsultingTypeResponseDTOList);
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
 
-    List<Integer> consultingTypeIds = consultingTypeService.getAllConsultingTypeIds();
+    List<Integer> consultingTypeIds = consultingTypeService.getAllConsultingTypeIds(null);
 
     assertEquals(consultingTypeIds.size(), size);
     assertEquals(randomBasicConsultingTypeResponseDTOList.stream().map(
