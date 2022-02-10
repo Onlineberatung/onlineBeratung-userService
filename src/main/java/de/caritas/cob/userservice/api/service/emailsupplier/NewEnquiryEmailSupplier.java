@@ -17,18 +17,28 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDT
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 /**
  * Supplier to provide mails to be sent when a new enquiry was created.
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Service
 public class NewEnquiryEmailSupplier implements EmailSupplier {
 
-  private final Session session;
-  private final ConsultantAgencyRepository consultantAgencyRepository;
-  private final AgencyService agencyService;
-  private final String applicationBaseUrl;
+  private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
+  private final @NonNull AgencyService agencyService;
+  @Value("${app.base.url}")
+  private String applicationBaseUrl;
+
+  private Session session;
+
+  public void setCurrentContext(Session session) {
+    this.session = session;
+  }
 
   /**
    * Generates the enquiry notification mails sent to regarding consultants when a new enquiry has

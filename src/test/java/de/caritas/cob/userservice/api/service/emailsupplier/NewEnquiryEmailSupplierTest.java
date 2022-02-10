@@ -42,8 +42,9 @@ public class NewEnquiryEmailSupplierTest {
 
   @Before
   public void setup() {
-    this.newEnquiryEmailSupplier = new NewEnquiryEmailSupplier(session,
-        consultantAgencyRepository, agencyService, "app base");
+    this.newEnquiryEmailSupplier = new NewEnquiryEmailSupplier(
+        consultantAgencyRepository, agencyService);
+    this.newEnquiryEmailSupplier.setCurrentContext(session);
   }
 
   @Test
@@ -95,7 +96,6 @@ public class NewEnquiryEmailSupplierTest {
     assertThat(templateData.get(2).getKey(), is("beratungsstelle"));
     assertThat(templateData.get(2).getValue(), is("Test Beratungsstelle"));
     assertThat(templateData.get(3).getKey(), is("url"));
-    assertThat(templateData.get(3).getValue(), is("app base"));
   }
 
 }

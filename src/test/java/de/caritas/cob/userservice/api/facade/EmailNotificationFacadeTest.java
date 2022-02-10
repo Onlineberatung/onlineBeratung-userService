@@ -41,6 +41,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -58,6 +59,7 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -69,6 +71,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewM
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.Arrays;
 import java.util.Collections;
@@ -198,6 +201,9 @@ public class EmailNotificationFacadeTest {
 
   @InjectMocks
   private EmailNotificationFacade emailNotificationFacade;
+
+  @Mock
+  private NewEnquiryEmailSupplier newEnquiryEmailSupplier;
   @Mock
   private ConsultantAgencyRepository consultantAgencyRepository;
   @Mock
@@ -240,10 +246,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
-        .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
-
+    givenNewEnquiryMailSupplierReturnNonEmptyMails();
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
@@ -253,43 +256,28 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
-        .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
+    givenNewEnquiryMailSupplierReturnNonEmptyMails();
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
-  @Test
-  public void sendNewEnquiryEmailNotification_Should_GetAgencyInformationFromAgencyServiceHelper() {
+  private void givenNewEnquiryMailSupplierReturnNonEmptyMails() {
+    List<MailDTO> mails = getMailDTOS();
+    when(newEnquiryEmailSupplier.generateEmails()).thenReturn(mails);
+  }
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(SESSION.getAgencyId()))
-        .thenReturn(CONSULTANT_AGENCY_LIST);
-    when(agencyService.getAgency(SESSION.getAgencyId())).thenReturn(AGENCY_DTO);
-
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
-
-    verify(agencyService, times(1)).getAgency(SESSION.getAgencyId());
-
+  private List<MailDTO> getMailDTOS() {
+    List<MailDTO> mails = Lists.newArrayList();
+    mails.add(new MailDTO());
+    return mails;
   }
 
   @Test
-  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenConsultantAgencyListIsEmpty() {
+  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenGeneratedEmailListIsEmpty() {
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID)).thenReturn(null);
-
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
-
-    verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
-  }
-
-  @Test
-  public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenConsultantIsAbsent() {
-
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID))
-        .thenReturn(ABSENT_CONSULTANT_AGENCY_LIST);
+    when(newEnquiryEmailSupplier.generateEmails()).thenReturn(Lists.newArrayList());
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 
@@ -302,8 +290,7 @@ public class EmailNotificationFacadeTest {
     EmailNotificationException emailNotificationException =
         new EmailNotificationException(new Exception());
 
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(AGENCY_ID))
-        .thenThrow(emailNotificationException);
+    when(newEnquiryEmailSupplier.generateEmails()).thenThrow(emailNotificationException);
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
 

@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
@@ -52,13 +51,13 @@ public class EmailNotificationFacade {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
-  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
@@ -70,9 +69,8 @@ public class EmailNotificationFacade {
   public void sendNewEnquiryEmailNotification(Session session) {
 
     try {
-      EmailSupplier newEnquiryMail = new NewEnquiryEmailSupplier(session,
-          consultantAgencyRepository, agencyService, applicationBaseUrl);
-      sendMailTasksToMailService(newEnquiryMail);
+      newEnquiryEmailSupplier.setCurrentContext(session);
+      sendMailTasksToMailService(newEnquiryEmailSupplier);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new enquiry notification for session %s.", session.getId()), ex);
