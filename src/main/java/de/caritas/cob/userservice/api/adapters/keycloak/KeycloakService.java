@@ -210,7 +210,7 @@ public class KeycloakService implements IdentityClient {
       keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, Success.class);
       return Optional.empty();
     } catch (RestClientException exception) {
-      return Optional.of(exception.getMessage());
+      return Optional.of("Keycloak answered: " + exception.getMessage());
     }
   }
 
