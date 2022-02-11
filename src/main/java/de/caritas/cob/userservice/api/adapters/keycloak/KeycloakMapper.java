@@ -24,14 +24,14 @@ public class KeycloakMapper {
   public Map<String, String> mapOf(ResponseEntity<SuccessWithEmail> responseEntity) {
     var status = responseEntity.getStatusCode();
     var isCreated = status.equals(HttpStatus.CREATED);
+    var hasBeenTriedTooOften = status.equals(HttpStatus.TOO_MANY_REQUESTS);
 
     return Map.of(
         "created", String.valueOf(isCreated),
-        "attemptsLeft", String.valueOf(status.equals(HttpStatus.TOO_MANY_REQUESTS) || isCreated),
+        "attemptsLeft", String.valueOf(!hasBeenTriedTooOften && !isCreated),
         "email", Objects.requireNonNull(responseEntity.getBody()).getEmail()
     );
   }
-
 
   public Map<String, String> mapOf(HttpClientErrorException exception) {
     var status = exception.getStatusCode();
