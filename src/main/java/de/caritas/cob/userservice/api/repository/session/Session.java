@@ -49,7 +49,6 @@ import org.springframework.lang.Nullable;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class Session implements TenantAware {
@@ -148,6 +147,11 @@ public class Session implements TenantAware {
     }
     Session session = (Session) o;
     return id.equals(session.id);
+  }
+
+  @Override
+  public String toString() {
+    return "Session id: " + id;
   }
 
   @Override
