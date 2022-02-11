@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailNotificationFacade {
 
   @Value("${app.base.url}")
@@ -83,6 +85,7 @@ public class EmailNotificationFacade {
     if (isNotEmpty(generatedMails)) {
       MailsDTO mailsDTO = new MailsDTO()
           .mails(generatedMails);
+      log.info("Sending email notifications with mailDTOs ", mailsDTO);
       mailService.sendEmailNotification(mailsDTO);
     }
   }

@@ -19,6 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
  */
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
@@ -48,13 +50,15 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
    */
   @Override
   public List<MailDTO> generateEmails() {
+    log.info("Generating emails for new enquiry");
     List<ConsultantAgency> consultantAgencyList =
         consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(session.getAgencyId());
-
+    log.info("Retrieved consultant agency list ", consultantAgencyList);
     if (isEmpty(consultantAgencyList)) {
       return emptyList();
     }
     AgencyDTO agency = agencyService.getAgency(session.getAgencyId());
+    log.info("Retrieved agency " + agency);
     return consultantAgencyList.stream()
         .filter(this::validConsultantAgency)
         .map(toEnquiryMailDTO(agency))
