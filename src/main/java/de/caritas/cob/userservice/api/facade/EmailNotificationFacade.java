@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.List;
@@ -69,13 +70,19 @@ public class EmailNotificationFacade {
    */
   @Async
   public void sendNewEnquiryEmailNotification(Session session) {
-
     try {
+      overtakeCurrentTenantContextFromSessionForAsyncThread(session);
       newEnquiryEmailSupplier.setCurrentContext(session);
       sendMailTasksToMailService(newEnquiryEmailSupplier);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new enquiry notification for session %s.", session.getId()), ex);
+    }
+  }
+
+  private void overtakeCurrentTenantContextFromSessionForAsyncThread(Session session) {
+    if (TenantContext.getCurrentTenant() == null && session.getTenantId() != null ) {
+      TenantContext.setCurrentTenant(session.getTenantId());
     }
   }
 

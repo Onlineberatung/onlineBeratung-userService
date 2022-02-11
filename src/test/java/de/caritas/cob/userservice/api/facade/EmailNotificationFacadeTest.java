@@ -29,6 +29,7 @@ import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
 import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
@@ -64,6 +65,7 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
@@ -262,6 +264,20 @@ public class EmailNotificationFacadeTest {
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
+
+  @Test
+  public void sendNewEnquiryEmailNotification_Should_SetCurrentTenantContextFromSession() {
+
+    assertThat(TenantContext.getCurrentTenant()).isNull();
+    givenNewEnquiryMailSupplierReturnNonEmptyMails();
+
+    SESSION.setTenantId(1L);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
+
+    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    assertThat(TenantContext.getCurrentTenant()).isEqualTo(1L);
+  }
+
 
   private void givenNewEnquiryMailSupplierReturnNonEmptyMails() {
     List<MailDTO> mails = getMailDTOS();
