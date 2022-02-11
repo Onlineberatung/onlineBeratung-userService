@@ -32,7 +32,6 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
-import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
@@ -48,6 +47,7 @@ import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
@@ -914,14 +914,15 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Activates 2FA for the calling user.
+   * Activates 2FA by mobile app for the calling user.
    *
-   * @param activateTwoFactorAuthUserDTO (required) {@link ActivateTwoFactorAuthUserDTO}
+   * @param twoFactorAuthOr2fa (required)
+   * @param oneTimePasswordDTO (required) {@link OneTimePasswordDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> activateTwoFactorAuthForUser(String twoFactorAuthOr2fa,
-      ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO) {
+  public ResponseEntity<Void> activateTwoFactorAuthByApp(String twoFactorAuthOr2fa,
+      OneTimePasswordDTO oneTimePasswordDTO) {
     if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
       throw new ConflictException("2FA is disabled for user role");
     }
@@ -931,20 +932,21 @@ public class UserController implements UsersApi {
 
     identityManager.setUpOneTimePassword(
         authenticatedUser.getUsername(),
-        activateTwoFactorAuthUserDTO.getOtp(),
-        activateTwoFactorAuthUserDTO.getSecret()
+        oneTimePasswordDTO.getOtp(),
+        oneTimePasswordDTO.getSecret()
     );
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
-   * Deletes 2FA for the calling user.
+   * Deactivates 2FA by mobile app for the calling user.
    *
+   * @param twoFactorAuthOr2fa (required)
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> deleteTwoFactorAuthForUser(String twoFactorAuthOr2fa) {
+  public ResponseEntity<Void> deactivateTwoFactorAuthByApp(String twoFactorAuthOr2fa) {
     identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
 
     return new ResponseEntity<>(HttpStatus.OK);

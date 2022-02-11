@@ -70,10 +70,10 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
+import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
@@ -2336,7 +2336,7 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+  public void deactivateTwoFactorAuthByApp_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     mvc.perform(delete("/users/twoFactorAuth")
             .cookie(CSRF_COOKIE)
@@ -2370,7 +2370,7 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
-  public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+  public void deactivateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(delete("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
@@ -2382,7 +2382,7 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+  public void deactivateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(delete("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
@@ -2449,7 +2449,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    var payload = givenAValidActivate2faDto();
+    var payload = givenAValidOneTimePasswordDto();
 
     mvc.perform(put("/users/2fa")
             .cookie(CSRF_COOKIE)
@@ -2464,9 +2464,9 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+  public void activateTwoFactorAuthByApp_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    var payload = givenAValidActivate2faDto();
+    var payload = givenAValidOneTimePasswordDto();
 
     mvc.perform(put("/users/twoFactorAuth")
             .cookie(CSRF_COOKIE)
@@ -2481,7 +2481,7 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
+  public void activateTwoFactorAuthByApp_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
       throws Exception {
     mvc.perform(put("/users/twoFactorAuth")
             .cookie(CSRF_COOKIE)
@@ -2501,7 +2501,7 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
-  public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+  public void activateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(put("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
@@ -2513,7 +2513,7 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+  public void activateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(put("/users/twoFactorAuth")
             .contentType(MediaType.APPLICATION_JSON)
@@ -2555,8 +2555,8 @@ public class UserControllerAuthorizationIT {
         .email(email).firstname("firstname").lastname("lastname");
   }
 
-  private ActivateTwoFactorAuthUserDTO givenAValidActivate2faDto() {
-    return new ActivateTwoFactorAuthUserDTO().otp("111111")
+  private OneTimePasswordDTO givenAValidOneTimePasswordDto() {
+    return new OneTimePasswordDTO().otp("111111")
         .secret(new RandomString(32).nextString());
   }
 

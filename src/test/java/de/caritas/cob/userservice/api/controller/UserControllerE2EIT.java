@@ -33,10 +33,10 @@ import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
+import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.Success;
@@ -151,7 +151,7 @@ public class UserControllerE2EIT {
 
   private Set<Consultant> consultantsToReset = new HashSet<>();
 
-  private ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO;
+  private OneTimePasswordDTO oneTimePasswordDTO;
 
   private EmailDTO emailDTO;
 
@@ -170,7 +170,7 @@ public class UserControllerE2EIT {
       consultantRepository.save(consultantToReset);
     });
     consultantsToReset = new HashSet<>();
-    activateTwoFactorAuthUserDTO = null;
+    oneTimePasswordDTO = null;
     emailDTO = null;
     tan = null;
   }
@@ -593,7 +593,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
     givenAValidConsultant();
-    givenAValidActivate2faUserDTO();
+    givenAValidOneTimePasswordDTO();
     givenABearerToken();
 
     mockMvc.perform(
@@ -601,7 +601,7 @@ public class UserControllerE2EIT {
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
@@ -611,8 +611,8 @@ public class UserControllerE2EIT {
 
     var otpSetupDTO = captor.getValue().getBody();
     assertNotNull(otpSetupDTO);
-    assertEquals(activateTwoFactorAuthUserDTO.getOtp(), otpSetupDTO.getInitialCode());
-    assertEquals(activateTwoFactorAuthUserDTO.getSecret(), otpSetupDTO.getSecret());
+    assertEquals(oneTimePasswordDTO.getOtp(), otpSetupDTO.getInitialCode());
+    assertEquals(oneTimePasswordDTO.getSecret(), otpSetupDTO.getSecret());
   }
 
   @Test
@@ -620,14 +620,14 @@ public class UserControllerE2EIT {
   public void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenOtpHasWrongLength()
       throws Exception {
     givenAValidConsultant();
-    givenAnActivate2faViaAppWithAnInvalidOtp();
+    givenAnInvalidOneTimePasswordDTO();
 
     mockMvc.perform(
             put("/users/twoFactorAuth")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -637,21 +637,21 @@ public class UserControllerE2EIT {
   public void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenSecretHasWrongLength()
       throws Exception {
     givenAValidConsultant();
-    givenAnActivate2faViaAppWithAnInvalidSecret();
+    givenAnInvalidSecret();
 
     mockMvc.perform(
             put("/users/twoFactorAuth")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void deleteTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
+  public void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
     givenAValidConsultant();
     givenABearerToken();
 
@@ -660,7 +660,7 @@ public class UserControllerE2EIT {
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
@@ -672,7 +672,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void deleteTwoFactorAuthForUserShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
+  public void deactivateTwoFactorAuthByAppShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
       throws Exception {
     givenAValidConsultant();
     givenABearerToken();
@@ -683,7 +683,7 @@ public class UserControllerE2EIT {
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(activateTwoFactorAuthUserDTO))
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError());
   }
@@ -695,24 +695,24 @@ public class UserControllerE2EIT {
     ).thenThrow(new RestClientException("Keycloak down"));
   }
 
-  private void givenAnActivate2faViaAppWithAnInvalidOtp() {
-    givenAValidActivate2faUserDTO();
-    while (activateTwoFactorAuthUserDTO.getOtp().length() == 6) {
-      activateTwoFactorAuthUserDTO.setOtp(RandomStringUtils.randomNumeric(1, 32));
+  private void givenAnInvalidOneTimePasswordDTO() {
+    givenAValidOneTimePasswordDTO();
+    while (oneTimePasswordDTO.getOtp().length() == 6) {
+      oneTimePasswordDTO.setOtp(RandomStringUtils.randomNumeric(1, 32));
     }
   }
 
-  private void givenAnActivate2faViaAppWithAnInvalidSecret() {
-    givenAValidActivate2faUserDTO();
-    while (activateTwoFactorAuthUserDTO.getSecret().length() == 32) {
-      activateTwoFactorAuthUserDTO.setSecret(RandomStringUtils.randomNumeric(1, 64));
+  private void givenAnInvalidSecret() {
+    givenAValidOneTimePasswordDTO();
+    while (oneTimePasswordDTO.getSecret().length() == 32) {
+      oneTimePasswordDTO.setSecret(RandomStringUtils.randomNumeric(1, 64));
     }
   }
 
-  private void givenAValidActivate2faUserDTO() {
-    activateTwoFactorAuthUserDTO = new ActivateTwoFactorAuthUserDTO();
-    activateTwoFactorAuthUserDTO.setOtp(RandomStringUtils.randomNumeric(6));
-    activateTwoFactorAuthUserDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
+  private void givenAValidOneTimePasswordDTO() {
+    oneTimePasswordDTO = new OneTimePasswordDTO();
+    oneTimePasswordDTO.setOtp(RandomStringUtils.randomNumeric(6));
+    oneTimePasswordDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
   }
 
   private void givenAValidKeycloakSetupEmailResponse() {
