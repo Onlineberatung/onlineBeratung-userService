@@ -593,7 +593,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
     givenAValidConsultant();
-    givenAValidOneTimePasswordDTO();
+    givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
 
     mockMvc.perform(
@@ -637,7 +637,7 @@ public class UserControllerE2EIT {
   public void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenSecretHasWrongLength()
       throws Exception {
     givenAValidConsultant();
-    givenAnInvalidSecret();
+    givenAWronglyFormattedSecret();
 
     mockMvc.perform(
             put("/users/twoFactorAuth")
@@ -647,6 +647,44 @@ public class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfTheOtpIsInvalid()
+      throws Exception {
+    givenAValidConsultant();
+    givenACorrectlyFormattedOneTimePasswordDTO();
+    givenABearerToken();
+    givenAKeycloakSetupOtpValidationErrorResponse();
+
+    mockMvc.perform(
+            put("/users/twoFactorAuth")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfParameterInvalid()
+      throws Exception {
+    givenAValidConsultant();
+    givenACorrectlyFormattedOneTimePasswordDTO();
+    givenABearerToken();
+    givenAKeycloakSetupOtpInvalidParameterErrorResponse();
+
+    mockMvc.perform(
+            put("/users/twoFactorAuth")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
@@ -696,20 +734,20 @@ public class UserControllerE2EIT {
   }
 
   private void givenAnInvalidOneTimePasswordDTO() {
-    givenAValidOneTimePasswordDTO();
+    givenACorrectlyFormattedOneTimePasswordDTO();
     while (oneTimePasswordDTO.getOtp().length() == 6) {
       oneTimePasswordDTO.setOtp(RandomStringUtils.randomNumeric(1, 32));
     }
   }
 
-  private void givenAnInvalidSecret() {
-    givenAValidOneTimePasswordDTO();
+  private void givenAWronglyFormattedSecret() {
+    givenACorrectlyFormattedOneTimePasswordDTO();
     while (oneTimePasswordDTO.getSecret().length() == 32) {
       oneTimePasswordDTO.setSecret(RandomStringUtils.randomNumeric(1, 64));
     }
   }
 
-  private void givenAValidOneTimePasswordDTO() {
+  private void givenACorrectlyFormattedOneTimePasswordDTO() {
     oneTimePasswordDTO = new OneTimePasswordDTO();
     oneTimePasswordDTO.setOtp(RandomStringUtils.randomNumeric(6));
     oneTimePasswordDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
@@ -767,6 +805,26 @@ public class UserControllerE2EIT {
     when(keycloakRestTemplate.exchange(
         endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Success.class)
     )).thenThrow(invalidParameter);
+  }
+
+  private void givenAKeycloakSetupOtpInvalidParameterErrorResponse() {
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp/" + consultant.getUsername();
+    var invalidParameter = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "invalid parameter",
+        null, null);
+
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(OtpInfoDTO.class)
+    )).thenThrow(invalidParameter);
+  }
+
+  private void givenAKeycloakSetupOtpValidationErrorResponse() {
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp/" + consultant.getUsername();
+    var invalidCode = new HttpClientErrorException(HttpStatus.UNAUTHORIZED,
+        "the code was not valid", null, null);
+
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(OtpInfoDTO.class)
+    )).thenThrow(invalidCode);
   }
 
   private void givenAValidEmailDTO() {

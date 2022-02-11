@@ -185,12 +185,21 @@ public class KeycloakService implements IdentityClient {
   }
 
   @Override
-  public void setUpOtpCredential(String userName, String initialCode, String secret) {
+  public boolean setUpOtpCredential(String userName, String initialCode, String secret) {
     var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, secret, null);
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_SETUP, userName);
 
-    keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
+    try {
+      keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
+      return true;
+    } catch (HttpClientErrorException exception) {
+      if (exception.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+        return false;
+      } else {
+        throw exception;
+      }
+    }
   }
 
   @Override

@@ -2450,6 +2450,7 @@ public class UserControllerAuthorizationIT {
   public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     var payload = givenAValidOneTimePasswordDto();
+    givenAValidOtpResponse();
 
     mvc.perform(put("/users/2fa")
             .cookie(CSRF_COOKIE)
@@ -2458,8 +2459,6 @@ public class UserControllerAuthorizationIT {
             .content(objectMapper.writeValueAsString(payload))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-
-    verify(identityManager).setUpOneTimePassword(any(), any(), any());
   }
 
   @Test
@@ -2467,6 +2466,7 @@ public class UserControllerAuthorizationIT {
   public void activateTwoFactorAuthByApp_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     var payload = givenAValidOneTimePasswordDto();
+    givenAValidOtpResponse();
 
     mvc.perform(put("/users/twoFactorAuth")
             .cookie(CSRF_COOKIE)
@@ -2579,5 +2579,9 @@ public class UserControllerAuthorizationIT {
     emailDTO.setEmail(email);
 
     return emailDTO;
+  }
+
+  private void givenAValidOtpResponse() {
+    when(identityManager.setUpOneTimePassword(any(), any(), any())).thenReturn(true);
   }
 }

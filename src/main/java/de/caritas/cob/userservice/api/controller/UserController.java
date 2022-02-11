@@ -930,13 +930,13 @@ public class UserController implements UsersApi {
       throw new ConflictException("2FA is disabled for consultant role");
     }
 
-    identityManager.setUpOneTimePassword(
+    var isValid = identityManager.setUpOneTimePassword(
         authenticatedUser.getUsername(),
         oneTimePasswordDTO.getOtp(),
         oneTimePasswordDTO.getSecret()
     );
 
-    return new ResponseEntity<>(HttpStatus.OK);
+    return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
   }
 
   /**

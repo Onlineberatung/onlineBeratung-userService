@@ -73,7 +73,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /otp-config/delete-otp/{username}:
-    get:
+    delete:
       summary: 'Deletes the otp credential if set'
       operationId: deleteOtp
       parameters:

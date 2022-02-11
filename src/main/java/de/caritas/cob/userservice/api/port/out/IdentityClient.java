@@ -19,7 +19,7 @@ public interface IdentityClient {
 
   Optional<OtpInfoDTO> getOtpCredential(final String userName);
 
-  void setUpOtpCredential(final String userName, final String initialCode, final String secret);
+  boolean setUpOtpCredential(final String userName, final String initialCode, final String secret);
 
   void deleteOtpCredential(final String userName);
 

@@ -21,8 +21,8 @@ public class IdentityManager implements IdentityManaging {
   }
 
   @Override
-  public void setUpOneTimePassword(String username, String initialCode, String secret) {
-    keycloakService.setUpOtpCredential(username, initialCode, secret);
+  public boolean setUpOneTimePassword(String username, String initialCode, String secret) {
+    return keycloakService.setUpOtpCredential(username, initialCode, secret);
   }
 
   @Override

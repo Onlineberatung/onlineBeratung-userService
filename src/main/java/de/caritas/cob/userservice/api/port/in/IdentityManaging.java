@@ -7,7 +7,7 @@ public interface IdentityManaging {
 
   Optional<String> setUpOneTimePassword(String username, String email);
 
-  void setUpOneTimePassword(String username, String initialCode, String secret);
+  boolean setUpOneTimePassword(String username, String initialCode, String secret);
 
   Map<String, String> validateOneTimePassword(String username, String code);
 
