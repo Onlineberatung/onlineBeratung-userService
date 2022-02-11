@@ -17,6 +17,7 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDT
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
    * @return a list of the generated {@link MailDTO}
    */
   @Override
+  @Transactional
   public List<MailDTO> generateEmails() {
     log.info("Generating emails for new enquiry");
     List<ConsultantAgency> consultantAgencyList =
