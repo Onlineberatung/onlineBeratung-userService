@@ -527,8 +527,6 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void finishTwoFactorAuthByEmailSetupShouldRespondWithNotFoundIfTanIsEmpty()
       throws Exception {
-    givenATanWithLetters();
-
     mockMvc.perform(
             post("/users/2fa/email/validate/")
                 .cookie(CSRF_COOKIE)
