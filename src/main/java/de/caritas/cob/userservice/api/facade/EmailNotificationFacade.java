@@ -81,7 +81,7 @@ public class EmailNotificationFacade {
   }
 
   private void overtakeCurrentTenantContextFromSessionForAsyncThread(Session session) {
-    if (TenantContext.getCurrentTenant() == null && session.getTenantId() != null ) {
+    if (TenantContext.getCurrentTenant() == null && session.getTenantId() != null) {
       TenantContext.setCurrentTenant(session.getTenantId());
     }
   }
