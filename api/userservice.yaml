@@ -2278,17 +2278,30 @@ components:
 
     TwoFactorAuthDTO:
       type: object
+      required:
+        - isEnabled
+        - isActive
       properties:
         isEnabled:
           type: boolean
           example: true
+          default: false
         isActive:
           type: boolean
           example: true
+          default: false
         secret:
           type: string
         qrCode:
           type: string
+        type:
+          $ref: "#/components/schemas/OtpType"
+
+    OtpType:
+      type: string
+      enum:
+        - EMAIL
+        - APP
 
   securitySchemes:
     Bearer:

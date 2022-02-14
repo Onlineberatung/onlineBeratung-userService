@@ -17,7 +17,7 @@ public interface IdentityClient {
 
   void deleteEmailAddress();
 
-  Optional<OtpInfoDTO> getOtpCredential(final String userName);
+  OtpInfoDTO getOtpCredential(final String userName);
 
   boolean setUpOtpCredential(final String userName, final String initialCode, final String secret);
 

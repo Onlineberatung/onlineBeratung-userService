@@ -1217,7 +1217,6 @@ public class TestConstants {
 
   public static final OtpInfoDTO OTP_INFO_DTO = new OtpInfoDTO().otpSecret("secret")
       .otpSecretQrCode("QrCode").otpSetup(false);
-  public static final Optional<OtpInfoDTO> OPTIONAL_OTP_INFO_DTO = Optional.of(OTP_INFO_DTO);
   public static final OtpSetupDTO VALID_OTP_SETUP_DTO = new OtpSetupDTO().initialCode("111111")
       .secret(new RandomString(32).nextString());
   public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_CODE = new OtpSetupDTO().initialCode(

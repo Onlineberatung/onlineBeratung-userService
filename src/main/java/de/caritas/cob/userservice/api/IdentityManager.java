@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api;
 
+import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import java.util.Map;
@@ -38,5 +39,10 @@ public class IdentityManager implements IdentityManaging {
   @Override
   public void deleteOneTimePassword(String username) {
     keycloakService.deleteOtpCredential(username);
+  }
+
+  @Override
+  public OtpInfoDTO getOtpCredential(String username) {
+    return keycloakService.getOtpCredential(username);
   }
 }

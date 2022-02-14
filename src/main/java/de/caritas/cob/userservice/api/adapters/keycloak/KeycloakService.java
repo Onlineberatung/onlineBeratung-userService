@@ -172,16 +172,12 @@ public class KeycloakService implements IdentityClient {
   }
 
   @Override
-  public Optional<OtpInfoDTO> getOtpCredential(String userName) {
+  public OtpInfoDTO getOtpCredential(String userName) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_INFO, userName);
-    try {
-      var response = keycloakClient.get(bearerToken, requestUrl, OtpInfoDTO.class);
-      return Optional.ofNullable(response.getBody());
-    } catch (RestClientException restClientException) {
-      log.error("Keycloak cannot be accessed", restClientException);
-      return Optional.empty();
-    }
+    var response = keycloakClient.get(bearerToken, requestUrl, OtpInfoDTO.class);
+
+    return response.getBody();
   }
 
   @Override
