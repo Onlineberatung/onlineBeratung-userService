@@ -9,11 +9,13 @@ import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAc
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpResponse;
+import de.caritas.cob.userservice.api.model.Success;
+import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import java.util.Map;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -50,6 +53,7 @@ public class KeycloakService implements IdentityClient {
   private static final String ENDPOINT_OTP_SETUP = "/setup-otp/{username}";
   private static final String ENDPOINT_OTP_TEARDOWN = "/delete-otp/{username}";
   private static final String ENDPOINT_OTP_VERIFY_EMAIL = "/send-verification-mail/{username}";
+  private static final String ENDPOINT_OTP_FINISH_EMAIL = "/setup-otp-mail/{username}";
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -181,12 +185,21 @@ public class KeycloakService implements IdentityClient {
   }
 
   @Override
-  public void setUpOtpCredential(String userName, String initialCode, String secret) {
+  public boolean setUpOtpCredential(String userName, String initialCode, String secret) {
     var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, secret, null);
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_SETUP, userName);
 
-    keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
+    try {
+      keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, OtpInfoDTO.class);
+      return true;
+    } catch (HttpClientErrorException exception) {
+      if (exception.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+        return false;
+      } else {
+        throw exception;
+      }
+    }
   }
 
   @Override
@@ -202,13 +215,26 @@ public class KeycloakService implements IdentityClient {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_VERIFY_EMAIL, username);
 
-    var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
-        OtpResponse.class);
-
-    if (response.getStatusCode().isError()) {
-      return Optional.of("Keycloak responded with " + response.getStatusCode());
+    try {
+      keycloakClient.putForEntity(bearerToken, requestUrl, otpSetupDTO, Success.class);
+      return Optional.empty();
+    } catch (RestClientException exception) {
+      return Optional.of("Keycloak answered: " + exception.getMessage());
     }
+  }
 
-    return Optional.empty();
+  @Override
+  public Map<String, String> finishEmailVerification(String username, String initialCode) {
+    var otpSetupDTO = keycloakMapper.otpSetupDtoOf(initialCode, null, null);
+    var bearerToken = keycloakAdminClientAccessor.getBearerToken();
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_FINISH_EMAIL, username);
+
+    try {
+      var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
+          SuccessWithEmail.class);
+      return keycloakMapper.mapOf(response);
+    } catch (HttpClientErrorException exception) {
+      return keycloakMapper.mapOf(exception);
+    }
   }
 }

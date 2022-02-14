@@ -73,7 +73,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /otp-config/delete-otp/{username}:
-    get:
+    delete:
       summary: 'Deletes the otp credential if set'
       operationId: deleteOtp
       parameters:
@@ -98,7 +98,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /otp-config/send-verification-mail/{username}:
-    post:
+    put:
       summary: 'Send an email to the user containing an OTP'
       operationId: sendVerificationMail
       requestBody:
@@ -120,19 +120,19 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/OtpResponse'
+                $ref: '#/components/schemas/Success'
         400:
           description: invalid parameter
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OtpResponse'
+                $ref: '#/components/schemas/Error'
         401:
           description: unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OtpResponse'
+                $ref: '#/components/schemas/Error'
 
   /otp-config/setup-otp-mail/{username}:
     post:
@@ -157,7 +157,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/Success'
+                $ref: '#/components/schemas/SuccessWithEmail'
         400:
           description: invalid parameter
           content:
@@ -166,6 +166,12 @@ paths:
                 $ref: '#/components/schemas/Error'
         401:
           description: the code was not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        429:
+          description: too many attempts
           content:
             application/json:
               schema:
@@ -204,27 +210,34 @@ components:
         - EMAIL
         - APP
 
-    Success:
-      type: object
-      properties:
-        info:
-          type: string
-
-    Error:
+    Challenge:
       type: object
       properties:
         error:
           type: string
         error_description:
           type: string
+        otpType:
+          $ref: "#/components/schemas/OtpType"
 
-    OtpResponse:
+    Success:
       type: object
       properties:
         info:
           type: string
-        success:
-          type: boolean
+
+    SuccessWithEmail:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        info:
+          type: string
+
+    Error:
+      type: object
+      properties:
         error:
           type: string
         error_description:

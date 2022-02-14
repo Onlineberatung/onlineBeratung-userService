@@ -32,7 +32,6 @@ import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
-import de.caritas.cob.userservice.api.model.ActivateTwoFactorAuthUserDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
@@ -48,6 +47,7 @@ import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
@@ -59,7 +59,6 @@ import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.Session;
@@ -140,7 +139,6 @@ public class UserController implements UsersApi {
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
   private final @NotNull SessionArchiveService sessionArchiveService;
-  private final @NotNull IdentityClient identityClient;
   private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull IdentityManaging identityManager;
   private final @NotNull ActionsRegistry actionsRegistry;
@@ -900,15 +898,31 @@ public class UserController implements UsersApi {
     return ResponseEntity.noContent().build();
   }
 
+  @Override
+  public ResponseEntity<Void> finishTwoFactorAuthByEmailSetup(String tan) {
+    var username = authenticatedUser.getUsername();
+    var validationResult = identityManager.validateOneTimePassword(username, tan);
+
+    if (Boolean.parseBoolean(validationResult.get("created"))) {
+      return ResponseEntity.noContent().build();
+    }
+    if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+  }
+
   /**
-   * Activates 2FA for the calling user.
+   * Activates 2FA by mobile app for the calling user.
    *
-   * @param activateTwoFactorAuthUserDTO (required) {@link ActivateTwoFactorAuthUserDTO}
+   * @param twoFactorAuthOr2fa (required)
+   * @param oneTimePasswordDTO (required) {@link OneTimePasswordDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> activateTwoFactorAuthForUser(String twoFactorAuthOr2fa,
-      ActivateTwoFactorAuthUserDTO activateTwoFactorAuthUserDTO) {
+  public ResponseEntity<Void> activateTwoFactorAuthByApp(String twoFactorAuthOr2fa,
+      OneTimePasswordDTO oneTimePasswordDTO) {
     if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
       throw new ConflictException("2FA is disabled for user role");
     }
@@ -916,22 +930,23 @@ public class UserController implements UsersApi {
       throw new ConflictException("2FA is disabled for consultant role");
     }
 
-    identityManager.setUpOneTimePassword(
+    var isValid = identityManager.setUpOneTimePassword(
         authenticatedUser.getUsername(),
-        activateTwoFactorAuthUserDTO.getOtp(),
-        activateTwoFactorAuthUserDTO.getSecret()
+        oneTimePasswordDTO.getOtp(),
+        oneTimePasswordDTO.getSecret()
     );
 
-    return new ResponseEntity<>(HttpStatus.OK);
+    return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
   }
 
   /**
-   * Deletes 2FA for the calling user.
+   * Deactivates 2FA by mobile app for the calling user.
    *
+   * @param twoFactorAuthOr2fa (required)
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> deleteTwoFactorAuthForUser(String twoFactorAuthOr2fa) {
+  public ResponseEntity<Void> deactivateTwoFactorAuthByApp(String twoFactorAuthOr2fa) {
     identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
 
     return new ResponseEntity<>(HttpStatus.OK);
