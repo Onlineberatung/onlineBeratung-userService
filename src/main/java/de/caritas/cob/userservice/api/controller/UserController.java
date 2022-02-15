@@ -60,6 +60,7 @@ import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
@@ -142,6 +143,7 @@ public class UserController implements UsersApi {
   private final @NotNull SessionArchiveService sessionArchiveService;
   private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull IdentityManaging identityManager;
+  private final @NonNull AccountManaging accountManager;
   private final @NotNull ActionsRegistry actionsRegistry;
   private final @NonNull ConsultantDtoMapper consultantDtoMapper;
   private final @NonNull UserDtoMapper userDtoMapper;
@@ -922,6 +924,7 @@ public class UserController implements UsersApi {
     var validationResult = identityManager.validateOneTimePassword(username, tan);
 
     if (Boolean.parseBoolean(validationResult.get("created"))) {
+      accountManager.saveEmail(authenticatedUser.getUserId(), validationResult.get("email"));
       return ResponseEntity.noContent().build();
     }
     if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {

@@ -166,6 +166,8 @@ public class UserControllerE2EIT {
 
   private String tan;
 
+  private String email;
+
   @AfterEach
   public void reset() {
     user = null;
@@ -182,6 +184,7 @@ public class UserControllerE2EIT {
     oneTimePasswordDTO = null;
     emailDTO = null;
     tan = null;
+    email = null;
   }
 
   @Test
@@ -396,7 +399,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userName", is("performance-asker-72")))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
-        .andExpect(jsonPath("email", is(nullValue())))
+        .andExpect(jsonPath("email").exists())
         .andExpect(jsonPath("languages", is(nullValue())))
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", is(nullValue())))
@@ -483,7 +486,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userName", is("performance-asker-72")))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
-        .andExpect(jsonPath("email", is(nullValue())))
+        .andExpect(jsonPath("email").exists())
         .andExpect(jsonPath("languages", is(nullValue())))
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", is(nullValue())))
@@ -741,11 +744,12 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
+  public void finishTwoFactorAuthByEmailSetupForAConsultantShouldRespondWithNoContent()
+      throws Exception {
     givenAValidConsultant();
     givenABearerToken();
     givenACorrectlyFormattedTan();
-    givenAValidKeycloakSetupEmailResponse();
+    givenAValidKeycloakSetupEmailResponse(consultant.getUsername());
 
     mockMvc.perform(
             post("/users/2fa/email/validate/{tan}", tan)
@@ -763,6 +767,38 @@ public class UserControllerE2EIT {
     var otpSetupDTO = captor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(tan, otpSetupDTO.getInitialCode());
+
+    var c = consultantRepository.findById(consultant.getId()).orElseThrow();
+    assertEquals(email, c.getEmail());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupForAUserShouldRespondWithNoContent() throws Exception {
+    givenAValidUser();
+    givenABearerToken();
+    givenACorrectlyFormattedTan();
+    givenAValidKeycloakSetupEmailResponse(user.getUsername());
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + user.getUsername();
+    verify(keycloakRestTemplate)
+        .postForEntity(
+            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+        );
+
+    var otpSetupDTO = captor.getValue().getBody();
+    assertNotNull(otpSetupDTO);
+    assertEquals(tan, otpSetupDTO.getInitialCode());
+
+    var u = userRepository.findById(user.getUserId()).orElseThrow();
+    assertEquals(email, u.getEmail());
   }
 
   @Test
@@ -1023,11 +1059,12 @@ public class UserControllerE2EIT {
     oneTimePasswordDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
   }
 
-  private void givenAValidKeycloakSetupEmailResponse() {
+  private void givenAValidKeycloakSetupEmailResponse(String username) {
     var urlSuffix =
-        "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+        "/auth/realms/test/otp-config/setup-otp-mail/" + username;
     var successWithEmail = new SuccessWithEmail();
-    successWithEmail.setEmail(givenAValidEmail());
+    email = givenAValidEmail();
+    successWithEmail.setEmail(email);
 
     when(keycloakRestTemplate.postForEntity(
         endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
