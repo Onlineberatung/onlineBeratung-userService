@@ -31,7 +31,6 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -186,22 +185,22 @@ public class KeycloakServiceTest {
 
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public void getOtpCredential_Should_Return_ResponseAsOptional_When_RequestWasSuccessfully() {
+  public void getOtpCredential_Should_Return_Response_When_RequestWasSuccessful() {
     when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
     var entity = new ResponseEntity(OTP_INFO_DTO, HttpStatus.OK);
     when(this.keycloakClient.get(anyString(), any(), any()))
         .thenReturn(entity);
 
-    assertEquals(Optional.of(OTP_INFO_DTO), keycloakService.getOtpCredential(USERNAME));
+    assertEquals(OTP_INFO_DTO, keycloakService.getOtpCredential(USERNAME));
   }
 
-  @Test
-  public void getOtpCredential_Should_Return_Empty_Optional_When_RequestHasAnError() {
+  @Test(expected = RestClientException.class)
+  public void getOtpCredential_Should_Throw_When_RequestHasAnError() {
     when(this.keycloakAdminClientAccessor.getBearerToken()).thenReturn(BEARER_TOKEN);
-    when(this.keycloakClient.get(anyString(), any(), any()))
+    when(this.keycloakClient.get(any(), any(), any()))
         .thenThrow(new RestClientException("Fail test case"));
 
-    assertEquals(Optional.empty(), keycloakService.getOtpCredential(USERNAME));
+    keycloakService.getOtpCredential(USERNAME);
   }
 
   @Test

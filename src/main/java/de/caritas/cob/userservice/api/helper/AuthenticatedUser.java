@@ -42,4 +42,9 @@ public class AuthenticatedUser {
   public boolean isConsultant() {
     return nonNull(roles) && roles.contains(UserRole.CONSULTANT.getValue());
   }
+
+  @JsonIgnore
+  public boolean isAnonymous() {
+    return nonNull(roles) && roles.contains(UserRole.ANONYMOUS.getValue());
+  }
 }

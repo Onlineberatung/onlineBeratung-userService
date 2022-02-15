@@ -185,6 +185,7 @@ components:
         otpSetup:
           type: boolean
           example: true
+          nullable: false
         otpSecret:
           type: string
           description: is only set when otpSetup if false

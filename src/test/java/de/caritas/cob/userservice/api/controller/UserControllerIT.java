@@ -99,7 +99,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.MASTER_KEY
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.NAME;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.OPTIONAL_OTP_INFO_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.OTP_INFO_DTO;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
@@ -166,8 +166,9 @@ import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
+import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
-import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
@@ -355,8 +356,6 @@ public class UserControllerIT {
   @MockBean
   private CreateEnquiryMessageFacade createEnquiryMessageFacade;
   @MockBean
-  private UserDataFacade userDataFacade;
-  @MockBean
   @SuppressWarnings("unused")
   private ConsultantImportService consultantImportService;
   @MockBean
@@ -434,7 +433,14 @@ public class UserControllerIT {
   @SuppressWarnings("unused")
   private ConsultantDtoMapper consultantDtoMapper;
   @MockBean
+  @SuppressWarnings("unused")
+  private UserDtoMapper userDtoMapper;
+  @MockBean
   private ConsultantService consultantService;
+  @MockBean
+  private ConsultantDataProvider consultantDataProvider;
+  @MockBean
+  private AskerDataProvider askerDataProvider;
 
   @Mock
   private Logger logger;
@@ -1211,13 +1217,15 @@ public class UserControllerIT {
   @Test
   public void getUserData_ForUser_Should_ReturnOkAndValidContent() throws Exception {
 
+    when(authenticatedUser.isUser()).thenReturn(true);
+
     UserDataResponseDTO responseDto = USER_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_USER);
     responseDto.setGrantedAuthorities(
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
-    when(userDataFacade.buildUserDataByRole())
-        .thenReturn(responseDto);
-    when(identityClient.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
+
+    when(askerDataProvider.retrieveData(any())).thenReturn(responseDto);
+    when(identityClient.getOtpCredential(null)).thenReturn(OTP_INFO_DTO);
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
@@ -1238,21 +1246,6 @@ public class UserControllerIT {
         .thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser())
         .thenThrow(new InternalServerErrorException(""));
-    when(userDataFacade.buildUserDataByRole())
-        .thenThrow(new InternalServerErrorException(""));
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-  }
-
-  @Test
-  public void getUserData_ForUser_Should_ReturnInternalServerError_When_UserDataFacadeReturnsEmptyDTO()
-      throws Exception {
-
-    when(userDataFacade.buildUserDataByRole())
-        .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
@@ -1263,16 +1256,16 @@ public class UserControllerIT {
   @Test
   public void getUserData_ForConsultant_Should_ReturnOkAndValidContent() throws Exception {
 
+    when(authenticatedUser.isConsultant()).thenReturn(true);
+
     UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
     responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
     responseDto.setLanguages(Set.of("de", "en"));
     responseDto.setGrantedAuthorities(
         new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
 
-    when(userDataFacade.buildUserDataByRole())
-        .thenReturn(responseDto);
-
-    when(identityClient.getOtpCredential(null)).thenReturn(OPTIONAL_OTP_INFO_DTO);
+    when(consultantDataProvider.retrieveData(any())).thenReturn(responseDto);
+    when(identityClient.getOtpCredential(null)).thenReturn(OTP_INFO_DTO);
 
     mvc.perform(
             get(PATH_USER_DATA)
@@ -1287,32 +1280,6 @@ public class UserControllerIT {
                 containsInAnyOrder("dummyRoleA", "dummyRoleB", CONSULTANT_ROLE)
             )
         );
-  }
-
-  @Test
-  public void getUserData_Should_ReturnInternalServerError_WhenAuthenticatedUserHasNoValidRole()
-      throws Exception {
-
-    when(userDataFacade.buildUserDataByRole())
-        .thenThrow(new InternalServerErrorException(""));
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-  }
-
-  @Test
-  public void getUserData_ForConsultant_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
-      throws Exception {
-
-    when(userDataFacade.buildUserDataByRole())
-        .thenThrow(new InternalServerErrorException(""));
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
   }
 
   /**

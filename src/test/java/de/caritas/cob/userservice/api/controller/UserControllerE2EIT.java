@@ -10,6 +10,7 @@ import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -39,6 +41,7 @@ import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.model.OtpType;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
@@ -54,12 +57,15 @@ import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -116,6 +122,9 @@ public class UserControllerE2EIT {
 
   @Autowired
   private SessionRepository sessionRepository;
+
+  @Autowired
+  private de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi consultingTypeControllerApi;
 
   @MockBean
   private AuthenticatedUser authenticatedUser;
@@ -319,6 +328,267 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())));
 
     assertEquals(24, consultant.getConsultantAgencies().size());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByAppIsActive()
+      throws Exception {
+    givenAValidConsultant();
+    givenKeycloakRespondsOtpByAppHasBeenSetup(consultant.getUsername());
+
+    var consultantAgency = consultant.getConsultantAgencies().iterator().next();
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("userId", is(consultant.getId())))
+        .andExpect(jsonPath("userName", is("emigration-team")))
+        .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
+        .andExpect(jsonPath("lastName", is(consultant.getLastName())))
+        .andExpect(jsonPath("email", is(consultant.getEmail())))
+        .andExpect(jsonPath("languages", is(notNullValue())))
+        .andExpect(jsonPath("absenceMessage", is(nullValue())))
+        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
+        .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
+        .andExpect(jsonPath("userRoles", hasSize(1)))
+        .andExpect(jsonPath("userRoles[0]", is("CONSULTANT")))
+        .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
+        .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
+        .andExpect(jsonPath("consultingTypes", is(nullValue())))
+        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
+        .andExpect(jsonPath("hasArchive", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.type", is("APP")))
+        .andExpect(jsonPath("absent", is(consultant.isAbsent())))
+        .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
+        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByAppIsActive()
+      throws Exception {
+    givenAValidUser();
+    givenConsultingTypeServiceResponse();
+    givenKeycloakRespondsOtpByAppHasBeenSetup(user.getUsername());
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("userId", is(user.getUserId())))
+        .andExpect(jsonPath("userName", is("performance-asker-72")))
+        .andExpect(jsonPath("firstName", is(nullValue())))
+        .andExpect(jsonPath("lastName", is(nullValue())))
+        .andExpect(jsonPath("email", is(nullValue())))
+        .andExpect(jsonPath("languages", is(nullValue())))
+        .andExpect(jsonPath("absenceMessage", is(nullValue())))
+        .andExpect(jsonPath("agencies", is(nullValue())))
+        .andExpect(jsonPath("userRoles", hasSize(1)))
+        .andExpect(jsonPath("userRoles[0]", is("USER")))
+        .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
+        .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
+        .andExpect(jsonPath("consultingTypes", is(notNullValue())))
+        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
+        .andExpect(jsonPath("hasArchive", is(false)))
+        .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.type", is("APP")))
+        .andExpect(jsonPath("absent", is(false)))
+        .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
+        .andExpect(jsonPath("inTeamAgency", is(false)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByEmailIsActive()
+      throws Exception {
+    givenAValidConsultant();
+    givenKeycloakRespondsOtpByEmailHasBeenSetup(consultant.getUsername());
+
+    var consultantAgency = consultant.getConsultantAgencies().iterator().next();
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("userId", is(consultant.getId())))
+        .andExpect(jsonPath("userName", is("emigration-team")))
+        .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
+        .andExpect(jsonPath("lastName", is(consultant.getLastName())))
+        .andExpect(jsonPath("email", is(consultant.getEmail())))
+        .andExpect(jsonPath("languages", is(notNullValue())))
+        .andExpect(jsonPath("absenceMessage", is(nullValue())))
+        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
+        .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
+        .andExpect(jsonPath("userRoles", hasSize(1)))
+        .andExpect(jsonPath("userRoles[0]", is("CONSULTANT")))
+        .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
+        .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
+        .andExpect(jsonPath("consultingTypes", is(nullValue())))
+        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
+        .andExpect(jsonPath("hasArchive", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.type", is("EMAIL")))
+        .andExpect(jsonPath("absent", is(consultant.isAbsent())))
+        .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
+        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByEmailIsActive()
+      throws Exception {
+    givenAValidUser();
+    givenConsultingTypeServiceResponse();
+    givenKeycloakRespondsOtpByEmailHasBeenSetup(user.getUsername());
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("userId", is(user.getUserId())))
+        .andExpect(jsonPath("userName", is("performance-asker-72")))
+        .andExpect(jsonPath("firstName", is(nullValue())))
+        .andExpect(jsonPath("lastName", is(nullValue())))
+        .andExpect(jsonPath("email", is(nullValue())))
+        .andExpect(jsonPath("languages", is(nullValue())))
+        .andExpect(jsonPath("absenceMessage", is(nullValue())))
+        .andExpect(jsonPath("agencies", is(nullValue())))
+        .andExpect(jsonPath("userRoles", hasSize(1)))
+        .andExpect(jsonPath("userRoles[0]", is("USER")))
+        .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
+        .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
+        .andExpect(jsonPath("consultingTypes", is(notNullValue())))
+        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
+        .andExpect(jsonPath("hasArchive", is(false)))
+        .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.type", is("EMAIL")))
+        .andExpect(jsonPath("absent", is(false)))
+        .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
+        .andExpect(jsonPath("inTeamAgency", is(false)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faIsNotActivated()
+      throws Exception {
+    givenAValidConsultant();
+    givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
+
+    var consultantAgency = consultant.getConsultantAgencies().iterator().next();
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("userId", is(consultant.getId())))
+        .andExpect(jsonPath("userName", is("emigration-team")))
+        .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
+        .andExpect(jsonPath("lastName", is(consultant.getLastName())))
+        .andExpect(jsonPath("email", is(consultant.getEmail())))
+        .andExpect(jsonPath("languages", is(notNullValue())))
+        .andExpect(jsonPath("absenceMessage", is(nullValue())))
+        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
+        .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].city", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
+        .andExpect(jsonPath("userRoles", hasSize(1)))
+        .andExpect(jsonPath("userRoles[0]", is("CONSULTANT")))
+        .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
+        .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
+        .andExpect(jsonPath("consultingTypes", is(nullValue())))
+        .andExpect(jsonPath("hasAnonymousConversations", is(true)))
+        .andExpect(jsonPath("hasArchive", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isActive", is(false)))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.type", is(nullValue())))
+        .andExpect(jsonPath("absent", is(consultant.isAbsent())))
+        .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
+        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faIsNotActivated()
+      throws Exception {
+    givenAValidUser();
+    givenConsultingTypeServiceResponse();
+    givenKeycloakRespondsOtpHasNotBeenSetup(user.getUsername());
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("userId", is(user.getUserId())))
+        .andExpect(jsonPath("userName", is("performance-asker-72")))
+        .andExpect(jsonPath("firstName", is(nullValue())))
+        .andExpect(jsonPath("lastName", is(nullValue())))
+        .andExpect(jsonPath("email", is(nullValue())))
+        .andExpect(jsonPath("languages", is(nullValue())))
+        .andExpect(jsonPath("absenceMessage", is(nullValue())))
+        .andExpect(jsonPath("agencies", is(nullValue())))
+        .andExpect(jsonPath("userRoles", hasSize(1)))
+        .andExpect(jsonPath("userRoles[0]", is("USER")))
+        .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
+        .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
+        .andExpect(jsonPath("consultingTypes", is(notNullValue())))
+        .andExpect(jsonPath("hasAnonymousConversations", is(false)))
+        .andExpect(jsonPath("hasArchive", is(false)))
+        .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
+        .andExpect(jsonPath("twoFactorAuth.isActive", is(false)))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.type", is(nullValue())))
+        .andExpect(jsonPath("absent", is(false)))
+        .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
+        .andExpect(jsonPath("inTeamAgency", is(false)));
   }
 
   @Test
@@ -827,6 +1097,43 @@ public class UserControllerE2EIT {
     )).thenThrow(invalidCode);
   }
 
+  private void givenKeycloakRespondsOtpByAppHasBeenSetup(String username) {
+    var urlSuffix = "/auth/realms/test/otp-config/fetch-otp-setup-info/" + username;
+
+    var otpInfo = new OtpInfoDTO();
+    otpInfo.setOtpSetup(true);
+    otpInfo.setOtpType(OtpType.APP);
+
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(OtpInfoDTO.class)
+    )).thenReturn(ResponseEntity.ok(otpInfo));
+  }
+
+  private void givenKeycloakRespondsOtpByEmailHasBeenSetup(String username) {
+    var urlSuffix = "/auth/realms/test/otp-config/fetch-otp-setup-info/" + username;
+
+    var otpInfo = new OtpInfoDTO();
+    otpInfo.setOtpSetup(true);
+    otpInfo.setOtpType(OtpType.EMAIL);
+
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(OtpInfoDTO.class)
+    )).thenReturn(ResponseEntity.ok(otpInfo));
+  }
+
+  private void givenKeycloakRespondsOtpHasNotBeenSetup(String username) {
+    var otpInfo = new OtpInfoDTO();
+    otpInfo.setOtpSetup(false);
+    otpInfo.setOtpSecret(RandomStringUtils.randomAlphabetic(32));
+    otpInfo.setOtpSecretQrCode(RandomStringUtils.randomAlphabetic(64));
+
+    var urlSuffix = "/auth/realms/test/otp-config/fetch-otp-setup-info/" + username;
+
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(OtpInfoDTO.class)
+    )).thenReturn(ResponseEntity.ok(otpInfo));
+  }
+
   private void givenAValidEmailDTO() {
     var email = givenAValidEmail();
     emailDTO = new EmailDTO();
@@ -877,6 +1184,43 @@ public class UserControllerE2EIT {
     when(authenticatedUser.isUser()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(true);
     when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(Authority.CONSULTANT.name()));
+    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
+  }
+
+  private void givenAValidUser() {
+    user = userRepository.findAll().iterator().next();
+    when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
+    when(authenticatedUser.isUser()).thenReturn(true);
+    when(authenticatedUser.isConsultant()).thenReturn(false);
+    when(authenticatedUser.getUsername()).thenReturn(user.getUsername());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(Authority.USER.name()));
+    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
+  }
+
+  private void givenConsultingTypeServiceResponse() {
+    consultingTypeControllerApi.getApiClient().setBasePath("https://www.google.de/");
+    when(restTemplate.getUriTemplateHandler()).thenReturn(new UriTemplateHandler() {
+      @SneakyThrows
+      @Override
+      public @NonNull URI expand(@NonNull String uriTemplate,
+          @NonNull Map<String, ?> uriVariables) {
+        return new URI("");
+      }
+
+      @SneakyThrows
+      @Override
+      public @NonNull URI expand(@NonNull String uriTemplate, Object @NonNull ... uriVariables) {
+        return new URI("");
+      }
+    });
+
+    var body = new BasicConsultingTypeResponseDTO();
+    body.setId(1);
+    ParameterizedTypeReference<List<BasicConsultingTypeResponseDTO>> value = new ParameterizedTypeReference<>() {
+    };
+    when(restTemplate.exchange(any(RequestEntity.class), eq(value)))
+        .thenReturn(ResponseEntity.ok(List.of(body)));
   }
 
   private void givenAValidConsultantSpeaking(LanguageCode languageCode) {

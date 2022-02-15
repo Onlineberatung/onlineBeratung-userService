@@ -65,8 +65,8 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
-import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -188,13 +188,13 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private SessionDataService sessionDataService;
   @MockBean
-  private UserDataFacade userDataFacade;
-  @MockBean
   private SessionArchiveService sessionArchiveService;
   @MockBean
   private ConsultantUpdateService consultantUpdateService;
   @MockBean
   private ConsultantService consultantService;
+  @MockBean
+  private AskerDataProvider askerDataProvider;
 
   /**
    * POST on /users/askers/new
@@ -2079,16 +2079,15 @@ public class UserControllerAuthorizationIT {
     when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
     when(this.validatedUserAccountProvider.retrieveValidatedUser())
         .thenReturn(new EasyRandom().nextObject(User.class));
-    when(this.userDataFacade.buildUserDataByRole()).thenReturn(new UserDataResponseDTO());
+    when(askerDataProvider.retrieveData(any())).thenReturn(easyRandom.nextObject(
+        UserDataResponseDTO.class));
 
     mvc.perform(get(PATH_GET_USER_DATA)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-
-    verify(this.userDataFacade).buildUserDataByRole();
   }
 
   @Test

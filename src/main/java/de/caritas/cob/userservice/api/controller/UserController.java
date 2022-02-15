@@ -27,8 +27,9 @@ import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
+import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
-import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
@@ -50,6 +51,7 @@ import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
+import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
@@ -116,7 +118,6 @@ public class UserController implements UsersApi {
   private final @NotNull SessionService sessionService;
   private final @NotNull AuthenticatedUser authenticatedUser;
   private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
-  private final @NotNull UserDataFacade userDataFacade;
   private final @NotNull ConsultantImportService consultantImportService;
   private final @NotNull EmailNotificationFacade emailNotificationFacade;
   private final @NotNull MonitoringService monitoringService;
@@ -143,8 +144,11 @@ public class UserController implements UsersApi {
   private final @NonNull IdentityManaging identityManager;
   private final @NotNull ActionsRegistry actionsRegistry;
   private final @NonNull ConsultantDtoMapper consultantDtoMapper;
+  private final @NonNull UserDtoMapper userDtoMapper;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
+  private final @NonNull ConsultantDataProvider consultantDataProvider;
+  private final @NonNull AskerDataProvider askerDataProvider;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -297,16 +301,30 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Gets the user data for the current logged in user depending on his user role.
+   * Gets the user data for the current logged-in user depending on his user role.
    *
    * @return {@link ResponseEntity} containing {@link UserDataResponseDTO}
    */
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
+    var userDataResponseDTO = authenticatedUser.isConsultant()
+        ? consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant())
+        : askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
 
-    var responseDTO = this.userDataFacade.buildUserDataByRole();
+    var isOtpEnabled = authenticatedUser.isUser() && identityClientConfig.getOtpAllowedForUsers()
+        || authenticatedUser.isConsultant() && identityClientConfig.getOtpAllowedForConsultants();
 
-    return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    TwoFactorAuthDTO twoFactorAuthDTO;
+    if (isOtpEnabled) {
+      var username = authenticatedUser.getUsername();
+      var otpInfoDTO = identityManager.getOtpCredential(username);
+      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(otpInfoDTO);
+    } else {
+      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf();
+    }
+    userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
+
+    return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
   }
 
   /**
