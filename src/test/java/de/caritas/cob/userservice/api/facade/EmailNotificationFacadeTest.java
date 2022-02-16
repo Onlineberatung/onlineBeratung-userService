@@ -94,6 +94,7 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class EmailNotificationFacadeTest {
 
+  private static final String REQUEST_SERVER_NAME = "subdomain.onlineberatung.net";
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, "XXX", USERNAME_CONSULTANT_ENCODED, "consultant", "consultant",
           "consultant@domain.de", false, false, null, false, 1L, null, null, null, null, null,
@@ -249,7 +250,8 @@ public class EmailNotificationFacadeTest {
   public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants() {
 
     givenNewEnquiryMailSupplierReturnNonEmptyMails();
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION,
+        REQUEST_SERVER_NAME);
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
 
@@ -260,7 +262,8 @@ public class EmailNotificationFacadeTest {
 
     givenNewEnquiryMailSupplierReturnNonEmptyMails();
 
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION,
+        REQUEST_SERVER_NAME);
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
@@ -272,7 +275,8 @@ public class EmailNotificationFacadeTest {
     givenNewEnquiryMailSupplierReturnNonEmptyMails();
 
     SESSION.setTenantId(1L);
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION,
+        REQUEST_SERVER_NAME);
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
     assertThat(TenantContext.getCurrentTenant()).isEqualTo(1L);
@@ -295,7 +299,8 @@ public class EmailNotificationFacadeTest {
 
     when(newEnquiryEmailSupplier.generateEmails()).thenReturn(Lists.newArrayList());
 
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION,
+        null);
 
     verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
@@ -308,7 +313,8 @@ public class EmailNotificationFacadeTest {
 
     when(newEnquiryEmailSupplier.generateEmails()).thenThrow(emailNotificationException);
 
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION,
+        REQUEST_SERVER_NAME);
 
     verify(logger, times(2)).error(anyString(), anyString(), anyString());
   }

@@ -47,7 +47,8 @@ public class TenantResolver {
   }
 
   private Long resolveForAuthenticatedUser(HttpServletRequest request) {
-    return isTechnicalUserRole(request) ? TECHNICAL_TENANT_ID : resolveForAuthenticatedNonTechnicalUser(request);
+    return isTechnicalUserRole(request) ? TECHNICAL_TENANT_ID
+        : resolveForAuthenticatedNonTechnicalUser(request);
   }
 
   private Long resolveForAuthenticatedNonTechnicalUser(HttpServletRequest request) {
@@ -94,7 +95,8 @@ public class TenantResolver {
     AccessToken token = ((KeycloakAuthenticationToken) request.getUserPrincipal()).getAccount()
         .getKeycloakSecurityContext().getToken();
     var accountResourceAccess = token.getResourceAccess("account");
-    return hasRoles(accountResourceAccess) && accountResourceAccess.getRoles().contains("technical");
+    return hasRoles(accountResourceAccess) && accountResourceAccess.getRoles()
+        .contains("technical");
   }
 
   private boolean hasRoles(Access accountResourceAccess) {
