@@ -51,6 +51,7 @@ public class AskerDataProvider {
         .userName(user.getUsername())
         .email(observeUserEmailAddress(user))
         .isAbsent(false)
+        .encourage2fa(user.getEncourage2fa())
         .isFormalLanguage(user.isLanguageFormal())
         .isInTeamAgency(false)
         .userRoles(authenticatedUser.getRoles())

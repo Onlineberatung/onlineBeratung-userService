@@ -50,6 +50,7 @@ import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
+import de.caritas.cob.userservice.api.model.PatchUserDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
@@ -327,6 +328,14 @@ public class UserController implements UsersApi {
     userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
 
     return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
+    var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser);
+    accountManager.patchUser(patchMap).orElseThrow();
+
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -924,7 +933,8 @@ public class UserController implements UsersApi {
     var validationResult = identityManager.validateOneTimePassword(username, tan);
 
     if (Boolean.parseBoolean(validationResult.get("created"))) {
-      accountManager.saveEmail(authenticatedUser.getUserId(), validationResult.get("email"));
+      var patchMap = userDtoMapper.mapOf(validationResult.get("email"), authenticatedUser);
+      accountManager.patchUser(patchMap).orElseThrow();
       return ResponseEntity.noContent().build();
     }
     if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {

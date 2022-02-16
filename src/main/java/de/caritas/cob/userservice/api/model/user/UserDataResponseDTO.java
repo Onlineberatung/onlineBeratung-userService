@@ -67,4 +67,6 @@ public class UserDataResponseDTO {
   private boolean hasAnonymousConversations;
   private boolean hasArchive;
   private TwoFactorAuthDTO twoFactorAuth;
+
+  private Boolean encourage2fa;
 }

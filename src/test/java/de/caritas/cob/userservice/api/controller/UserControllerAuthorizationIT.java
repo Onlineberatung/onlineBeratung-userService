@@ -49,6 +49,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -2002,22 +2003,64 @@ public class UserControllerAuthorizationIT {
   public void updateSessionData_Should_ReturnOK_When_ProperlyAuthorizedWithUserAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(new SessionDataDTO().age("2")))
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(new ObjectMapper().writeValueAsString(new SessionDataDTO().age("2")))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void patchUser_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
+      throws Exception {
+    mvc.perform(
+            patch(PATH_GET_USER_DATA)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  public void patchUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+      throws Exception {
+    mvc.perform(
+            patch(PATH_GET_USER_DATA)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void patchUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    mvc.perform(
+            patch(PATH_GET_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
   }
 
   @Test
   public void updateUserData_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     mvc.perform(put(PATH_GET_USER_DATA)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantDataFacade);

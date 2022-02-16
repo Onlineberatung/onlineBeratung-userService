@@ -70,6 +70,7 @@ public class ConsultantDataProvider {
         .isAbsent(consultant.isAbsent())
         .isFormalLanguage(consultant.isLanguageFormal())
         .languages(languageStringsOf(consultant.getLanguages()))
+        .encourage2fa(consultant.getEncourage2fa())
         .absenceMessage(consultant.getAbsenceMessage())
         .isInTeamAgency(consultant.isTeamConsultant())
         .agencies(agencyDTOsOf(consultant))

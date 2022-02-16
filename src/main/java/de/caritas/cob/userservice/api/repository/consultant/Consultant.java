@@ -136,6 +136,9 @@ public class Consultant {
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
 
+  @Column(name = "encourage_2fa", nullable = false, columnDefinition = "bit default true")
+  private Boolean encourage2fa;
+
   @JsonIgnore
   public String getFullName() {
     return (this.firstName + " " + this.lastName).trim();

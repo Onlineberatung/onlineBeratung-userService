@@ -121,6 +121,7 @@ public class ConsultantCreatorService {
         .absenceMessage(consultantCreationInput.getAbsenceMessage())
         .teamConsultant(consultantCreationInput.isTeamConsultant())
         .rocketChatId(rocketChatUserId)
+        .encourage2fa(true)
         .languageFormal(consultantCreationInput.isLanguageFormal())
         .languages(Set.of())
         .createDate(consultantCreationInput.getCreateDate())

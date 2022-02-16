@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,6 +43,7 @@ import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.OtpType;
+import de.caritas.cob.userservice.api.model.PatchUserDTO;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
@@ -59,6 +61,7 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -168,6 +171,8 @@ public class UserControllerE2EIT {
 
   private String email;
 
+  private PatchUserDTO patchUserDTO;
+
   @AfterEach
   public void reset() {
     user = null;
@@ -185,6 +190,7 @@ public class UserControllerE2EIT {
     emailDTO = null;
     tan = null;
     email = null;
+    patchUserDTO = null;
   }
 
   @Test
@@ -354,6 +360,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
         .andExpect(jsonPath("languages", is(notNullValue())))
+        .andExpect(jsonPath("encourage2fa", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", hasSize(1)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
@@ -401,6 +408,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email").exists())
         .andExpect(jsonPath("languages", is(nullValue())))
+        .andExpect(jsonPath("encourage2fa", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", is(nullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
@@ -441,6 +449,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
         .andExpect(jsonPath("languages", is(notNullValue())))
+        .andExpect(jsonPath("encourage2fa", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", hasSize(1)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
@@ -488,6 +497,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email").exists())
         .andExpect(jsonPath("languages", is(nullValue())))
+        .andExpect(jsonPath("encourage2fa", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", is(nullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
@@ -528,6 +538,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
         .andExpect(jsonPath("languages", is(notNullValue())))
+        .andExpect(jsonPath("encourage2fa", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", hasSize(1)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
@@ -592,6 +603,122 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void patchUserDataShouldSaveAdviceSeekerAndRespondWithNoContent() throws Exception {
+    givenAValidUser();
+    givenAValidPatchDto();
+
+    mockMvc.perform(
+            patch("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchUserDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    var savedUser = userRepository.findById(user.getUserId());
+    assertTrue(savedUser.isPresent());
+    assertEquals(patchUserDTO.getEncourage2fa(), savedUser.get().getEncourage2fa());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void patchUserDataShouldSaveConsultantAndRespondWithNoContent() throws Exception {
+    givenAValidConsultant();
+    givenAValidPatchDto();
+
+    mockMvc.perform(
+            patch("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchUserDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    var savedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(savedConsultant.isPresent());
+    assertEquals(patchUserDTO.getEncourage2fa(), savedConsultant.get().getEncourage2fa());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void patchUserDataShouldOverrideDefaultAndRespondWithNoContent() throws Exception {
+    givenAValidConsultant();
+    givenAValidPatchDto(false);
+
+    mockMvc.perform(
+            patch("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchUserDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    var savedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(savedConsultant.isPresent());
+    assertEquals(false, savedConsultant.get().getEncourage2fa());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void patchUserDataShouldOverridePreviousValueAndRespondWithNoContentEachTime()
+      throws Exception {
+    givenAValidConsultant();
+
+    var savedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(savedConsultant.isPresent());
+    assertEquals(true, savedConsultant.get().getEncourage2fa());
+
+    givenAValidPatchDto(false);
+    mockMvc.perform(
+            patch("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchUserDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    savedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(savedConsultant.isPresent());
+    assertEquals(false, savedConsultant.get().getEncourage2fa());
+
+    givenAValidPatchDto(true);
+    mockMvc.perform(
+            patch("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchUserDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    savedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(savedConsultant.isPresent());
+    assertEquals(true, savedConsultant.get().getEncourage2fa());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void patchUserDataShouldRespondWithBadRequestOnNullInMandatoryDtoFields()
+      throws Exception {
+    givenAValidConsultant();
+    var patchDto = givenAnInvalidPatchDto();
+
+    mockMvc.perform(
+            patch("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDto))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -1302,6 +1429,23 @@ public class UserControllerE2EIT {
         .email(email)
         .firstname(RandomStringUtils.randomAlphabetic(8))
         .lastname(RandomStringUtils.randomAlphabetic(12));
+  }
+
+  private HashMap<String, Object> givenAnInvalidPatchDto() {
+    var patchDtoAsMap = new HashMap<String, Object>(1);
+    patchDtoAsMap.put("encourage2fa", null);
+
+    return patchDtoAsMap;
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void givenAValidPatchDto(boolean encourage2fa) {
+    givenAValidPatchDto();
+    patchUserDTO.setEncourage2fa(encourage2fa);
+  }
+
+  private void givenAValidPatchDto() {
+    patchUserDTO = easyRandom.nextObject(PatchUserDTO.class);
   }
 
   private void givenAnUpdateConsultantDtoWithLanguages(String email) {
