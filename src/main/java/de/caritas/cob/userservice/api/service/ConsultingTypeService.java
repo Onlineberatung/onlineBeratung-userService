@@ -49,7 +49,7 @@ public class ConsultingTypeService {
    * @return list with consulting type ids
    */
   @Cacheable(cacheNames = CacheManagerConfig.CONSULTING_TYPE_CACHE)
-  public List<Integer> getAllConsultingTypeIds(Long tenantContext) {
+  public List<Integer> getAllConsultingTypeIds(Long tenantId) {
     addDefaultHeaders(this.consultingTypeControllerApi.getApiClient());
     return this.consultingTypeControllerApi.getBasicConsultingTypeList().stream()
         .map(BasicConsultingTypeResponseDTO::getId)
