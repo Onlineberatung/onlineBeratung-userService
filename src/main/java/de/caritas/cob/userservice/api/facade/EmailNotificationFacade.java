@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
@@ -23,12 +22,14 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailNotificationFacade {
 
   @Value("${app.base.url}")
@@ -52,13 +54,13 @@ public class EmailNotificationFacade {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
-  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
@@ -68,14 +70,19 @@ public class EmailNotificationFacade {
    */
   @Async
   public void sendNewEnquiryEmailNotification(Session session) {
-
     try {
-      EmailSupplier newEnquiryMail = new NewEnquiryEmailSupplier(session,
-          consultantAgencyRepository, agencyService, applicationBaseUrl);
-      sendMailTasksToMailService(newEnquiryMail);
+      overtakeCurrentTenantContextFromSessionForAsyncThread(session);
+      newEnquiryEmailSupplier.setCurrentContext(session);
+      sendMailTasksToMailService(newEnquiryEmailSupplier);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new enquiry notification for session %s.", session.getId()), ex);
+    }
+  }
+
+  private void overtakeCurrentTenantContextFromSessionForAsyncThread(Session session) {
+    if (TenantContext.getCurrentTenant() == null && session.getTenantId() != null) {
+      TenantContext.setCurrentTenant(session.getTenantId());
     }
   }
 
@@ -85,6 +92,7 @@ public class EmailNotificationFacade {
     if (isNotEmpty(generatedMails)) {
       MailsDTO mailsDTO = new MailsDTO()
           .mails(generatedMails);
+      log.info("Sending email notifications with mailDTOs ", mailsDTO);
       mailService.sendEmailNotification(mailsDTO);
     }
   }
