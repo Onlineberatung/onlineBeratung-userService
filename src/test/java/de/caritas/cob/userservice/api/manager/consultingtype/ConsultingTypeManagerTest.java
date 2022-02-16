@@ -85,5 +85,6 @@ class ConsultingTypeManagerTest {
     assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(1, 2, 3, 4));
     TenantContext.setCurrentTenant(tenant2);
     assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(5, 6, 7, 8));
+    TenantContext.setCurrentTenant(null);
   }
 }
