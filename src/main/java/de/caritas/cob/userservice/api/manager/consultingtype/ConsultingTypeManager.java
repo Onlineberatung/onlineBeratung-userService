@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import lombok.Getter;
@@ -50,7 +51,7 @@ public class ConsultingTypeManager {
    * @return {@link List} with all consulting type IDS
    */
   public List<Integer> getAllConsultingTypeIds() {
-    return consultingTypeService.getAllConsultingTypeIds();
+    return consultingTypeService.getAllConsultingTypeIds(TenantContext.getCurrentTenant());
   }
 
   public boolean isConsultantBoundedToAgency(int consultingTypeId) {
