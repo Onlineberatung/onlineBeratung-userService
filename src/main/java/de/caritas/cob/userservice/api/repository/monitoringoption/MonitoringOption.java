@@ -16,7 +16,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
 /**
  * Represents the monitoring option of an asker
@@ -38,7 +37,6 @@ public class MonitoringOption {
   @Id
   @Column(name = "monitoring_type", updatable = false, nullable = false)
   @NonNull
-  @Type(type = "org.hibernate.type.ByteType")
   private MonitoringType monitoringType;
 
   @Id

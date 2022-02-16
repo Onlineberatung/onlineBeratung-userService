@@ -10,7 +10,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.ToString.Exclude;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -60,23 +59,20 @@ public class User {
   @Column(name = "rc_user_id")
   private String rcUserId;
 
-  @Column(name = "language_formal", nullable = false, columnDefinition = "tinyint")
+  @Column(name = "language_formal", nullable = false)
+  @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean languageFormal;
 
   @OneToMany(mappedBy = "user")
-  @Exclude
   private Set<Session> sessions;
 
   @OneToMany(mappedBy = "user")
-  @Exclude
   private Set<UserAgency> userAgencies;
 
   @Column(name = "mobile_token")
-  @Lob
   private String mobileToken;
 
   @OneToMany(mappedBy = "user")
-  @Exclude
   private Set<UserMobileToken> userMobileTokens;
 
   @Column(name = "delete_date", columnDefinition = "datetime")
