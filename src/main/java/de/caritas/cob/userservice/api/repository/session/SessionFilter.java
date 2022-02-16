@@ -5,9 +5,9 @@ import java.util.Optional;
 
 public enum SessionFilter {
   ALL("all"), FEEDBACK("feedback");
-  private final String value;
+  private String value;
 
-  SessionFilter(String value) {
+  private SessionFilter(String value) {
     this.value = value;
   }
 

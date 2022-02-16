@@ -56,7 +56,6 @@ public class Chat {
 
   @Column(name = "consulting_type", updatable = false, nullable = false)
   @NonNull
-  @Type(type = "org.hibernate.type.ByteType")
   private Integer consultingTypeId;
 
   @Column(name = "initial_start_date", nullable = false)
@@ -67,10 +66,11 @@ public class Chat {
   @NonNull
   private LocalDateTime startDate;
 
-  @Column(name = "duration", nullable = false, columnDefinition = "smallint")
+  @Column(name = "duration", nullable = false)
   private int duration;
 
   @Column(name = "is_repetitive", nullable = false)
+  @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean repetitive;
 
   @Enumerated(EnumType.STRING)
@@ -78,10 +78,10 @@ public class Chat {
   private ChatInterval chatInterval;
 
   @Column(name = "is_active", nullable = false)
+  @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean active;
 
   @Column(name = "max_participants")
-  @Type(type = "org.hibernate.type.ByteType")
   private Integer maxParticipants;
 
   @Column(name = "rc_group_id")
@@ -99,8 +99,8 @@ public class Chat {
   @Column(name = "update_date")
   private LocalDateTime updateDate;
 
-  public Chat(@NonNull String topic, int consultingTypeId, @NonNull LocalDateTime initialStartDate,
-      @NonNull LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
+  public Chat(String topic, int consultingTypeId, LocalDateTime initialStartDate,
+      LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
       Consultant chatOwner) {
     this.topic = topic;
     this.consultingTypeId = consultingTypeId;
