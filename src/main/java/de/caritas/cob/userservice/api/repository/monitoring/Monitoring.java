@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.monitoring;
 
+import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -11,13 +12,11 @@ import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
 /**
  * Represents the monitoring of an asker
@@ -53,7 +52,6 @@ public class Monitoring {
   @Id
   @Column(name = "type", updatable = false, nullable = false)
   @NonNull
-  @Type(type = "org.hibernate.type.ByteType")
   private MonitoringType monitoringType;
 
   @Id
