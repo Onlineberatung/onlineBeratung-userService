@@ -18,8 +18,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,11 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private Session session;
 
-  public void setCurrentContext(Session session) {
+  @Getter
+  @Setter
+  private String requestServerName;
+
+  public void setCurrentSession(Session session) {
     this.session = session;
   }
 
@@ -59,7 +65,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
     if (isEmpty(consultantAgencyList)) {
       return emptyList();
     }
-    AgencyDTO agency = agencyService.getAgency(session.getAgencyId());
+    AgencyDTO agency = agencyService.getAgency(session.getAgencyId(), requestServerName);
     log.info("Retrieved agency " + agency);
     return consultantAgencyList.stream()
         .filter(this::validConsultantAgency)

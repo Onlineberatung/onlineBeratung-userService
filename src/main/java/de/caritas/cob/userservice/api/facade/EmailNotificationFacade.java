@@ -67,12 +67,14 @@ public class EmailNotificationFacade {
    * written.
    *
    * @param session the regarding session
+   * @param requestServerName
    */
   @Async
-  public void sendNewEnquiryEmailNotification(Session session) {
+  public void sendNewEnquiryEmailNotification(Session session, String requestServerName) {
     try {
       overtakeCurrentTenantContextFromSessionForAsyncThread(session);
-      newEnquiryEmailSupplier.setCurrentContext(session);
+      newEnquiryEmailSupplier.setCurrentSession(session);
+      newEnquiryEmailSupplier.setRequestServerName(requestServerName);
       sendMailTasksToMailService(newEnquiryEmailSupplier);
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(

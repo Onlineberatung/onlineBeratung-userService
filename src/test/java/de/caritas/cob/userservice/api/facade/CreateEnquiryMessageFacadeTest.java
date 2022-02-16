@@ -86,6 +86,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Welc
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,6 +96,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateEnquiryMessageFacadeTest {
@@ -203,6 +206,9 @@ public class CreateEnquiryMessageFacadeTest {
   @Mock
   private LiveEventNotificationService liveEventNotificationService;
 
+  @Mock
+  HttpServletRequest servletRequest;
+
   private Session session;
   private User user;
   private ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO;
@@ -235,6 +241,8 @@ public class CreateEnquiryMessageFacadeTest {
     this.groupResponseDTO = new GroupResponseDTO();
     this.groupDTO = new GroupDTO();
     this.rocketChatCredentials = RocketChatCredentials.builder().build();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(Mockito.mock(
+        HttpServletRequest.class)));
   }
 
   @Test
@@ -278,7 +286,8 @@ public class CreateEnquiryMessageFacadeTest {
     verify(messageServiceProvider, atLeastOnce())
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(sessionService, atLeastOnce()).saveSession(any());
-    verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any());
+    verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any(),
+        any());
     assertEquals(SESSION_ID, response.getSessionId());
     assertEquals(RC_GROUP_ID, response.getRcGroupId());
   }
