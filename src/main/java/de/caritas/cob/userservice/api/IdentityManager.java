@@ -14,35 +14,36 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class IdentityManager implements IdentityManaging {
 
-  private final IdentityClient keycloakService;
+  private final IdentityClient identityClient;
 
   @Override
   public Optional<String> setUpOneTimePassword(String username, String email) {
-    return keycloakService.initiateEmailVerification(username, email);
+    return identityClient.initiateEmailVerification(username, email);
   }
 
   @Override
   public boolean setUpOneTimePassword(String username, String initialCode, String secret) {
-    return keycloakService.setUpOtpCredential(username, initialCode, secret);
+    return identityClient.setUpOtpCredential(username, initialCode, secret);
   }
 
   @Override
   public Map<String, String> validateOneTimePassword(String username, String code) {
-    var verificationResult = keycloakService.finishEmailVerification(username, code);
-    if (verificationResult.get("created").equals("true")) {
-      keycloakService.changeEmailAddress(verificationResult.get("email"));
+    var validationResult = identityClient.finishEmailVerification(username, code);
+    if (validationResult.get("created").equals("true")) {
+      var email = validationResult.get("email");
+      identityClient.changeEmailAddress(email);
     }
 
-    return verificationResult;
+    return validationResult;
   }
 
   @Override
   public void deleteOneTimePassword(String username) {
-    keycloakService.deleteOtpCredential(username);
+    identityClient.deleteOtpCredential(username);
   }
 
   @Override
   public OtpInfoDTO getOtpCredential(String username) {
-    return keycloakService.getOtpCredential(username);
+    return identityClient.getOtpCredential(username);
   }
 }

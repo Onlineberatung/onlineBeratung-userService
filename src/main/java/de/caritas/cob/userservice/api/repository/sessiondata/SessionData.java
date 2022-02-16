@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.sessiondata;
 
+import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,12 +12,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import lombok.NoArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "session_data")
@@ -46,7 +45,6 @@ public class SessionData {
 
   @Column(name = "type", updatable = false, nullable = false)
   @NonNull
-  @Type(type = "org.hibernate.type.ByteType")
   private SessionDataType sessionDataType;
 
   @Column(name = "key_name")
