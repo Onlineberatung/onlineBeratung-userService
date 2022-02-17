@@ -941,6 +941,9 @@ public class UserController implements UsersApi {
     if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
       return ResponseEntity.badRequest().build();
     }
+    if (Boolean.parseBoolean(validationResult.get("createdBefore"))) {
+      return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+    }
 
     return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
   }
