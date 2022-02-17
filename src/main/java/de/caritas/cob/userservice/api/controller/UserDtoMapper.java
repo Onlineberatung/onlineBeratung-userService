@@ -13,13 +13,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDtoMapper {
 
-  public TwoFactorAuthDTO twoFactorAuthDtoOf() {
-    return new TwoFactorAuthDTO();
+  public TwoFactorAuthDTO twoFactorAuthDtoOf(Boolean encourage2fa) {
+    var twoFactorAuthDTO = new TwoFactorAuthDTO();
+    twoFactorAuthDTO.setIsToEncourage(encourage2fa);
+
+    return twoFactorAuthDTO;
   }
 
-  public TwoFactorAuthDTO twoFactorAuthDtoOf(OtpInfoDTO otpInfoDTO) {
+  public TwoFactorAuthDTO twoFactorAuthDtoOf(OtpInfoDTO otpInfoDTO, Boolean encourage2fa) {
     var twoFactorAuthDTO = new TwoFactorAuthDTO();
     twoFactorAuthDTO.setIsEnabled(true);
+    twoFactorAuthDTO.setIsToEncourage(encourage2fa);
 
     if (otpInfoDTO.getOtpSetup()) {
       twoFactorAuthDTO.isActive(true);

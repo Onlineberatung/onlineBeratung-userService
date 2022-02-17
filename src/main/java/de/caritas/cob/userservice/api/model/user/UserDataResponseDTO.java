@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import java.util.LinkedHashMap;
@@ -68,5 +69,6 @@ public class UserDataResponseDTO {
   private boolean hasArchive;
   private TwoFactorAuthDTO twoFactorAuth;
 
+  @JsonIgnore
   private Boolean encourage2fa;
 }
