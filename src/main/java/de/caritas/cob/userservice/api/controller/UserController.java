@@ -318,12 +318,13 @@ public class UserController implements UsersApi {
         || authenticatedUser.isConsultant() && identityClientConfig.getOtpAllowedForConsultants();
 
     TwoFactorAuthDTO twoFactorAuthDTO;
+    var encourage2fa = userDataResponseDTO.getEncourage2fa();
     if (isOtpEnabled) {
       var username = authenticatedUser.getUsername();
       var otpInfoDTO = identityManager.getOtpCredential(username);
-      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(otpInfoDTO);
+      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(otpInfoDTO, encourage2fa);
     } else {
-      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf();
+      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(encourage2fa);
     }
     userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
 

@@ -1983,12 +1983,6 @@ components:
           type: boolean
           example: true
           description: "Is true if consultant has access to archive"
-        encourage2fa:
-          type: boolean
-          example: true
-          default: true
-          nullable: false
-          description: indicates if 2FA is supposed to be encouraged
 
     PatchUserDTO:
       type: object
@@ -2337,6 +2331,12 @@ components:
           type: string
         type:
           $ref: "#/components/schemas/OtpType"
+        isToEncourage:
+          type: boolean
+          example: true
+          default: true
+          nullable: false
+          description: indicates if 2FA is supposed to be encouraged
 
     OtpType:
       type: string
