@@ -133,6 +133,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        409:
+          description: already configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /otp-config/setup-otp-mail/{username}:
     post:
@@ -152,6 +158,12 @@ paths:
             schema:
               $ref: '#/components/schemas/OtpSetupDTO'
       responses:
+        200:
+          description: otp already configured
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SuccessWithEmail'
         201:
           description: otp created
           content:

@@ -858,12 +858,31 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithError()
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithInvalidParameterError()
       throws Exception {
     givenAValidConsultant();
     givenAValidEmailDTO();
     givenABearerToken();
-    givenAKeycloakVerifyEmailErrorResponse();
+    givenAKeycloakVerifyEmailInvalidParameterErrorResponse();
+
+    mockMvc.perform(
+            put("/users/2fa/email")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithAlreadyConfiguredError()
+      throws Exception {
+    givenAValidConsultant();
+    givenAValidEmailDTO();
+    givenABearerToken();
+    givenAKeycloakVerifyEmailIAlreadyConfiguredErrorResponse();
 
     mockMvc.perform(
             put("/users/2fa/email")
@@ -1016,6 +1035,33 @@ public class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isTooManyRequests());
+
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    verify(keycloakRestTemplate)
+        .postForEntity(
+            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+        );
+
+    var otpSetupDTO = captor.getValue().getBody();
+    assertNotNull(otpSetupDTO);
+    assertEquals(tan, otpSetupDTO.getInitialCode());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithPreconditionFailedIfOtpByEmailHasBeenSetupBefore()
+      throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+    givenACorrectlyFormattedTan();
+    givenAKeycloakAlreadySetupEmailResponse();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isPreconditionFailed());
 
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
     verify(keycloakRestTemplate)
@@ -1226,6 +1272,17 @@ public class UserControllerE2EIT {
     )).thenThrow(tooManyAttempts);
   }
 
+  private void givenAKeycloakAlreadySetupEmailResponse() {
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    var successWithEmail = new SuccessWithEmail();
+    email = givenAValidEmail();
+    successWithEmail.setEmail(email);
+
+    when(keycloakRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
+    )).thenReturn(new ResponseEntity<>(successWithEmail, HttpStatus.OK));
+  }
+
   private void givenAValidKeycloakVerifyEmailResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
@@ -1236,10 +1293,21 @@ public class UserControllerE2EIT {
     )).thenReturn(ResponseEntity.ok(success));
   }
 
-  private void givenAKeycloakVerifyEmailErrorResponse() {
+  private void givenAKeycloakVerifyEmailInvalidParameterErrorResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
     var invalidParameter = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "invalid parameter",
+        null, null);
+
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Success.class)
+    )).thenThrow(invalidParameter);
+  }
+
+  private void givenAKeycloakVerifyEmailIAlreadyConfiguredErrorResponse() {
+    var urlSuffix =
+        "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
+    var invalidParameter = new HttpClientErrorException(HttpStatus.CONFLICT, "already configured",
         null, null);
 
     when(keycloakRestTemplate.exchange(
