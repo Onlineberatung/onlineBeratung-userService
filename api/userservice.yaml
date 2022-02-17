@@ -1359,6 +1359,8 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        412:
+          description: PRECONDITION FAILED - already set up
         429:
           description: TOO MANY REQUESTS - maximum number of attempts has been reached
         500:
