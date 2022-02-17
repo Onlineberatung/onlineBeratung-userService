@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.deleteworkflow.scheduler;
 
 import de.caritas.cob.userservice.api.deleteworkflow.service.DeleteUsersRegisteredOnlyService;
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class DeleteUsersRegisteredOnlyScheduler {
 
   private final @NonNull DeleteUsersRegisteredOnlyService deleteUsersRegisteredOnlyService;
+  private final @NonNull TenantContextProvider tenantContextProvider;
 
   @Value("${user.registeredonly.deleteWorkflow.enabled}")
   private boolean userRegisteredOnlyDeleteWorkflowEnabled;
@@ -27,6 +29,7 @@ public class DeleteUsersRegisteredOnlyScheduler {
    */
   @Scheduled(cron = "${user.registeredonly.deleteWorkflow.cron}")
   public void performDeletionWorkflow() {
+    tenantContextProvider.setTechnicalContextIfMultiTenancyIsEnabled();
     if (userRegisteredOnlyDeleteWorkflowEnabled) {
       deleteUsersRegisteredOnlyService.deleteUserAccountsTimeSensitive();
     }
