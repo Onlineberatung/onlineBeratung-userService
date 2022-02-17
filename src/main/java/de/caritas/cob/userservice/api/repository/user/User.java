@@ -86,6 +86,9 @@ public class User {
   @Column(name = "update_date", columnDefinition = "datetime")
   private LocalDateTime updateDate;
 
+  @Column(name = "encourage_2fa", nullable = false, columnDefinition = "bit default true")
+  private Boolean encourage2fa;
+
   public User(@Size(max = 36) String userId, Long oldId, @Size(max = 255) String username,
       @Size(max = 255) String email, boolean languageFormal) {
     this.userId = userId;
@@ -93,6 +96,7 @@ public class User {
     this.username = username;
     this.email = email;
     this.languageFormal = languageFormal;
+    setEncourage2fa(true);
   }
 
   @Override

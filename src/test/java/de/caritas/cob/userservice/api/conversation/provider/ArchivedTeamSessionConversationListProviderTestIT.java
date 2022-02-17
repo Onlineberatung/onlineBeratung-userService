@@ -185,6 +185,7 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
     consultant.setTeamConsultant(false);
     consultant.setLanguageFormal(false);
     consultant.setAbsent(false);
+    consultant.setEncourage2fa(true);
     return consultant;
   }
 

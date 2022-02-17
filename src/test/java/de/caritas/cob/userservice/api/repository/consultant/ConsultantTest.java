@@ -15,8 +15,8 @@ public class ConsultantTest {
   private static final String FIRSTNAME = "firstname";
   private static final String LASTNAME = "lastname";
   private static final Consultant CONSULTANT = new Consultant("yyy", "XXX", "consultant",
-      FIRSTNAME, LASTNAME, "consultant@domain.de", false, false, null, false, null, 1L, null, null, null,
-      null, null, null);
+      FIRSTNAME, LASTNAME, "consultant@domain.de", false, false, null, false, null, 1L, null, null,
+      null, null, null, null, true);
 
   @Test
   public void getFullName_Should_Return_FirstnameAndLastname() {

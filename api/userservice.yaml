@@ -397,6 +397,31 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+    patch:
+      tags:
+        - user-controller
+      summary: 'Updates an account property of the currently authenticated user'
+      description: 'The only supported field so far is encourage2fa [Authorization: Role: consultant, user]'
+      operationId: patchUser
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/PatchUserDTO'
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/email:
     put:
       tags:
@@ -1958,6 +1983,22 @@ components:
           type: boolean
           example: true
           description: "Is true if consultant has access to archive"
+        encourage2fa:
+          type: boolean
+          example: true
+          default: true
+          nullable: false
+          description: indicates if 2FA is supposed to be encouraged
+
+    PatchUserDTO:
+      type: object
+      required:
+        - encourage2fa
+      properties:
+        encourage2fa:
+          type: boolean
+          example: true
+          description: indicates if 2FA is supposed to be encouraged
 
     UpdateConsultantDTO:
       type: object
