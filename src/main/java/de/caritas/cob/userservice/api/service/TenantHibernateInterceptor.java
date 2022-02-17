@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.tenant.TenantResolver.TECHNICAL_TENANT_ID;
+
 import de.caritas.cob.userservice.api.repository.TenantAware;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Iterator;
@@ -13,8 +15,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TenantHibernateInterceptor extends EmptyInterceptor {
 
-  private final Long TECHNICAL_TENANT_ID = 0L;
-
   @Override
   public void preFlush(Iterator entities) {
     Object entity;
@@ -22,7 +22,7 @@ public class TenantHibernateInterceptor extends EmptyInterceptor {
       entity = entities.next();
       if (entity instanceof TenantAware) {
         var tenantAware = (TenantAware) entity;
-        if (tenantAware.getTenantId() == null && !Long.valueOf(TECHNICAL_TENANT_ID)
+        if (tenantAware.getTenantId() == null && !TECHNICAL_TENANT_ID
             .equals(TenantContext.getCurrentTenant())) {
           ((TenantAware) entity).setTenantId(TenantContext.getCurrentTenant());
         }

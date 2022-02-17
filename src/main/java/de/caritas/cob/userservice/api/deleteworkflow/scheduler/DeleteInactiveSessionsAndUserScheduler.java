@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.deleteworkflow.scheduler;
 
 import de.caritas.cob.userservice.api.deleteworkflow.service.DeleteInactiveSessionsAndUserService;
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class DeleteInactiveSessionsAndUserScheduler {
 
   private final @NonNull DeleteInactiveSessionsAndUserService deleteInactiveSessionsAndUserService;
+  private final @NonNull TenantContextProvider tenantContextProvider;
 
   @Value("${session.inactive.deleteWorkflow.enabled}")
   private boolean sessionInactiveDeleteWorkflowEnabled;
@@ -24,7 +26,7 @@ public class DeleteInactiveSessionsAndUserScheduler {
    */
   @Scheduled(cron = "${session.inactive.deleteWorkflow.cron}")
   public void performDeletionWorkflow() {
-
+    tenantContextProvider.setTechnicalContextIfMultiTenancyIsEnabled();
     if (sessionInactiveDeleteWorkflowEnabled) {
       this.deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
     }

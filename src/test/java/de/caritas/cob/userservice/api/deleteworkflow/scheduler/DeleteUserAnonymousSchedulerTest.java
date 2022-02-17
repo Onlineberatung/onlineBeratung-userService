@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.deleteworkflow.scheduler;
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import de.caritas.cob.userservice.api.deleteworkflow.service.DeleteUserAnonymousService;
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,10 +19,14 @@ public class DeleteUserAnonymousSchedulerTest {
   @Mock
   private DeleteUserAnonymousService deleteUserAnonymousService;
 
+  @Mock
+  private TenantContextProvider tenantContextProvider;
+
   @Test
   public void performDeletionWorkflow_Should_executeDeleteInactiveAnonymousUsers() {
     this.deleteUserAnonymousScheduler.performDeletionWorkflow();
 
-    verify(this.deleteUserAnonymousService, times(1)).deleteInactiveAnonymousUsers();
+    verify(tenantContextProvider).setTechnicalContextIfMultiTenancyIsEnabled();
+    verify(this.deleteUserAnonymousService).deleteInactiveAnonymousUsers();
   }
 }

@@ -25,10 +25,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class TenantResolver {
 
+  public static final Long TECHNICAL_TENANT_ID = 0L;
   private static final String TENANT_ID = "tenantId";
-  private static final long TECHNICAL_TENANT_ID = 0L;
-  private @NonNull SubdomainExtractor subdomainExtractor;
-  private @NonNull TenantControllerApi tenantControllerApi;
+  private final @NonNull SubdomainExtractor subdomainExtractor;
+  private final @NonNull TenantControllerApi tenantControllerApi;
 
   public Long resolve(HttpServletRequest request) {
     if (userIsAuthenticated(request)) {

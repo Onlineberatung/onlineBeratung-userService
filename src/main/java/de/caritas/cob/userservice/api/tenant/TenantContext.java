@@ -9,17 +9,18 @@ public class TenantContext {
 
   }
 
-  private static ThreadLocal<Long> currentTenant = new ThreadLocal<>();
+  private static final ThreadLocal<Long> CURRENT_TENANT = new ThreadLocal<>();
+
 
   public static Long getCurrentTenant() {
-    return currentTenant.get();
+    return CURRENT_TENANT.get();
   }
 
   public static void setCurrentTenant(Long tenant) {
-    currentTenant.set(tenant);
+    CURRENT_TENANT.set(tenant);
   }
 
   public static void clear() {
-    currentTenant.remove();
+    CURRENT_TENANT.remove();
   }
 }

@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.deactivateworkflow.scheduler;
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import de.caritas.cob.userservice.api.deactivateworkflow.service.DeactivateGroupChatService;
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,10 +19,14 @@ class DeactivateGroupChatSchedulerTest {
   @Mock
   private DeactivateGroupChatService deactivateGroupChatService;
 
+  @Mock
+  private TenantContextProvider tenantContextProvider;
+
   @Test
   void performDeactivationWorkflow_Should_useService() {
     this.deactivateGroupChatScheduler.performDeactivationWorkflow();
 
-    verify(this.deactivateGroupChatService, times(1)).deactivateStaleGroupChats();
+    verify(tenantContextProvider).setTechnicalContextIfMultiTenancyIsEnabled();
+    verify(this.deactivateGroupChatService).deactivateStaleGroupChats();
   }
 }
