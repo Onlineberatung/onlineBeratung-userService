@@ -2394,11 +2394,12 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    mvc.perform(delete("/users/2fa")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(
+            delete("/users/2fa/app")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(identityManager).deleteOneTimePassword(any());
@@ -2494,7 +2495,7 @@ public class UserControllerAuthorizationIT {
     var payload = givenAValidOneTimePasswordDto();
     givenAValidOtpResponse();
 
-    mvc.perform(put("/users/2fa")
+    mvc.perform(put("/users/2fa/app")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)

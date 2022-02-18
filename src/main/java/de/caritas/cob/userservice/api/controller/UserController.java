@@ -951,13 +951,11 @@ public class UserController implements UsersApi {
   /**
    * Activates 2FA by mobile app for the calling user.
    *
-   * @param twoFactorAuthOr2fa (required)
    * @param oneTimePasswordDTO (required) {@link OneTimePasswordDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> activateTwoFactorAuthByApp(String twoFactorAuthOr2fa,
-      OneTimePasswordDTO oneTimePasswordDTO) {
+  public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
     if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
       throw new ConflictException("2FA is disabled for user role");
     }
@@ -974,17 +972,27 @@ public class UserController implements UsersApi {
     return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
   }
 
+  @Override
+  public ResponseEntity<Void> activateTwoFactorAuthByAppDeprecated(
+      OneTimePasswordDTO oneTimePasswordDTO) {
+    return activateTwoFactorAuthByApp(oneTimePasswordDTO);
+  }
+
   /**
    * Deactivates 2FA by mobile app for the calling user.
    *
-   * @param twoFactorAuthOr2fa (required)
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> deactivateTwoFactorAuthByApp(String twoFactorAuthOr2fa) {
+  public ResponseEntity<Void> deactivateTwoFactorAuthByApp() {
     identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
 
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> deactivateTwoFactorAuthByAppDeprecated() {
+    return deactivateTwoFactorAuthByApp();
   }
 
   /**
