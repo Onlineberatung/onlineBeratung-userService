@@ -2395,7 +2395,7 @@ public class UserControllerAuthorizationIT {
   public void deactivate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     mvc.perform(
-            delete("/users/2fa/app")
+            delete("/users/2fa")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
