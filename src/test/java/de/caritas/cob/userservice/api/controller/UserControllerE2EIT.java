@@ -1181,7 +1181,7 @@ public class UserControllerE2EIT {
   public void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
     givenAValidConsultant();
     givenABearerToken();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa");
 
     mockMvc.perform(
             delete(path)
@@ -1205,7 +1205,7 @@ public class UserControllerE2EIT {
     givenAValidConsultant();
     givenABearerToken();
     givenKeycloakIsDown();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa");
 
     mockMvc.perform(
             delete(path)

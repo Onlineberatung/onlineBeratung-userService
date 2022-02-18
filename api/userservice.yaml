@@ -1394,6 +1394,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/2fa:
     delete:
       tags:
         - user-controller
