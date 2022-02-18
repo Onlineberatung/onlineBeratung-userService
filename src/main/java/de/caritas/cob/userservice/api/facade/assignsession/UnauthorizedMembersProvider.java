@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,7 @@ public class UnauthorizedMembersProvider {
    * @param memberList list of {@link GroupMemberDTO} containing the current members of the group
    * @return list of {@link Consultant}s to be removed
    */
+  @Transactional
   public List<Consultant> obtainConsultantsToRemove(String rcGroupId, Session session,
       Consultant consultant, List<GroupMemberDTO> memberList) {
     var authorizedMembers = obtainAuthorizedMembers(rcGroupId, session, consultant);
