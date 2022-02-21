@@ -1106,9 +1106,10 @@ public class UserControllerE2EIT {
       throws Exception {
     givenAValidConsultant();
     givenAnInvalidOneTimePasswordDTO();
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put("/users/twoFactorAuth")
+            put(path)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1123,9 +1124,10 @@ public class UserControllerE2EIT {
       throws Exception {
     givenAValidConsultant();
     givenAWronglyFormattedSecret();
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put("/users/twoFactorAuth")
+            put(path)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1142,9 +1144,10 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpValidationErrorResponse();
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put("/users/twoFactorAuth")
+            put(path)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1161,9 +1164,10 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpInvalidParameterErrorResponse();
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put("/users/twoFactorAuth")
+            put(path)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1177,9 +1181,10 @@ public class UserControllerE2EIT {
   public void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
     givenAValidConsultant();
     givenABearerToken();
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa");
 
     mockMvc.perform(
-            delete("/users/twoFactorAuth")
+            delete(path)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1200,9 +1205,10 @@ public class UserControllerE2EIT {
     givenAValidConsultant();
     givenABearerToken();
     givenKeycloakIsDown();
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa");
 
     mockMvc.perform(
-            delete("/users/twoFactorAuth")
+            delete(path)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
