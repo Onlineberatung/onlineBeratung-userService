@@ -47,6 +47,7 @@ import de.caritas.cob.userservice.api.model.PatchUserDTO;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -73,6 +74,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,6 +175,8 @@ public class UserControllerE2EIT {
 
   private PatchUserDTO patchUserDTO;
 
+  private UserDTO userDTO;
+
   @AfterEach
   public void reset() {
     user = null;
@@ -191,6 +195,7 @@ public class UserControllerE2EIT {
     tan = null;
     email = null;
     patchUserDTO = null;
+    userDTO = null;
   }
 
   @Test
@@ -1215,6 +1220,38 @@ public class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  public void registerUserWithoutConsultingIdShouldSaveMonitoring() throws Exception {
+    givenConsultingTypeServiceResponse();
+    givenAUserResource();
+    givenAUserDTO();
+
+    mockMvc.perform(
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isCreated());
+  }
+
+  private void givenAUserResource() {
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(mock(UsersResource.class));
+  }
+
+  private void givenAUserDTO() {
+    userDTO = easyRandom.nextObject(UserDTO.class);
+    userDTO.setUsername(RandomStringUtils.randomAlphabetic(5, 30));
+    userDTO.setAge("17");
+    userDTO.setState("8");
+    userDTO.setPostcode(RandomStringUtils.randomNumeric(5));
+    userDTO.setTermsAccepted("true");
+    userDTO.setConsultingType("1");
+    userDTO.setConsultantId(null);
+    userDTO.setAgencyId(Math.abs(easyRandom.nextLong()));
+    userDTO.setEmail(givenAValidEmail());
   }
 
   private void givenKeycloakIsDown() {

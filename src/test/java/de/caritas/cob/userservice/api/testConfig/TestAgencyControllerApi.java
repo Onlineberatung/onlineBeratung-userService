@@ -40,6 +40,7 @@ public class TestAgencyControllerApi extends AgencyControllerApi {
     return agencyIds.stream().map(id -> {
       var agencyResponseDto = easyRandom.nextObject(AgencyResponseDTO.class);
       agencyResponseDto.setId(id);
+      agencyResponseDto.setConsultingType(1);
       return agencyResponseDto;
     }).collect(Collectors.toList());
   }
