@@ -16,6 +16,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
@@ -27,7 +28,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.standard.ClassicTokenizerFactory;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
@@ -93,20 +93,18 @@ public class Consultant {
   @Analyzer(definition = EMAIL_ANALYZER)
   private String email;
 
-  @Column(name = "is_absent", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Column(name = "is_absent", nullable = false, columnDefinition = "tinyint")
   @Field
   private boolean absent;
 
-  @Column(name = "is_team_consultant", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Column(name = "is_team_consultant", nullable = false, columnDefinition = "tinyint")
   private boolean teamConsultant;
 
   @Column(name = "absence_message")
+  @Lob
   private String absenceMessage;
 
-  @Column(name = "language_formal", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Column(name = "language_formal", nullable = false, columnDefinition = "tinyint")
   private boolean languageFormal;
 
   @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL, orphanRemoval = true)
