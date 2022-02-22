@@ -17,6 +17,8 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,6 +27,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RelevantUserAccountIdsByChatProviderTest {
+
+  private final static EasyRandom easyRandom = new EasyRandom();
 
   @InjectMocks
   private RelevantUserAccountIdsByChatProvider byChatProvider;
@@ -83,7 +87,11 @@ public class RelevantUserAccountIdsByChatProviderTest {
   }
 
   private User userWithId(String userId) {
-    return new User(userId, null, null, null, false);
+    var username = RandomStringUtils.randomAlphabetic(8);
+    var email = RandomStringUtils.randomAlphabetic(4, 8) + "@"
+        + RandomStringUtils.randomAlphabetic(4, 8) + ".com";
+
+    return new User(userId, null, username, email, false);
   }
 
   @Test
