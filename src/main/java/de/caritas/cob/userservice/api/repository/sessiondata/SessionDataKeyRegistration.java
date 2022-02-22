@@ -8,7 +8,7 @@ public enum SessionDataKeyRegistration {
   ADDICTIVE_DRUGS("addictiveDrugs"), RELATION("relation"), AGE("age"), GENDER("gender"), STATE(
       "state");
 
-  private String key;
+  private final String key;
 
   SessionDataKeyRegistration(String key) {
     this.key = key;

@@ -43,7 +43,7 @@ public class SessionData {
   @NonNull
   private Session session;
 
-  @Column(name = "type", updatable = false, nullable = false)
+  @Column(name = "type", updatable = false, nullable = false, columnDefinition = "tinyint(4)")
   @NonNull
   private SessionDataType sessionDataType;
 
