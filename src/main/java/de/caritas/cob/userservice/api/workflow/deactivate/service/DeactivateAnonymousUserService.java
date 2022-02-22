@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConve
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,5 +1,6 @@
-package de.caritas.cob.userservice.api.repository.consultantmobiletoken;
+package de.caritas.cob.userservice.api.port.out;
 
+import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 

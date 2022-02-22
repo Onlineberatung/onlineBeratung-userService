@@ -8,7 +8,7 @@ import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflo
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

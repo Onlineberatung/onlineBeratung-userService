@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.repository.user;
+package de.caritas.cob.userservice.api.port.out;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.caritas.cob.userservice.api.config.JpaAuditingConfiguration;
+import de.caritas.cob.userservice.api.repository.user.User;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;

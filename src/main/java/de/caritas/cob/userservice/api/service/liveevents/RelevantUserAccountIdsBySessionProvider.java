@@ -4,7 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 
 import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

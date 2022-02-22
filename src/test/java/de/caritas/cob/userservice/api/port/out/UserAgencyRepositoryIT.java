@@ -1,10 +1,10 @@
-package de.caritas.cob.userservice.api.repository.useragency;
+package de.caritas.cob.userservice.api.port.out;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.caritas.cob.userservice.api.config.JpaAuditingConfiguration;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
 import java.util.Objects;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;

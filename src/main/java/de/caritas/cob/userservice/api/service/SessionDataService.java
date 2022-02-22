@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
+import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 
 /**
  * Service for session data.

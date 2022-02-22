@@ -8,7 +8,7 @@ import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWo
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

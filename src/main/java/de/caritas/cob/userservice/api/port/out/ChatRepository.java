@@ -1,5 +1,6 @@
-package de.caritas.cob.userservice.api.repository.chat;
+package de.caritas.cob.userservice.api.port.out;
 
+import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import java.util.List;
 import java.util.Optional;

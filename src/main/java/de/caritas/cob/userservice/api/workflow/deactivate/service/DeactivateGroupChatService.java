@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.workflow.deactivate.service;
 import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
 import javax.transaction.Transactional;
