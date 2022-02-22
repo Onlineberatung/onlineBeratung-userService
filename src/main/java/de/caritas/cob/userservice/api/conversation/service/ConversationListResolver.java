@@ -4,7 +4,7 @@ import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.conversation.registry.ConversationListProviderRegistry;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
-import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;

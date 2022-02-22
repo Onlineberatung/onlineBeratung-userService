@@ -2,11 +2,11 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.OtpType;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpType;
-import de.caritas.cob.userservice.api.model.PatchUserDTO;
-import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 

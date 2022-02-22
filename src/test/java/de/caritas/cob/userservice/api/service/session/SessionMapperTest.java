@@ -6,7 +6,7 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toIsoTim
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import de.caritas.cob.userservice.api.model.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.time.LocalDateTime;
 import org.jeasy.random.EasyRandom;

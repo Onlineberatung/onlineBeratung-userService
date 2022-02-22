@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.model.rocketchat.room.deserializer;
 
-import static de.caritas.cob.userservice.api.model.VideoCallMessageDTO.EventTypeEnum.IGNORED_CALL;
+import static de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO.EventTypeEnum.IGNORED_CALL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -14,10 +14,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ForwardMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.AliasMessageDTO;
-import de.caritas.cob.userservice.api.model.ForwardMessageDTO;
-import de.caritas.cob.userservice.api.model.VideoCallMessageDTO;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

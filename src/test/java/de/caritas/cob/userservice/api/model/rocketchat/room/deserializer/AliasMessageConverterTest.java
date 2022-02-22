@@ -4,8 +4,8 @@ import static de.caritas.cob.userservice.messageservice.generated.web.model.Mess
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import de.caritas.cob.userservice.api.model.AliasMessageDTO;
-import de.caritas.cob.userservice.api.model.ForwardMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ForwardMessageDTO;
 import java.util.Optional;
 import org.junit.Test;
 

@@ -10,11 +10,11 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.model.AliasMessageDTO;
-import de.caritas.cob.userservice.api.model.MessageType;
-import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.VideoCallMessageDTO;
-import de.caritas.cob.userservice.api.model.VideoCallMessageDTO.EventTypeEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.MessageType;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO.EventTypeEnum;
 import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
 import java.util.HashMap;
 import java.util.Map;

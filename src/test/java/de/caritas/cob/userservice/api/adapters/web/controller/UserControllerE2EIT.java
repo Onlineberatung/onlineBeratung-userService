@@ -32,32 +32,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.EmailDTO;
-import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
-import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
-import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.OtpType;
-import de.caritas.cob.userservice.api.model.PatchUserDTO;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultant.Language;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.consultant.Language;
+import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
@@ -161,7 +161,7 @@ public class UserControllerE2EIT {
 
   private EnquiryMessageDTO enquiryMessageDTO;
 
-  private Set<de.caritas.cob.userservice.api.model.LanguageCode> allLanguages = new HashSet<>();
+  private Set<de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode> allLanguages = new HashSet<>();
 
   private Set<Consultant> consultantsToReset = new HashSet<>();
 
@@ -774,7 +774,7 @@ public class UserControllerE2EIT {
     var savedLanguages = savedConsultant.get().getLanguages();
     assertEquals(3, savedLanguages.size());
     savedLanguages.forEach(language -> assertTrue(updateConsultantDTO.getLanguages().contains(
-        de.caritas.cob.userservice.api.model.LanguageCode.fromValue(
+        de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
             language.getLanguageCode().toString()
         )
     )));
@@ -800,7 +800,7 @@ public class UserControllerE2EIT {
     var savedLanguages = savedConsultant.get().getLanguages();
     assertEquals(3, savedLanguages.size());
     savedLanguages.forEach(language -> assertTrue(updateConsultantDTO.getLanguages().contains(
-        de.caritas.cob.userservice.api.model.LanguageCode.fromValue(
+        de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
             language.getLanguageCode().toString())
     )));
   }
@@ -1604,8 +1604,9 @@ public class UserControllerE2EIT {
     return agencyId;
   }
 
-  private de.caritas.cob.userservice.api.model.LanguageCode mapLanguageCode(Language language) {
-    return de.caritas.cob.userservice.api.model.LanguageCode.fromValue(
+  private de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode mapLanguageCode(
+      Language language) {
+    return de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
         language.getLanguageCode().name()
     );
   }
@@ -1638,9 +1639,9 @@ public class UserControllerE2EIT {
     givenAMinimalUpdateConsultantDto(email);
 
     var languages = List.of(
-        easyRandom.nextObject(de.caritas.cob.userservice.api.model.LanguageCode.class),
-        easyRandom.nextObject(de.caritas.cob.userservice.api.model.LanguageCode.class),
-        easyRandom.nextObject(de.caritas.cob.userservice.api.model.LanguageCode.class)
+        easyRandom.nextObject(de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.class),
+        easyRandom.nextObject(de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.class),
+        easyRandom.nextObject(de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.class)
     );
     updateConsultantDTO.languages(languages);
   }

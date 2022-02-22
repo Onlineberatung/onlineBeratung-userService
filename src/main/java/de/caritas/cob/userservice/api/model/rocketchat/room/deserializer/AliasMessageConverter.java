@@ -6,8 +6,8 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.model.AliasMessageDTO;
-import de.caritas.cob.userservice.api.model.ForwardMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ForwardMessageDTO;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
