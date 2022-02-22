@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.controller.validation;
+package de.caritas.cob.userservice.api.adapters.web.controller.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

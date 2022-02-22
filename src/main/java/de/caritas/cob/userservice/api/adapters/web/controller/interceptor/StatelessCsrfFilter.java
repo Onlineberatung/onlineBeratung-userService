@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.controller.interceptor;
+package de.caritas.cob.userservice.api.adapters.web.controller.interceptor;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -38,7 +38,7 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+  public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
     if (requireCsrfProtectionMatcher.matches(request)) {

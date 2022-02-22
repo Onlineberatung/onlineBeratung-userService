@@ -1,7 +1,7 @@
-package de.caritas.cob.userservice.api.controller;
+package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
-import de.caritas.cob.userservice.generated.api.controller.LiveproxyApi;
+import de.caritas.cob.userservice.generated.api.adapters.web.controller.LiveproxyApi;
 import io.swagger.annotations.Api;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

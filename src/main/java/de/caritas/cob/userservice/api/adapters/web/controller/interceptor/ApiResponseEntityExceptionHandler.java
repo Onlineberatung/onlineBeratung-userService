@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.controller.interceptor;
+package de.caritas.cob.userservice.api.adapters.web.controller.interceptor;
 
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
 import de.caritas.cob.userservice.api.exception.NoMasterKeyException;

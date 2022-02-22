@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.controller;
+package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static java.util.Objects.isNull;
 

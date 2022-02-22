@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.controller.interceptor;
+package de.caritas.cob.userservice.api.adapters.web.controller.interceptor;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties.ConfigProperty;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties.Whitelist;

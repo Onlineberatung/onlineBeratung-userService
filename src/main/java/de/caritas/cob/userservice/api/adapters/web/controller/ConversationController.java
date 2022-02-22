@@ -1,15 +1,15 @@
-package de.caritas.cob.userservice.api.controller;
+package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import static de.caritas.cob.userservice.api.controller.UserController.COUNT_INVALID_MESSAGE;
-import static de.caritas.cob.userservice.api.controller.UserController.MIN_COUNT;
-import static de.caritas.cob.userservice.api.controller.UserController.MIN_OFFSET;
-import static de.caritas.cob.userservice.api.controller.UserController.OFFSET_INVALID_MESSAGE;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.COUNT_INVALID_MESSAGE;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.MIN_COUNT;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.MIN_OFFSET;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.OFFSET_INVALID_MESSAGE;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 
-import de.caritas.cob.userservice.api.controller.validation.MinValue;
+import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;

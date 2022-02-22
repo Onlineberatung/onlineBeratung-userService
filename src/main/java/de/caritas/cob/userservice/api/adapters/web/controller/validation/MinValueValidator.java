@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.controller.validation;
+package de.caritas.cob.userservice.api.adapters.web.controller.validation;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;

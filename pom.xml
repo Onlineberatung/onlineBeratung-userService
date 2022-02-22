@@ -390,7 +390,8 @@
 						<configuration>
 							<inputSpec>${project.basedir}/api/userservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.controller
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.generated.api.adapters.web.controller
 							</apiPackage>
 							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>

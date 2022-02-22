@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.controller.validation;
+package de.caritas.cob.userservice.api.adapters.web.controller.validation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValue;
+import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValueValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;

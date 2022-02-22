@@ -1,6 +1,6 @@
-package de.caritas.cob.userservice.api.controller;
+package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import static de.caritas.cob.userservice.api.controller.UserControllerIT.PATH_GET_PUBLIC_CONSULTANT_DATA;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserControllerIT.PATH_GET_PUBLIC_CONSULTANT_DATA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
