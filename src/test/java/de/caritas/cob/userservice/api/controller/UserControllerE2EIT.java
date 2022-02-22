@@ -1027,6 +1027,33 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
+      throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+    givenACorrectlyFormattedTan();
+    givenAKeycloakSetupEmailOtpAnotherOtpConfigActiveErrorResponse();
+
+    mockMvc.perform(
+            post("/users/2fa/email/validate/{tan}", tan)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    verify(keycloakRestTemplate)
+        .postForEntity(
+            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+        );
+
+    var otpSetupDTO = captor.getValue().getBody();
+    assertNotNull(otpSetupDTO);
+    assertEquals(tan, otpSetupDTO.getInitialCode());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void finishTwoFactorAuthByEmailSetupShouldRespondWithTooManyRequestsIfTooManyTanAttempts()
       throws Exception {
     givenAValidConsultant();
@@ -1181,6 +1208,27 @@ public class UserControllerE2EIT {
         .andExpect(status().isInternalServerError());
   }
 
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
+      throws Exception {
+    givenAValidConsultant();
+    givenACorrectlyFormattedOneTimePasswordDTO();
+    givenABearerToken();
+    givenAKeycloakSetupOtpAnotherOtpConfigActiveErrorResponse();
+    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
+
+    mockMvc.perform(
+            put(path)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+  }
+
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
@@ -1304,6 +1352,17 @@ public class UserControllerE2EIT {
     )).thenThrow(codeInvalid);
   }
 
+  private void givenAKeycloakSetupEmailOtpAnotherOtpConfigActiveErrorResponse() {
+    var urlSuffix =
+        "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
+    var codeInvalid = new HttpClientErrorException(HttpStatus.CONFLICT,
+        "another otp configuration is already active", null, null);
+
+    when(keycloakRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
+    )).thenThrow(codeInvalid);
+  }
+
   private void givenAKeycloakSetupEmailTooManyRequestsResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
@@ -1362,6 +1421,16 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp/" + consultant.getUsername();
     var invalidParameter = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "invalid parameter",
         null, null);
+
+    when(keycloakRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(OtpInfoDTO.class)
+    )).thenThrow(invalidParameter);
+  }
+
+  private void givenAKeycloakSetupOtpAnotherOtpConfigActiveErrorResponse() {
+    var urlSuffix = "/auth/realms/test/otp-config/setup-otp/" + consultant.getUsername();
+    var invalidParameter = new HttpClientErrorException(HttpStatus.CONFLICT,
+        "another otp configuration is already active", null, null);
 
     when(keycloakRestTemplate.exchange(
         endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(OtpInfoDTO.class)

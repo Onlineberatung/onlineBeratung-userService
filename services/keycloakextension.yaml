@@ -71,6 +71,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        409:
+          description: another otp configuration is already active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /otp-config/delete-otp/{username}:
     delete:
@@ -134,7 +140,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         409:
-          description: already configured
+          description: another otp configuration is already active
           content:
             application/json:
               schema:
@@ -178,6 +184,12 @@ paths:
                 $ref: '#/components/schemas/Error'
         401:
           description: the code was not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        409:
+          description: another otp configuration is already active
           content:
             application/json:
               schema:
