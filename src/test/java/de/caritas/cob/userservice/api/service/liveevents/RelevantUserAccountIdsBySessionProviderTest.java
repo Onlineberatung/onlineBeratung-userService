@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -50,8 +51,13 @@ public class RelevantUserAccountIdsBySessionProviderTest {
     Consultant consultant = new Consultant();
     consultant.setId("consultant");
     session.setConsultant(consultant);
-    User user = new User("user", null, null, null, false);
+
+    var username = RandomStringUtils.randomAlphabetic(8);
+    var email = RandomStringUtils.randomAlphabetic(4, 8) + "@"
+        + RandomStringUtils.randomAlphabetic(4, 8) + ".com";
+    var user = new User("user", null, username, email, false);
     session.setUser(user);
+
     return Optional.of(session);
   }
 

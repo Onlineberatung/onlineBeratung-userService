@@ -29,7 +29,6 @@ import lombok.ToString;
 import lombok.ToString.Exclude;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Type;
 
 /**
  * Representation of a chat.
@@ -54,7 +53,7 @@ public class Chat {
   @NonNull
   private String topic;
 
-  @Column(name = "consulting_type", updatable = false, nullable = false)
+  @Column(name = "consulting_type", updatable = false, nullable = false, columnDefinition = "tinyint(4) unsigned")
   @NonNull
   private Integer consultingTypeId;
 
@@ -66,11 +65,10 @@ public class Chat {
   @NonNull
   private LocalDateTime startDate;
 
-  @Column(name = "duration", nullable = false)
+  @Column(name = "duration", nullable = false, columnDefinition = "smallint")
   private int duration;
 
   @Column(name = "is_repetitive", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean repetitive;
 
   @Enumerated(EnumType.STRING)
@@ -78,10 +76,9 @@ public class Chat {
   private ChatInterval chatInterval;
 
   @Column(name = "is_active", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
   private boolean active;
 
-  @Column(name = "max_participants")
+  @Column(name = "max_participants", columnDefinition = "tinyint(4) unsigned NULL")
   private Integer maxParticipants;
 
   @Column(name = "rc_group_id")
@@ -99,8 +96,8 @@ public class Chat {
   @Column(name = "update_date")
   private LocalDateTime updateDate;
 
-  public Chat(String topic, int consultingTypeId, LocalDateTime initialStartDate,
-      LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
+  public Chat(@NonNull String topic, int consultingTypeId, @NonNull LocalDateTime initialStartDate,
+      @NonNull LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
       Consultant chatOwner) {
     this.topic = topic;
     this.consultingTypeId = consultingTypeId;
