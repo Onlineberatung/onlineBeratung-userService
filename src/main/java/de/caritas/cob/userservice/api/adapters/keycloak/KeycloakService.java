@@ -172,6 +172,17 @@ public class KeycloakService implements IdentityClient {
   }
 
   @Override
+  public Map<String, String> findUserByEmail(String email) {
+    return keycloakAdminClientAccessor.getUsersResource()
+        .search(email, 0, Integer.MAX_VALUE)
+        .stream()
+        .filter(userRepresentation -> userRepresentation.getEmail().equals(email))
+        .findFirst()
+        .map(keycloakMapper::mapOf)
+        .orElseGet(Map::of);
+  }
+
+  @Override
   public OtpInfoDTO getOtpCredential(String userName) {
     var bearerToken = keycloakAdminClientAccessor.getBearerToken();
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_INFO, userName);

@@ -1,9 +1,11 @@
 package de.caritas.cob.userservice.api.adapters.keycloak;
 
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import java.util.Map;
 import java.util.Objects;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,8 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class KeycloakMapper {
+
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   public OtpSetupDTO otpSetupDtoOf(String initialCode, String secret, String email) {
     var otpSetupDTO = new OtpSetupDTO();
@@ -45,6 +49,16 @@ public class KeycloakMapper {
         "createdBefore", "false",
         "attemptsLeft", String.valueOf(!status.equals(HttpStatus.TOO_MANY_REQUESTS)),
         "email", "null"
+    );
+  }
+
+  public Map<String, String> mapOf(UserRepresentation userRepresentation) {
+    var username = userRepresentation.getUsername();
+
+    return Map.of(
+        "encodedUsername", username,
+        "decodedUsername", usernameTranscoder.decodeUsername(username),
+        "email", userRepresentation.getEmail()
     );
   }
 }
