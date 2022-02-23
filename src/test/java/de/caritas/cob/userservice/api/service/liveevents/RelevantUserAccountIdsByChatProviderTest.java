@@ -9,7 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;

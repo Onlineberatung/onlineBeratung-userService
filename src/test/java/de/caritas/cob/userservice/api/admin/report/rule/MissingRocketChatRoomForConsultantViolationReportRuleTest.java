@@ -13,8 +13,8 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.ViolationDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserRoomDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserRoomDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;

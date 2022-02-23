@@ -61,10 +61,10 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;

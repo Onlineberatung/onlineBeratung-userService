@@ -15,7 +15,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.MessageType;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO.EventTypeEnum;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;

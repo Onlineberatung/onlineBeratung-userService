@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.sql.Timestamp;

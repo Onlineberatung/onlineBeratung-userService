@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LdapLoginDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LdapLoginDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;

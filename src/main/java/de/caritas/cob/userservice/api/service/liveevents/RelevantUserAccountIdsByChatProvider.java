@@ -3,11 +3,10 @@ package de.caritas.cob.userservice.api.service.liveevents;
 import static java.util.Collections.emptyList;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;

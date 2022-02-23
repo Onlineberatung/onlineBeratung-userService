@@ -1,11 +1,11 @@
 package de.caritas.cob.userservice.api.testConfig;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.MeDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.DataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.MeDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;

@@ -30,9 +30,9 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.DataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
@@ -122,11 +122,13 @@ public class RocketChatCredentialsProviderTest {
 
   LogoutResponseDTO LOGOUT_RESPONSE_DTO_SYSTEM_USER_A = new LogoutResponseDTO("status",
       SYSTEM_USER_USERNAME,
-      new de.caritas.cob.userservice.api.model.rocketchat.logout.DataDTO(SYSTEM_USER_A_USERNAME));
+      new de.caritas.cob.userservice.api.service.rocketchat.dto.logout.DataDTO(
+          SYSTEM_USER_A_USERNAME));
 
   LogoutResponseDTO LOGOUT_RESPONSE_DTO_TECHNICAL_USER_A = new LogoutResponseDTO("status",
-      TECHNICAL_USER_USERNAME, new de.caritas.cob.userservice.api.model.rocketchat.logout.DataDTO(
-      TECHNICAL_USER_A_USERNAME));
+      TECHNICAL_USER_USERNAME,
+      new de.caritas.cob.userservice.api.service.rocketchat.dto.logout.DataDTO(
+          TECHNICAL_USER_A_USERNAME));
 
   private final static String TECHNICAL_USER_USERNAME = "techUserName";
   private final static String TECHNICAL_USER_PW = "techUserPW";

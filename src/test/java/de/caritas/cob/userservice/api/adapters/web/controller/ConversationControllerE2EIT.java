@@ -16,10 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.session.Session;

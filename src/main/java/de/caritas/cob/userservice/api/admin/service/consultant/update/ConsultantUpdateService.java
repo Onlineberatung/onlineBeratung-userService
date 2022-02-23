@@ -9,8 +9,8 @@ import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAc
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.Language;
 import de.caritas.cob.userservice.api.service.ConsultantService;

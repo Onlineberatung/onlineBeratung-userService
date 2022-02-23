@@ -8,8 +8,8 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.user.User;

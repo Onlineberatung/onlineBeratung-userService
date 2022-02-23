@@ -25,7 +25,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
 import de.caritas.cob.userservice.api.repository.session.Session;
