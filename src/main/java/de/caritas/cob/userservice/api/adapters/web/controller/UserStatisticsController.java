@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import de.caritas.cob.userservice.api.model.SessionStatisticsResultDTO;
 import de.caritas.cob.userservice.api.service.statistics.SessionStatisticsService;
+import de.caritas.cob.userservice.api.statistics.model.SessionStatisticsResultDTO;
 import de.caritas.cob.userservice.generated.api.statistics.controller.UserstatisticsApi;
 import io.swagger.annotations.Api;
 import lombok.NonNull;

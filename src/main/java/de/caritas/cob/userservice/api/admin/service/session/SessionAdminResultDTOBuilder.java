@@ -9,12 +9,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.controller.UserAdminController;
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.model.HalLink;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.model.SessionAdminDTO;
-import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.model.PaginationLinks;
-import de.caritas.cob.userservice.api.model.SessionFilter;
+import de.caritas.cob.userservice.api.admin.model.HalLink;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.SessionAdminDTO;
+import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.admin.model.PaginationLinks;
+import de.caritas.cob.userservice.api.admin.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.List;
 import java.util.stream.Collectors;

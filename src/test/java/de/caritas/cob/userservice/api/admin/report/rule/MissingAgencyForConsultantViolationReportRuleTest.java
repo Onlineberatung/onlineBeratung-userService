@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.admin.report.rule;
 
-import static de.caritas.cob.userservice.api.model.ViolationDTO.ViolationTypeEnum.CONSULTANT;
+import static de.caritas.cob.userservice.api.admin.model.ViolationDTO.ViolationTypeEnum.CONSULTANT;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.model.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import java.util.List;

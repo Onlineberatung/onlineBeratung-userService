@@ -7,8 +7,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.model.SessionFilter;
+import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.admin.model.SessionFilter;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import java.util.stream.Stream;
 import org.jeasy.random.EasyRandom;

@@ -1,22 +1,22 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
-import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
-import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
+import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
+import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
-import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAgencyResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;

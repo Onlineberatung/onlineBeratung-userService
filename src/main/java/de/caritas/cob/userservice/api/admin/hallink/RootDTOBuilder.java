@@ -3,10 +3,10 @@ package de.caritas.cob.userservice.api.admin.hallink;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.controller.UserAdminController;
-import de.caritas.cob.userservice.api.model.HalLink;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.model.RootDTO;
-import de.caritas.cob.userservice.api.model.RootLinks;
+import de.caritas.cob.userservice.api.admin.model.HalLink;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.RootDTO;
+import de.caritas.cob.userservice.api.admin.model.RootLinks;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 
 /**

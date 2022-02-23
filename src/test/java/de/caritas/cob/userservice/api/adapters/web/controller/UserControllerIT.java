@@ -190,7 +190,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;

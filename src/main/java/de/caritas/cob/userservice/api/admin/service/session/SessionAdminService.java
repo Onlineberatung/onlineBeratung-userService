@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.admin.service.session;
 
 import de.caritas.cob.userservice.api.admin.service.session.pageprovider.PageProviderFactory;
-import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.model.SessionFilter;
+import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.admin.model.SessionFilter;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

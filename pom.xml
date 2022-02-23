@@ -470,7 +470,7 @@
 							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.admin.controller</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.admin.model</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 							<typeMappings>
@@ -493,7 +493,8 @@
 							<inputSpec>${project.basedir}/api/userstatisticsservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.statistics.controller</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.statistics.model
+							</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 						</configuration>
