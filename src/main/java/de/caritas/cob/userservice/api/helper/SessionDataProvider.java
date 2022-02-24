@@ -7,10 +7,9 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitializing;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.SessionData;
+import de.caritas.cob.userservice.api.model.SessionData.SessionDataType;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

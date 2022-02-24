@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.port.out;
 
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;

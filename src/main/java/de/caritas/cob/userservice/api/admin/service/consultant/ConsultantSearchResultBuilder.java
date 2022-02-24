@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.admin.model.HalLink;
 import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.admin.model.PaginationLinks;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import java.util.List;
 import java.util.stream.Collectors;

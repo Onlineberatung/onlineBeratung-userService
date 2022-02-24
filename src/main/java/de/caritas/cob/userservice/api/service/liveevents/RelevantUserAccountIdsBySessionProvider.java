@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.service.liveevents;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import java.util.List;
 import java.util.stream.Collectors;

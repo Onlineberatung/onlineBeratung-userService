@@ -6,8 +6,8 @@ import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyA
 import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
 import de.caritas.cob.userservice.api.admin.report.model.AgencyDependedViolationReportRule;
 import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import java.util.Collection;
 import java.util.List;

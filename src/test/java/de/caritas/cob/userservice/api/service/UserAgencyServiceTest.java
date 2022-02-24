@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import java.util.List;
 import org.junit.Test;

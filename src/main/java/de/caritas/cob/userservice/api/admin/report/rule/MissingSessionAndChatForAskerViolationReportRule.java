@@ -5,7 +5,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import java.util.List;

@@ -25,7 +25,7 @@ import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginRespons
 import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;

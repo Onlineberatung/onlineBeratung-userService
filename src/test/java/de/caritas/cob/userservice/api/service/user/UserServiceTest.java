@@ -25,9 +25,9 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
+import de.caritas.cob.userservice.api.model.UserMobileToken;
 import de.caritas.cob.userservice.api.port.out.UserMobileTokenRepository;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;

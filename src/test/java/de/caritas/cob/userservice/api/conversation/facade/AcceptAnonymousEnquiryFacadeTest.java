@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;

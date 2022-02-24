@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
@@ -19,7 +19,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;

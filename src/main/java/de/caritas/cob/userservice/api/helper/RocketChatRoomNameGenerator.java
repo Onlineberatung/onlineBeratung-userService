@@ -2,8 +2,8 @@ package de.caritas.cob.userservice.api.helper;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Session;
 
 public class RocketChatRoomNameGenerator {
 

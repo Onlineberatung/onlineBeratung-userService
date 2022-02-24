@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toIsoTime;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import java.time.LocalDateTime;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;

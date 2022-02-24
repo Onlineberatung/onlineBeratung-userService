@@ -12,7 +12,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDt
 import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserRegistrationDTO;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

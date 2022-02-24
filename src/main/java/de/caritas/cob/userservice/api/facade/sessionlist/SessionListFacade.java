@@ -10,9 +10,9 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResp
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.service.session.SessionFilter;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.util.ArrayList;

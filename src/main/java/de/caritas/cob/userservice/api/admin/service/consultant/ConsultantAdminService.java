@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

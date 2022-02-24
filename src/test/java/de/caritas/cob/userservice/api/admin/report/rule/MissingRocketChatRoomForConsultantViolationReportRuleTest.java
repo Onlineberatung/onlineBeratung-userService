@@ -15,9 +15,9 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserRoomDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;

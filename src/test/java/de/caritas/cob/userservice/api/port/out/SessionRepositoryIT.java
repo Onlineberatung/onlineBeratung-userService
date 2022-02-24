@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.repository.session.RegistrationType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.SessionData;
+import de.caritas.cob.userservice.api.model.SessionData.SessionDataType;
+import de.caritas.cob.userservice.api.model.User;
 import java.util.List;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;

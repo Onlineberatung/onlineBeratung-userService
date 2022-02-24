@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

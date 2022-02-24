@@ -6,8 +6,8 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import de.caritas.cob.userservice.api.actions.ActionCommand;
 import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
 import lombok.NonNull;

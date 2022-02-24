@@ -5,9 +5,9 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;

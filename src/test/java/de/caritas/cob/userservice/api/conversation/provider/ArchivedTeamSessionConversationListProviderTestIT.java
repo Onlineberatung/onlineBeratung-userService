@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.conversation.provider;
 
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_OFFENDER;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,14 +15,14 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponse
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;

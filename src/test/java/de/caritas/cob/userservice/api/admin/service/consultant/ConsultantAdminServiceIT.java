@@ -18,7 +18,7 @@ import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.workflow.deactivate.service;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NEW;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.session.DeactivateSessionActionCommand;
@@ -10,9 +10,9 @@ import de.caritas.cob.userservice.api.actions.session.PostConversationFinishedAl
 import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;

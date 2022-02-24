@@ -22,10 +22,10 @@ import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflo
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;

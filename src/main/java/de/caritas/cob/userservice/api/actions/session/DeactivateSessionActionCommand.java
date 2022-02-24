@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.actions.session;
 
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.DONE;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.DONE;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

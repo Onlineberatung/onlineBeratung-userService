@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;

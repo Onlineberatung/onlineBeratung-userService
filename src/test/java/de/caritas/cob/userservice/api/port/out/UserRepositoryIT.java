@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.caritas.cob.userservice.api.config.JpaAuditingConfiguration;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;

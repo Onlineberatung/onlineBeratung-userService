@@ -14,7 +14,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.conversation.service.AnonymousConversationCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUserCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;

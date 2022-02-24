@@ -3,10 +3,10 @@ package de.caritas.cob.userservice.api.workflow.delete.service;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;

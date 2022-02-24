@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.conversation.provider;
 
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
@@ -9,11 +9,11 @@ import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionMapper;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;

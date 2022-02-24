@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatMemberResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
+import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;

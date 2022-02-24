@@ -12,7 +12,7 @@ import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyA
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;

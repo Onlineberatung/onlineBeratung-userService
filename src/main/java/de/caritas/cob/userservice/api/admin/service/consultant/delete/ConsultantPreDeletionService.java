@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.delete;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_HAS_ACTIVE_SESSIONS;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDeletionValidationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;

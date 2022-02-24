@@ -5,7 +5,7 @@ import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflo
 import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

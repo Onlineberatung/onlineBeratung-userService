@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.caritas.cob.userservice.api.config.JpaAuditingConfiguration;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.model.UserAgency;
 import java.util.Objects;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;

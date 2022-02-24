@@ -15,7 +15,7 @@ import de.caritas.cob.userservice.api.admin.model.SessionAdminDTO;
 import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.admin.model.PaginationLinks;
 import de.caritas.cob.userservice.api.admin.model.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;

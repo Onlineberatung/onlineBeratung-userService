@@ -8,8 +8,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.SessionData;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 
 /**

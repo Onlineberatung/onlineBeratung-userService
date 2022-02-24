@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.port.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Monitoring;
+import de.caritas.cob.userservice.api.model.Session;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
