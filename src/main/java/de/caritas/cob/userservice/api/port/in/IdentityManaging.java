@@ -15,4 +15,6 @@ public interface IdentityManaging {
   void deleteOneTimePassword(String username);
 
   OtpInfoDTO getOtpCredential(String username);
+
+  boolean isEmailAvailableOrOwn(String username, String email);
 }
