@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.endsWith;
@@ -43,6 +44,7 @@ import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.OtpType;
@@ -62,11 +64,13 @@ import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.servlet.http.Cookie;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -74,7 +78,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -810,6 +816,7 @@ public class UserControllerE2EIT {
   public void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant();
     givenAValidEmailDTO();
+    givenKeycloakFoundNoEmailInUse();
     givenABearerToken();
     givenAValidKeycloakVerifyEmailResponse();
 
@@ -830,6 +837,44 @@ public class UserControllerE2EIT {
     var otpSetupDTO = captor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(emailDTO.getEmail(), otpSetupDTO.getEmail());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithNoContentIfEmailIsOwnedByUser()
+      throws Exception {
+    givenAValidConsultant();
+    givenAValidEmailDTO();
+    givenKeycloakFoundOwnEmailInUse();
+    givenABearerToken();
+    givenAValidKeycloakVerifyEmailResponse();
+
+    mockMvc.perform(
+            put("/users/2fa/email")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfEmailIsNotAvailable()
+      throws Exception {
+    givenAValidConsultant();
+    givenAValidEmailDTO();
+    givenKeycloakFoundAnEmailInUse();
+
+    mockMvc.perform(
+            put("/users/2fa/email")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isPreconditionFailed());
   }
 
   @Test
@@ -867,6 +912,7 @@ public class UserControllerE2EIT {
       throws Exception {
     givenAValidConsultant();
     givenAValidEmailDTO();
+    givenKeycloakFoundNoEmailInUse();
     givenABearerToken();
     givenAKeycloakVerifyEmailInvalidParameterErrorResponse();
 
@@ -886,6 +932,7 @@ public class UserControllerE2EIT {
       throws Exception {
     givenAValidConsultant();
     givenAValidEmailDTO();
+    givenKeycloakFoundNoEmailInUse();
     givenABearerToken();
     givenAKeycloakVerifyEmailIAlreadyConfiguredErrorResponse();
 
@@ -907,6 +954,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAValidKeycloakSetupEmailResponse(consultant.getUsername());
+    givenAValidKeycloakEmailChangeByUsernameResponse(consultant.getUsername());
 
     mockMvc.perform(
             post("/users/2fa/email/validate/{tan}", tan)
@@ -936,6 +984,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAValidKeycloakSetupEmailResponse(user.getUsername());
+    givenAValidKeycloakEmailChangeByUsernameResponse(user.getUsername());
 
     mockMvc.perform(
             post("/users/2fa/email/validate/{tan}", tan)
@@ -1289,6 +1338,24 @@ public class UserControllerE2EIT {
     when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(mock(UsersResource.class));
   }
 
+  private void givenAValidKeycloakEmailChangeByUsernameResponse(String username) {
+    var usernameTranscoder = new UsernameTranscoder();
+    var userRepresentation = new UserRepresentation();
+    var encodedUsername = usernameTranscoder.encodeUsername(username);
+    var keycloakId = UUID.randomUUID().toString();
+    userRepresentation.setId(keycloakId);
+    userRepresentation.setUsername(encodedUsername);
+    userRepresentation.setEmail(givenAValidEmail());
+    var userRepresentationList = new ArrayList<UserRepresentation>(1);
+    userRepresentationList.add(userRepresentation);
+    var usersResource = mock(UsersResource.class);
+    var userResource = mock(UserResource.class);
+
+    when(usersResource.search(eq(encodedUsername))).thenReturn(userRepresentationList);
+    when(usersResource.get(keycloakId)).thenReturn(userResource);
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+  }
+
   private void givenAUserDTO() {
     userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setUsername(RandomStringUtils.randomAlphabetic(5, 30));
@@ -1350,6 +1417,42 @@ public class UserControllerE2EIT {
     when(keycloakRestTemplate.postForEntity(
         endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
     )).thenThrow(codeInvalid);
+  }
+
+  private void givenKeycloakFoundAnEmailInUse() {
+    var usernameTranscoder = new UsernameTranscoder();
+    var userRepresentation = new UserRepresentation();
+    var username = usernameTranscoder.encodeUsername(RandomStringUtils.randomAlphabetic(8, 16));
+    userRepresentation.setUsername(username);
+    userRepresentation.setEmail(emailDTO.getEmail());
+    var userRepresentationList = new ArrayList<UserRepresentation>(1);
+    userRepresentationList.add(userRepresentation);
+    var usersResource = mock(UsersResource.class);
+    when(usersResource.search(eq(emailDTO.getEmail()), anyInt(), anyInt()))
+        .thenReturn(userRepresentationList);
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+  }
+
+  private void givenKeycloakFoundOwnEmailInUse() {
+    var usernameTranscoder = new UsernameTranscoder();
+    var userRepresentation = new UserRepresentation();
+    var username = usernameTranscoder.encodeUsername(consultant.getUsername());
+    userRepresentation.setUsername(username);
+    userRepresentation.setEmail(emailDTO.getEmail());
+    var userRepresentationList = new ArrayList<UserRepresentation>(1);
+    userRepresentationList.add(userRepresentation);
+    var usersResource = mock(UsersResource.class);
+    when(usersResource.search(eq(emailDTO.getEmail()), anyInt(), anyInt()))
+        .thenReturn(userRepresentationList);
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+  }
+
+  private void givenKeycloakFoundNoEmailInUse() {
+    var userRepresentationList = new ArrayList<UserRepresentation>(0);
+    var usersResource = mock(UsersResource.class);
+    when(usersResource.search(eq(emailDTO.getEmail()), anyInt(), anyInt()))
+        .thenReturn(userRepresentationList);
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
   }
 
   private void givenAKeycloakSetupEmailOtpAnotherOtpConfigActiveErrorResponse() {

@@ -2437,21 +2437,6 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetup_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
-      throws Exception {
-    var payload = givenAValidEmailDTO();
-
-    mvc.perform(put("/users/2fa/email")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(payload))
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void startTwoFactorAuthByEmailSetup_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     var payload = givenAValidEmailDTO();

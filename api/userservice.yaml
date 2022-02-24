@@ -1333,6 +1333,8 @@ paths:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        412:
+          description: PRECONDITION FAILED - another user owns this email
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:

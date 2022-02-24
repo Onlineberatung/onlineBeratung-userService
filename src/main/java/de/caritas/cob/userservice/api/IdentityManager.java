@@ -31,7 +31,7 @@ public class IdentityManager implements IdentityManaging {
     var validationResult = identityClient.finishEmailVerification(username, code);
     if (validationResult.get("created").equals("true")) {
       var email = validationResult.get("email");
-      identityClient.changeEmailAddress(email);
+      identityClient.changeEmailAddress(username, email);
     }
 
     return validationResult;
@@ -45,5 +45,14 @@ public class IdentityManager implements IdentityManaging {
   @Override
   public OtpInfoDTO getOtpCredential(String username) {
     return identityClient.getOtpCredential(username);
+  }
+
+  @Override
+  public boolean isEmailAvailableOrOwn(String username, String email) {
+    var user = identityClient.findUserByEmail(email);
+
+    return user.isEmpty()
+        || user.get("encodedUsername").equals(username)
+        || user.get("decodedUsername").equals(username);
   }
 }

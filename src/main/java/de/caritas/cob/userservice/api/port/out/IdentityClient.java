@@ -15,6 +15,8 @@ public interface IdentityClient {
 
   void changeEmailAddress(final String emailAddress);
 
+  void changeEmailAddress(final String username, final String emailAddress);
+
   void deleteEmailAddress();
 
   OtpInfoDTO getOtpCredential(final String userName);
@@ -26,4 +28,6 @@ public interface IdentityClient {
   Optional<String> initiateEmailVerification(final String username, final String email);
 
   Map<String, String> finishEmailVerification(final String username, final String initialCode);
+
+  Map<String, String> findUserByEmail(String email);
 }

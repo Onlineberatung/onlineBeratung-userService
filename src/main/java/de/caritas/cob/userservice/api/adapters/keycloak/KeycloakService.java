@@ -167,8 +167,29 @@ public class KeycloakService implements IdentityClient {
     this.keycloakAdminClientService.updateEmail(userId, emailAddress);
   }
 
+  public void changeEmailAddress(String username, String emailAddress) {
+    var lowerEmailAddress = emailAddress.toLowerCase();
+    var usersResource = keycloakAdminClientAccessor.getUsersResource();
+    var userRepresentation = usersResource.search(username).get(0);
+    if (!lowerEmailAddress.equals(userRepresentation.getEmail())) {
+      userRepresentation.setEmail(lowerEmailAddress);
+      usersResource.get(userRepresentation.getId()).update(userRepresentation);
+    }
+  }
+
   public void deleteEmailAddress() {
     keycloakAdminClientService.updateDummyEmail(authenticatedUser.getUserId());
+  }
+
+  @Override
+  public Map<String, String> findUserByEmail(String email) {
+    return keycloakAdminClientAccessor.getUsersResource()
+        .search(email, 0, Integer.MAX_VALUE)
+        .stream()
+        .filter(userRepresentation -> userRepresentation.getEmail().equals(email))
+        .findFirst()
+        .map(keycloakMapper::mapOf)
+        .orElseGet(Map::of);
   }
 
   @Override

@@ -921,7 +921,13 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> startTwoFactorAuthByEmailSetup(EmailDTO emailDTO) {
     var username = authenticatedUser.getUsername();
-    identityManager.setUpOneTimePassword(username, emailDTO.getEmail()).ifPresent(message -> {
+    var email = emailDTO.getEmail();
+
+    if (!identityManager.isEmailAvailableOrOwn(username, email)) {
+      return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
+    }
+
+    identityManager.setUpOneTimePassword(username, email).ifPresent(message -> {
       throw new InternalServerErrorException(message);
     });
 
