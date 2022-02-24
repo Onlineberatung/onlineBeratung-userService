@@ -29,8 +29,14 @@
 		<keycloak.version>13.0.1</keycloak.version>
 		<springfox.version>2.9.2</springfox.version>
 		<powermock.version>2.0.2</powermock.version>
-		<!-- force at least version 2.16 due to https://logging.apache.org/log4j/2.x/security.html -->
-		<log4j.version>2.17.1</log4j.version>
+		<adapters.web.generated.path>
+			${project.groupId}.${project.artifactId}.generated.api.adapters.web
+		</adapters.web.generated.path>
+		<adapters.web.dto.path>
+			${project.groupId}.${project.artifactId}.api.adapters.web.dto
+		</adapters.web.dto.path>
+		<log4j.version>2.17.1
+		</log4j.version> <!-- force safe version due to https://logging.apache.org/log4j/2.x/security.html -->
 	</properties>
 
 	<dependencies>
@@ -390,11 +396,8 @@
 						<configuration>
 							<inputSpec>${project.basedir}/api/userservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>
-								${project.groupId}.${project.artifactId}.generated.api.adapters.web.controller
-							</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.adapters.web.dto
-							</modelPackage>
+							<apiPackage>${adapters.web.generated.path}.controller</apiPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<configOptions>
 								<interfaceOnly>true</interfaceOnly>
@@ -402,57 +405,34 @@
 							</configOptions>
 							<output>target/generated-sources</output>
 							<importMappings>
-								<importMapping>
-									UserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserDTO
+								<importMapping>UserDTO=${adapters.web.dto.path}.UserDTO</importMapping>
+								<importMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO
 								</importMapping>
 								<importMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.SessionUserDTO
+									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
 								</importMapping>
-								<importMapping>
-									SessionConsultantForUserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.SessionConsultantForUserDTO
+								<importMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</importMapping>
+								<importMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
 								</importMapping>
-								<importMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserChatDTO
-								</importMapping>
-								<importMapping>
-									UserDataResponseDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserDataResponseDTO
-								</importMapping>
-								<importMapping>
-									MonitoringDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.MonitoringDTO
-								</importMapping>
-								<importMapping>
-									ChatDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.ChatDTO
-								</importMapping>
-								<importMapping>
-									NewRegistrationDto=${project.groupId}.${project.artifactId}.api.adapters.web.dto.NewRegistrationDto
+								<importMapping>MonitoringDTO=${adapters.web.dto.path}.MonitoringDTO</importMapping>
+								<importMapping>ChatDTO=${adapters.web.dto.path}.ChatDTO</importMapping>
+								<importMapping>NewRegistrationDto=${adapters.web.dto.path}.NewRegistrationDto
 								</importMapping>
 								<importMapping>Date=java.util.Date</importMapping>
 								<importMapping>HttpStatus=org.springframework.http.HttpStatus</importMapping>
 							</importMappings>
 							<typeMappings>
+								<typeMapping>UserDTO=${adapters.web.dto.path}.UserDTO</typeMapping>
+								<typeMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO</typeMapping>
 								<typeMapping>
-									UserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserDTO
+									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
 								</typeMapping>
-								<typeMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.SessionUserDTO
+								<typeMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</typeMapping>
+								<typeMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
 								</typeMapping>
-								<typeMapping>
-									SessionConsultantForUserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.SessionConsultantForUserDTO
-								</typeMapping>
-								<typeMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserChatDTO
-								</typeMapping>
-								<typeMapping>
-									UserDataResponseDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserDataResponseDTO
-								</typeMapping>
-								<typeMapping>
-									MonitoringDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.MonitoringDTO
-								</typeMapping>
-								<typeMapping>
-									ChatDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.ChatDTO
-								</typeMapping>
-								<typeMapping>
-									NewRegistrationDto=${project.groupId}.${project.artifactId}.api.adapters.web.dto.NewRegistrationDto
+								<typeMapping>MonitoringDTO=${adapters.web.dto.path}.MonitoringDTO</typeMapping>
+								<typeMapping>ChatDTO=${adapters.web.dto.path}.ChatDTO</typeMapping>
+								<typeMapping>NewRegistrationDto=${adapters.web.dto.path}.NewRegistrationDto
 								</typeMapping>
 							</typeMappings>
 						</configuration>
@@ -515,26 +495,18 @@
 							<apiPackage>
 								${project.groupId}.${project.artifactId}.generated.api.conversation.controller
 							</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.adapters.web.dto
-							</modelPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 							<importMappings>
-								<importMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.SessionUserDTO
+								<importMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO
 								</importMapping>
-								<importMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserChatDTO
-								</importMapping>
+								<importMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</importMapping>
 								<importMapping>Date=java.util.Date</importMapping>
 							</importMappings>
 							<typeMappings>
-								<typeMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.SessionUserDTO
-								</typeMapping>
-								<typeMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.adapters.web.dto.UserChatDTO
-								</typeMapping>
+								<typeMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO</typeMapping>
+								<typeMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</typeMapping>
 							</typeMappings>
 						</configuration>
 					</execution>
