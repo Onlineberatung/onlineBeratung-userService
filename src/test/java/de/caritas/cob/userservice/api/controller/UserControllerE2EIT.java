@@ -70,6 +70,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.servlet.http.Cookie;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -77,6 +78,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
@@ -952,6 +954,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAValidKeycloakSetupEmailResponse(consultant.getUsername());
+    givenAValidKeycloakEmailChangeByUsernameResponse(consultant.getUsername());
 
     mockMvc.perform(
             post("/users/2fa/email/validate/{tan}", tan)
@@ -981,6 +984,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAValidKeycloakSetupEmailResponse(user.getUsername());
+    givenAValidKeycloakEmailChangeByUsernameResponse(user.getUsername());
 
     mockMvc.perform(
             post("/users/2fa/email/validate/{tan}", tan)
@@ -1332,6 +1336,24 @@ public class UserControllerE2EIT {
 
   private void givenAUserResource() {
     when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(mock(UsersResource.class));
+  }
+
+  private void givenAValidKeycloakEmailChangeByUsernameResponse(String username) {
+    var usernameTranscoder = new UsernameTranscoder();
+    var userRepresentation = new UserRepresentation();
+    var encodedUsername = usernameTranscoder.encodeUsername(username);
+    var keycloakId = UUID.randomUUID().toString();
+    userRepresentation.setId(keycloakId);
+    userRepresentation.setUsername(encodedUsername);
+    userRepresentation.setEmail(givenAValidEmail());
+    var userRepresentationList = new ArrayList<UserRepresentation>(1);
+    userRepresentationList.add(userRepresentation);
+    var usersResource = mock(UsersResource.class);
+    var userResource = mock(UserResource.class);
+
+    when(usersResource.search(eq(encodedUsername))).thenReturn(userRepresentationList);
+    when(usersResource.get(keycloakId)).thenReturn(userResource);
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
   }
 
   private void givenAUserDTO() {

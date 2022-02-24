@@ -15,6 +15,8 @@ public interface IdentityClient {
 
   void changeEmailAddress(final String emailAddress);
 
+  void changeEmailAddress(final String username, final String emailAddress);
+
   void deleteEmailAddress();
 
   OtpInfoDTO getOtpCredential(final String userName);
