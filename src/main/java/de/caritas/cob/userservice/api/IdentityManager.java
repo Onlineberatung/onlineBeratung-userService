@@ -31,7 +31,7 @@ public class IdentityManager implements IdentityManaging {
     var validationResult = identityClient.finishEmailVerification(username, code);
     if (validationResult.get("created").equals("true")) {
       var email = validationResult.get("email");
-      identityClient.changeEmailAddress(email);
+      identityClient.changeEmailAddress(username, email);
     }
 
     return validationResult;

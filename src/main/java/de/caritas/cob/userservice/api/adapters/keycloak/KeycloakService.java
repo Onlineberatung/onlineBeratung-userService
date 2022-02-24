@@ -167,6 +167,15 @@ public class KeycloakService implements IdentityClient {
     this.keycloakAdminClientService.updateEmail(userId, emailAddress);
   }
 
+  public void changeEmailAddress(String username, String emailAddress) {
+    var usersResource = keycloakAdminClientAccessor.getUsersResource();
+    var userRepresentation = usersResource.search(username).get(0);
+    if (!emailAddress.equals(userRepresentation.getEmail())) {
+      userRepresentation.setEmail(emailAddress);
+      usersResource.get(userRepresentation.getId()).update(userRepresentation);
+    }
+  }
+
   public void deleteEmailAddress() {
     keycloakAdminClientService.updateDummyEmail(authenticatedUser.getUserId());
   }
