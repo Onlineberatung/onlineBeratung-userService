@@ -52,7 +52,7 @@ class TenantResolverTest {
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
     when(tenantControllerApi.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
         new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO().id(1L));
-    HashMap<String, Object> claimMap = givenClaimMapContainingTenantId(1);
+    HashMap<String, Object> claimMap = givenClaimMapContainingTenantId("1");
     when(token.getAccount().getKeycloakSecurityContext().getToken().getOtherClaims())
         .thenReturn(claimMap);
 
@@ -106,7 +106,7 @@ class TenantResolverTest {
     assertThat(resolved).isEqualTo(TECHNICAL_CONTEXT);
   }
 
-  private HashMap<String, Object> givenClaimMapContainingTenantId(Integer tenantId) {
+  private HashMap<String, Object> givenClaimMapContainingTenantId(String tenantId) {
     HashMap<String, Object> claimMap = Maps.newHashMap();
     claimMap.put("tenantId", tenantId);
     return claimMap;

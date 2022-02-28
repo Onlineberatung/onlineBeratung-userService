@@ -76,10 +76,10 @@ public class TenantResolver {
     return tenantControllerApi.getRestrictedTenantDataBySubdomain(currentSubdomain).getId();
   }
 
-  private Optional<Long> getUserTenantIdAttribute(Map<String, Object> claimMap) {
-    if (claimMap.containsKey(TENANT_ID)) {
-      Integer tenantId = (Integer) claimMap.get(TENANT_ID);
-      return Optional.of(Long.valueOf(tenantId));
+  private Optional<Long> getUserAttribute(Map<String, Object> claimMap, String claim) {
+    if (claimMap.containsKey(claim)) {
+      String userAttribute = (String) claimMap.get(claim);
+      return of(Long.parseLong(userAttribute));
     } else {
       return Optional.empty();
     }
@@ -88,7 +88,7 @@ public class TenantResolver {
   private Optional<Long> resolveTenantIdFromTokenClaims(HttpServletRequest request) {
     Map<String, Object> claimMap = getClaimMap(request);
     log.debug("Found tenantId in claim : " + claimMap.toString());
-    return getUserTenantIdAttribute(claimMap);
+    return getUserAttribute(claimMap, TENANT_ID);
   }
 
   private boolean isTechnicalUserRole(HttpServletRequest request) {
