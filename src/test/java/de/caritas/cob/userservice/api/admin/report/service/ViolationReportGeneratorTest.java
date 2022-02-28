@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.admin.report.registry.ViolationRuleRegistry;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.model.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;

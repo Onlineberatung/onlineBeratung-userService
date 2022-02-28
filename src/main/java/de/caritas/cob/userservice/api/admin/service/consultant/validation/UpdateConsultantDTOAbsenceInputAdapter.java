@@ -2,9 +2,9 @@ package de.caritas.cob.userservice.api.admin.service.consultant.validation;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 

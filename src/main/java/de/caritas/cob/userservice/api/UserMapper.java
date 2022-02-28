@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api;
 
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;

@@ -4,7 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import java.util.List;
 import org.junit.jupiter.api.extension.ExtendWith;

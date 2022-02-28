@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.helper;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

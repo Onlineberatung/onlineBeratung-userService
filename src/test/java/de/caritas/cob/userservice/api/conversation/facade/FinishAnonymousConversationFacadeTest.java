@@ -14,8 +14,8 @@ import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConve
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;

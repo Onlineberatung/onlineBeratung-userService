@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.actions.user;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

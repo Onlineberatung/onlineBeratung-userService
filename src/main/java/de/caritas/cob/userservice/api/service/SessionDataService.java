@@ -1,16 +1,16 @@
 package de.caritas.cob.userservice.api.service;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.model.SessionDataDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataRepository;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.SessionData;
+import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 
 /**
  * Service for session data.

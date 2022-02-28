@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.report.model;
 
-import de.caritas.cob.userservice.api.model.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import java.util.List;
 
 /**
