@@ -61,6 +61,7 @@ public class EmailNotificationFacade {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
+  private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
@@ -182,10 +183,13 @@ public class EmailNotificationFacade {
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
       String askerUserName) {
 
-    EmailSupplier assignEnquiryMails = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService);
+    assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
+    assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
+    assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
+    assignEnquiryEmailSupplier.setApplicationBaseUrl(applicationBaseUrl);
+    assignEnquiryEmailSupplier.setConsultantService(consultantService);
     try {
-      sendMailTasksToMailService(assignEnquiryMails);
+      sendMailTasksToMailService(assignEnquiryEmailSupplier);
     } catch (Exception exception) {
       LogService.logEmailNotificationFacadeError(exception);
     }

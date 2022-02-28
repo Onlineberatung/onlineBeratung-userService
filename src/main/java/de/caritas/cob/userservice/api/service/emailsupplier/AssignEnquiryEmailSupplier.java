@@ -15,19 +15,24 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.stereotype.Service;
 
 /**
  * Supplier to provide mails to be sent when an enquiry is assigned.
  */
 @AllArgsConstructor
+@Service
+@Data
 public class AssignEnquiryEmailSupplier implements EmailSupplier {
 
-  private final Consultant receiverConsultant;
-  private final String senderUserId;
-  private final String askerUserName;
-  private final String applicationBaseUrl;
-  private final ConsultantService consultantService;
+  private Consultant receiverConsultant;
+  private String senderUserId;
+  private String askerUserName;
+  private String applicationBaseUrl;
+  private ConsultantService consultantService;
 
   /**
    * Generates the enquiry notification mail sent to regarding consultant.
@@ -35,6 +40,7 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
    * @return a list of the generated {@link MailDTO}
    */
   @Override
+  @Transactional
   public List<MailDTO> generateEmails() {
     if (isReceiverConsultantValid()) {
       return buildAssignEnquiryMailWithValidReceiver();
