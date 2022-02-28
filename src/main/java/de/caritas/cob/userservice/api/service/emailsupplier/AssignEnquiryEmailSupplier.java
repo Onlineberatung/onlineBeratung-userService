@@ -16,14 +16,12 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDT
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
 /**
  * Supplier to provide mails to be sent when an enquiry is assigned.
  */
-@AllArgsConstructor
 @Service
 @Data
 public class AssignEnquiryEmailSupplier implements EmailSupplier {
