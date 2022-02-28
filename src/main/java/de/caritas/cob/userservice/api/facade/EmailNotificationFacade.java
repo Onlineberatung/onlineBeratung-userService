@@ -104,7 +104,8 @@ public class EmailNotificationFacade {
 
   @Async
   @Transactional
-  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId, Long tenantId) {
+  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId,
+      Long tenantId) {
     TenantContext.setCurrentTenant(tenantId);
     sendNewMessageNotification(rcGroupId, roles, userId);
     TenantContext.clear();
@@ -193,6 +194,14 @@ public class EmailNotificationFacade {
     } catch (Exception exception) {
       LogService.logEmailNotificationFacadeError(exception);
     }
+  }
+
+  @Async
+  public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
+      String askerUserName, Long tenantId) {
+    TenantContext.setCurrentTenant(tenantId);
+    sendAssignEnquiryEmailNotification(receiverConsultant, senderUserId, askerUserName);
+    TenantContext.clear();
   }
 
 }
