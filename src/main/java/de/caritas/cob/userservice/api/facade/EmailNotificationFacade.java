@@ -76,6 +76,7 @@ public class EmailNotificationFacade {
       newEnquiryEmailSupplier.setCurrentSession(session);
       newEnquiryEmailSupplier.setRequestServerName(requestServerName);
       sendMailTasksToMailService(newEnquiryEmailSupplier);
+      TenantContext.clear();
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new enquiry notification for session %s.", session.getId()), ex);
@@ -97,6 +98,15 @@ public class EmailNotificationFacade {
       log.info("Sending email notifications with mailDTOs ", mailsDTO);
       mailService.sendEmailNotification(mailsDTO);
     }
+  }
+
+
+  @Async
+  @Transactional
+  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId, Long tenantId) {
+    TenantContext.setCurrentTenant(tenantId);
+    sendNewMessageNotification(rcGroupId, roles, userId);
+    TenantContext.clear();
   }
 
   /**
