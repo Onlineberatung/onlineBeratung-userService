@@ -42,10 +42,14 @@ public class AssignEnquiryEmailSupplierTest {
   @Before
   public void setup() {
     String applicationBaseUrl = "application base url";
+    this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier();
+    this.assignEnquiryEmailSupplier.setConsultantService(consultantService);
+    this.assignEnquiryEmailSupplier.setApplicationBaseUrl(applicationBaseUrl);
     String askerUserName = "asker user name";
+    this.assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
     String senderUserId = "sender user id";
-    this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService);
+    this.assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
+    this.assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
