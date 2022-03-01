@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api.adapters.keycloak.config;
 
 import lombok.NonNull;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +20,15 @@ public class KeycloakClient {
 
   private final RestTemplate restTemplate;
 
-  public KeycloakClient(@Qualifier("keycloakRestTemplate") final RestTemplate restTemplate) {
+  private final Keycloak keycloak;
+
+  private final KeycloakConfig keycloakConfig;
+
+  public KeycloakClient(@Qualifier("keycloakRestTemplate") final RestTemplate restTemplate,
+      final Keycloak keycloak, final KeycloakConfig keycloakConfig) {
     this.restTemplate = restTemplate;
+    this.keycloak = keycloak;
+    this.keycloakConfig = keycloakConfig;
   }
 
   public <T> ResponseEntity<T> get(String bearerToken, String url, Class<T> responseType)
@@ -59,6 +69,19 @@ public class KeycloakClient {
     var entity = new HttpEntity<>(httpHeaders);
 
     return restTemplate.exchange(url, HttpMethod.DELETE, entity, responseType);
+  }
+
+  public UsersResource getUsersResource() {
+    return getRealmResource().users();
+  }
+
+  public RealmResource getRealmResource() {
+    String realm = keycloakConfig.getRealm();
+    return keycloak.realm(realm);
+  }
+
+  public String getBearerToken() {
+    return keycloak.tokenManager().getAccessTokenString();
   }
 
   @NonNull

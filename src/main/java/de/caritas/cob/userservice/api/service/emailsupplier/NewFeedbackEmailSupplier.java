@@ -11,12 +11,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -40,7 +40,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
   private final ConsultantService consultantService;
   private final RocketChatService rocketChatService;
   private final String rocketChatSystemUserId;
-  private final KeycloakAdminClientService keycloakAdminClientService;
+  private final IdentityClient identityClient;
 
   /**
    * Generates feedback message notification mails sent to regarding consultants.
@@ -148,7 +148,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     var isAssignedToSession = consultant.getRocketChatId().equals(
         session.getConsultant().getRocketChatId()
     );
-    var isMainConsultant = keycloakAdminClientService.userHasRole(
+    var isMainConsultant = identityClient.userHasRole(
         consultant.getId(), UserRole.MAIN_CONSULTANT.getValue()
     );
 

@@ -7,11 +7,11 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ public class RocketChatOperationConditionProviderTest {
   private RocketChatOperationConditionProvider conditionProvider;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Mock
   private Session session;
@@ -76,8 +76,8 @@ public class RocketChatOperationConditionProviderTest {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
     when(this.session.getConsultingTypeId()).thenReturn(1);
-    when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
-    when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(false);
+    when(this.keycloakService.userHasRole(any(), any())).thenReturn(true);
     when(this.consultingTypeManager.getConsultingTypeSettings(1))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
@@ -110,8 +110,8 @@ public class RocketChatOperationConditionProviderTest {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
     when(this.session.getConsultingTypeId()).thenReturn(1);
-    when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
-    when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(false);
+    when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(false);
+    when(this.keycloakService.userHasRole(any(), any())).thenReturn(false);
     when(this.consultingTypeManager.getConsultingTypeSettings(1))
         .thenReturn(CONSULTING_TYPE_SETTINGS_U25);
 
@@ -134,7 +134,7 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndConsultantHasMainConsultantAuthority() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedbackGroup");
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
-    when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(true);
+    when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(true);
 
     boolean result = this.conditionProvider.canAddToRocketChatFeedbackGroup();
 
@@ -145,8 +145,8 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndConsultantHasMainConsultantRole() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedbackGroup");
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
-    when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
-    when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(false);
+    when(this.keycloakService.userHasRole(any(), any())).thenReturn(true);
 
     boolean result = this.conditionProvider.canAddToRocketChatFeedbackGroup();
 
@@ -164,8 +164,8 @@ public class RocketChatOperationConditionProviderTest {
   public void canAddToRocketChatFeedbackGroup_Should_returnFalse_When_sessionHasFeedbackGroupAndConsultantHasNoRoleAndNoAuthority() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedbackGroup");
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
-    when(this.keycloakAdminClientService.userHasAuthority(any(), any())).thenReturn(false);
-    when(this.keycloakAdminClientService.userHasRole(any(), any())).thenReturn(false);
+    when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(false);
+    when(this.keycloakService.userHasRole(any(), any())).thenReturn(false);
 
     boolean result = this.conditionProvider.canAddToRocketChatFeedbackGroup();
 

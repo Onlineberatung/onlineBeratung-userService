@@ -5,11 +5,11 @@ import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
@@ -30,7 +30,7 @@ public class AssignSessionFacade {
 
   private final @NonNull SessionService sessionService;
   private final @NonNull RocketChatFacade rocketChatFacade;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
@@ -98,8 +98,7 @@ public class AssignSessionFacade {
             consultant, memberList);
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
-            this.consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromGroupOrRollbackOnFailure();
   }
@@ -111,8 +110,7 @@ public class AssignSessionFacade {
             consultant, memberList);
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
-            this.consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromFeedbackGroupOrRollbackOnFailure();
   }

@@ -45,23 +45,22 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.OtpType;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.Language;
-import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
 import java.util.ArrayList;
@@ -78,8 +77,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.admin.client.token.TokenManager;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -152,7 +154,7 @@ public class UserControllerE2EIT {
   private RestTemplate keycloakRestTemplate;
 
   @MockBean
-  private KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private Keycloak keycloak;
 
   @Captor
   private ArgumentCaptor<HttpEntity<OtpSetupDTO>> captor;
@@ -354,6 +356,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByAppIsActive()
       throws Exception {
+    givenABearerToken();
     givenAValidConsultant();
     givenKeycloakRespondsOtpByAppHasBeenSetup(consultant.getUsername());
 
@@ -404,6 +407,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByAppIsActive()
       throws Exception {
+    givenABearerToken();
     givenAValidUser();
     givenConsultingTypeServiceResponse();
     givenKeycloakRespondsOtpByAppHasBeenSetup(user.getUsername());
@@ -445,6 +449,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByEmailIsActive()
       throws Exception {
+    givenABearerToken();
     givenAValidConsultant();
     givenKeycloakRespondsOtpByEmailHasBeenSetup(consultant.getUsername());
 
@@ -495,6 +500,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByEmailIsActive()
       throws Exception {
+    givenABearerToken();
     givenAValidUser();
     givenConsultingTypeServiceResponse();
     givenKeycloakRespondsOtpByEmailHasBeenSetup(user.getUsername());
@@ -536,6 +542,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faIsNotActivated()
       throws Exception {
+    givenABearerToken();
     givenAValidConsultant();
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
 
@@ -586,6 +593,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faIsNotActivated()
       throws Exception {
+    givenABearerToken();
     givenAValidUser();
     givenConsultingTypeServiceResponse();
     givenKeycloakRespondsOtpHasNotBeenSetup(user.getUsername());
@@ -866,6 +874,7 @@ public class UserControllerE2EIT {
     givenAValidConsultant();
     givenAValidEmailDTO();
     givenKeycloakFoundAnEmailInUse();
+    givenABearerToken();
 
     mockMvc.perform(
             put("/users/2fa/email")
@@ -1322,7 +1331,7 @@ public class UserControllerE2EIT {
   @Test
   public void registerUserWithoutConsultingIdShouldSaveMonitoring() throws Exception {
     givenConsultingTypeServiceResponse();
-    givenAUserResource();
+    givenARealmResource();
     givenAUserDTO();
 
     mockMvc.perform(
@@ -1334,8 +1343,10 @@ public class UserControllerE2EIT {
         .andExpect(status().isCreated());
   }
 
-  private void givenAUserResource() {
-    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(mock(UsersResource.class));
+  private void givenARealmResource() {
+    var realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(mock(UsersResource.class));
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
   private void givenAValidKeycloakEmailChangeByUsernameResponse(String username) {
@@ -1353,7 +1364,10 @@ public class UserControllerE2EIT {
 
     when(usersResource.search(eq(encodedUsername))).thenReturn(userRepresentationList);
     when(usersResource.get(keycloakId)).thenReturn(userResource);
-    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+
+    var realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
   private void givenAUserDTO() {
@@ -1430,7 +1444,9 @@ public class UserControllerE2EIT {
     var usersResource = mock(UsersResource.class);
     when(usersResource.search(eq(emailDTO.getEmail()), anyInt(), anyInt()))
         .thenReturn(userRepresentationList);
-    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    var realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
   private void givenKeycloakFoundOwnEmailInUse() {
@@ -1444,7 +1460,9 @@ public class UserControllerE2EIT {
     var usersResource = mock(UsersResource.class);
     when(usersResource.search(eq(emailDTO.getEmail()), anyInt(), anyInt()))
         .thenReturn(userRepresentationList);
-    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    var realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
   private void givenKeycloakFoundNoEmailInUse() {
@@ -1452,7 +1470,9 @@ public class UserControllerE2EIT {
     var usersResource = mock(UsersResource.class);
     when(usersResource.search(eq(emailDTO.getEmail()), anyInt(), anyInt()))
         .thenReturn(userRepresentationList);
-    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    var realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
   private void givenAKeycloakSetupEmailOtpAnotherOtpConfigActiveErrorResponse() {
@@ -1608,8 +1628,10 @@ public class UserControllerE2EIT {
   }
 
   private void givenABearerToken() {
-    when(keycloakAdminClientAccessor.getBearerToken()).thenReturn(
-        RandomStringUtils.randomAlphanumeric(255));
+    var tokenManager = mock(TokenManager.class);
+    when(tokenManager.getAccessTokenString())
+        .thenReturn(RandomStringUtils.randomAlphanumeric(255));
+    when(keycloak.tokenManager()).thenReturn(tokenManager);
   }
 
   private void givenACorrectlyFormattedTan() {

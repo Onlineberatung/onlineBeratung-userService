@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -30,7 +31,6 @@ import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import org.hamcrest.Matchers;
@@ -47,7 +47,7 @@ public class CreateUserFacadeTest {
   @InjectMocks
   private CreateUserFacade createUserFacade;
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
   @Mock
   private UserService userService;
   @Mock
@@ -102,7 +102,7 @@ public class CreateUserFacadeTest {
   @Test(expected = InternalServerErrorException.class)
   public void createUserAccountWithInitializedConsultingType_Should_ThrowInternalServerErrorException_When_CreateKeycloakUserReturnsNoUserId() {
 
-    when(keycloakAdminClientService.createKeycloakUser(any()))
+    when(keycloakService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID);
 
     createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_SUCHT);
@@ -113,9 +113,9 @@ public class CreateUserFacadeTest {
 
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
-    when(keycloakAdminClientService.createKeycloakUser(any()))
+    when(keycloakService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
+    doNothing().when(keycloakService).updatePassword(anyString(),
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
@@ -128,17 +128,17 @@ public class CreateUserFacadeTest {
   public void createUserAccountWithInitializedConsultingType_Should_CallNecessaryMethods_When_EverythingSucceeds() {
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
-    when(keycloakAdminClientService.createKeycloakUser(any()))
+    when(keycloakService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
-    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
+    doNothing().when(keycloakService).updatePassword(anyString(),
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
     createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_KREUZBUND);
 
-    verify(keycloakAdminClientService, times(1)).createKeycloakUser(any(UserDTO.class));
-    verify(keycloakAdminClientService, times(1)).updateRole(any(), any(UserRole.class));
-    verify(keycloakAdminClientService, times(1)).updatePassword(anyString(), anyString());
+    verify(keycloakService, times(1)).createKeycloakUser(any(UserDTO.class));
+    verify(keycloakService, times(1)).updateRole(any(), any(UserRole.class));
+    verify(keycloakService, times(1)).updatePassword(anyString(), anyString());
     verify(createNewConsultingTypeFacade, times(1))
         .initializeNewConsultingType(any(), any(), any(ExtendedConsultingTypeResponseDTO.class));
     verify(rollbackFacade, times(0)).rollBackUserAccount(any());
@@ -148,21 +148,21 @@ public class CreateUserFacadeTest {
   public void updateKeycloakAccountAndCreateDatabaseUserAccount_Should_CallNecessaryMethods_When_EverythingSucceeds() {
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
-    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
+    doNothing().when(keycloakService).updatePassword(anyString(),
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
     createUserFacade
         .updateKeycloakAccountAndCreateDatabaseUserAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
-    verify(keycloakAdminClientService, times(1)).updateRole(any(), any(UserRole.class));
-    verify(keycloakAdminClientService, times(1)).updatePassword(anyString(), anyString());
+    verify(keycloakService, times(1)).updateRole(any(), any(UserRole.class));
+    verify(keycloakService, times(1)).updatePassword(anyString(), anyString());
     verify(rollbackFacade, times(0)).rollBackUserAccount(any());
   }
 
   @Test(expected = InternalServerErrorException.class)
   public void updateKeycloakAccountAndCreateDatabaseUserAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakPwFails() {
-    doThrow(new RuntimeException()).when(keycloakAdminClientService).updatePassword(anyString(),
+    doThrow(new RuntimeException()).when(keycloakService).updatePassword(anyString(),
         anyString());
 
     createUserFacade
@@ -173,7 +173,7 @@ public class CreateUserFacadeTest {
 
   @Test(expected = InternalServerErrorException.class)
   public void updateKeycloakAccountAndCreateDatabaseUserAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakRoleFails() {
-    doThrow(new RuntimeException()).when(keycloakAdminClientService).updateRole(anyString(),
+    doThrow(new RuntimeException()).when(keycloakService).updateRole(anyString(),
         any(UserRole.class));
 
     createUserFacade
@@ -186,7 +186,7 @@ public class CreateUserFacadeTest {
   public void updateKeycloakAccountAndCreateDatabaseUserAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_CreateDbUserFails() {
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
-    doNothing().when(keycloakAdminClientService).updatePassword(anyString(),
+    doNothing().when(keycloakService).updatePassword(anyString(),
         anyString());
     when(userService.createUser(any(), any(), any(), anyBoolean()))
         .thenThrow(new IllegalArgumentException());
