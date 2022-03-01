@@ -18,11 +18,11 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -55,7 +55,7 @@ public class NewFeedbackEmailSupplierTest {
   private RocketChatService rocketChatService;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Mock
   private Logger logger;
@@ -64,7 +64,7 @@ public class NewFeedbackEmailSupplierTest {
   public void setup() {
     this.newFeedbackEmailSupplier = new NewFeedbackEmailSupplier(session, "feedbackGroupId",
         "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId", keycloakAdminClientService);
+        "rocketChatSystemUserId", keycloakService);
     setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
   }
 
@@ -73,7 +73,7 @@ public class NewFeedbackEmailSupplierTest {
       throws RocketChatGetGroupMembersException {
     List<MailDTO> generatedMails = new NewFeedbackEmailSupplier(null, "feedbackGroupId",
         "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId", keycloakAdminClientService).generateEmails();
+        "rocketChatSystemUserId", keycloakService).generateEmails();
 
     assertThat(generatedMails, hasSize(0));
     verify(logger).error(anyString(), anyString());
@@ -258,7 +258,7 @@ public class NewFeedbackEmailSupplierTest {
 
   private void whenConsultantIsMain(boolean returnValue) {
     when(
-        keycloakAdminClientService.userHasRole(anyString(), eq("main-consultant"))
+        keycloakService.userHasRole(anyString(), eq("main-consultant"))
     ).thenReturn(returnValue);
   }
 }

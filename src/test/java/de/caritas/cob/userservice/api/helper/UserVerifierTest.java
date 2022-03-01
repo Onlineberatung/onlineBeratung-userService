@@ -5,9 +5,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,14 +22,14 @@ public class UserVerifierTest {
   @InjectMocks
   private UserVerifier userVerifier;
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void checkIfUsernameIsAvailable_Should_ThrowCustomValidationHttpStatusException_When_UsernameIsNotAvailable() {
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    when(keycloakAdminClientService.isUsernameAvailable(userDTO.getUsername())).thenReturn(false);
+    when(keycloakService.isUsernameAvailable(userDTO.getUsername())).thenReturn(false);
 
     try {
       userVerifier.checkIfUsernameIsAvailable(userDTO);
@@ -42,7 +42,7 @@ public class UserVerifierTest {
   @Test
   public void checkIfUsernameIsAvailable_ShouldNot_ThrowException_When_UsernameIsAvailable() {
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    when(keycloakAdminClientService.isUsernameAvailable(userDTO.getUsername())).thenReturn(true);
+    when(keycloakService.isUsernameAvailable(userDTO.getUsername())).thenReturn(true);
 
     userVerifier.checkIfUsernameIsAvailable(userDTO);
   }

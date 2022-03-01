@@ -14,12 +14,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDeletionValidationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +40,7 @@ public class ConsultantPreDeletionServiceTest {
   private SessionRepository sessionRepository;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Test
   public void performPreDeletionSteps_Should_throwCustomValidationHttpStatusException_When_consultantHasOpenSessions() {
@@ -75,7 +75,7 @@ public class ConsultantPreDeletionServiceTest {
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
-    verify(this.keycloakAdminClientService, times(1)).deactivateUser(eq(consultant.getId()));
+    verify(this.keycloakService, times(1)).deactivateUser(eq(consultant.getId()));
   }
 
 }

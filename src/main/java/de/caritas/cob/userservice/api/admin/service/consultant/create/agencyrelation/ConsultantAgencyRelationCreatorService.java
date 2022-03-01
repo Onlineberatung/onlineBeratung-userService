@@ -14,13 +14,13 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class ConsultantAgencyRelationCreatorService {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull AgencyService agencyService;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatFacade rocketChatFacade;
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
@@ -103,7 +103,7 @@ public class ConsultantAgencyRelationCreatorService {
       var roleSets = roles.getConsultant().getRoleSets();
       for (var roleSetName : input.getRoleSetNames()) {
         roleSets.getOrDefault(roleSetName, Collections.emptyList()).forEach(
-            roleName -> keycloakAdminClientService.ensureRole(input.getConsultantId(), roleName));
+            roleName -> identityClient.ensureRole(input.getConsultantId(), roleName));
       }
     }
   }
@@ -116,7 +116,7 @@ public class ConsultantAgencyRelationCreatorService {
 
   private void checkConsultantHasRoleSet(Set<String> roles, String consultantId) {
     roles.stream()
-        .filter(role -> keycloakAdminClientService.userHasRole(consultantId, role))
+        .filter(role -> identityClient.userHasRole(consultantId, role))
         .findAny()
         .orElseThrow(() -> new BadRequestException(
             String
@@ -151,7 +151,7 @@ public class ConsultantAgencyRelationCreatorService {
       Consumer<String> logMethod) {
     List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
     RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
+        .getInstance(this.rocketChatFacade, identityClient, logMethod,
             consultingTypeManager)
         .onSessions(relevantSessions)
         .withConsultant(consultant)

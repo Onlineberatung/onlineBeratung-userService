@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.workflow.delete.action.asker;
 
-import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourceType.ASKER;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourceType.ASKER;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.workflow.delete.action.DeleteKeycloakUserAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 public class DeleteKeycloakAskerAction extends DeleteKeycloakUserAction implements
     ActionCommand<AskerDeletionWorkflowDTO> {
 
-  public DeleteKeycloakAskerAction(@NonNull KeycloakAdminClientService keycloakAdminClientService) {
-    super(keycloakAdminClientService);
+  public DeleteKeycloakAskerAction(@NonNull IdentityClient identityClient) {
+    super(identityClient);
   }
 
   /**

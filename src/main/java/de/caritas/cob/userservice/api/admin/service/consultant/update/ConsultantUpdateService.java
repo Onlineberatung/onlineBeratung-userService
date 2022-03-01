@@ -4,18 +4,18 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import static java.util.Objects.isNull;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UpdateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateRequestDTO;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ConsultantUpdateService {
 
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
   private final @NonNull RocketChatService rocketChatService;
@@ -52,7 +52,7 @@ public class ConsultantUpdateService {
                 String.format("Consultant with id %s does not exist", consultantId)));
 
     UserDTO userDTO = buildValidatedUserDTO(updateConsultantDTO, consultant);
-    this.keycloakAdminClientService.updateUserData(consultant.getId(), userDTO,
+    this.identityClient.updateUserData(consultant.getId(), userDTO,
         updateConsultantDTO.getFirstname(), updateConsultantDTO.getLastname());
 
     this.rocketChatService

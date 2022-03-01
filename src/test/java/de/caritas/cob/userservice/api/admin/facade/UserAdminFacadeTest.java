@@ -8,10 +8,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Optional;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class UserAdminFacadeTest {
   private UserAdminFacade userAdminFacade;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Mock
   private UserService userService;
@@ -56,7 +56,7 @@ public class UserAdminFacadeTest {
 
     this.userAdminFacade.markAskerForDeletion("user id");
 
-    verify(this.keycloakAdminClientService, times(1)).deactivateUser("user id");
+    verify(this.keycloakService, times(1)).deactivateUser("user id");
     ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
     verify(this.userService, times(1)).saveUser(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue().getDeleteDate(), notNullValue());

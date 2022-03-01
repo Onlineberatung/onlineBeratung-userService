@@ -11,8 +11,6 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientAccessor;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -24,11 +22,33 @@ import org.springframework.web.client.RestTemplate;
 public class KeycloakTestConfig {
 
   @Bean
-  public KeycloakAdminClientService keycloakAdminClientService(UserHelper userHelper,
-      KeycloakAdminClientAccessor keycloakAdminClientAccessor,
-      IdentityClientConfig identityClientConfig) {
-    return new KeycloakAdminClientService(userHelper, keycloakAdminClientAccessor,
-        identityClientConfig) {
+  public KeycloakService keycloakService(RestTemplate restTemplate,
+      AuthenticatedUser authenticatedUser, UserAccountInputValidator userAccountInputValidator,
+      IdentityClientConfig identityClientConfig, KeycloakClient keycloakClient,
+      KeycloakMapper keycloakMapper, UserHelper userHelper) {
+
+    return new KeycloakService(restTemplate, authenticatedUser, userAccountInputValidator,
+        identityClientConfig, keycloakClient, keycloakMapper, userHelper) {
+      @Override
+      public boolean changePassword(String userId, String password) {
+        return super.changePassword(userId, password);
+      }
+
+      @Override
+      public KeycloakLoginResponseDTO loginUser(String userName, String password) {
+        return new KeycloakLoginResponseDTO("", 0, 0, "", "", "", "");
+      }
+
+      @Override
+      public boolean logoutUser(String refreshToken) {
+        return true;
+      }
+
+      @Override
+      public void changeEmailAddress(String emailAddress) {
+        log.debug("KeycloakService.changeEmailAddress called");
+      }
+
       @Override
       public KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO user) {
         KeycloakCreateUserResponseDTO keycloakUserDTO = new KeycloakCreateUserResponseDTO();
@@ -80,39 +100,6 @@ public class KeycloakTestConfig {
 
       @Override
       public void deactivateUser(String userId) {
-      }
-    };
-  }
-
-  @Bean
-  public KeycloakService keycloakService(RestTemplate restTemplate,
-      AuthenticatedUser authenticatedUser, KeycloakAdminClientService keycloakAdminClientService,
-      UserAccountInputValidator userAccountInputValidator,
-      IdentityClientConfig identityClientConfig,
-      KeycloakAdminClientAccessor keycloakAdminClientAccessor,
-      KeycloakClient keycloakClient, KeycloakMapper keycloakMapper) {
-
-    return new KeycloakService(restTemplate, authenticatedUser, keycloakAdminClientService,
-        userAccountInputValidator, identityClientConfig, keycloakAdminClientAccessor,
-        keycloakClient, keycloakMapper) {
-      @Override
-      public boolean changePassword(String userId, String password) {
-        return super.changePassword(userId, password);
-      }
-
-      @Override
-      public KeycloakLoginResponseDTO loginUser(String userName, String password) {
-        return new KeycloakLoginResponseDTO("", 0, 0, "", "", "", "");
-      }
-
-      @Override
-      public boolean logoutUser(String refreshToken) {
-        return true;
-      }
-
-      @Override
-      public void changeEmailAddress(String emailAddress) {
-        log.debug("KeycloakService.changeEmailAddress called");
       }
     };
   }
