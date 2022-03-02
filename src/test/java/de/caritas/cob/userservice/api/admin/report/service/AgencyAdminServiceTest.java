@@ -10,7 +10,8 @@ import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyCo
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminSearchResultDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,9 @@ public class AgencyAdminServiceTest {
 
   @Mock
   private SecurityHeaderSupplier securityHeaderSupplier;
+
+  @Mock
+  private OriginHeaderSupplier originHeaderSupplier;
 
   @Mock
   private ApiClient apiClient;

@@ -10,19 +10,17 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.config.CacheManagerConfig;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * Service class to communicate with the AgencyService.
@@ -33,6 +31,7 @@ public class AgencyService {
 
   private final @NonNull AgencyControllerApi agencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
+  private final @NonNull OriginHeaderSupplier originHeaderSupplier;
 
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
@@ -123,33 +122,14 @@ public class AgencyService {
   private void addDefaultHeaders(ApiClient apiClient, String requestServerName) {
     var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
     addOriginHeader(headers, requestServerName);
-
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 
   private void addOriginHeader(HttpHeaders headers, String requestServerName) {
-    String originHeaderValue = getOriginHeaderValue(requestServerName);
+    String originHeaderValue = originHeaderSupplier.getOriginHeaderValue(requestServerName);
     if (originHeaderValue != null) {
       headers.add("origin", originHeaderValue);
     }
-  }
-
-  private String getOriginHeaderValue(String requestServerName) {
-    if (requestServerName != null) {
-      return requestServerName;
-    } else {
-      return getOriginHeaderValueFromRequestContext();
-    }
-  }
-
-  private String getOriginHeaderValueFromRequestContext() {
-    HttpServletRequest request =
-        ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-            .getRequest();
-
-    return Collections.list(request.getHeaderNames())
-        .stream()
-        .collect(Collectors.toMap(h -> h, request::getHeader)).get("host");
   }
 
   private AgencyDTO fromOriginalAgency(AgencyResponseDTO agencyResponseDTO) {

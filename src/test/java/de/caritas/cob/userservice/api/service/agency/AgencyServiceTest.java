@@ -7,7 +7,8 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,11 +23,16 @@ import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 @ExtendWith(MockitoExtension.class)
 class AgencyServiceTest {
 
+  private static final String ORIGIN_URL = "subdomain.onlineberatung.net";
+
   @InjectMocks
   AgencyService agencyService;
 
   @Mock
   AgencyControllerApi agencyControllerApi;
+
+  @Mock
+  OriginHeaderSupplier originHeaderSupplier;
 
   @Mock
   SecurityHeaderSupplier securityHeaderSupplier;
@@ -49,14 +55,16 @@ class AgencyServiceTest {
     // given
     HttpHeaders headers = new HttpHeaders();
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(headers);
+
+    when(originHeaderSupplier.getOriginHeaderValue(ORIGIN_URL)).thenReturn(ORIGIN_URL);
     when(this.agencyControllerApi.getApiClient()).thenReturn(apiClient);
     var agencyDTOS = Lists.newArrayList(new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);
     // when
-    this.agencyService.getAgency(1L, "subdomain.onlineberatung.net");
+    this.agencyService.getAgency(1L, ORIGIN_URL);
 
     // then
-    assertThat(headers.get("origin").get(0)).isEqualTo("subdomain.onlineberatung.net");
+    assertThat(headers.get("origin").get(0)).isEqualTo(ORIGIN_URL);
   }
 
 }

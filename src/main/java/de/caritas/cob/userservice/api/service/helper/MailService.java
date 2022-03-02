@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.helper;
 
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
