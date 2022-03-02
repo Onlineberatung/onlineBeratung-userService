@@ -61,6 +61,7 @@ public class EmailNotificationFacade {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
+  private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
@@ -76,6 +77,7 @@ public class EmailNotificationFacade {
       newEnquiryEmailSupplier.setCurrentSession(session);
       newEnquiryEmailSupplier.setRequestServerName(requestServerName);
       sendMailTasksToMailService(newEnquiryEmailSupplier);
+      TenantContext.clear();
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new enquiry notification for session %s.", session.getId()), ex);
@@ -97,6 +99,16 @@ public class EmailNotificationFacade {
       log.info("Sending email notifications with mailDTOs ", mailsDTO);
       mailService.sendEmailNotification(mailsDTO);
     }
+  }
+
+
+  @Async
+  @Transactional
+  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId,
+      Long tenantId) {
+    TenantContext.setCurrentTenant(tenantId);
+    sendNewMessageNotification(rcGroupId, roles, userId);
+    TenantContext.clear();
   }
 
   /**
@@ -172,13 +184,24 @@ public class EmailNotificationFacade {
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
       String askerUserName) {
 
-    EmailSupplier assignEnquiryMails = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService);
+    assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
+    assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
+    assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
+    assignEnquiryEmailSupplier.setApplicationBaseUrl(applicationBaseUrl);
+    assignEnquiryEmailSupplier.setConsultantService(consultantService);
     try {
-      sendMailTasksToMailService(assignEnquiryMails);
+      sendMailTasksToMailService(assignEnquiryEmailSupplier);
     } catch (Exception exception) {
       LogService.logEmailNotificationFacadeError(exception);
     }
+  }
+
+  @Async
+  public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
+      String askerUserName, Long tenantId) {
+    TenantContext.setCurrentTenant(tenantId);
+    sendAssignEnquiryEmailNotification(receiverConsultant, senderUserId, askerUserName);
+    TenantContext.clear();
   }
 
 }

@@ -115,7 +115,8 @@ public class AssignSessionFacadeTest {
     Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any())).thenReturn(List.of(consultantToRemove));
+    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
+        .thenReturn(List.of(consultantToRemove));
 
     this.assignSessionFacade.assignSession(session, consultant);
 
@@ -128,7 +129,7 @@ public class AssignSessionFacadeTest {
     verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
         .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
     verify(this.emailNotificationFacade, times(1))
-        .sendAssignEnquiryEmailNotification(any(), any(), any());
+        .sendAssignEnquiryEmailNotification(any(), any(), any(), any());
   }
 
   @Test
@@ -176,8 +177,8 @@ public class AssignSessionFacadeTest {
         .removeUserFromGroup("teamConsultantRcId2", session.getGroupId()));
     verifyAsync(a -> verify(this.rocketChatFacade, never())
         .removeUserFromGroup("teamConsultantRcId2", session.getFeedbackGroupId()));
-    verify(this.emailNotificationFacade, times(1))
-        .sendAssignEnquiryEmailNotification(any(), any(), any());
+    verifyAsync(a -> verify(this.emailNotificationFacade, times(1))
+        .sendAssignEnquiryEmailNotification(any(), any(), any(), any()));
   }
 
   @Test
