@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service.helper;
+package de.caritas.cob.userservice.api.service.httpheader;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

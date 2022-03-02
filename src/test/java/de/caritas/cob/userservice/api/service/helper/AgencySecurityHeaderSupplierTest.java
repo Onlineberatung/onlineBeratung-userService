@@ -14,14 +14,15 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.lang.model.util.Elements.Origin;
 import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,13 +55,7 @@ public class AgencySecurityHeaderSupplierTest {
   private List<AgencyResponseDTO> agencyResponseDTOS;
 
   @Mock
-  private ServletRequestAttributes requestAttributes;
-
-  @Mock
-  private HttpServletRequest httpServletRequest;
-
-  @Mock
-  private Enumeration<String> headers;
+  private OriginHeaderSupplier originHeaderSupplier;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -83,7 +78,6 @@ public class AgencySecurityHeaderSupplierTest {
 
   @Test
   public void getAgencies_Should_ReturnAgencyDTOList_When_ProvidedWithValidAgencyIds() {
-    givenRequestContextIsSet();
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
 
@@ -97,7 +91,7 @@ public class AgencySecurityHeaderSupplierTest {
       throws NoSuchMethodException, SecurityException {
 
     AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class));
+        mock(SecurityHeaderSupplier.class), mock(OriginHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest
         .getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
@@ -108,7 +102,7 @@ public class AgencySecurityHeaderSupplierTest {
 
   @Test
   public void getAgency_Should_ReturnAgencyDTO_When_ProvidedWithValidAgencyId() {
-    givenRequestContextIsSet();
+
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
 
@@ -116,19 +110,15 @@ public class AgencySecurityHeaderSupplierTest {
     resetRequestAttributes();
   }
 
-  private void givenRequestContextIsSet() {
-    when(requestAttributes.getRequest()).thenReturn(httpServletRequest);
-    when(httpServletRequest.getHeaderNames()).thenReturn(headers);
-    RequestContextHolder.setRequestAttributes(requestAttributes);
-  }
+
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
   public void test_Should_Fail_When_MethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
-    givenRequestContextIsSet();
+
     AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class));
+        mock(SecurityHeaderSupplier.class), mock(OriginHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest.getMethod(GET_AGENCY_METHOD_NAME, GET_AGENCY_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);
@@ -139,7 +129,6 @@ public class AgencySecurityHeaderSupplierTest {
 
   @Test
   public void getAgencyWithoutCaching_Should_ReturnAgencyDTO_WhenProvidedWithValidAgencyId() {
-    givenRequestContextIsSet();
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
 
