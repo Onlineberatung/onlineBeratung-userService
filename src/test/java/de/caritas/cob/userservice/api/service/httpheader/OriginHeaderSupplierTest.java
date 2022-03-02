@@ -44,12 +44,17 @@ class OriginHeaderSupplierTest {
     givenRequestContextIsSet();
     // when, then
     assertThat(originHeaderSupplier.getOriginHeaderValue()).isEqualTo("host header value");
+    resetRequestAttributes();
   }
 
   private void givenRequestContextIsSet() {
     when(requestAttributes.getRequest()).thenReturn(httpServletRequest);
     when(httpServletRequest.getHeaderNames()).thenReturn(headers);
     RequestContextHolder.setRequestAttributes(requestAttributes);
+  }
+
+  private void resetRequestAttributes() {
+    RequestContextHolder.setRequestAttributes(null);
   }
 
 }
