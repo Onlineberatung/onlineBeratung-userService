@@ -83,7 +83,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -248,6 +247,9 @@ public class EmailNotificationFacadeTest {
         emailNotificationFacade.getClass().getDeclaredField(APPLICATION_BASE_URL_FIELD_NAME),
         APPLICATION_BASE_URL);
     setInternalState(LogService.class, "LOGGER", logger);
+    FieldSetter.setField(emailNotificationFacade,
+        emailNotificationFacade.getClass().getDeclaredField("assignEnquiryEmailSupplier"),
+        new AssignEnquiryEmailSupplier());
   }
 
   /**
@@ -581,11 +583,9 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  @Ignore
   public void sendAssignEnquiryEmailNotification_Should_SendEmail_WhenAllParametersAreValid() {
 
     when(consultantService.getConsultant(CONSULTANT_ID_2)).thenReturn(Optional.of(CONSULTANT2));
-    when(assignEnquiryEmailSupplier.generateEmails()).thenReturn(getMailDTOS());
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME);
 
@@ -593,17 +593,13 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  @Ignore
   public void sendAssignEnquiryEmailNotification_Should_LogErrorAndSendNoMails_WhenReceiverConsultantIsNull() {
-    when(assignEnquiryEmailSupplier.generateEmails()).thenReturn(getMailDTOS());
     emailNotificationFacade.sendAssignEnquiryEmailNotification(null, CONSULTANT_ID_2, USERNAME);
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  @Ignore
   public void sendAssignEnquiryEmailNotification_Should_LogErrorAndSendNoMails_WhenReceiverConsultantIsMissingEmailAddress() {
-    when(assignEnquiryEmailSupplier.generateEmails()).thenReturn(getMailDTOS());
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT_WITHOUT_MAIL,
         CONSULTANT_ID_2, USERNAME);
 
@@ -611,11 +607,9 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  @Ignore
   public void sendAssignEnquiryEmailNotification_Should_LogErrorAndSendNoMails_WhenSenderConsultantIsNotFound() {
 
     when(consultantService.getConsultant(Mockito.anyString())).thenReturn(Optional.empty());
-    when(assignEnquiryEmailSupplier.generateEmails()).thenReturn(getMailDTOS());
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME);
 
@@ -636,7 +630,6 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
-  @Ignore
   public void sendAssignEnquiryEmailNotification_Should_LogError_When_MailServiceHelperThrowsException() {
     doThrow(new RuntimeException("unexpected")).when(mailService)
         .sendEmailNotification(any());

@@ -39,7 +39,6 @@ import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole
 import java.util.List;
 import java.util.Objects;
 import org.jeasy.random.EasyRandom;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -95,7 +94,6 @@ public class AssignSessionFacadeTest {
   }
 
   @Test
-  @Ignore
   public void assignSession_Should_removeAllUnauthorizedMembers_When_sessionIsNotATeamSession() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(false);
@@ -131,11 +129,10 @@ public class AssignSessionFacadeTest {
     verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
         .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
     verify(this.emailNotificationFacade, times(1))
-        .sendAssignEnquiryEmailNotification(any(), any(), any());
+        .sendAssignEnquiryEmailNotification(any(), any(), any(), any());
   }
 
   @Test
-  @Ignore
   public void assignSession_ShouldNot_removeTeamMembers_When_sessionIsTeamSession() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(false);
@@ -180,8 +177,8 @@ public class AssignSessionFacadeTest {
         .removeUserFromGroup("teamConsultantRcId2", session.getGroupId()));
     verifyAsync(a -> verify(this.rocketChatFacade, never())
         .removeUserFromGroup("teamConsultantRcId2", session.getFeedbackGroupId()));
-    verify(this.emailNotificationFacade, times(1))
-        .sendAssignEnquiryEmailNotification(any(), any(), any());
+    verifyAsync(a -> verify(this.emailNotificationFacade, times(1))
+        .sendAssignEnquiryEmailNotification(any(), any(), any(), any()));
   }
 
   @Test
