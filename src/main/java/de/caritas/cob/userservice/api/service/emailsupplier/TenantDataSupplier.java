@@ -43,9 +43,9 @@ public class TenantDataSupplier {
 
     templateAttributes.add(new TemplateDataDTO().key("url").value(tenantUrl));
     templateAttributes
-        .add(new TemplateDataDTO().key("urlimpressum").value(tenantUrl + "/impressum"));
+        .add(new TemplateDataDTO().key("tenant_urlimpressum").value(tenantUrl + "/impressum"));
     templateAttributes
-        .add(new TemplateDataDTO().key("urldatenschutz").value(tenantUrl + "/datenschutz"));
+        .add(new TemplateDataDTO().key("tenant_urldatenschutz").value(tenantUrl + "/datenschutz"));
 
     return templateAttributes;
   }
