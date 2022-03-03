@@ -598,7 +598,7 @@ public class EmailNotificationFacadeTest {
 
   @Test
   public void sendAssignEnquiryEmailNotification_Should_LogErrorAndSendNoMails_WhenReceiverConsultantIsNull() {
-    emailNotificationFacade.sendAssignEnquiryEmailNotification(null, CONSULTANT_ID_2, USERNAME, null);
+    emailNotificationFacade.sendAssignEnquiryEmailNotification(new Consultant(), CONSULTANT_ID_2, USERNAME, null);
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
