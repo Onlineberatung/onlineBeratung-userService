@@ -18,9 +18,11 @@ import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportReco
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,6 +39,9 @@ public class ConsultantCreatorService {
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
 
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
+
   /**
    * Creates a new {@link Consultant} by {@link CreateConsultantDTO} in database, keycloak and
    * rocket chat.
@@ -49,6 +54,7 @@ public class ConsultantCreatorService {
         new CreateConsultantDTOAbsenceInputAdapter(createConsultantDTO));
     ConsultantCreationInput consultantCreationInput =
         new CreateConsultantDTOCreationInputAdapter(createConsultantDTO);
+    assignCurrentTenantContext(createConsultantDTO);
     return createNewConsultant(consultantCreationInput, asSet(CONSULTANT.getValue()));
   }
 
@@ -79,6 +85,12 @@ public class ConsultantCreatorService {
 
     return consultantService.saveConsultant(
         buildConsultant(consultantCreationInput, keycloakUserId, rocketChatUserId));
+  }
+
+  private void assignCurrentTenantContext(CreateConsultantDTO createConsultantDTO) {
+    if (multiTenancyEnabled) {
+      createConsultantDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
+    }
   }
 
   private String createKeycloakUser(ConsultantCreationInput consultantCreationInput) {
