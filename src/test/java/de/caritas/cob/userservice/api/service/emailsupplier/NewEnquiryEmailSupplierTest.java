@@ -43,7 +43,7 @@ public class NewEnquiryEmailSupplierTest {
   @Before
   public void setup() {
     this.newEnquiryEmailSupplier = new NewEnquiryEmailSupplier(
-        consultantAgencyRepository, agencyService);
+        consultantAgencyRepository, agencyService, null);
     this.newEnquiryEmailSupplier.setCurrentSession(session);
   }
 

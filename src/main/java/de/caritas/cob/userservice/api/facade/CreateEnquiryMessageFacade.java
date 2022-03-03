@@ -35,6 +35,7 @@ import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import java.util.Objects;
@@ -116,7 +117,9 @@ public class CreateEnquiryMessageFacade {
 
       updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
 
-      emailNotificationFacade.sendNewEnquiryEmailNotification(session, getHttpServletRequest().getServerName());
+      emailNotificationFacade
+          .sendNewEnquiryEmailNotification(session, getHttpServletRequest().getServerName(),
+              TenantContext.getCurrentTenantData());
 
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)

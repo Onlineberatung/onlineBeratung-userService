@@ -25,6 +25,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,6 +48,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private final ConsultantService consultantService;
   private final String applicationBaseUrl;
   private final String emailDummySuffix;
+  private boolean multiTenancyEnabled;
+  private final TenantDataSupplier tenantDataSupplier;
 
   /**
    * Generates new message notification mails sent to regarding consultants when a user has written
@@ -199,13 +202,20 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewMessageNotificationAsker(String email, String consultantName,
       String askerName) {
+    var templateAttributes = new ArrayList<TemplateDataDTO>();
+    templateAttributes.add(new TemplateDataDTO().key("consultantName").value(consultantName));
+    templateAttributes.add(new TemplateDataDTO().key("askerName").value(askerName));
+
+    if (!multiTenancyEnabled) {
+      templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+    } else {
+      templateAttributes.addAll(tenantDataSupplier.getTemplateAttributes());
+    }
+
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER)
         .email(email)
-        .templateData(asList(
-            new TemplateDataDTO().key("consultantName").value(consultantName),
-            new TemplateDataDTO().key("askerName").value(askerName),
-            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
+        .templateData(templateAttributes);
   }
 
 }

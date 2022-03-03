@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -14,6 +13,7 @@ import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
@@ -44,6 +47,11 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
   @Getter
   @Setter
   private String requestServerName;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
+
+  private final TenantDataSupplier tenantDataSupplier;
 
   public void setCurrentSession(Session session) {
     this.session = session;
@@ -90,14 +98,22 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewEnquiryNotificationConsultant(String email, String name,
       String postCode, String agency) {
+
+    var templateAttributes = new ArrayList<TemplateDataDTO>();
+    templateAttributes.add(new TemplateDataDTO().key("name").value(name));
+    templateAttributes.add(new TemplateDataDTO().key("plz").value(postCode));
+    templateAttributes.add(new TemplateDataDTO().key("beratungsstelle").value(agency));
+
+    if (!multiTenancyEnabled) {
+      templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+    } else {
+      templateAttributes.addAll(tenantDataSupplier.getTemplateAttributes());
+    }
+
     return new MailDTO()
         .template(TEMPLATE_NEW_ENQUIRY_NOTIFICATION)
         .email(email)
-        .templateData(asList(
-            new TemplateDataDTO().key("name").value(name),
-            new TemplateDataDTO().key("plz").value(postCode),
-            new TemplateDataDTO().key("beratungsstelle").value(agency),
-            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
+        .templateData(templateAttributes);
   }
 
 }

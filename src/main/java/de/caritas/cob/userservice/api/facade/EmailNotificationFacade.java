@@ -18,11 +18,13 @@ import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.TenantDataSupplier;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.List;
@@ -62,18 +64,22 @@ public class EmailNotificationFacade {
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
   private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
+  private final @NonNull TenantDataSupplier tenantDataSupplier;
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
    * written.
    *
-   * @param session the regarding session
+   * @param session           the regarding session
    * @param requestServerName
    */
   @Async
-  public void sendNewEnquiryEmailNotification(Session session, String requestServerName) {
+  public void sendNewEnquiryEmailNotification(Session session, String requestServerName,
+      TenantData tenantData) {
     try {
-      overtakeCurrentTenantContextFromSessionForAsyncThread(session);
+      TenantContext.setCurrentTenantData(tenantData);
       newEnquiryEmailSupplier.setCurrentSession(session);
       newEnquiryEmailSupplier.setRequestServerName(requestServerName);
       sendMailTasksToMailService(newEnquiryEmailSupplier);
@@ -81,12 +87,6 @@ public class EmailNotificationFacade {
     } catch (Exception ex) {
       LogService.logEmailNotificationFacadeError(String.format(
           "Failed to send new enquiry notification for session %s.", session.getId()), ex);
-    }
-  }
-
-  private void overtakeCurrentTenantContextFromSessionForAsyncThread(Session session) {
-    if (TenantContext.getCurrentTenant() == null && session.getTenantId() != null) {
-      TenantContext.setCurrentTenant(session.getTenantId());
     }
   }
 
@@ -101,16 +101,6 @@ public class EmailNotificationFacade {
     }
   }
 
-
-  @Async
-  @Transactional
-  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId,
-      Long tenantId) {
-    TenantContext.setCurrentTenant(tenantId);
-    sendNewMessageNotification(rcGroupId, roles, userId);
-    TenantContext.clear();
-  }
-
   /**
    * Sends email notifications according to the corresponding consultant(s) or asker when a new
    * message was written.
@@ -121,8 +111,9 @@ public class EmailNotificationFacade {
    */
   @Async
   @Transactional
-  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId) {
-
+  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId,
+      TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
     try {
       Session session = sessionService.getSessionByGroupIdAndUser(rcGroupId, userId, roles);
       EmailSupplier newMessageMails = NewMessageEmailSupplier
@@ -136,6 +127,8 @@ public class EmailNotificationFacade {
           .consultantService(consultantService)
           .applicationBaseUrl(applicationBaseUrl)
           .emailDummySuffix(emailDummySuffix)
+          .tenantDataSupplier(tenantDataSupplier)
+          .multiTenancyEnabled(multiTenancyEnabled)
           .build();
       sendMailTasksToMailService(newMessageMails);
 
@@ -148,6 +141,7 @@ public class EmailNotificationFacade {
           "Failed to send new message notification with Rocket.Chat group ID %s and user ID %s.",
           rcGroupId, userId), ex);
     }
+    TenantContext.clear();
   }
 
   /**
@@ -158,8 +152,9 @@ public class EmailNotificationFacade {
    * @param userId            regarding user id
    */
   @Async
-  public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, String userId) {
-
+  public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, String userId,
+      TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
     try {
       Session session = sessionService.getSessionByFeedbackGroupId(rcFeedbackGroupId);
       EmailSupplier newFeedbackMessages = new NewFeedbackEmailSupplier(session,
@@ -170,6 +165,7 @@ public class EmailNotificationFacade {
       LogService.logEmailNotificationFacadeError(String.format(
           "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId), e);
     }
+    TenantContext.clear();
   }
 
   /**
@@ -182,25 +178,16 @@ public class EmailNotificationFacade {
    */
   @Async
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
-      String askerUserName) {
-
+      String askerUserName, TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
     assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
     assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
     assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
-    assignEnquiryEmailSupplier.setApplicationBaseUrl(applicationBaseUrl);
-    assignEnquiryEmailSupplier.setConsultantService(consultantService);
     try {
       sendMailTasksToMailService(assignEnquiryEmailSupplier);
     } catch (Exception exception) {
       LogService.logEmailNotificationFacadeError(exception);
     }
-  }
-
-  @Async
-  public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
-      String askerUserName, Long tenantId) {
-    TenantContext.setCurrentTenant(tenantId);
-    sendAssignEnquiryEmailNotification(receiverConsultant, senderUserId, askerUserName);
     TenantContext.clear();
   }
 
