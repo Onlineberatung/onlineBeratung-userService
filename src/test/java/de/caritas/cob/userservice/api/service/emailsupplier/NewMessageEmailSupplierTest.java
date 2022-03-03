@@ -254,7 +254,7 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiverMultiTenancy(){
+  public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiverMultiTenancy() {
     var tenantData = new TenantData();
     tenantData.setTenantId(1L);
     tenantData.setSubdomain("subdomain");
@@ -269,12 +269,13 @@ public class NewMessageEmailSupplierTest {
     mockedTemplateAtt.add(new TemplateDataDTO());
     when(tenantDataSupplier.getTemplateAttributes()).thenReturn(mockedTemplateAtt);
 
-    ReflectionTestUtils.setField(newMessageEmailSupplier, "multiTenancyEnabled",true);
-    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantDataSupplier",tenantDataSupplier);
+    ReflectionTestUtils.setField(newMessageEmailSupplier, "multiTenancyEnabled", true);
+    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantDataSupplier", tenantDataSupplier);
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(1));
     assertThat(generatedMails.get(0).getTemplateData(), hasSize(3));
+    TenantContext.clear();
   }
 
   @Test(expected = InternalServerErrorException.class)

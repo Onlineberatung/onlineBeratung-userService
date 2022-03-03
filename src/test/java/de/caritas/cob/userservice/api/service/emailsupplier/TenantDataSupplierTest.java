@@ -58,7 +58,7 @@ public class TenantDataSupplierTest {
     assertThat(templateAttributes.get(4).getValue(),
         is("https://subdomain.onlineberatung.net/datenschutz"));
 
-
+    TenantContext.clear();
   }
 
 }
