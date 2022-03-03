@@ -79,6 +79,8 @@ public class EmailNotificationFacade {
   public void sendNewEnquiryEmailNotification(Session session, String requestServerName,
       TenantData tenantData) {
     try {
+      log.info("Preparing to send NEW_ENQUIRY_EMAIL_NOTIFICATION email for session: ",
+          session.getId());
       TenantContext.setCurrentTenantData(tenantData);
       newEnquiryEmailSupplier.setCurrentSession(session);
       newEnquiryEmailSupplier.setRequestServerName(requestServerName);
@@ -113,6 +115,8 @@ public class EmailNotificationFacade {
   @Transactional
   public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId,
       TenantData tenantData) {
+    log.info("Preparing to send NEW_MESSAGE_NOTIFICATION with rcGroupId: ",
+        rcGroupId);
     TenantContext.setCurrentTenantData(tenantData);
     try {
       Session session = sessionService.getSessionByGroupIdAndUser(rcGroupId, userId, roles);
@@ -180,6 +184,8 @@ public class EmailNotificationFacade {
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
       String askerUserName, TenantData tenantData) {
     TenantContext.setCurrentTenantData(tenantData);
+    log.info("Preparing to send ASSIGN_ENQUIRY_NOTIFICATION email to consultant: ",
+        receiverConsultant.getId());
     assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
     assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
     assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
