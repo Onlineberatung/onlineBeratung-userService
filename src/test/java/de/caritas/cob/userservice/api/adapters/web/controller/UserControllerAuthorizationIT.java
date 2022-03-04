@@ -99,6 +99,7 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
@@ -1608,6 +1609,49 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isOk());
   }
 
+  @Test
+  public void banUserFromChat_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
+      throws Exception {
+    mvc.perform(
+        post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), aPositiveLong())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.USER_ADMIN,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS, AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.STOP_CHAT, AuthorityValue.START_CHAT,
+      AuthorityValue.USER_DEFAULT, AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION, AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY}
+  )
+  public void banUserFromChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoUpdateChatAuthority()
+      throws Exception {
+    mvc.perform(
+        post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), aPositiveLong())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banUserFromChat_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
+    mvc.perform(
+        post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), aPositiveLong())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
+  }
+
   /**
    * PUT on /users/chat/{chatId}/update
    */
@@ -2310,11 +2354,8 @@ public class UserControllerAuthorizationIT {
   @Test
   public void deleteSessionAndInactiveUser_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
       throws Exception {
-    var sessionId = Math.abs(easyRandom.nextLong());
-    var path = "/users/sessions/" + sessionId;
-
     mvc.perform(
-        delete(path)
+        delete("/users/sessions/" + aPositiveLong())
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
     ).andExpect(status().isUnauthorized());
@@ -2326,11 +2367,8 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void deleteSessionAndInactiveUser_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
       throws Exception {
-    var sessionId = Math.abs(easyRandom.nextLong());
-    var path = "/users/sessions/" + sessionId;
-
     mvc.perform(
-        delete(path)
+        delete("/users/sessions/" + aPositiveLong())
     ).andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(identityClient);
@@ -2348,11 +2386,8 @@ public class UserControllerAuthorizationIT {
   )
   public void deactivateAndFlagUserAccountForDeletion_Should_ReturnForbidden_WhenNoConsultantAuthority()
       throws Exception {
-    var sessionId = Math.abs(easyRandom.nextLong());
-    var path = "/users/sessions/" + sessionId;
-
     mvc.perform(
-        delete(path)
+        delete("/users/sessions/" + aPositiveLong())
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
     ).andExpect(status().isForbidden());
@@ -2364,7 +2399,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void deactivateAndFlagUserAccountForDeletion_Should_ReturnSessionNotFound_WhenProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
-    var sessionId = Math.abs(easyRandom.nextLong());
+    var sessionId = aPositiveLong();
     var path = "/users/sessions/" + sessionId;
 
     mvc.perform(
@@ -2596,6 +2631,10 @@ public class UserControllerAuthorizationIT {
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
 
     return consultant;
+  }
+
+  private long aPositiveLong() {
+    return Math.abs(easyRandom.nextLong());
   }
 
   private EmailDTO givenAValidEmailDTO() {

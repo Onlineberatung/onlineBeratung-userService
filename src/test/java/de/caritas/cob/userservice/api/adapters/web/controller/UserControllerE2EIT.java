@@ -45,6 +45,7 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
@@ -54,6 +55,7 @@ import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
@@ -137,6 +139,9 @@ public class UserControllerE2EIT {
   private SessionRepository sessionRepository;
 
   @Autowired
+  private ChatRepository chatRepository;
+
+  @Autowired
   private de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi consultingTypeControllerApi;
 
   @MockBean
@@ -185,6 +190,8 @@ public class UserControllerE2EIT {
 
   private UserDTO userDTO;
 
+  private Chat chat;
+
   @AfterEach
   public void reset() {
     user = null;
@@ -204,6 +211,7 @@ public class UserControllerE2EIT {
     email = null;
     patchUserDTO = null;
     userDTO = null;
+    chat = null;
   }
 
   @Test
@@ -820,6 +828,74 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banFromChatShouldReturnBadRequestIfUserIdHasInvalidFormat() throws Exception {
+    var invalidUserId = RandomStringUtils.randomAlphabetic(16);
+
+    mockMvc.perform(
+            post("/users/{userId}/chat/{chatId}/ban", invalidUserId, aPositiveLong())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banFromChatShouldReturnBadRequestIfChatIdHasInvalidFormat() throws Exception {
+    var invalidChatId = RandomStringUtils.randomAlphabetic(16);
+
+    mockMvc.perform(
+            post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), invalidChatId)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banFromChatShouldReturnNotFoundIfUserDoesNotExist() throws Exception {
+    givenAValidConsultant();
+    givenAValidChat(consultant);
+
+    mockMvc.perform(
+            post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banFromChatShouldReturnNotFoundIfChatDoesNotExist() throws Exception {
+    givenAValidUser();
+
+    mockMvc.perform(
+            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), aPositiveLong())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banFromChatShouldReturnNoContentIfBanWentWell() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant();
+    givenAValidChat(consultant);
+
+    mockMvc.perform(
+            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant();
@@ -1379,8 +1455,12 @@ public class UserControllerE2EIT {
     userDTO.setTermsAccepted("true");
     userDTO.setConsultingType("1");
     userDTO.setConsultantId(null);
-    userDTO.setAgencyId(Math.abs(easyRandom.nextLong()));
+    userDTO.setAgencyId(aPositiveLong());
     userDTO.setEmail(givenAValidEmail());
+  }
+
+  private long aPositiveLong() {
+    return Math.abs(easyRandom.nextLong());
   }
 
   private void givenKeycloakIsDown() {
@@ -1671,6 +1751,16 @@ public class UserControllerE2EIT {
     when(authenticatedUser.getUsername()).thenReturn(user.getUsername());
     when(authenticatedUser.getRoles()).thenReturn(Set.of(Authority.USER.name()));
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
+  }
+
+  private void givenAValidChat(Consultant consultant) {
+    chat = easyRandom.nextObject(Chat.class);
+    chat.setId(null);
+    chat.setChatOwner(consultant);
+    chat.setConsultingTypeId(easyRandom.nextInt(128));
+    chat.setDuration(easyRandom.nextInt(32768));
+    chat.setMaxParticipants(easyRandom.nextInt(128));
+    chatRepository.save(chat);
   }
 
   private void givenConsultingTypeServiceResponse() {

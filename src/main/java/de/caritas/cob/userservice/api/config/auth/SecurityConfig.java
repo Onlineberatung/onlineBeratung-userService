@@ -41,6 +41,8 @@ import org.springframework.security.web.csrf.CsrfFilter;
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
+  private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
+
   @SuppressWarnings({"unused", "FieldCanBeLocal"})
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
   private final CsrfSecurityProperties csrfSecurityProperties;
@@ -72,7 +74,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris())
         .permitAll()
         .antMatchers("/users/askers/new", "/conversations/askers/anonymous/new",
-            "/users/consultants/{consultantId:\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b}",
+            "/users/consultants/{consultantId:" + UUID_PATTERN + "}",
             "/users/consultants/languages"
         )
         .permitAll()
@@ -120,7 +122,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(START_CHAT)
         .antMatchers("/users/chat/{chatId:[0-9]+}/stop")
         .hasAuthority(STOP_CHAT)
-        .antMatchers("/users/chat/{chatId:[0-9]+}/update")
+        .antMatchers(
+            "/users/chat/{chatId:[0-9]+}/update",
+            "/users/{userId:" + UUID_PATTERN + "}/chat/{chatId:[0-9]+}/ban"
+        )
         .hasAuthority(UPDATE_CHAT)
         .antMatchers("/useradmin", "/useradmin/**")
         .hasAuthority(USER_ADMIN)

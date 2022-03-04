@@ -63,9 +63,11 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -87,6 +89,7 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.InternalServerErrorException;
@@ -152,6 +155,8 @@ public class UserController implements UsersApi {
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantDataProvider consultantDataProvider;
   private final @NonNull AskerDataProvider askerDataProvider;
+  private final @NotNull UserRepository userRepository;
+  private final @NonNull ChatRepository chatRepository;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -796,6 +801,18 @@ public class UserController implements UsersApi {
     var updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
         authenticatedUser);
     return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> banFromChat(UUID userId, Long chatId) {
+    userRepository.findByUserIdAndDeleteDateIsNull(userId.toString()).orElseThrow(() ->
+        new NotFoundException(String.format("User (%s) not found", userId))
+    );
+    chatRepository.findById(chatId).orElseThrow(() ->
+        new NotFoundException(String.format("Chat (%s) not found", chatId))
+    );
+
+    return ResponseEntity.noContent().build();
   }
 
   /**

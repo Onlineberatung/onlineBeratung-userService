@@ -193,6 +193,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryField
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.model.Chat;
@@ -200,6 +201,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -445,6 +447,12 @@ public class UserControllerIT {
   private ConsultantDataProvider consultantDataProvider;
   @MockBean
   private AskerDataProvider askerDataProvider;
+  @MockBean
+  @SuppressWarnings("unused")
+  private UserRepository userRepository;
+  @MockBean
+  @SuppressWarnings("unused")
+  private ChatRepository chatRepository;
 
   @Mock
   private Logger logger;
