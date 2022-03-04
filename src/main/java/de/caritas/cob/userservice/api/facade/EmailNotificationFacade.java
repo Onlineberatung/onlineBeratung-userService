@@ -18,7 +18,7 @@ import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
-import de.caritas.cob.userservice.api.service.emailsupplier.TenantDataSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -64,7 +64,7 @@ public class EmailNotificationFacade {
   private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
   private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
-  private final @NonNull TenantDataSupplier tenantDataSupplier;
+  private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
 
@@ -72,7 +72,7 @@ public class EmailNotificationFacade {
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
    * written.
    *
-   * @param session           the regarding session
+   * @param session the regarding session
    * @param requestServerName
    */
   @Async
@@ -131,7 +131,7 @@ public class EmailNotificationFacade {
           .consultantService(consultantService)
           .applicationBaseUrl(applicationBaseUrl)
           .emailDummySuffix(emailDummySuffix)
-          .tenantDataSupplier(tenantDataSupplier)
+          .tenantTemplateSupplier(tenantTemplateSupplier)
           .multiTenancyEnabled(multiTenancyEnabled)
           .build();
       sendMailTasksToMailService(newMessageMails);

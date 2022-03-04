@@ -48,7 +48,7 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
 
-  private final TenantDataSupplier tenantDataSupplier;
+  private final TenantTemplateSupplier tenantTemplateSupplier;
 
 
   /**
@@ -99,7 +99,7 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
     if (!multiTenancyEnabled) {
       templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
     } else {
-      templateAttributes.addAll(tenantDataSupplier.getTemplateAttributes());
+      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
     }
 
     return new MailDTO()

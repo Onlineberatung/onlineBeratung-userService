@@ -24,17 +24,19 @@ public class TenantContext {
   }
 
   public static void setCurrentTenant(Long tenantId) {
-    if (CURRENT_TENANT_DATA.get() == null) {
-      CURRENT_TENANT_DATA.set(new TenantData());
-    }
+    initializeCurrentTenantDataIfNotExist();
     CURRENT_TENANT_DATA.get().setTenantId(tenantId);
   }
 
   public static void setCurrentSubdomain(String subdomain) {
+    initializeCurrentTenantDataIfNotExist();
+    CURRENT_TENANT_DATA.get().setSubdomain(subdomain);
+  }
+
+  private static void initializeCurrentTenantDataIfNotExist() {
     if (CURRENT_TENANT_DATA.get() == null) {
       CURRENT_TENANT_DATA.set(new TenantData());
     }
-    CURRENT_TENANT_DATA.get().setSubdomain(subdomain);
   }
 
   public static void clear() {

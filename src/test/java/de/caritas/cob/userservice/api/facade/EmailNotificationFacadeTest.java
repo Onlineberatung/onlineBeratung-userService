@@ -62,7 +62,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
-import de.caritas.cob.userservice.api.service.emailsupplier.TenantDataSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -237,7 +237,7 @@ public class EmailNotificationFacadeTest {
   KeycloakAdminClientService keycloakAdminClientService;
 
   @Mock
-  TenantDataSupplier tenantDataSupplier;
+  TenantTemplateSupplier tenantTemplateSupplier;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {

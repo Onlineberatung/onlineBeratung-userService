@@ -80,7 +80,7 @@ public class NewMessageEmailSupplierTest {
   private Logger logger;
 
   @Mock
-  private TenantDataSupplier tenantDataSupplier;
+  private TenantTemplateSupplier tenantTemplateSupplier;
 
   @Before
   public void setup() {
@@ -255,10 +255,8 @@ public class NewMessageEmailSupplierTest {
 
   @Test
   public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiverMultiTenancy() {
-    var tenantData = new TenantData();
-    tenantData.setTenantId(1L);
-    tenantData.setSubdomain("subdomain");
-    TenantContext.setCurrentTenantData(tenantData);
+    // given
+    givenCurrentTenantDataIsSet();
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Consultant consultant = mock(Consultant.class);
     when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
@@ -267,12 +265,15 @@ public class NewMessageEmailSupplierTest {
     when(session.getUser()).thenReturn(USER);
     var mockedTemplateAtt = new ArrayList<TemplateDataDTO>();
     mockedTemplateAtt.add(new TemplateDataDTO());
-    when(tenantDataSupplier.getTemplateAttributes()).thenReturn(mockedTemplateAtt);
-
+    when(tenantTemplateSupplier.getTemplateAttributes()).thenReturn(mockedTemplateAtt);
     ReflectionTestUtils.setField(newMessageEmailSupplier, "multiTenancyEnabled", true);
-    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantDataSupplier", tenantDataSupplier);
+    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantDataSupplier",
+        tenantTemplateSupplier);
+
+    //when
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
+    // then
     assertThat(generatedMails, hasSize(1));
     assertThat(generatedMails.get(0).getTemplateData(), hasSize(3));
     TenantContext.clear();
@@ -289,6 +290,13 @@ public class NewMessageEmailSupplierTest {
         .thenReturn(Optional.empty());
 
     this.newMessageEmailSupplier.generateEmails();
+  }
+
+  private void givenCurrentTenantDataIsSet() {
+    var tenantData = new TenantData();
+    tenantData.setTenantId(1L);
+    tenantData.setSubdomain("subdomain");
+    TenantContext.setCurrentTenantData(tenantData);
   }
 
 

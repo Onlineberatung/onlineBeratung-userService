@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class TenantDataSupplier {
+public class TenantTemplateSupplier {
 
   private final TenantControllerApi tenantControllerApi;
 
@@ -29,9 +29,26 @@ public class TenantDataSupplier {
         .getRestrictedTenantDataBySubdomain(subdomain);
 
     List<TemplateDataDTO> templateAttributes = new ArrayList<>();
-    templateAttributes.add(new TemplateDataDTO().key("tenant_name").value(tenantData.getName()));
-    templateAttributes
-        .add(new TemplateDataDTO().key("tenant_claim").value(tenantData.getContent().getClaim()));
+    templateAttributes.add(getTenantName(tenantData));
+    templateAttributes.add(getTenantClaim(tenantData));
+    String tenantBaseUrl = getTenantBaseUrl(subdomain);
+    templateAttributes.add(new TemplateDataDTO().key("url").value(tenantBaseUrl));
+    templateAttributes.add(getTenantImpressumUrl(tenantBaseUrl));
+    templateAttributes.add(getTanantDatenschutzUrl(tenantBaseUrl));
+
+    return templateAttributes;
+  }
+
+  private TemplateDataDTO getTenantImpressumUrl(String tenantUrl) {
+    return new TemplateDataDTO().key("tenant_urlimpressum").value(tenantUrl + "/impressum");
+  }
+
+  private TemplateDataDTO getTanantDatenschutzUrl(String tenantUrl) {
+    return new TemplateDataDTO().key("tenant_urldatenschutz").value(tenantUrl + "/datenschutz");
+  }
+
+  private String getTenantBaseUrl(
+      String subdomain) {
     String hostName = "";
     try {
       hostName = new URI(applicationBaseUrl).getHost();
@@ -39,15 +56,15 @@ public class TenantDataSupplier {
       log.error("Application base url not valid");
     }
 
-    var tenantUrl = "https://" + subdomain + "." + hostName;
+    return "https://" + subdomain + "." + hostName;
+  }
 
-    templateAttributes.add(new TemplateDataDTO().key("url").value(tenantUrl));
-    templateAttributes
-        .add(new TemplateDataDTO().key("tenant_urlimpressum").value(tenantUrl + "/impressum"));
-    templateAttributes
-        .add(new TemplateDataDTO().key("tenant_urldatenschutz").value(tenantUrl + "/datenschutz"));
+  private TemplateDataDTO getTenantClaim(RestrictedTenantDTO tenantData) {
+    return new TemplateDataDTO().key("tenant_claim").value(tenantData.getContent().getClaim());
+  }
 
-    return templateAttributes;
+  private TemplateDataDTO getTenantName(RestrictedTenantDTO tenantData) {
+    return new TemplateDataDTO().key("tenant_name").value(tenantData.getName());
   }
 
 }

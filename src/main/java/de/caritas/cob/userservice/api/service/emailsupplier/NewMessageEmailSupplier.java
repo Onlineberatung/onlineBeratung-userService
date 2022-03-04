@@ -49,7 +49,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private final String applicationBaseUrl;
   private final String emailDummySuffix;
   private boolean multiTenancyEnabled;
-  private final TenantDataSupplier tenantDataSupplier;
+  private final TenantTemplateSupplier tenantTemplateSupplier;
 
   /**
    * Generates new message notification mails sent to regarding consultants when a user has written
@@ -209,7 +209,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     if (!multiTenancyEnabled) {
       templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
     } else {
-      templateAttributes.addAll(tenantDataSupplier.getTemplateAttributes());
+      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
     }
 
     return new MailDTO()

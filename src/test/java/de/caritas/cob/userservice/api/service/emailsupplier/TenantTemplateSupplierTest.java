@@ -19,10 +19,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TenantDataSupplierTest {
+public class TenantTemplateSupplierTest {
 
   @InjectMocks
-  TenantDataSupplier tenantDataSupplier;
+  TenantTemplateSupplier tenantTemplateSupplier;
 
   @Mock
   TenantControllerApi tenantControllerApi;
@@ -31,16 +31,21 @@ public class TenantDataSupplierTest {
 
   @Test
   public void test_Provide_Tenant_Specific_Data_For_Email_Templates() {
+    //given
     var tenantData = new TenantData();
     tenantData.setTenantId(1L);
     tenantData.setSubdomain("subdomain");
     TenantContext.setCurrentTenantData(tenantData);
     ReflectionTestUtils
-        .setField(tenantDataSupplier, "applicationBaseUrl", "https://onlineberatung.net");
+        .setField(tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
     RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
+
+    //when
     when(tenantControllerApi.getRestrictedTenantDataBySubdomain(tenantData.getSubdomain()))
         .thenReturn(mockedTenantData);
-    List<TemplateDataDTO> templateAttributes = tenantDataSupplier.getTemplateAttributes();
+    List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
+
+    //then
     assertThat(templateAttributes.get(0).getKey(), is("tenant_name"));
     assertThat(templateAttributes.get(0).getValue(), is(mockedTenantData.getName()));
 
