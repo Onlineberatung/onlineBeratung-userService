@@ -61,16 +61,16 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.port.in.AccountManaging;
-import de.caritas.cob.userservice.api.port.in.IdentityManaging;
-import de.caritas.cob.userservice.api.port.out.ChatRepository;
-import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.in.Messaging;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -81,6 +81,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
+import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
@@ -148,6 +149,7 @@ public class UserController implements UsersApi {
   private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull IdentityManaging identityManager;
   private final @NonNull AccountManaging accountManager;
+  private final @NonNull Messaging messenger;
   private final @NotNull ActionsRegistry actionsRegistry;
   private final @NonNull ConsultantDtoMapper consultantDtoMapper;
   private final @NonNull UserDtoMapper userDtoMapper;
@@ -804,7 +806,7 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> banFromChat(UUID userId, Long chatId) {
+  public ResponseEntity<Void> banFromChat(String rcToken, UUID userId, Long chatId) {
     userRepository.findByUserIdAndDeleteDateIsNull(userId.toString()).orElseThrow(() ->
         new NotFoundException(String.format("User (%s) not found", userId))
     );
@@ -812,7 +814,12 @@ public class UserController implements UsersApi {
         new NotFoundException(String.format("Chat (%s) not found", chatId))
     );
 
-    return ResponseEntity.noContent().build();
+    var consultantId = authenticatedUser.getUserId();
+    if (messenger.banUserFromChat(consultantId, userId.toString(), chatId)) {
+      return ResponseEntity.noContent().build();
+    }
+
+    throw new NotFoundException(String.format("User (%s) not found in Chat (%s)", userId, chatId));
   }
 
   /**

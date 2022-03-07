@@ -1616,6 +1616,7 @@ public class UserControllerAuthorizationIT {
         post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), aPositiveLong())
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
+            .header("rcToken", RandomStringUtils.randomAlphabetic(8))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isUnauthorized());
@@ -1637,6 +1638,7 @@ public class UserControllerAuthorizationIT {
         post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), aPositiveLong())
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
+            .header("rcToken", RandomStringUtils.randomAlphabetic(8))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isForbidden());
@@ -1648,6 +1650,7 @@ public class UserControllerAuthorizationIT {
     mvc.perform(
         post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), aPositiveLong())
             .contentType(MediaType.APPLICATION_JSON)
+            .header("rcToken", RandomStringUtils.randomAlphabetic(8))
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isForbidden());
   }

@@ -193,6 +193,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryField
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
@@ -433,6 +434,9 @@ public class UserControllerIT {
   @MockBean
   @SuppressWarnings("unused")
   private AccountManaging accountManager;
+  @MockBean
+  @SuppressWarnings("unused")
+  private Messaging messenger;
   @MockBean
   private ConsultantUpdateService consultantUpdateService;
   @SpyBean

@@ -1069,6 +1069,11 @@ paths:
         [Authorization: Role: consultant with authority UPDATE_CHAT]'
       operationId: banFromChat
       parameters:
+        - name: rcToken
+          in: header
+          required: true
+          schema:
+            type: string
         - name: userId
           in: path
           required: true

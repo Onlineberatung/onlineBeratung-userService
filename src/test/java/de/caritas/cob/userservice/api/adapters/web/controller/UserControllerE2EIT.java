@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
@@ -159,6 +160,10 @@ public class UserControllerE2EIT {
   private RestTemplate keycloakRestTemplate;
 
   @MockBean
+  @Qualifier("rocketChatRestTemplate")
+  private RestTemplate rocketChatRestTemplate;
+
+  @MockBean
   private Keycloak keycloak;
 
   @Captor
@@ -211,7 +216,10 @@ public class UserControllerE2EIT {
     email = null;
     patchUserDTO = null;
     userDTO = null;
-    chat = null;
+    if (nonNull(chat)) {
+      chatRepository.deleteById(chat.getId());
+      chat = null;
+    }
   }
 
   @Test
@@ -829,28 +837,45 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnBadRequestIfUserIdHasInvalidFormat() throws Exception {
+  public void banFromChatShouldReturnClientErrorIfUserIdHasInvalidFormat() throws Exception {
     var invalidUserId = RandomStringUtils.randomAlphabetic(16);
 
     mockMvc.perform(
             post("/users/{userId}/chat/{chatId}/ban", invalidUserId, aPositiveLong())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnBadRequestIfChatIdHasInvalidFormat() throws Exception {
+  public void banFromChatShouldReturnClientErrorIfChatIdHasInvalidFormat() throws Exception {
     var invalidChatId = RandomStringUtils.randomAlphabetic(16);
 
     mockMvc.perform(
             post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), invalidChatId)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banFromChatShouldReturnBadRequestIfRcTokenIsNotGiven() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant();
+    givenAValidChat(consultant);
+
+    mockMvc.perform(
+            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -863,6 +888,7 @@ public class UserControllerE2EIT {
             post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
@@ -876,6 +902,7 @@ public class UserControllerE2EIT {
             post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), aPositiveLong())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
@@ -886,13 +913,42 @@ public class UserControllerE2EIT {
     givenAValidUser();
     givenAValidConsultant();
     givenAValidChat(consultant);
+    givenAValidRocketChatMuteUserInRoomResponse();
 
     mockMvc.perform(
             post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
+
+    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
+    verify(rocketChatRestTemplate).postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
+    );
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
+  public void banFromChatShouldReturnNotFoundIfRocketChatReturnsAnInvalidResponse() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant();
+    givenAValidChat(consultant);
+    givenAnInvalidRocketChatMuteUserInRoomResponse();
+
+    mockMvc.perform(
+            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
+    verify(rocketChatRestTemplate).postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
+    );
   }
 
   @Test
@@ -1685,6 +1741,30 @@ public class UserControllerE2EIT {
     when(keycloakRestTemplate.exchange(
         endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(OtpInfoDTO.class)
     )).thenReturn(ResponseEntity.ok(otpInfo));
+  }
+
+  private void givenAValidRocketChatMuteUserInRoomResponse() {
+    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
+    var messageResponse = easyRandom.nextObject(MessageResponse.class);
+    messageResponse.setSuccess(true);
+
+    when(rocketChatRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
+    )).thenReturn(ResponseEntity.ok(messageResponse));
+  }
+
+  private void givenAnInvalidRocketChatMuteUserInRoomResponse() {
+    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
+    var messageResponse = easyRandom.nextObject(MessageResponse.class);
+    messageResponse.setSuccess(true); // according to Rocket.Chat
+    var message = RandomStringUtils.randomAlphanumeric(8)
+        + "error-user-not-in-room"
+        + RandomStringUtils.randomAlphanumeric(8);
+    messageResponse.setMessage(message);
+
+    when(rocketChatRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
+    )).thenReturn(ResponseEntity.ok().body(messageResponse));
   }
 
   private void givenAValidEmailDTO() {
