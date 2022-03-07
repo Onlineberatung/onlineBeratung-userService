@@ -804,14 +804,13 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> banFromChat(String rcToken, UUID userId, Long chatId) {
     if (!accountManager.existsAdviceSeeker(userId.toString())) {
-      throw new NotFoundException(String.format("User (%s) not found", userId));
+      throw new NotFoundException("User (%s) not found", userId.toString());
     }
     if (!messenger.existsChat(chatId)) {
-      throw new NotFoundException(String.format("Chat (%s) not found", chatId));
+      throw new NotFoundException("Chat (%s) not found", chatId);
     }
     if (!messenger.banUserFromChat(authenticatedUser.getUserId(), userId.toString(), chatId)) {
-      throw new NotFoundException(
-          String.format("User (%s) not found in Chat (%s)", userId, chatId));
+      throw new NotFoundException("User (%s) not found in Chat (%s)", userId.toString(), chatId);
     }
 
     return ResponseEntity.noContent().build();
