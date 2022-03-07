@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.Licensing;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
-import java.time.LocalDateTime;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,11 +23,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
+@TestPropertySource(properties = "multitenancy.enabled=true")
+@Transactional
 public class ConsultantCreatorServiceTenantAwareIT {
 
   @Autowired
@@ -46,25 +48,23 @@ public class ConsultantCreatorServiceTenantAwareIT {
   public void createNewConsultant_Should_throwCustomValidationHttpStatusException_When_LicensesAreExceeded() {
     //given
     givenTenantApiCall();
-    ReflectionTestUtils.setField(consultantCreatorService, "multiTenancyEnabled", true);
-    givenDatabaseState_2_Consultants_Exist();
+    createConsultant("username1");
+    createConsultant("username2");
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     this.consultantCreatorService.createNewConsultant(createConsultantDTO);
     rollbackDBState();
   }
 
-  private void givenDatabaseState_2_Consultants_Exist() {
-    Iterable<Consultant> all = consultantRepository.findAll();
-    for (Consultant c : all) {
-      c.setDeleteDate(LocalDateTime.now());
-    }
-    var iterator = all.iterator();
-    Consultant next1 = iterator.next();
-    Consultant next2 = iterator.next();
-
-    next1.setDeleteDate(null);
-    next2.setDeleteDate(null);
-    consultantRepository.saveAll(all);
+  private void createConsultant(String username) {
+    Consultant consultant = new Consultant();
+    consultant.setTenantId(1L);
+    consultant.setId(username);
+    consultant.setRocketChatId(username);
+    consultant.setUsername(username);
+    consultant.setFirstName(username);
+    consultant.setLastName(username);
+    consultant.setEmail(username + "@email.com");
+    consultantRepository.save(consultant);
   }
 
   private void rollbackDBState() {
@@ -77,7 +77,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
   }
 
   private void givenTenantApiCall() {
-    var currentTenant = new TenantData(11L, "testdomain");
+    var currentTenant = new TenantData(1L, "testdomain");
     TenantContext.setCurrentTenantData(currentTenant);
     var dummyTenant = new TenantDTO();
     var licensing = new Licensing();
