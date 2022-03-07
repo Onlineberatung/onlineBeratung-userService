@@ -68,9 +68,7 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.in.Messaging;
-import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -157,8 +155,6 @@ public class UserController implements UsersApi {
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantDataProvider consultantDataProvider;
   private final @NonNull AskerDataProvider askerDataProvider;
-  private final @NotNull UserRepository userRepository;
-  private final @NonNull ChatRepository chatRepository;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -807,19 +803,18 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> banFromChat(String rcToken, UUID userId, Long chatId) {
-    userRepository.findByUserIdAndDeleteDateIsNull(userId.toString()).orElseThrow(() ->
-        new NotFoundException(String.format("User (%s) not found", userId))
-    );
-    chatRepository.findById(chatId).orElseThrow(() ->
-        new NotFoundException(String.format("Chat (%s) not found", chatId))
-    );
-
-    var consultantId = authenticatedUser.getUserId();
-    if (messenger.banUserFromChat(consultantId, userId.toString(), chatId)) {
-      return ResponseEntity.noContent().build();
+    if (!accountManager.existsAdviceSeeker(userId.toString())) {
+      throw new NotFoundException(String.format("User (%s) not found", userId));
+    }
+    if (!messenger.existsChat(chatId)) {
+      throw new NotFoundException(String.format("Chat (%s) not found", chatId));
+    }
+    if (!messenger.banUserFromChat(authenticatedUser.getUserId(), userId.toString(), chatId)) {
+      throw new NotFoundException(
+          String.format("User (%s) not found in Chat (%s)", userId, chatId));
     }
 
-    throw new NotFoundException(String.format("User (%s) not found in Chat (%s)", userId, chatId));
+    return ResponseEntity.noContent().build();
   }
 
   /**

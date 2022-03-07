@@ -1,10 +1,12 @@
 package de.caritas.cob.userservice.api;
 
+import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,5 +31,15 @@ public class Messenger implements Messaging {
     return messageClient.muteUserInRoom(
         consultant.getRocketChatId(), adviceSeeker.getUsername(), chat.getGroupId()
     );
+  }
+
+  @Override
+  public boolean existsChat(long chatId) {
+    return findChat(chatId).isPresent();
+  }
+
+  @Override
+  public Optional<Chat> findChat(long chatId) {
+    return chatRepository.findById(chatId);
   }
 }
