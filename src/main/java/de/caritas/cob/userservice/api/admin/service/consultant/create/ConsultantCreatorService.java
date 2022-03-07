@@ -4,9 +4,11 @@ import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
@@ -16,9 +18,11 @@ import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
+import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,7 @@ public class ConsultantCreatorService {
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
+  private final @NonNull TenantControllerApi tenantControllerApi;
 
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
@@ -50,6 +55,7 @@ public class ConsultantCreatorService {
    * @return the generated {@link Consultant}
    */
   public Consultant createNewConsultant(CreateConsultantDTO createConsultantDTO) {
+    assertLicensesNotExceeded();
     this.userAccountInputValidator.validateAbsence(
         new CreateConsultantDTOAbsenceInputAdapter(createConsultantDTO));
     ConsultantCreationInput consultantCreationInput =
@@ -147,5 +153,18 @@ public class ConsultantCreatorService {
     userDto.setTenantId(tenantId);
     return userDto;
   }
+
+  private void assertLicensesNotExceeded() {
+    if (multiTenancyEnabled) {
+      TenantDTO tenantById = tenantControllerApi.getTenantById(TenantContext.getCurrentTenant());
+      long numberOfActiveConsultants = consultantService.getNumberOfActiveConsultants();
+      Integer allowedNumberOfUsers = tenantById.getLicensing().getAllowedNumberOfUsers();
+      if (numberOfActiveConsultants >= allowedNumberOfUsers) {
+        throw new CustomValidationHttpStatusException(
+            HttpStatusExceptionReason.NUMBER_OF_LICENSES_EXCEEDED);
+      }
+    }
+  }
+
 
 }
