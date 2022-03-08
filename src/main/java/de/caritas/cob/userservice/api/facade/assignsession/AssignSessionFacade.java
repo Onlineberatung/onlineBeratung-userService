@@ -121,7 +121,7 @@ public class AssignSessionFacade {
   private void sendEmailForConsultantChange(Session session, Consultant consultant) {
     if (!authenticatedUser.getUserId().equals(consultant.getId())) {
       emailNotificationFacade.sendAssignEnquiryEmailNotification(consultant,
-          authenticatedUser.getUserId(), session.getUser().getUsername(), TenantContext.getCurrentTenant());
+          authenticatedUser.getUserId(), session.getUser().getUsername(), TenantContext.getCurrentTenantData());
     }
   }
 

@@ -427,7 +427,7 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewMessageNotification(newMessageNotificationDTO.getRcGroupId(),
-        authenticatedUser.getRoles(), authenticatedUser.getUserId(), TenantContext.getCurrentTenant());
+        authenticatedUser.getRoles(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -445,7 +445,7 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(
-        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId());
+        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
@@ -13,24 +12,44 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**
  * Supplier to provide mails to be sent when an enquiry is assigned.
  */
 @Service
-@Data
+@RequiredArgsConstructor
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AssignEnquiryEmailSupplier implements EmailSupplier {
 
+  @Setter
   private Consultant receiverConsultant;
+
+  @Setter
   private String senderUserId;
+
+  @Setter
   private String askerUserName;
+
+  @Value("${app.base.url}")
   private String applicationBaseUrl;
-  private ConsultantService consultantService;
+
+  private final ConsultantService consultantService;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
+
+  private final TenantTemplateSupplier tenantTemplateSupplier;
+
 
   /**
    * Generates the enquiry notification mail sent to regarding consultant.
@@ -72,14 +91,21 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForAssignEnquiryNotification(String email, String nameSender,
       String nameRecipient, String nameUser) {
+    var templateAttributes = new ArrayList<TemplateDataDTO>();
+    templateAttributes.add(new TemplateDataDTO().key("name_sender").value(nameSender));
+    templateAttributes.add(new TemplateDataDTO().key("name_recipient").value(nameRecipient));
+    templateAttributes.add(new TemplateDataDTO().key("name_user").value(nameUser));
+
+    if (!multiTenancyEnabled) {
+      templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+    } else {
+      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
+    }
+
     return new MailDTO()
         .template(TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION)
         .email(email)
-        .templateData(asList(
-            new TemplateDataDTO().key("name_sender").value(nameSender),
-            new TemplateDataDTO().key("name_recipient").value(nameRecipient),
-            new TemplateDataDTO().key("name_user").value(nameUser),
-            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
+        .templateData(templateAttributes);
   }
 
 }

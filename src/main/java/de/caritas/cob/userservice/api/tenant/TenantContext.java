@@ -9,18 +9,37 @@ public class TenantContext {
 
   }
 
-  private static final ThreadLocal<Long> CURRENT_TENANT = new ThreadLocal<>();
-
+  private static final ThreadLocal<TenantData> CURRENT_TENANT_DATA = new ThreadLocal<>();
 
   public static Long getCurrentTenant() {
-    return CURRENT_TENANT.get();
+    return CURRENT_TENANT_DATA.get() != null ? CURRENT_TENANT_DATA.get().getTenantId() : null;
   }
 
-  public static void setCurrentTenant(Long tenant) {
-    CURRENT_TENANT.set(tenant);
+  public static TenantData getCurrentTenantData() {
+    return CURRENT_TENANT_DATA.get();
+  }
+
+  public static void setCurrentTenantData(TenantData tenantData) {
+    CURRENT_TENANT_DATA.set(tenantData);
+  }
+
+  public static void setCurrentTenant(Long tenantId) {
+    initializeCurrentTenantDataIfNotExist();
+    CURRENT_TENANT_DATA.get().setTenantId(tenantId);
+  }
+
+  public static void setCurrentSubdomain(String subdomain) {
+    initializeCurrentTenantDataIfNotExist();
+    CURRENT_TENANT_DATA.get().setSubdomain(subdomain);
+  }
+
+  private static void initializeCurrentTenantDataIfNotExist() {
+    if (CURRENT_TENANT_DATA.get() == null) {
+      CURRENT_TENANT_DATA.set(new TenantData());
+    }
   }
 
   public static void clear() {
-    CURRENT_TENANT.remove();
+    CURRENT_TENANT_DATA.remove();
   }
 }
