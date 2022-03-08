@@ -267,7 +267,7 @@ public class NewMessageEmailSupplierTest {
     mockedTemplateAtt.add(new TemplateDataDTO());
     when(tenantTemplateSupplier.getTemplateAttributes()).thenReturn(mockedTemplateAtt);
     ReflectionTestUtils.setField(newMessageEmailSupplier, "multiTenancyEnabled", true);
-    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantDataSupplier",
+    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantTemplateSupplier",
         tenantTemplateSupplier);
 
     //when

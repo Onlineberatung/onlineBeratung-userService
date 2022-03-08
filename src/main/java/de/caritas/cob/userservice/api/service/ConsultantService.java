@@ -150,6 +150,10 @@ public class ConsultantService {
     }
   }
 
+  public long getNumberOfActiveConsultants() {
+    return consultantRepository.countByDeleteDateIsNull();
+  }
+
   private void addConsultantToken(Consultant consultant, String mobileToken) {
     verifyTokenDoesNotAlreadyExist(mobileToken);
     var consultantMobileToken = new ConsultantMobileToken();
