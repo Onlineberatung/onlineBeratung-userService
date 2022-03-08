@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER;
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT;
 import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
@@ -138,13 +137,18 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewMessageNotificationConsultant(String email, String name,
       String postCode) {
+    var templateAttributes = new ArrayList<TemplateDataDTO>();
+    templateAttributes.add(new TemplateDataDTO().key("name").value(name));
+    templateAttributes.add(new TemplateDataDTO().key("plz").value(postCode));
+    if (!multiTenancyEnabled) {
+      templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+    } else {
+      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
+    }
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT)
         .email(email)
-        .templateData(asList(
-            new TemplateDataDTO().key("name").value(name),
-            new TemplateDataDTO().key("plz").value(postCode),
-            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
+        .templateData(templateAttributes);
   }
 
   private List<MailDTO> buildMailForAsker() {
