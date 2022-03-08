@@ -48,6 +48,11 @@ public class AccountManager implements AccountManaging {
     return userRepository.findByUserIdAndDeleteDateIsNull(id);
   }
 
+  @Override
+  public Optional<User> findAdviceSeekerByChatUserId(String chatUserId) {
+    return userRepository.findByRcUserIdAndDeleteDateIsNull(chatUserId);
+  }
+
   private Map<String, Object> patchAdviceSeeker(User adviceSeeker, Map<String, Object> patchMap) {
     if (patchMap.containsKey("email")) {
       adviceSeeker.setEmail((String) patchMap.get("email"));

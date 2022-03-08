@@ -1061,7 +1061,7 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/{userId}/chat/{chatId}/ban:
+  /users/{chatUserId}/chat/{chatId}/ban:
     post:
       tags:
         - user-controller
@@ -1069,17 +1069,19 @@ paths:
         [Authorization: Role: consultant with authority UPDATE_CHAT]'
       operationId: banFromChat
       parameters:
-        - name: rcToken
+        - name: chatConsultantToken
           in: header
           required: true
           schema:
             type: string
-        - name: userId
+        - name: chatUserId
           in: path
           required: true
+          example: Dd2WYSdFXP4No7bW6
           schema:
             type: string
-            format: uuid
+            minLength: 17
+            maxLength: 17
         - name: chatId
           in: path
           required: true

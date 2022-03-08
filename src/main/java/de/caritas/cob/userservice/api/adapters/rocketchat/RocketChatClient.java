@@ -24,7 +24,7 @@ public class RocketChatClient {
 
   public HttpHeaders httpHeaders(String userId) {
     var httpHeaders = new HttpHeaders();
-    httpHeaders.add("X-Auth-Token", httpServletRequest.getHeader("rcToken"));
+    httpHeaders.add("X-Auth-Token", httpServletRequest.getHeader("chatConsultantToken"));
     httpHeaders.add("X-User-Id", userId);
 
     return httpHeaders;

@@ -841,10 +841,10 @@ public class UserControllerE2EIT {
     var invalidUserId = RandomStringUtils.randomAlphabetic(16);
 
     mockMvc.perform(
-            post("/users/{userId}/chat/{chatId}/ban", invalidUserId, aPositiveLong())
+            post("/users/{chatUserId}/chat/{chatId}/ban", invalidUserId, aPositiveLong())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .header("chatConsultantToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
@@ -852,26 +852,27 @@ public class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
   public void banFromChatShouldReturnClientErrorIfChatIdHasInvalidFormat() throws Exception {
+    givenAValidUser();
     var invalidChatId = RandomStringUtils.randomAlphabetic(16);
 
     mockMvc.perform(
-            post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), invalidChatId)
+            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), invalidChatId)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .header("chatConsultantToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnBadRequestIfRcTokenIsNotGiven() throws Exception {
+  public void banFromChatShouldReturnBadRequestIfChatConsultantTokenIsNotGiven() throws Exception {
     givenAValidUser();
     givenAValidConsultant();
     givenAValidChat(consultant);
 
     mockMvc.perform(
-            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), chat.getId())
+            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
@@ -881,14 +882,15 @@ public class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
   public void banFromChatShouldReturnNotFoundIfUserDoesNotExist() throws Exception {
+    var nonExistingUserId = RandomStringUtils.randomAlphanumeric(17);
     givenAValidConsultant();
     givenAValidChat(consultant);
 
     mockMvc.perform(
-            post("/users/{userId}/chat/{chatId}/ban", UUID.randomUUID(), chat.getId())
+            post("/users/{chatUserId}/chat/{chatId}/ban", nonExistingUserId, chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .header("chatConsultantToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
@@ -899,10 +901,10 @@ public class UserControllerE2EIT {
     givenAValidUser();
 
     mockMvc.perform(
-            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), aPositiveLong())
+            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), aPositiveLong())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .header("chatConsultantToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
@@ -916,10 +918,10 @@ public class UserControllerE2EIT {
     givenAValidRocketChatMuteUserInRoomResponse();
 
     mockMvc.perform(
-            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), chat.getId())
+            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .header("chatConsultantToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
@@ -931,17 +933,18 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnNotFoundIfRocketChatReturnsAnInvalidResponse() throws Exception {
+  public void banFromChatShouldReturnNotFoundIfRocketChatReturnsAnInvalidResponse()
+      throws Exception {
     givenAValidUser();
     givenAValidConsultant();
     givenAValidChat(consultant);
     givenAnInvalidRocketChatMuteUserInRoomResponse();
 
     mockMvc.perform(
-            post("/users/{userId}/chat/{chatId}/ban", user.getUserId(), chat.getId())
+            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .header("chatConsultantToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
 
@@ -1885,8 +1888,8 @@ public class UserControllerE2EIT {
         .findByAgencyIdAndDeleteDateIsNull(agencyId)
         .forEach(consultantAgency -> {
           var consultant = consultantAgency.getConsultant();
-          var language1 = new Language(consultant, easyRandom.nextObject(LanguageCode.class));
-          var language2 = new Language(consultant, easyRandom.nextObject(LanguageCode.class));
+          var language1 = new Language(consultant, aLanguageCode());
+          var language2 = new Language(consultant, aLanguageCode());
           allLanguages.add(mapLanguageCode(language1));
           allLanguages.add(mapLanguageCode(language2));
           var languages = Set.of(language1, language2);
@@ -1897,6 +1900,14 @@ public class UserControllerE2EIT {
         });
 
     return agencyId;
+  }
+
+  private LanguageCode aLanguageCode() {
+    LanguageCode languageCode = null;
+    while (isNull(languageCode) || languageCode.equals(LanguageCode.undefined)) {
+      languageCode = easyRandom.nextObject(LanguageCode.class);
+    }
+    return languageCode;
   }
 
   private de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode mapLanguageCode(

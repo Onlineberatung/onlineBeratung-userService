@@ -88,7 +88,6 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.InternalServerErrorException;
@@ -802,15 +801,18 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> banFromChat(String rcToken, UUID userId, Long chatId) {
-    if (!accountManager.existsAdviceSeeker(userId.toString())) {
-      throw new NotFoundException("User (%s) not found", userId.toString());
-    }
+  public ResponseEntity<Void> banFromChat(String token, String chatUserId, Long chatId) {
+    var adviceSeeker = accountManager.findAdviceSeekerByChatUserId(chatUserId).orElseThrow(() -> {
+      throw new NotFoundException("Chat User (%s) not found", chatUserId);
+    });
     if (!messenger.existsChat(chatId)) {
       throw new NotFoundException("Chat (%s) not found", chatId);
     }
-    if (!messenger.banUserFromChat(authenticatedUser.getUserId(), userId.toString(), chatId)) {
-      throw new NotFoundException("User (%s) not found in Chat (%s)", userId.toString(), chatId);
+
+    var consultantId = authenticatedUser.getUserId();
+    var adviceSeekerId = adviceSeeker.getUserId();
+    if (!messenger.banUserFromChat(consultantId, adviceSeekerId, chatId)) {
+      throw new NotFoundException("User (%s) not found in Chat (%s)", adviceSeekerId, chatId);
     }
 
     return ResponseEntity.noContent().build();
