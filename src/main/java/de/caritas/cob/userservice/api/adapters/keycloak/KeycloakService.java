@@ -7,7 +7,6 @@ import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHea
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
