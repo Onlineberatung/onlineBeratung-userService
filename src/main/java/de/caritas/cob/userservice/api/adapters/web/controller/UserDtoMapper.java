@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
@@ -52,5 +53,10 @@ public class UserDtoMapper {
         "id", user.getUserId(),
         "email", email
     );
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<String> bannedChatUserIdsOf(Map<String, Object> chatMetaInfoMap) {
+    return (List<String>) chatMetaInfoMap.get("mutedUsers");
   }
 }

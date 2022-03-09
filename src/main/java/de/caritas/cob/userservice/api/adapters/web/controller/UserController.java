@@ -715,9 +715,15 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link ChatInfoResponseDTO}
    */
   @Override
-  public ResponseEntity<ChatInfoResponseDTO> getChat(@PathVariable Long chatId) {
-
+  public ResponseEntity<ChatInfoResponseDTO> getChat(Long chatId, String rcToken) {
     var response = getChatFacade.getChat(chatId);
+
+    if (nonNull(rcToken)) {
+      messenger.findChatMetaInfo(chatId, authenticatedUser.getUserId()).ifPresent(chatMetaInfoMap -> {
+        var bannedChatUserIds = userDtoMapper.bannedChatUserIdsOf(chatMetaInfoMap);
+        response.setBannedUsers(bannedChatUserIds);
+      });
+    }
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
