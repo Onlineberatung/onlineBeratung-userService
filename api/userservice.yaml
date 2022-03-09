@@ -1069,7 +1069,7 @@ paths:
         [Authorization: Role: consultant with authority UPDATE_CHAT]'
       operationId: banFromChat
       parameters:
-        - name: chatConsultantToken
+        - name: rcToken
           in: header
           required: true
           schema:
@@ -1181,6 +1181,11 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: rcToken
+          in: header
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: OK - successful operation
@@ -2271,6 +2276,11 @@ components:
         active:
           type: boolean
           example: false
+        bannedUsers:
+          type: array
+          description: chat user IDs
+          items:
+            type: string
 
     ChatMembersResponseDTO:
       type: object

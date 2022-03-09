@@ -5,7 +5,10 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MessageResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,8 @@ import org.springframework.web.client.HttpClientErrorException;
 public class RocketChatAdapterService implements MessageClient {
 
   private static final String ENDPOINT_MUTE_USER = "/method.call/muteUserInRoom";
+
+  private static final String ENDPOINT_ROOM_INFO = "/rooms.info?roomId=";
 
   private final RocketChatClient rocketChatClient;
 
@@ -36,6 +41,19 @@ public class RocketChatAdapterService implements MessageClient {
     } catch (HttpClientErrorException exception) {
       log.error("Muting failed.", exception);
       return false;
+    }
+  }
+
+  @Override
+  public Optional<Map<String, Object>> getChatInfo(String roomId, String userId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_INFO + roomId);
+
+    try {
+      var response = rocketChatClient.getForEntity(url, userId, RoomResponse.class);
+      return mapper.mapOf(response);
+    } catch (HttpClientErrorException exception) {
+      log.error("Chat Info failed.", exception);
+      return Optional.empty();
     }
   }
 
