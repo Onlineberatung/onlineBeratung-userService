@@ -1,5 +1,6 @@
-package de.caritas.cob.userservice.api.adapters.keycloak.config;
+package de.caritas.cob.userservice.api.adapters.keycloak;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakConfig;
 import lombok.NonNull;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
