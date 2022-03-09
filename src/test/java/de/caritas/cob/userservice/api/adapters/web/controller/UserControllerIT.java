@@ -140,13 +140,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.ApiResponseEntityExceptionHandler;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.ApiResponseEntityExceptionHandler;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -175,31 +191,16 @@ import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
-import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.port.in.AccountManaging;
-import de.caritas.cob.userservice.api.port.in.IdentityManaging;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.in.Messaging;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -431,6 +432,9 @@ public class UserControllerIT {
   @MockBean
   @SuppressWarnings("unused")
   private AccountManaging accountManager;
+  @MockBean
+  @SuppressWarnings("unused")
+  private Messaging messenger;
   @MockBean
   private ConsultantUpdateService consultantUpdateService;
   @SpyBean

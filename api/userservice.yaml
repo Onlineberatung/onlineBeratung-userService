@@ -1061,6 +1061,49 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/{chatUserId}/chat/{chatId}/ban:
+    post:
+      tags:
+        - user-controller
+      summary: 'Ban a user from a group chat 
+        [Authorization: Role: consultant with authority UPDATE_CHAT]'
+      operationId: banFromChat
+      parameters:
+        - name: chatConsultantToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: chatUserId
+          in: path
+          required: true
+          example: Dd2WYSdFXP4No7bW6
+          schema:
+            type: string
+            minLength: 17
+            maxLength: 17
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - No permission to ban
+        404:
+          description: NOT FOUND - User or chat not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered an unexpected condition
+      security:
+        - Bearer: [ ]
   /users/chat/{chatId}/start:
     put:
       tags:

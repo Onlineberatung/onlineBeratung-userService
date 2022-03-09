@@ -61,14 +61,14 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.port.in.AccountManaging;
-import de.caritas.cob.userservice.api.port.in.IdentityManaging;
-import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.in.Messaging;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -79,6 +79,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
+import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
@@ -145,6 +146,7 @@ public class UserController implements UsersApi {
   private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull IdentityManaging identityManager;
   private final @NonNull AccountManaging accountManager;
+  private final @NonNull Messaging messenger;
   private final @NotNull ActionsRegistry actionsRegistry;
   private final @NonNull ConsultantDtoMapper consultantDtoMapper;
   private final @NonNull UserDtoMapper userDtoMapper;
@@ -796,6 +798,24 @@ public class UserController implements UsersApi {
     var updateChatResponseDTO = chatService.updateChat(chatId, chatDTO,
         authenticatedUser);
     return new ResponseEntity<>(updateChatResponseDTO, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> banFromChat(String token, String chatUserId, Long chatId) {
+    var adviceSeeker = accountManager.findAdviceSeekerByChatUserId(chatUserId).orElseThrow(() -> {
+      throw new NotFoundException("Chat User (%s) not found", chatUserId);
+    });
+    if (!messenger.existsChat(chatId)) {
+      throw new NotFoundException("Chat (%s) not found", chatId);
+    }
+
+    var consultantId = authenticatedUser.getUserId();
+    var adviceSeekerId = adviceSeeker.getUserId();
+    if (!messenger.banUserFromChat(consultantId, adviceSeekerId, chatId)) {
+      throw new NotFoundException("User (%s) not found in Chat (%s)", adviceSeekerId, chatId);
+    }
+
+    return ResponseEntity.noContent().build();
   }
 
   /**
