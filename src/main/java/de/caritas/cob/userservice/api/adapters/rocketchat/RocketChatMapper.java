@@ -40,7 +40,7 @@ public class RocketChatMapper {
     );
 
     var message = new Message();
-    message.setParams(params);
+    message.setParams(List.of(params));
     message.setId(new Random().nextInt(100));
     message.setMsg("method");
     var methodName = mute ? "muteUserInRoom" : "unmuteUserInRoom";

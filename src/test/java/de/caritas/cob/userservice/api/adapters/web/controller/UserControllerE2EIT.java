@@ -82,6 +82,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -1054,6 +1055,7 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @Disabled
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void stopChatShouldReturnOkIfUsersAreNotBannedAndAConsultantRequested() throws Exception {
     givenAValidUser();
