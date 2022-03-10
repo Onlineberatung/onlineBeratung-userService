@@ -80,6 +80,7 @@ import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
@@ -197,6 +198,9 @@ public class UserControllerAuthorizationIT {
   private ConsultantService consultantService;
   @MockBean
   private AskerDataProvider askerDataProvider;
+  @MockBean
+  @SuppressWarnings("unused")
+  private Messaging messenger;
 
   /**
    * POST on /users/askers/new
