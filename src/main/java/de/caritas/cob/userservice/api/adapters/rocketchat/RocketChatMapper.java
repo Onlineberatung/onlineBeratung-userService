@@ -36,7 +36,7 @@ public class RocketChatMapper {
   private MuteUnmuteUser muteOrUnmuteUserOf(String username, String roomId, boolean mute) {
     var params = Map.of(
         "rid", roomId,
-        "username", username
+        "username", username.toLowerCase()
     );
 
     var message = new Message();
