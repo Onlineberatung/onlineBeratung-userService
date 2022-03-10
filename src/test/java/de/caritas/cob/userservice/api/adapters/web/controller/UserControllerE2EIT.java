@@ -1054,6 +1054,31 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void stopChatShouldReturnOkIfUsersAreNotBannedAndAConsultantRequested() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant(true);
+    givenAValidChat(consultant);
+    givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
+
+    mockMvc.perform(
+            put("/users/chat/{chatId}/stop", chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("groupId", is(chat.getGroupId())))
+        .andExpect(jsonPath("bannedUsers", is(empty())));
+
+    var urlSuffix = "/api/v1/rooms.info?roomId=" + chat.getGroupId();
+    verify(rocketChatRestTemplate).exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
+    );
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);

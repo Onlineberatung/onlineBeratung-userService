@@ -13,4 +13,6 @@ public interface Messaging {
   Optional<Chat> findChat(long id);
 
   Optional<Map<String, Object>> findChatMetaInfo(long chatId, String userId);
+
+  void unbanUsersInChat(Long chatId, String id);
 }

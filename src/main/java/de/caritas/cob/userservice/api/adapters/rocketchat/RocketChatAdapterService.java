@@ -22,6 +22,8 @@ public class RocketChatAdapterService implements MessageClient {
 
   private static final String ENDPOINT_MUTE_USER = "/method.call/muteUserInRoom";
 
+  private static final String ENDPOINT_UNMUTE_USER = "/method.call/unmuteUserInRoom";
+
   private static final String ENDPOINT_ROOM_INFO = "/rooms.info?roomId=";
 
   private final RocketChatClient rocketChatClient;
@@ -31,7 +33,7 @@ public class RocketChatAdapterService implements MessageClient {
   private final RocketChatMapper mapper;
 
   @Override
-  public boolean muteUserInRoom(String ownerId, String username, String roomId) {
+  public boolean muteUserInChat(String ownerId, String username, String roomId) {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_MUTE_USER);
     var muteUser = mapper.muteUserOf(username, roomId);
 
@@ -40,6 +42,22 @@ public class RocketChatAdapterService implements MessageClient {
       return userWasInRoom(response) && response.getStatusCode().is2xxSuccessful();
     } catch (HttpClientErrorException exception) {
       log.error("Muting failed.", exception);
+      return false;
+    }
+  }
+
+  @Override
+  public boolean unmuteUserInChat(String ownerId, String username, String roomId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_UNMUTE_USER);
+    var unmuteUser = mapper.unmuteUserOf(username, roomId);
+
+    try {
+      var response = rocketChatClient.postForEntity(
+          url, ownerId, unmuteUser, MessageResponse.class
+      );
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Un-muting failed.", exception);
       return false;
     }
   }

@@ -1150,6 +1150,11 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: rcToken
+          in: header
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: OK - successful operation
