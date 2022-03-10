@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat;
 
 import javax.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
+@Slf4j
 public class RocketChatClient {
 
   private final RestTemplate restTemplate;
@@ -35,7 +37,11 @@ public class RocketChatClient {
       Class<T> responseType) {
     var entity = new HttpEntity<>(request, httpHeaders(userId));
 
-    return restTemplate.postForEntity(url, entity, responseType);
+    log.info("body: {}, header: {} ", entity.getBody(), entity.getHeaders());
+    var responseEntity = restTemplate.postForEntity(url, entity, responseType);
+    log.info("response: {}", responseEntity.getBody());
+
+    return responseEntity;
   }
 
   public <T> ResponseEntity<T> getForEntity(String url, String userId, Class<T> responseType) {
