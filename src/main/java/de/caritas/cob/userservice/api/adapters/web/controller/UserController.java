@@ -751,7 +751,7 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> stopChat(@PathVariable Long chatId) {
+  public ResponseEntity<Void> stopChat(Long chatId, String rcToken) {
 
     var chat = chatService.getChat(chatId)
         .orElseThrow(() -> new BadRequestException(

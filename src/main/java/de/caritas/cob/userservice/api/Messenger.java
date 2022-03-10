@@ -47,8 +47,8 @@ public class Messenger implements Messaging {
       var chat = chatRepository.findById(chatId).orElseThrow();
 
       chatUserIds.forEach(chatUserId -> {
-          var username = getUsername(chatUserId);
-          messageClient.unmuteUserInChat(consultant.getRocketChatId(), username, chat.getGroupId());
+        var username = getUsername(chatUserId);
+        messageClient.unmuteUserInChat(consultant.getRocketChatId(), username, chat.getGroupId());
       });
     });
   }
