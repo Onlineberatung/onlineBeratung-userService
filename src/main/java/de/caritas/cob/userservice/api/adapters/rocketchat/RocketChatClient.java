@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat;
 
+import static java.util.Objects.isNull;
+
+import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,16 +22,31 @@ public class RocketChatClient {
 
   private final HttpServletRequest httpServletRequest;
 
+  private final RocketChatCredentialsProvider rcCredentialHelper;
+
   public RocketChatClient(@Qualifier("rocketChatRestTemplate") final RestTemplate restTemplate,
-      final HttpServletRequest httpServletRequest) {
+      final HttpServletRequest httpServletRequest,
+      final RocketChatCredentialsProvider rocketChatCredentialsProvider) {
     this.restTemplate = restTemplate;
     this.httpServletRequest = httpServletRequest;
+    this.rcCredentialHelper = rocketChatCredentialsProvider;
+  }
+
+  public HttpHeaders httpHeaders() {
+    return httpHeaders(null);
   }
 
   public HttpHeaders httpHeaders(String userId) {
     var httpHeaders = new HttpHeaders();
-    httpHeaders.add("X-Auth-Token", httpServletRequest.getHeader("rcToken"));
-    httpHeaders.add("X-User-Id", userId);
+
+    if (isNull(userId)) {
+      var systemUser = rcCredentialHelper.getSystemUserSneaky();
+      httpHeaders.add("X-Auth-Token", systemUser.getRocketChatToken());
+      httpHeaders.add("X-User-Id", systemUser.getRocketChatUserId());
+    } else {
+      httpHeaders.add("X-Auth-Token", httpServletRequest.getHeader("rcToken"));
+      httpHeaders.add("X-User-Id", userId);
+    }
 
     return httpHeaders;
   }

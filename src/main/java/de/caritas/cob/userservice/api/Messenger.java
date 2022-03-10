@@ -30,25 +30,20 @@ public class Messenger implements Messaging {
   @Override
   public boolean banUserFromChat(String consultantId, String adviceSeekerId, long chatId) {
     var adviceSeeker = userRepository.findByUserIdAndDeleteDateIsNull(adviceSeekerId).orElseThrow();
-    var consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId).orElseThrow();
     var chat = chatRepository.findById(chatId).orElseThrow();
 
-    return messageClient.muteUserInChat(
-        consultant.getRocketChatId(), adviceSeeker.getUsername(), chat.getGroupId()
-    );
+    return messageClient.muteUserInChat(adviceSeeker.getUsername(), chat.getGroupId());
   }
 
   @Override
   public void unbanUsersInChat(Long chatId, String consultantId) {
-    var consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId).orElseThrow();
-
     findChatMetaInfo(chatId, consultantId).ifPresent(chatMetaInfoMap -> {
       var chatUserIds = mapper.bannedChatUserIdsOfMap(chatMetaInfoMap);
       var chat = chatRepository.findById(chatId).orElseThrow();
 
       chatUserIds.forEach(chatUserId -> {
         var username = getUsername(chatUserId);
-        messageClient.unmuteUserInChat(consultant.getRocketChatId(), username, chat.getGroupId());
+        messageClient.unmuteUserInChat(username, chat.getGroupId());
       });
     });
   }

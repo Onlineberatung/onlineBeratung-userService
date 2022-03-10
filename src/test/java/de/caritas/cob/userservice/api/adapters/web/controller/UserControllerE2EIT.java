@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
@@ -919,6 +920,7 @@ public class UserControllerE2EIT {
     givenAValidUser();
     givenAValidConsultant(true);
     givenAValidChat(consultant);
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatMuteUserInRoomResponse();
 
     mockMvc.perform(
@@ -942,6 +944,7 @@ public class UserControllerE2EIT {
     givenAValidUser();
     givenAValidConsultant(true);
     givenAValidChat(consultant);
+    givenAValidRocketChatSystemUser();
     givenAnInvalidRocketChatMuteUserInRoomResponse();
 
     mockMvc.perform(
@@ -2101,6 +2104,10 @@ public class UserControllerE2EIT {
         easyRandom.nextObject(de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.class)
     );
     updateConsultantDTO.languages(languages);
+  }
+
+  private void givenAValidRocketChatSystemUser() {
+    when(rocketChatCredentialsProvider.getSystemUserSneaky()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
   }
 
   private void givenValidRocketChatInfoResponse() throws RocketChatUserNotInitializedException {
