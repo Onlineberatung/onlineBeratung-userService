@@ -967,13 +967,13 @@ public class UserControllerE2EIT {
     givenAValidUser(true);
     givenAValidConsultant();
     givenAValidChat(consultant);
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
 
     mockMvc.perform(
             get("/users/chat/{chatId}", chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("groupId", is(chat.getGroupId())))
@@ -991,13 +991,13 @@ public class UserControllerE2EIT {
     givenAValidUser(true);
     givenAValidConsultant();
     givenAValidChat(consultant);
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
     mockMvc.perform(
             get("/users/chat/{chatId}", chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("groupId", is(chat.getGroupId())))
@@ -1015,13 +1015,13 @@ public class UserControllerE2EIT {
     givenAValidUser();
     givenAValidConsultant(true);
     givenAValidChat(consultant);
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
 
     mockMvc.perform(
             get("/users/chat/{chatId}", chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("groupId", is(chat.getGroupId())))
@@ -1039,13 +1039,13 @@ public class UserControllerE2EIT {
     givenAValidUser();
     givenAValidConsultant(true);
     givenAValidChat(consultant);
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
     mockMvc.perform(
             get("/users/chat/{chatId}", chat.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("groupId", is(chat.getGroupId())))
