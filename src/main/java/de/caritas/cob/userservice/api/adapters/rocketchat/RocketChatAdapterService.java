@@ -38,7 +38,7 @@ public class RocketChatAdapterService implements MessageClient {
     var muteUser = mapper.muteUserOf(username, roomId);
 
     try {
-      var response = rocketChatClient.postForEntity(url, null, muteUser, MessageResponse.class);
+      var response = rocketChatClient.postForEntity(url, muteUser, MessageResponse.class);
       return userWasInRoom(response) && response.getStatusCode().is2xxSuccessful();
     } catch (HttpClientErrorException exception) {
       log.error("Muting failed.", exception);
@@ -52,7 +52,7 @@ public class RocketChatAdapterService implements MessageClient {
     var unmuteUser = mapper.unmuteUserOf(username, roomId);
 
     try {
-      var response = rocketChatClient.postForEntity(url, null, unmuteUser, MessageResponse.class);
+      var response = rocketChatClient.postForEntity(url, unmuteUser, MessageResponse.class);
       return response.getStatusCode().is2xxSuccessful();
     } catch (HttpClientErrorException exception) {
       log.error("Un-muting failed.", exception);
@@ -65,7 +65,7 @@ public class RocketChatAdapterService implements MessageClient {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_INFO + roomId);
 
     try {
-      var response = rocketChatClient.getForEntity(url, null, RoomResponse.class);
+      var response = rocketChatClient.getForEntity(url, RoomResponse.class);
       return mapper.mapOf(response);
     } catch (HttpClientErrorException exception) {
       log.error("Chat Info failed.", exception);

@@ -10,13 +10,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
 @Slf4j
 public class RocketChatClient {
+
+  private static final String HEADER_AUTH_TOKEN = "X-Auth-Token";
+  private static final String HEADER_USER_ID = "X-User-Id";
 
   private final RestTemplate restTemplate;
 
@@ -32,39 +34,39 @@ public class RocketChatClient {
     this.rcCredentialHelper = rocketChatCredentialsProvider;
   }
 
-  public HttpHeaders httpHeaders() {
-    return httpHeaders(null);
+  public <T> ResponseEntity<T> postForEntity(String url, Object request, Class<T> responseType) {
+    return postForEntity(url, null, request, responseType);
   }
 
-  public HttpHeaders httpHeaders(String userId) {
-    var httpHeaders = new HttpHeaders();
-
-    if (isNull(userId)) {
-      var systemUser = rcCredentialHelper.getSystemUserSneaky();
-      httpHeaders.add("X-Auth-Token", systemUser.getRocketChatToken());
-      httpHeaders.add("X-User-Id", systemUser.getRocketChatUserId());
-    } else {
-      httpHeaders.add("X-Auth-Token", httpServletRequest.getHeader("rcToken"));
-      httpHeaders.add("X-User-Id", userId);
-    }
-
-    return httpHeaders;
-  }
-
-  public <T> ResponseEntity<T> postForEntity(String url, String userId, @Nullable Object request,
+  public <T> ResponseEntity<T> postForEntity(String url, String userId, Object request,
       Class<T> responseType) {
     var entity = new HttpEntity<>(request, httpHeaders(userId));
 
-    log.info("body: {}, header: {} ", entity.getBody(), entity.getHeaders());
-    var responseEntity = restTemplate.postForEntity(url, entity, responseType);
-    log.info("response: {}", responseEntity.getBody());
+    return restTemplate.postForEntity(url, entity, responseType);
+  }
 
-    return responseEntity;
+  public <T> ResponseEntity<T> getForEntity(String url, Class<T> responseType) {
+    return getForEntity(url, null, responseType);
   }
 
   public <T> ResponseEntity<T> getForEntity(String url, String userId, Class<T> responseType) {
     var entity = new HttpEntity<>(httpHeaders(userId));
 
     return restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
+  }
+
+  private HttpHeaders httpHeaders(String userId) {
+    var httpHeaders = new HttpHeaders();
+
+    if (isNull(userId)) {
+      var systemUser = rcCredentialHelper.getSystemUserSneaky();
+      httpHeaders.add(HEADER_AUTH_TOKEN, systemUser.getRocketChatToken());
+      httpHeaders.add(HEADER_USER_ID, systemUser.getRocketChatUserId());
+    } else {
+      httpHeaders.add(HEADER_AUTH_TOKEN, httpServletRequest.getHeader("rcToken"));
+      httpHeaders.add(HEADER_USER_ID, userId);
+    }
+
+    return httpHeaders;
   }
 }
