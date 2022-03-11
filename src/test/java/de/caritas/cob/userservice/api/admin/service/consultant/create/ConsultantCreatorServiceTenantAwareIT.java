@@ -3,23 +3,23 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantData;
-import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.Licensing;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -39,8 +39,8 @@ public class ConsultantCreatorServiceTenantAwareIT {
   @Autowired
   private ConsultantRepository consultantRepository;
 
-  @Mock
-  private TenantControllerApi tenantControllerApi;
+  @MockBean
+  private TenantService tenantService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -84,8 +84,8 @@ public class ConsultantCreatorServiceTenantAwareIT {
     licensing.setAllowedNumberOfUsers(2);
     dummyTenant.setLicensing(licensing);
     ReflectionTestUtils
-        .setField(consultantCreatorService, "tenantControllerApi", tenantControllerApi);
-    when(tenantControllerApi.getTenantById(currentTenant.getTenantId())).thenReturn(dummyTenant);
+        .setField(consultantCreatorService, "tenantService", tenantService);
+    when(tenantService.getTenantById()).thenReturn(dummyTenant);
   }
 
 }
