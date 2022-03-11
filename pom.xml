@@ -26,7 +26,7 @@
 		<java.version>11</java.version>
 		<skip.unit-tests>false</skip.unit-tests>
 		<skip.integration-tests>false</skip.integration-tests>
-		<keycloak.version>13.0.1</keycloak.version>
+		<keycloak.version>17.0.0</keycloak.version>
 		<springfox.version>2.9.2</springfox.version>
 		<powermock.version>2.0.2</powermock.version>
 		<adapters.web.generated.path>
