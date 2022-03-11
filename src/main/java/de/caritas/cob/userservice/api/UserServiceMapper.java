@@ -3,11 +3,12 @@ package de.caritas.cob.userservice.api;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserMapper {
+public class UserServiceMapper {
 
   public Map<String, Object> mapOf(User user) {
     return new HashMap<>() {
@@ -30,5 +31,10 @@ public class UserMapper {
         put("encourage2fa", consultant.getEncourage2fa());
       }
     };
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<String> bannedChatUserIdsOfMap(Map<String, Object> chatMetaInfoMap) {
+    return (List<String>) chatMetaInfoMap.get("mutedUsers");
   }
 }

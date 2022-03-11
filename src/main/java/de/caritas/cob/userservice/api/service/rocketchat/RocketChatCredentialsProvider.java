@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -112,6 +113,11 @@ public class RocketChatCredentialsProvider {
    */
   public RocketChatCredentials getSystemUser() throws RocketChatUserNotInitializedException {
     return observeNonNullOrLatestUser(this.systemUserA, this.systemUserB);
+  }
+
+  @SneakyThrows
+  public RocketChatCredentials getSystemUserSneaky() {
+    return getSystemUser();
   }
 
   /**

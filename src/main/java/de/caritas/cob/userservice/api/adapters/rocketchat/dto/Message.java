@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat.dto;
 
+import java.util.List;
 import java.util.Map;
 import lombok.Data;
 
@@ -12,5 +13,5 @@ public class Message {
 
   private String method;
 
-  private Map<String, String> params;
+  private List<Map<String, String>> params;
 }

@@ -21,7 +21,7 @@ public class AccountManager implements AccountManaging {
 
   private final UserRepository userRepository;
 
-  private final UserMapper userMapper;
+  private final UserServiceMapper userServiceMapper;
 
   @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
@@ -62,7 +62,7 @@ public class AccountManager implements AccountManaging {
     }
     var savedAdviceSeeker = userRepository.save(adviceSeeker);
 
-    return userMapper.mapOf(savedAdviceSeeker);
+    return userServiceMapper.mapOf(savedAdviceSeeker);
   }
 
   private Map<String, Object> patchConsultant(Consultant consultant, Map<String, Object> patchMap) {
@@ -80,6 +80,6 @@ public class AccountManager implements AccountManaging {
     }
     var savedConsultant = consultantRepository.save(consultant);
 
-    return userMapper.mapOf(savedConsultant);
+    return userServiceMapper.mapOf(savedConsultant);
   }
 }

@@ -6,7 +6,7 @@ import static java.util.Objects.nonNull;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.Message;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MuteUser;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MuteUnmuteUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
 import java.util.List;
 import java.util.Map;
@@ -25,27 +25,36 @@ public class RocketChatMapper {
 
   private final ObjectMapper mapper;
 
-  public MuteUser muteUserOf(@NonNull String username, @NonNull String roomId) {
+  public MuteUnmuteUser muteUserOf(@NonNull String username, @NonNull String roomId) {
+    return muteOrUnmuteUserOf(username, roomId, true);
+  }
+
+  public MuteUnmuteUser unmuteUserOf(@NonNull String username, @NonNull String roomId) {
+    return muteOrUnmuteUserOf(username, roomId, false);
+  }
+
+  private MuteUnmuteUser muteOrUnmuteUserOf(String username, String roomId, boolean mute) {
     var params = Map.of(
         "rid", roomId,
-        "username", username
+        "username", username.toLowerCase()
     );
 
     var message = new Message();
-    message.setParams(params);
+    message.setParams(List.of(params));
     message.setId(new Random().nextInt(100));
     message.setMsg("method");
-    message.setMethod("muteUserInRoom");
+    var methodName = mute ? "muteUserInRoom" : "unmuteUserInRoom";
+    message.setMethod(methodName);
 
-    var muteUser = new MuteUser();
+    var muteUnmuteUser = new MuteUnmuteUser();
     try {
       var messageString = mapper.writeValueAsString(message);
-      muteUser.setMessage(messageString);
+      muteUnmuteUser.setMessage(messageString);
     } catch (JsonProcessingException e) {
       log.error("Serializing {} did not work.", message);
     }
 
-    return muteUser;
+    return muteUnmuteUser;
   }
 
   public Optional<Map<String, Object>> mapOf(ResponseEntity<RoomResponse> roomResponse) {

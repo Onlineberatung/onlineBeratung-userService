@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +25,27 @@ public class Messenger implements Messaging {
 
   private final ChatRepository chatRepository;
 
+  private final UserServiceMapper mapper;
+
   @Override
   public boolean banUserFromChat(String consultantId, String adviceSeekerId, long chatId) {
     var adviceSeeker = userRepository.findByUserIdAndDeleteDateIsNull(adviceSeekerId).orElseThrow();
-    var consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId).orElseThrow();
     var chat = chatRepository.findById(chatId).orElseThrow();
 
-    return messageClient.muteUserInRoom(
-        consultant.getRocketChatId(), adviceSeeker.getUsername(), chat.getGroupId()
-    );
+    return messageClient.muteUserInChat(adviceSeeker.getUsername(), chat.getGroupId());
+  }
+
+  @Override
+  public void unbanUsersInChat(Long chatId, String consultantId) {
+    findChatMetaInfo(chatId, consultantId).ifPresent(chatMetaInfoMap -> {
+      var chatUserIds = mapper.bannedChatUserIdsOfMap(chatMetaInfoMap);
+      var chat = chatRepository.findById(chatId).orElseThrow();
+
+      chatUserIds.forEach(chatUserId -> {
+        var username = getUsername(chatUserId);
+        messageClient.unmuteUserInChat(username, chat.getGroupId());
+      });
+    });
   }
 
   @Override
@@ -55,7 +66,6 @@ public class Messenger implements Messaging {
     return messageClient.getChatInfo(chat.getGroupId(), chatUserId);
   }
 
-  @NonNull
   private String getChatUserId(String userId) {
     var chatUserId = new AtomicReference<String>();
     userRepository.findByUserIdAndDeleteDateIsNull(userId).ifPresentOrElse(
@@ -67,5 +77,18 @@ public class Messenger implements Messaging {
             }));
 
     return chatUserId.toString();
+  }
+
+  private String getUsername(String chatUserId) {
+    var username = new AtomicReference<String>();
+    userRepository.findByRcUserIdAndDeleteDateIsNull(chatUserId).ifPresentOrElse(
+        user -> username.set(user.getUsername()),
+        () -> consultantRepository.findByRocketChatIdAndDeleteDateIsNull(chatUserId)
+            .ifPresentOrElse(consultant -> username.set(consultant.getUsername()),
+                () -> {
+                  throw new NoSuchElementException();
+                }));
+
+    return username.toString();
   }
 }
