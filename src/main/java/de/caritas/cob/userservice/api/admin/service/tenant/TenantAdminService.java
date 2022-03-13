@@ -2,9 +2,9 @@ package de.caritas.cob.userservice.api.admin.service.tenant;
 
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
-import de.caritas.cob.userservice.tenantservice.generated.ApiClient;
-import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
-import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
+import de.caritas.cob.userservice.tenantadminservice.generated.ApiClient;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.TenantAdminControllerApi;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +16,7 @@ import org.springframework.web.client.RestClientException;
 public class TenantAdminService {
 
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final @NonNull TenantControllerApi tenantControllerApi;
+  private final @NonNull TenantAdminControllerApi tenantControllerApi;
 
   public TenantDTO getTenantById() throws RestClientException {
     addDefaultHeaders(this.tenantControllerApi.getApiClient());

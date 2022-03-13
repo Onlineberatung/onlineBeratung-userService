@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
-import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
+2import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
@@ -22,7 +22,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
-import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
