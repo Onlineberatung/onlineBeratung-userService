@@ -6,7 +6,7 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
-import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
@@ -22,7 +22,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
-import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class ConsultantCreatorService {
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
-  private final @NonNull TenantService tenantService;
+  private final @NonNull TenantAdminService tenantAdminService;
 
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
@@ -156,7 +156,7 @@ public class ConsultantCreatorService {
 
   private void assertLicensesNotExceeded() {
     if (multiTenancyEnabled) {
-      TenantDTO tenantById = tenantService.getTenantById();
+      TenantDTO tenantById = tenantAdminService.getTenantById();
       long numberOfActiveConsultants = consultantService.getNumberOfActiveConsultants();
       Integer allowedNumberOfUsers = tenantById.getLicensing().getAllowedNumberOfUsers();
       if (numberOfActiveConsultants >= allowedNumberOfUsers) {

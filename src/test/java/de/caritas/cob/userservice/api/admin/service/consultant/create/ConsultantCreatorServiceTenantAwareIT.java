@@ -3,15 +3,15 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantData;
-import de.caritas.cob.userservice.tenantservice.generated.web.model.Licensing;
-import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.Licensing;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +40,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
   private ConsultantRepository consultantRepository;
 
   @MockBean
-  private TenantService tenantService;
+  private TenantAdminService tenantAdminService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -84,8 +84,8 @@ public class ConsultantCreatorServiceTenantAwareIT {
     licensing.setAllowedNumberOfUsers(2);
     dummyTenant.setLicensing(licensing);
     ReflectionTestUtils
-        .setField(consultantCreatorService, "tenantService", tenantService);
-    when(tenantService.getTenantById()).thenReturn(dummyTenant);
+        .setField(consultantCreatorService, "tenantAdminService", tenantAdminService);
+    when(tenantAdminService.getTenantById()).thenReturn(dummyTenant);
   }
 
 }
