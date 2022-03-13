@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.tenant;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.filter.SubdomainExtractor;
-import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
 import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +28,7 @@ public class TenantResolver {
   public static final Long TECHNICAL_TENANT_ID = 0L;
   private static final String TENANT_ID = "tenantId";
   private final @NonNull SubdomainExtractor subdomainExtractor;
-  private final @NonNull TenantControllerApi tenantControllerApi;
+  private final @NonNull TenantService tenantService;
 
   public Long resolve(HttpServletRequest request) {
     if (userIsAuthenticated(request)) {
@@ -74,7 +74,7 @@ public class TenantResolver {
   }
 
   private Long getTenantIdBySubdomain(String currentSubdomain) {
-    return tenantControllerApi.getRestrictedTenantDataBySubdomain(currentSubdomain).getId();
+    return tenantService.getRestrictedTenantDataBySubdomain(currentSubdomain).getId();
   }
 
   private Optional<Long> getUserTenantIdAttribute(Map<String, Object> claimMap) {

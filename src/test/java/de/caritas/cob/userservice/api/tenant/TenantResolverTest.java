@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Maps;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.filter.SubdomainExtractor;
 import java.util.HashMap;
 import java.util.Optional;
@@ -28,7 +29,7 @@ class TenantResolverTest {
   SubdomainExtractor subdomainExtractor;
 
   @Mock
-  de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi tenantControllerApi;
+  TenantService tenantService;
 
   @Mock
   HttpServletRequest authenticatedRequest;
@@ -50,7 +51,7 @@ class TenantResolverTest {
     // given
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
-    when(tenantControllerApi.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
+    when(tenantService.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
         new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO().id(1L));
     HashMap<String, Object> claimMap = givenClaimMapContainingTenantId(1);
     when(token.getAccount().getKeycloakSecurityContext().getToken().getOtherClaims())
@@ -86,7 +87,7 @@ class TenantResolverTest {
   void resolve_Should_ResolveTenantId_IfSubdomainCouldBeDetermined() {
     // given
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
-    when(tenantControllerApi.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
+    when(tenantService.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
         new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO().id(1L));
     // when
     Long resolved = tenantResolver.resolve(nonAuthenticatedRequest);

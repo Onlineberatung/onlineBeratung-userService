@@ -1,13 +1,14 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
-import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,14 +19,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class TenantTemplateSupplier {
 
-  private final TenantControllerApi tenantControllerApi;
+  private final @NonNull TenantService tenantService;
 
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
   public List<TemplateDataDTO> getTemplateAttributes() {
     var subdomain = TenantContext.getCurrentTenantData().getSubdomain();
-    RestrictedTenantDTO tenantData = tenantControllerApi
+    RestrictedTenantDTO tenantData = tenantService
         .getRestrictedTenantDataBySubdomain(subdomain);
 
     List<TemplateDataDTO> templateAttributes = new ArrayList<>();

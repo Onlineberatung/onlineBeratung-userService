@@ -4,10 +4,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
-import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
@@ -25,7 +25,7 @@ public class TenantTemplateSupplierTest {
   TenantTemplateSupplier tenantTemplateSupplier;
 
   @Mock
-  TenantControllerApi tenantControllerApi;
+  TenantService tenantService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -41,7 +41,7 @@ public class TenantTemplateSupplierTest {
     RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
 
     //when
-    when(tenantControllerApi.getRestrictedTenantDataBySubdomain(tenantData.getSubdomain()))
+    when(tenantService.getRestrictedTenantDataBySubdomain(tenantData.getSubdomain()))
         .thenReturn(mockedTenantData);
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
