@@ -78,7 +78,7 @@ public class NewEnquiryEmailSupplierTest {
             nowInUtc(), null),
         new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),
             nowInUtc(), null)));
-    when(agencyService.getAgency(any(), any())).thenReturn(AGENCY_DTO_U25);
+    when(agencyService.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
