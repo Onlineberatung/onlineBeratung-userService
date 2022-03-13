@@ -7,12 +7,10 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Extension of the generated UserService API client to adapt the handling of parameter values.
  */
-public class TenantServiceApiClient extends
-    de.caritas.cob.userservice.tenantservice.generated.ApiClient {
+public class TenantAdminServiceApiClient extends
+    de.caritas.cob.userservice.tenantadminservice.generated.ApiClient {
 
-  private static final String FILTER_NAME = "filter";
-
-  public TenantServiceApiClient(RestTemplate restTemplate) {
+  public TenantAdminServiceApiClient(RestTemplate restTemplate) {
     super(restTemplate);
   }
 
