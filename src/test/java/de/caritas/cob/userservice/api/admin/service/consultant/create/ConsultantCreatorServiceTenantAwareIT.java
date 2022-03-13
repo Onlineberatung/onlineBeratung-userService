@@ -84,7 +84,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
     licensing.setAllowedNumberOfUsers(2);
     dummyTenant.setLicensing(licensing);
     ReflectionTestUtils
-        .setField(consultantCreatorService, "tenantService", tenantAdminService);
+        .setField(consultantCreatorService, "tenantAdminService", tenantAdminService);
     when(tenantAdminService.getTenantById()).thenReturn(dummyTenant);
   }
 
