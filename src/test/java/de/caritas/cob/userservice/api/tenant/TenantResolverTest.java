@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.filter.SubdomainExtractor;
 import java.util.HashMap;
 import java.util.Optional;
@@ -30,6 +31,9 @@ class TenantResolverTest {
 
   @Mock
   TenantService tenantService;
+
+  @Mock
+  TenantHeaderSupplier tenantHeaderSupplier;
 
   @Mock
   HttpServletRequest authenticatedRequest;
@@ -106,6 +110,17 @@ class TenantResolverTest {
     // then
     assertThat(resolved).isEqualTo(TECHNICAL_CONTEXT);
   }
+
+  @Test
+  //TODO: complete test
+  void resolve_Should_ResolveTenantId_FromHeader(){
+    // given
+    when(tenantHeaderSupplier.getTenantFromHeader()).thenReturn(Optional.of(2L));
+    Long resolved = tenantResolver.resolve(authenticatedRequest);
+    // then
+    assertThat(resolved).isEqualTo(2L);
+  }
+
 
   private HashMap<String, Object> givenClaimMapContainingTenantId(Integer tenantId) {
     HashMap<String, Object> claimMap = Maps.newHashMap();
