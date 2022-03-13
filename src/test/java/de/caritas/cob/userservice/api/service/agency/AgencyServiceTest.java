@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class AgencyServiceTest {
   AgencyControllerApi agencyControllerApi;
 
   @Mock
-  OriginHeaderSupplier originHeaderSupplier;
+  TenantHeaderSupplier tenantHeaderSupplier;
 
   @Mock
   SecurityHeaderSupplier securityHeaderSupplier;
@@ -56,7 +56,7 @@ class AgencyServiceTest {
     HttpHeaders headers = new HttpHeaders();
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(headers);
 
-    when(originHeaderSupplier.getOriginHeaderValue(ORIGIN_URL)).thenReturn(ORIGIN_URL);
+    when(tenantHeaderSupplier.getOriginHeaderValue(ORIGIN_URL)).thenReturn(ORIGIN_URL);
     when(this.agencyControllerApi.getApiClient()).thenReturn(apiClient);
     var agencyDTOS = Lists.newArrayList(new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);

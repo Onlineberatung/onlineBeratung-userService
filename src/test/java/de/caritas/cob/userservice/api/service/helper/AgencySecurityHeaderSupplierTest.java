@@ -14,14 +14,11 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.lang.model.util.Elements.Origin;
-import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +30,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AgencySecurityHeaderSupplierTest {
@@ -55,7 +51,7 @@ public class AgencySecurityHeaderSupplierTest {
   private List<AgencyResponseDTO> agencyResponseDTOS;
 
   @Mock
-  private OriginHeaderSupplier originHeaderSupplier;
+  private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -91,7 +87,7 @@ public class AgencySecurityHeaderSupplierTest {
       throws NoSuchMethodException, SecurityException {
 
     AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class), mock(OriginHeaderSupplier.class));
+        mock(SecurityHeaderSupplier.class), mock(TenantHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest
         .getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
@@ -118,7 +114,7 @@ public class AgencySecurityHeaderSupplierTest {
       throws NoSuchMethodException, SecurityException {
 
     AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class), mock(OriginHeaderSupplier.class));
+        mock(SecurityHeaderSupplier.class), mock(TenantHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest.getMethod(GET_AGENCY_METHOD_NAME, GET_AGENCY_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);

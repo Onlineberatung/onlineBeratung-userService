@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyCo
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminSearchResultDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +32,7 @@ public class AgencyAdminServiceTest {
   private SecurityHeaderSupplier securityHeaderSupplier;
 
   @Mock
-  private OriginHeaderSupplier originHeaderSupplier;
+  private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Mock
   private ApiClient apiClient;

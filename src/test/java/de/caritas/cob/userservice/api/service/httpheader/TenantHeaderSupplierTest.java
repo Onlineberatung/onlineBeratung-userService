@@ -18,10 +18,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @ExtendWith(MockitoExtension.class)
-class OriginHeaderSupplierTest {
+class TenantHeaderSupplierTest {
 
   @InjectMocks
-  OriginHeaderSupplier originHeaderSupplier;
+  TenantHeaderSupplier tenantHeaderSupplier;
 
   private Enumeration<String> headers;
 
@@ -33,7 +33,7 @@ class OriginHeaderSupplierTest {
 
   @Test
   void getOriginHeaderValue_Should_ReturnPassedRequestServerName() {
-    assertThat(originHeaderSupplier.getOriginHeaderValue("request server name")).isEqualTo("request server name");
+    assertThat(tenantHeaderSupplier.getOriginHeaderValue("request server name")).isEqualTo("request server name");
   }
 
   @Test
@@ -43,7 +43,7 @@ class OriginHeaderSupplierTest {
     when(httpServletRequest.getHeader("host")).thenReturn("host header value");
     givenRequestContextIsSet();
     // when, then
-    assertThat(originHeaderSupplier.getOriginHeaderValue()).isEqualTo("host header value");
+    assertThat(tenantHeaderSupplier.getOriginHeaderValue()).isEqualTo("host header value");
     resetRequestAttributes();
   }
 

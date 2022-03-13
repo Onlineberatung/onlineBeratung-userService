@@ -4,6 +4,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.filter.SubdomainExtractor;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ public class TenantResolver {
   private static final String TENANT_ID = "tenantId";
   private final @NonNull SubdomainExtractor subdomainExtractor;
   private final @NonNull TenantService tenantService;
+  private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
 
   public Long resolve(HttpServletRequest request) {
     if (userIsAuthenticated(request)) {
@@ -39,7 +41,7 @@ public class TenantResolver {
   }
 
   private Long resolveForNonAuthenticatedUser() {
-    Optional<Long> tenantId = resolveTenantFromSubdomain();
+    Optional<Long> tenantId = resolveTenantFromHttpRequest();
     if (tenantId.isEmpty()) {
       throw new AccessDeniedException("Tenant id could not be resolved");
     }
@@ -53,7 +55,7 @@ public class TenantResolver {
 
   private Long resolveForAuthenticatedNonTechnicalUser(HttpServletRequest request) {
     Optional<Long> tenantId = resolveTenantIdFromTokenClaims(request);
-    Optional<Long> tenantIdFromSubdomain = resolveTenantFromSubdomain();
+    Optional<Long> tenantIdFromSubdomain = resolveTenantFromHttpRequest();
     if (tenantId.isPresent() && tenantIdFromSubdomain.isPresent()) {
       if (tenantId.get().equals(tenantIdFromSubdomain.get())) {
         return tenantId.get();
@@ -63,7 +65,13 @@ public class TenantResolver {
     throw new AccessDeniedException("Tenant id could not be resolved");
   }
 
-  private Optional<Long> resolveTenantFromSubdomain() {
+  private Optional<Long> resolveTenantFromHttpRequest() {
+
+    Optional<Long> tenantFromHeader = tenantHeaderSupplier.getTenantFromHeader();
+    if(tenantFromHeader.isPresent()){
+      return tenantFromHeader;
+    }
+
     Optional<String> currentSubdomain = subdomainExtractor.getCurrentSubdomain();
     if (currentSubdomain.isPresent()) {
       TenantContext.setCurrentSubdomain(currentSubdomain.get());

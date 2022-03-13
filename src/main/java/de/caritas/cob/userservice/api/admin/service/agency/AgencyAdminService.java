@@ -6,7 +6,7 @@ import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +24,7 @@ public class AgencyAdminService {
 
   private final @NonNull AdminAgencyControllerApi adminAgencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final @NonNull OriginHeaderSupplier originHeaderSupplier;
+  private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
 
   /**
    * Retrieves all agencies provided by agency service. Important hint: Depending on the amount of
@@ -43,17 +43,8 @@ public class AgencyAdminService {
 
   private void addDefaultHeaders(ApiClient apiClient) {
     HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
-    addOriginHeader(headers);
+    tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
-
-  private void addOriginHeader(HttpHeaders headers) {
-    String originHeaderValue = originHeaderSupplier.getOriginHeaderValue();
-    if (originHeaderValue != null) {
-      headers.add("origin", originHeaderValue);
-    }
-  }
-
-
 
 }

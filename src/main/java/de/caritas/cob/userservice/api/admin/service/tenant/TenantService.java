@@ -8,6 +8,7 @@ import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTe
 import de.caritas.cob.userservice.tenantservice.generated.web.model.TenantDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -19,19 +20,21 @@ public class TenantService {
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantControllerApi tenantControllerApi;
 
+  @Cacheable
   public TenantDTO getTenantById() throws RestClientException {
     addDefaultHeaders(this.tenantControllerApi.getApiClient());
     return this.tenantControllerApi.getTenantById(
         TenantContext.getCurrentTenant());
   }
 
+  @Cacheable
+  public RestrictedTenantDTO getRestrictedTenantDataBySubdomain(String subdomain) {
+    return tenantControllerApi.getRestrictedTenantDataBySubdomainWithHttpInfo(subdomain).getBody();
+  }
+
   private void addDefaultHeaders(ApiClient apiClient) {
     HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
-  }
-
-  public RestrictedTenantDTO getRestrictedTenantDataBySubdomain(String subdomain) {
-    return tenantControllerApi.getRestrictedTenantDataBySubdomainWithHttpInfo(subdomain).getBody();
   }
 
 }

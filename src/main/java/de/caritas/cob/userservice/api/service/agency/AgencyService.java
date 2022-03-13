@@ -10,8 +10,8 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.config.CacheManagerConfig;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,7 +30,7 @@ public class AgencyService {
 
   private final @NonNull AgencyControllerApi agencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final @NonNull OriginHeaderSupplier originHeaderSupplier;
+  private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
 
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
@@ -121,15 +120,8 @@ public class AgencyService {
 
   private void addDefaultHeaders(ApiClient apiClient, String requestServerName) {
     var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
-    addOriginHeader(headers, requestServerName);
+    tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
-  }
-
-  private void addOriginHeader(HttpHeaders headers, String requestServerName) {
-    String originHeaderValue = originHeaderSupplier.getOriginHeaderValue(requestServerName);
-    if (originHeaderValue != null) {
-      headers.add("origin", originHeaderValue);
-    }
   }
 
   private AgencyDTO fromOriginalAgency(AgencyResponseDTO agencyResponseDTO) {
