@@ -61,7 +61,7 @@ class AgencyServiceTest {
     var agencyDTOS = Lists.newArrayList(new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);
     // when
-    this.agencyService.getAgency(1L, ORIGIN_URL);
+    this.agencyService.getAgency(1L);
 
     // then
     assertThat(headers.get("tenantId").get(0)).isEqualTo(Optional.of(1L));
