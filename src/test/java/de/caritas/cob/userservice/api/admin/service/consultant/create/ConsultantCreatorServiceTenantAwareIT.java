@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
@@ -40,7 +40,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
   private ConsultantRepository consultantRepository;
 
   @MockBean
-  private TenantService tenantService;
+  private TenantAdminService tenantAdminService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -84,8 +84,8 @@ public class ConsultantCreatorServiceTenantAwareIT {
     licensing.setAllowedNumberOfUsers(2);
     dummyTenant.setLicensing(licensing);
     ReflectionTestUtils
-        .setField(consultantCreatorService, "tenantService", tenantService);
-    when(tenantService.getTenantById()).thenReturn(dummyTenant);
+        .setField(consultantCreatorService, "tenantService", tenantAdminService);
+    when(tenantAdminService.getTenantById()).thenReturn(dummyTenant);
   }
 
 }
