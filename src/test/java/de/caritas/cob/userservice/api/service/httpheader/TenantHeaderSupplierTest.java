@@ -20,41 +20,5 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @ExtendWith(MockitoExtension.class)
 class TenantHeaderSupplierTest {
 
-  @InjectMocks
-  TenantHeaderSupplier tenantHeaderSupplier;
-
-  private Enumeration<String> headers;
-
-  @Mock
-  private ServletRequestAttributes requestAttributes;
-
-  @Mock
-  private HttpServletRequest httpServletRequest;
-
-  @Test
-  void getOriginHeaderValue_Should_ReturnPassedRequestServerName() {
-    assertThat(tenantHeaderSupplier.getOriginHeaderValue("request server name")).isEqualTo("request server name");
-  }
-
-  @Test
-  void getOriginHeaderValue_Should_ReturnValueFromHostRequestParameter() {
-    // given
-    headers = Collections.enumeration(Lists.newArrayList("host"));
-    when(httpServletRequest.getHeader("host")).thenReturn("host header value");
-    givenRequestContextIsSet();
-    // when, then
-    assertThat(tenantHeaderSupplier.getOriginHeaderValue()).isEqualTo("host header value");
-    resetRequestAttributes();
-  }
-
-  private void givenRequestContextIsSet() {
-    when(requestAttributes.getRequest()).thenReturn(httpServletRequest);
-    when(httpServletRequest.getHeaderNames()).thenReturn(headers);
-    RequestContextHolder.setRequestAttributes(requestAttributes);
-  }
-
-  private void resetRequestAttributes() {
-    RequestContextHolder.setRequestAttributes(null);
-  }
 
 }

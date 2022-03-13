@@ -118,8 +118,7 @@ public class CreateEnquiryMessageFacade {
       updateSession(session, rcGroupId, rcFeedbackGroupId, createEnquiryExceptionInformation);
 
       emailNotificationFacade
-          .sendNewEnquiryEmailNotification(session, getHttpServletRequest().getServerName(),
-              TenantContext.getCurrentTenantData());
+          .sendNewEnquiryEmailNotification(session, TenantContext.getCurrentTenantData());
 
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)

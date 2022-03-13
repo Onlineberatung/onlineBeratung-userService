@@ -46,13 +46,6 @@ public class AgencyService {
         .next();
   }
 
-  @Cacheable(value = CacheManagerConfig.AGENCY_CACHE, key = "#agencyId")
-  public AgencyDTO getAgency(Long agencyId, String requestServerName) {
-    return getAgenciesFromAgencyServiceWithRequestContext(Collections.singletonList(agencyId), requestServerName)
-        .iterator()
-        .next();
-  }
-
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency won't be cached for further
    * requests.
@@ -86,17 +79,7 @@ public class AgencyService {
    */
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
     if (isNotEmpty(agencyIds)) {
-      addDefaultHeaders(this.agencyControllerApi.getApiClient(), null);
-      return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
-          .map(this::fromOriginalAgency)
-          .collect(Collectors.toList());
-    }
-    return emptyList();
-  }
-
-  private List<AgencyDTO> getAgenciesFromAgencyServiceWithRequestContext(List<Long> agencyIds, String requestServerName) {
-    if (isNotEmpty(agencyIds)) {
-      addDefaultHeaders(this.agencyControllerApi.getApiClient(), requestServerName);
+      addDefaultHeaders(this.agencyControllerApi.getApiClient());
       return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
           .map(this::fromOriginalAgency)
           .collect(Collectors.toList());
@@ -111,14 +94,14 @@ public class AgencyService {
    * @return List of {@link AgencyDTO}
    */
   public List<AgencyDTO> getAgenciesByConsultingType(int consultingTypeId) {
-    addDefaultHeaders(this.agencyControllerApi.getApiClient(), null);
+    addDefaultHeaders(this.agencyControllerApi.getApiClient());
     return this.agencyControllerApi.getAgenciesByConsultingType(consultingTypeId)
         .stream()
         .map(this::fromOriginalAgency)
         .collect(Collectors.toList());
   }
 
-  private void addDefaultHeaders(ApiClient apiClient, String requestServerName) {
+  private void addDefaultHeaders(ApiClient apiClient) {
     var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));

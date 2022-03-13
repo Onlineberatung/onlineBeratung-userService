@@ -68,7 +68,7 @@ public class TenantResolver {
   private Optional<Long> resolveTenantFromHttpRequest() {
 
     Optional<Long> tenantFromHeader = tenantHeaderSupplier.getTenantFromHeader();
-    if(tenantFromHeader.isPresent()){
+    if (tenantFromHeader.isPresent()) {
       return tenantFromHeader;
     }
 

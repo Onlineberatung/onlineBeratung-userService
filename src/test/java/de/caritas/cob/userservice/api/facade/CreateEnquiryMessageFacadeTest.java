@@ -286,8 +286,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(messageServiceProvider, atLeastOnce())
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(sessionService, atLeastOnce()).saveSession(any());
-    verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any(),
-        any(), any());
+    verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any(), any());
     assertEquals(SESSION_ID, response.getSessionId());
     assertEquals(RC_GROUP_ID, response.getRcGroupId());
   }
