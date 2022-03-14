@@ -5,6 +5,7 @@ import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyCo
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,6 +25,7 @@ public class AgencyAdminServiceApiClientConfig {
    * @return the LiveService controller {@link AdminAgencyControllerApi}
    */
   @Bean
+  @Scope("prototype")
   public AdminAgencyControllerApi adminAgencyControllerApi(ApiClient apiClient) {
     return new AdminAgencyControllerApi(apiClient);
   }
@@ -36,6 +38,7 @@ public class AgencyAdminServiceApiClientConfig {
    */
   @Bean
   @Primary
+  @Scope("prototype")
   public ApiClient adminAgencyApiClient(RestTemplate restTemplate) {
     return new ApiClient(restTemplate).setBasePath(this.agencyAdminServiceApiUrl);
   }
