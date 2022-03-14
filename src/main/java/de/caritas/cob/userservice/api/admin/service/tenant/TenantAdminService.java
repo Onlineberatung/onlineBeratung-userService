@@ -16,11 +16,11 @@ import org.springframework.web.client.RestClientException;
 public class TenantAdminService {
 
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final @NonNull TenantAdminControllerApi tenantControllerApi;
+  private final @NonNull TenantAdminControllerApi tenantAdminControllerApi;
 
   public TenantDTO getTenantById() throws RestClientException {
-    addDefaultHeaders(this.tenantControllerApi.getApiClient());
-    return this.tenantControllerApi.getTenantById(
+    addDefaultHeaders(this.tenantAdminControllerApi.getApiClient());
+    return this.tenantAdminControllerApi.getTenantById(
         TenantContext.getCurrentTenant());
   }
 

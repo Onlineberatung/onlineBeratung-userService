@@ -15,13 +15,13 @@ public class TenantAdminServiceApiClientConfig {
   private String tenantServiceApiUrl;
 
   @Bean
-  public TenantAdminControllerApi tenantControllerApi(ApiClient apiClient) {
-    return new TenantAdminControllerApi(apiClient);
+  public TenantAdminControllerApi tenantAdminControllerApi(ApiClient tenantAdminApiClient) {
+    return new TenantAdminControllerApi(tenantAdminApiClient);
   }
 
   @Bean
   @Primary
-  public ApiClient tenantApiClient(RestTemplate restTemplate) {
+  public ApiClient tenantAdminApiClient(RestTemplate restTemplate) {
     ApiClient apiClient = new TenantAdminServiceApiClient(
         restTemplate);
     apiClient.setBasePath(this.tenantServiceApiUrl);
