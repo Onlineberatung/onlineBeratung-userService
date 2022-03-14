@@ -9,8 +9,8 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AgencyServiceTest {
@@ -53,10 +54,12 @@ class AgencyServiceTest {
   @Test
   void getAgenciesFromAgencyService_Should_passTenantId() {
     // given
+    TenantContext.setCurrentTenant(1L);
+    TenantHeaderSupplier tenantHeaderSupplier = new TenantHeaderSupplier();
+    ReflectionTestUtils.setField(tenantHeaderSupplier, "multitenancy", true);
+    ReflectionTestUtils.setField(agencyService, "tenantHeaderSupplier", tenantHeaderSupplier);
     HttpHeaders headers = new HttpHeaders();
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(headers);
-
-    when(tenantHeaderSupplier.getTenantFromHeader()).thenReturn(Optional.of(1L));
     when(this.agencyControllerApi.getApiClient()).thenReturn(apiClient);
     var agencyDTOS = Lists.newArrayList(new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);
@@ -64,7 +67,8 @@ class AgencyServiceTest {
     this.agencyService.getAgency(1L);
 
     // then
-    assertThat(headers.get("tenantId").get(0)).isEqualTo(Optional.of(1L));
+    assertThat(headers.get("tenantId").get(0)).isEqualTo("1");
+    TenantContext.clear();
   }
 
 }

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.util.Enumeration;
@@ -42,6 +43,9 @@ public class ConsultingTypeServiceTest {
 
   @Mock
   private Enumeration<String> headers;
+
+  @Mock
+  private TenantHeaderSupplier tenantHeaderSupplier;
 
 
   @Test
