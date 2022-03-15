@@ -1,16 +1,16 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_WITH_FEEDBACK;
-import static de.caritas.cob.userservice.testHelper.TestConstants.COUNT_10;
-import static de.caritas.cob.userservice.testHelper.TestConstants.OFFSET_0;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_IN_PROGRESS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION_STATUS_NEW;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_SESSION_RESPONSE_DTO_WITH_FEEDBACK;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.COUNT_10;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.OFFSET_0;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_STATUS_IN_PROGRESS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_STATUS_NEW;
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static org.jsoup.helper.Validate.fail;

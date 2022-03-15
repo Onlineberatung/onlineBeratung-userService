@@ -1,0 +1,34 @@
+{
+    "addictiveDrugs":
+    {
+    	"alcohol": false,
+    	"drugs":
+    	{
+    		"amphetamines": false,
+    		"cannabis": false,
+    		"hallucinogens": false,
+    		"cocaineCrack": false,
+    		"opioids": false,
+    		"others": false
+    	},
+    	"legalHighs": false,
+    	"tobacco": false,
+    	"medication": false,
+    	"gambling":
+    	{
+    		"online": false,
+    		"offline": false
+    	},
+    	"internetComputer":
+    	{
+    		"chatting": false,
+    		"gaming": false,
+    		"shopping": false,
+    		"pornography": false,
+    		"surfing": false,
+    		"others": false
+    	},
+    	"eatingDisorder": false,
+    	"others": false
+    }
+}

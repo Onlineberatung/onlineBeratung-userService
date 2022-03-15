@@ -14,7 +14,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.AliasMessageDTO;
 import de.caritas.cob.userservice.api.model.ForwardMessageDTO;
@@ -31,7 +30,6 @@ import org.springframework.util.ClassUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class AliasJsonDeserializerTest {
 
-  private static final UserHelper USER_HELPER = new UserHelper();
   private static final String DECODED_USERNAME = "username";
   private static final String ENCODE_USERNAME = new UsernameTranscoder()
       .encodeUsername(DECODED_USERNAME);

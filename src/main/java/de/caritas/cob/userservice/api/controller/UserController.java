@@ -6,13 +6,13 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.controller.validation.MinValue;
-import de.caritas.cob.userservice.api.deleteworkflow.action.asker.DeleteSingleRoomAndSessionAction;
-import de.caritas.cob.userservice.api.deleteworkflow.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
@@ -27,11 +27,11 @@ import de.caritas.cob.userservice.api.facade.StopChatFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
+import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
-import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.helper.TwoFactorAuthValidator;
 import de.caritas.cob.userservice.api.model.AbsenceDTO;
 import de.caritas.cob.userservice.api.model.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ChatMembersResponseDTO;
@@ -41,14 +41,18 @@ import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.model.MasterKeyDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
+import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
+import de.caritas.cob.userservice.api.model.PatchUserDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
+import de.caritas.cob.userservice.api.model.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.model.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
@@ -57,6 +61,9 @@ import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionFilter;
@@ -66,20 +73,26 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
+import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.generated.api.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.InternalServerErrorException;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,6 +105,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for user api requests
  */
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
@@ -106,7 +120,6 @@ public class UserController implements UsersApi {
   private final @NotNull SessionService sessionService;
   private final @NotNull AuthenticatedUser authenticatedUser;
   private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
-  private final @NotNull UserDataFacade userDataFacade;
   private final @NotNull ConsultantImportService consultantImportService;
   private final @NotNull EmailNotificationFacade emailNotificationFacade;
   private final @NotNull MonitoringService monitoringService;
@@ -129,9 +142,16 @@ public class UserController implements UsersApi {
   private final @NotNull ConsultantDataFacade consultantDataFacade;
   private final @NotNull SessionDataService sessionDataService;
   private final @NotNull SessionArchiveService sessionArchiveService;
-  private final @NotNull KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
-  private final @NotNull TwoFactorAuthValidator twoFactorAuthValidator;
+  private final @NonNull IdentityClientConfig identityClientConfig;
+  private final @NonNull IdentityManaging identityManager;
+  private final @NonNull AccountManaging accountManager;
   private final @NotNull ActionsRegistry actionsRegistry;
+  private final @NonNull ConsultantDtoMapper consultantDtoMapper;
+  private final @NonNull UserDtoMapper userDtoMapper;
+  private final @NonNull ConsultantService consultantService;
+  private final @NonNull ConsultantUpdateService consultantUpdateService;
+  private final @NonNull ConsultantDataProvider consultantDataProvider;
+  private final @NonNull AskerDataProvider askerDataProvider;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -166,10 +186,10 @@ public class UserController implements UsersApi {
         .rocketChatUserId(rcUserId)
         .build();
 
-    return new ResponseEntity<>(new NewRegistrationResponseDto()
-        .sessionId(createNewConsultingTypeFacade
-            .initializeNewConsultingType(newRegistrationDto, user, rocketChatCredentials))
-        .status(HttpStatus.CREATED), HttpStatus.CREATED);
+    var registrationResponse = createNewConsultingTypeFacade
+        .initializeNewConsultingType(newRegistrationDto, user, rocketChatCredentials);
+
+    return new ResponseEntity<>(registrationResponse, registrationResponse.getStatus());
   }
 
   /**
@@ -182,13 +202,11 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> acceptEnquiry(@PathVariable Long sessionId,
       @RequestHeader String rcUserId) {
-
     var session = sessionService.getSession(sessionId);
 
     if (session.isEmpty() || isNull(session.get().getGroupId())) {
-      LogService.logInternalServerError(String.format(
-          "Session id %s is invalid, session not found or has no Rocket.Chat groupId assigned.",
-          sessionId));
+      log.error("Internal Server Error: Session id {} is invalid, session not found or has no "
+          + "Rocket.Chat groupId assigned.", sessionId);
 
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -217,9 +235,10 @@ public class UserController implements UsersApi {
         .rocketChatToken(rcToken)
         .rocketChatUserId(rcUserId)
         .build();
+    var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(
-        user, sessionId, enquiryMessage.getMessage(), rocketChatCredentials
+        user, sessionId, enquiryMessage.getMessage(), language, rocketChatCredentials
     );
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -285,16 +304,39 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Gets the user data for the current logged in user depending on his user role.
+   * Gets the user data for the current logged-in user depending on his user role.
    *
    * @return {@link ResponseEntity} containing {@link UserDataResponseDTO}
    */
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
+    var userDataResponseDTO = authenticatedUser.isConsultant()
+        ? consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant())
+        : askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
 
-    var responseDTO = this.userDataFacade.buildUserDataByRole();
+    var isOtpEnabled = authenticatedUser.isUser() && identityClientConfig.getOtpAllowedForUsers()
+        || authenticatedUser.isConsultant() && identityClientConfig.getOtpAllowedForConsultants();
 
-    return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    TwoFactorAuthDTO twoFactorAuthDTO;
+    var encourage2fa = userDataResponseDTO.getEncourage2fa();
+    if (isOtpEnabled) {
+      var username = authenticatedUser.getUsername();
+      var otpInfoDTO = identityManager.getOtpCredential(username);
+      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(otpInfoDTO, encourage2fa);
+    } else {
+      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(encourage2fa);
+    }
+    userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
+
+    return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
+    var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser);
+    accountManager.patchUser(patchMap).orElseThrow();
+
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -305,8 +347,26 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateConsultantData(UpdateConsultantDTO updateConsultantDTO) {
-    this.consultantDataFacade.updateConsultantData(updateConsultantDTO);
+    var consultantId = authenticatedUser.getUserId();
+    var consultant = consultantService.getConsultant(consultantId)
+        .orElseThrow(() ->
+            new NotFoundException(String.format("Consultant with id %s not found", consultantId))
+        );
+
+    var updateAdminConsultantDTO = consultantDtoMapper.updateAdminConsultantOf(
+        updateConsultantDTO, consultant
+    );
+    consultantUpdateService.updateConsultant(consultantId, updateAdminConsultantDTO);
+
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<LanguageResponseDTO> getLanguages(Long agencyId) {
+    var languageCodes = consultantAgencyService.getLanguageCodesOfAgency(agencyId);
+    var languageResponseDTO = consultantDtoMapper.languageResponseDtoOf(languageCodes);
+
+    return new ResponseEntity<>(languageResponseDTO, HttpStatus.OK);
   }
 
   /**
@@ -473,15 +533,16 @@ public class UserController implements UsersApi {
     // Check if session exists
     var session = sessionService.getSession(sessionId);
     if (session.isEmpty()) {
-      LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
+      log.warn("Bad request: Session with id {} not found", sessionId);
+
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     // Check if consultant has the right to access the session
     if (!authenticatedUserHelper.hasPermissionForSession(session.get())) {
-      LogService.logBadRequest(
-          String.format("Consultant with id %s has no permission to access session with id %s",
-              authenticatedUser.getUserId(), sessionId));
+      log.warn("Bad request: Consultant with id {} has no permission to access session with id {}",
+          authenticatedUser.getUserId(), sessionId);
+
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
@@ -517,14 +578,16 @@ public class UserController implements UsersApi {
         return new ResponseEntity<>(HttpStatus.OK);
 
       } else {
-        LogService.logUnauthorized(String.format(
-            "Consultant with id %s is not authorized to update monitoring of session %s",
-            authenticatedUser.getUserId(), sessionId));
+        log.warn(
+            "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}",
+            authenticatedUser.getUserId(), sessionId
+        );
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
 
     } else {
-      LogService.logBadRequest(String.format("Session with id %s not found", sessionId));
+      log.warn("Bad request: Session with id {} not found", sessionId);
+
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
   }
@@ -558,9 +621,9 @@ public class UserController implements UsersApi {
       @PathVariable String consultantId) {
 
     var session = sessionService.getSession(sessionId);
-
     if (session.isEmpty()) {
-      LogService.logInternalServerError(String.format("Session with id %s not found.", sessionId));
+      log.error("Internal Server Error: Session with id {} not found.", sessionId);
+
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -759,7 +822,24 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
-    this.userAccountProvider.changeUserAccountEmailAddress(emailAddress);
+    userAccountProvider.changeUserAccountEmailAddress(
+        Optional.of(emailAddress)
+    );
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
+   * Sets the user's email address to its default.
+   *
+   * @return {@link ResponseEntity}
+   */
+  @Override
+  public ResponseEntity<Void> deleteEmailAddress() {
+    userAccountProvider.changeUserAccountEmailAddress(
+        Optional.empty()
+    );
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
@@ -838,30 +918,104 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  @Override
+  public ResponseEntity<Void> startTwoFactorAuthByEmailSetup(EmailDTO emailDTO) {
+    var username = authenticatedUser.getUsername();
+    var email = emailDTO.getEmail();
+
+    if (!identityManager.isEmailAvailableOrOwn(username, email)) {
+      return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
+    }
+
+    identityManager.setUpOneTimePassword(username, email).ifPresent(message -> {
+      throw new InternalServerErrorException(message);
+    });
+
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> finishTwoFactorAuthByEmailSetup(String tan) {
+    var username = authenticatedUser.getUsername();
+    var validationResult = identityManager.validateOneTimePassword(username, tan);
+
+    if (Boolean.parseBoolean(validationResult.get("created"))) {
+      var patchMap = userDtoMapper.mapOf(validationResult.get("email"), authenticatedUser);
+      accountManager.patchUser(patchMap).orElseThrow();
+      return ResponseEntity.noContent().build();
+    }
+    if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
+      return ResponseEntity.badRequest().build();
+    }
+    if (Boolean.parseBoolean(validationResult.get("createdBefore"))) {
+      return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
+    }
+
+    return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+  }
+
   /**
-   * Activates 2FA for the calling user.
+   * Activates 2FA by mobile app for the calling user.
    *
-   * @param otpSetupDTO (required) {@link OtpSetupDTO}
+   * @param oneTimePasswordDTO (required) {@link OneTimePasswordDTO}
    * @return {@link ResponseEntity} containing {@link HttpStatus}
    */
   @Override
-  public ResponseEntity<Void> activateTwoFactorAuthForUser(OtpSetupDTO otpSetupDTO) {
+  public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
+    if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
+      throw new ConflictException("2FA is disabled for user role");
+    }
+    if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
+      throw new ConflictException("2FA is disabled for consultant role");
+    }
 
-    twoFactorAuthValidator.checkRequestParameterForTwoFactorAuthActivations(otpSetupDTO);
-    twoFactorAuthValidator.checkIfRoleHasTwoFactorAuthEnabled(authenticatedUser);
-    keycloakTwoFactorAuthService.setUpOtpCredential(authenticatedUser.getUsername(), otpSetupDTO);
+    var isValid = identityManager.setUpOneTimePassword(
+        authenticatedUser.getUsername(),
+        oneTimePasswordDTO.getOtp(),
+        oneTimePasswordDTO.getSecret()
+    );
+
+    return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> activateTwoFactorAuthByAppDeprecated(
+      OneTimePasswordDTO oneTimePasswordDTO) {
+    return activateTwoFactorAuthByApp(oneTimePasswordDTO);
+  }
+
+  /**
+   * Deactivates 2FA by mobile app for the calling user.
+   *
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   */
+  @Override
+  public ResponseEntity<Void> deactivateTwoFactorAuthByApp() {
+    identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  @Override
+  public ResponseEntity<Void> deactivateTwoFactorAuthByAppDeprecated() {
+    return deactivateTwoFactorAuthByApp();
+  }
+
   /**
-   * Deletes 2FA for the calling user.
+   * Returns all agencies of given consultant.
    *
-   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   * @param consultantId Consultant Id (required)
+   * @return {@link ResponseEntity} containing all agencies of consultant
    */
   @Override
-  public ResponseEntity<Void> deleteTwoFactorAuthForUser() {
-    keycloakTwoFactorAuthService.deleteOtpCredential(authenticatedUser.getUsername());
-    return new ResponseEntity<>(HttpStatus.OK);
+  public ResponseEntity<ConsultantResponseDTO> getConsultantPublicData(String consultantId) {
+    var consultant = consultantService.getConsultant(consultantId)
+        .orElseThrow(() ->
+            new NotFoundException(String.format("Consultant with id %s not found", consultantId))
+        );
+    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId);
+    var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
+
+    return new ResponseEntity<>(consultantDto, HttpStatus.OK);
   }
 }

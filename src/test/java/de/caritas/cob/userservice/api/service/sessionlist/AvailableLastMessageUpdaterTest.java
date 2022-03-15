@@ -5,11 +5,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.model.AliasMessageDTO;
+import de.caritas.cob.userservice.api.model.MessageType;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.VideoCallMessageDTO;
 import de.caritas.cob.userservice.api.model.VideoCallMessageDTO.EventTypeEnum;
@@ -50,8 +52,7 @@ public class AvailableLastMessageUpdaterTest {
 
   @Test
   public void updateSessionWithAvailableLastMessage_Should_notSetVideoCallMessageDto_When_lastMessageHasNoAlias() {
-
-    SessionDTO sessionDTO = new SessionDTO();
+    var sessionDTO = new SessionDTO();
 
     this.availableLastMessageUpdater
         .updateSessionWithAvailableLastMessage(this.rocketChatRoomInformation, "",
@@ -62,7 +63,7 @@ public class AvailableLastMessageUpdaterTest {
 
   @Test
   public void updateSessionWithAvailableLastMessage_Should_setVideoCallMessageDto_When_lastMessageHasAlias() {
-    SessionDTO sessionDTO = new SessionDTO();
+    var sessionDTO = new SessionDTO();
     when(this.roomsLastMessageDTO.getAlias()).thenReturn(
         new AliasMessageDTO()
             .videoCallMessageDTO(new VideoCallMessageDTO()
@@ -78,6 +79,30 @@ public class AvailableLastMessageUpdaterTest {
     assertThat(sessionDTO.getVideoCallMessageDTO().getEventType(), is(EventTypeEnum.IGNORED_CALL));
     assertThat(sessionDTO.getVideoCallMessageDTO().getInitiatorUserName(), is("initiator"));
     assertThat(sessionDTO.getVideoCallMessageDTO().getInitiatorRcUserId(), is("user id"));
+  }
+
+  @Test
+  public void updateSessionWithAvailableLastMessage_Should_useAnalyser_When_lasMessageIsPresent() {
+    when(roomsLastMessageDTO.getMessage()).thenReturn("message");
+
+    this.availableLastMessageUpdater
+        .updateSessionWithAvailableLastMessage(this.rocketChatRoomInformation, "",
+            mock(Consumer.class), new SessionDTO(), GROUP_ID);
+
+    verify(sessionListAnalyser).prepareMessageForSessionList("message", GROUP_ID);
+  }
+
+  @Test
+  public void updateSessionWithAvailableLastMessage_Should_setFurtherStepsMessage_When_lasMessageHasFurtherStepsAlias() {
+    var session = new SessionDTO();
+    when(roomsLastMessageDTO.getAlias())
+        .thenReturn(new AliasMessageDTO().messageType(MessageType.FURTHER_STEPS));
+
+    this.availableLastMessageUpdater
+        .updateSessionWithAvailableLastMessage(this.rocketChatRoomInformation, "",
+            mock(Consumer.class), session, GROUP_ID);
+
+    assertThat(session.getLastMessage(), is("So geht es weiter"));
   }
 
 }

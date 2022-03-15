@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.repository.chat.Chat;

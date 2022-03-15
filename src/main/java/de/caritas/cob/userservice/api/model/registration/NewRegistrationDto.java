@@ -53,4 +53,6 @@ public class NewRegistrationDto implements UserRegistrationDTO {
 
   @ApiModelProperty(hidden = true)
   private boolean newUserAccount;
+
+  private String consultantId;
 }

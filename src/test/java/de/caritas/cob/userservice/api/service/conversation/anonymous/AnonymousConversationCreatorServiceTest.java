@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.service.conversation.anonymous;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKETCHAT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SESSION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_DTO_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_SUCHT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.ArgumentMatchers.any;

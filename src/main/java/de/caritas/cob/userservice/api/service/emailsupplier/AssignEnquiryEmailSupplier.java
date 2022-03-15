@@ -10,16 +10,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Supplier to provide mails to be sent when an enquiry is assigned.
  */
+@Slf4j
 @AllArgsConstructor
 public class AssignEnquiryEmailSupplier implements EmailSupplier {
 
@@ -39,9 +40,12 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
     if (isReceiverConsultantValid()) {
       return buildAssignEnquiryMailWithValidReceiver();
     }
-    LogService.logEmailNotificationFacadeError(String.format(
-        "Error while sending assign message notification: Receiver consultant with id %s is null or doesn't have an email address.",
-        nonNull(receiverConsultant) ? receiverConsultant.getId() : "unknown"));
+    var receiverId = nonNull(receiverConsultant) ? receiverConsultant.getId() : "unknown";
+    log.error(
+        "EmailNotificationFacade error: Error while sending assign message notification: Receiver "
+            + "consultant with id {} is null or doesn't have an email address.", receiverId
+    );
+
     return emptyList();
   }
 
@@ -59,9 +63,10 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
           receiverConsultant.getFullName(),
           new UsernameTranscoder().decodeUsername(askerUserName)));
     }
-    LogService.logEmailNotificationFacadeError(String.format(
-        "Error while sending assign message notification: Sender consultant with id %s could not be found in database.",
-        senderUserId));
+    log.error(
+        "EmailNotificationFacade error: Error while sending assign message notification: Sender "
+            + "consultant with id {} could not be found in database.", senderUserId
+    );
 
     return emptyList();
   }

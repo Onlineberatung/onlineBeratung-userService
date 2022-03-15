@@ -9,4 +9,6 @@ public interface UserRegistrationDTO {
   String getConsultingType();
 
   boolean isNewUserAccount();
+
+  String getConsultantId();
 }

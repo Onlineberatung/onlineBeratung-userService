@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +25,7 @@ public class UserService {
   private final @NonNull UserRepository userRepository;
   private final @NonNull UserMobileTokenRepository userMobileTokenRepository;
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
+  private final AuditingHandler auditingHandler;
 
   /**
    * Deletes an user.
@@ -59,7 +61,10 @@ public class UserService {
    */
   public User createUser(String userId, Long oldId, String username, String email,
       boolean languageFormal) {
-    return userRepository.save(new User(userId, oldId, username, email, languageFormal));
+    var user = new User(userId, oldId, username, email, languageFormal);
+    auditingHandler.markCreated(user);
+
+    return userRepository.save(user);
   }
 
   /**

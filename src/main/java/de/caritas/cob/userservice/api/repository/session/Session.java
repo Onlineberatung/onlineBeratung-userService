@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.repository.session;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -30,9 +31,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.ToString.Exclude;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Type;
 import org.springframework.lang.Nullable;
 
 /**
@@ -48,8 +49,8 @@ import org.springframework.lang.Nullable;
 @ToString
 public class Session {
 
-  public Session(User user, int consultingTypeId, String postcode, Long agencyId,
-      SessionStatus status, boolean teamSession, boolean monitoring) {
+  public Session(User user, int consultingTypeId, @NonNull String postcode, Long agencyId,
+      @NonNull SessionStatus status, boolean teamSession, boolean monitoring) {
     this.user = user;
     this.consultingTypeId = consultingTypeId;
     this.postcode = postcode;
@@ -71,14 +72,14 @@ public class Session {
   private User user;
 
   @ManyToOne
-  @JoinColumn(name = "consultant_id", nullable = false)
+  @JoinColumn(name = "consultant_id")
   @Fetch(FetchMode.SELECT)
   private Consultant consultant;
 
-  @Column(name = "consulting_type", updatable = false, nullable = false)
+  @Column(name = "consulting_type", updatable = false, nullable = false, columnDefinition = "tinyint")
   private int consultingTypeId;
 
-  @Column(name = "registration_type", updatable = false, nullable = false)
+  @Column(name = "registration_type", updatable = false, nullable = false, columnDefinition = "varchar(20) not null default 'REGISTERED'")
   @Enumerated(EnumType.STRING)
   @NonNull
   private RegistrationType registrationType;
@@ -91,7 +92,12 @@ public class Session {
   @Column(name = "agency_id")
   private Long agencyId;
 
+  @Enumerated(EnumType.STRING)
+  @Column(columnDefinition = "varchar(2) not null default 'de'", length = 2, nullable = false)
+  private LanguageCode languageCode;
+
   @NonNull
+  @Column(columnDefinition = "tinyint")
   private SessionStatus status;
 
   @Column(name = "message_date")
@@ -105,28 +111,26 @@ public class Session {
   private String feedbackGroupId;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "session")
+  @Exclude
   private List<SessionData> sessionData;
 
-  @Column(name = "is_team_session", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Column(name = "is_team_session", columnDefinition = "tinyint(4) default '0'")
   private boolean teamSession;
 
-  @Column(name = "is_peer_chat", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Column(name = "is_peer_chat", columnDefinition = "tinyint(4) unsigned default '0'")
   private boolean isPeerChat;
 
-  @Column(name = "is_monitoring", nullable = false)
-  @Type(type = "org.hibernate.type.NumericBooleanType")
+  @Column(name = "is_monitoring", columnDefinition = "tinyint(4) default '0'")
   private boolean monitoring;
 
   public boolean hasFeedbackChat() {
     return isNotBlank(feedbackGroupId);
   }
 
-  @Column(name = "create_date")
+  @Column(name = "create_date", columnDefinition = "datetime")
   private LocalDateTime createDate;
 
-  @Column(name = "update_date")
+  @Column(name = "update_date", columnDefinition = "datetime")
   private LocalDateTime updateDate;
 
   @Override

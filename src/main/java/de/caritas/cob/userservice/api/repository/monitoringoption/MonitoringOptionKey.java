@@ -10,7 +10,6 @@ import lombok.Setter;
 /**
  * Composite key for {@link MonitoringOption}.
  */
-@SuppressWarnings("serial")
 @Getter
 @Setter
 @AllArgsConstructor

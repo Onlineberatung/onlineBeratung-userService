@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.repository.monitoring;
 
+import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -11,7 +12,6 @@ import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,8 +31,8 @@ import lombok.Setter;
 @Setter
 public class Monitoring {
 
-  public Monitoring(Long sessionId, MonitoringType monitoringType, @Size(max = 255) String key,
-      Boolean value) {
+  public Monitoring(@NonNull Long sessionId, @NonNull MonitoringType monitoringType,
+      @Size(max = 255) @NonNull String key, Boolean value) {
     this.sessionId = sessionId;
     this.monitoringType = monitoringType;
     this.key = key;
@@ -50,7 +50,7 @@ public class Monitoring {
    * entity because multiple keys can have the same identifier.
    */
   @Id
-  @Column(name = "type", updatable = false, nullable = false)
+  @Column(name = "type", updatable = false, nullable = false, columnDefinition = "tinyint(4) unsigned")
   @NonNull
   private MonitoringType monitoringType;
 
@@ -60,7 +60,7 @@ public class Monitoring {
   @Size(max = 255)
   private String key;
 
-  @Column(name = "value", updatable = true, nullable = true)
+  @Column(name = "value")
   private Boolean value;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "monitoring")

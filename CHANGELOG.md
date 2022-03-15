@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.16.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.15.1...v2.16.0) (2022-03-14)
+
+
+### Features
+
+* add 2fa type information to user data endpoint ([f0f2398](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f0f2398a14f3deae1ff813509d7e2f1f099e9d57))
+* add language code to session ([d590a62](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d590a62e29a45dc8aeaec6deadc97795a83586f2))
+* add language codes to enquiry message ([b2b9714](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/b2b9714ce18e68081ee13e7cfa43d39c0193c664))
+* add response if setup process has been done ([f17016f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f17016fe05259c60f6b68bb6f912a62c1aae8585))
+* allow new session creation for new consultingtypes ([51d3b0f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/51d3b0f65ba8245e592adeafa9f7b5385134ccfa))
+* connect enquiry message language and session in database ([1d65703](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1d657033651facaa9883090b3e9dc5923ecf6073))
+* expose all languages of the consultants who work for a given agency ([26390c2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/26390c2070b38794ff5c29d49f8aeb40845c925e))
+* expose set session language in registered enquiries endpoint ([3bd8d54](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3bd8d54a1d07040f182c2146fa4a0370dcf2f441))
+* identify keycloak config port ([f268075](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/f268075b0cd30ffa0802a2613920f0c1cf1a78b6))
+* integrated validation for already registered direct conversation ([42c5b37](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/42c5b375b030d62ccb2a6bbab200e7be69da853c))
+* let the user speak with encourage-2fa flag ([2b15867](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2b15867bb48c2c271d8b15269ac0c40dbe9e2995))
+* provide technical solution for direct registration ([1f1ce8c](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/1f1ce8c32800834e929d292d1111bf2e056f8666))
+* save email from 2fa workflow ([2e46a26](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/2e46a2652fe4133c19e839bb013e6b5c9e5fec89))
+
+
+### Bug Fixes
+
+* add consistent response to Keycloak API ([fdac9c9](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/fdac9c921a6c78eb47251ed47f05ceacd9c6a219))
+* add user create date and modified date automatically ([83f20d4](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/83f20d4123a4eaf4400b2f5684fd0df4641b179d))
+* api generation of 2fa ([a3a14eb](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/a3a14ebd1831142c56d34f3ae52e9e55c52630d0))
+* audit user agencies ([ad1464e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/ad1464e555ef619ba9387b2a4ef89a23f75f9ae6))
+* compare enum names ([d3ecf70](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d3ecf70926e25456a891f43f11fcfaa394abeff9))
+* fetch additional messages for session if last message is system alias message ([4777eea](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4777eea955124da46bc390e25d70024834b3f8d0))
+* fix checkstyle warnings ([c209f33](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/c209f3345fb3cf6d19f5e8087fad13bec38f979e))
+* Hibernate property access in session data ([76661a7](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/76661a766cb7a65b6ca8d060d20ff57fdd74b92b))
+* impl. review requested changes, formatting ([e03bc3e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/e03bc3e78910accf48320606f744255ecf6c2393))
+* logical error in attempts-left flag ([5973011](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/59730111e3f67ce600329b65be6529e9fe8ac5c2))
+* multiple Hibernate properties ([d467fc0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/d467fc0fe2856469bc23374782d9535a6ea316b4))
+* path in auth test ([200f429](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/200f429436a2d6ff1dc0e92e3480de4349405f80))
+* potential null pointer exception in keycloak message ([391415f](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/391415f43ce34aaa6287b38d91b8fe9c8646f0a9))
+* prevent finishing 2fa process if email has not changed ([aa9f543](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/aa9f5434ed7229d689bc0bdd094fc832225b21a5))
+* prevent starting 2fa process if email is owned by other user ([fe550d2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/fe550d28a39208ebb68bd0609f001f9d7859a75c))
+* provide alternative message for last message ([cc83bd2](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/cc83bd2f9ca6cb0ac250e37b3dea2b0a6a98738f))
+* remove Hibernate type from monitoringType field ([cd0676e](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/cd0676e67d6f873f5ca5713d5865008237144752))
+* take care of comparing emails lowercase for Keycloak ([8065f63](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/8065f63813932a0a9e17e2c2647f59ab49e11d7b))
+
 ## [2.15.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.13.3...v2.15.0) (2021-12-14)
 
 

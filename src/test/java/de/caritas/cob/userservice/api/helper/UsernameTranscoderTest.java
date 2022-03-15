@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_DECODED;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_DECODED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

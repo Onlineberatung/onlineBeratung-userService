@@ -2,9 +2,9 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
-import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -49,7 +49,7 @@ public class MonitoringServiceTest {
   private final Long SESSION_ID = 123L;
   private final Session SESSION =
       new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
-          IN_PROGRESS, null, null, null, null, false, false, false, null, null);
+          null, IN_PROGRESS, null, null, null, null, false, false, false, null, null);
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
   @Before

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
-import static de.caritas.cob.userservice.api.authorization.UserRole.CONSULTANT;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
@@ -121,7 +121,9 @@ public class ConsultantCreatorService {
         .absenceMessage(consultantCreationInput.getAbsenceMessage())
         .teamConsultant(consultantCreationInput.isTeamConsultant())
         .rocketChatId(rocketChatUserId)
+        .encourage2fa(true)
         .languageFormal(consultantCreationInput.isLanguageFormal())
+        .languages(Set.of())
         .createDate(consultantCreationInput.getCreateDate())
         .updateDate(consultantCreationInput.getUpdateDate())
         .build();

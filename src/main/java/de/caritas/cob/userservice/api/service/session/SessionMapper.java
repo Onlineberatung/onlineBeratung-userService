@@ -1,11 +1,12 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toIsoTime;
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toUnixTime;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toIsoTime;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toUnixTime;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.LanguageCode;
 import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.model.SessionDTO;
 import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
@@ -62,6 +63,7 @@ public class SessionMapper {
             ? session.getUser().getRcUserId() : null)
         .messageDate(toUnixTime(session.getEnquiryMessageDate()))
         .isTeamSession(session.isTeamSession())
+        .language(LanguageCode.fromValue(session.getLanguageCode().name()))
         .isPeerChat(session.isPeerChat())
         .monitoring(session.isMonitoring())
         .registrationType(session.getRegistrationType().name())

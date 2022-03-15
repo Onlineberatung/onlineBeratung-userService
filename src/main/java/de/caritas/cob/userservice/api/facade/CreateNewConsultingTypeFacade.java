@@ -2,19 +2,21 @@ package de.caritas.cob.userservice.api.facade;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.registration.NewRegistrationDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.registration.UserRegistrationDTO;
 import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,7 +40,8 @@ public class CreateNewConsultingTypeFacade {
    * @return session ID of created session (if not consulting id refers to a group only consulting
    * type)
    */
-  public Long initializeNewConsultingType(UserRegistrationDTO userRegistrationDTO, User user,
+  public NewRegistrationResponseDto initializeNewConsultingType(
+      UserRegistrationDTO userRegistrationDTO, User user,
       RocketChatCredentials rocketChatCredentials) {
     try {
       var extendedConsultingTypeResponseDTO = consultingTypeManager
@@ -47,7 +50,7 @@ public class CreateNewConsultingTypeFacade {
       return createSessionOrChat(userRegistrationDTO, user,
           extendedConsultingTypeResponseDTO, rocketChatCredentials);
     } catch (MissingConsultingTypeException | IllegalArgumentException e) {
-      throw new BadRequestException(e.getMessage(), LogService::logInternalServerError);
+      throw new BadRequestException(e.getMessage(), e);
     }
   }
 
@@ -65,9 +68,14 @@ public class CreateNewConsultingTypeFacade {
     createSessionOrChat(userRegistrationDTO, user, extendedConsultingTypeResponseDTO, null);
   }
 
-  private Long createSessionOrChat(UserRegistrationDTO userRegistrationDTO, User user,
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
+  private NewRegistrationResponseDto createSessionOrChat(UserRegistrationDTO userRegistrationDTO,
+      User user, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       RocketChatCredentials rocketChatCredentials) {
+
+    if (isNotBlank(userRegistrationDTO.getConsultantId())) {
+      return createSessionFacade.createDirectUserSession(userRegistrationDTO.getConsultantId(),
+          fromUserRegistrationDTO(userRegistrationDTO), user, extendedConsultingTypeResponseDTO);
+    }
 
     Long sessionId = null;
 
@@ -76,14 +84,15 @@ public class CreateNewConsultingTypeFacade {
       createUserChatRelationFacade
           .initializeUserChatAgencyRelation(fromUserRegistrationDTO(userRegistrationDTO), user,
               rocketChatCredentials);
-
     } else {
       sessionId = createSessionFacade
           .createUserSession(fromUserRegistrationDTO(userRegistrationDTO), user,
               extendedConsultingTypeResponseDTO);
     }
 
-    return sessionId;
+    return new NewRegistrationResponseDto()
+        .sessionId(sessionId)
+        .status(HttpStatus.CREATED);
   }
 
   private UserDTO fromUserRegistrationDTO(UserRegistrationDTO userRegistrationDTO) {

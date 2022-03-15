@@ -1,23 +1,23 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_B;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_C;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_B;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_C;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SYSTEM_USER_A_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SYSTEM_USER_A_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SYSTEM_USER_A_USERNAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SYSTEM_USER_B_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.SYSTEM_USER_B_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.TECHNICAL_USER_A_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.TECHNICAL_USER_A_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.TECHNICAL_USER_A_USERNAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.TECHNICAL_USER_B_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.TECHNICAL_USER_B_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.TECHNICAL_USER_B_USERNAME;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_B;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_C;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_B;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_C;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SYSTEM_USER_A_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SYSTEM_USER_A_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SYSTEM_USER_A_USERNAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SYSTEM_USER_B_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SYSTEM_USER_B_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_A_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_A_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_A_USERNAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_B_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_B_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_B_USERNAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -41,7 +41,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -143,28 +142,17 @@ public class RocketChatCredentialsProviderTest {
 
   @Before
   public void setup() throws NoSuchFieldException {
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_USERNAME),
-        TECHNICAL_USER_USERNAME);
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_TECHNICAL_PASSWORD),
-        TECHNICAL_USER_PW);
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_USERNAME),
-        SYSTEM_USER_USERNAME);
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_SYSTEM_PASSWORD), SYSTEM_USER_PW);
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN),
+    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USERNAME, TECHNICAL_USER_USERNAME);
+    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_PASSWORD, TECHNICAL_USER_PW);
+    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USERNAME, SYSTEM_USER_USERNAME);
+    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_PASSWORD, SYSTEM_USER_PW);
+    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN,
         RC_URL_CHAT_USER_LOGIN);
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT),
+    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT,
         RC_URL_CHAT_USER_LOGOUT);
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN),
+    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
         FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN);
-    FieldSetter.setField(rcCredentialHelper,
-        rcCredentialHelper.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID),
+    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
         FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID);
   }
 

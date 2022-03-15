@@ -1,13 +1,14 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -141,6 +142,21 @@ public class SessionService {
   }
 
   /**
+   * Initialize a {@link Session} and assign given consultant directly.
+   *
+   * @param user    the user
+   * @param userDto the dto of the user
+   * @return the initialized session
+   */
+  public Session initializeDirectSession(Consultant consultant, User user, UserDTO userDto,
+      boolean isTeamSession) {
+    var session = initializeSession(user, userDto, isTeamSession, RegistrationType.REGISTERED,
+        SessionStatus.INITIAL);
+    session.setConsultant(consultant);
+    return saveSession(session);
+  }
+
+  /**
    * Initialize a {@link Session} as initial registered enquiry.
    *
    * @param user    the user
@@ -172,6 +188,7 @@ public class SessionService {
         .registrationType(registrationType)
         .postcode(userDto.getPostcode())
         .agencyId(userDto.getAgencyId())
+        .languageCode(LanguageCode.de)
         .status(sessionStatus)
         .teamSession(isTeamSession)
         .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
@@ -275,7 +292,7 @@ public class SessionService {
   public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
       Consultant consultant) {
     return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
@@ -490,4 +507,22 @@ public class SessionService {
     }
     return emptyList();
   }
+
+  /**
+   * Find one session by assigned consultant and user.
+   *
+   * @param consultant       the consultant
+   * @param user             the user
+   * @param consultingTypeId the id of the consulting type
+   * @return an {@link Optional} of the result
+   */
+  public Optional<Session> findSessionByConsultantAndUserAndConsultingType(Consultant consultant,
+      User user, Integer consultingTypeId) {
+    if (nonNull(consultant) && nonNull(user)) {
+      return sessionRepository
+          .findByConsultantAndUserAndConsultingTypeId(consultant, user, consultingTypeId);
+    }
+    return Optional.empty();
+  }
+
 }

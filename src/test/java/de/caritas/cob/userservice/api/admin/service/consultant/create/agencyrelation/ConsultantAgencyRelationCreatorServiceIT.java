@@ -13,7 +13,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.UserServiceApplication;
+import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
@@ -230,6 +231,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     consultant.setConsultantMobileTokens(null);
     consultant.setRocketChatId("RocketChatId");
     consultant.setDeleteDate(null);
+    consultant.setLanguages(null);
     return this.consultantRepository.save(consultant);
   }
 
@@ -253,6 +255,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     session.setConsultant(null);
     session.setUser(user);
     session.setAgencyId(agencyId);
+    session.setLanguageCode(LanguageCode.de);
     session.setTeamSession(true);
     return this.sessionRepository.save(session);
   }

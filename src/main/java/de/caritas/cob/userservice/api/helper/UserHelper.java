@@ -1,9 +1,12 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.passay.CharacterData;
 import org.passay.CharacterRule;
@@ -15,6 +18,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserHelper {
+
+  private static final Pattern EMAIL_PATTERN = Pattern.compile(
+      "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@"
+          + "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$");
 
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
@@ -91,6 +98,10 @@ public class UserHelper {
   public boolean isUsernameValid(String username) {
     username = this.usernameTranscoder.decodeUsername(username);
     return username.length() >= USERNAME_MIN_LENGTH && username.length() <= USERNAME_MAX_LENGTH;
+  }
+
+  public boolean isValidEmail(String email) {
+    return nonNull(email) && EMAIL_PATTERN.matcher(email).matches();
   }
 
   /**

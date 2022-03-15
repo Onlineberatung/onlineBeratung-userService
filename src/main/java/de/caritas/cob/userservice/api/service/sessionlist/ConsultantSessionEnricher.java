@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toDate;
 import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.toDate;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 

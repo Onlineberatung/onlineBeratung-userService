@@ -19,12 +19,14 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 /**
  * Service for {@link Monitoring}.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MonitoringService {
@@ -177,9 +179,8 @@ public class MonitoringService {
             monitoringStructureProvider.getMonitoringInitialList(session.getConsultingTypeId()));
 
       } catch (InternalServerErrorException ex) {
-        LogService.logInternalServerError(String.format(
-            "Error during monitoring rollback. Monitoring data could not be deleted for session: %s",
-            session.toString()), ex);
+        log.error("Internal Server Error: Error during monitoring rollback. Monitoring data could "
+            + "not be deleted for session: {}", session, ex);
       }
     }
   }

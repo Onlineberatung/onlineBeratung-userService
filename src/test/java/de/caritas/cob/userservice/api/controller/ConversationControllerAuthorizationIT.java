@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.controller;
 
-import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
-import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.USER_DEFAULT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USER_DEFAULT;
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.ACCEPT_ANONYMOUS_ENQUIRY_PATH;
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.FINISH_ANONYMOUS_CONVERSATION_PATH;
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH;
@@ -9,8 +9,8 @@ import static de.caritas.cob.userservice.api.controller.ConversationControllerIT
 import static de.caritas.cob.userservice.api.controller.ConversationControllerIT.POST_CREATE_ANONYMOUS_ENQUIRY_PATH;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;

@@ -13,17 +13,21 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,6 +42,7 @@ public class CreateSessionFacade {
   private final @NonNull MonitoringService monitoringService;
   private final @NonNull SessionDataService sessionDataService;
   private final @NonNull RollbackFacade rollbackFacade;
+  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
 
   /**
    * Creates a new session for the provided user.
@@ -55,6 +60,46 @@ public class CreateSessionFacade {
     initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
 
     return session.getId();
+  }
+
+  /**
+   * Creates a new session for the provided user and assignes it to given consultant.
+   *
+   * @param userDTO                           {@link UserDTO}
+   * @param user                              {@link User}
+   * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
+   */
+  public NewRegistrationResponseDto createDirectUserSession(String consultantId, UserDTO userDTO,
+      User user, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    var consultant = userAccountProvider.retrieveValidatedConsultantById(consultantId);
+
+    var existingSession = sessionService
+        .findSessionByConsultantAndUserAndConsultingType(consultant, user,
+            extendedConsultingTypeResponseDTO.getId());
+    if (existingSession.isPresent()) {
+      var session = existingSession.get();
+      return new NewRegistrationResponseDto()
+          .sessionId(session.getId())
+          .rcGroupId(session.getGroupId())
+          .status(HttpStatus.CONFLICT);
+    }
+
+    return initializeNewDirectSession(userDTO, user, extendedConsultingTypeResponseDTO, consultant);
+  }
+
+  private NewRegistrationResponseDto initializeNewDirectSession(UserDTO userDTO, User user,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, Consultant consultant) {
+    var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
+    var session = sessionService
+        .initializeDirectSession(consultant, user, userDTO, agencyDTO.getTeamAgency());
+    sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
+    initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
+    session.setConsultant(consultant);
+    sessionService.saveSession(session);
+
+    return new NewRegistrationResponseDto()
+        .sessionId(session.getId())
+        .status(HttpStatus.CREATED);
   }
 
   private void initializeMonitoring(UserDTO userDTO, User user,

@@ -1,163 +1,6 @@
-CREATE TABLE USER
-(
-    USER_ID         varchar(36)  NOT NULL,
-    ID_OLD          bigint(21)   NULL,
-    USERNAME        varchar(255) NOT NULL,
-    EMAIL           varchar(255) NOT NULL,
-    RC_USER_ID      varchar(255) NULL,
-    LANGUAGE_FORMAL tinyint(4)   NOT NULL DEFAULT 0,
-    CREATE_DATE     datetime,
-    UPDATE_DATE     datetime,
-    DELETE_DATE     datetime,
-    MOBILE_TOKEN    longtext              DEFAULT NULL,
-    PRIMARY KEY (USER_ID)
-);
-CREATE SEQUENCE SEQUENCE_USER
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE CONSULTANT
-(
-    CONSULTANT_ID      varchar(36)  NOT NULL,
-    USERNAME           varchar(255) NOT NULL,
-    FIRST_NAME         varchar(255) NOT NULL,
-    LAST_NAME          varchar(255) NOT NULL,
-    EMAIL              varchar(255) NOT NULL,
-    IS_TEAM_CONSULTANT tinyint(4)   NOT NULL DEFAULT 0,
-    IS_ABSENT          tinyint(4)   NOT NULL DEFAULT 0,
-    ABSENCE_MESSAGE    longtext              DEFAULT NULL,
-    LANGUAGE_FORMAL    tinyint(4)   NOT NULL DEFAULT 1,
-    RC_USER_ID         varchar(255) NULL,
-    ID_OLD             bigint(21)   NULL,
-    CREATE_DATE        datetime,
-    UPDATE_DATE        datetime,
-    DELETE_DATE        datetime,
-    PRIMARY KEY (CONSULTANT_ID)
-);
-CREATE SEQUENCE SEQUENCE_CONSULTANT
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE CONSULTANT_AGENCY
-(
-    ID            bigint(21)  NOT NULL,
-    CONSULTANT_ID varchar(36) NOT NULL,
-    AGENCY_ID     bigint(21)  NOT NULL,
-    CREATE_DATE   datetime,
-    UPDATE_DATE   datetime,
-    DELETE_DATE   datetime,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (CONSULTANT_ID) REFERENCES CONSULTANT (CONSULTANT_ID)
-);
-CREATE SEQUENCE SEQUENCE_CONSULTANT_AGENCY
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE USER_AGENCY
-(
-    ID          bigint(21)  NOT NULL,
-    USER_ID     varchar(36) NOT NULL,
-    AGENCY_ID   bigint(21)  NOT NULL,
-    CREATE_DATE datetime,
-    UPDATE_DATE datetime,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (USER_ID) REFERENCES USER (USER_ID)
-);
-CREATE SEQUENCE SEQUENCE_USER_AGENCY
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE SESSION
-(
-    ID                   bigint(21)   NOT NULL,
-    USER_ID              varchar(36)  NOT NULL,
-    CONSULTANT_ID        varchar(36),
-    CONSULTING_TYPE      tinyint(4)   NOT NULL,
-    REGISTRATION_TYPE    varchar(255) NOT NULL DEFAULT 'REGISTERED',
-    MESSAGE_DATE         datetime              DEFAULT NULL,
-    POSTCODE             varchar(5)   NOT NULL,
-    AGENCY_ID            bigint(21)            DEFAULT NULL,
-    RC_GROUP_ID          varchar(255) NULL,
-    RC_FEEDBACK_GROUP_ID varchar(255) NULL,
-    IS_PEER_CHAT         tinyint(4)   NOT NULL DEFAULT '0',
-    STATUS               tinyint(4)   NOT NULL,
-    IS_TEAM_SESSION      tinyint(4)   NOT NULL DEFAULT '0',
-    IS_MONITORING        tinyint(4)   NOT NULL,
-    CREATE_DATE          datetime,
-    UPDATE_DATE          datetime,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (USER_ID) REFERENCES USER (USER_ID),
-    FOREIGN KEY (CONSULTANT_ID) REFERENCES CONSULTANT (CONSULTANT_ID)
-);
-CREATE SEQUENCE SEQUENCE_SESSION
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE SESSION_DATA
-(
-    ID          bigint(21)   NOT NULL,
-    SESSION_ID  bigint(21)   NOT NULL,
-    TYPE        tinyint(4)   NOT NULL,
-    KEY_NAME    varchar(255) NOT NULL,
-    VALUE       varchar(255) DEFAULT NULL,
-    CREATE_DATE datetime,
-    UPDATE_DATE datetime,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (SESSION_ID) REFERENCES SESSION (ID)
-);
-CREATE SEQUENCE SEQUENCE_SESSION_DATA
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE SESSION_MONITORING
-(
-    SESSION_ID  bigint(21)   NOT NULL,
-    TYPE        tinyint(4)   NOT NULL,
-    KEY_NAME    varchar(255) NOT NULL,
-    VALUE       tinyint(1) DEFAULT NULL,
-    CREATE_DATE datetime,
-    UPDATE_DATE datetime,
-    PRIMARY KEY (SESSION_ID, TYPE, KEY_NAME)
-);
-CREATE SEQUENCE SEQUENCE_SESSION_MONITORING
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE SESSION_MONITORING_OPTION
-(
-    SESSION_ID          bigint(21)   NOT NULL,
-    MONITORING_TYPE     tinyint(4)   NOT NULL,
-    MONITORING_KEY_NAME varchar(255) NOT NULL,
-    KEY_NAME            varchar(255) NOT NULL,
-    VALUE               tinyint(1) DEFAULT NULL,
-    CREATE_DATE         datetime,
-    UPDATE_DATE         datetime,
-    PRIMARY KEY (SESSION_ID, MONITORING_TYPE, MONITORING_KEY_NAME, KEY_NAME)
-);
-CREATE SEQUENCE SEQUENCE_SESSION_MONITORING_OPTION
-    START WITH 100000
-    INCREMENT BY 1;
-CREATE TABLE USER_MOBILE_TOKEN
-(
-    ID               bigint(21)  NOT NULL,
-    USER_ID          varchar(36) NOT NULL,
-    MOBILE_APP_TOKEN longtext    NOT NULL,
-    CREATE_DATE      datetime,
-    UPDATE_DATE      datetime,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (USER_ID) REFERENCES USER (USER_ID)
-);
-CREATE SEQUENCE SEQUENCE_USER_MOBILE_TOKEN
-    INCREMENT BY 1
-    START WITH 0;
-
-CREATE TABLE CONSULTANT_MOBILE_TOKEN
-(
-    ID               bigint(21)  NOT NULL,
-    CONSULTANT_ID    varchar(36) NOT NULL,
-    MOBILE_APP_TOKEN longtext    NOT NULL,
-    CREATE_DATE      datetime,
-    UPDATE_DATE      datetime,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (CONSULTANT_ID) REFERENCES CONSULTANT (CONSULTANT_ID)
-);
-CREATE SEQUENCE SEQUENCE_CONSULTANT_MOBILE_TOKEN
-    INCREMENT BY 1
-    START WITH 0;
-INSERT INTO USER (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
+ALTER SEQUENCE sequence_session RESTART WITH 100000;
+ALTER SEQUENCE sequence_consultant_agency RESTART WITH 100000;
+INSERT INTO user (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
                   `language_formal`, `create_date`, `update_date`)
 VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS',
         '015d013d-95e7-4e91-85b5-12cdb3d317f3@beratungcaritas.de', 'dciScSDa9Qm8vmEBB', 1,
@@ -619,7 +462,7 @@ VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMU
        ('opiti0a1-c936-45ee-9141-d73dfc0a3000', 0, NULL, 'enc.ODDAEZGDCHOJDAT5AUWGC43DMAZF2MJQ',
         'opiti0a1-c936-45ee-9141-d73dfc0a3000@beratungcaritas.de', 'atFf3kAfdG23tf3kWf', 1,
         '2018-01-01 11:09:32', '2018-01-01 11:09:32');
-INSERT INTO CONSULTANT (`consultant_id`, `username`, `first_name`, `last_name`, `email`,
+INSERT INTO consultant (`consultant_id`, `username`, `first_name`, `last_name`, `email`,
                         `is_team_consultant`, `is_absent`, `absence_message`, `rc_user_id`,
                         `language_formal`, `id_old`, `delete_date`, `create_date`, `update_date`)
 VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b9', 'enc.MVWWSZ3SMF2GS33OFV2GKYLN', 'Emiration',
@@ -736,7 +579,7 @@ VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b9', 'enc.MVWWSZ3SMF2GS33OFV2GKYLN', 
        ('34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 'enc.AAAW42LPOJUXI6JNMRTFMYLVNR2A....', 'Default',
         'Consultant', 'new@consultant.de', 0, 0, NULL, 'aaa8Fw2juns6FFTks', 1, 0, NULL,
         '2020-10-08 08:54:09', '2020-10-08 08:54:09');
-INSERT INTO CONSULTANT_AGENCY (`id`, `consultant_id`, `agency_id`, `create_date`, `update_date`)
+INSERT INTO consultant_agency (`id`, `consultant_id`, `agency_id`, `create_date`, `update_date`)
 VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '2020-10-08 08:53:55'),
        (1, '88613f5d-0d40-47e0-b323-e792e7fba3ed', 1, '2020-10-08 08:53:56', '2020-10-08 08:53:56'),
        (2, '75abe824-fb42-476d-a52a-66660113bdcc', 0, '2020-10-08 08:53:57', '2020-10-08 08:53:57'),
@@ -859,7 +702,7 @@ VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '20
         '2020-10-08 08:57:45'),
        (62, '66794732-8751-4a06-a786-4849375e8999', 1733, '2020-10-08 08:57:45',
         '2020-10-08 08:57:45');
-INSERT INTO SESSION (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
+INSERT INTO session (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
                      `postcode`, `agency_id`, `rc_group_id`, `rc_feedback_group_id`, `status`,
                      `is_team_session`, `is_monitoring`, `create_date`, `update_date`)
 VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb636a5b399', 0,
@@ -1307,8 +1150,3 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
        (1212, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
         '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 3, 0, 1,
         '2020-10-08 09:03:47', '2020-10-08 09:03:48');
-INSERT INTO USER_AGENCY (`id`, `user_id`, `agency_id`, `create_date`, `update_date`)
-VALUES (0, 'opiti0a1-c936-45ee-9141-d73dfc0a3000', 777, '2020-02-05 11:09:32',
-        '2020-02-05 11:09:32');
-
-

@@ -5,16 +5,16 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.authorization.Authority;
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.config.auth.Authority;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Service;
  * Helper class for the KeycloakService. Communicates to the Keycloak Admin API over the Keycloak
  * Admin Client.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KeycloakAdminClientService {
@@ -49,16 +51,11 @@ public class KeycloakAdminClientService {
   @Value("${api.error.keycloakError}")
   private String keycloakError;
 
-  @Value("${keycloakApi.error.username}")
-  private String keycloakErrorUsername;
-
-  @Value("${keycloakApi.error.email}")
-  private String keycloakErrorEmail;
-
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   private final @NonNull UserHelper userHelper;
   private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private final IdentityClientConfig identityClientConfig;
 
   /**
    * Creates a user in Keycloak and returns its Keycloak user ID.
@@ -95,10 +92,10 @@ public class KeycloakAdminClientService {
 
   private void handleCreateKeycloakUserError(Response response) {
     String errorMsg = response.readEntity(ErrorRepresentation.class).getErrorMessage();
-    if (errorMsg.equals(keycloakErrorEmail)) {
+    if (errorMsg.equals(identityClientConfig.getErrorMessageDuplicatedEmail())) {
       throw new CustomValidationHttpStatusException(EMAIL_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
-    if (errorMsg.equals(keycloakErrorUsername)) {
+    if (errorMsg.equals(identityClientConfig.getErrorMessageDuplicatedUsername())) {
       throw new CustomValidationHttpStatusException(USERNAME_NOT_AVAILABLE, HttpStatus.CONFLICT);
     }
   }
@@ -218,7 +215,7 @@ public class KeycloakAdminClientService {
     List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
     for (RoleRepresentation role : userRoles) {
       if (role.toString().equalsIgnoreCase(roleName)) {
-        LogService.logDebug(String.format("Added role \"user\" to %s", userId));
+        log.debug("Added role \"user\" to {}", userId);
         isRoleUpdated = true;
       }
     }
@@ -240,7 +237,7 @@ public class KeycloakAdminClientService {
         .get(userId);
 
     userResource.resetPassword(newCredentials);
-    LogService.logDebug(String.format("Updated user credentials for %s", userId));
+    log.debug("Updated user credentials for {}", userId);
   }
 
   /**
@@ -258,9 +255,18 @@ public class KeycloakAdminClientService {
         .get(userId);
 
     userResource.update(getUserRepresentation(user, null, null));
-    LogService.logDebug(String.format("Set email dummy for %s to %s", userId, dummyEmail));
+    log.debug("Set email dummy for {} to {}", userId, dummyEmail);
 
     return dummyEmail;
+  }
+
+  /**
+   * Sets a user's dummy email
+   *
+   * @param userId user ID
+   */
+  public void updateDummyEmail(String userId) {
+    updateEmail(userId, userHelper.getDummyEmail(userId));
   }
 
   /**
@@ -312,10 +318,9 @@ public class KeycloakAdminClientService {
   public void rollBackUser(String userId) {
     try {
       deleteUser(userId);
-      LogService.logDebug(String.format("User %s has been removed due to rollback", userId));
+      log.debug("User {} has been removed due to rollback", userId);
     } catch (Exception e) {
-      LogService
-          .logKeycloakError(String.format("User could not be removed/rolled back: %s", userId));
+      log.error("Keycloak error: User could not be removed/rolled back: {}", userId);
     }
   }
 
@@ -347,7 +352,7 @@ public class KeycloakAdminClientService {
           .anyMatch(currentAuthority -> currentAuthority.contains(authority));
     } catch (Exception ex) {
       var error = String.format("Could not get roles for user id %s", userId);
-      LogService.logKeycloakError(error, ex);
+      log.error("Keycloak error: " + error, ex);
       throw new KeycloakException(error);
     }
   }
@@ -369,7 +374,7 @@ public class KeycloakAdminClientService {
           .anyMatch(userRole::equals);
     } catch (Exception ex) {
       var error = String.format("Could not get roles for user id %s", userId);
-      LogService.logKeycloakError(error, ex);
+      log.error("Keycloak error: " + error, ex);
       throw new KeycloakException(error);
     }
   }

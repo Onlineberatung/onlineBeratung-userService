@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_AGENCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_AGENCY_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_AGENCY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_AGENCY_LIST;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;

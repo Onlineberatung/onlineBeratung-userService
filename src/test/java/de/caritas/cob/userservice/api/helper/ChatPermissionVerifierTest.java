@@ -1,16 +1,16 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_3;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID_3;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
@@ -97,8 +97,9 @@ public class ChatPermissionVerifierTest {
 
   @Test
   public void isChatAgenciesContainUserAgency_Should_ReturnTrue_WhenChatAgenciesContainUserAgency() {
-    UserAgency[] userAgencyArray = new UserAgency[]{new UserAgency(AGENCY_ID, user, AGENCY_ID),
-        new UserAgency(AGENCY_ID_2, user, AGENCY_ID_2)};
+    UserAgency[] userAgencyArray = new UserAgency[]{
+        new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
+        new UserAgency(AGENCY_ID_2, user, AGENCY_ID_2, null, null)};
     Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
@@ -108,8 +109,9 @@ public class ChatPermissionVerifierTest {
 
   @Test
   public void isChatAgenciesContainUserAgency_Should_ReturnFalse_WhenChatAgenciesNotContainUserAgency() {
-    UserAgency[] userAgencyArray = new UserAgency[]{new UserAgency(AGENCY_ID, user, AGENCY_ID),
-        new UserAgency(AGENCY_ID_3, user, AGENCY_ID_3)};
+    UserAgency[] userAgencyArray = new UserAgency[]{
+        new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
+        new UserAgency(AGENCY_ID_3, user, AGENCY_ID_3, null, null)};
     Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);

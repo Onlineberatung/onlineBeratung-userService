@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service.rocketchat;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -10,11 +10,11 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
-import de.caritas.cob.userservice.api.service.LogService;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +26,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RocketChatCredentialsProvider {
@@ -215,7 +216,6 @@ public class RocketChatCredentialsProvider {
    * @return true if logout was successful
    */
   public boolean logoutUser(String rcUserId, String rcAuthToken) {
-
     try {
       var headers = getStandardHttpHeaders(rcAuthToken, rcUserId);
 
@@ -227,8 +227,7 @@ public class RocketChatCredentialsProvider {
       return response.getStatusCode() == HttpStatus.OK;
 
     } catch (Exception ex) {
-      LogService.logRocketChatError(
-          String.format("Could not log out user id (%s) from Rocket.Chat", rcUserId), ex);
+      log.error("Rocket.Chat Error: Could not log out user id ({}) from Rocket.Chat", rcUserId, ex);
 
       return false;
     }

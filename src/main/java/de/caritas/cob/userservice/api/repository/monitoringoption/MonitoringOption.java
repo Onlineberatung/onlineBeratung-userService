@@ -35,7 +35,7 @@ public class MonitoringOption {
   private Long sessionId;
 
   @Id
-  @Column(name = "monitoring_type", updatable = false, nullable = false)
+  @Column(name = "monitoring_type", updatable = false, nullable = false, columnDefinition = "tinyint(4) unsigned")
   @NonNull
   private MonitoringType monitoringType;
 

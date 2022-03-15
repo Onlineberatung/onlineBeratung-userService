@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GRANTED_AUTHORIZATION_USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_WITH_SESSIONS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_KREUZBUND;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GRANTED_AUTHORIZATION_USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_WITH_SESSIONS;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;

@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api.service.statistics;
 
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.statistics.event.StatisticsEvent;
 import java.nio.charset.StandardCharsets;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-/** Service class for the processing of statistical events. */
+/**
+ * Service class for the processing of statistical events.
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StatisticsService {
@@ -45,10 +48,11 @@ public class StatisticsService {
                           .setContentType(MessageProperties.CONTENT_TYPE_JSON)
                           .build()),
               () ->
-                  LogService.logStatisticsEventWarning(
-                      String.format(
-                          "Empty statistics event message payload for type %s received",
-                          statisticsEvent.getClass().getSimpleName())));
+                  log.warn(
+                      "StatisticsEventProcessing warning: Empty statistics event message payload for type {} received",
+                      statisticsEvent.getClass().getSimpleName()
+                  )
+          );
     }
   }
 }

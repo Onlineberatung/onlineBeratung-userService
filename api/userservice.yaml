@@ -64,8 +64,11 @@ paths:
         403:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
         409:
-          description: CONFLICT - user is already registered for provided consulting
-            type
+          description: CONFLICT - user is already registered for provided consulting type or to given consultant
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NewRegistrationResponseDto'
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -314,6 +317,35 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/consultants/languages:
+    get:
+      tags:
+        - user-controller
+      summary: 'Get the languages of all consultants who work for the given agency
+       [Authorization: none]'
+      operationId: getLanguages
+      parameters:
+        - name: agencyId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/LanguageResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        404:
+          description: NOT FOUND - Agency not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /users/data:
     get:
       tags:
@@ -365,6 +397,31 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+    patch:
+      tags:
+        - user-controller
+      summary: 'Updates an account property of the currently authenticated user'
+      description: 'The only supported field so far is encourage2fa [Authorization: Role: consultant, user]'
+      operationId: patchUser
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/PatchUserDTO'
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/email:
     put:
       tags:
@@ -389,6 +446,25 @@ paths:
           description: FORBIDDEN - no/invalid role/authorization or CSRF token
         409:
           description: CONFLICT - invalid/unavailable email
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    delete:
+      tags:
+        - user-controller
+      summary: 'Deletes the email address of the authorized user account [Authorization:
+          Role: asker/consultant]'
+      operationId: deleteEmailAddress
+      responses:
+        200:
+          description: OK - successful operation
+        400:
+          description: BAD REQUEST - invalid request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -731,6 +807,34 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/consultants/{consultantId}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns registration relevant data of a consultant [Authorization: none]'
+      operationId: getConsultantPublicData
+      parameters:
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ConsultantResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - invalid/unavailable username
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /users/sessions/{sessionId}/consultant/{consultantId}:
     put:
       tags:
@@ -1208,17 +1312,74 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/twoFactorAuth:
+  /users/2fa/email:
     put:
       tags:
         - user-controller
-      summary: 'Activates Two-Factor Authentication for a user'
-      operationId: activateTwoFactorAuthForUser
+      summary: 'Starts 2FA activation process by email [authorities: consultant or user]'
+      operationId: startTwoFactorAuthByEmailSetup
       requestBody:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/ActivateTwoFactorAuthUserDTO'
+              $ref: '#/components/schemas/EmailDTO'
+        required: true
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        412:
+          description: PRECONDITION FAILED - another user owns this email
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/2fa/email/validate/{tan}:
+    post:
+      tags:
+        - user-controller
+      summary: 'Finishes 2FA activation process by email [authorities: consultant or user]'
+      operationId: finishTwoFactorAuthByEmailSetup
+      parameters:
+        - name: tan
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "[0-9]{6}"
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        412:
+          description: PRECONDITION FAILED - already set up
+        429:
+          description: TOO MANY REQUESTS - maximum number of attempts has been reached
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/2fa/app:
+    put:
+      tags:
+        - user-controller
+      summary: 'Activates 2FA by mobile app [authorities: consultant or user]'
+      operationId: activateTwoFactorAuthByApp
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/OneTimePasswordDTO'
         required: true
       responses:
         200:
@@ -1235,12 +1396,12 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
+  /users/2fa:
     delete:
       tags:
         - user-controller
-      summary: 'Deletes the Two-Factor Authentication for a user'
-      operationId: deleteTwoFactorAuthForUser
+      summary: 'Deactivates 2FA by mobile app [authorities: consultant or user]'
+      operationId: deactivateTwoFactorAuthByApp
       responses:
         200:
           description: OK - successful operation
@@ -1254,7 +1415,52 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
+  /users/twoFactorAuth:
+    description: deprecated
+    put:
+      tags:
+        - user-controller
+      summary: 'Activates 2FA by mobile app [authorities: consultant or user]'
+      operationId: activateTwoFactorAuthByAppDeprecated
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/OneTimePasswordDTO'
+        required: true
+      responses:
+        200:
+          description: OK - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        409:
+          description: CONFLICT - role from the request has no two factor auth enabled
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    delete:
+      tags:
+        - user-controller
+      summary: 'Deactivates 2FA by mobile app [authorities: consultant or user]'
+      operationId: deactivateTwoFactorAuthByAppDeprecated
+      responses:
+        200:
+          description: OK - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /liveproxy/send:
     post:
       tags:
@@ -1317,6 +1523,9 @@ components:
         consultingType:
           type: string
           example: 3
+        consultantId:
+          type: string
+          description: UUID
 
     SessionDataDTO:
       allOf:
@@ -1418,6 +1627,8 @@ components:
           minLength: 1
           maxLength: 5
           example: 79098
+        language:
+          $ref: '#/components/schemas/LanguageCode'
         groupId:
           type: string
           example: xGklslk2JJKK
@@ -1727,6 +1938,8 @@ components:
         message:
           type: string
           example: Lorem ipsum dolor sit amet, consetetur...
+        language:
+          $ref: '#/components/schemas/LanguageCode'
 
     CreateEnquiryMessageResponseDTO:
       type: object
@@ -1775,6 +1988,13 @@ components:
         isFormalLanguage:
           type: boolean
           example: true
+        languages:
+          type: array
+          items:
+            type: string
+            description: each an ISO 639-1 code
+            default: de
+            example: de, en
         absenceMessage:
           type: string
           example: Bin mal weg...
@@ -1807,6 +2027,16 @@ components:
           example: true
           description: "Is true if consultant has access to archive"
 
+    PatchUserDTO:
+      type: object
+      required:
+        - encourage2fa
+      properties:
+        encourage2fa:
+          type: boolean
+          example: true
+          description: indicates if 2FA is supposed to be encouraged
+
     UpdateConsultantDTO:
       type: object
       required:
@@ -1828,6 +2058,34 @@ components:
           type: string
           format: email
           example: "maxmuster@mann.com"
+        languages:
+          type: array
+          example: de, en
+          items:
+            $ref: '#/components/schemas/LanguageCode'
+
+    LanguageCode:
+      type: string
+      description: ISO 639-1 code
+      enum: [
+        aa, ab, ae, af, ak, am, an, ar, as, av, ay, az, ba, be, bg, bh, bi, bm, bn, bo, br,
+        bs, ca, ce, ch, co, cr, cs, cu, cv, cy, da, de, dv, dz, ee, el, en, eo, es, et, eu,
+        fa, ff, fi, fj, fo, fr, fy, ga, gd, gl, gn, gu, gv, ha, he, hi, ho, hr, ht, hu, hy,
+        hz, ia, id, ie, ig, ii, ik, io, is, it, iu, ja, jv, ka, kg, ki, kj, kk, kl, km, kn,
+        ko, kr, ks, ku, kv, kw, ky, la, lb, lg, li, ln, lo, lt, lu, lv, mg, mh, mi, mk, ml,
+        mn, mr, ms, mt, my, na, nb, nd, ne, ng, nl, nn, no, nr, nv, ny, oc, oj, om, or, os,
+        pa, pi, pl, ps, pt, qu, rm, rn, ro, ru, rw, sa, sc, sd, se, sg, si, sk, sl, sm, sn,
+        so, sq, sr, ss, st, su, sv, sw, ta, te, tg, th, ti, tk, tl, tn, to, tr, ts, tt, tw,
+        ty, ug, uk, ur, uz, ve, vi, vo, wa, wo, xh, yi, yo, za, zh, zu
+      ]
+
+    LanguageResponseDTO:
+      type: object
+      properties:
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageCode'
 
     ConsultingTypeMap:
       type: object
@@ -1895,6 +2153,10 @@ components:
         lastName:
           type: string
           example: Mustermann
+        agencies:
+          type: array
+          items:
+            $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
 
     PasswordDTO:
       type: object
@@ -2021,6 +2283,9 @@ components:
         consultingType:
           type: string
           example: 1
+        consultantId:
+          type: string
+          description: used for direct consultant registration
 
     NewRegistrationResponseDto:
       type: object
@@ -2028,6 +2293,8 @@ components:
         sessionId:
           type: integer
           format: int64
+        rcGroupId:
+          type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
 
@@ -2062,7 +2329,17 @@ components:
           type: string
           example: p@ssw0rd
 
-    ActivateTwoFactorAuthUserDTO:
+    EmailDTO:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: max.mustermann@domain.de
+
+    OneTimePasswordDTO:
       type: object
       required:
         - secret
@@ -2079,17 +2356,36 @@ components:
 
     TwoFactorAuthDTO:
       type: object
+      required:
+        - isEnabled
+        - isActive
       properties:
         isEnabled:
           type: boolean
           example: true
+          default: false
         isActive:
           type: boolean
           example: true
+          default: false
         secret:
           type: string
         qrCode:
           type: string
+        type:
+          $ref: "#/components/schemas/OtpType"
+        isToEncourage:
+          type: boolean
+          example: true
+          default: true
+          nullable: false
+          description: indicates if 2FA is supposed to be encouraged
+
+    OtpType:
+      type: string
+      enum:
+        - EMAIL
+        - APP
 
   securitySchemes:
     Bearer:

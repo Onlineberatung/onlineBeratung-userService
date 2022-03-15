@@ -1,61 +1,64 @@
 package de.caritas.cob.userservice.api.controller;
 
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_CONSULTANTS;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_ENQUIRIES_FOR_AGENCY;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_MONITORING;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_OPEN_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_SESSION_FOR_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_GET_USER_DATA;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_CHAT_NEW;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS_WITHOUT_SESSION;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_IMPORT_CONSULTANTS;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_NEW_MESSAGE_NOTIFICATION;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_POST_REGISTER_USER;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_START;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CHAT_STOP;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_CONSULTANT_ABSENT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_JOIN_CHAT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_LEAVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_MONITORING;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
-import static de.caritas.cob.userservice.testHelper.PathConstants.PATH_UPDATE_KEY;
-import static de.caritas.cob.userservice.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.VALID_OTP_SETUP_DTO;
+import static de.caritas.cob.userservice.api.controller.UserControllerIT.PATH_GET_PUBLIC_CONSULTANT_DATA;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DEARCHIVE_SESSION;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_DELETE_FLAG_USER_DELETED;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CONSULTANTS;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_ENQUIRIES_FOR_AGENCY;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_MONITORING;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_OPEN_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSION_FOR_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_USER_DATA;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_IMPORT_ASKERS_WITHOUT_SESSION;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_IMPORT_CONSULTANTS;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_NEW_MESSAGE_NOTIFICATION;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_USER;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_CHAT_START;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_CHAT_STOP;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_CONSULTANT_ABSENT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_JOIN_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_LEAVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_MONITORING;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_UPDATE_KEY;
+import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_UPDATE_CHAT_BODY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.IdentityManager;
+import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.facade.CreateSessionFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.GetChatFacade;
@@ -63,16 +66,20 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
-import de.caritas.cob.userservice.api.facade.userdata.UserDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
+import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.session.SessionRepository;
 import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.repository.user.UserRepository;
@@ -80,9 +87,8 @@ import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
-import de.caritas.cob.userservice.api.service.KeycloakService;
-import de.caritas.cob.userservice.api.service.KeycloakTwoFactorAuthService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
@@ -91,11 +97,14 @@ import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import java.util.Optional;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.common.util.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -116,6 +125,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class UserControllerAuthorizationIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
@@ -149,7 +159,9 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private ConsultantAgencyService consultantAgencyService;
   @MockBean
-  private KeycloakService keycloakService;
+  private IdentityClient identityClient;
+  @MockBean
+  private IdentityManager identityManager;
   @MockBean
   private DecryptionService encryptionService;
   @MockBean
@@ -177,11 +189,13 @@ public class UserControllerAuthorizationIT {
   @MockBean
   private SessionDataService sessionDataService;
   @MockBean
-  private UserDataFacade userDataFacade;
-  @MockBean
   private SessionArchiveService sessionArchiveService;
   @MockBean
-  private KeycloakTwoFactorAuthService keycloakTwoFactorAuthService;
+  private ConsultantUpdateService consultantUpdateService;
+  @MockBean
+  private ConsultantService consultantService;
+  @MockBean
+  private AskerDataProvider askerDataProvider;
 
   /**
    * POST on /users/askers/new
@@ -286,7 +300,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_OPEN_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
@@ -301,8 +315,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            get(PATH_GET_ENQUIRIES_FOR_AGENCY).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        get(PATH_GET_ENQUIRIES_FOR_AGENCY).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
@@ -323,8 +337,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            get(PATH_GET_ENQUIRIES_FOR_AGENCY).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        get(PATH_GET_ENQUIRIES_FOR_AGENCY).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
@@ -349,7 +363,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_ACCEPT_ENQUIRY + "/1").cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
@@ -369,7 +383,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_ACCEPT_ENQUIRY + "/1").cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
@@ -395,8 +409,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_CREATE_ENQUIRY_MESSAGE).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        post(PATH_CREATE_ENQUIRY_MESSAGE).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository, userService,
@@ -418,8 +432,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_CREATE_ENQUIRY_MESSAGE).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        post(PATH_CREATE_ENQUIRY_MESSAGE).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository, userService,
@@ -480,7 +494,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
@@ -495,7 +509,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantDataFacade, logService);
@@ -515,7 +529,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_CONSULTANT_ABSENT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantDataFacade, logService);
@@ -573,7 +587,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService);
@@ -584,7 +598,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_USER_DATA).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantDataFacade, logService);
@@ -603,7 +617,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_USER_DATA).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantDataFacade, logService);
@@ -661,7 +675,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService);
@@ -676,8 +690,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_POST_NEW_MESSAGE_NOTIFICATION).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        post(PATH_POST_NEW_MESSAGE_NOTIFICATION).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(emailNotificationFacade, authenticatedUser);
@@ -696,8 +710,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_POST_NEW_MESSAGE_NOTIFICATION).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        post(PATH_POST_NEW_MESSAGE_NOTIFICATION).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(emailNotificationFacade, authenticatedUser);
@@ -723,8 +737,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_POST_IMPORT_CONSULTANTS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        post(PATH_POST_IMPORT_CONSULTANTS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantImportService);
@@ -742,8 +756,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(
-            post(PATH_POST_IMPORT_CONSULTANTS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        post(PATH_POST_IMPORT_CONSULTANTS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantImportService);
@@ -768,7 +782,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_GET_MONITORING).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
@@ -786,7 +800,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_GET_MONITORING).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
@@ -811,7 +825,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_MONITORING).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
@@ -829,7 +843,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_MONITORING).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
@@ -855,7 +869,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_POST_IMPORT_ASKERS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(askerImportService);
@@ -873,7 +887,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_POST_IMPORT_ASKERS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(askerImportService);
@@ -899,7 +913,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_POST_IMPORT_ASKERS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(askerImportService);
@@ -930,12 +944,23 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_POST_IMPORT_ASKERS_WITHOUT_SESSION)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(askerImportService);
   }
 
+  @Test
+  public void getLanguages_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens()
+      throws Exception {
+    mvc.perform(
+        post("/users/consultants/languages")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAgencyService);
+  }
 
   /**
    * GET on /users/consultants (authority: VIEW_AGENCY_CONSULTANTS)
@@ -946,7 +971,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_CONSULTANTS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAgencyService);
@@ -967,7 +992,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_CONSULTANTS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAgencyService);
@@ -993,7 +1018,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantDataFacade, sessionService);
@@ -1018,10 +1043,10 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService, authenticatedUser);
+    verifyNoMoreInteractions(identityClient, authenticatedUser);
   }
 
   @Test
@@ -1037,10 +1062,10 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService, authenticatedUser);
+    verifyNoMoreInteractions(identityClient, authenticatedUser);
   }
 
   @Test
@@ -1052,7 +1077,7 @@ public class UserControllerAuthorizationIT {
     mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService, authenticatedUser);
+    verifyNoMoreInteractions(identityClient, authenticatedUser);
   }
 
   /**
@@ -1064,7 +1089,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_UPDATE_KEY).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(encryptionService);
@@ -1085,7 +1110,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_UPDATE_KEY).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(encryptionService);
@@ -1110,7 +1135,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_POST_CHAT_NEW).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
@@ -1132,7 +1157,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(post(PATH_POST_CHAT_NEW).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
@@ -1156,7 +1181,7 @@ public class UserControllerAuthorizationIT {
   public void createChat_Should_ReturnBadRequest_WhenProperlyAuthorized() throws Exception {
 
     mvc.perform(post(PATH_POST_CHAT_NEW).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -1168,7 +1193,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_START).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
@@ -1192,7 +1217,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_START).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
@@ -1219,7 +1244,7 @@ public class UserControllerAuthorizationIT {
   public void startChat_Should_ReturnBadRequest_WhenProperlyAuthorized() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_START).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -1231,7 +1256,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_JOIN_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
@@ -1254,7 +1279,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_JOIN_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
@@ -1283,7 +1308,7 @@ public class UserControllerAuthorizationIT {
   public void joinChat_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(put(PATH_PUT_JOIN_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1292,7 +1317,7 @@ public class UserControllerAuthorizationIT {
   public void joinChat_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(put(PATH_PUT_JOIN_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1304,7 +1329,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(getChatFacade);
@@ -1328,7 +1353,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(getChatFacade);
@@ -1357,7 +1382,7 @@ public class UserControllerAuthorizationIT {
   public void getChat_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1366,7 +1391,7 @@ public class UserControllerAuthorizationIT {
   public void getChat_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1378,7 +1403,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
@@ -1401,7 +1426,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
@@ -1426,7 +1451,7 @@ public class UserControllerAuthorizationIT {
   public void stopChat_Should_ReturnBadRequest_WhenProperlyAuthorized() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_STOP).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -1437,7 +1462,7 @@ public class UserControllerAuthorizationIT {
   public void getChatMembers_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
       throws Exception {
     mvc.perform(put(PATH_GET_CHAT_MEMBERS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(getChatMembersFacade);
@@ -1463,7 +1488,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT_MEMBERS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(getChatMembersFacade);
@@ -1497,7 +1522,7 @@ public class UserControllerAuthorizationIT {
   public void getChatMembers_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT_MEMBERS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1506,7 +1531,7 @@ public class UserControllerAuthorizationIT {
   public void getChatMembers_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(get(PATH_GET_CHAT_MEMBERS).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1518,7 +1543,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_LEAVE_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
@@ -1541,7 +1566,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_LEAVE_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
@@ -1570,7 +1595,7 @@ public class UserControllerAuthorizationIT {
   public void leaveChat_Should_ReturnOK_WhenProperlyAuthorizedAsConsultant() throws Exception {
 
     mvc.perform(put(PATH_PUT_LEAVE_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1579,7 +1604,7 @@ public class UserControllerAuthorizationIT {
   public void leaveChat_Should_ReturnOK_WhenProperlyAuthorizedAsUser() throws Exception {
 
     mvc.perform(put(PATH_PUT_LEAVE_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1591,7 +1616,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(chatService);
@@ -1609,7 +1634,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_CHAT).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(chatService);
@@ -1676,7 +1701,7 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(get(PATH_GET_SESSION_FOR_CONSULTANT)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(authenticatedUser, sessionService);
@@ -1687,13 +1712,13 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1708,13 +1733,13 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1723,11 +1748,11 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1736,11 +1761,68 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_EMAIL)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("email")
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("email")
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void deleteEmailAddress_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
+      throws Exception {
+
+    mvc.perform(delete("/users/email")
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(identityClient);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  public void deleteEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoUserOrConsultantAuthority()
+      throws Exception {
+
+    mvc.perform(delete("/users/email")
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(identityClient);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void deleteEmailAddress_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfToken()
+      throws Exception {
+
+    mvc.perform(delete("/users/email")
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(identityClient);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void deleteEmailAddress_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
+      throws Exception {
+
+    mvc.perform(delete("/users/email")
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1749,13 +1831,13 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1771,13 +1853,13 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1786,11 +1868,11 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -1799,12 +1881,12 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(new DeleteUserAccountDTO().password(
-                "passwort")))
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(new DeleteUserAccountDTO().password(
+            "passwort")))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1813,10 +1895,10 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(validatedUserAccountProvider);
@@ -1834,10 +1916,10 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(validatedUserAccountProvider);
@@ -1849,8 +1931,8 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(validatedUserAccountProvider);
@@ -1862,12 +1944,12 @@ public class UserControllerAuthorizationIT {
       throws Exception {
 
     mvc.perform(put(PATH_PUT_UPDATE_MOBILE_TOKEN)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token(
-                "token")))
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token(
+            "token")))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -1875,10 +1957,10 @@ public class UserControllerAuthorizationIT {
   public void updateSessionData_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(sessionDataService);
@@ -1895,10 +1977,10 @@ public class UserControllerAuthorizationIT {
   public void updateSessionData_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(sessionDataService);
@@ -1909,8 +1991,8 @@ public class UserControllerAuthorizationIT {
   public void updateSessionData_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(put(PATH_PUT_UPDATE_SESSION_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(sessionDataService);
@@ -1927,6 +2009,48 @@ public class UserControllerAuthorizationIT {
             .content(new ObjectMapper().writeValueAsString(new SessionDataDTO().age("2")))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void patchUser_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
+      throws Exception {
+    mvc.perform(
+            patch(PATH_GET_USER_DATA)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  public void patchUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+      throws Exception {
+    mvc.perform(
+            patch(PATH_GET_USER_DATA)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void patchUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+      throws Exception {
+    mvc.perform(
+            patch(PATH_GET_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
   }
 
   @Test
@@ -1953,10 +2077,10 @@ public class UserControllerAuthorizationIT {
   public void updateUserData_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_GET_USER_DATA)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantDataFacade);
@@ -1967,8 +2091,8 @@ public class UserControllerAuthorizationIT {
   public void updateUserData_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
     mvc.perform(put(PATH_GET_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantDataFacade);
@@ -1978,17 +2102,17 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void updateUserData_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
+    var consultant = givenAValidConsultant();
+    var updateConsultantDTO = givenAMinimalUpdateConsultantDto(consultant.getEmail());
+    when(consultantUpdateService.updateConsultant(anyString(), any())).thenReturn(consultant);
+
     mvc.perform(put(PATH_GET_USER_DATA)
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(
-                new UpdateConsultantDTO().email("mail@mail.de").firstname("firstname").lastname(
-                    "lastname")))
+            .content(objectMapper.writeValueAsString(updateConsultantDTO))
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-
-    verify(this.consultantDataFacade).updateConsultantData(any());
   }
 
   @Test
@@ -1998,7 +2122,8 @@ public class UserControllerAuthorizationIT {
     when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
     when(this.validatedUserAccountProvider.retrieveValidatedUser())
         .thenReturn(new EasyRandom().nextObject(User.class));
-    when(this.userDataFacade.buildUserDataByRole()).thenReturn(new UserDataResponseDTO());
+    when(askerDataProvider.retrieveData(any())).thenReturn(easyRandom.nextObject(
+        UserDataResponseDTO.class));
 
     mvc.perform(get(PATH_GET_USER_DATA)
             .cookie(CSRF_COOKIE)
@@ -2006,8 +2131,6 @@ public class UserControllerAuthorizationIT {
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-
-    verify(this.userDataFacade).buildUserDataByRole();
   }
 
   @Test
@@ -2019,11 +2142,11 @@ public class UserControllerAuthorizationIT {
         .thenReturn(new EasyRandom().nextObject(User.class));
 
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
   }
 
@@ -2032,8 +2155,8 @@ public class UserControllerAuthorizationIT {
   public void archiveSession_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_ARCHIVE_SESSION)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(this.sessionArchiveService).archiveSession(any());
@@ -2061,8 +2184,8 @@ public class UserControllerAuthorizationIT {
   public void archiveSession_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_ARCHIVE_SESSION)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(sessionArchiveService);
@@ -2072,8 +2195,8 @@ public class UserControllerAuthorizationIT {
   public void archiveSession_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     mvc.perform(put(PATH_ARCHIVE_SESSION)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(sessionArchiveService);
@@ -2084,8 +2207,8 @@ public class UserControllerAuthorizationIT {
   public void dearchiveSession_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(this.sessionArchiveService).dearchiveSession(any());
@@ -2112,8 +2235,8 @@ public class UserControllerAuthorizationIT {
   public void dearchiveSession_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(sessionArchiveService);
@@ -2123,8 +2246,8 @@ public class UserControllerAuthorizationIT {
   public void dearchiveSession_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(sessionArchiveService);
@@ -2135,10 +2258,10 @@ public class UserControllerAuthorizationIT {
   public void addMobileAppToken_Should_ReturnOK_When_ProperlyAuthorizedWithConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)
-            .cookie(CSRF_COOKIE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token("test")))
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(new MobileTokenDTO().token("test")))
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(this.validatedUserAccountProvider).addMobileAppToken("test");
@@ -2165,8 +2288,8 @@ public class UserControllerAuthorizationIT {
   public void addMobileAppToken_Should_ReturnForbiddenAndCallNoMethods_When_NoConsultantAuthority()
       throws Exception {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(validatedUserAccountProvider);
@@ -2176,8 +2299,8 @@ public class UserControllerAuthorizationIT {
   public void addMobileAppToken_Should_ReturnUnauthorizedAndCallNoMethods_When_NoKeycloakAuthorization()
       throws Exception {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(validatedUserAccountProvider);
@@ -2196,7 +2319,7 @@ public class UserControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE)
     ).andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2210,7 +2333,7 @@ public class UserControllerAuthorizationIT {
         delete(path)
     ).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2234,7 +2357,7 @@ public class UserControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE)
     ).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(keycloakService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
@@ -2255,103 +2378,238 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+  public void deactivateTwoFactorAuthByApp_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(delete("/users/twoFactorAuth")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService).deleteOtpCredential(any());
+    verify(identityManager).deleteOneTimePassword(any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  public void deactivate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    mvc.perform(
+            delete("/users/2fa")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(identityManager).deleteOneTimePassword(any());
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
       AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
       AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
-  public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+  public void deactivateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(delete("/users/twoFactorAuth")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+  public void deactivateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(delete(PATH_DELETE_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(delete("/users/twoFactorAuth")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+  public void startTwoFactorAuthByEmailSetup_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(
-            VALID_OTP_SETUP_DTO))
-        .accept(MediaType.APPLICATION_JSON))
+    var payload = givenAValidEmailDTO();
+
+    mvc.perform(put("/users/2fa/email")
+            .content(objectMapper.writeValueAsString(payload))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  public void startTwoFactorAuthByEmailSetup_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+      throws Exception {
+    var payload = givenAValidEmailDTO();
+
+    mvc.perform(put("/users/2fa/email")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(payload))
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    var payload = givenAValidOneTimePasswordDto();
+    givenAValidOtpResponse();
+
+    mvc.perform(put("/users/2fa/app")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(payload))
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  public void activateTwoFactorAuthByApp_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
+      throws Exception {
+    var payload = givenAValidOneTimePasswordDto();
+    givenAValidOtpResponse();
+
+    mvc.perform(put("/users/twoFactorAuth")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(payload))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.keycloakTwoFactorAuthService).setUpOtpCredential(any(), any());
+    verify(identityManager).setUpOneTimePassword(any(), any(), any());
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUser_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
+  public void activateTwoFactorAuthByApp_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
       throws Exception {
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(put("/users/twoFactorAuth")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
       AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
       AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
-  public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
+  public void activateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+    mvc.perform(put("/users/twoFactorAuth")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoMoreInteractions(identityClient);
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUser_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
+  public void activateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(put(PATH_PUT_ACTIVATE_TWO_FACTOR_AUTH)
+    mvc.perform(put("/users/twoFactorAuth")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(identityClient);
+  }
+
+  @Test
+  public void getConsultantPublicData_Should_ReturnForbiddenAndCallNoMethods_When_noCsrfTokens()
+      throws Exception {
+
+    mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA)
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(this.keycloakTwoFactorAuthService);
+    verifyNoInteractions(consultantAgencyService);
+  }
+
+  @Test
+  public void getConsultantPublicData_Should_ReturnOk_When_CsrfTokensAreGiven()
+      throws Exception {
+    givenAValidConsultant();
+
+    mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA)
+        .contentType(MediaType.APPLICATION_JSON)
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(consultantAgencyService).getAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
+  }
+
+  private UpdateConsultantDTO givenAMinimalUpdateConsultantDto(String email) {
+    return new UpdateConsultantDTO()
+        .email(email).firstname("firstname").lastname("lastname");
+  }
+
+  private OneTimePasswordDTO givenAValidOneTimePasswordDto() {
+    return new OneTimePasswordDTO().otp("111111")
+        .secret(new RandomString(32).nextString());
+  }
+
+  private Consultant givenAValidConsultant() {
+    var consultant = easyRandom.nextObject(Consultant.class);
+    consultant.setEmail(
+        RandomStringUtils.randomAlphabetic(8) + "@" + RandomStringUtils.randomAlphabetic(8) + ".com"
+    );
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
+
+    return consultant;
+  }
+
+  private EmailDTO givenAValidEmailDTO() {
+    var email = RandomStringUtils.randomAlphabetic(8)
+        + "@" + RandomStringUtils.randomAlphabetic(8)
+        + ".com";
+
+    var emailDTO = new EmailDTO();
+    emailDTO.setEmail(email);
+
+    return emailDTO;
+  }
+
+  private void givenAValidOtpResponse() {
+    when(identityManager.setUpOneTimePassword(any(), any(), any())).thenReturn(true);
   }
 }

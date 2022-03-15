@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.service.archive;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID_2;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
