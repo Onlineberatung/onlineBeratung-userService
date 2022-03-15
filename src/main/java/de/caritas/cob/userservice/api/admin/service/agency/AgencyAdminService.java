@@ -39,9 +39,10 @@ public class AgencyAdminService {
    */
   public List<AgencyAdminResponseDTO> retrieveAllAgencies() {
     var apiClient = new ApiClient(restTemplate).setBasePath(this.agencyAdminServiceApiUrl);
-    this.adminAgencyControllerApi.setApiClient(apiClient);
-    addDefaultHeaders(this.adminAgencyControllerApi.getApiClient());
-    return requireNonNull(this.adminAgencyControllerApi.searchAgencies(0, Integer.MAX_VALUE, null)
+    addDefaultHeaders(apiClient);
+    AdminAgencyControllerApi adminAgencyControllerApi = new AdminAgencyControllerApi(apiClient);
+    adminAgencyControllerApi.setApiClient(apiClient);
+    return requireNonNull(adminAgencyControllerApi.searchAgencies(0, Integer.MAX_VALUE, null)
         .getEmbedded())
         .stream()
         .map(AgencyAdminFullResponseDTO::getEmbedded)
