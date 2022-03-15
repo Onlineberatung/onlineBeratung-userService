@@ -38,13 +38,10 @@ public class Messenger implements Messaging {
   @Override
   public void unbanUsersInChat(Long chatId, String consultantId) {
     findChatMetaInfo(chatId, consultantId).ifPresent(chatMetaInfoMap -> {
-      var chatUserIds = mapper.bannedChatUserIdsOfMap(chatMetaInfoMap);
       var chat = chatRepository.findById(chatId).orElseThrow();
-
-      chatUserIds.forEach(chatUserId -> {
-        var username = getUsername(chatUserId);
-        messageClient.unmuteUserInChat(username, chat.getGroupId());
-      });
+      mapper.bannedUsernamesOfMap(chatMetaInfoMap).forEach(username ->
+          messageClient.unmuteUserInChat(username, chat.getGroupId())
+      );
     });
   }
 
@@ -77,18 +74,5 @@ public class Messenger implements Messaging {
             }));
 
     return chatUserId.toString();
-  }
-
-  private String getUsername(String chatUserId) {
-    var username = new AtomicReference<String>();
-    userRepository.findByRcUserIdAndDeleteDateIsNull(chatUserId).ifPresentOrElse(
-        user -> username.set(user.getUsername()),
-        () -> consultantRepository.findByRocketChatIdAndDeleteDateIsNull(chatUserId)
-            .ifPresentOrElse(consultant -> username.set(consultant.getUsername()),
-                () -> {
-                  throw new NoSuchElementException();
-                }));
-
-    return username.toString();
   }
 }
