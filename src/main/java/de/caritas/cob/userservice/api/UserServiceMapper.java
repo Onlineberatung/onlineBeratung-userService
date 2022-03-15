@@ -34,7 +34,7 @@ public class UserServiceMapper {
   }
 
   @SuppressWarnings("unchecked")
-  public List<String> bannedChatUserIdsOfMap(Map<String, Object> chatMetaInfoMap) {
+  public List<String> bannedUsernamesOfMap(Map<String, Object> chatMetaInfoMap) {
     return (List<String>) chatMetaInfoMap.get("mutedUsers");
   }
 }
