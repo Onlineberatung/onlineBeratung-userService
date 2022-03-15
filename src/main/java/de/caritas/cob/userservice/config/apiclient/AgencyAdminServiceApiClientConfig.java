@@ -25,6 +25,7 @@ public class AgencyAdminServiceApiClientConfig {
    * @return the LiveService controller {@link AdminAgencyControllerApi}
    */
   @Bean
+  @Primary
   @Scope("prototype")
   public AdminAgencyControllerApi adminAgencyControllerApi(ApiClient apiClient) {
     return new AdminAgencyControllerApi(apiClient);
