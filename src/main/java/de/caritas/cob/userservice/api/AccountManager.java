@@ -1,10 +1,10 @@
 package de.caritas.cob.userservice.api;
 
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +21,7 @@ public class AccountManager implements AccountManaging {
 
   private final UserRepository userRepository;
 
-  private final UserMapper userMapper;
+  private final UserServiceMapper userServiceMapper;
 
   @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
@@ -38,6 +38,21 @@ public class AccountManager implements AccountManaging {
     return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
   }
 
+  @Override
+  public boolean existsAdviceSeeker(String id) {
+    return findAdviceSeeker(id).isPresent();
+  }
+
+  @Override
+  public Optional<User> findAdviceSeeker(String id) {
+    return userRepository.findByUserIdAndDeleteDateIsNull(id);
+  }
+
+  @Override
+  public Optional<User> findAdviceSeekerByChatUserId(String chatUserId) {
+    return userRepository.findByRcUserIdAndDeleteDateIsNull(chatUserId);
+  }
+
   private Map<String, Object> patchAdviceSeeker(User adviceSeeker, Map<String, Object> patchMap) {
     if (patchMap.containsKey("email")) {
       adviceSeeker.setEmail((String) patchMap.get("email"));
@@ -47,7 +62,7 @@ public class AccountManager implements AccountManaging {
     }
     var savedAdviceSeeker = userRepository.save(adviceSeeker);
 
-    return userMapper.mapOf(savedAdviceSeeker);
+    return userServiceMapper.mapOf(savedAdviceSeeker);
   }
 
   private Map<String, Object> patchConsultant(Consultant consultant, Map<String, Object> patchMap) {
@@ -65,6 +80,6 @@ public class AccountManager implements AccountManaging {
     }
     var savedConsultant = consultantRepository.save(consultant);
 
-    return userMapper.mapOf(savedConsultant);
+    return userServiceMapper.mapOf(savedConsultant);
   }
 }

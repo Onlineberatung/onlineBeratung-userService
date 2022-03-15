@@ -4,9 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.model.RootDTO;
-import de.caritas.cob.userservice.api.model.RootLinks;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.RootDTO;
+import de.caritas.cob.userservice.api.admin.model.RootLinks;
 import org.junit.Test;
 
 public class RootDTOBuilderTest {

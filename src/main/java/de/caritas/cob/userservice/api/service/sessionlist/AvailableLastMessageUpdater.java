@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
-import static de.caritas.cob.userservice.api.model.MessageType.FURTHER_STEPS;
+import static de.caritas.cob.userservice.api.adapters.web.dto.MessageType.FURTHER_STEPS;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
 import java.util.Date;
 import java.util.function.Consumer;
 import lombok.NonNull;

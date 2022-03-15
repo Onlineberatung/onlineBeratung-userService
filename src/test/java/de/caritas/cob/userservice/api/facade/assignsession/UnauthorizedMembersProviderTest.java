@@ -16,13 +16,13 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +47,7 @@ public class UnauthorizedMembersProviderTest {
   RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @Mock
-  KeycloakAdminClientService keycloakAdminClientService;
+  KeycloakService keycloakService;
 
   EasyRandom easyRandom = new EasyRandom();
   Consultant newConsultant = easyRandom.nextObject(Consultant.class);
@@ -148,9 +148,9 @@ public class UnauthorizedMembersProviderTest {
     consultantList.forEach(consultant ->
         when(consultantService.getConsultantByRcUserId(consultant.getRocketChatId()))
             .thenReturn(Optional.of(consultant)));
-    when(keycloakAdminClientService
+    when(keycloakService
         .userHasAuthority(mainConsultant.getId(), VIEW_ALL_PEER_SESSIONS)).thenReturn(true);
-    when(keycloakAdminClientService
+    when(keycloakService
         .userHasAuthority(mainConsultant2.getId(), VIEW_ALL_PEER_SESSIONS)).thenReturn(true);
 
     List<Consultant> result = unauthorizedMembersProvider
@@ -172,9 +172,9 @@ public class UnauthorizedMembersProviderTest {
     when(consultantService
         .findConsultantsByAgencyId(FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT.getAgencyId()))
         .thenReturn(consultantList);
-    when(keycloakAdminClientService
+    when(keycloakService
         .userHasAuthority(mainConsultant.getId(), VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
-    when(keycloakAdminClientService
+    when(keycloakService
         .userHasAuthority(mainConsultant2.getId(), VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
 
     List<Consultant> result = unauthorizedMembersProvider

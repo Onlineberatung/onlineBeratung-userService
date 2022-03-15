@@ -5,11 +5,11 @@ import static java.util.Objects.nonNull;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.model.AgencyAdminFullResponseDTO;
-import de.caritas.cob.userservice.api.model.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyLinks;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.AgencyAdminFullResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAgencyLinks;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAgencyResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import java.util.List;
 import java.util.stream.Collectors;

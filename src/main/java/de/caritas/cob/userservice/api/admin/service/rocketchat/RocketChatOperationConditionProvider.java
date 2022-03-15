@@ -7,10 +7,10 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class RocketChatOperationConditionProvider {
 
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull Session session;
   private final @NonNull Consultant consultant;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
@@ -52,9 +52,9 @@ class RocketChatOperationConditionProvider {
   }
 
   private boolean isMainConsultant() {
-    return keycloakAdminClientService
+    return identityClient
         .userHasAuthority(this.consultant.getId(), AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
-        || keycloakAdminClientService
+        || identityClient
         .userHasRole(this.consultant.getId(), UserRole.MAIN_CONSULTANT.name());
   }
 

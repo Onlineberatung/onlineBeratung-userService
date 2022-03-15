@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.report.rule;
 
-import static de.caritas.cob.userservice.api.model.ViolationDTO.ViolationTypeEnum.CONSULTANT;
+import static de.caritas.cob.userservice.api.admin.model.ViolationDTO.ViolationTypeEnum.CONSULTANT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,10 +10,10 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.model.ViolationDTO;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;

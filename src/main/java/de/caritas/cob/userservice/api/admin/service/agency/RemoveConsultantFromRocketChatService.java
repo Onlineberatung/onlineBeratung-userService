@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class RemoveConsultantFromRocketChatService {
 
   private final @NonNull RocketChatFacade rocketChatFacade;
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
@@ -40,7 +40,7 @@ public class RemoveConsultantFromRocketChatService {
         .collect(Collectors.toMap(session -> session, this::observeConsultantsToRemove));
 
     RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
+        .getInstance(this.rocketChatFacade, this.identityClient,
             this.consultingTypeManager)
         .onSessionConsultants(consultantsFromSession)
         .removeFromGroupsOrRollbackOnFailure();

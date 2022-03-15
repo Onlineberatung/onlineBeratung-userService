@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ADDICTIVE_DRUGS_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGE_VALUE;
@@ -29,15 +29,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.SessionDataDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionData;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataType;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.SessionData;
+import de.caritas.cob.userservice.api.model.SessionData.SessionDataType;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;

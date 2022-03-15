@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
-import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

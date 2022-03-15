@@ -2,9 +2,9 @@ package de.caritas.cob.userservice.api.workflow.delete.service.provider;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
 import de.caritas.cob.userservice.api.helper.DateCalculator;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;

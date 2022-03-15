@@ -32,7 +32,7 @@ import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Collections;

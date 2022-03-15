@@ -3,10 +3,10 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyLinks;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAgencyLinks;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import java.util.List;
 

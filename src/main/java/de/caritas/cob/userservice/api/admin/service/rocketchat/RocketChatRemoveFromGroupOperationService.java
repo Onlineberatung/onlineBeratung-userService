@@ -3,10 +3,10 @@ package de.caritas.cob.userservice.api.admin.service.rocketchat;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +21,8 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
       "Failed to remove consultants from Rocket.Chat groups %s for session %s:";
 
   private RocketChatRemoveFromGroupOperationService(RocketChatFacade rocketChatFacade,
-      KeycloakAdminClientService keycloakAdminClientService,
-      ConsultingTypeManager consultingTypeManager) {
-    super(rocketChatFacade, keycloakAdminClientService);
+      IdentityClient identityClient, ConsultingTypeManager consultingTypeManager) {
+    super(rocketChatFacade, identityClient);
     this.consultingTypeManager = consultingTypeManager;
   }
 
@@ -34,10 +33,10 @@ public class RocketChatRemoveFromGroupOperationService extends RocketChatGroupOp
    * @return the {@link RocketChatRemoveFromGroupOperationService} instance
    */
   public static RocketChatRemoveFromGroupOperationService getInstance(
-      RocketChatFacade rocketChatFacade, KeycloakAdminClientService keycloakAdminClientService,
+      RocketChatFacade rocketChatFacade, IdentityClient identityClient,
       ConsultingTypeManager consultingTypeManager) {
     return new RocketChatRemoveFromGroupOperationService(rocketChatFacade,
-        keycloakAdminClientService, consultingTypeManager);
+        identityClient, consultingTypeManager);
   }
 
   /**

@@ -9,10 +9,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantMobileToken;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserMobileToken;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;

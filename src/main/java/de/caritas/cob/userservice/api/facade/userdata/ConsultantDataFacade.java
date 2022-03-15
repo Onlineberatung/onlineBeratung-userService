@@ -4,8 +4,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.model.AbsenceDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.container;
 
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsLastMessageDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsUpdateDTO;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

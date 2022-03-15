@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.ANONYMOUS;
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.RC_ADD_USER_TO_GROUP_EXCEPTION;
@@ -61,15 +61,15 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;

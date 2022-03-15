@@ -18,22 +18,21 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
-import de.caritas.cob.userservice.api.model.PasswordDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -59,13 +58,11 @@ public class ValidatedUserAccountProviderTest {
   @Mock
   private AuthenticatedUser authenticatedUser;
   @Mock
-  private IdentityClient identityClient;
+  private KeycloakService keycloakService;
   @Mock
   private RocketChatService rocketChatService;
   @Mock
   private UserAccountValidator userAccountValidator;
-  @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
   @Mock
   private UserRepository userRepository;
   @Mock
@@ -132,7 +129,7 @@ public class ValidatedUserAccountProviderTest {
 
     this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
-    verify(identityClient).changeEmailAddress("newMail");
+    verify(keycloakService).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
@@ -154,7 +151,7 @@ public class ValidatedUserAccountProviderTest {
 
     this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
-    verify(identityClient).changeEmailAddress("newMail");
+    verify(keycloakService).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
@@ -178,8 +175,8 @@ public class ValidatedUserAccountProviderTest {
 
     accountProvider.changeUserAccountEmailAddress(Optional.empty());
 
-    verify(identityClient).deleteEmailAddress();
-    verify(identityClient, never()).changeEmailAddress(anyString());
+    verify(keycloakService).deleteEmailAddress();
+    verify(keycloakService, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
@@ -203,8 +200,8 @@ public class ValidatedUserAccountProviderTest {
 
     accountProvider.changeUserAccountEmailAddress(Optional.empty());
 
-    verify(identityClient).deleteEmailAddress();
-    verify(identityClient, never()).changeEmailAddress(anyString());
+    verify(keycloakService).deleteEmailAddress();
+    verify(keycloakService, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
@@ -226,12 +223,12 @@ public class ValidatedUserAccountProviderTest {
   @Test
   public void changePassword_Should_CallKeycloakAdminClientServiceToUpdateThePassword() {
     PasswordDTO passwordDTO = EASY_RANDOM.nextObject(PasswordDTO.class);
-    when(identityClient.changePassword(any(), any())).thenReturn(true);
+    when(keycloakService.changePassword(any(), any())).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
 
     this.accountProvider.changePassword(passwordDTO);
 
-    verify(identityClient, times(1)).changePassword(any(), any());
+    verify(keycloakService, times(1)).changePassword(any(), any());
   }
 
   @Test(expected = BadRequestException.class)
@@ -245,7 +242,7 @@ public class ValidatedUserAccountProviderTest {
         .nextObject(DeleteUserAccountDTO.class);
     this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
 
-    verifyNoInteractions(keycloakAdminClientService);
+    verifyNoInteractions(keycloakService);
     verifyNoInteractions(userRepository);
   }
 
@@ -258,7 +255,7 @@ public class ValidatedUserAccountProviderTest {
         EASY_RANDOM.nextObject(DeleteUserAccountDTO.class);
     this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
 
-    verify(keycloakAdminClientService, times(1)).deactivateUser(USER.getUserId());
+    verify(keycloakService, times(1)).deactivateUser(USER.getUserId());
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(userService, times(1)).saveUser(captor.capture());
     assertNotNull(captor.getValue().getDeleteDate());

@@ -8,12 +8,13 @@ import static java.util.Objects.requireNonNull;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.logout.LogoutResponseDTO;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -112,6 +113,11 @@ public class RocketChatCredentialsProvider {
    */
   public RocketChatCredentials getSystemUser() throws RocketChatUserNotInitializedException {
     return observeNonNullOrLatestUser(this.systemUserA, this.systemUserB);
+  }
+
+  @SneakyThrows
+  public RocketChatCredentials getSystemUserSneaky() {
+    return getSystemUser();
   }
 
   /**

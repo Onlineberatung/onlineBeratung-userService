@@ -14,9 +14,9 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.testConfig.ConsultingTypeManagerTestConfig;

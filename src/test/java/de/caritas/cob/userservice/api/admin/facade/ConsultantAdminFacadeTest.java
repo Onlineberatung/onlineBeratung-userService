@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
-import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
-import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
+import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
+import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -11,8 +11,8 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
-import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
-import de.caritas.cob.userservice.api.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

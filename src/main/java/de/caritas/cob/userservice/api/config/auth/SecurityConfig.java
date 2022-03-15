@@ -15,7 +15,7 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
-import de.caritas.cob.userservice.api.controller.interceptor.StatelessCsrfFilter;
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -40,6 +40,8 @@ import org.springframework.security.web.csrf.CsrfFilter;
  */
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+
+  private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
 
   @SuppressWarnings({"unused", "FieldCanBeLocal"})
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
@@ -72,7 +74,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris())
         .permitAll()
         .antMatchers("/users/askers/new", "/conversations/askers/anonymous/new",
-            "/users/consultants/{consultantId:\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b}",
+            "/users/consultants/{consultantId:" + UUID_PATTERN + "}",
             "/users/consultants/languages"
         )
         .permitAll()
@@ -120,7 +122,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(START_CHAT)
         .antMatchers("/users/chat/{chatId:[0-9]+}/stop")
         .hasAuthority(STOP_CHAT)
-        .antMatchers("/users/chat/{chatId:[0-9]+}/update")
+        .antMatchers(
+            "/users/chat/{chatId:[0-9]+}/update",
+            "/users/{chatUserId:[0-9A-Za-z]+}/chat/{chatId:[0-9]+}/ban"
+        )
         .hasAuthority(UPDATE_CHAT)
         .antMatchers("/useradmin", "/useradmin/**")
         .hasAuthority(USER_ADMIN)

@@ -2,18 +2,18 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

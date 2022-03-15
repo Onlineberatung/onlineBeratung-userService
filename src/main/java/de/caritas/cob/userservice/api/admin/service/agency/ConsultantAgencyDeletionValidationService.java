@@ -2,17 +2,17 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.INITIAL;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NEW;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.INITIAL;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.function.Predicate;
 import lombok.NonNull;

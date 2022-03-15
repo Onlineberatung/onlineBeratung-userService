@@ -5,14 +5,14 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toUnixTi
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.LanguageCode;
-import de.caritas.cob.userservice.api.model.SessionConsultantForConsultantDTO;
-import de.caritas.cob.userservice.api.model.SessionDTO;
-import de.caritas.cob.userservice.api.model.user.SessionUserDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.sessiondata.SessionDataKeyRegistration;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionUserDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.helper.SessionDataKeyRegistration;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;

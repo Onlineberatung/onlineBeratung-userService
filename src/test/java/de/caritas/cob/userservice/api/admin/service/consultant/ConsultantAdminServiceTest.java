@@ -11,8 +11,8 @@ import de.caritas.cob.userservice.api.admin.service.consultant.create.Consultant
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;

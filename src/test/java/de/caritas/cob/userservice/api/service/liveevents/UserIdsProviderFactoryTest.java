@@ -6,7 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;

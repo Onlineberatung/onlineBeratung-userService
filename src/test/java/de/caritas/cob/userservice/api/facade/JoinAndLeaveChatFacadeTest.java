@@ -21,9 +21,9 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGr
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;

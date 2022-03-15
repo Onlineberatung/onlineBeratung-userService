@@ -14,10 +14,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.model.User;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -35,7 +35,7 @@ public class DeleteKeycloakAskerActionTest {
   private DeleteKeycloakAskerAction deleteKeycloakAskerAction;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Mock
   private Logger logger;
@@ -53,14 +53,14 @@ public class DeleteKeycloakAskerActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(0));
-    verify(this.keycloakAdminClientService, times(1)).deleteUser(any());
+    verify(this.keycloakService, times(1)).deleteUser(any());
   }
 
   @Test
   public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_userDeletionFailes() {
     User user = new User();
     user.setUserId("userId");
-    doThrow(new RuntimeException()).when(this.keycloakAdminClientService).deleteUser(any());
+    doThrow(new RuntimeException()).when(this.keycloakService).deleteUser(any());
     AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(user, new ArrayList<>());
 
     this.deleteKeycloakAskerAction.execute(workflowDTO);

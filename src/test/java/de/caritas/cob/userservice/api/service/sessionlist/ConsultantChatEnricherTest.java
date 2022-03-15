@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

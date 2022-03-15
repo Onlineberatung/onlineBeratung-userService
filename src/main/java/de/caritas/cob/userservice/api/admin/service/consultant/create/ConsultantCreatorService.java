@@ -4,20 +4,20 @@ import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
-import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
+import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ConsultantCreatorService {
 
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserHelper userHelper;
@@ -71,8 +71,8 @@ public class ConsultantCreatorService {
     String keycloakUserId = createKeycloakUser(consultantCreationInput);
 
     String password = userHelper.getRandomPassword();
-    keycloakAdminClientService.updatePassword(keycloakUserId, password);
-    roles.forEach(roleName -> this.keycloakAdminClientService.updateRole(keycloakUserId, roleName));
+    identityClient.updatePassword(keycloakUserId, password);
+    roles.forEach(roleName -> identityClient.updateRole(keycloakUserId, roleName));
 
     String rocketChatUserId =
         createRocketChatUser(consultantCreationInput, keycloakUserId, password);
@@ -88,7 +88,7 @@ public class ConsultantCreatorService {
     this.userAccountInputValidator.validateUserDTO(userDto);
 
     KeycloakCreateUserResponseDTO response =
-        this.keycloakAdminClientService
+        identityClient
             .createKeycloakUser(userDto, consultantCreationInput.getFirstName(),
                 consultantCreationInput.getLastName());
 

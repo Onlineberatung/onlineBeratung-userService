@@ -7,10 +7,10 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.workflow.delete.service.provider.InactivePrivateGroupsProvider;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
