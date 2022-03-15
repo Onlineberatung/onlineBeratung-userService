@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AgencyAdminServiceTest {
@@ -33,6 +34,9 @@ public class AgencyAdminServiceTest {
 
   @Mock
   private OriginHeaderSupplier originHeaderSupplier;
+
+  @Mock
+  private RestTemplate restTemplate;
 
   @Mock
   private ApiClient apiClient;

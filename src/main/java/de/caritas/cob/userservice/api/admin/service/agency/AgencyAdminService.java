@@ -12,8 +12,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Service to wrap admin api call for agencies.
@@ -25,6 +27,9 @@ public class AgencyAdminService {
   private final @NonNull AdminAgencyControllerApi adminAgencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull OriginHeaderSupplier originHeaderSupplier;
+  private final @NonNull RestTemplate restTemplate;
+  @Value("${agency.admin.service.api.url}")
+  private String agencyAdminServiceApiUrl;
 
   /**
    * Retrieves all agencies provided by agency service. Important hint: Depending on the amount of
@@ -33,6 +38,8 @@ public class AgencyAdminService {
    * @return all existing agencies
    */
   public List<AgencyAdminResponseDTO> retrieveAllAgencies() {
+    var apiClient = new ApiClient(restTemplate).setBasePath(this.agencyAdminServiceApiUrl);
+    this.adminAgencyControllerApi.setApiClient(apiClient);
     addDefaultHeaders(this.adminAgencyControllerApi.getApiClient());
     return requireNonNull(this.adminAgencyControllerApi.searchAgencies(0, Integer.MAX_VALUE, null)
         .getEmbedded())
