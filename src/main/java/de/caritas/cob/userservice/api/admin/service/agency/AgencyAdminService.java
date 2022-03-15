@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Service to wrap admin api call for agencies.
@@ -24,10 +23,8 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class AgencyAdminService {
 
-  private final @NonNull AdminAgencyControllerApi adminAgencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull OriginHeaderSupplier originHeaderSupplier;
-  private final @NonNull RestTemplate restTemplate;
   @Value("${agency.admin.service.api.url}")
   private String agencyAdminServiceApiUrl;
 
@@ -38,15 +35,19 @@ public class AgencyAdminService {
    * @return all existing agencies
    */
   public List<AgencyAdminResponseDTO> retrieveAllAgencies() {
-    var apiClient = new ApiClient(restTemplate).setBasePath(this.agencyAdminServiceApiUrl);
-    addDefaultHeaders(apiClient);
-    AdminAgencyControllerApi adminAgencyControllerApi = new AdminAgencyControllerApi(apiClient);
-    adminAgencyControllerApi.setApiClient(apiClient);
-    return requireNonNull(adminAgencyControllerApi.searchAgencies(0, Integer.MAX_VALUE, null)
+    return requireNonNull(createControllerApi().searchAgencies(0, Integer.MAX_VALUE, null)
         .getEmbedded())
         .stream()
         .map(AgencyAdminFullResponseDTO::getEmbedded)
         .collect(Collectors.toList());
+  }
+
+  public AdminAgencyControllerApi createControllerApi() {
+    var apiClient = new ApiClient().setBasePath(this.agencyAdminServiceApiUrl);
+    addDefaultHeaders(apiClient);
+    AdminAgencyControllerApi adminAgencyControllerApi = new AdminAgencyControllerApi(apiClient);
+    adminAgencyControllerApi.setApiClient(apiClient);
+    return adminAgencyControllerApi;
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
