@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.17.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.16.0...v2.17.0) (2022-03-15)
+
+
+### Features
+
+* add endpoint to ban users from group chats ([da346c1](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/da346c100d710b8d0d07fc8ec2609632dde088c6))
+* add mute call towards Rocket.Chat API ([194fc09](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/194fc096bb03b361b4c54cb33b80ca29c9c7d4bf))
+
+
+### Bug Fixes
+
+* chat info's auth ([cda81e6](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/cda81e6ac6fd5b96774b3b74d1a11235d1e5eed1))
+* format and fix signature ([4c47b19](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4c47b1918d5c82a72905bf35baf1456e17b6f783))
+* format of ban payload ([3983b13](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3983b13defae467618540a2ddd11b18b3fe1123f))
+* prevent case error in user search ([4188ef0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4188ef0c431ee15ee5509ec84e1f54d2d85258cc))
+* replace user's account id by their messenger id ([5453954](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/5453954414a9d0c7da4f7b777b943b9783bb02ff))
+* use system user for banned users info ([4f3c828](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/4f3c828077c469f0faff5b795d081cf9f2dae8fc))
+* use system user to mute or unmute ([3b37b6b](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/commit/3b37b6bfa94634715b9e764ff2035094ed66eb2f))
+
 ## [2.16.0](https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/compare/v2.15.1...v2.16.0) (2022-03-14)
 
 
