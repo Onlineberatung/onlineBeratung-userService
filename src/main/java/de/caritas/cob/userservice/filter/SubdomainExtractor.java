@@ -6,13 +6,8 @@ import static org.springframework.web.context.request.RequestContextHolder.curre
 
 import com.google.common.net.InternetDomainName;
 import de.caritas.cob.userservice.api.helper.HttpUrlUtils;
-import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,59 +19,23 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @AllArgsConstructor
 public class SubdomainExtractor {
 
-  private @NonNull NonInternetDomainSubdomainExtractor nonInternetDomainSubdomainExtractor;
-
   public Optional<String> getCurrentSubdomain() {
-    return tryResolveSubdomain(getHttpServletRequest());
+    var request = ((ServletRequestAttributes) currentRequestAttributes()).getRequest();
+    String url = HttpUrlUtils.removeHttpPrefix(request.getServerName());
+    return getSubdomain(url);
   }
 
-  private HttpServletRequest getHttpServletRequest() {
-    return ((ServletRequestAttributes) currentRequestAttributes()).getRequest();
-  }
-
-  private Optional<String> tryResolveSubdomain(HttpServletRequest request) {
-    try {
-      return resolveSubdomain(request.getServerName(), request);
-    } catch (URISyntaxException e) {
-      log.error("Could not extract subdomain: ", e);
+  public Optional<String> getSubdomain(String url) {
+    var domain = InternetDomainName.from(url);
+    if (!domain.hasParent()) {
       return empty();
     }
-  }
-
-  Optional<String> resolveSubdomain(String site, HttpServletRequest request)
-      throws URISyntaxException {
-    String domain = HttpUrlUtils.removeHttpPrefix(site);
-    if (isUnderPublicDomain(domain)) {
-      return getInternetDomainPrefix(domain);
-    } else {
-      return nonInternetDomainSubdomainExtractor
-          .resolveSubdomain(domain, getOriginHeaderValue(request));
-    }
-  }
-
-  private String getOriginHeaderValue(HttpServletRequest request) {
-    return Collections.list(request.getHeaderNames())
-        .stream()
-        .collect(Collectors.toMap(h -> h, request::getHeader)).get("origin");
-  }
-
-  private boolean isUnderPublicDomain(String site) {
-    log.info("Site is under public domain. Site: " + site);
-    //TODO: we must change it. just for testing
-    return InternetDomainName.isValid(site) && InternetDomainName.from(site).hasPublicSuffix()
-        && !site.substring(site.length() - 4).equals("prod");
-  }
-
-  private Optional<String> getInternetDomainPrefix(String site) {
-    var domainName = InternetDomainName.from(site);
-    return domainName.hasParent() ? getInternetSubdomain(domainName) : empty();
-  }
-
-  private Optional<String> getInternetSubdomain(InternetDomainName domainName) {
-    if (domainName.parts().isEmpty()) {
+    if (domain.parts().isEmpty()) {
       return Optional.empty();
     }
-    return of(domainName.parts().get(0));
+    return of(domain.parts().get(0));
+
   }
+
 }
 

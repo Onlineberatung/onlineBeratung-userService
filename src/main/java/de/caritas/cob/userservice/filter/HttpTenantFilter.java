@@ -30,9 +30,9 @@ public class HttpTenantFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    log.info("Trying to resolve tenant for request coming from URI {}", request.getRequestURI());
+    log.debug("Trying to resolve tenant for request coming from URI {}", request.getRequestURI());
     Long tenantId = tenantResolver.resolve(request);
-    log.info("Setting current tenant context to: " + tenantId);
+    log.debug("Setting current tenant context to: " + tenantId);
     TenantContext.setCurrentTenant(tenantId);
     filterChain.doFilter(request, response);
     TenantContext.clear();

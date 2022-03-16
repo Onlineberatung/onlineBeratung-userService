@@ -5,8 +5,8 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ public class AgencyAdminServiceTest {
   private SecurityHeaderSupplier securityHeaderSupplier;
 
   @Mock
-  private OriginHeaderSupplier originHeaderSupplier;
+  private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Test
   public void agencyAdminControllerShouldHaveCorrectHeaders() {

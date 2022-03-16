@@ -73,17 +73,15 @@ public class EmailNotificationFacade {
    * written.
    *
    * @param session the regarding session
-   * @param requestServerName
    */
   @Async
-  public void sendNewEnquiryEmailNotification(Session session, String requestServerName,
+  public void sendNewEnquiryEmailNotification(Session session,
       TenantData tenantData) {
     try {
       log.info("Preparing to send NEW_ENQUIRY_EMAIL_NOTIFICATION email for session: ",
           session.getId());
       TenantContext.setCurrentTenantData(tenantData);
       newEnquiryEmailSupplier.setCurrentSession(session);
-      newEnquiryEmailSupplier.setRequestServerName(requestServerName);
       sendMailTasksToMailService(newEnquiryEmailSupplier);
       TenantContext.clear();
     } catch (Exception ex) {

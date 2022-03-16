@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.filter.SubdomainExtractor;
 import java.util.HashMap;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @ExtendWith(MockitoExtension.class)
 class TenantResolverTest {
@@ -30,6 +32,9 @@ class TenantResolverTest {
 
   @Mock
   TenantService tenantService;
+
+  @Mock
+  TenantHeaderSupplier tenantHeaderSupplier;
 
   @Mock
   HttpServletRequest authenticatedRequest;
@@ -46,13 +51,20 @@ class TenantResolverTest {
   @InjectMocks
   TenantResolver tenantResolver;
 
+  @Mock
+  private ServletRequestAttributes requestAttributes;
+
+  @Mock
+  private HttpServletRequest httpServletRequest;
+
   @Test
   void resolve_Should_ResolveFromAccessTokenForAuthenticatedUser() {
     // given
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
     when(tenantService.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
-        new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO().id(1L));
+        new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
+            .id(1L));
     HashMap<String, Object> claimMap = givenClaimMapContainingTenantId(1);
     when(token.getAccount().getKeycloakSecurityContext().getToken().getOtherClaims())
         .thenReturn(claimMap);
@@ -88,7 +100,8 @@ class TenantResolverTest {
     // given
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
     when(tenantService.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
-        new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO().id(1L));
+        new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
+            .id(1L));
     // when
     Long resolved = tenantResolver.resolve(nonAuthenticatedRequest);
     // then
@@ -107,11 +120,19 @@ class TenantResolverTest {
     assertThat(resolved).isEqualTo(TECHNICAL_CONTEXT);
   }
 
+  @Test
+  void resolve_Should_ResolveTenantId_FromHeader() {
+    // given
+    when(tenantHeaderSupplier.getTenantFromHeader()).thenReturn(Optional.of(2L));
+    Long resolved = tenantResolver.resolve(authenticatedRequest);
+    // then
+    assertThat(resolved).isEqualTo(2L);
+  }
+
   private HashMap<String, Object> givenClaimMapContainingTenantId(Integer tenantId) {
     HashMap<String, Object> claimMap = Maps.newHashMap();
     claimMap.put("tenantId", tenantId);
     return claimMap;
   }
-
 
 }

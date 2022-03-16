@@ -3,12 +3,13 @@ package de.caritas.cob.userservice.api.service.agency;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-
 import com.google.common.collect.Lists;
+import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.httpheader.OriginHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
-import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AgencyServiceTest {
@@ -32,7 +33,7 @@ class AgencyServiceTest {
   AgencyControllerApi agencyControllerApi;
 
   @Mock
-  OriginHeaderSupplier originHeaderSupplier;
+  TenantHeaderSupplier tenantHeaderSupplier;
 
   @Mock
   SecurityHeaderSupplier securityHeaderSupplier;
@@ -51,20 +52,23 @@ class AgencyServiceTest {
   }
 
   @Test
-  void getAgenciesFromAgencyService_Should_passOriginalRequestHeaderIfCalledWithRequestServerNameParameter() {
+  void getAgenciesFromAgencyService_Should_passTenantId() {
     // given
+    TenantContext.setCurrentTenant(1L);
+    TenantHeaderSupplier tenantHeaderSupplier = new TenantHeaderSupplier();
+    ReflectionTestUtils.setField(tenantHeaderSupplier, "multitenancy", true);
+    ReflectionTestUtils.setField(agencyService, "tenantHeaderSupplier", tenantHeaderSupplier);
     HttpHeaders headers = new HttpHeaders();
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(headers);
-
-    when(originHeaderSupplier.getOriginHeaderValue(ORIGIN_URL)).thenReturn(ORIGIN_URL);
     when(this.agencyControllerApi.getApiClient()).thenReturn(apiClient);
     var agencyDTOS = Lists.newArrayList(new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);
     // when
-    this.agencyService.getAgency(1L, ORIGIN_URL);
+    this.agencyService.getAgency(1L);
 
     // then
-    assertThat(headers.get("origin").get(0)).isEqualTo(ORIGIN_URL);
+    assertThat(headers.get("tenantId").get(0)).isEqualTo("1");
+    TenantContext.clear();
   }
 
 }

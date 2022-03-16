@@ -44,10 +44,6 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private Session session;
 
-  @Getter
-  @Setter
-  private String requestServerName;
-
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
 
@@ -73,7 +69,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
     if (isEmpty(consultantAgencyList)) {
       return emptyList();
     }
-    AgencyDTO agency = agencyService.getAgency(session.getAgencyId(), requestServerName);
+    AgencyDTO agency = agencyService.getAgency(session.getAgencyId());
     log.info("Retrieved agency " + agency);
     return consultantAgencyList.stream()
         .filter(this::validConsultantAgency)
