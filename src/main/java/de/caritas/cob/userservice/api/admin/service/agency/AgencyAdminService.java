@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +23,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AgencyAdminService {
 
-  private final @NonNull AdminAgencyControllerApi adminAgencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull OriginHeaderSupplier originHeaderSupplier;
+  @Value("${agency.admin.service.api.url}")
+  private String agencyAdminServiceApiUrl;
 
   /**
    * Retrieves all agencies provided by agency service. Important hint: Depending on the amount of
@@ -33,12 +35,19 @@ public class AgencyAdminService {
    * @return all existing agencies
    */
   public List<AgencyAdminResponseDTO> retrieveAllAgencies() {
-    addDefaultHeaders(this.adminAgencyControllerApi.getApiClient());
-    return requireNonNull(this.adminAgencyControllerApi.searchAgencies(0, Integer.MAX_VALUE, null)
+    return requireNonNull(createControllerApi().searchAgencies(0, Integer.MAX_VALUE, null)
         .getEmbedded())
         .stream()
         .map(AgencyAdminFullResponseDTO::getEmbedded)
         .collect(Collectors.toList());
+  }
+
+  public AdminAgencyControllerApi createControllerApi() {
+    var apiClient = new ApiClient().setBasePath(this.agencyAdminServiceApiUrl);
+    addDefaultHeaders(apiClient);
+    AdminAgencyControllerApi adminAgencyControllerApi = new AdminAgencyControllerApi(apiClient);
+    adminAgencyControllerApi.setApiClient(apiClient);
+    return adminAgencyControllerApi;
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
