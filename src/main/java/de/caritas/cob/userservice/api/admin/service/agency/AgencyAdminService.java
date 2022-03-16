@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AgencyAdminService {
 
-  private final @NonNull AdminAgencyControllerApi adminAgencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   @Value("${agency.admin.service.api.url}")
@@ -53,17 +52,9 @@ public class AgencyAdminService {
 
   private void addDefaultHeaders(ApiClient apiClient) {
     HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
-    addOriginHeader(headers);
+    tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
-
-  private void addOriginHeader(HttpHeaders headers) {
-    String originHeaderValue = originHeaderSupplier.getOriginHeaderValue();
-    if (originHeaderValue != null) {
-      headers.add("origin", originHeaderValue);
-    }
-  }
-
 
 
 }
