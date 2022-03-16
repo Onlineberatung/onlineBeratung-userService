@@ -29,13 +29,15 @@ public class AgencyAdminServiceTest {
 
   @Test
   public void agencyAdminControllerShouldHaveCorrectHeaders() {
-    ReflectionTestUtils.setField(agencyAdminService, "agencyAdminServiceApiUrl", "http://onlineberatung.net");
+    ReflectionTestUtils
+        .setField(agencyAdminService, "agencyAdminServiceApiUrl", "http://onlineberatung.net");
     var headers = new HttpHeaders();
-    headers.add("header1","header1");
+    headers.add("header1", "header1");
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
     AdminAgencyControllerApi controllerApi = this.agencyAdminService.createControllerApi();
 
-    HttpHeaders defaultHeaders = (HttpHeaders) ReflectionTestUtils.getField(controllerApi.getApiClient(),"defaultHeaders");
+    HttpHeaders defaultHeaders = (HttpHeaders) ReflectionTestUtils
+        .getField(controllerApi.getApiClient(), "defaultHeaders");
     assertEquals(defaultHeaders.get("header1").get(0), "header1");
 
   }
