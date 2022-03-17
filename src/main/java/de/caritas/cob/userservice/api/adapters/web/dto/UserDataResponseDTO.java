@@ -70,5 +70,5 @@ public class UserDataResponseDTO {
   @JsonIgnore
   private Boolean encourage2fa;
 
-  private boolean isE2EEncryptionEnabled;
+  private Boolean e2eEncryptionEnabled;
 }

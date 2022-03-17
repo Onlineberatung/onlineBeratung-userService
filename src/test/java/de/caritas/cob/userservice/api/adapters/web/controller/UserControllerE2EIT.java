@@ -679,7 +679,7 @@ public class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("e2EEncryptionEnabled", is(true)));
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(true)));
   }
 
   @Test
@@ -696,7 +696,7 @@ public class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("e2EEncryptionEnabled", is(false)));
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)));
   }
 
   @Test
@@ -2241,7 +2241,7 @@ public class UserControllerE2EIT {
   }
 
   private void givenEnabledE2EEncryption() {
-    when(videoChatConfig.isE2EEncryptionEnabled()).thenReturn(true);
+    when(videoChatConfig.getE2eEncryptionEnabled()).thenReturn(true);
   }
 
   private void restoreSession() {

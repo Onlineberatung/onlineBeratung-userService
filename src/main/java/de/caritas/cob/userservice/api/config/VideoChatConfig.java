@@ -1,14 +1,16 @@
 package de.caritas.cob.userservice.api.config;
 
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import javax.validation.constraints.NotNull;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Getter
+@Data
 @Configuration
+@ConfigurationProperties(prefix = "videochat")
 public class VideoChatConfig {
 
-  @Value("video.chat.e2e-encryption.enabled")
-  private boolean isE2EEncryptionEnabled;
+  @NotNull
+  private Boolean e2eEncryptionEnabled;
 
 }

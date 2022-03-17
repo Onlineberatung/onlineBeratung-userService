@@ -332,7 +332,7 @@ public class UserController implements UsersApi {
     }
     userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
 
-    userDataResponseDTO.setE2EEncryptionEnabled(videoChatConfig.isE2EEncryptionEnabled());
+    userDataResponseDTO.setE2eEncryptionEnabled(videoChatConfig.getE2eEncryptionEnabled());
 
     return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
   }
