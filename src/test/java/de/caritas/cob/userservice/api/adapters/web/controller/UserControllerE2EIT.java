@@ -156,6 +156,9 @@ public class UserControllerE2EIT {
   @Autowired
   private de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi consultingTypeControllerApi;
 
+  @Autowired
+  private VideoChatConfig videoChatConfig;
+
   @MockBean
   private AuthenticatedUser authenticatedUser;
 
@@ -180,9 +183,6 @@ public class UserControllerE2EIT {
   @MockBean
   @SuppressWarnings("unused")
   private StopChatActionCommand stopChatActionCommand;
-
-  @MockBean
-  private VideoChatConfig videoChatConfig;
 
   @Captor
   private ArgumentCaptor<HttpEntity<OtpSetupDTO>> captor;
@@ -238,6 +238,7 @@ public class UserControllerE2EIT {
       chatRepository.deleteById(chat.getId());
       chat = null;
     }
+    videoChatConfig.setE2eEncryptionEnabled(false);
   }
 
   @Test
@@ -2241,7 +2242,7 @@ public class UserControllerE2EIT {
   }
 
   private void givenEnabledE2EEncryption() {
-    when(videoChatConfig.getE2eEncryptionEnabled()).thenReturn(true);
+    videoChatConfig.setE2eEncryptionEnabled(true);
   }
 
   private void restoreSession() {
