@@ -158,6 +158,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
+import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
@@ -449,6 +450,9 @@ public class UserControllerIT {
   private ConsultantDataProvider consultantDataProvider;
   @MockBean
   private AskerDataProvider askerDataProvider;
+  @MockBean
+  @SuppressWarnings("unused")
+  private VideoChatConfig videoChatConfig;
 
   @Mock
   private Logger logger;
