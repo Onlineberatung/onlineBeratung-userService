@@ -37,6 +37,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
+import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -154,6 +155,7 @@ public class UserController implements UsersApi {
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantDataProvider consultantDataProvider;
   private final @NonNull AskerDataProvider askerDataProvider;
+  private final @NonNull VideoChatConfig videoChatConfig;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -329,6 +331,8 @@ public class UserController implements UsersApi {
       twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(encourage2fa);
     }
     userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
+
+    userDataResponseDTO.setE2EEncryptionEnabled(videoChatConfig.isE2EEncryptionEnabled());
 
     return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
   }

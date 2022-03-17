@@ -2069,6 +2069,10 @@ components:
           type: boolean
           example: true
           description: "Is true if consultant has access to archive"
+        isE2EEncryptionEnabled:
+          type: boolean
+          example: true
+          description: "Is true if feature is enabled. Enables end-to-end encryption in video chat"
 
     PatchUserDTO:
       type: object
