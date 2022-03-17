@@ -46,6 +46,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
@@ -155,6 +156,9 @@ public class UserControllerE2EIT {
   @Autowired
   private de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi consultingTypeControllerApi;
 
+  @Autowired
+  private VideoChatConfig videoChatConfig;
+
   @MockBean
   private AuthenticatedUser authenticatedUser;
 
@@ -234,6 +238,7 @@ public class UserControllerE2EIT {
       chatRepository.deleteById(chat.getId());
       chat = null;
     }
+    videoChatConfig.setE2eEncryptionEnabled(false);
   }
 
   @Test
@@ -658,6 +663,41 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getUserDataShouldContainIfEndToEndEncryptionIsEnabled() throws Exception {
+    givenABearerToken();
+    givenAValidUser(true);
+    givenConsultingTypeServiceResponse();
+    givenKeycloakRespondsOtpHasNotBeenSetup(user.getUsername());
+    givenEnabledE2EEncryption();
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(true)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getUserDataShouldContainIfEndToEndEncryptionIsDisabled() throws Exception {
+    givenABearerToken();
+    givenAValidUser(true);
+    givenConsultingTypeServiceResponse();
+    givenKeycloakRespondsOtpHasNotBeenSetup(user.getUsername());
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)));
   }
 
   @Test
@@ -2199,6 +2239,10 @@ public class UserControllerE2EIT {
     if (!isLanguageSet) {
       enquiryMessageDTO.setLanguage(null);
     }
+  }
+
+  private void givenEnabledE2EEncryption() {
+    videoChatConfig.setE2eEncryptionEnabled(true);
   }
 
   private void restoreSession() {
