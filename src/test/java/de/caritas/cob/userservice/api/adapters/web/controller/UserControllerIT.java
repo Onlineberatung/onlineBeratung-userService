@@ -1835,16 +1835,6 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updatePassword_Should_ReturnOK_When_UpdatingThePasswordWasSuccessful()
-      throws Exception {
-    var validPasswortRequestBody =
-        "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(validPasswortRequestBody)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.OK.value()));
-  }
-
-  @Test
   public void updateKey_Should_ReturnConflict_WhenProvidedWithSameKey() throws Exception {
 
     when(encryptionService.getMasterKey())

@@ -74,4 +74,6 @@ public interface IdentityClient {
   void closeSession(String sessionId);
 
   void deactivateUser(String userId);
+
+  boolean verifyIgnoringOtp(String username, String password);
 }

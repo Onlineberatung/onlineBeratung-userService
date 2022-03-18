@@ -34,15 +34,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -210,6 +213,8 @@ public class UserControllerE2EIT {
   private UserDTO userDTO;
 
   private Chat chat;
+
+  private PasswordDTO passwordDto;
 
   @AfterEach
   public void reset() {
@@ -774,6 +779,57 @@ public class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(patchDto))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOff() throws Exception {
+    givenAValidUser(true);
+    givenAPasswordDto();
+    givenAValidKeycloakLoginResponse();
+
+    mockMvc.perform(
+        put("/users/password/change")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(passwordDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOn() throws Exception {
+    givenAValidUser(true);
+    givenAPasswordDto();
+    givenAnInvalidKeycloakLoginResponseMissingOtp();
+
+    mockMvc.perform(
+        put("/users/password/change")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(passwordDto)
+            ).accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void updatePasswordShouldRespondWithBadRequestIfPasswordIsFalse() throws Exception {
+    givenAValidUser(true);
+    givenAPasswordDto();
+    givenAnInvalidKeycloakLoginResponseFailingPassword();
+
+    mockMvc.perform(
+        put("/users/password/change")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(passwordDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -1806,6 +1862,37 @@ public class UserControllerE2EIT {
     )).thenReturn(new ResponseEntity<>(successWithEmail, HttpStatus.OK));
   }
 
+  private void givenAValidKeycloakLoginResponse() {
+    var loginResponse = easyRandom.nextObject(KeycloakLoginResponseDTO.class);
+    var urlSuffix = "/auth/realms/test/protocol/openid-connect/token";
+    when(restTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(KeycloakLoginResponseDTO.class)
+    )).thenReturn(ResponseEntity.ok().body(loginResponse));
+  }
+
+  private void givenAnInvalidKeycloakLoginResponseFailingPassword() {
+    var exception = new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+    var urlSuffix = "/auth/realms/test/protocol/openid-connect/token";
+    when(restTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(KeycloakLoginResponseDTO.class)
+    )).thenThrow(exception);
+  }
+
+  private void givenAnInvalidKeycloakLoginResponseMissingOtp() throws JsonProcessingException {
+    var responseMap = Map.of(
+        "error", "invalid_grant",
+        "error_description", "Missing totp",
+        "otpType", easyRandom.nextBoolean() ? "EMAIL" : "APP"
+    );
+    var body = objectMapper.writeValueAsString(responseMap).getBytes();
+    var statusText = HttpStatus.BAD_REQUEST.getReasonPhrase();
+    var exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST, statusText, body, null);
+    var urlSuffix = "/auth/realms/test/protocol/openid-connect/token";
+    when(restTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(KeycloakLoginResponseDTO.class)
+    )).thenThrow(exception);
+  }
+
   private void givenAValidKeycloakVerifyEmailResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
@@ -2126,6 +2213,10 @@ public class UserControllerE2EIT {
         .email(email)
         .firstname(RandomStringUtils.randomAlphabetic(8))
         .lastname(RandomStringUtils.randomAlphabetic(12));
+  }
+
+  private void givenAPasswordDto() {
+    passwordDto = easyRandom.nextObject(PasswordDTO.class);
   }
 
   private HashMap<String, Object> givenAnInvalidPatchDto() {
