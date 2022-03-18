@@ -657,6 +657,12 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updatePassword(@RequestBody PasswordDTO passwordDTO) {
+    var username = authenticatedUser.getUsername();
+    if (!identityManager.validatePasswordIgnoring2fa(username, passwordDTO.getOldPassword())) {
+      var message = String.format("Could not log in user %s into Keycloak", username);
+      throw new BadRequestException(message);
+    }
+
     this.userAccountProvider.changePassword(passwordDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
