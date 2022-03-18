@@ -61,7 +61,7 @@ public class RocketChatAdapterService implements MessageClient {
   }
 
   @Override
-  public Optional<Map<String, Object>> getChatInfo(String roomId, String userId) {
+  public Optional<Map<String, Object>> getChatInfo(String roomId) {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_INFO + roomId);
 
     try {

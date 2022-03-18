@@ -818,9 +818,8 @@ public class UserController implements UsersApi {
       throw new NotFoundException("Chat (%s) not found", chatId);
     }
 
-    var consultantId = authenticatedUser.getUserId();
     var adviceSeekerId = adviceSeeker.getUserId();
-    if (!messenger.banUserFromChat(consultantId, adviceSeekerId, chatId)) {
+    if (!messenger.banUserFromChat(adviceSeekerId, chatId)) {
       throw new NotFoundException("User (%s) not found in Chat (%s)", adviceSeekerId, chatId);
     }
 
