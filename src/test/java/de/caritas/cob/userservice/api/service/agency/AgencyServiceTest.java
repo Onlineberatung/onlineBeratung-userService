@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.List;
@@ -44,16 +44,13 @@ class AgencyServiceTest {
   @ParameterizedTest
   @NullAndEmptySource
   void getAgenciesFromAgencyService_Should_returnEmptyList_When_nullPassed(List<Long> emptyIds) {
-    // given, when
     List<AgencyDTO> result = this.agencyService.getAgencies(emptyIds);
 
-    // then
     assertThat(result).isEmpty();
   }
 
   @Test
   void getAgenciesFromAgencyService_Should_passTenantId() {
-    // given
     TenantContext.setCurrentTenant(1L);
     TenantHeaderSupplier tenantHeaderSupplier = new TenantHeaderSupplier();
     ReflectionTestUtils.setField(tenantHeaderSupplier, "multitenancy", true);
@@ -63,10 +60,9 @@ class AgencyServiceTest {
     when(this.agencyControllerApi.getApiClient()).thenReturn(apiClient);
     var agencyDTOS = Lists.newArrayList(new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);
-    // when
+
     this.agencyService.getAgency(1L);
 
-    // then
     assertThat(headers.get("tenantId").get(0)).isEqualTo("1");
     TenantContext.clear();
   }

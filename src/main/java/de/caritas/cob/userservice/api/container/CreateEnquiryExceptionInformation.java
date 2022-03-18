@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.container;
 
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Session;
 import lombok.Builder;
 import lombok.Data;
 

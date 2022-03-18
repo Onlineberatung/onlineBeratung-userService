@@ -71,9 +71,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        409:
+          description: another otp configuration is already active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /otp-config/delete-otp/{username}:
-    get:
+    delete:
       summary: 'Deletes the otp credential if set'
       operationId: deleteOtp
       parameters:
@@ -97,6 +103,104 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /otp-config/send-verification-mail/{username}:
+    put:
+      summary: 'Send an email to the user containing an OTP'
+      operationId: sendVerificationMail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpSetupDTO'
+      parameters:
+        - name: username
+          in: path
+          description: the username
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/Success'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        409:
+          description: another otp configuration is already active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /otp-config/setup-otp-mail/{username}:
+    post:
+      summary: 'Creates the otp mail credential if not created'
+      operationId: setupOtpMail
+      parameters:
+        - name: username
+          in: path
+          description: the username
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpSetupDTO'
+      responses:
+        200:
+          description: otp already configured
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SuccessWithEmail'
+        201:
+          description: otp created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SuccessWithEmail'
+        400:
+          description: invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: the code was not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        409:
+          description: another otp configuration is already active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        429:
+          description: too many attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     OtpInfoDTO:
@@ -105,12 +209,15 @@ components:
         otpSetup:
           type: boolean
           example: true
+          nullable: false
         otpSecret:
           type: string
           description: is only set when otpSetup if false
         otpSecretQrCode:
           type: string
           description: is only set when otpSetup if false
+        otpType:
+          $ref: "#/components/schemas/OtpType"
 
     OtpSetupDTO:
       type: object
@@ -119,10 +226,37 @@ components:
           type: string
         initialCode:
           type: string
+        email:
+          type: string
+
+    OtpType:
+      type: string
+      enum:
+        - EMAIL
+        - APP
+
+    Challenge:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
+        otpType:
+          $ref: "#/components/schemas/OtpType"
 
     Success:
       type: object
       properties:
+        info:
+          type: string
+
+    SuccessWithEmail:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
         info:
           type: string
 

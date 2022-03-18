@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.service.user;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.AUTHENTICATED_USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.EMAIL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_LANGUAGE_FORMAL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_NO_RC_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.EMAIL;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_LANGUAGE_FORMAL;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_NO_RC_USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -25,10 +25,10 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileToken;
-import de.caritas.cob.userservice.api.repository.usermobiletoken.UserMobileTokenRepository;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.model.UserMobileToken;
+import de.caritas.cob.userservice.api.port.out.UserMobileTokenRepository;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -40,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.auditing.AuditingHandler;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -55,6 +56,10 @@ class UserServiceTest {
 
   @Mock
   private UsernameTranscoder usernameTranscoder;
+
+  @Mock
+  @SuppressWarnings("unused")
+  private AuditingHandler auditingHandler;
 
   @Test
   void createUser_Should_ReturnUser_When_RepositoryCallIsSuccessful() {

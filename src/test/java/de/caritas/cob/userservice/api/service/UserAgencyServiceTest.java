@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_AGENCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_AGENCY_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_AGENCY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_AGENCY_LIST;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,8 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.model.UserAgency;
+import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;

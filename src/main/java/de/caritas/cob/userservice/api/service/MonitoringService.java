@@ -7,24 +7,26 @@ import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformatio
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
-import de.caritas.cob.userservice.api.model.monitoring.MonitoringDTO;
-import de.caritas.cob.userservice.api.repository.monitoring.Monitoring;
-import de.caritas.cob.userservice.api.repository.monitoring.MonitoringRepository;
-import de.caritas.cob.userservice.api.repository.monitoring.MonitoringType;
-import de.caritas.cob.userservice.api.repository.monitoringoption.MonitoringOption;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.Monitoring;
+import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
+import de.caritas.cob.userservice.api.model.Monitoring.MonitoringType;
+import de.caritas.cob.userservice.api.model.MonitoringOption;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 /**
  * Service for {@link Monitoring}.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MonitoringService {
@@ -177,9 +179,8 @@ public class MonitoringService {
             monitoringStructureProvider.getMonitoringInitialList(session.getConsultingTypeId()));
 
       } catch (InternalServerErrorException ex) {
-        LogService.logInternalServerError(String.format(
-            "Error during monitoring rollback. Monitoring data could not be deleted for session: %s",
-            session.toString()), ex);
+        log.error("Internal Server Error: Error during monitoring rollback. Monitoring data could "
+            + "not be deleted for session: {}", session, ex);
       }
     }
   }

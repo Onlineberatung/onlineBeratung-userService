@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

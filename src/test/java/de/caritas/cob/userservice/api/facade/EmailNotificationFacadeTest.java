@@ -1,38 +1,37 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_NAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.APPLICATION_BASE_URL;
-import static de.caritas.cob.userservice.testHelper.TestConstants.APPLICATION_BASE_URL_FIELD_NAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CITY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_ID_3;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.DESCRIPTION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_MONITORING;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NOT_OFFLINE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_AGENCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_NO_TEAM_SESSION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.IS_TEAM_SESSION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.NAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.POSTCODE;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME_ENCODED;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_NAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.APPLICATION_BASE_URL;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.APPLICATION_BASE_URL_FIELD_NAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CITY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_3;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.DESCRIPTION;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NOT_OFFLINE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_AGENCY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_SESSION;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_TEAM_SESSION;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.NAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -42,30 +41,32 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import com.google.api.client.util.Lists;
-import de.caritas.cob.userservice.api.authorization.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
@@ -89,34 +90,34 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmailNotificationFacadeTest {
 
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, "XXX", USERNAME_CONSULTANT_ENCODED, "consultant", "consultant",
-          "consultant@domain.de", false, false, null, false, 1L, null, null, null, null, null,
-          null, null);
+          "consultant@domain.de", false, false, null, false, null, 1L, null, null, null,
+          null, null, null, true, null);
   private final Consultant CONSULTANT_WITHOUT_MAIL = new Consultant(CONSULTANT_ID, "XXX",
-      "consultant", "consultant", "consultant", "", false, false, null, false, 1L, null, null, null,
-      null, null, null, null);
+      "consultant", "consultant", "consultant", "", false, false, null, false, null, 1L,
+      null, null, null, null, null, null, true, null);
   private final Consultant CONSULTANT2 =
       new Consultant(CONSULTANT_ID_2, "XXX", "consultant2", "consultant2", "consultant2",
-          "consultant2@domain.de", false, false, null, false, 1L, null, null, null, null, null,
-          null, null);
+          "consultant2@domain.de", false, false, null, false, null, 1L, null, null, null,
+          null, null, null, true, null);
   private final Consultant CONSULTANT3 =
       new Consultant(CONSULTANT_ID_3, "XXX", "consultant3", "consultant3", "consultant3",
-          "consultant3@domain.de", false, false, null, false, 1L, null, null, null, null, null,
-          null, null);
+          "consultant3@domain.de", false, false, null, false, null, 1L, null, null, null,
+          null, null, null, true, null);
   private final Consultant CONSULTANT_NO_EMAIL = new Consultant(CONSULTANT_ID, "XXX", "consultant",
-      "consultant", "consultant", "", false, false, null, false, 1L, null, null, null, null, null,
-      null, null);
+      "consultant", "consultant", "", false, false, null, false, null, 1L, null, null,
+      null, null, null, null, true, null);
   private final Consultant ABSENT_CONSULTANT = new Consultant("XXX", "XXX", "consultant",
-      "consultant", "consultant", "consultant@domain.de", true, false, null, false, 1L, null,
-      null, null, null, null, null, null);
+      "consultant", "consultant", "consultant@domain.de", true, false, null, false, null,
+      1L, null, null, null, null, null, null, true, null);
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =
@@ -128,23 +129,23 @@ public class EmailNotificationFacadeTest {
           null);
   private final Session SESSION =
       new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045",
-          AGENCY_ID, SessionStatus.INITIAL, nowInUtc(), RC_GROUP_ID, null, null,
+          AGENCY_ID, null, SessionStatus.INITIAL, nowInUtc(), RC_GROUP_ID, null, null,
           IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(1L, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID,
+      new Session(1L, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING,
           false, nowInUtc(), null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, SessionStatus.IN_PROGRESS,
+      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null, SessionStatus.IN_PROGRESS,
       nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
       null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
-      CONSULTANT_NO_EMAIL, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID,
+      CONSULTANT_NO_EMAIL, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null,
       SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
       IS_MONITORING, false, nowInUtc(), null, null);
   private final Session TEAM_SESSION =
       new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "12345", AGENCY_ID,
-          SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
+          null, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
           IS_MONITORING, false, nowInUtc(), null, null);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO()
       .id(AGENCY_ID)
@@ -233,23 +234,23 @@ public class EmailNotificationFacadeTest {
   ConsultingTypeManager consultingTypeManager;
   @Mock
   @SuppressWarnings("unused")
-  KeycloakAdminClientService keycloakAdminClientService;
+  KeycloakService keycloakService;
 
   @Mock
   TenantTemplateSupplier tenantTemplateSupplier;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    FieldSetter.setField(emailNotificationFacade,
-        emailNotificationFacade.getClass().getDeclaredField(FIELD_NAME_EMAIL_DUMMY_SUFFIX),
+    ReflectionTestUtils.setField(emailNotificationFacade, FIELD_NAME_EMAIL_DUMMY_SUFFIX,
         FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
-    FieldSetter.setField(emailNotificationFacade,
-        emailNotificationFacade.getClass().getDeclaredField(FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID),
+    ReflectionTestUtils.setField(emailNotificationFacade, FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID,
         FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID);
-    FieldSetter.setField(emailNotificationFacade,
-        emailNotificationFacade.getClass().getDeclaredField(APPLICATION_BASE_URL_FIELD_NAME),
+    ReflectionTestUtils.setField(emailNotificationFacade, APPLICATION_BASE_URL_FIELD_NAME,
         APPLICATION_BASE_URL);
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(EmailNotificationFacade.class, "log", logger);
+    setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
+    setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
+    setInternalState(NewMessageEmailSupplier.class, "log", logger);
     FieldSetter.setField(emailNotificationFacade,
         emailNotificationFacade.getClass().getDeclaredField("assignEnquiryEmailSupplier"),
         new AssignEnquiryEmailSupplier(consultantService, null));
@@ -288,10 +289,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION, null);
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
-    //TODO: should not be the case. we need to reset the tenant context to null
-    //    assertThat(TenantContext.getCurrentTenant()).isEqualTo(1L);
   }
-
 
   private void givenNewEnquiryMailSupplierReturnNonEmptyMails() {
     List<MailDTO> mails = getMailDTOS();
@@ -324,7 +322,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION, null);
 
-    verify(logger, times(2)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), any(), any(Exception.class));
   }
 
   /**
@@ -443,7 +441,7 @@ public class EmailNotificationFacadeTest {
 
     verify(mailService, times(0))
         .sendEmailNotification(Mockito.any(MailsDTO.class));
-    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).warn(anyString(), anyString(), anyString(), any(Exception.class));
   }
 
   @Test
@@ -457,7 +455,8 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID, null);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString(),
+        any(NullPointerException.class));
   }
 
   @Test
@@ -551,7 +550,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID, null);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
 
   }
 
@@ -563,7 +562,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID, null);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
 
   }
 
@@ -576,7 +575,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID, null);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
 
   }
 
@@ -593,7 +592,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendAssignEnquiryEmailNotification_Should_LogErrorAndSendNoMails_WhenReceiverConsultantIsNull() {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(new Consultant(), CONSULTANT_ID_2, USERNAME, null);
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -601,7 +600,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT_WITHOUT_MAIL,
         CONSULTANT_ID_2, USERNAME, null);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -611,7 +610,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME, null);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -634,7 +633,7 @@ public class EmailNotificationFacadeTest {
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(CONSULTANT));
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME, null);
 
-    verify(logger, times(1)).error(anyString(), anyString(), contains("unexpected"));
+    verify(logger).error(anyString(), any(RuntimeException.class));
   }
 
   @Test
@@ -643,7 +642,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID, null);
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), any(Exception.class));
   }
 
 }

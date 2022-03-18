@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.actions.session;
 
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -10,8 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +35,7 @@ class SetRocketChatRoomReadOnlyActionCommandTest {
 
   @BeforeAll
   public static void setup() {
-    setInternalState(LogService.class, "LOGGER", LOGGER);
+    setInternalState(SetRocketChatRoomReadOnlyActionCommand.class, "log", LOGGER);
   }
 
   @ParameterizedTest
@@ -73,7 +71,7 @@ class SetRocketChatRoomReadOnlyActionCommandTest {
 
     this.actionCommand.execute(session);
 
-    verify(LOGGER, times(1)).error(anyString(), anyString(), anyString());
+    verify(LOGGER).error(anyString(), anyString());
   }
 
 }

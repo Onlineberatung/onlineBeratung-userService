@@ -1,13 +1,13 @@
 package de.caritas.cob.userservice.api.admin.report.service;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.time.format.DateTimeFormatter.ofPattern;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.admin.report.registry.ViolationRuleRegistry;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.model.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import io.swagger.util.Json;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

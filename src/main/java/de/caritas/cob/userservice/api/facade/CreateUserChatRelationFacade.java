@@ -11,11 +11,11 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.DataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
@@ -23,6 +23,7 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class CreateUserChatRelationFacade {
   private final @NonNull UserService userService;
   private final @NonNull UserAgencyService userAgencyService;
   private final @NonNull RollbackFacade rollbackFacade;
+  private final AuditingHandler auditingHandler;
 
   /**
    * Creates an user-chat/agency relation for the provided {@link User}. Either provide username and
@@ -152,6 +154,7 @@ public class CreateUserChatRelationFacade {
     checkIfAlreadyAssignedToAgency(user, userAgency);
 
     try {
+      auditingHandler.markCreated(userAgency);
       userAgencyService.saveUserAgency(userAgency);
 
     } catch (InternalServerErrorException serviceException) {

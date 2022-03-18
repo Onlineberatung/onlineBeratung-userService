@@ -20,5 +20,8 @@
 	<include file="db/changelog/changeset/0013_add_assign_date_to_session/0013_changeSet.xml"/>
 	<include file="db/changelog/changeset/0014_add_is_peer_chat_to_session/0014_changeSet.xml"/>
 	<include file="db/changelog/changeset/0015_add_app_mobile_token/0015_changeSet.xml"/>
+	<include file="db/changelog/changeset/0016_add_consultant_languages/0016_changeSet.xml"/>
+	<include file="db/changelog/changeset/0017_add_session_language/0017_changeSet.xml"/>
+	<include file="db/changelog/changeset/0018_add_2fa_encourage/0018_changeSet.xml"/>
 	<include file="db/changelog/changeset/0016_tenant_id/0016_changeSet.xml"/>
 </databaseChangeLog>

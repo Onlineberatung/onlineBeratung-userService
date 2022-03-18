@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.container;
 
-import de.caritas.cob.userservice.api.repository.session.SessionFilter;
+import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import lombok.Builder;
 import lombok.Getter;
 

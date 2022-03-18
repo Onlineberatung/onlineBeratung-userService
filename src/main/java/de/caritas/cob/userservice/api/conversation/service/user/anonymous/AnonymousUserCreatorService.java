@@ -1,22 +1,21 @@
 package de.caritas.cob.userservice.api.conversation.service.user.anonymous;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.keycloak.login.KeycloakLoginResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
-import de.caritas.cob.userservice.api.service.KeycloakService;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +29,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AnonymousUserCreatorService {
 
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull CreateUserFacade createUserFacade;
-  private final @NonNull KeycloakService keycloakService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull UserService userService;
@@ -45,14 +43,14 @@ public class AnonymousUserCreatorService {
    */
   public AnonymousUserCredentials createAnonymousUser(UserDTO userDto) {
 
-    KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDto);
+    KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDto);
     createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(),
         userDto, UserRole.ANONYMOUS);
 
     KeycloakLoginResponseDTO kcLoginResponseDTO;
     ResponseEntity<LoginResponseDTO> rcLoginResponseDto;
     try {
-      kcLoginResponseDTO = keycloakService.loginUser(userDto.getUsername(), userDto.getPassword());
+      kcLoginResponseDTO = identityClient.loginUser(userDto.getUsername(), userDto.getPassword());
       rcLoginResponseDto =
           rocketChatService.loginUserFirstTime(userDto.getUsername(), userDto.getPassword());
     } catch (RocketChatLoginException | BadRequestException e) {

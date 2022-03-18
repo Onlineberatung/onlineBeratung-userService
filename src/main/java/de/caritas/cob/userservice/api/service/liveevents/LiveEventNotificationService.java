@@ -9,7 +9,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
@@ -20,12 +19,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
 /**
  * Service class to provide live event triggers to the live service.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LiveEventNotificationService {
@@ -63,7 +64,7 @@ public class LiveEventNotificationService {
     try {
       this.liveControllerApi.sendLiveEvent(liveEventMessage);
     } catch (RestClientException e) {
-      LogService.logInternalServerError(errorMessageSupplier.get(), e);
+      log.error("Internal Server Error: {}", errorMessageSupplier.get(), e);
     }
   }
 

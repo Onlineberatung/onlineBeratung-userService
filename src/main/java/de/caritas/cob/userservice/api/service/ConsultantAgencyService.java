@@ -4,11 +4,18 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Language;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +26,7 @@ import org.springframework.stereotype.Service;
 public class ConsultantAgencyService {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
+  private final @NonNull AgencyService agencyService;
 
   /**
    * Save a {@link ConsultantAgency} to the database.
@@ -87,6 +95,18 @@ public class ConsultantAgencyService {
     return emptyList();
   }
 
+  public Set<String> getLanguageCodesOfAgency(long agencyId) {
+    var consultantAgencies = findConsultantsByAgencyId(agencyId);
+
+    return consultantAgencies.stream()
+        .map(ConsultantAgency::getConsultant)
+        .map(Consultant::getLanguages)
+        .flatMap(Collection::stream)
+        .map(Language::getLanguageCode)
+        .map(LanguageCode::name)
+        .collect(Collectors.toSet());
+  }
+
   private ConsultantResponseDTO convertToConsultantResponseDTO(ConsultantAgency agency) {
 
     checkForInconsistencies(agency);
@@ -117,5 +137,19 @@ public class ConsultantAgencyService {
               agency.getAgencyId()),
           LogService::logDatabaseError);
     }
+  }
+
+  /**
+   * Returns all agencies of given consultant.
+   *
+   * @param consultantId the id of the consultant
+   * @return the related agencies
+   */
+  public List<AgencyDTO> getAgenciesOfConsultant(String consultantId) {
+    var agencyIds = consultantAgencyRepository.findByConsultantId(consultantId).stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+
+    return agencyService.getAgencies(agencyIds);
   }
 }

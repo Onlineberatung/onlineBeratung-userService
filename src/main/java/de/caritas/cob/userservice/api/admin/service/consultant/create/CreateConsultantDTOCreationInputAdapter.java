@@ -3,7 +3,8 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
+
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 

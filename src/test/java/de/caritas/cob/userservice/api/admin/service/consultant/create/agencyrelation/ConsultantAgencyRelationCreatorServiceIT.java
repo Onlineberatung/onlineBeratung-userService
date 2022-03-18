@@ -13,26 +13,27 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.UserServiceApplication;
+import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgencyRepository;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.model.UserAgency;
+import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -81,7 +82,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   private AgencyService agencyService;
 
   @MockBean
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @MockBean
   private RocketChatFacade rocketChatFacade;
@@ -98,7 +99,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     createConsultantAgencyDTO.setAgencyId(15L);
     createConsultantAgencyDTO.setRoleSetKey("valid-role-set");
 
-    when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
+    when(keycloakService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
 
     AgencyDTO agencyDTO = new AgencyDTO();
     agencyDTO.setId(15L);
@@ -138,7 +139,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     createConsultantAgencyDTO.setAgencyId(15L);
     createConsultantAgencyDTO.setRoleSetKey("valid-role-set");
 
-    when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
+    when(keycloakService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
     ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     extendedConsultingTypeResponseDTO.setExcludeNonMainConsultantsFromTeamSessions(true);
     AgencyDTO agencyDTO = new AgencyDTO();
@@ -186,14 +187,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
     var consultant = createConsultantWithoutAgencyAndSession();
-    when(keycloakAdminClientService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
+    when(keycloakService.userHasRole(eq(consultant.getId()), any())).thenReturn(true);
     var roles = givenRoleSets(consultingType, roleSetName);
 
     consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     roles.forEach(role ->
-        verify(keycloakAdminClientService).ensureRole(eq(consultant.getId()), eq(role))
+        verify(keycloakService).ensureRole(eq(consultant.getId()), eq(role))
     );
     var result = consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
@@ -230,6 +231,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     consultant.setConsultantMobileTokens(null);
     consultant.setRocketChatId("RocketChatId");
     consultant.setDeleteDate(null);
+    consultant.setLanguages(null);
     return this.consultantRepository.save(consultant);
   }
 
@@ -253,6 +255,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     session.setConsultant(null);
     session.setUser(user);
     session.setAgencyId(agencyId);
+    session.setLanguageCode(LanguageCode.de);
     session.setTeamSession(true);
     return this.sessionRepository.save(session);
   }
@@ -268,7 +271,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO();
-    when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(false);
+    when(keycloakService.userHasRole(any(), any())).thenReturn(false);
 
     this.consultantAgencyRelationCreatorService.createNewConsultantAgency(consultant.getId(),
         createConsultantAgencyDTO);
@@ -280,7 +283,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .roleSetKey("valid role set");
-    when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(keycloakService.userHasRole(any(), any())).thenReturn(true);
     when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(null);
 
     this.consultantAgencyRelationCreatorService.createNewConsultantAgency(consultant.getId(),
@@ -293,7 +296,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
         .roleSetKey("valid role set");
-    when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(keycloakService.userHasRole(any(), any())).thenReturn(true);
     when(agencyService.getAgencyWithoutCaching(any()))
         .thenThrow(new InternalServerErrorException(""));
 
@@ -313,7 +316,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
     when(agencyService.getAgencyWithoutCaching(2L)).thenReturn(agencyDTO);
-    when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(keycloakService.userHasRole(any(), any())).thenReturn(true);
     when(consultingTypeManager.isConsultantBoundedToAgency(1)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
@@ -337,7 +340,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
 
     when(agencyService.getAgencyWithoutCaching(1731L)).thenReturn(emigrationAgency);
     when(agencyService.getAgencyWithoutCaching(2L)).thenReturn(agencyDTO);
-    when(keycloakAdminClientService.userHasRole(any(), any())).thenReturn(true);
+    when(keycloakService.userHasRole(any(), any())).thenReturn(true);
     when(consultingTypeManager.isConsultantBoundedToAgency(15)).thenReturn(true);
 
     CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
