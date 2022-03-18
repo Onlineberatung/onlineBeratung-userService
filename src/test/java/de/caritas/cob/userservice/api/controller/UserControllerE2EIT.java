@@ -31,24 +31,27 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.model.EmailDTO;
+import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
+import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
+import de.caritas.cob.userservice.api.model.PasswordDTO;
+import de.caritas.cob.userservice.api.model.PatchUserDTO;
+import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.EmailDTO;
-import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
-import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
-import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.OtpType;
-import de.caritas.cob.userservice.api.model.PatchUserDTO;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
@@ -182,6 +185,8 @@ public class UserControllerE2EIT {
   private PatchUserDTO patchUserDTO;
 
   private UserDTO userDTO;
+
+  private PasswordDTO passwordDto;
 
   @AfterEach
   public void reset() {
@@ -736,6 +741,57 @@ public class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(patchDto))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOff() throws Exception {
+    givenAValidUser();
+    givenAPasswordDto();
+    givenAValidKeycloakLoginResponse();
+
+    mockMvc.perform(
+        put("/users/password/change")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(passwordDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOn() throws Exception {
+    givenAValidUser();
+    givenAPasswordDto();
+    givenAnInvalidKeycloakLoginResponseMissingOtp();
+
+    mockMvc.perform(
+        put("/users/password/change")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(passwordDto)
+            ).accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void updatePasswordShouldRespondWithBadRequestIfPasswordIsFalse() throws Exception {
+    givenAValidUser();
+    givenAPasswordDto();
+    givenAnInvalidKeycloakLoginResponseFailingPassword();
+
+    mockMvc.perform(
+        put("/users/password/change")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(passwordDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -1488,6 +1544,37 @@ public class UserControllerE2EIT {
     )).thenReturn(new ResponseEntity<>(successWithEmail, HttpStatus.OK));
   }
 
+  private void givenAValidKeycloakLoginResponse() {
+    var loginResponse = easyRandom.nextObject(KeycloakLoginResponseDTO.class);
+    var urlSuffix = "/auth/realms/test/protocol/openid-connect/token";
+    when(restTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(KeycloakLoginResponseDTO.class)
+    )).thenReturn(ResponseEntity.ok().body(loginResponse));
+  }
+
+  private void givenAnInvalidKeycloakLoginResponseFailingPassword() {
+    var exception = new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+    var urlSuffix = "/auth/realms/test/protocol/openid-connect/token";
+    when(restTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(KeycloakLoginResponseDTO.class)
+    )).thenThrow(exception);
+  }
+
+  private void givenAnInvalidKeycloakLoginResponseMissingOtp() throws JsonProcessingException {
+    var responseMap = Map.of(
+        "error", "invalid_grant",
+        "error_description", "Missing totp",
+        "otpType", easyRandom.nextBoolean() ? "EMAIL" : "APP"
+    );
+    var body = objectMapper.writeValueAsString(responseMap).getBytes();
+    var statusText = HttpStatus.BAD_REQUEST.getReasonPhrase();
+    var exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST, statusText, body, null);
+    var urlSuffix = "/auth/realms/test/protocol/openid-connect/token";
+    when(restTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(KeycloakLoginResponseDTO.class)
+    )).thenThrow(exception);
+  }
+
   private void givenAValidKeycloakVerifyEmailResponse() {
     var urlSuffix =
         "/auth/realms/test/otp-config/send-verification-mail/" + consultant.getUsername();
@@ -1718,6 +1805,10 @@ public class UserControllerE2EIT {
         .email(email)
         .firstname(RandomStringUtils.randomAlphabetic(8))
         .lastname(RandomStringUtils.randomAlphabetic(12));
+  }
+
+  private void givenAPasswordDto() {
+    passwordDto = easyRandom.nextObject(PasswordDTO.class);
   }
 
   private HashMap<String, Object> givenAnInvalidPatchDto() {

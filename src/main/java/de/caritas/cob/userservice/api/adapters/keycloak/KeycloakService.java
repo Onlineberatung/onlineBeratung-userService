@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.adapters.keycloak;
 
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
+import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.config.KeycloakClient;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
@@ -116,6 +117,34 @@ public class KeycloakService implements IdentityClient {
     }
   }
 
+
+  @Override
+  public boolean verifyIgnoringOtp(String username, String password) {
+    var requestPayload = Map.of(
+        BODY_KEY_USERNAME, username,
+        BODY_KEY_PASSWORD, password,
+        BODY_KEY_CLIENT_ID, keycloakClientId,
+        BODY_KEY_GRANT_TYPE, KEYCLOAK_GRANT_TYPE_PW
+    );
+    var entity = new HttpEntity<>(requestPayload, getFormHttpHeaders());
+    var url = identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGIN);
+
+    ResponseEntity<KeycloakLoginResponseDTO> loginResponse;
+    try {
+      loginResponse = restTemplate.postForEntity(url, entity, KeycloakLoginResponseDTO.class);
+    } catch (HttpClientErrorException exception) {
+      return exception.getStatusCode().equals(HttpStatus.BAD_REQUEST)
+          && exception.getResponseBodyAsString().contains("Missing totp"); // but password correct
+    }
+
+    var responsePayload = loginResponse.getBody();
+    if (nonNull(responsePayload) && nonNull(responsePayload.getRefreshToken())) {
+      logoutUser(responsePayload.getRefreshToken());
+    }
+
+    return true;
+  }
+
   /**
    * Performs a Keycloak logout. This only destroys the Keycloak session, the (offline) access token
    * will still be valid until expiration date/time ends.
@@ -134,11 +163,9 @@ public class KeycloakService implements IdentityClient {
     map.add(KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN, refreshToken);
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, httpHeaders);
 
+    var url = identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGOUT);
     try {
-      var response = restTemplate.postForEntity(
-          identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGOUT),
-          request, Void.class
-      );
+      var response = restTemplate.postForEntity(url, request, Void.class);
       return wasLogoutSuccessful(response, refreshToken);
     } catch (Exception ex) {
       log.error("Keycloak error: Could not log out user with refresh token {}", refreshToken, ex);
