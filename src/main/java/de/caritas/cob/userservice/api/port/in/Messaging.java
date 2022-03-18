@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface Messaging {
 
-  boolean banUserFromChat(String consultantId, String adviceSeekerId, long chatId);
+  boolean banUserFromChat(String adviceSeekerId, long chatId);
 
   boolean existsChat(long id);
 
