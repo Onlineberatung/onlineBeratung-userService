@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service.user;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
-import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -145,14 +144,10 @@ public class ValidatedUserAccountProvider {
 
   /**
    * Deactivates the Keycloak account of the currently authenticated user and flags this account for
-   * deletion if the provided password is valid.
-   *
-   * @param deleteUserAccountDTO {@link DeleteUserAccountDTO}
+   * deletion.
    */
-  public void deactivateAndFlagUserAccountForDeletion(DeleteUserAccountDTO deleteUserAccountDTO) {
+  public void deactivateAndFlagUserAccountForDeletion() {
     User user = retrieveValidatedUser();
-    this.userAccountValidator
-        .checkPasswordValidity(user.getUsername(), deleteUserAccountDTO.getPassword());
     this.identityClient.deactivateUser(user.getUserId());
     user.setDeleteDate(nowInUtc());
     userService.saveUser(user);
