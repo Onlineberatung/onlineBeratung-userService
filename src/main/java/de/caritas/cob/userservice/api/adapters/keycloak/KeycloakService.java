@@ -149,13 +149,13 @@ public class KeycloakService implements IdentityClient {
 
   @Override
   public boolean verifyIgnoringOtp(String username, String password) {
-    var requestPayload = Map.of(
-        BODY_KEY_USERNAME, username,
-        BODY_KEY_PASSWORD, password,
-        BODY_KEY_CLIENT_ID, keycloakClientId,
-        BODY_KEY_GRANT_TYPE, KEYCLOAK_GRANT_TYPE_PW
-    );
-    var entity = new HttpEntity<>(requestPayload, getFormHttpHeaders());
+    MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+    map.add(BODY_KEY_USERNAME, username);
+    map.add(BODY_KEY_PASSWORD, password);
+    map.add(BODY_KEY_CLIENT_ID, keycloakClientId);
+    map.add(BODY_KEY_GRANT_TYPE, KEYCLOAK_GRANT_TYPE_PW);
+
+    var entity = new HttpEntity<>(map, getFormHttpHeaders());
     var url = identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGIN);
 
     ResponseEntity<KeycloakLoginResponseDTO> loginResponse;
