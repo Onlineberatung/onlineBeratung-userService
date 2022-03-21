@@ -3,9 +3,9 @@ package de.caritas.cob.userservice.api.admin.service.session;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
-import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.model.SessionFilter;
+import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.admin.model.SessionFilter;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.junit.After;
 import org.junit.Before;

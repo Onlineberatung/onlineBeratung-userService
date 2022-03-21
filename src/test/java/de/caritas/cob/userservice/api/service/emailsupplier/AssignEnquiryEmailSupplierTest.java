@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignEnquiryEmailSupplierTest {
@@ -45,7 +44,7 @@ public class AssignEnquiryEmailSupplierTest {
     String askerUserName = "asker user name";
     String senderUserId = "sender user id";
     this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService);
+        senderUserId, askerUserName, applicationBaseUrl, consultantService, null, false);
     setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
   }
 

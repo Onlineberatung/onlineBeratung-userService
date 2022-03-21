@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import javax.transaction.Transactional;
 import lombok.Setter;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @AllArgsConstructor
+@NoArgsConstructor
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AssignEnquiryEmailSupplier implements EmailSupplier {
@@ -44,13 +49,11 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
-  private final ConsultantService consultantService;
+  private ConsultantService consultantService;
+  private TenantTemplateSupplier tenantTemplateSupplier;
 
   @Value("${multitenancy.enabled}")
-  private boolean multiTenancyEnabled;
-
-  private final TenantTemplateSupplier tenantTemplateSupplier;
-
+  private Boolean multiTenancyEnabled;
 
   /**
    * Generates the enquiry notification mail sent to regarding consultant.

@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
-import de.caritas.cob.userservice.UserServiceApplication;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.port.out.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.junit.After;
 import org.junit.jupiter.api.BeforeEach;

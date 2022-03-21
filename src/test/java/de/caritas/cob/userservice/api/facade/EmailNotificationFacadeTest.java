@@ -41,10 +41,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -59,11 +59,10 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
-import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
@@ -251,9 +250,6 @@ public class EmailNotificationFacadeTest {
     setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
     setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
     setInternalState(NewMessageEmailSupplier.class, "log", logger);
-    FieldSetter.setField(emailNotificationFacade,
-        emailNotificationFacade.getClass().getDeclaredField("assignEnquiryEmailSupplier"),
-        new AssignEnquiryEmailSupplier(consultantService, null));
   }
 
   /**
@@ -525,7 +521,8 @@ public class EmailNotificationFacadeTest {
     when(consultantService.getConsultantByRcUserId(GROUP_MEMBER_2_RC_ID))
         .thenReturn(Optional.of(CONSULTANT3));
 
-    emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID, CONSULTANT_ID, null);
+    emailNotificationFacade
+        .sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID, CONSULTANT_ID, null);
 
     verify(mailService, times(1)).sendEmailNotification(Mockito.any());
 
@@ -591,7 +588,8 @@ public class EmailNotificationFacadeTest {
 
   @Test
   public void sendAssignEnquiryEmailNotification_Should_LogErrorAndSendNoMails_WhenReceiverConsultantIsNull() {
-    emailNotificationFacade.sendAssignEnquiryEmailNotification(new Consultant(), CONSULTANT_ID_2, USERNAME, null);
+    emailNotificationFacade
+        .sendAssignEnquiryEmailNotification(new Consultant(), CONSULTANT_ID_2, USERNAME, null);
     verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 

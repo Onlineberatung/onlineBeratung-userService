@@ -22,5 +22,5 @@
 	<include file="db/changelog/changeset/0016_add_consultant_languages/0016_changeSet.xml"/>
 	<include file="db/changelog/changeset/0017_add_session_language/0017_changeSet.xml"/>
 	<include file="db/changelog/changeset/0018_add_2fa_encourage/0018_changeSet.xml"/>
-	<include file="db/changelog/changeset/0016_tenant_id/0016_changeSet.xml"/>
+	<include file="db/changelog/changeset/0019_tenant_id/0019_changeSet.xml"/>
 </databaseChangeLog>

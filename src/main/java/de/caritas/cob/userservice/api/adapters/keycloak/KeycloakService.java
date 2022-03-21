@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
@@ -35,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -100,19 +100,8 @@ public class KeycloakService implements IdentityClient {
   @Value("${api.error.keycloakError}")
   private String keycloakError;
 
-  @Value("${keycloakApi.error.username}")
-  private String keycloakErrorUsername;
-
-  @Value("${keycloakApi.error.email}")
-  private String keycloakErrorEmail;
-
   @Value("${multitenancy.enabled}")
-  private boolean multiTenancyEnabled;
-
-  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
-
-  private final @NonNull UserHelper userHelper;
-  private final @NonNull KeycloakAdminClientAccessor keycloakAdminClientAccessor;
+  private Boolean multiTenancyEnabled;
 
   /**
    * Changes the (Keycloak) password of a user and returns true on success.

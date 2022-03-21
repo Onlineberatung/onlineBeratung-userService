@@ -113,6 +113,7 @@ public class KeycloakServiceTest {
     givenAKeycloakLogoutUrl();
     setField(keycloakService, "keycloakClientId", "app");
     setField(keycloakService, "usernameTranscoder", usernameTranscoder);
+    setField(keycloakService, "multiTenancyEnabled", false);
     setInternalState(KeycloakService.class, "log", logger);
   }
 
@@ -295,7 +296,7 @@ public class KeycloakServiceTest {
   @Test
   public void createKeycloakUser_Should_createExpectedTenantAwareUser_When_keycloakReturnsCreated() {
     TenantContext.setCurrentTenant(1L);
-    setField(keycloakAdminClientService, "multiTenancyEnabled", true);
+    setField(keycloakService, "multiTenancyEnabled", true);
 
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
     userDTO.setTenantId(1L);
@@ -303,9 +304,9 @@ public class KeycloakServiceTest {
     Response response = mock(Response.class);
     when(response.getStatus()).thenReturn(HttpStatus.CREATED.value());
     when(usersResource.create(any())).thenReturn(response);
-    when(this.keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+    when(this.keycloakClient.getUsersResource()).thenReturn(usersResource);
 
-    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakAdminClientService
+    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakService
         .createKeycloakUser(userDTO);
 
     assertThat(keycloakUser, notNullValue());
