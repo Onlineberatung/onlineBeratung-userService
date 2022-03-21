@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.service.user;
 
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -9,7 +8,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -19,9 +17,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
-import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -231,29 +227,12 @@ public class ValidatedUserAccountProviderTest {
     verify(keycloakService, times(1)).changePassword(any(), any());
   }
 
-  @Test(expected = BadRequestException.class)
-  public void deactivateAndFlagUserAccountForDeletion_ShouldNot_DeactivateKeycloakAccountOrSetDeleteDate_When_PasswordIsIncorrect() {
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    doThrow(new BadRequestException(MESSAGE)).when(userAccountValidator)
-        .checkPasswordValidity(anyString(), anyString());
-
-    DeleteUserAccountDTO deleteUserAccountDTO = EASY_RANDOM
-        .nextObject(DeleteUserAccountDTO.class);
-    this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
-
-    verifyNoInteractions(keycloakService);
-    verifyNoInteractions(userRepository);
-  }
-
   @Test
   public void deactivateAndFlagUserAccountForDeletion_Should_DeactivateKeycloakAccountAndSetDeleteDate_When_PasswordIsCorrect() {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    DeleteUserAccountDTO deleteUserAccountDTO =
-        EASY_RANDOM.nextObject(DeleteUserAccountDTO.class);
-    this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
+    this.accountProvider.deactivateAndFlagUserAccountForDeletion();
 
     verify(keycloakService, times(1)).deactivateUser(USER.getUserId());
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
