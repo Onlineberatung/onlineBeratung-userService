@@ -14,14 +14,11 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDT
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import javax.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -53,7 +50,7 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
   private TenantTemplateSupplier tenantTemplateSupplier;
 
   @Value("${multitenancy.enabled}")
-  private Boolean multiTenancyEnabled;
+  private boolean multiTenancyEnabled;
 
   /**
    * Generates the enquiry notification mail sent to regarding consultant.

@@ -89,6 +89,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -210,7 +211,7 @@ public class EmailNotificationFacadeTest {
   @Mock
   private NewEnquiryEmailSupplier newEnquiryEmailSupplier;
 
-  @Mock
+  @Spy
   private AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
 
   @Mock
@@ -246,6 +247,8 @@ public class EmailNotificationFacadeTest {
         FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID);
     ReflectionTestUtils.setField(emailNotificationFacade, APPLICATION_BASE_URL_FIELD_NAME,
         APPLICATION_BASE_URL);
+    ReflectionTestUtils.setField(assignEnquiryEmailSupplier, "consultantService",
+        consultantService);
     setInternalState(EmailNotificationFacade.class, "log", logger);
     setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
     setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
@@ -370,14 +373,12 @@ public class EmailNotificationFacadeTest {
 
   @Test
   public void sendNewMessageNotification_Should_LogError_WhenSessionServiceFails() {
-
     InternalServerErrorException serviceException = new InternalServerErrorException(ERROR_MSG);
-
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, USER_ID, USER_ROLES))
         .thenThrow(serviceException);
-
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID, null);
-    verify(logger, times(2)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), anyString(),
+        any(InternalServerErrorException.class));
   }
 
   @Test
@@ -589,7 +590,7 @@ public class EmailNotificationFacadeTest {
   @Test
   public void sendAssignEnquiryEmailNotification_Should_LogErrorAndSendNoMails_WhenReceiverConsultantIsNull() {
     emailNotificationFacade
-        .sendAssignEnquiryEmailNotification(new Consultant(), CONSULTANT_ID_2, USERNAME, null);
+        .sendAssignEnquiryEmailNotification(null, CONSULTANT_ID_2, USERNAME, null);
     verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
@@ -630,7 +631,6 @@ public class EmailNotificationFacadeTest {
         .sendEmailNotification(any());
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(CONSULTANT));
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME, null);
-
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
 

@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
@@ -67,7 +66,7 @@ public class EmailNotificationFacade {
   private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
 
   @Value("${multitenancy.enabled}")
-  private Boolean multiTenancyEnabled;
+  private boolean multiTenancyEnabled;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
@@ -116,8 +115,6 @@ public class EmailNotificationFacade {
   @Transactional
   public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId,
       TenantData tenantData) {
-    log.info("Preparing to send NEW_MESSAGE_NOTIFICATION with rcGroupId: ",
-        rcGroupId);
     TenantContext.setCurrentTenantData(tenantData);
     try {
       Session session = sessionService.getSessionByGroupIdAndUser(rcGroupId, userId, roles);
@@ -188,7 +185,7 @@ public class EmailNotificationFacade {
       String askerUserName, TenantData tenantData) {
     TenantContext.setCurrentTenantData(tenantData);
     log.info("Preparing to send ASSIGN_ENQUIRY_NOTIFICATION email to consultant: ",
-        receiverConsultant.getId());
+        receiverConsultant != null ? receiverConsultant.getId() : "No consultant selected");
     assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
     assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
     assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
