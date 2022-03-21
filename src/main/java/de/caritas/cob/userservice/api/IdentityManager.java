@@ -43,6 +43,11 @@ public class IdentityManager implements IdentityManaging {
   }
 
   @Override
+  public boolean changePassword(String userId, String password) {
+    return identityClient.changePassword(userId, password);
+  }
+
+  @Override
   public void deleteOneTimePassword(String username) {
     identityClient.deleteOtpCredential(username);
   }
