@@ -663,7 +663,12 @@ public class UserController implements UsersApi {
       throw new BadRequestException(message);
     }
 
-    this.userAccountProvider.changePassword(passwordDTO);
+    var userId = authenticatedUser.getUserId();
+    if (!identityManager.changePassword(userId, passwordDTO.getNewPassword())) {
+      var message = String.format("Could not update password of user %s", userId);
+      throw new InternalServerErrorException(message);
+    }
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
