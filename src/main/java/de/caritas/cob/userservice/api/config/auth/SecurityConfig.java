@@ -50,7 +50,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
   private final CsrfSecurityProperties csrfSecurityProperties;
   @Value("${multitenancy.enabled}")
-  private Boolean multitenancy;
+  private boolean multitenancy;
   private HttpTenantFilter tenantFilter;
 
   /**
