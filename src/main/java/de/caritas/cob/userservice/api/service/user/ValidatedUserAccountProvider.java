@@ -136,9 +136,6 @@ public class ValidatedUserAccountProvider {
    * @param passwordDTO {@link PasswordDTO}
    */
   public void changePassword(PasswordDTO passwordDTO) {
-    userAccountValidator
-        .checkPasswordValidity(authenticatedUser.getUsername(), passwordDTO.getOldPassword());
-
     if (!identityClient.changePassword(authenticatedUser.getUserId(),
         passwordDTO.getNewPassword())) {
       throw new InternalServerErrorException(
