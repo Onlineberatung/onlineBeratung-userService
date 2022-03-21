@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
-@TestPropertySource(properties = "spring.datasource.schema=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@TestPropertySource(properties = "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
 @Transactional
 public class SessionAdminServiceTenantAwareIT {
 
@@ -49,7 +49,7 @@ public class SessionAdminServiceTenantAwareIT {
         .findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
-    assertThat(secondPage.getEmbedded(), hasSize(51));
+    assertThat(secondPage.getEmbedded(), hasSize(53));
   }
 
 }

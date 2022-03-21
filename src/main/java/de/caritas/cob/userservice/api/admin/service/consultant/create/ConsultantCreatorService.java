@@ -45,7 +45,7 @@ public class ConsultantCreatorService {
   private final @NonNull TenantAdminService tenantAdminService;
 
   @Value("${multitenancy.enabled}")
-  private Boolean multiTenancyEnabled;
+  private boolean multiTenancyEnabled;
 
   /**
    * Creates a new {@link Consultant} by {@link CreateConsultantDTO} in database, keycloak and

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
@@ -17,6 +18,7 @@ import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -30,7 +32,9 @@ import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.After;
 import org.junit.Before;
@@ -152,6 +156,12 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     consultant.setConsultantMobileTokens(null);
     consultant.setRocketChatId("RocketChatId");
     consultant.setDeleteDate(null);
+    Set<Language> language = new HashSet<>();
+    Language lang = new Language();
+    lang.setLanguageCode(LanguageCode.de);
+    lang.setConsultant(consultant);
+    language.add(lang);
+    consultant.setLanguages(language);
     return this.consultantRepository.save(consultant);
   }
 
@@ -175,6 +185,7 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     session.setUser(user);
     session.setAgencyId(agencyId);
     session.setTeamSession(true);
+    session.setLanguageCode(LanguageCode.de);
     return this.sessionRepository.save(session);
   }
 
