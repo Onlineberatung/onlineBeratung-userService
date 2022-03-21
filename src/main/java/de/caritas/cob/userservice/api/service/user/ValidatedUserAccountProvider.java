@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.PasswordDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
@@ -147,15 +146,11 @@ public class ValidatedUserAccountProvider {
 
   /**
    * Deactivates the Keycloak account of the currently authenticated user and flags this account for
-   * deletion if the provided password is valid.
-   *
-   * @param deleteUserAccountDTO {@link DeleteUserAccountDTO}
+   * deletion.
    */
-  public void deactivateAndFlagUserAccountForDeletion(DeleteUserAccountDTO deleteUserAccountDTO) {
+  public void deactivateAndFlagUserAccountForDeletion() {
     User user = retrieveValidatedUser();
-    this.userAccountValidator
-        .checkPasswordValidity(user.getUsername(), deleteUserAccountDTO.getPassword());
-    this.keycloakAdminClientService.deactivateUser(user.getUserId());
+    this.identityClient.deactivateUser(user.getUserId());
     user.setDeleteDate(nowInUtc());
     userService.saveUser(user);
   }

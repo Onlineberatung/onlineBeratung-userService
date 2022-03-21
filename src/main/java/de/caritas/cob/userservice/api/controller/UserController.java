@@ -858,7 +858,15 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> deactivateAndFlagUserAccountForDeletion(
       @Valid DeleteUserAccountDTO deleteUserAccountDTO) {
-    this.userAccountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
+    var username = authenticatedUser.getUsername();
+    var password = deleteUserAccountDTO.getPassword();
+    if (!identityManager.validatePasswordIgnoring2fa(username, password)) {
+      var message = String.format("Could not log in user %s into Keycloak", username);
+      throw new BadRequestException(message);
+    }
+
+    userAccountProvider.deactivateAndFlagUserAccountForDeletion();
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

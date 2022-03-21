@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.controller;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION_INVALID_PATH_VAR;
@@ -178,7 +177,6 @@ import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandat
 import de.caritas.cob.userservice.api.model.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.model.CreateEnquiryMessageResponseDTO;
-import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.model.SessionDTO;
@@ -197,6 +195,7 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.repository.chat.Chat;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.repository.session.RegistrationType;
 import de.caritas.cob.userservice.api.repository.session.Session;
 import de.caritas.cob.userservice.api.repository.session.SessionStatus;
 import de.caritas.cob.userservice.api.repository.user.User;
@@ -314,19 +313,23 @@ public class UserControllerIT {
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.IN_PROGRESS,
+      CONSULTING_TYPE_ID_SUCHT, RegistrationType.REGISTERED, POSTCODE, AGENCY_ID, null,
+      SessionStatus.IN_PROGRESS,
       nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
       null);
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
+      new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, RegistrationType.REGISTERED,
+          POSTCODE, AGENCY_ID,
           null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
           IS_MONITORING, false, nowInUtc(), null);
   private final Session TEAM_SESSION =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT,
+          RegistrationType.REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null,
           IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
+      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT,
+          RegistrationType.REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
           IS_MONITORING, false, nowInUtc(), null);
   private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO = new ConsultantResponseDTO()
@@ -2203,22 +2206,6 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(accountProvider);
-  }
-
-  @Test
-  public void deactivateAndFlagUserAccountForDeletion_Should_ReturnOk_When_RequestOk()
-      throws Exception {
-
-    DeleteUserAccountDTO deleteUserAccountDTO = new DeleteUserAccountDTO().password("p@ssword");
-    String bodyPayload = objectMapper.writeValueAsString(deleteUserAccountDTO);
-
-    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(bodyPayload)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(accountProvider, times(1)).deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
   }
 
   @Test

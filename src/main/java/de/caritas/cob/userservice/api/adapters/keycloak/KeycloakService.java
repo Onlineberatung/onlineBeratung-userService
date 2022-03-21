@@ -281,4 +281,16 @@ public class KeycloakService implements IdentityClient {
       return keycloakMapper.mapOf(exception);
     }
   }
+
+  /**
+   * Deactivates the user account.
+   *
+   * @param userId the user id to be deactivated
+   */
+  public void deactivateUser(String userId) {
+    var userResource = keycloakAdminClientAccessor.getUsersResource().get(userId);
+    var userRepresentation = userResource.toRepresentation();
+    userRepresentation.setEnabled(false);
+    userResource.update(userRepresentation);
+  }
 }

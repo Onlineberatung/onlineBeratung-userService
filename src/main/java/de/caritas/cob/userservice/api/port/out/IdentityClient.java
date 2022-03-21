@@ -31,5 +31,7 @@ public interface IdentityClient {
 
   Map<String, String> findUserByEmail(String email);
 
+  void deactivateUser(String userId);
+
   boolean verifyIgnoringOtp(String username, String password);
 }

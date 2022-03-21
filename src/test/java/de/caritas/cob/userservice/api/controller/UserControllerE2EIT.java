@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.model.LanguageResponseDTO;
@@ -55,6 +57,8 @@ import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.registration.UserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.repository.chat.Chat;
+import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Consultant;
 import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
 import de.caritas.cob.userservice.api.repository.consultant.Language;
@@ -138,6 +142,9 @@ public class UserControllerE2EIT {
   private SessionRepository sessionRepository;
 
   @Autowired
+  private ChatRepository chatRepository;
+
+  @Autowired
   private de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi consultingTypeControllerApi;
 
   @MockBean
@@ -186,11 +193,19 @@ public class UserControllerE2EIT {
 
   private UserDTO userDTO;
 
+  private Chat chat;
+
   private PasswordDTO passwordDto;
+
+  private DeleteUserAccountDTO deleteUserAccountDto;
 
   @AfterEach
   public void reset() {
-    user = null;
+    if (nonNull(user)) {
+      user.setDeleteDate(null);
+      userRepository.save(user);
+      user = null;
+    }
     session = null;
     consultant = null;
     updateConsultantDTO = null;
@@ -207,6 +222,12 @@ public class UserControllerE2EIT {
     email = null;
     patchUserDTO = null;
     userDTO = null;
+    if (nonNull(chat)) {
+      chatRepository.deleteById(chat.getId());
+      chat = null;
+    }
+    passwordDto = null;
+    deleteUserAccountDto = null;
   }
 
   @Test
@@ -423,7 +444,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userName", is("performance-asker-72")))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
-        .andExpect(jsonPath("email").exists())
+        .andExpect(jsonPath("email", is(nullValue())))
         .andExpect(jsonPath("languages", is(nullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
@@ -514,7 +535,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userName", is("performance-asker-72")))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
-        .andExpect(jsonPath("email").exists())
+        .andExpect(jsonPath("email", is(nullValue())))
         .andExpect(jsonPath("languages", is(nullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
@@ -741,6 +762,74 @@ public class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(patchDto))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
+      throws Exception {
+    givenAValidUser();
+    givenADeleteUserAccountDto();
+    givenAKeycloakUserFindAndUpdate();
+    givenAValidKeycloakLoginResponse();
+
+    mockMvc.perform(
+        delete("/users/account")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(deleteUserAccountDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+
+    var savedUser = userRepository.findById(user.getUserId());
+    assertTrue(savedUser.isPresent());
+    assertNotNull(savedUser.get().getDeleteDate());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOn()
+      throws Exception {
+    givenAValidUser();
+    givenADeleteUserAccountDto();
+    givenAKeycloakUserFindAndUpdate();
+    givenAnInvalidKeycloakLoginResponseMissingOtp();
+
+    mockMvc.perform(
+        delete("/users/account")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(deleteUserAccountDto)
+            ).accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+
+    var savedUser = userRepository.findById(user.getUserId());
+    assertTrue(savedUser.isPresent());
+    assertNotNull(savedUser.get().getDeleteDate());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void deactivateAndFlagUserAccountForDeletionShouldRespondWithBadRequestIfPasswordIsFalse()
+      throws Exception {
+    givenAValidUser();
+    givenADeleteUserAccountDto();
+    givenAnInvalidKeycloakLoginResponseFailingPassword();
+
+    mockMvc.perform(
+        delete("/users/account")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(deleteUserAccountDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
+
+    var savedUser = userRepository.findById(user.getUserId());
+    assertTrue(savedUser.isPresent());
+    assertNull(savedUser.get().getDeleteDate());
   }
 
   @Test
@@ -1394,6 +1483,16 @@ public class UserControllerE2EIT {
     when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(mock(UsersResource.class));
   }
 
+  private void givenAKeycloakUserFindAndUpdate() {
+    var usersResource = mock(UsersResource.class);
+    var userResource = mock(UserResource.class);
+    var userRepresentation = new UserRepresentation();
+
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    when(usersResource.get(anyString())).thenReturn(userResource);
+    when(keycloakAdminClientAccessor.getUsersResource()).thenReturn(usersResource);
+  }
+
   private void givenAValidKeycloakEmailChangeByUsernameResponse(String username) {
     var usernameTranscoder = new UsernameTranscoder();
     var userRepresentation = new UserRepresentation();
@@ -1809,6 +1908,10 @@ public class UserControllerE2EIT {
 
   private void givenAPasswordDto() {
     passwordDto = easyRandom.nextObject(PasswordDTO.class);
+  }
+
+  private void givenADeleteUserAccountDto() {
+    deleteUserAccountDto = easyRandom.nextObject(DeleteUserAccountDTO.class);
   }
 
   private HashMap<String, Object> givenAnInvalidPatchDto() {

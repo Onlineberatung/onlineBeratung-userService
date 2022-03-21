@@ -71,7 +71,6 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.model.EmailDTO;
 import de.caritas.cob.userservice.api.model.MobileTokenDTO;
 import de.caritas.cob.userservice.api.model.OneTimePasswordDTO;
@@ -1873,21 +1872,6 @@ public class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(identityClient);
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void deactivateAndFlagUserAccountForDeletion_Should_ReturnOK_WhenProperlyAuthorizedWithUpdateChatAuthority()
-      throws Exception {
-
-    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(new ObjectMapper().writeValueAsString(new DeleteUserAccountDTO().password(
-            "passwort")))
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
   }
 
   @Test
