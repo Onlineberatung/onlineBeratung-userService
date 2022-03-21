@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
-@TestPropertySource(properties = "spring.datasource.schema=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@TestPropertySource(properties = "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
 @Transactional
 public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
 

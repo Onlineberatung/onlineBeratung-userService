@@ -122,7 +122,7 @@ public class ConsultantAdminFilterServiceBase {
 
     assertThat(consultants.getLinks(), notNullValue());
     assertThat(consultants.getLinks().getSelf(), notNullValue());
-    assertThat(consultants.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
+    assertThat(consultants.getLinks().getSelf().getMethod().getValue(), is(MethodEnum.GET.getValue()));
     assertThat(consultants.getLinks().getSelf().getHref(),
         endsWith("/useradmin/consultants?page=1&perPage=100"));
   }
