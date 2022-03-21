@@ -43,6 +43,7 @@ class ConsultantServiceITBase {
 
     assertThrows(ConflictException.class,
         () -> this.consultantService.addMobileAppToken(consultantId, "token"));
+    TenantContext.clear();
   }
 
 }

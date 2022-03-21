@@ -1438,7 +1438,6 @@ public class UserControllerIT {
   @Test
   public void sendNewMessageNotification_Should_CallEmailNotificationFacadeAndReturn2xxSuccessful_WhenCalled()
       throws Exception {
-
     var validNewMessageRequestBody = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
     mvc.perform(post(PATH_SEND_NEW_MESSAGE_NOTIFICATION)
             .content(validNewMessageRequestBody)

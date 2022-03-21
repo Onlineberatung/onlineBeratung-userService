@@ -21,7 +21,7 @@ public class TenantAspect {
   @PersistenceContext
   private final @NonNull EntityManager entityManager;
 
-  @Before("execution(* de.caritas.cob.userservice.api.repository..*(..)))")
+  @Before("execution(* de.caritas.cob.userservice.api.port..*(..)))")
   public void beforeQueryAspect() {
 
     if (TECHNICAL_TENANT_ID.equals(TenantContext.getCurrentTenant())) {
