@@ -1,21 +1,21 @@
 package de.caritas.cob.userservice.api.workflow.enquirynotification.service;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_DAILY_ENQUIRY_NOTIFICATION;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_DAILY_ENQUIRY_NOTIFICATION;
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.workflow.enquirynotification.model.EnquiriesNotificationMailContent;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
+import de.caritas.cob.userservice.api.workflow.enquirynotification.model.EnquiriesNotificationMailContent;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EnquiryNotificationService {
 
-  private static final String MAIL_SUBJECT = "Online Beratung | Unbeantwortete Erstanfragen";
+  private static final String MAIL_SUBJECT = "Online-Beratung | Unbeantwortete Erstanfragen";
   private static final String UNKNOWN_AGENCY = "Unbekannte Beratungsstelle";
 
   private final @NonNull MailService mailService;

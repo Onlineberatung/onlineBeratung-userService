@@ -144,7 +144,6 @@ import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.ApiRes
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
@@ -1838,16 +1837,6 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updatePassword_Should_ReturnOK_When_UpdatingThePasswordWasSuccessful()
-      throws Exception {
-    var validPasswortRequestBody =
-        "{ \"oldPassword\": \"0lDpw!\", " + "\"newPassword\": \"n3wPw!\" }";
-    mvc.perform(put(PATH_PUT_UPDATE_PASSWORD).content(validPasswortRequestBody)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.OK.value()));
-  }
-
-  @Test
   public void updateKey_Should_ReturnConflict_WhenProvidedWithSameKey() throws Exception {
 
     when(encryptionService.getMasterKey())
@@ -2220,22 +2209,6 @@ public class UserControllerIT {
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(accountProvider);
-  }
-
-  @Test
-  public void deactivateAndFlagUserAccountForDeletion_Should_ReturnOk_When_RequestOk()
-      throws Exception {
-
-    DeleteUserAccountDTO deleteUserAccountDTO = new DeleteUserAccountDTO().password("p@ssword");
-    String bodyPayload = objectMapper.writeValueAsString(deleteUserAccountDTO);
-
-    mvc.perform(delete(PATH_DELETE_FLAG_USER_DELETED)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(bodyPayload)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(accountProvider, times(1)).deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
   }
 
   @Test
