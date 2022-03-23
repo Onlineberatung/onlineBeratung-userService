@@ -17,10 +17,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
@@ -165,6 +164,28 @@ public class ConsultantAgencyServiceTest {
 
     assertThat(consultantAgencyService.getConsultantsOfAgency(AGENCY_ID),
         everyItem(instanceOf(ConsultantResponseDTO.class)));
+  }
+
+  @Test
+  public void getConsultantsOfAgency_Should_ReturnOnlyConsultantsNotMarkedAsDeleted() {
+    var consultantAgencies = new EasyRandom().objects(ConsultantAgency.class, 10)
+        .collect(Collectors.toList());
+    removeDeletionFlagForConsultantAtIndex(consultantAgencies, 0, 2, 4, 6, 8, 9);
+    when(consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(any()))
+        .thenReturn(consultantAgencies);
+
+    var consultants = consultantAgencyService.getConsultantsOfAgency(0L);
+
+    assertThat(consultants, hasSize(6));
+  }
+
+  private void removeDeletionFlagForConsultantAtIndex(List<ConsultantAgency> consultantAgencies,
+      int... indexRange) {
+    Arrays.stream(indexRange)
+        .mapToObj(consultantAgencies::get)
+        .map(ConsultantAgency::getConsultant)
+        .forEach(consultant -> consultant.setDeleteDate(null));
   }
 
   @Test
