@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.adapters.web.controller;
+package de.caritas.cob.userservice.api.adapters.web.mapping;
 
 import static java.util.Objects.nonNull;
 
