@@ -7,10 +7,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
 
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,7 +23,7 @@ public class ConsultantUpdateServiceBase {
   protected ConsultantUpdateService consultantUpdateService;
 
   @MockBean
-  protected KeycloakAdminClientService keycloakAdminClientService;
+  protected IdentityClient identityClient;
 
   @MockBean
   protected RocketChatService rocketChatService;

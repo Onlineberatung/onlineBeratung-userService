@@ -1,12 +1,14 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import static de.caritas.cob.userservice.testHelper.AsyncVerification.verifyAsync;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
-import static de.caritas.cob.userservice.testHelper.TestConstants.FEEDBACKSESSION_WITH_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.FEEDBACKSESSION_WITH_CONSULTANT;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -17,20 +19,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.RegistrationType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
@@ -38,6 +40,7 @@ import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStat
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +66,8 @@ public class AssignSessionFacadeTest {
   @Mock
   SessionService sessionService;
   @Mock
-  KeycloakAdminClientService keycloakAdminClientService;
+  @SuppressWarnings("unused")
+  KeycloakService keycloakService;
   @Mock
   LogService logService;
   @Mock
@@ -77,20 +81,22 @@ public class AssignSessionFacadeTest {
   @Mock
   StatisticsService statisticsService;
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void assignSession_Should_ReturnInternalServerErrorAndLogErrorAndDoARollback_WhenAddConsultantToRcGroupFails_WhenSessionIsNoEnquiry() {
-    doThrow(new InternalServerErrorException("")).when(rocketChatFacade).addUserToRocketChatGroup(
+    var exception = new InternalServerErrorException(RandomStringUtils.random(16));
+    doThrow(exception).when(rocketChatFacade).addUserToRocketChatGroup(
         CONSULTANT_WITH_AGENCY.getRocketChatId(), FEEDBACKSESSION_WITH_CONSULTANT.getGroupId());
 
-    assignSessionFacade.assignSession(FEEDBACKSESSION_WITH_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    var thrown = assertThrows(InternalServerErrorException.class,
+        () -> assignSessionFacade.assignSession(FEEDBACKSESSION_WITH_CONSULTANT,
+            CONSULTANT_WITH_AGENCY)
+    );
 
-    verify(logService, times(1)).logInternalServerError(anyString(), any());
+    assertEquals(exception.getMessage(), thrown.getMessage());
     verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(CONSULTANT_WITH_AGENCY)
                 && consultantSessionDTO.getSession().equals(FEEDBACKSESSION_WITH_CONSULTANT)));
-    verify(rocketChatRollbackService, times(1))
-        .rollbackRemoveUsersFromRocketChatGroup(anyString(), any());
   }
 
   @Test
@@ -115,8 +121,8 @@ public class AssignSessionFacadeTest {
     Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
-        .thenReturn(List.of(consultantToRemove));
+    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(),
+        any())).thenReturn(List.of(consultantToRemove));
 
     this.assignSessionFacade.assignSession(session, consultant);
 

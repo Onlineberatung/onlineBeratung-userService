@@ -4,17 +4,17 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.keycloak.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class CreateUserFacade {
 
   private final @NonNull UserVerifier userVerifier;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull UserService userService;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
@@ -47,7 +47,7 @@ public class CreateUserFacade {
     userVerifier.checkIfUsernameIsAvailable(userDTO);
     agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
 
-    KeycloakCreateUserResponseDTO response = keycloakAdminClientService.createKeycloakUser(userDTO);
+    KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDTO);
     var user = updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
         UserRole.USER);
     createNewConsultingTypeFacade
@@ -88,8 +88,8 @@ public class CreateUserFacade {
 
   private void updateKeycloakRoleAndPassword(String userId, UserDTO userDTO, UserRole role) {
     checkIfUserIdNotNull(userId, userDTO);
-    keycloakAdminClientService.updateRole(userId, role);
-    keycloakAdminClientService.updatePassword(userId, userDTO.getPassword());
+    identityClient.updateRole(userId, role);
+    identityClient.updatePassword(userId, userDTO.getPassword());
   }
 
   private void checkIfUserIdNotNull(String userId, UserDTO userDTO) {
@@ -101,7 +101,7 @@ public class CreateUserFacade {
 
   private String returnDummyEmailIfNoneGiven(UserDTO userDTO, String userId) {
     if (isBlank(userDTO.getEmail())) {
-      return keycloakAdminClientService.updateDummyEmail(userId, userDTO);
+      return identityClient.updateDummyEmail(userId, userDTO);
     }
 
     return userDTO.getEmail();

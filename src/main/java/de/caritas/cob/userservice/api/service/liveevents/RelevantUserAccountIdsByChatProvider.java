@@ -3,11 +3,10 @@ package de.caritas.cob.userservice.api.service.liveevents;
 import static java.util.Collections.emptyList;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
@@ -15,11 +14,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Provider to observe all assigned chat user ids instead of initiator.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RelevantUserAccountIdsByChatProvider implements UserIdsProvider {
@@ -39,8 +40,7 @@ public class RelevantUserAccountIdsByChatProvider implements UserIdsProvider {
     try {
       return extractDependentUserIds(rcGroupId);
     } catch (RocketChatGetGroupMembersException e) {
-      LogService.logRocketChatError(
-          String.format("Unable to collect rc members for group id %s", rcGroupId));
+      log.error("Rocket.Chat Error: Unable to collect rc members for group id {}", rcGroupId);
     }
     return emptyList();
   }

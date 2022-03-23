@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;

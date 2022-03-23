@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;

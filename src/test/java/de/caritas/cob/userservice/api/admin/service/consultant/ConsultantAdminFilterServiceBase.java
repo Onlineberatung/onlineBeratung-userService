@@ -8,10 +8,10 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
-import de.caritas.cob.userservice.api.model.ConsultantDTO;
-import de.caritas.cob.userservice.api.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ConsultantAdminFilterServiceBase {
@@ -122,7 +122,7 @@ public class ConsultantAdminFilterServiceBase {
 
     assertThat(consultants.getLinks(), notNullValue());
     assertThat(consultants.getLinks().getSelf(), notNullValue());
-    assertThat(consultants.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
+    assertThat(consultants.getLinks().getSelf().getMethod().getValue(), is(MethodEnum.GET.getValue()));
     assertThat(consultants.getLinks().getSelf().getHref(),
         endsWith("/useradmin/consultants?page=1&perPage=100"));
   }

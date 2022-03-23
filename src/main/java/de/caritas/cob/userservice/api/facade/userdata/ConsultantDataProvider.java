@@ -4,19 +4,22 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.user.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.RegistrationType;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Language;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,28 +44,23 @@ public class ConsultantDataProvider {
    * @return the user data
    */
   public UserDataResponseDTO retrieveData(Consultant consultant) {
-    var agencyDTOs = obtainAgencies(consultant);
-    return createUserDataResponseDTO(consultant, agencyDTOs);
-  }
-
-  private List<AgencyDTO> obtainAgencies(Consultant consultant) {
     if (isEmpty(consultant.getConsultantAgencies())) {
       throw new InternalServerErrorException(
-          String.format("No agency available for consultant %s", consultant.getId()));
+          String.format("No agency available for consultant %s", consultant.getId())
+      );
     }
-    var agencyIds = obtainAgencyIds(consultant);
 
-    return this.agencyService.getAgencies(agencyIds);
+    return userDataResponseDtoOf(consultant);
   }
 
-  private List<Long> obtainAgencyIds(Consultant consultant) {
-    return consultant.getConsultantAgencies().stream()
+  private List<Long> agencyIdsOf(Set<ConsultantAgency> agencies) {
+    return agencies.stream()
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toList());
   }
 
-  private UserDataResponseDTO createUserDataResponseDTO(Consultant consultant,
-      List<AgencyDTO> agencyDTOs) {
+  private UserDataResponseDTO userDataResponseDtoOf(Consultant consultant) {
+
     return UserDataResponseDTO.builder()
         .userId(consultant.getId())
         .userName(consultant.getUsername())
@@ -71,18 +69,34 @@ public class ConsultantDataProvider {
         .email(consultant.getEmail())
         .isAbsent(consultant.isAbsent())
         .isFormalLanguage(consultant.isLanguageFormal())
+        .languages(languageStringsOf(consultant.getLanguages()))
+        .encourage2fa(consultant.getEncourage2fa())
         .absenceMessage(consultant.getAbsenceMessage())
         .isInTeamAgency(consultant.isTeamConsultant())
-        .agencies(agencyDTOs)
+        .agencies(agencyDTOsOf(consultant))
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
-        .hasAnonymousConversations(hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOs))
+        .hasAnonymousConversations(
+            hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOsOf(consultant))
+        )
         .hasArchive(hasArchive(consultant))
         .build();
   }
 
-  private boolean hasAtLeastOneTypeWithAllowedAnonymousConversations(
-      List<AgencyDTO> agencyDTOS) {
+  private List<AgencyDTO> agencyDTOsOf(Consultant consultant) {
+    return agencyService.getAgencies(
+        agencyIdsOf(consultant.getConsultantAgencies())
+    );
+  }
+
+  private Set<String> languageStringsOf(Set<Language> languages) {
+    return languages.stream()
+        .map(Language::getLanguageCode)
+        .map(LanguageCode::name)
+        .collect(Collectors.toSet());
+  }
+
+  private boolean hasAtLeastOneTypeWithAllowedAnonymousConversations(List<AgencyDTO> agencyDTOS) {
     return agencyDTOS.stream()
         .map(AgencyDTO::getConsultingType)
         .map(this.consultingTypeManager::getConsultingTypeSettings)

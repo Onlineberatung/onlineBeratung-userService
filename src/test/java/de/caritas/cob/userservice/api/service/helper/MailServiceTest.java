@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
@@ -46,7 +45,7 @@ public class MailServiceTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(MailService.class, "log", logger);
     when(this.mailsControllerApi.getApiClient()).thenReturn(this.apiClient);
   }
 
@@ -66,7 +65,7 @@ public class MailServiceTest {
 
     mailService.sendEmailNotification(new MailsDTO());
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), any(Exception.class));
   }
 
   @Test
@@ -85,7 +84,7 @@ public class MailServiceTest {
 
     mailService.sendErrorEmailNotification(new ErrorMailDTO());
 
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), any(Exception.class));
   }
 
   private HttpHeaders getCsrfHttpHeaders() {

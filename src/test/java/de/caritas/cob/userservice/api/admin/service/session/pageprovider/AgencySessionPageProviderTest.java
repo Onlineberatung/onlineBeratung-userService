@@ -6,8 +6,8 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.model.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.admin.model.SessionFilter;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

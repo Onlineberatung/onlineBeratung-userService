@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -14,7 +14,7 @@ import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
+import de.caritas.cob.userservice.api.model.Chat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
-import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
-@TestPropertySource(properties = "spring.datasource.schema=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@TestPropertySource(properties = "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
 @Transactional
 public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
 

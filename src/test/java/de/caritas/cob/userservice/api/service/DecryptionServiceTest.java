@@ -10,8 +10,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DecryptionServiceTest {
@@ -34,9 +34,7 @@ public class DecryptionServiceTest {
 
   @Before
   public void setup() throws NoSuchFieldException {
-    FieldSetter.setField(encryptionService,
-        encryptionService.getClass().getDeclaredField(FIELD_NAME_FRAGMENT_APP_KEY),
-        KEY_APPLICATION);
+    ReflectionTestUtils.setField(encryptionService, FIELD_NAME_FRAGMENT_APP_KEY, KEY_APPLICATION);
     encryptionService.updateMasterKey(KEY_MASTER);
   }
 

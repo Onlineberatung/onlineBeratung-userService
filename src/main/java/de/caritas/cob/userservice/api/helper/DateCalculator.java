@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.helper;
 
-import de.caritas.cob.userservice.localdatetime.CustomLocalDateTime;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 

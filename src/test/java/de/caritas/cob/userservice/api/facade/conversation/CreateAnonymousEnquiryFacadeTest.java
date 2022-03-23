@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade.conversation;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,9 +12,9 @@ import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiry
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.CreateAnonymousEnquiryDTO;
-import de.caritas.cob.userservice.api.model.user.AnonymousUserCredentials;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.conversation.service.AnonymousConversationCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUserCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;

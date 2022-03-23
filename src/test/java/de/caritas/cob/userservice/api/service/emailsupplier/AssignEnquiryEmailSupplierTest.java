@@ -6,14 +6,13 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -24,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignEnquiryEmailSupplierTest {
@@ -42,15 +40,12 @@ public class AssignEnquiryEmailSupplierTest {
 
   @Before
   public void setup() {
-    this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier(consultantService, null);
+    String applicationBaseUrl = "application base url";
     String askerUserName = "asker user name";
-    this.assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
     String senderUserId = "sender user id";
-    this.assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
-    this.assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
-    ReflectionTestUtils
-        .setField(this.assignEnquiryEmailSupplier, "applicationBaseUrl", "application base url");
-    setInternalState(LogService.class, "LOGGER", logger);
+    this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier(receiverConsultant,
+        senderUserId, askerUserName, applicationBaseUrl, consultantService, null, false);
+    setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
   }
 
   @Test
@@ -58,7 +53,7 @@ public class AssignEnquiryEmailSupplierTest {
     List<MailDTO> generatedMails = assignEnquiryEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), nullable(String.class));
   }
 
   @Test
@@ -69,7 +64,7 @@ public class AssignEnquiryEmailSupplierTest {
     List<MailDTO> generatedMails = assignEnquiryEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString());
   }
 
   @Test

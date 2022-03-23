@@ -7,13 +7,12 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.service.session.SessionFilter;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -71,7 +70,7 @@ public class ConsultantSessionListService {
   private SessionStatus getVerifiedSessionStatus(Integer status) {
     return SessionStatus.valueOf(status)
         .orElseThrow(() -> new BadRequestException(String.format(
-            "Invalid session status %s ", status), LogService::logBadRequestException));
+            "Invalid session status %s ", status)));
   }
 
   /**

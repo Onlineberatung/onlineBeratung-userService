@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
-import de.caritas.cob.userservice.UserServiceApplication;
+import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.junit.After;
 import org.junit.Before;

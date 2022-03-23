@@ -4,7 +4,7 @@ import static org.mockito.Mockito.mock;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
-import de.caritas.cob.userservice.api.deleteworkflow.service.DeleteUserAccountServiceTest;
+import de.caritas.cob.userservice.api.workflow.delete.service.DeleteUserAccountServiceTest;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;

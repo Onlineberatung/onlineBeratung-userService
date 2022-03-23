@@ -1,59 +1,59 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
-import static de.caritas.cob.userservice.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUPS_LIST_ALL_GET_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USERS_LIST_GET_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_INFO;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_USER_ID;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_ADD_USER;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_DELETE;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGIN;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGOUT;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CHAT_USER_UPDATE;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_CLEAN_ROOM_HISTORY;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_CREATE;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_DELETE;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_LIST_ALL;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_MEMBERS_GET;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_REMOVE_USER;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_GROUPS_SET_READ_ONLY;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_ROOMS_GET;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_SUBSCRIPTIONS_GET;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_USERS_INFO_GET;
-import static de.caritas.cob.userservice.testHelper.FieldConstants.RC_URL_USERS_LIST_GET;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ERROR;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_USER_1;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_USER_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_GROUP_ID_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_USER_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.ROCKET_CHAT_USER_DTO_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USERNAME;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
+import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUPS_LIST_ALL_GET_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USERS_LIST_GET_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_INFO;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_ADD_USER;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_DELETE;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGIN;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGOUT;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_UPDATE;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CLEAN_ROOM_HISTORY;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_CREATE;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_DELETE;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_LIST_ALL;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_MEMBERS_GET;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_REMOVE_USER;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_SET_READ_ONLY;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_ROOMS_GET;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_SUBSCRIPTIONS_GET;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_USERS_INFO_GET;
+import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_USERS_LIST_GET;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_USER_1;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_USER_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKET_CHAT_USER_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKET_CHAT_USER_DTO_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_INFO_RESPONSE_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -64,9 +64,11 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -76,7 +78,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.UnauthorizedException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
@@ -88,30 +90,29 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketchat.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.StandardResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDeleteResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupsListAllResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.DataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.logout.LogoutResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsGetDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.SetRoomReadOnlyBodyDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UsersListReponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.StandardResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupDeleteResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupsListAllResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.DataDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.SetRoomReadOnlyBodyDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UsersListReponseDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
@@ -240,7 +241,7 @@ public class RocketChatServiceTest {
     setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY,
         RC_URL_GROUPS_SET_READ_ONLY);
 
-    setInternalState(LogService.class, "LOGGER", logger);
+    setInternalState(RocketChatService.class, "log", logger);
   }
 
   /**
@@ -312,8 +313,7 @@ public class RocketChatServiceTest {
 
     assertFalse(result);
 
-    verify(logger, atLeastOnce())
-        .error(anyString(), anyString(), anyString(), anyString(), anyString());
+    verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
@@ -328,7 +328,7 @@ public class RocketChatServiceTest {
     rocketChatService.rollbackGroup(GROUP_ID, RC_CREDENTIALS);
 
     verify(logger, atLeastOnce())
-        .error(anyString(), anyString(), anyString(), anyString(), anyString());
+        .error(anyString(), anyString(), any(Exception.class));
   }
 
   /**
@@ -659,12 +659,12 @@ public class RocketChatServiceTest {
         any(), ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
         .thenThrow(HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION);
 
-    try {
-      rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
-      fail("Expected exception: UnauthorizedException");
-    } catch (UnauthorizedException ex) {
-      assertTrue("Excepted UnauthorizedException thrown", true);
-    }
+    var thrown = assertThrows(RocketChatUnauthorizedException.class,
+        () -> rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS)
+    );
+
+    var prefix = "Could not get Rocket.Chat subscriptions for user ID";
+    assertTrue(thrown.getMessage().startsWith(prefix));
   }
 
   @Test
@@ -1042,7 +1042,7 @@ public class RocketChatServiceTest {
 
     this.rocketChatService.setRoomReadOnly("");
 
-    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), nullable(String.class));
   }
 
   @Test
@@ -1074,7 +1074,7 @@ public class RocketChatServiceTest {
 
     this.rocketChatService.setRoomWriteable("");
 
-    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString(), nullable(String.class));
   }
 
   @Test

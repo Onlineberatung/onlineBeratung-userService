@@ -1,17 +1,16 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT_2;
-import static de.caritas.cob.userservice.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.USER;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_2;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -19,12 +18,11 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -57,7 +55,7 @@ public class NewFeedbackEmailSupplierTest {
   private RocketChatService rocketChatService;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Mock
   private Logger logger;
@@ -66,8 +64,8 @@ public class NewFeedbackEmailSupplierTest {
   public void setup() {
     this.newFeedbackEmailSupplier = new NewFeedbackEmailSupplier(session, "feedbackGroupId",
         "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId", keycloakAdminClientService);
-    setInternalState(LogService.class, "LOGGER", logger);
+        "rocketChatSystemUserId", keycloakService);
+    setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
   }
 
   @Test
@@ -75,10 +73,10 @@ public class NewFeedbackEmailSupplierTest {
       throws RocketChatGetGroupMembersException {
     List<MailDTO> generatedMails = new NewFeedbackEmailSupplier(null, "feedbackGroupId",
         "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId", keycloakAdminClientService).generateEmails();
+        "rocketChatSystemUserId", keycloakService).generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString());
   }
 
   @Test
@@ -88,7 +86,7 @@ public class NewFeedbackEmailSupplierTest {
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString());
   }
 
   @Test
@@ -99,7 +97,7 @@ public class NewFeedbackEmailSupplierTest {
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString());
   }
 
   @Test
@@ -112,7 +110,7 @@ public class NewFeedbackEmailSupplierTest {
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(logger).error(anyString(), anyString());
   }
 
   @Test
@@ -260,7 +258,7 @@ public class NewFeedbackEmailSupplierTest {
 
   private void whenConsultantIsMain(boolean returnValue) {
     when(
-        keycloakAdminClientService.userHasRole(anyString(), eq("main-consultant"))
+        keycloakService.userHasRole(anyString(), eq("main-consultant"))
     ).thenReturn(returnValue);
   }
 }

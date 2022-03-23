@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.conversation.provider;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 
 /**
  * The basic provider for all conversation lists.

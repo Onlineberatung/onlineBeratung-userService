@@ -80,12 +80,12 @@ class ConsultingTypeManagerTest {
     when(consultingTypeService.getAllConsultingTypeIds(tenant1)).thenReturn(List.of(1, 2, 3, 4));
     when(consultingTypeService.getAllConsultingTypeIds(tenant2)).thenReturn(List.of(5, 6, 7, 8));
 
-    TenantContext.setCurrentTenant(null);
+    TenantContext.clear();
     assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(1, 2, 3, 4, 5, 6, 7, 8));
     TenantContext.setCurrentTenant(tenant1);
     assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(1, 2, 3, 4));
     TenantContext.setCurrentTenant(tenant2);
     assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(5, 6, 7, 8));
-    TenantContext.setCurrentTenant(null);
+    TenantContext.clear();
   }
 }

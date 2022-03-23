@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,6 +43,7 @@ class ConsultantServiceITBase {
 
     assertThrows(ConflictException.class,
         () -> this.consultantService.addMobileAppToken(consultantId, "token"));
+    TenantContext.clear();
   }
 
 }

@@ -1,16 +1,16 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
-import static de.caritas.cob.userservice.api.authorization.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public class UnauthorizedMembersProvider {
 
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
 
   /**
    * Obtains a list of {@link Consultant}s which are not authorized to view the given Rocket.Chat
@@ -132,11 +132,11 @@ public class UnauthorizedMembersProvider {
   }
 
   private boolean hasAuthorityToViewPeerGroups(Consultant consultant) {
-    return keycloakAdminClientService.userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS);
+    return identityClient.userHasAuthority(consultant.getId(), VIEW_ALL_PEER_SESSIONS);
   }
 
   private boolean hasAuthorityToViewFeedbackGroups(Consultant consultant) {
-    return keycloakAdminClientService.userHasAuthority(consultant.getId(),
+    return identityClient.userHasAuthority(consultant.getId(),
         VIEW_ALL_FEEDBACK_SESSIONS);
   }
 }

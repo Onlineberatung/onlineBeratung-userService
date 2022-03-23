@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.ACTIVE_CHAT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CHAT_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.CONSULTANT;
-import static de.caritas.cob.userservice.testHelper.TestConstants.RC_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,9 +21,9 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGr
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;

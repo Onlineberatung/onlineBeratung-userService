@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
-import static de.caritas.cob.userservice.localdatetime.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
 import java.time.LocalDateTime;
 

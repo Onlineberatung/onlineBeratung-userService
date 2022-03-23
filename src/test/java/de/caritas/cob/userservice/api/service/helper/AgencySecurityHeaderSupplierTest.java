@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service.helper;
 
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_DTO_LIST;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.testHelper.TestConstants.AGENCY_ID_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID_LIST;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;

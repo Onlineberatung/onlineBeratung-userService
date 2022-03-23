@@ -6,20 +6,20 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
-import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.model.UserSessionListResponseDTO;
-import de.caritas.cob.userservice.api.model.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.SessionFilter;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.service.session.SessionFilter;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
  * Facade to encapsulate the steps to get the session list for a user or consultant (read sessions
  * from database and get unread messages status from Rocket.Chat).
  */
+@Slf4j
 @Service
 public class SessionListFacade {
 
@@ -121,10 +122,13 @@ public class SessionListFacade {
     try {
       return consultantSessions.subList(queryParameterOffset, subListMax);
     } catch (Exception e) {
-      LogService.logInternalServerError(String.format(
-          "Error while processing retrieveConsultantSessionsSublist with Parameters (queryParameterOffset: %s) - (queryParameterCount: %s) - (queryParameterSum: %s) - (consultantSessionSize: %s) - (subListMax: %s)",
+      log.error(
+          "Internal Server Error: Error while processing retrieveConsultantSessionsSublist with "
+              + "Parameters (queryParameterOffset: {}) - (queryParameterCount: {}) - "
+              + "(queryParameterSum: {}) - (consultantSessionSize: {}) - (subListMax: {})",
           queryParameterOffset, queryParameterCount, queryParameterSum, consultantSessionSize,
-          subListMax), e);
+          subListMax, e
+      );
       return Collections.emptyList();
     }
   }

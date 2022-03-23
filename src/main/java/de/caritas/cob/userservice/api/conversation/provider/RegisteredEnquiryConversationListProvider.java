@@ -4,7 +4,7 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
-import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
@@ -33,13 +33,11 @@ public class RegisteredEnquiryConversationListProvider extends DefaultConversati
    * {@inheritDoc}
    */
   @Override
-  public ConsultantSessionListResponseDTO buildConversations(
-      PageableListRequest pageableListRequest) {
+  public ConsultantSessionListResponseDTO buildConversations(PageableListRequest request) {
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var registeredEnquiries = sessionService.getRegisteredEnquiriesForConsultant(consultant);
 
-    return buildConversations(pageableListRequest,
-        consultant,
-        sessionService.getRegisteredEnquiriesForConsultant(consultant));
+    return buildConversations(request, consultant, registeredEnquiries);
   }
 
   /**

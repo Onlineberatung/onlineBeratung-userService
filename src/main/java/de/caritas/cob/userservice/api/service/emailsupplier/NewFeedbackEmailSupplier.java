@@ -8,16 +8,15 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import de.caritas.cob.userservice.api.authorization.UserRole;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -25,10 +24,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Supplier to provide mails to be sent when a feedback message has been written.
  */
+@Slf4j
 @AllArgsConstructor
 public class NewFeedbackEmailSupplier implements EmailSupplier {
 
@@ -39,7 +40,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
   private final ConsultantService consultantService;
   private final RocketChatService rocketChatService;
   private final String rocketChatSystemUserId;
-  private final KeycloakAdminClientService keycloakAdminClientService;
+  private final IdentityClient identityClient;
 
   /**
    * Generates feedback message notification mails sent to regarding consultants.
@@ -51,8 +52,10 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     if (nonNull(session)) {
       return buildFeedbackMessageMailsForExistingSession();
     }
-    LogService.logEmailNotificationFacadeError(String.format(
-        "No session found for the rocket chat feedback group id %s.", rcFeedbackGroupId));
+    log.error(
+        "EmailNotificationFacade error: No session found for the rocket chat feedback group id {}.",
+        rcFeedbackGroupId
+    );
 
     return emptyList();
   }
@@ -62,9 +65,10 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     if (nonNull(session.getConsultant())) {
       return buildFeedbackMessageMailsForExistingConsultant();
     }
-    LogService.logEmailNotificationFacadeError(String.format(
-        "No consultant is assigned to the session found by rocket chat feedback group id %s.",
-        rcFeedbackGroupId));
+    log.error(
+        "EmailNotificationFacade error: No consultant is assigned to the session found by rocket "
+            + "chat feedback group id {}.", rcFeedbackGroupId
+    );
 
     return emptyList();
   }
@@ -76,8 +80,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
       Consultant sendingConsultant = sendingConsultantOptional.get();
       return buildMailsDependingOnAuthor(sendingConsultant);
     }
-    LogService.logEmailNotificationFacadeError(
-        String.format("Consultant with id %s not found.", userId));
+    log.error("EmailNotificationFacade error: Consultant with id {} not found.", userId);
 
     return emptyList();
   }
@@ -106,8 +109,11 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
       return buildMailsForAllDueConsultants(sendingConsultant, groupMembers);
     }
 
-    LogService.logEmailNotificationFacadeError(String.format(
-        "List of members for rocket chat feedback group id %s is empty.", rcFeedbackGroupId));
+    log.error(
+        "EmailNotificationFacade error: List of members for rocket chat feedback group id {} is "
+            + "empty.", rcFeedbackGroupId
+    );
+
     return emptyList();
   }
 
@@ -129,9 +135,12 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     if (optionalConsultant.isPresent()) {
       return optionalConsultant.get();
     }
-    LogService.logEmailNotificationFacadeError(String.format(
-        "Consultant with rc user id %s not found. Why is this consultant in the rc room with the id %s?",
-        groupMemberDTO.get_id(), rcFeedbackGroupId));
+
+    log.error(
+        "Consultant with rc user id {} not found. Why is this consultant in the rc room with the "
+            + "id {}?", groupMemberDTO.get_id(), rcFeedbackGroupId
+    );
+
     return null;
   }
 
@@ -139,7 +148,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     var isAssignedToSession = consultant.getRocketChatId().equals(
         session.getConsultant().getRocketChatId()
     );
-    var isMainConsultant = keycloakAdminClientService.userHasRole(
+    var isMainConsultant = identityClient.userHasRole(
         consultant.getId(), UserRole.MAIN_CONSULTANT.getValue()
     );
 
