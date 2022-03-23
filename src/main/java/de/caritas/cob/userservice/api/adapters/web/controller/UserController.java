@@ -659,7 +659,18 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updatePassword(@RequestBody PasswordDTO passwordDTO) {
-    this.userAccountProvider.changePassword(passwordDTO);
+    var username = authenticatedUser.getUsername();
+    if (!identityManager.validatePasswordIgnoring2fa(username, passwordDTO.getOldPassword())) {
+      var message = String.format("Could not log in user %s into Keycloak", username);
+      throw new BadRequestException(message);
+    }
+
+    var userId = authenticatedUser.getUserId();
+    if (!identityManager.changePassword(userId, passwordDTO.getNewPassword())) {
+      var message = String.format("Could not update password of user %s", userId);
+      throw new InternalServerErrorException(message);
+    }
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
@@ -882,7 +893,15 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> deactivateAndFlagUserAccountForDeletion(
       @Valid DeleteUserAccountDTO deleteUserAccountDTO) {
-    this.userAccountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
+    var username = authenticatedUser.getUsername();
+    var password = deleteUserAccountDTO.getPassword();
+    if (!identityManager.validatePasswordIgnoring2fa(username, password)) {
+      var message = String.format("Could not log in user %s into Keycloak", username);
+      throw new BadRequestException(message);
+    }
+
+    userAccountProvider.deactivateAndFlagUserAccountForDeletion();
+
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
