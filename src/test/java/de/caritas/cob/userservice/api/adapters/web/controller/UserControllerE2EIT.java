@@ -833,6 +833,38 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void patchUserDataShouldRespondWithBadRequestOnEmptyPayload() throws Exception {
+    givenAValidUser(true);
+    var patchDto = givenAnEmptyPatchDto();
+
+    mockMvc.perform(
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void patchUserDataShouldRespondWithNoContentOnPartialPayload() throws Exception {
+    givenAValidUser(true);
+    var patchDto = givenAPartialPatchDto();
+
+    mockMvc.perform(
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
   public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
       throws Exception {
     givenAValidUser(true);
@@ -2341,7 +2373,22 @@ public class UserControllerE2EIT {
 
   private HashMap<String, Object> givenAnInvalidPatchDto() {
     var patchDtoAsMap = new HashMap<String, Object>(1);
-    patchDtoAsMap.put("encourage2fa", null);
+    if (easyRandom.nextBoolean()) {
+      patchDtoAsMap.put("encourage2fa", null);
+    } else {
+      patchDtoAsMap.put("displayName", "");
+    }
+
+    return patchDtoAsMap;
+  }
+
+  private HashMap<String, Object> givenAnEmptyPatchDto() {
+    return new HashMap<>(0);
+  }
+
+  private HashMap<String, Object> givenAPartialPatchDto() {
+    var patchDtoAsMap = new HashMap<String, Object>(1);
+    patchDtoAsMap.put("displayName", RandomStringUtils.randomAlphabetic(4));
 
     return patchDtoAsMap;
   }
