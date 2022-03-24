@@ -1670,7 +1670,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
 
     mockMvc.perform(
-            put("/users/twoFactorAuth")
+            put("/users/2fa/app")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1694,10 +1694,9 @@ public class UserControllerE2EIT {
       throws Exception {
     givenAValidConsultant(true);
     givenAnInvalidOneTimePasswordDTO();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put(path)
+            put("/users/2fa/app")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1712,10 +1711,9 @@ public class UserControllerE2EIT {
       throws Exception {
     givenAValidConsultant(true);
     givenAWronglyFormattedSecret();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put(path)
+            put("/users/2fa/app")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1732,10 +1730,9 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpValidationErrorResponse();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put(path)
+            put("/users/2fa/app")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1752,10 +1749,9 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpInvalidParameterErrorResponse();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put(path)
+            put("/users/2fa/app")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1773,10 +1769,9 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpAnotherOtpConfigActiveErrorResponse();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa/app");
 
     mockMvc.perform(
-            put(path)
+            put("/users/2fa/app")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1790,10 +1785,9 @@ public class UserControllerE2EIT {
   public void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa");
 
     mockMvc.perform(
-            delete(path)
+            delete("/users/2fa")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1814,10 +1808,9 @@ public class UserControllerE2EIT {
     givenAValidConsultant(true);
     givenABearerToken();
     givenKeycloakIsDown();
-    var path = "/users/" + (easyRandom.nextBoolean() ? "twoFactorAuth" : "2fa");
 
     mockMvc.perform(
-            delete(path)
+            delete("/users/2fa")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
