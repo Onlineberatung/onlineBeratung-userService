@@ -342,7 +342,9 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
-    var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser);
+    var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser).orElseThrow(() ->
+        new BadRequestException("Invalid payload: at least one property must be set")
+    );
     accountManager.patchUser(patchMap).orElseThrow();
 
     return ResponseEntity.noContent().build();

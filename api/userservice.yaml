@@ -400,8 +400,9 @@ paths:
     patch:
       tags:
         - user-controller
-      summary: 'Updates an account property of the currently authenticated user'
-      description: 'The only supported field so far is encourage2fa [Authorization: Role: consultant, user]'
+      summary: 'Partially updates account properties of the currently authenticated user'
+      description: 'Supported fields so far are encourage2fa and displayName 
+        [Authorization: Role: consultant, user]'
       operationId: patchUser
       requestBody:
         required: true
@@ -2076,13 +2077,15 @@ components:
 
     PatchUserDTO:
       type: object
-      required:
-        - encourage2fa
+      description: at least one property must be set
       properties:
         encourage2fa:
           type: boolean
           example: true
           description: indicates if 2FA is supposed to be encouraged
+        displayName:
+          type: string
+          minLength: 1
 
     UpdateConsultantDTO:
       type: object
