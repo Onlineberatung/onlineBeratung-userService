@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.filter;
+package de.caritas.cob.userservice.api.adapters.web.controller.interceptor;
 
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantResolver;

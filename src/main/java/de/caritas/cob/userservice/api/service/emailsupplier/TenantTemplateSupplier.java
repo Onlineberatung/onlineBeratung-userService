@@ -34,17 +34,17 @@ public class TenantTemplateSupplier {
     templateAttributes.add(getTenantClaim(tenantData));
     String tenantBaseUrl = getTenantBaseUrl(subdomain);
     templateAttributes.add(new TemplateDataDTO().key("url").value(tenantBaseUrl));
-    templateAttributes.add(getTenantImpressumUrl(tenantBaseUrl));
-    templateAttributes.add(getTanantDatenschutzUrl(tenantBaseUrl));
+    templateAttributes.add(getTenantImprintUrl(tenantBaseUrl));
+    templateAttributes.add(getTanantPrivacyUrl(tenantBaseUrl));
 
     return templateAttributes;
   }
 
-  private TemplateDataDTO getTenantImpressumUrl(String tenantUrl) {
+  private TemplateDataDTO getTenantImprintUrl(String tenantUrl) {
     return new TemplateDataDTO().key("tenant_urlimpressum").value(tenantUrl + "/impressum");
   }
 
-  private TemplateDataDTO getTanantDatenschutzUrl(String tenantUrl) {
+  private TemplateDataDTO getTanantPrivacyUrl(String tenantUrl) {
     return new TemplateDataDTO().key("tenant_urldatenschutz").value(tenantUrl + "/datenschutz");
   }
 

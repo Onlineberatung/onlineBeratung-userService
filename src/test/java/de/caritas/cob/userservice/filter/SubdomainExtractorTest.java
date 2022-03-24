@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.filter;
 
 import static java.util.Optional.of;
 
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
 import java.net.URISyntaxException;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;

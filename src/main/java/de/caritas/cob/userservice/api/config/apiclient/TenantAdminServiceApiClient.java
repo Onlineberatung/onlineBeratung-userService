@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.config.apiclient;
+package de.caritas.cob.userservice.api.config.apiclient;
 
 import java.util.Collection;
 import org.springframework.util.MultiValueMap;

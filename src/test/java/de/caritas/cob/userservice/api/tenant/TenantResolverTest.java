@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import de.caritas.cob.userservice.filter.SubdomainExtractor;
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
 import java.util.HashMap;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
