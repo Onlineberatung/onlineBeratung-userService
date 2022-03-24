@@ -16,7 +16,7 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
-import de.caritas.cob.userservice.filter.HttpTenantFilter;
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.HttpTenantFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;

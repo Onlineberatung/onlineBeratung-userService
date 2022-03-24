@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.config.apiclient;
+package de.caritas.cob.userservice.api.config.apiclient;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -15,6 +15,9 @@ import org.springframework.util.MultiValueMap;
 public class TenantServiceHelper {
 
   private static final String FILTER_NAME = "filter";
+
+  private TenantServiceHelper() { // hide public constructor
+  }
 
   public static boolean noValidFilterParams(String queryName, Object queryValue) {
     return isEmpty(queryName) || !queryName.equals(FILTER_NAME) || isNull(queryValue);

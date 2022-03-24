@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.config.apiclient;
+package de.caritas.cob.userservice.api.config.apiclient;
 
 import java.util.Collection;
 import org.springframework.util.MultiValueMap;
@@ -9,8 +9,6 @@ import org.springframework.web.client.RestTemplate;
  */
 public class TenantServiceApiClient extends
     de.caritas.cob.userservice.tenantservice.generated.ApiClient {
-
-  private static final String FILTER_NAME = "filter";
 
   public TenantServiceApiClient(RestTemplate restTemplate) {
     super(restTemplate);

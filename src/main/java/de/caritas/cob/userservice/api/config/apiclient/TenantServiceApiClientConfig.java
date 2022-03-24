@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.config.apiclient;
+package de.caritas.cob.userservice.api.config.apiclient;
 
 import de.caritas.cob.userservice.tenantservice.generated.ApiClient;
 import de.caritas.cob.userservice.tenantservice.generated.web.TenantControllerApi;
