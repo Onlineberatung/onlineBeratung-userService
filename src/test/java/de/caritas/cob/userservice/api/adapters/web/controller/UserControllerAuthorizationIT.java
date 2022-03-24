@@ -105,7 +105,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.keycloak.common.util.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -2581,7 +2580,7 @@ public class UserControllerAuthorizationIT {
 
   private OneTimePasswordDTO givenAValidOneTimePasswordDto() {
     return new OneTimePasswordDTO().otp("111111")
-        .secret(new RandomString(32).nextString());
+        .secret(RandomStringUtils.randomAlphanumeric(32));
   }
 
   private Consultant givenAValidConsultant() {
