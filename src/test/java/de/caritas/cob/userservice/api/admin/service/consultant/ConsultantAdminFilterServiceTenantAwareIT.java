@@ -1,11 +1,14 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 @TestPropertySource(properties = "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
 @Transactional
 public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
+
+  @Autowired
+  ConsultantRepository consultantRepository;
 
   @Before
   public void beforeTests() {
