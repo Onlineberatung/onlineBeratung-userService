@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,8 @@ public class AccountManager implements AccountManaging {
   private final UserRepository userRepository;
 
   private final UserServiceMapper userServiceMapper;
+
+  private final MessageClient messageClient;
 
   @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
@@ -79,6 +82,12 @@ public class AccountManager implements AccountManaging {
       consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
     }
     var savedConsultant = consultantRepository.save(consultant);
+
+    if (patchMap.containsKey("displayName")) {
+      messageClient.updateUser(
+          consultant.getRocketChatId(), (String) patchMap.get("displayName")
+      );
+    }
 
     return userServiceMapper.mapOf(savedConsultant);
   }

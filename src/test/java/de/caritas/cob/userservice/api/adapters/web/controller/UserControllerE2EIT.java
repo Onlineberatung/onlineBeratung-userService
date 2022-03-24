@@ -133,6 +133,9 @@ public class UserControllerE2EIT {
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
+  private static final Cookie RC_TOKEN_COOKIE = new Cookie(
+      "rcToken", RandomStringUtils.randomAlphanumeric(43)
+  );
 
   @Autowired
   private MockMvc mockMvc;
@@ -719,7 +722,7 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   public void patchUserDataShouldSaveAdviceSeekerAndRespondWithNoContent() throws Exception {
     givenAValidUser(true);
-    givenAValidPatchDto();
+    givenAFullPatchDto();
 
     mockMvc.perform(
             patch("/users/data")
@@ -739,11 +742,13 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void patchUserDataShouldSaveConsultantAndRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
-    givenAValidPatchDto();
+    givenAFullPatchDto();
+    givenAValidRocketChatUpdateUserResponse();
 
     mockMvc.perform(
             patch("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchUserDTO))
@@ -759,11 +764,13 @@ public class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void patchUserDataShouldOverrideDefaultAndRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
-    givenAValidPatchDto(false);
+    givenAFullPatchDto(false);
+    givenAValidRocketChatUpdateUserResponse();
 
     mockMvc.perform(
             patch("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchUserDTO))
@@ -785,10 +792,12 @@ public class UserControllerE2EIT {
     assertTrue(savedConsultant.isPresent());
     assertEquals(true, savedConsultant.get().getEncourage2fa());
 
-    givenAValidPatchDto(false);
+    givenAFullPatchDto(false);
+    givenAValidRocketChatUpdateUserResponse();
     mockMvc.perform(
             patch("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchUserDTO))
@@ -799,10 +808,11 @@ public class UserControllerE2EIT {
     assertTrue(savedConsultant.isPresent());
     assertEquals(false, savedConsultant.get().getEncourage2fa());
 
-    givenAValidPatchDto(true);
+    givenAFullPatchDto(true);
     mockMvc.perform(
             patch("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchUserDTO))
@@ -2150,6 +2160,15 @@ public class UserControllerE2EIT {
     )).thenReturn(ResponseEntity.ok(messageResponse));
   }
 
+  private void givenAValidRocketChatUpdateUserResponse() {
+    var urlSuffix = "/api/v1/users.update";
+    var updateUserResponse = easyRandom.nextObject(Void.class);
+
+    when(rocketChatRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(Void.class)
+    )).thenReturn(ResponseEntity.ok(updateUserResponse));
+  }
+
   private void givenAValidRocketChatRoomResponse(String roomId, boolean hasBannedUsers) {
     var urlSuffix = "/rooms.info?roomId=" + roomId;
     var roomResponse = easyRandom.nextObject(RoomResponse.class);
@@ -2393,13 +2412,12 @@ public class UserControllerE2EIT {
     return patchDtoAsMap;
   }
 
-  @SuppressWarnings("SameParameterValue")
-  private void givenAValidPatchDto(boolean encourage2fa) {
-    givenAValidPatchDto();
+  private void givenAFullPatchDto(boolean encourage2fa) {
+    givenAFullPatchDto();
     patchUserDTO.setEncourage2fa(encourage2fa);
   }
 
-  private void givenAValidPatchDto() {
+  private void givenAFullPatchDto() {
     patchUserDTO = easyRandom.nextObject(PatchUserDTO.class);
   }
 

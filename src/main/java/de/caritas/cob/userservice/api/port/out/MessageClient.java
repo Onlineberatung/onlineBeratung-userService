@@ -10,4 +10,6 @@ public interface MessageClient {
   Optional<Map<String, Object>> getChatInfo(String chatId);
 
   boolean unmuteUserInChat(String chatUserId, String chatId);
+
+  boolean updateUser(String chatUserId, String displayName);
 }
