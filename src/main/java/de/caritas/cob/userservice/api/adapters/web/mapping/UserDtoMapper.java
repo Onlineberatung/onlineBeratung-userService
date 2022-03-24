@@ -8,6 +8,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class UserDtoMapper {
       return Optional.empty();
     }
 
-    var map = new java.util.HashMap<String, Object>();
+    var map = new HashMap<String, Object>();
     map.put("id", user.getUserId());
     if (nonNull(patchUserDTO.getEncourage2fa())) {
       map.put("encourage2fa", patchUserDTO.getEncourage2fa());
