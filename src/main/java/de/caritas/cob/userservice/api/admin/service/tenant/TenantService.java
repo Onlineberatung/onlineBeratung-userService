@@ -16,13 +16,13 @@ public class TenantService {
 
   @Cacheable(cacheNames = CacheManagerConfig.TENANT_CACHE, key = "#subdomain")
   public RestrictedTenantDTO getRestrictedTenantData(String subdomain) {
-    return tenantControllerApi.getRestrictedTenantDataBySubdomainWithHttpInfo(subdomain).getBody();
+    return tenantControllerApi.getRestrictedTenantDataBySubdomain(subdomain);
   }
 
   @Cacheable(cacheNames = CacheManagerConfig.TENANT_CACHE, key = "#tenantId")
   public RestrictedTenantDTO getRestrictedTenantData(Long tenantId) {
     return tenantControllerApi
-        .getRestrictedTenantDataBySubdomainWithHttpInfo(String.valueOf(tenantId)).getBody();
+        .getRestrictedTenantDataByTenantId(tenantId);
   }
 
 }
