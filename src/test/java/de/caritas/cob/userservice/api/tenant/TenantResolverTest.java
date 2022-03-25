@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.Subdom
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
+import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.util.HashMap;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -67,7 +67,7 @@ class TenantResolverTest {
     // given
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
-    when(tenantService.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
+    when(tenantService.getRestrictedTenantData("mucoviscidose")).thenReturn(
         new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
             .id(1L));
     HashMap<String, Object> claimMap = givenClaimMapContainingTenantId(1);
@@ -104,7 +104,7 @@ class TenantResolverTest {
   void resolve_Should_ResolveTenantId_IfSubdomainCouldBeDetermined() {
     // given
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
-    when(tenantService.getRestrictedTenantDataBySubdomain("mucoviscidose")).thenReturn(
+    when(tenantService.getRestrictedTenantData("mucoviscidose")).thenReturn(
         new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
             .id(1L));
     // when
@@ -129,9 +129,9 @@ class TenantResolverTest {
   void resolve_Should_ResolveTenantId_FromHeader() {
     // given
     when(tenantHeaderSupplier.getTenantFromHeader()).thenReturn(Optional.of(2L));
-    TenantDTO tenant = new TenantDTO();
+    RestrictedTenantDTO tenant = new RestrictedTenantDTO();
     tenant.setSubdomain("subdomain");
-    when(tenantAdminService.getTenantById(2L)).thenReturn(tenant);
+    when(tenantService.getRestrictedTenantData(2L)).thenReturn(tenant);
     Long resolved = tenantResolver.resolve(authenticatedRequest);
     // then
     assertThat(resolved).isEqualTo(2L);

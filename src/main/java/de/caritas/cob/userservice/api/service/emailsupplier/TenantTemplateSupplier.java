@@ -27,7 +27,7 @@ public class TenantTemplateSupplier {
   public List<TemplateDataDTO> getTemplateAttributes() {
     var subdomain = TenantContext.getCurrentTenantData().getSubdomain();
     RestrictedTenantDTO tenantData = tenantService
-        .getRestrictedTenantDataBySubdomain(subdomain);
+        .getRestrictedTenantData(subdomain);
 
     List<TemplateDataDTO> templateAttributes = new ArrayList<>();
     templateAttributes.add(getTenantName(tenantData));
