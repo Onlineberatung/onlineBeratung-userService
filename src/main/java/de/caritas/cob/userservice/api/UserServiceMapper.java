@@ -69,4 +69,15 @@ public class UserServiceMapper {
 
     return Optional.empty();
   }
+
+  public User adviceSeekerOf(User adviceSeeker, Map<String, Object> patchMap) {
+    if (patchMap.containsKey("email")) {
+      adviceSeeker.setEmail((String) patchMap.get("email"));
+    }
+    if (patchMap.containsKey("encourage2fa")) {
+      adviceSeeker.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
+    }
+
+    return adviceSeeker;
+  }
 }

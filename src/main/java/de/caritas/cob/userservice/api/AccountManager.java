@@ -57,20 +57,15 @@ public class AccountManager implements AccountManaging {
   }
 
   private Map<String, Object> patchAdviceSeeker(User adviceSeeker, Map<String, Object> patchMap) {
-    if (patchMap.containsKey("email")) {
-      adviceSeeker.setEmail((String) patchMap.get("email"));
-    }
-    if (patchMap.containsKey("encourage2fa")) {
-      adviceSeeker.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
-    }
-    var savedAdviceSeeker = userRepository.save(adviceSeeker);
+    var patchedAdviceSeeker = userServiceMapper.adviceSeekerOf(adviceSeeker, patchMap);
+    var savedAdviceSeeker = userRepository.save(patchedAdviceSeeker);
 
     return userServiceMapper.mapOf(savedAdviceSeeker);
   }
 
   private Map<String, Object> patchConsultant(Consultant consultant, Map<String, Object> patchMap) {
-    var consultantFromMapping = userServiceMapper.consultantOf(consultant, patchMap);
-    var savedConsultant = consultantRepository.save(consultantFromMapping);
+    var patchedConsultant = userServiceMapper.consultantOf(consultant, patchMap);
+    var savedConsultant = consultantRepository.save(patchedConsultant);
 
     userServiceMapper.displayNameOf(patchMap).ifPresent(displayName ->
         messageClient.updateUser(savedConsultant.getRocketChatId(), displayName)
