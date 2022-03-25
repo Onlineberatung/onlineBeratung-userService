@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.model;
 
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -16,6 +17,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.bridge.builtin.LongBridge;
@@ -30,7 +34,9 @@ import org.hibernate.search.bridge.builtin.LongBridge;
 @Builder
 @Getter
 @Setter
-public class ConsultantAgency {
+@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
+public class ConsultantAgency implements TenantAware {
 
   @Id
   @SequenceGenerator(
@@ -58,6 +64,10 @@ public class ConsultantAgency {
 
   @Column(name = "delete_date")
   private LocalDateTime deleteDate;
+
+  @Column(name = "tenant_id")
+  private Long tenantId;
+
 
   @Override
   public boolean equals(Object o) {

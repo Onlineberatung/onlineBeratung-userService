@@ -14,7 +14,8 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.context.request.RequestContextHolder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AgencySecurityHeaderSupplierTest {
@@ -48,12 +50,19 @@ public class AgencySecurityHeaderSupplierTest {
 
   private List<AgencyResponseDTO> agencyResponseDTOS;
 
+  @Mock
+  private TenantHeaderSupplier tenantHeaderSupplier;
+
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
     this.agencyResponseDTOS = AGENCY_DTO_LIST.stream()
         .map(this::toAgencyResponseDTO)
         .collect(Collectors.toList());
     when(this.securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
+  }
+
+  private void resetRequestAttributes() {
+    RequestContextHolder.setRequestAttributes(null);
   }
 
   @SneakyThrows
@@ -69,6 +78,7 @@ public class AgencySecurityHeaderSupplierTest {
         .thenReturn(this.agencyResponseDTOS);
 
     assertThat(agencyService.getAgencies(AGENCY_ID_LIST).get(0), instanceOf(AgencyDTO.class));
+    resetRequestAttributes();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -77,7 +87,7 @@ public class AgencySecurityHeaderSupplierTest {
       throws NoSuchMethodException, SecurityException {
 
     AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class));
+        mock(SecurityHeaderSupplier.class), mock(TenantHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest
         .getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
@@ -88,11 +98,15 @@ public class AgencySecurityHeaderSupplierTest {
 
   @Test
   public void getAgency_Should_ReturnAgencyDTO_When_ProvidedWithValidAgencyId() {
+
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
 
     assertThat(agencyService.getAgency(AGENCY_ID), instanceOf(AgencyDTO.class));
+    resetRequestAttributes();
   }
+
+
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
@@ -100,12 +114,13 @@ public class AgencySecurityHeaderSupplierTest {
       throws NoSuchMethodException, SecurityException {
 
     AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class));
+        mock(SecurityHeaderSupplier.class), mock(TenantHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest.getMethod(GET_AGENCY_METHOD_NAME, GET_AGENCY_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);
 
     assertNotNull(annotation);
+    resetRequestAttributes();
   }
 
   @Test
@@ -114,6 +129,7 @@ public class AgencySecurityHeaderSupplierTest {
         .thenReturn(this.agencyResponseDTOS);
 
     assertThat(agencyService.getAgencyWithoutCaching(AGENCY_ID), instanceOf(AgencyDTO.class));
+    resetRequestAttributes();
   }
 
 }

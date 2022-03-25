@@ -85,6 +85,7 @@ import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi;
@@ -508,7 +509,7 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewMessageNotification(newMessageNotificationDTO.getRcGroupId(),
-        authenticatedUser.getRoles(), authenticatedUser.getUserId());
+        authenticatedUser.getRoles(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -526,7 +527,7 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(
-        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId());
+        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

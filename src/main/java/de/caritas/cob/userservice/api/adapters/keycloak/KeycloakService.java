@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
@@ -25,13 +24,17 @@ import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -96,6 +99,9 @@ public class KeycloakService implements IdentityClient {
 
   @Value("${api.error.keycloakError}")
   private String keycloakError;
+
+  @Value("${multitenancy.enabled}")
+  private Boolean multiTenancyEnabled;
 
   /**
    * Changes the (Keycloak) password of a user and returns true on success.
@@ -406,7 +412,22 @@ public class KeycloakService implements IdentityClient {
     }
     kcUser.setEnabled(true);
 
+    updateTenantId(user, kcUser);
     return kcUser;
+  }
+
+  private void updateTenantId(UserDTO userDTO, UserRepresentation kcUser) {
+    if (multiTenancyEnabled) {
+      Map<String, List<String>> attributes = new HashMap<>();
+      var list = new ArrayList<String>();
+      if (userDTO.getTenantId() != null) {
+        list.add(userDTO.getTenantId().toString());
+      } else {
+        list.add(TenantContext.getCurrentTenant().toString());
+      }
+      attributes.put("tenantId", list);
+      kcUser.setAttributes(attributes);
+    }
   }
 
   private String getCreatedUserId(final URI location) {

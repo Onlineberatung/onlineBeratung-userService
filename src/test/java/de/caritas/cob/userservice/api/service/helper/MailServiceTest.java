@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
 import de.caritas.cob.userservice.mailservice.generated.web.model.ErrorMailDTO;

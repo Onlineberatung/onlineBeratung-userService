@@ -108,13 +108,24 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
   }
 
   /**
-   * Provdes the language formal flag.
+   * Provides the language formal flag.
    *
    * @return the language formal flag
    */
   @Override
   public boolean isLanguageFormal() {
     return isTrue(this.createConsultantDTO.getFormalLanguage());
+  }
+  
+  /**
+   * Provides the tenant id.
+   *
+   * @return the tenant id
+   */
+  @Override
+  public Long getTenantId() {
+    Integer tenantId = this.createConsultantDTO.getTenantId();
+    return tenantId == null ? null : Long.valueOf(tenantId);
   }
 
 }

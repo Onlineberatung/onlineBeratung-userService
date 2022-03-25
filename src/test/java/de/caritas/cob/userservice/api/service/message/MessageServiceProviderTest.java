@@ -33,8 +33,9 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessage
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
@@ -66,6 +67,9 @@ public class MessageServiceProviderTest {
 
   @Mock
   private SecurityHeaderSupplier securityHeaderSupplier;
+
+  @Mock
+  private TenantHeaderSupplier tenantHeaderSupplier;
 
   private final RestClientException restClientException = new RestClientException(ERROR);
 
