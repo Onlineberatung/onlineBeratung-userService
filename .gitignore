@@ -35,3 +35,6 @@ consultants-import.txt*
 
 ### Mac files ###
 .DS_Store
+
+#local helper files
+*localdev*

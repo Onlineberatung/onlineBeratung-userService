@@ -63,13 +63,13 @@ public class SessionDataProviderTest {
   private final User USER = new User(USER_ID, null, USERNAME, EMAIL, false);
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
       "first name", "last name", "consultant@cob.de", false, false, null, false, null,
-      null, null, null, null, null, null, null, true);
+      null, null, null, null, null, null, null, true, null);
   private final Session INITIALIZED_SESSION_SUCHT = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 0L, null, SessionStatus.INITIAL, null, null,
-      null, null, false, false, false, nowInUtc(), null);
+      null, null, false, false, false, nowInUtc(), null, null);
   private final Session INITIALIZED_SESSION_U25 = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_U25, REGISTERED, "99999", 0L, null, SessionStatus.INITIAL, null, null,
-      null, null, false, false, false, nowInUtc(), null);
+      null, null, false, false, false, nowInUtc(), null, null);
   private final SessionData SESSION_DATA_ADDICTIVE_DRUGS = new SessionData(new Session(),
       SessionDataType.REGISTRATION, SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(), "1");
   private final SessionData SESSION_DATA_AGE = new SessionData(new Session(),
@@ -81,7 +81,7 @@ public class SessionDataProviderTest {
   private final Session INITIALIZED_SESSION_WITH_SESSION_DATA = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, null, SessionStatus.IN_PROGRESS,
       nowInUtc(), null, null, SESSION_DATA, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
-      null);
+      null, null);
   private final SessionDataDTO SESSION_DATA_DTO = new SessionDataDTO()
       .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
       .age(AGE_VALUE).state(STATE_VALUE);

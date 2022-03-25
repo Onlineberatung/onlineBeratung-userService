@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.model;
 
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -11,6 +12,9 @@ import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +25,7 @@ import lombok.ToString.Exclude;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.search.annotations.Field;
 
 /**
  * Represents a user
@@ -33,7 +38,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
-public class User {
+@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
+public class User implements TenantAware {
 
   @Id
   @Column(name = "user_id", updatable = false, nullable = false)
@@ -78,6 +85,9 @@ public class User {
 
   @Column(name = "delete_date", columnDefinition = "datetime")
   private LocalDateTime deleteDate;
+
+  @Column(name = "tenant_id")
+  private Long tenantId;
 
   @CreatedDate
   @Column(name = "create_date", columnDefinition = "datetime")

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.service.securityheader;
+package de.caritas.cob.userservice.api.service.httpheader;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import java.util.UUID;
@@ -40,7 +40,6 @@ public class SecurityHeaderSupplier {
   public HttpHeaders getKeycloakAndCsrfHttpHeaders() {
     var header = getCsrfHttpHeaders();
     this.addKeycloakAuthorizationHeader(header, authenticatedUser.getAccessToken());
-
     return header;
   }
 

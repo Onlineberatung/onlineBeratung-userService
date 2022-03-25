@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +35,9 @@ import lombok.ToString;
 import lombok.ToString.Exclude;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.springframework.lang.Nullable;
 
 @Entity
@@ -44,7 +48,9 @@ import org.springframework.lang.Nullable;
 @Getter
 @Setter
 @ToString
-public class Session {
+@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
+public class Session implements TenantAware {
 
   public enum RegistrationType {
     REGISTERED,
@@ -159,6 +165,9 @@ public class Session {
 
   @Column(name = "update_date", columnDefinition = "datetime")
   private LocalDateTime updateDate;
+
+  @Column(name = "tenant_id")
+  private Long tenantId;
 
   @Override
   public boolean equals(Object o) {

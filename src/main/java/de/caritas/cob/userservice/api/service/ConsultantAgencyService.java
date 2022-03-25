@@ -82,17 +82,23 @@ public class ConsultantAgencyService {
    */
   public List<ConsultantResponseDTO> getConsultantsOfAgency(Long agencyId) {
 
-    List<ConsultantAgency> agencyList =
+    var agencyList =
         consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(
             agencyId);
 
     if (isNotEmpty(agencyList)) {
       return agencyList.stream()
+          .filter(this::onlyConsultantNotMarkedAsDeleted)
           .map(this::convertToConsultantResponseDTO)
           .collect(Collectors.toList());
     }
 
     return emptyList();
+  }
+
+  private boolean onlyConsultantNotMarkedAsDeleted(ConsultantAgency consultantAgency) {
+    checkForInconsistencies(consultantAgency);
+    return isNull(consultantAgency.getConsultant().getDeleteDate());
   }
 
   public Set<String> getLanguageCodesOfAgency(long agencyId) {
@@ -105,16 +111,6 @@ public class ConsultantAgencyService {
         .map(Language::getLanguageCode)
         .map(LanguageCode::name)
         .collect(Collectors.toSet());
-  }
-
-  private ConsultantResponseDTO convertToConsultantResponseDTO(ConsultantAgency agency) {
-
-    checkForInconsistencies(agency);
-
-    return new ConsultantResponseDTO()
-        .consultantId(agency.getConsultant().getId())
-        .firstName(agency.getConsultant().getFirstName())
-        .lastName(agency.getConsultant().getLastName());
   }
 
   private void checkForInconsistencies(ConsultantAgency agency) {
@@ -137,6 +133,13 @@ public class ConsultantAgencyService {
               agency.getAgencyId()),
           LogService::logDatabaseError);
     }
+  }
+
+  private ConsultantResponseDTO convertToConsultantResponseDTO(ConsultantAgency agency) {
+    return new ConsultantResponseDTO()
+        .consultantId(agency.getConsultant().getId())
+        .firstName(agency.getConsultant().getFirstName())
+        .lastName(agency.getConsultant().getLastName());
   }
 
   /**

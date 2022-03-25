@@ -29,12 +29,15 @@ import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -46,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NewMessageEmailSupplierTest {
@@ -72,6 +76,9 @@ public class NewMessageEmailSupplierTest {
 
   @Mock
   private Logger logger;
+
+  @Mock
+  private TenantTemplateSupplier tenantTemplateSupplier;
 
   @Before
   public void setup() {
@@ -244,6 +251,32 @@ public class NewMessageEmailSupplierTest {
     assertThat(templateData.get(2).getValue(), is("app baseurl"));
   }
 
+  @Test
+  public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiverMultiTenancy() {
+    // given
+    givenCurrentTenantDataIsSet();
+    when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
+    Consultant consultant = mock(Consultant.class);
+    when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
+    when(session.getConsultant()).thenReturn(consultant);
+    when(consultant.getId()).thenReturn(USER.getUserId());
+    when(session.getUser()).thenReturn(USER);
+    var mockedTemplateAtt = new ArrayList<TemplateDataDTO>();
+    mockedTemplateAtt.add(new TemplateDataDTO());
+    when(tenantTemplateSupplier.getTemplateAttributes()).thenReturn(mockedTemplateAtt);
+    ReflectionTestUtils.setField(newMessageEmailSupplier, "multiTenancyEnabled", true);
+    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantTemplateSupplier",
+        tenantTemplateSupplier);
+
+    //when
+    List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
+
+    // then
+    assertThat(generatedMails, hasSize(1));
+    assertThat(generatedMails.get(0).getTemplateData(), hasSize(3));
+    TenantContext.clear();
+  }
+
   @Test(expected = InternalServerErrorException.class)
   public void generateEmails_Should_ThrowInternalServerException_When_ConsultantIsNotFound() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
@@ -255,6 +288,13 @@ public class NewMessageEmailSupplierTest {
         .thenReturn(Optional.empty());
 
     this.newMessageEmailSupplier.generateEmails();
+  }
+
+  private void givenCurrentTenantDataIsSet() {
+    var tenantData = new TenantData();
+    tenantData.setTenantId(1L);
+    tenantData.setSubdomain("subdomain");
+    TenantContext.setCurrentTenantData(tenantData);
   }
 
 

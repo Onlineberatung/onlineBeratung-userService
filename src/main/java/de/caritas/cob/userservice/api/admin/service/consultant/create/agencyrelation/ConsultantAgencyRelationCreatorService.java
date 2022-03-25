@@ -180,6 +180,7 @@ public class ConsultantAgencyRelationCreatorService {
         .agencyId(agencyId)
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
+        .tenantId(consultant.getTenantId())
         .build();
   }
 

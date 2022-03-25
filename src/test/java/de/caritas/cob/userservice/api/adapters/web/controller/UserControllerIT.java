@@ -262,7 +262,7 @@ public class UserControllerIT {
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
-          null, null, null, true);
+          null, null, null, true, null);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final Set<String> ROLES_WITH_CONSULTANT =
@@ -319,19 +319,19 @@ public class UserControllerIT {
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.IN_PROGRESS,
       nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
-      null);
+      null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null);
+          IS_MONITORING, false, nowInUtc(), null, null);
   private final Session TEAM_SESSION =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null);
+          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null);
+          IS_MONITORING, false, nowInUtc(), null, null);
   private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO = new ConsultantResponseDTO()
       .consultantId(CONSULTANT_ID)
       .firstName(FIRST_NAME)
@@ -1439,7 +1439,6 @@ public class UserControllerIT {
   @Test
   public void sendNewMessageNotification_Should_CallEmailNotificationFacadeAndReturn2xxSuccessful_WhenCalled()
       throws Exception {
-
     var validNewMessageRequestBody = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
     mvc.perform(post(PATH_SEND_NEW_MESSAGE_NOTIFICATION)
             .content(validNewMessageRequestBody)
@@ -1449,7 +1448,7 @@ public class UserControllerIT {
 
     verify(emailNotificationFacade, atLeastOnce())
         .sendNewMessageNotification(RC_GROUP_ID, authenticatedUser.getRoles(),
-            authenticatedUser.getUserId());
+            authenticatedUser.getUserId(), null);
   }
 
   /**
