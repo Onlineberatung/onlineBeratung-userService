@@ -41,12 +41,14 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.List;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleMappingResource;
@@ -59,6 +61,7 @@ import org.keycloak.representations.idm.ErrorRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentMatchers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -110,6 +113,7 @@ public class KeycloakServiceTest {
     givenAKeycloakLogoutUrl();
     setField(keycloakService, "keycloakClientId", "app");
     setField(keycloakService, "usernameTranscoder", usernameTranscoder);
+    setField(keycloakService, "multiTenancyEnabled", false);
     setInternalState(KeycloakService.class, "log", logger);
   }
 
@@ -287,6 +291,35 @@ public class KeycloakServiceTest {
 
     assertThat(keycloakUser, notNullValue());
     assertThat(keycloakUser.getStatus(), is(HttpStatus.CREATED));
+  }
+
+  @Test
+  public void createKeycloakUser_Should_createExpectedTenantAwareUser_When_keycloakReturnsCreated() {
+    TenantContext.setCurrentTenant(1L);
+    setField(keycloakService, "multiTenancyEnabled", true);
+
+    UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
+    userDTO.setTenantId(1L);
+    UsersResource usersResource = mock(UsersResource.class);
+    Response response = mock(Response.class);
+    when(response.getStatus()).thenReturn(HttpStatus.CREATED.value());
+    when(usersResource.create(any())).thenReturn(response);
+    when(this.keycloakClient.getUsersResource()).thenReturn(usersResource);
+
+    KeycloakCreateUserResponseDTO keycloakUser = this.keycloakService
+        .createKeycloakUser(userDTO);
+
+    assertThat(keycloakUser, notNullValue());
+    assertThat(keycloakUser.getStatus(), is(HttpStatus.CREATED));
+
+    ArgumentCaptor<UserRepresentation> argumentCaptor = ArgumentCaptor
+        .forClass(UserRepresentation.class);
+    verify(usersResource, times(1)).create(argumentCaptor.capture());
+
+    Assertions.assertEquals(argumentCaptor.getValue().getAttributes().get("tenantId").get(0),
+        TenantContext.getCurrentTenant().toString());
+
+    TenantContext.clear();
   }
 
   @Test

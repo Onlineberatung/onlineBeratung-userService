@@ -8,10 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.config.CacheManagerConfig;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class AgencyService {
 
   private final @NonNull AgencyControllerApi agencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
+  private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
 
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
@@ -101,6 +103,7 @@ public class AgencyService {
 
   private void addDefaultHeaders(ApiClient apiClient) {
     var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
+    tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 

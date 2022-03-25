@@ -103,6 +103,10 @@ public class UserDTO implements UserRegistrationDTO {
 
   private boolean newUserAccount;
 
+  @ApiModelProperty(required = false, example = "\"1\"", position = 12)
+  @JsonProperty("tenantId")
+  private Long tenantId;
+
   public UserDTO(String email) {
     this.email = email;
   }

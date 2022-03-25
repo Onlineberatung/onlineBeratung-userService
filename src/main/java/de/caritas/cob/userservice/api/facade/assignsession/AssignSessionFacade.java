@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDT
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +119,7 @@ public class AssignSessionFacade {
   private void sendEmailForConsultantChange(Session session, Consultant consultant) {
     if (!authenticatedUser.getUserId().equals(consultant.getId())) {
       emailNotificationFacade.sendAssignEnquiryEmailNotification(consultant,
-          authenticatedUser.getUserId(), session.getUser().getUsername());
+          authenticatedUser.getUserId(), session.getUser().getUsername(), TenantContext.getCurrentTenantData());
     }
   }
 

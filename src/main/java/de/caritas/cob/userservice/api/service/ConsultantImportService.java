@@ -288,6 +288,7 @@ public class ConsultantImportService {
     }
     importRecord.setAbsenceMessage(absenceMessage);
     importRecord.setAgenciesAndRoleSets(record.get(8));
+    importRecord.setTenantId((record.get(9).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(9)));
     return importRecord;
   }
 
@@ -296,6 +297,7 @@ public class ConsultantImportService {
   public static class ImportRecord {
 
     String consultantId;
+    Long tenantId;
     Long idOld;
     String username;
     String usernameEncoded;

@@ -91,27 +91,27 @@ class SessionServiceTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
       "first name", "last name", "consultant@cob.de", false, false, null, false, null,
-      null, null, null, null, nowInUtc(), null, null, true);
+      null, null, null, null, nowInUtc(), null, null, true, null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
       REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
-      false, nowInUtc(), null);
+      false, nowInUtc(), null, null);
   private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, CONSULTING_TYPE_ID_SUCHT,
       REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
-      false, nowInUtc(), null);
+      false, nowInUtc(), null, null);
   private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, LanguageCode.de, SessionStatus.NEW,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null);
+      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null);
   private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, LanguageCode.de, SessionStatus.NEW,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null);
+      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
-      nowInUtc(), nowInUtc(), nowInUtc());
+      nowInUtc(), nowInUtc(), nowInUtc(), null);
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
-      null, null, CONSULTING_TYPE_ID_SUCHT + "", "", true);
+      null, null, CONSULTING_TYPE_ID_SUCHT + "", "", true, null);
 
   @InjectMocks
   private SessionService sessionService;

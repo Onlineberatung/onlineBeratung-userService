@@ -13,15 +13,17 @@ import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import java.util.List;
@@ -53,13 +55,18 @@ public class EmailNotificationFacade {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
-  private final @NonNull AgencyService agencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull IdentityClient identityClient;
+  private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
+  private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
+  private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   /**
    * Sends email notifications according to the corresponding consultant(s) when a new enquiry was
@@ -68,12 +75,15 @@ public class EmailNotificationFacade {
    * @param session the regarding session
    */
   @Async
-  public void sendNewEnquiryEmailNotification(Session session) {
-
+  public void sendNewEnquiryEmailNotification(Session session,
+      TenantData tenantData) {
     try {
-      EmailSupplier newEnquiryMail = new NewEnquiryEmailSupplier(session,
-          consultantAgencyRepository, agencyService, applicationBaseUrl);
-      sendMailTasksToMailService(newEnquiryMail);
+      log.info("Preparing to send NEW_ENQUIRY_EMAIL_NOTIFICATION email for session: ",
+          session.getId());
+      TenantContext.setCurrentTenantData(tenantData);
+      newEnquiryEmailSupplier.setCurrentSession(session);
+      sendMailTasksToMailService(newEnquiryEmailSupplier);
+      TenantContext.clear();
     } catch (Exception ex) {
       log.error(
           "EmailNotificationFacade error: Failed to send new enquiry notification for session {}.",
@@ -88,6 +98,7 @@ public class EmailNotificationFacade {
     if (isNotEmpty(generatedMails)) {
       MailsDTO mailsDTO = new MailsDTO()
           .mails(generatedMails);
+      log.info("Sending email notifications with mailDTOs ", mailsDTO);
       mailService.sendEmailNotification(mailsDTO);
     }
   }
@@ -102,8 +113,9 @@ public class EmailNotificationFacade {
    */
   @Async
   @Transactional
-  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId) {
-
+  public void sendNewMessageNotification(String rcGroupId, Set<String> roles, String userId,
+      TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
     try {
       Session session = sessionService.getSessionByGroupIdAndUser(rcGroupId, userId, roles);
       EmailSupplier newMessageMails = NewMessageEmailSupplier
@@ -117,6 +129,8 @@ public class EmailNotificationFacade {
           .consultantService(consultantService)
           .applicationBaseUrl(applicationBaseUrl)
           .emailDummySuffix(emailDummySuffix)
+          .tenantTemplateSupplier(tenantTemplateSupplier)
+          .multiTenancyEnabled(multiTenancyEnabled)
           .build();
       sendMailTasksToMailService(newMessageMails);
 
@@ -129,6 +143,7 @@ public class EmailNotificationFacade {
           "EmailNotificationFacade warning: Failed to send new message notification with Rocket.Chat group ID {} and user ID {}.",
           rcGroupId, userId, ex);
     }
+    TenantContext.clear();
   }
 
   /**
@@ -139,8 +154,9 @@ public class EmailNotificationFacade {
    * @param userId            regarding user id
    */
   @Async
-  public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, String userId) {
-
+  public void sendNewFeedbackMessageNotification(String rcFeedbackGroupId, String userId,
+      TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
     try {
       Session session = sessionService.getSessionByFeedbackGroupId(rcFeedbackGroupId);
       EmailSupplier newFeedbackMessages = new NewFeedbackEmailSupplier(session,
@@ -153,6 +169,7 @@ public class EmailNotificationFacade {
           rcFeedbackGroupId, e
       );
     }
+    TenantContext.clear();
   }
 
   /**
@@ -165,15 +182,19 @@ public class EmailNotificationFacade {
    */
   @Async
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
-      String askerUserName) {
-
-    EmailSupplier assignEnquiryMails = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService);
+      String askerUserName, TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
+    log.info("Preparing to send ASSIGN_ENQUIRY_NOTIFICATION email to consultant: ",
+        receiverConsultant != null ? receiverConsultant.getId() : "No consultant selected");
+    assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
+    assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
+    assignEnquiryEmailSupplier.setAskerUserName(askerUserName);
     try {
-      sendMailTasksToMailService(assignEnquiryMails);
+      sendMailTasksToMailService(assignEnquiryEmailSupplier);
     } catch (Exception exception) {
       log.error("EmailNotificationFacade error: ", exception);
     }
+    TenantContext.clear();
   }
 
 }

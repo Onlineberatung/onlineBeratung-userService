@@ -11,7 +11,8 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import java.util.List;
@@ -36,6 +37,9 @@ class PostConversationFinishedAliasMessageActionCommandTest {
 
   @Mock
   private SecurityHeaderSupplier securityHeaderSupplier;
+
+  @Mock
+  private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Mock
   private IdentityClient identityClient;

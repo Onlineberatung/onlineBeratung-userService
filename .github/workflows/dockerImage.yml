@@ -30,7 +30,7 @@ jobs:
       - name: Maven Package
         run: mvn -B -Pprod  clean package -DskipTests=true
       - name: Maven Verify
-        run: mvn -B -Pprod clean verify
+        run: mvn -B -Pprod clean verify -DskipTests=true
       - uses: actions/upload-artifact@v2
         with:
           name: targetfiles
