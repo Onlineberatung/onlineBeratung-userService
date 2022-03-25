@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Maps;
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import java.util.HashMap;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +34,9 @@ class TenantResolverTest {
 
   @Mock
   TenantService tenantService;
+
+  @Mock
+  TenantAdminService tenantAdminService;
 
   @Mock
   TenantHeaderSupplier tenantHeaderSupplier;
@@ -124,9 +129,13 @@ class TenantResolverTest {
   void resolve_Should_ResolveTenantId_FromHeader() {
     // given
     when(tenantHeaderSupplier.getTenantFromHeader()).thenReturn(Optional.of(2L));
+    TenantDTO tenant = new TenantDTO();
+    tenant.setSubdomain("subdomain");
+    when(tenantAdminService.getTenantById(2L)).thenReturn(tenant);
     Long resolved = tenantResolver.resolve(authenticatedRequest);
     // then
     assertThat(resolved).isEqualTo(2L);
+    assertThat(TenantContext.getCurrentTenantData().getSubdomain()).isEqualTo("subdomain");
   }
 
   private HashMap<String, Object> givenClaimMapContainingTenantId(Integer tenantId) {

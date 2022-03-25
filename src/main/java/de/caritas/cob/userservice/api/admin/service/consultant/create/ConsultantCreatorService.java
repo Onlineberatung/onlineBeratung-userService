@@ -158,7 +158,7 @@ public class ConsultantCreatorService {
 
   private void assertLicensesNotExceeded() {
     if (multiTenancyEnabled) {
-      TenantDTO tenantById = tenantAdminService.getTenantById();
+      TenantDTO tenantById = tenantAdminService.getTenantById(TenantContext.getCurrentTenant());
       long numberOfActiveConsultants = consultantService.getNumberOfActiveConsultants();
       Integer allowedNumberOfUsers = tenantById.getLicensing().getAllowedNumberOfUsers();
       if (numberOfActiveConsultants >= allowedNumberOfUsers) {
