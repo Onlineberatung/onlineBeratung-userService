@@ -22,7 +22,6 @@ public class RocketChatClient {
 
   private static final String HEADER_AUTH_TOKEN = "X-Auth-Token";
   private static final String HEADER_USER_ID = "X-User-Id";
-  private static final String RC_TOKEN = "rcToken";
 
   private final RestTemplate restTemplate;
 
@@ -82,13 +81,13 @@ public class RocketChatClient {
   }
 
   private String rcToken() {
-    var rcToken = httpServletRequest.getHeader(RC_TOKEN);
+    var rcToken = httpServletRequest.getHeader("rcToken");
     if (isNull(rcToken)) {
-      var cookie = WebUtils.getCookie(httpServletRequest, RC_TOKEN);
+      var cookie = WebUtils.getCookie(httpServletRequest, "rc_token");
       if (nonNull(cookie)) {
         rcToken = cookie.getValue();
       } else {
-        throw new BadRequestException("rcToken neither in header nor cookie.");
+        throw new BadRequestException("Neither rcToken in header nor rc_token in cookie.");
       }
     }
 
