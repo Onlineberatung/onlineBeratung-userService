@@ -2,10 +2,12 @@ package de.caritas.cob.userservice.api.helper;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * Transcoder class to encode and decode username with base32.
  */
+@Component
 public class UsernameTranscoder {
 
   private static final String ENCODING_PREFIX = "enc.";

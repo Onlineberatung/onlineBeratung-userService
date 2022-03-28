@@ -1,15 +1,20 @@
 package de.caritas.cob.userservice.api;
 
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceMapper {
+
+  private final UsernameTranscoder usernameTranscoder;
 
   public Map<String, Object> mapOf(User user) {
     return new HashMap<>() {
@@ -64,7 +69,10 @@ public class UserServiceMapper {
 
   public Optional<String> displayNameOf(Map<String, Object> patchMap) {
     if (patchMap.containsKey("displayName")) {
-      return Optional.of((String) patchMap.get("displayName"));
+      var displayName = (String) patchMap.get("displayName");
+      var encodedDisplayName = usernameTranscoder.encodeUsername(displayName);
+
+      return Optional.of(encodedDisplayName);
     }
 
     return Optional.empty();
