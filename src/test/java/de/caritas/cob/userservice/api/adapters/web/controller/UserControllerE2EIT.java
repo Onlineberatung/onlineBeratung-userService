@@ -135,7 +135,7 @@ public class UserControllerE2EIT {
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
   private static final Cookie RC_TOKEN_COOKIE = new Cookie(
-      "rcToken", RandomStringUtils.randomAlphanumeric(43)
+      "rc_token", RandomStringUtils.randomAlphanumeric(43)
   );
 
   @Autowired
@@ -770,8 +770,8 @@ public class UserControllerE2EIT {
 
     var updateUser = updateUserCaptor.getValue().getBody();
     assertNotNull(updateUser);
-    assertTrue(updateUser.getDisplayName().startsWith("enc."));
-    assertTrue(updateUser.getDisplayName().length() > 4);
+    assertTrue(updateUser.getName().startsWith("enc."));
+    assertTrue(updateUser.getName().length() > 4);
   }
 
   @Test
