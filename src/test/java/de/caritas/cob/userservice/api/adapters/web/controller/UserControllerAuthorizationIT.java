@@ -105,7 +105,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.keycloak.common.util.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -2406,20 +2405,6 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivateTwoFactorAuthByApp_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
-    mvc.perform(delete("/users/twoFactorAuth")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(identityManager).deleteOneTimePassword(any());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
-      throws Exception {
     mvc.perform(
             delete("/users/2fa")
                 .cookie(CSRF_COOKIE)
@@ -2441,7 +2426,7 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void deactivateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    mvc.perform(delete("/users/twoFactorAuth")
+    mvc.perform(delete("/users/2fa")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -2453,7 +2438,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void deactivateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(delete("/users/twoFactorAuth")
+    mvc.perform(delete("/users/2fa")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -2501,28 +2486,12 @@ public class UserControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
-  public void activate2faForUser_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
-      throws Exception {
-    var payload = givenAValidOneTimePasswordDto();
-    givenAValidOtpResponse();
-
-    mvc.perform(put("/users/2fa/app")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(payload))
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthByApp_Should_ReturnOK_When_ProperlyAuthorizedWithConsultant_Or_UserAuthority()
       throws Exception {
     var payload = givenAValidOneTimePasswordDto();
     givenAValidOtpResponse();
 
-    mvc.perform(put("/users/twoFactorAuth")
+    mvc.perform(put("/users/2fa/app")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2537,7 +2506,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthByApp_Should_ReturnBadRequest_When_RequestBody_Is_Missing()
       throws Exception {
-    mvc.perform(put("/users/twoFactorAuth")
+    mvc.perform(put("/users/2fa/app")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
@@ -2557,7 +2526,7 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
   public void activateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoUserOrConsultantAuthority()
       throws Exception {
-    mvc.perform(put("/users/twoFactorAuth")
+    mvc.perform(put("/users/2fa/app")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -2569,7 +2538,7 @@ public class UserControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthByApp_Should_ReturnForbiddenAndCallNoMethods_When_NoCsrfToken()
       throws Exception {
-    mvc.perform(put("/users/twoFactorAuth")
+    mvc.perform(put("/users/2fa/app")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -2611,7 +2580,7 @@ public class UserControllerAuthorizationIT {
 
   private OneTimePasswordDTO givenAValidOneTimePasswordDto() {
     return new OneTimePasswordDTO().otp("111111")
-        .secret(new RandomString(32).nextString());
+        .secret(RandomStringUtils.randomAlphanumeric(32));
   }
 
   private Consultant givenAValidConsultant() {

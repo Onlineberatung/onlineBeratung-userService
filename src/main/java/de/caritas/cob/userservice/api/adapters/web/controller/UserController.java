@@ -1030,12 +1030,6 @@ public class UserController implements UsersApi {
     return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
   }
 
-  @Override
-  public ResponseEntity<Void> activateTwoFactorAuthByAppDeprecated(
-      OneTimePasswordDTO oneTimePasswordDTO) {
-    return activateTwoFactorAuthByApp(oneTimePasswordDTO);
-  }
-
   /**
    * Deactivates 2FA by mobile app for the calling user.
    *
@@ -1046,11 +1040,6 @@ public class UserController implements UsersApi {
     identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
 
     return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  @Override
-  public ResponseEntity<Void> deactivateTwoFactorAuthByAppDeprecated() {
-    return deactivateTwoFactorAuthByApp();
   }
 
   /**
