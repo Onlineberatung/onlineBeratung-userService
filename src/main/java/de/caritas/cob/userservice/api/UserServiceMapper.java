@@ -58,7 +58,7 @@ public class UserServiceMapper {
       consultant.setFirstName((String) patchMap.get("firstName"));
     }
     if (patchMap.containsKey("lastName")) {
-      consultant.setFirstName((String) patchMap.get("lastName"));
+      consultant.setLastName((String) patchMap.get("lastName"));
     }
     if (patchMap.containsKey("encourage2fa")) {
       consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
