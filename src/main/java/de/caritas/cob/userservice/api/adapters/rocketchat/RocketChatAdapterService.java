@@ -26,6 +26,8 @@ public class RocketChatAdapterService implements MessageClient {
 
   private static final String ENDPOINT_ROOM_INFO = "/rooms.info?roomId=";
 
+  private static final String ENDPOINT_UPDATE_USER = "/users.update";
+
   private final RocketChatClient rocketChatClient;
 
   private final RocketChatConfig rocketChatConfig;
@@ -56,6 +58,20 @@ public class RocketChatAdapterService implements MessageClient {
       return response.getStatusCode().is2xxSuccessful();
     } catch (HttpClientErrorException exception) {
       log.error("Un-muting failed.", exception);
+      return false;
+    }
+  }
+
+  @Override
+  public boolean updateUser(String chatUserId, String displayName) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_UPDATE_USER);
+    var updateUser = mapper.updateUserOf(chatUserId, displayName);
+
+    try {
+      var response = rocketChatClient.postForEntity(url, chatUserId, updateUser, Void.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Setting display failed.", exception);
       return false;
     }
   }

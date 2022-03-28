@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,8 @@ public class AccountManager implements AccountManaging {
   private final UserRepository userRepository;
 
   private final UserServiceMapper userServiceMapper;
+
+  private final MessageClient messageClient;
 
   @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
@@ -54,32 +57,20 @@ public class AccountManager implements AccountManaging {
   }
 
   private Map<String, Object> patchAdviceSeeker(User adviceSeeker, Map<String, Object> patchMap) {
-    if (patchMap.containsKey("email")) {
-      adviceSeeker.setEmail((String) patchMap.get("email"));
-    }
-    if (patchMap.containsKey("encourage2fa")) {
-      adviceSeeker.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
-    }
-    var savedAdviceSeeker = userRepository.save(adviceSeeker);
+    var patchedAdviceSeeker = userServiceMapper.adviceSeekerOf(adviceSeeker, patchMap);
+    var savedAdviceSeeker = userRepository.save(patchedAdviceSeeker);
 
     return userServiceMapper.mapOf(savedAdviceSeeker);
   }
 
   private Map<String, Object> patchConsultant(Consultant consultant, Map<String, Object> patchMap) {
-    if (patchMap.containsKey("email")) {
-      consultant.setEmail((String) patchMap.get("email"));
-    }
-    if (patchMap.containsKey("firstName")) {
-      consultant.setFirstName((String) patchMap.get("firstName"));
-    }
-    if (patchMap.containsKey("lastName")) {
-      consultant.setFirstName((String) patchMap.get("lastName"));
-    }
-    if (patchMap.containsKey("encourage2fa")) {
-      consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
-    }
-    var savedConsultant = consultantRepository.save(consultant);
+    var patchedConsultant = userServiceMapper.consultantOf(consultant, patchMap);
+    var savedConsultant = consultantRepository.save(patchedConsultant);
 
-    return userServiceMapper.mapOf(savedConsultant);
+    userServiceMapper.displayNameOf(patchMap).ifPresent(displayName ->
+        messageClient.updateUser(savedConsultant.getRocketChatId(), displayName)
+    );
+
+    return userServiceMapper.mapOf(savedConsultant, patchMap);
   }
 }
