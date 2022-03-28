@@ -7,5 +7,5 @@ public class UpdateUser {
 
   private String userId;
 
-  private String name;
+  private User data;
 }

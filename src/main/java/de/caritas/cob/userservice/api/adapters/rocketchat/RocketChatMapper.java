@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.Message;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MuteUnmuteUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.UpdateUser;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.User;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,7 +77,10 @@ public class RocketChatMapper {
   public UpdateUser updateUserOf(String chatUserId, String displayName) {
     var updateUser = new UpdateUser();
     updateUser.setUserId(chatUserId);
-    updateUser.setName(displayName);
+
+    var user = new User();
+    user.setName(displayName);
+    updateUser.setData(user);
 
     return updateUser;
   }
