@@ -76,7 +76,7 @@ public class RocketChatMapper {
   public UpdateUser updateUserOf(String chatUserId, String displayName) {
     var updateUser = new UpdateUser();
     updateUser.setUserId(chatUserId);
-    updateUser.setDisplayName(displayName);
+    updateUser.setName(displayName);
 
     return updateUser;
   }
