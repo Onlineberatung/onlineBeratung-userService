@@ -42,6 +42,7 @@ import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
@@ -193,7 +194,10 @@ public class UserControllerE2EIT {
   private StopChatActionCommand stopChatActionCommand;
 
   @Captor
-  private ArgumentCaptor<HttpEntity<OtpSetupDTO>> captor;
+  private ArgumentCaptor<HttpEntity<OtpSetupDTO>> otpSetupCaptor;
+
+  @Captor
+  private ArgumentCaptor<HttpEntity<UpdateUser>> updateUserCaptor;
 
   private User user;
 
@@ -758,6 +762,16 @@ public class UserControllerE2EIT {
     var savedConsultant = consultantRepository.findById(consultant.getId());
     assertTrue(savedConsultant.isPresent());
     assertEquals(patchUserDTO.getEncourage2fa(), savedConsultant.get().getEncourage2fa());
+
+    var urlSuffix = "/api/v1/users.update";
+    verify(rocketChatRestTemplate).postForEntity(
+        endsWith(urlSuffix), updateUserCaptor.capture(), eq(Void.class)
+    );
+
+    var updateUser = updateUserCaptor.getValue().getBody();
+    assertNotNull(updateUser);
+    assertTrue(updateUser.getDisplayName().startsWith("enc."));
+    assertTrue(updateUser.getDisplayName().length() > 4);
   }
 
   @Test
@@ -1348,9 +1362,10 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/send-verification-mail/"
         + consultant.getUsername();
     verify(keycloakRestTemplate)
-        .exchange(endsWith(urlSuffix), eq(HttpMethod.PUT), captor.capture(), eq(Success.class));
+        .exchange(endsWith(urlSuffix), eq(HttpMethod.PUT), otpSetupCaptor.capture(),
+            eq(Success.class));
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(emailDTO.getEmail(), otpSetupDTO.getEmail());
   }
@@ -1483,10 +1498,10 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
     verify(keycloakRestTemplate)
         .postForEntity(
-            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+            endsWith(urlSuffix), otpSetupCaptor.capture(), eq(SuccessWithEmail.class)
         );
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(tan, otpSetupDTO.getInitialCode());
 
@@ -1513,10 +1528,10 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + user.getUsername();
     verify(keycloakRestTemplate)
         .postForEntity(
-            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+            endsWith(urlSuffix), otpSetupCaptor.capture(), eq(SuccessWithEmail.class)
         );
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(tan, otpSetupDTO.getInitialCode());
 
@@ -1583,10 +1598,10 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
     verify(keycloakRestTemplate)
         .postForEntity(
-            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+            endsWith(urlSuffix), otpSetupCaptor.capture(), eq(SuccessWithEmail.class)
         );
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(tan, otpSetupDTO.getInitialCode());
   }
@@ -1610,10 +1625,10 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
     verify(keycloakRestTemplate)
         .postForEntity(
-            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+            endsWith(urlSuffix), otpSetupCaptor.capture(), eq(SuccessWithEmail.class)
         );
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(tan, otpSetupDTO.getInitialCode());
   }
@@ -1637,10 +1652,10 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
     verify(keycloakRestTemplate)
         .postForEntity(
-            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+            endsWith(urlSuffix), otpSetupCaptor.capture(), eq(SuccessWithEmail.class)
         );
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(tan, otpSetupDTO.getInitialCode());
   }
@@ -1664,10 +1679,10 @@ public class UserControllerE2EIT {
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp-mail/" + consultant.getUsername();
     verify(keycloakRestTemplate)
         .postForEntity(
-            endsWith(urlSuffix), captor.capture(), eq(SuccessWithEmail.class)
+            endsWith(urlSuffix), otpSetupCaptor.capture(), eq(SuccessWithEmail.class)
         );
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(tan, otpSetupDTO.getInitialCode());
   }
@@ -1689,10 +1704,11 @@ public class UserControllerE2EIT {
         .andExpect(status().isOk());
 
     var urlSuffix = "/auth/realms/test/otp-config/setup-otp/" + consultant.getUsername();
-    verify(keycloakRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.PUT), captor.capture(),
+    verify(keycloakRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.PUT),
+        otpSetupCaptor.capture(),
         eq(OtpInfoDTO.class));
 
-    var otpSetupDTO = captor.getValue().getBody();
+    var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
     assertEquals(oneTimePasswordDTO.getOtp(), otpSetupDTO.getInitialCode());
     assertEquals(oneTimePasswordDTO.getSecret(), otpSetupDTO.getSecret());
