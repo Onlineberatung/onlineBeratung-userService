@@ -770,8 +770,9 @@ public class UserControllerE2EIT {
 
     var updateUser = updateUserCaptor.getValue().getBody();
     assertNotNull(updateUser);
-    assertTrue(updateUser.getName().startsWith("enc."));
-    assertTrue(updateUser.getName().length() > 4);
+    var user = updateUser.getData();
+    assertTrue(user.getName().startsWith("enc."));
+    assertTrue(user.getName().length() > 4);
   }
 
   @Test
