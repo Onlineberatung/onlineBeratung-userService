@@ -10,6 +10,8 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MuteUnmuteUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.User;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,8 +61,8 @@ public class RocketChatMapper {
     return muteUnmuteUser;
   }
 
-  public Optional<Map<String, Object>> mapOf(ResponseEntity<RoomResponse> roomResponse) {
-    var body = roomResponse.getBody();
+  public Optional<Map<String, Object>> mapOfRoomResponse(ResponseEntity<RoomResponse> response) {
+    var body = response.getBody();
     if (nonNull(body)) {
       var room = body.getRoom();
       var mutedUsers = isNull(room.getMuted()) ? List.of() : room.getMuted();
@@ -83,5 +85,25 @@ public class RocketChatMapper {
     updateUser.setData(user);
 
     return updateUser;
+  }
+
+  public Optional<Map<String, Object>> mapOfUserResponse(
+      ResponseEntity<UserInfoResponseDTO> userResponse) {
+    var body = userResponse.getBody();
+    if (nonNull(body)) {
+      var user = body.getUser();
+      var map = new HashMap<String, Object>();
+      map.put("id", user.getId());
+      if (nonNull(user.getUsername())) {
+        map.put("username", user.getUsername().toLowerCase());
+      }
+      if (nonNull(user.getName())) {
+        map.put("displayName", user.getName().toLowerCase());
+      }
+
+      return Optional.of(map);
+    }
+
+    return Optional.empty();
   }
 }

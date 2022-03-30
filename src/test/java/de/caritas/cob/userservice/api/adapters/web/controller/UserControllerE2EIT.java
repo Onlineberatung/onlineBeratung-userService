@@ -145,6 +145,9 @@ public class UserControllerE2EIT {
   private ObjectMapper objectMapper;
 
   @Autowired
+  private UsernameTranscoder usernameTranscoder;
+
+  @Autowired
   private ConsultantRepository consultantRepository;
 
   @Autowired
@@ -231,6 +234,8 @@ public class UserControllerE2EIT {
 
   private DeleteUserAccountDTO deleteUserAccountDto;
 
+  private UserInfoResponseDTO userInfoResponse;
+
   @AfterEach
   public void reset() {
     if (nonNull(user)) {
@@ -261,6 +266,7 @@ public class UserControllerE2EIT {
     videoChatConfig.setE2eEncryptionEnabled(false);
     passwordDto = null;
     deleteUserAccountDto = null;
+    userInfoResponse = null;
   }
 
   @Test
@@ -268,7 +274,7 @@ public class UserControllerE2EIT {
   public void createEnquiryMessageWithLanguageShouldSaveLanguageAndRespondWithCreated()
       throws Exception {
     givenAUserWithASessionNotEnquired();
-    givenValidRocketChatInfoResponse();
+    givenValidRocketChatTechUserResponse();
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(true);
 
@@ -301,7 +307,7 @@ public class UserControllerE2EIT {
   public void createEnquiryMessageWithoutLanguageShouldSaveDefaultLanguageAndRespondWithCreated()
       throws Exception {
     givenAUserWithASessionNotEnquired();
-    givenValidRocketChatInfoResponse();
+    givenValidRocketChatTechUserResponse();
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(false);
 
@@ -416,17 +422,22 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenAValidConsultant(true);
     givenKeycloakRespondsOtpByAppHasBeenSetup(consultant.getUsername());
+    givenAValidRocketChatInfoUserResponse();
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
+    var displayName = usernameTranscoder.decodeUsername(userInfoResponse.getUser().getName());
+    var username = usernameTranscoder.decodeUsername(consultant.getUsername());
 
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(consultant.getId())))
-        .andExpect(jsonPath("userName", is("emigration-team")))
+        .andExpect(jsonPath("userName", is(username)))
+        .andExpect(jsonPath("displayName", is(displayName)))
         .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
@@ -457,6 +468,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -469,14 +481,18 @@ public class UserControllerE2EIT {
     givenConsultingTypeServiceResponse();
     givenKeycloakRespondsOtpByAppHasBeenSetup(user.getUsername());
 
+    var username = usernameTranscoder.decodeUsername(user.getUsername());
+
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(user.getUserId())))
-        .andExpect(jsonPath("userName", is("performance-asker-72")))
+        .andExpect(jsonPath("userName", is(username)))
+        .andExpect(jsonPath("displayName", is(nullValue())))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email", is(nullValue())))
@@ -499,6 +515,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("inTeamAgency", is(false)));
   }
 
@@ -509,17 +526,22 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenAValidConsultant(true);
     givenKeycloakRespondsOtpByEmailHasBeenSetup(consultant.getUsername());
+    givenAValidRocketChatInfoUserResponse();
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
+    var displayName = usernameTranscoder.decodeUsername(userInfoResponse.getUser().getName());
+    var username = usernameTranscoder.decodeUsername(consultant.getUsername());
 
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(consultant.getId())))
-        .andExpect(jsonPath("userName", is("emigration-team")))
+        .andExpect(jsonPath("userName", is(username)))
+        .andExpect(jsonPath("displayName", is(displayName)))
         .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
@@ -550,6 +572,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -562,14 +585,18 @@ public class UserControllerE2EIT {
     givenConsultingTypeServiceResponse();
     givenKeycloakRespondsOtpByEmailHasBeenSetup(user.getUsername());
 
+    var username = usernameTranscoder.decodeUsername(user.getUsername());
+
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(user.getUserId())))
-        .andExpect(jsonPath("userName", is("performance-asker-72")))
+        .andExpect(jsonPath("userName", is(username)))
+        .andExpect(jsonPath("displayName", is(nullValue())))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email", is(nullValue())))
@@ -592,6 +619,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("inTeamAgency", is(false)));
   }
 
@@ -602,17 +630,22 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenAValidConsultant(true);
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
+    givenAValidRocketChatInfoUserResponse();
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
+    var displayName = usernameTranscoder.decodeUsername(userInfoResponse.getUser().getName());
+    var username = usernameTranscoder.decodeUsername(consultant.getUsername());
 
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(consultant.getId())))
-        .andExpect(jsonPath("userName", is("emigration-team")))
+        .andExpect(jsonPath("userName", is(username)))
+        .andExpect(jsonPath("displayName", is(displayName)))
         .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
@@ -643,6 +676,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -655,14 +689,18 @@ public class UserControllerE2EIT {
     givenConsultingTypeServiceResponse();
     givenKeycloakRespondsOtpHasNotBeenSetup(user.getUsername());
 
+    var username = usernameTranscoder.decodeUsername(user.getUsername());
+
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(user.getUserId())))
-        .andExpect(jsonPath("userName", is("performance-asker-72")))
+        .andExpect(jsonPath("userName", is(username)))
+        .andExpect(jsonPath("displayName", is(nullValue())))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email", is(nullValue())))
@@ -684,6 +722,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("inTeamAgency", is(false)));
   }
 
@@ -703,23 +742,6 @@ public class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("e2eEncryptionEnabled", is(true)));
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getUserDataShouldContainIfEndToEndEncryptionIsDisabled() throws Exception {
-    givenABearerToken();
-    givenAValidUser(true);
-    givenConsultingTypeServiceResponse();
-    givenKeycloakRespondsOtpHasNotBeenSetup(user.getUsername());
-
-    mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("e2eEncryptionEnabled", is(false)));
   }
 
   @Test
@@ -1010,7 +1032,7 @@ public class UserControllerE2EIT {
   public void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
     givenAValidConsultant(true);
     givenAMinimalUpdateConsultantDto(consultant.getEmail());
-    givenValidRocketChatInfoResponse();
+    givenValidRocketChatTechUserResponse();
 
     mockMvc.perform(put("/users/data")
             .cookie(CSRF_COOKIE)
@@ -1032,7 +1054,7 @@ public class UserControllerE2EIT {
   public void updateUserDataShouldSaveGivenLanguagesAndRespondWithOk() throws Exception {
     givenAValidConsultant(true);
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
-    givenValidRocketChatInfoResponse();
+    givenValidRocketChatTechUserResponse();
 
     mockMvc.perform(put("/users/data")
             .cookie(CSRF_COOKIE)
@@ -1058,7 +1080,7 @@ public class UserControllerE2EIT {
   public void updateUserDataShouldCascadeLanguageDeletionAndRespondWithOk() throws Exception {
     givenAValidConsultantSpeaking(easyRandom.nextObject(LanguageCode.class));
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
-    givenValidRocketChatInfoResponse();
+    givenValidRocketChatTechUserResponse();
 
     mockMvc.perform(put("/users/data")
             .cookie(CSRF_COOKIE)
@@ -2170,6 +2192,23 @@ public class UserControllerE2EIT {
     )).thenReturn(ResponseEntity.ok(messageResponse));
   }
 
+  private void givenAValidRocketChatInfoUserResponse() {
+    userInfoResponse = new UserInfoResponseDTO();
+    userInfoResponse.setSuccess(true);
+
+    var chatUser = easyRandom.nextObject(RocketChatUserDTO.class);
+    chatUser.setId(consultant.getRocketChatId());
+    chatUser.setUsername(consultant.getUsername());
+    chatUser.setName(usernameTranscoder.encodeUsername("Consultant Max"));
+    userInfoResponse.setUser(chatUser);
+
+    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
+    when(rocketChatRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(UserInfoResponseDTO.class))
+    ).thenReturn(ResponseEntity.ok(userInfoResponse));
+  }
+
   private void givenAValidRocketChatUpdateUserResponse() {
     var urlSuffix = "/api/v1/users.update";
     var updateUserResponse = easyRandom.nextObject(Void.class);
@@ -2446,13 +2485,13 @@ public class UserControllerE2EIT {
     when(rocketChatCredentialsProvider.getSystemUserSneaky()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
   }
 
-  private void givenValidRocketChatInfoResponse() throws RocketChatUserNotInitializedException {
+  private void givenValidRocketChatTechUserResponse() throws RocketChatUserNotInitializedException {
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     var body = new UserInfoResponseDTO();
     body.setSuccess(true);
     if (nonNull(user)) {
-      body.setUser(new RocketChatUserDTO("", user.getUsername(), null));
+      body.setUser(new RocketChatUserDTO("", user.getUsername(), null, null));
     }
     var userInfoResponseDTO = ResponseEntity.ok(body);
     when(restTemplate.exchange(anyString(), any(), any(), eq(UserInfoResponseDTO.class)))

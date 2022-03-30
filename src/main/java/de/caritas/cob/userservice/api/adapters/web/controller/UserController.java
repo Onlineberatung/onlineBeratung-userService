@@ -334,8 +334,15 @@ public class UserController implements UsersApi {
       twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(encourage2fa);
     }
     userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
-
     userDataResponseDTO.setE2eEncryptionEnabled(videoChatConfig.getE2eEncryptionEnabled());
+
+    if (authenticatedUser.isConsultant()) {
+      accountManager.findConsultant(authenticatedUser.getUserId()).ifPresent(consultantMap -> {
+        if (consultantMap.containsKey("displayName")) {
+          userDataResponseDTO.setDisplayName((String) consultantMap.get("displayName"));
+        }
+      });
+    }
 
     return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
   }
@@ -509,7 +516,8 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewMessageNotification(newMessageNotificationDTO.getRcGroupId(),
-        authenticatedUser.getRoles(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
+        authenticatedUser.getRoles(), authenticatedUser.getUserId(),
+        TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -527,7 +535,8 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(
-        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
+        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId(),
+        TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

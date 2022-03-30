@@ -13,4 +13,6 @@ public interface AccountManaging {
   Optional<User> findAdviceSeeker(String id);
 
   Optional<User> findAdviceSeekerByChatUserId(String chatId);
+
+  Optional<Map<String, Object>> findConsultant(String id);
 }
