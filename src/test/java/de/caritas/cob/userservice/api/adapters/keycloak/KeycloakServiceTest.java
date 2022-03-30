@@ -33,7 +33,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
@@ -43,6 +42,7 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.List;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
@@ -121,7 +121,7 @@ public class KeycloakServiceTest {
   public void changePassword_Should_ReturnTrue_When_KeycloakPasswordChangeWasSuccessful() {
     var usersResource = mock(UsersResource.class);
     var userResource = mock(UserResource.class);
-    when(usersResource.get(eq(USER_ID))).thenReturn(userResource);
+    when(usersResource.get(USER_ID)).thenReturn(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     assertTrue(keycloakService.changePassword(USER_ID, NEW_PW));
@@ -148,7 +148,8 @@ public class KeycloakServiceTest {
 
   @Test
   public void loginUser_Should_ReturnBadRequest_When_KeycloakLoginFails() {
-    RestClientResponseException exception = mock(RestClientResponseException.class);
+    var exception = new RestClientResponseException("some exception", 500, "text", null, null,
+        null);
     when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
         ArgumentMatchers.<Class<KeycloakLoginResponseDTO>>any())).thenThrow(exception);
 
@@ -196,13 +197,10 @@ public class KeycloakServiceTest {
   @Test
   public void changeEmailAddress_Should_useServicesCorrectly() {
     when(this.authenticatedUser.getUserId()).thenReturn("userId");
-    var usersResource = mock(UsersResource.class);
-    var userResource = mock(UserResource.class);
-    var userRepresentation = mock(UserRepresentation.class);
-    when(userRepresentation.getEmail()).thenReturn(RandomStringUtils.randomAlphanumeric(8));
-    when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    when(usersResource.get(eq("userId"))).thenReturn(userResource);
-    when(usersResource.search(anyString(), eq(0), eq(Integer.MAX_VALUE))).thenReturn(List.of());
+    UserRepresentation userRepresentation = givenUserRepresentationWithFilledEmail(
+        RandomStringUtils.randomAlphanumeric(8));
+    UserResource userResource = givenUserResource(userRepresentation);
+    UsersResource usersResource = givenUsersResource(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
     var email = RandomStringUtils.randomAlphabetic(8);
 
@@ -212,17 +210,56 @@ public class KeycloakServiceTest {
     verify(this.authenticatedUser, times(1)).getUserId();
   }
 
+  private UserRepresentation givenUserRepresentationWithFilledEmail(String email) {
+    var userRepresentation = mock(UserRepresentation.class);
+    when(userRepresentation.getEmail()).thenReturn(email);
+    return userRepresentation;
+  }
+
+  @Test
+  public void changeEmailAddress_Should_NotThrowNPEIfUserDoesNotHaveEmailDefinedInKeycloak() {
+    when(this.authenticatedUser.getUserId()).thenReturn("userId");
+    UserRepresentation userRepresentation = givenUserRepresentationWithNullEmail();
+    UserResource userResource = givenUserResource(userRepresentation);
+    UsersResource usersResource = givenUsersResource(userResource);
+    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+    var email = RandomStringUtils.randomAlphabetic(8);
+
+    this.keycloakService.changeEmailAddress(email);
+
+    verify(this.userAccountInputValidator, times(1)).validateEmailAddress(email);
+    verify(this.authenticatedUser, times(1)).getUserId();
+  }
+
+  private UserRepresentation givenUserRepresentationWithNullEmail() {
+    UserRepresentation userRepresentation = givenUserRepresentationWithFilledEmail(null);
+    return userRepresentation;
+  }
+
+  private UsersResource givenUsersResource(UserResource userResource) {
+    var usersResource = mock(UsersResource.class);
+    when(usersResource.get("userId")).thenReturn(userResource);
+    when(usersResource.search(anyString(), eq(0), eq(Integer.MAX_VALUE))).thenReturn(List.of());
+    return usersResource;
+  }
+
+  private UserResource givenUserResource(UserRepresentation userRepresentation) {
+    var userResource = mock(UserResource.class);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    return userResource;
+  }
+
   @Test
   public void deleteEmailAddress_Should_useServicesCorrectly() {
     var userId = random(16);
     when(authenticatedUser.getUserId()).thenReturn(userId);
-    when(userHelper.getDummyEmail(eq(userId))).thenReturn("dummy");
+    when(userHelper.getDummyEmail(userId)).thenReturn("dummy");
     var usersResource = mock(UsersResource.class);
     var userResource = mock(UserResource.class);
-    var userRepresentation = mock(UserRepresentation.class);
-    when(userRepresentation.getEmail()).thenReturn(RandomStringUtils.randomAlphanumeric(8));
+    UserRepresentation userRepresentation = givenUserRepresentationWithFilledEmail(
+        RandomStringUtils.randomAlphanumeric(8));
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    when(usersResource.get(eq(userId))).thenReturn(userResource);
+    when(usersResource.get(userId)).thenReturn(userResource);
     when(usersResource.search(anyString(), eq(0), eq(Integer.MAX_VALUE))).thenReturn(List.of());
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
