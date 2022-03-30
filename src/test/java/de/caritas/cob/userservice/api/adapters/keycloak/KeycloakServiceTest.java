@@ -148,7 +148,8 @@ public class KeycloakServiceTest {
 
   @Test
   public void loginUser_Should_ReturnBadRequest_When_KeycloakLoginFails() {
-    var exception = new RestClientResponseException("some exception",500,"text",null,null, null);
+    var exception = new RestClientResponseException("some exception", 500, "text", null, null,
+        null);
     when(restTemplate.postForEntity(ArgumentMatchers.anyString(), any(),
         ArgumentMatchers.<Class<KeycloakLoginResponseDTO>>any())).thenThrow(exception);
 
@@ -198,7 +199,7 @@ public class KeycloakServiceTest {
     when(this.authenticatedUser.getUserId()).thenReturn("userId");
     UserRepresentation userRepresentation = givenUserRepresentationWithFilledEmail(
         RandomStringUtils.randomAlphanumeric(8));
-    UserResource userResource =givenUserResource(userRepresentation);
+    UserResource userResource = givenUserResource(userRepresentation);
     UsersResource usersResource = givenUsersResource(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
     var email = RandomStringUtils.randomAlphabetic(8);
