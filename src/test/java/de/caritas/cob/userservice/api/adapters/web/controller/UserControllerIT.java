@@ -77,7 +77,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_ME
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ROLE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
@@ -99,7 +98,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.MASTER_KEY
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.NAME;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.OTP_INFO_DTO;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
@@ -109,8 +107,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -265,11 +261,6 @@ public class UserControllerIT {
           null, null, null, true, null);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
-  private final Set<String> ROLES_WITH_CONSULTANT =
-      new HashSet<>(Arrays.asList("dummyRoleA", UserRole.CONSULTANT.getValue(), "dummyRoleB"));
-  private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + "dummyRoleA" + "\",\""
-      + UserRole.USER.getValue() + "\",\"" + "dummyRoleB" + "\"],\"grantedAuthorities\": [\""
-      + AuthorityValue.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
@@ -296,17 +287,12 @@ public class UserControllerIT {
       .session(SESSION_DTO)
       .agency(AGENCY_DTO)
       .consultant(SESSION_CONSULTANT_DTO);
-  private final List<AgencyDTO> AGENCY_LIST = new ArrayList<>();
   private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<>() {
     {
       put("age", "1");
       put("state", "4");
     }
   };
-  private final UserDataResponseDTO CONSULTANT_USER_DATA_RESPONSE_DTO = UserDataResponseDTO
-      .builder().userId(USER_ID).userName("Beraterbiene").firstName("Max").lastName("Mustermann")
-      .email("mail@muster.mann").isAbsent(true).isFormalLanguage(false).absenceMessage("Bin weg")
-      .isInTeamAgency(true).agencies(AGENCY_LIST).hasAnonymousConversations(false).build();
   private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = UserDataResponseDTO.builder()
       .userId(USER_ID).userName(NAME).isAbsent(false).isFormalLanguage(false).isInTeamAgency(false)
       .consultingTypes(SESSION_DATA).hasAnonymousConversations(false).build();
@@ -448,8 +434,10 @@ public class UserControllerIT {
   @MockBean
   private ConsultantService consultantService;
   @MockBean
+  @SuppressWarnings("unused")
   private ConsultantDataProvider consultantDataProvider;
   @MockBean
+  @SuppressWarnings("unused")
   private AskerDataProvider askerDataProvider;
   @MockBean
   @SuppressWarnings("unused")
@@ -1228,26 +1216,6 @@ public class UserControllerIT {
    */
 
   @Test
-  public void getUserData_ForUser_Should_ReturnOkAndValidContent() throws Exception {
-
-    when(authenticatedUser.isUser()).thenReturn(true);
-
-    UserDataResponseDTO responseDto = USER_USER_DATA_RESPONSE_DTO;
-    responseDto.setUserRoles(ROLES_WITH_USER);
-    responseDto.setGrantedAuthorities(
-        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
-
-    when(askerDataProvider.retrieveData(any())).thenReturn(responseDto);
-    when(identityClient.getOtpCredential(null)).thenReturn(OTP_INFO_DTO);
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().json(VALID_USER_ROLE_RESULT));
-  }
-
-  @Test
   public void getUserData_ForUser_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
       throws Exception {
 
@@ -1264,35 +1232,6 @@ public class UserControllerIT {
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-  }
-
-  @Test
-  public void getUserData_ForConsultant_Should_ReturnOkAndValidContent() throws Exception {
-
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-
-    UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
-    responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
-    responseDto.setLanguages(Set.of("de", "en"));
-    responseDto.setGrantedAuthorities(
-        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
-
-    when(consultantDataProvider.retrieveData(any())).thenReturn(responseDto);
-    when(identityClient.getOtpCredential(null)).thenReturn(OTP_INFO_DTO);
-
-    mvc.perform(
-            get(PATH_USER_DATA)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-        )
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.languages", containsInAnyOrder("de", "en")))
-        .andExpect(jsonPath("$.userRoles", hasSize(3)))
-        .andExpect(
-            jsonPath("$.userRoles",
-                containsInAnyOrder("dummyRoleA", "dummyRoleB", CONSULTANT_ROLE)
-            )
-        );
   }
 
   /**
