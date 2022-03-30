@@ -645,6 +645,8 @@ components:
           type: string
         deleteDate:
           type: string
+        status:
+          type: string
 
     ConsultantAdminResponseDTO:
       type: object

@@ -4,8 +4,8 @@ import static de.caritas.cob.userservice.api.model.Consultant.EMAIL_ANALYZER;
 import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.caritas.cob.userservice.api.repository.TenantAware;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -13,6 +13,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
@@ -143,6 +145,10 @@ public class Consultant implements TenantAware {
   @Column(name = "tenant_id")
   @Field
   private Long tenantId;
+
+  @Column(name = "status")
+  @Enumerated(EnumType.STRING)
+  private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
 
   @JsonIgnore
   public String getFullName() {

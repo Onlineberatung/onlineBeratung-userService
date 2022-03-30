@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class ConsultantAgencyServiceTest {
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
           "last name", "consultant@cob.de", false, false, null, false, null, null, null,
-          null, null, null, null, null, true, null);
+          null, null, null, null, null, true, null, ConsultantStatus.CREATED);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null);
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);

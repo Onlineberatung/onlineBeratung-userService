@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
@@ -49,6 +49,7 @@ import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -57,13 +58,13 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
@@ -91,7 +92,7 @@ class SessionServiceTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
       "first name", "last name", "consultant@cob.de", false, false, null, false, null,
-      null, null, null, null, nowInUtc(), null, null, true, null);
+      null, null, null, null, nowInUtc(), null, null, true, null, ConsultantStatus.CREATED);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
       REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
