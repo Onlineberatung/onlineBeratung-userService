@@ -6,6 +6,7 @@ import static java.util.Objects.nonNull;
 import de.caritas.cob.userservice.api.adapters.web.dto.OtpType;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import java.util.HashMap;
@@ -17,31 +18,38 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDtoMapper {
 
-  public TwoFactorAuthDTO twoFactorAuthDtoOf(Boolean encourage2fa) {
+  public UserDataResponseDTO userDataOf(UserDataResponseDTO userData, OtpInfoDTO otpInfoDTO,
+      boolean isE2eEncEnabled) {
     var twoFactorAuthDTO = new TwoFactorAuthDTO();
-    twoFactorAuthDTO.setIsToEncourage(encourage2fa);
 
-    return twoFactorAuthDTO;
-  }
-
-  public TwoFactorAuthDTO twoFactorAuthDtoOf(OtpInfoDTO otpInfoDTO, Boolean encourage2fa) {
-    var twoFactorAuthDTO = new TwoFactorAuthDTO();
-    twoFactorAuthDTO.setIsEnabled(true);
-    twoFactorAuthDTO.setIsToEncourage(encourage2fa);
-
-    if (otpInfoDTO.getOtpSetup()) {
-      twoFactorAuthDTO.isActive(true);
-      var foreignType = otpInfoDTO.getOtpType();
-      if (nonNull(foreignType)) {
-        var type = foreignType.getValue().equals("APP") ? OtpType.APP : OtpType.EMAIL;
-        twoFactorAuthDTO.setType(type);
+    if (nonNull(otpInfoDTO)) {
+      twoFactorAuthDTO.setIsEnabled(true);
+      if (otpInfoDTO.getOtpSetup()) {
+        twoFactorAuthDTO.isActive(true);
+        var foreignType = otpInfoDTO.getOtpType();
+        if (nonNull(foreignType)) {
+          var type = foreignType.getValue().equals("APP") ? OtpType.APP : OtpType.EMAIL;
+          twoFactorAuthDTO.setType(type);
+        }
+      } else {
+        twoFactorAuthDTO.setQrCode(otpInfoDTO.getOtpSecretQrCode());
+        twoFactorAuthDTO.setSecret(otpInfoDTO.getOtpSecret());
       }
-    } else {
-      twoFactorAuthDTO.setQrCode(otpInfoDTO.getOtpSecretQrCode());
-      twoFactorAuthDTO.setSecret(otpInfoDTO.getOtpSecret());
     }
 
-    return twoFactorAuthDTO;
+    twoFactorAuthDTO.setIsToEncourage(userData.getEncourage2fa());
+    userData.setTwoFactorAuth(twoFactorAuthDTO);
+    userData.setE2eEncryptionEnabled(isE2eEncEnabled);
+
+    return userData;
+  }
+
+  public String displayNameOf(Map<String, Object> consultantMap) {
+    if (consultantMap.containsKey("displayName")) {
+      return (String) consultantMap.get("displayName");
+    }
+
+    return null;
   }
 
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {

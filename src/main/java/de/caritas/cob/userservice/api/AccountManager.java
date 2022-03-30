@@ -1,9 +1,10 @@
 package de.caritas.cob.userservice.api;
 
-import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.HashMap;
@@ -25,6 +26,19 @@ public class AccountManager implements AccountManaging {
   private final UserServiceMapper userServiceMapper;
 
   private final MessageClient messageClient;
+
+  @Override
+  public Optional<Map<String, Object>> findConsultant(String id) {
+    var userMap = new HashMap<String, Object>();
+
+    consultantRepository.findByIdAndDeleteDateIsNull(id).ifPresent(dbConsultant ->
+        messageClient.findUser(dbConsultant.getRocketChatId()).ifPresentOrElse(
+            chatUserMap -> userMap.putAll(userServiceMapper.mapOf(dbConsultant, chatUserMap)),
+            throwPersistenceConflict(id, dbConsultant.getRocketChatId())
+        ));
+
+    return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
+  }
 
   @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
@@ -72,5 +86,15 @@ public class AccountManager implements AccountManaging {
     );
 
     return userServiceMapper.mapOf(savedConsultant, patchMap);
+  }
+
+  private Runnable throwPersistenceConflict(String dbUserId, String chatUserId) {
+    var message = String.format(
+        "User (%s) found in database but not in Rocket.Chat (%s)", dbUserId, chatUserId
+    );
+
+    return () -> {
+      throw new InternalServerErrorException(message);
+    };
   }
 }

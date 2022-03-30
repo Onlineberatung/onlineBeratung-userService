@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.config.auth;
 
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.util.Arrays;
+import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -65,5 +66,11 @@ public class IdentityConfig implements IdentityClientConfig {
         .trimLeadingCharacter(path, PATH_SEPARATOR)
         .replaceAll("(\\{).*(})", arg)
         .split(Character.toString(PATH_SEPARATOR))).forEach(builder::pathSegment);
+  }
+
+  @Override
+  public boolean isOtpAllowed(@NotNull Set<String> roles) {
+    return roles.contains(UserRole.USER.getValue()) && otpAllowedForUsers
+        || roles.contains(UserRole.CONSULTANT.getValue()) && otpAllowedForConsultants;
   }
 }

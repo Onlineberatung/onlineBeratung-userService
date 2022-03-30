@@ -27,7 +27,7 @@ public class UserServiceMapper {
     };
   }
 
-  public Map<String, Object> mapOf(Consultant consultant, Map<String, Object> patchMap) {
+  public Map<String, Object> mapOf(Consultant consultant, Map<String, Object> additionalMap) {
     var map = new HashMap<String, Object>() {
       {
         put("id", consultant.getId());
@@ -38,8 +38,9 @@ public class UserServiceMapper {
       }
     };
 
-    if (patchMap.containsKey("displayName")) {
-      map.put("displayName", patchMap.get("displayName"));
+    if (additionalMap.containsKey("displayName")) {
+      var displayName = (String) additionalMap.get("displayName");
+      map.put("displayName", usernameTranscoder.decodeUsername(displayName));
     }
 
     return map;

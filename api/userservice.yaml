@@ -1970,6 +1970,9 @@ components:
         userName:
           type: string
           example: max.muster
+        displayName:
+          type: string
+          example: Max M.
         firstName:
           type: string
           example: Max
