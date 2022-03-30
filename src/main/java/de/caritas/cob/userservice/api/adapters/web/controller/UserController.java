@@ -30,7 +30,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -317,31 +316,27 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
-    var userDataResponseDTO = authenticatedUser.isConsultant()
-        ? consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant())
-        : askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
-
-    TwoFactorAuthDTO twoFactorAuthDTO;
-    var encourage2fa = userDataResponseDTO.getEncourage2fa();
-    if (identityClientConfig.isOtpAllowed(authenticatedUser.getRoles())) {
-      var username = authenticatedUser.getUsername();
-      var otpInfoDTO = identityManager.getOtpCredential(username);
-      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(otpInfoDTO, encourage2fa);
-    } else {
-      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(encourage2fa);
-    }
-    userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
-    userDataResponseDTO.setE2eEncryptionEnabled(videoChatConfig.getE2eEncryptionEnabled());
-
+    UserDataResponseDTO partialUserData;
     if (authenticatedUser.isConsultant()) {
-      accountManager.findConsultant(authenticatedUser.getUserId()).ifPresent(consultantMap -> {
-        if (consultantMap.containsKey("displayName")) {
-          userDataResponseDTO.setDisplayName((String) consultantMap.get("displayName"));
-        }
-      });
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      partialUserData = consultantDataProvider.retrieveData(consultant);
+      accountManager.findConsultant(authenticatedUser.getUserId()).ifPresent(consultantMap ->
+          partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap))
+      );
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      partialUserData = askerDataProvider.retrieveData(user);
     }
 
-    return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
+    var otpInfoDTO = identityClientConfig.isOtpAllowed(authenticatedUser.getRoles())
+        ? identityManager.getOtpCredential(authenticatedUser.getUsername())
+        : null;
+
+    var fullUserData = userDtoMapper.userDataOf(
+        partialUserData, otpInfoDTO, videoChatConfig.getE2eEncryptionEnabled()
+    );
+
+    return new ResponseEntity<>(fullUserData, HttpStatus.OK);
   }
 
   @Override
