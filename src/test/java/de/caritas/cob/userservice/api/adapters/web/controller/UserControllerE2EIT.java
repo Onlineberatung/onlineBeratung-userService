@@ -53,8 +53,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
-import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
@@ -69,11 +69,13 @@ import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
@@ -164,6 +166,9 @@ public class UserControllerE2EIT {
 
   @Autowired
   private ChatAgencyRepository chatAgencyRepository;
+
+  @Autowired
+  private UserAgencyRepository userAgencyRepository;
 
   @Autowired
   private de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi consultingTypeControllerApi;
@@ -454,7 +459,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
-        .andExpect(jsonPath("userRoles[0]", is("CONSULTANT")))
+        .andExpect(jsonPath("userRoles[0]", is("consultant")))
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
@@ -501,7 +506,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", is(nullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
-        .andExpect(jsonPath("userRoles[0]", is("USER")))
+        .andExpect(jsonPath("userRoles[0]", is("user")))
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
@@ -558,7 +563,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
-        .andExpect(jsonPath("userRoles[0]", is("CONSULTANT")))
+        .andExpect(jsonPath("userRoles[0]", is("consultant")))
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
@@ -605,7 +610,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", is(nullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
-        .andExpect(jsonPath("userRoles[0]", is("USER")))
+        .andExpect(jsonPath("userRoles[0]", is("user")))
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
@@ -662,7 +667,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
-        .andExpect(jsonPath("userRoles[0]", is("CONSULTANT")))
+        .andExpect(jsonPath("userRoles[0]", is("consultant")))
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anAuthority")))
         .andExpect(jsonPath("consultingTypes", is(nullValue())))
@@ -708,7 +713,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
         .andExpect(jsonPath("agencies", is(nullValue())))
         .andExpect(jsonPath("userRoles", hasSize(1)))
-        .andExpect(jsonPath("userRoles[0]", is("USER")))
+        .andExpect(jsonPath("userRoles[0]", is("user")))
         .andExpect(jsonPath("grantedAuthorities", hasSize(1)))
         .andExpect(jsonPath("grantedAuthorities[0]", is("anotherAuthority")))
         .andExpect(jsonPath("consultingTypes", is(notNullValue())))
@@ -1134,7 +1139,7 @@ public class UserControllerE2EIT {
   public void banFromChatShouldReturnBadRequestIfRcTokenIsNotGiven() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
 
     mockMvc.perform(
             post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
@@ -1149,7 +1154,7 @@ public class UserControllerE2EIT {
   public void banFromChatShouldReturnNotFoundIfUserDoesNotExist() throws Exception {
     var nonExistingUserId = RandomStringUtils.randomAlphanumeric(17);
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
 
     mockMvc.perform(
             post("/users/{chatUserId}/chat/{chatId}/ban", nonExistingUserId, chat.getId())
@@ -1179,7 +1184,7 @@ public class UserControllerE2EIT {
   public void banFromChatShouldReturnNoContentIfBanWentWell() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatMuteUserInRoomResponse();
 
@@ -1203,7 +1208,7 @@ public class UserControllerE2EIT {
       throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAnInvalidRocketChatMuteUserInRoomResponse();
 
@@ -1226,7 +1231,7 @@ public class UserControllerE2EIT {
   public void getChatShouldReturnOkIfUsersAreBannedAndAUserRequested() throws Exception {
     givenAValidUser(true);
     givenAValidConsultant();
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
 
@@ -1250,7 +1255,7 @@ public class UserControllerE2EIT {
   public void getChatShouldReturnOkIfUsersAreNotBannedAndAUserRequested() throws Exception {
     givenAValidUser(true);
     givenAValidConsultant();
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
@@ -1274,7 +1279,7 @@ public class UserControllerE2EIT {
   public void getChatShouldReturnOkIfUsersAreBannedAndAConsultantRequested() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
 
@@ -1298,7 +1303,7 @@ public class UserControllerE2EIT {
   public void getChatShouldReturnOkIfUsersAreNotBannedAndAConsultantRequested() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
@@ -1322,7 +1327,7 @@ public class UserControllerE2EIT {
   public void stopChatShouldReturnOkIfUsersAreNotBanned() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
@@ -1345,7 +1350,7 @@ public class UserControllerE2EIT {
   public void stopChatShouldReturnOkIfUsersAreBanned() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat(consultant);
+    givenAValidChat();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
     givenAValidRocketChatUnmuteResponse();
@@ -2314,7 +2319,7 @@ public class UserControllerE2EIT {
       when(authenticatedUser.isUser()).thenReturn(false);
       when(authenticatedUser.isConsultant()).thenReturn(true);
       when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
-      when(authenticatedUser.getRoles()).thenReturn(Set.of(Authority.CONSULTANT.name()));
+      when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
       when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
     }
   }
@@ -2330,12 +2335,12 @@ public class UserControllerE2EIT {
       when(authenticatedUser.isUser()).thenReturn(true);
       when(authenticatedUser.isConsultant()).thenReturn(false);
       when(authenticatedUser.getUsername()).thenReturn(user.getUsername());
-      when(authenticatedUser.getRoles()).thenReturn(Set.of(Authority.USER.name()));
+      when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));
       when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
     }
   }
 
-  private void givenAValidChat(Consultant consultant) {
+  private void givenAValidChat() {
     chat = easyRandom.nextObject(Chat.class);
     chat.setId(null);
     chat.setActive(true);
@@ -2351,6 +2356,14 @@ public class UserControllerE2EIT {
     chatAgency.setChat(chat);
     chatAgency.setAgencyId(agencyId);
     chatAgencyRepository.save(chatAgency);
+
+    if (nonNull(user)) {
+      var userAgency = new UserAgency();
+      userAgency.setUser(user);
+      userAgency.setAgencyId(agencyId);
+      user.getUserAgencies().add(userAgency);
+      userAgencyRepository.save(userAgency);
+    }
   }
 
   private void givenConsultingTypeServiceResponse() {
