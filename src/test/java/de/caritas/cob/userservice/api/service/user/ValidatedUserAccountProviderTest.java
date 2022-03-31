@@ -123,7 +123,7 @@ public class ValidatedUserAccountProviderTest {
         .updateUser(
             new UserUpdateRequestDTO(
                 consultant.getRocketChatId(),
-                new UserUpdateDataDTO("newMail", consultant.getFullName())));
+                new UserUpdateDataDTO("newMail")));
     consultant.setEmail("newMail");
     verify(this.consultantService, times(1)).saveConsultant(consultant);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -144,7 +144,7 @@ public class ValidatedUserAccountProviderTest {
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
-                user.getRcUserId(), new UserUpdateDataDTO("newMail", user.getUsername())));
+                user.getRcUserId(), new UserUpdateDataDTO("newMail")));
     user.setEmail("newMail");
     verify(this.userService, times(1)).saveUser(user);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -170,7 +170,7 @@ public class ValidatedUserAccountProviderTest {
         .updateUser(
             new UserUpdateRequestDTO(
                 consultant.getRocketChatId(),
-                new UserUpdateDataDTO(dummyEmail, consultant.getFullName())));
+                new UserUpdateDataDTO(dummyEmail)));
     consultant.setEmail(dummyEmail);
     verify(consultantService).saveConsultant(consultant);
     verifyNoMoreInteractions(rocketChatService);
@@ -194,7 +194,7 @@ public class ValidatedUserAccountProviderTest {
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
-                user.getRcUserId(), new UserUpdateDataDTO(dummyEmail, user.getUsername())));
+                user.getRcUserId(), new UserUpdateDataDTO(dummyEmail)));
     user.setEmail(dummyEmail);
     verify(userService).saveUser(user);
     verifyNoMoreInteractions(rocketChatService);
