@@ -147,7 +147,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserD
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
@@ -219,11 +218,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
@@ -252,6 +251,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc(addFilters = false)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 public class UserControllerIT {
+
+  private static final Cookie RC_TOKEN_COOKIE = new Cookie(
+      "rc_token", RandomStringUtils.randomAlphanumeric(43)
+  );
 
   private final String VALID_ENQUIRY_MESSAGE_BODY = "{\"message\": \"" + MESSAGE + "\"}";
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
@@ -287,15 +290,6 @@ public class UserControllerIT {
       .session(SESSION_DTO)
       .agency(AGENCY_DTO)
       .consultant(SESSION_CONSULTANT_DTO);
-  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<>() {
-    {
-      put("age", "1");
-      put("state", "4");
-    }
-  };
-  private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = UserDataResponseDTO.builder()
-      .userId(USER_ID).userName(NAME).isAbsent(false).isFormalLanguage(false).isInTeamAgency(false)
-      .consultingTypes(SESSION_DATA).hasAnonymousConversations(false).build();
   private final String PATH_PUT_SESSIONS_MONITORING = "/users/sessions/monitoring/" + SESSION_ID;
   private final String PATH_GET_MONITORING = "/users/sessions/" + SESSION_ID + "/monitoring";
   protected static final String PATH_GET_PUBLIC_CONSULTANT_DATA = "/users/consultants/65c1095e-b977-493a-a34f-064b729d1d6c";
@@ -1230,6 +1224,7 @@ public class UserControllerIT {
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
   }
