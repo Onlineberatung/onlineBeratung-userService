@@ -130,6 +130,9 @@ public class UserControllerAuthorizationIT {
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
+  private static final Cookie RC_TOKEN_COOKIE = new Cookie(
+      "rc_token", RandomStringUtils.randomAlphanumeric(43)
+  );
 
   @Autowired
   private MockMvc mvc;
@@ -2051,6 +2054,7 @@ public class UserControllerAuthorizationIT {
     mvc.perform(
             patch(PATH_GET_USER_DATA)
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -2070,6 +2074,7 @@ public class UserControllerAuthorizationIT {
     mvc.perform(
             patch(PATH_GET_USER_DATA)
                 .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -2083,6 +2088,7 @@ public class UserControllerAuthorizationIT {
     mvc.perform(
             patch(PATH_GET_USER_DATA)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie(RC_TOKEN_COOKIE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
   }
@@ -2161,6 +2167,7 @@ public class UserControllerAuthorizationIT {
 
     mvc.perform(get(PATH_GET_USER_DATA)
             .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))

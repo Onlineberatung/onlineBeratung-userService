@@ -359,11 +359,13 @@ paths:
           description: either this or rc_token must be set
           schema:
             type: string
+          required: false
         - name: rc_token
           in: cookie
           description: either this or rcToken must be set
           schema:
             type: string
+          required: false
       responses:
         200:
           description: OK - successful operation
@@ -421,11 +423,13 @@ paths:
           description: either this or rc_token must be set
           schema:
             type: string
+          required: false
         - name: rc_token
           in: cookie
           description: either this or rcToken must be set
           schema:
             type: string
+          required: false
       requestBody:
         required: true
         content:
