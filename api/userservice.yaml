@@ -353,6 +353,17 @@ paths:
       summary: 'Returns user (meta)data for the currently authenticated user [Authorization:
         Role: user, anonymous, consultant]'
       operationId: getUserData
+      parameters:
+        - name: rcToken
+          in: header
+          description: either this or rc_token must be set
+          schema:
+            type: string
+        - name: rc_token
+          in: cookie
+          description: either this or rcToken must be set
+          schema:
+            type: string
       responses:
         200:
           description: OK - successful operation
@@ -404,6 +415,17 @@ paths:
       description: 'Supported fields so far are encourage2fa and displayName 
         [Authorization: Role: consultant, user]'
       operationId: patchUser
+      parameters:
+        - name: rcToken
+          in: header
+          description: either this or rc_token must be set
+          schema:
+            type: string
+        - name: rc_token
+          in: cookie
+          description: either this or rcToken must be set
+          schema:
+            type: string
       requestBody:
         required: true
         content:
