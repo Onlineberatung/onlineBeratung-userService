@@ -74,7 +74,7 @@ public class RocketChatAsyncHelper {
     ErrorMailDTO errorMailDTO = new ErrorMailDTO()
         .template(TEMPLATE_FREE_TEXT)
         .templateData(asList(
-            new TemplateDataDTO().key("subject").value("Deletion workflow errors"),
+            new TemplateDataDTO().key("subject").value("RocketChat sessions assignment error"),
             new TemplateDataDTO().key("url").value(this.applicationBaseUrl),
             new TemplateDataDTO().key("text").value(getEmailText(consultant, exception))));
     this.mailService.sendErrorEmailNotification(errorMailDTO);
