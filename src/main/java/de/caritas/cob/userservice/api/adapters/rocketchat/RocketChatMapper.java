@@ -95,10 +95,10 @@ public class RocketChatMapper {
       var map = new HashMap<String, Object>();
       map.put("id", user.getId());
       if (nonNull(user.getUsername())) {
-        map.put("username", user.getUsername().toLowerCase());
+        map.put("username", user.getUsername());
       }
       if (nonNull(user.getName())) {
-        map.put("displayName", user.getName().toLowerCase());
+        map.put("displayName", user.getName());
       }
 
       return Optional.of(map);
