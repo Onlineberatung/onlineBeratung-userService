@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 public class UserUpdateDataDTO {
 
   private String email;
-  private String name;
 
 }

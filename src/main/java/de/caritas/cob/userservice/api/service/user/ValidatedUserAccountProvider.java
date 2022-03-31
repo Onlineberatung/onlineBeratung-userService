@@ -106,7 +106,7 @@ public class ValidatedUserAccountProvider {
   }
 
   private void updateConsultantEmail(Consultant consultant, String email) {
-    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, consultant.getFullName());
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email);
     UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(consultant.getRocketChatId(),
         userUpdateDataDTO);
     this.rocketChatService.updateUser(requestDTO);
@@ -116,7 +116,7 @@ public class ValidatedUserAccountProvider {
   }
 
   private void updateUserEmail(User user, String email) {
-    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, user.getUsername());
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email);
     UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(user.getRcUserId(),
         userUpdateDataDTO);
     this.rocketChatService.updateUser(requestDTO);
