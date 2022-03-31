@@ -45,19 +45,20 @@ public class AccountManager implements AccountManaging {
 
   @Override
   public Optional<Map<String, Object>> findConsultantByUsername(String username) {
-    var consultantRef = new AtomicReference<Consultant>();
-    consultantRepository.findByUsernameAndDeleteDateIsNull(username).ifPresentOrElse(
-        consultantRef::set,
-        () -> consultantRepository.findByUsernameAndDeleteDateIsNull(
-            usernameTranscoder.transformedOf(username)
-        ).ifPresent(consultantRef::set)
-    );
+    var dbConsultantRef = new AtomicReference<Consultant>();
+    var transformedUsername = usernameTranscoder.transformedOf(username);
 
-    var consultant = consultantRef.get();
+    consultantRepository.findByUsernameAndDeleteDateIsNull(username)
+        .ifPresentOrElse(dbConsultantRef::set, () ->
+            consultantRepository.findByUsernameAndDeleteDateIsNull(transformedUsername)
+                .ifPresent(dbConsultantRef::set)
+        );
 
-    return isNull(consultant)
+    var dbConsultant = dbConsultantRef.get();
+
+    return isNull(dbConsultant)
         ? Optional.empty()
-        : Optional.of(findByDbConsultant(consultant));
+        : Optional.of(findByDbConsultant(dbConsultant));
   }
 
   @Override
