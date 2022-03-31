@@ -290,6 +290,15 @@ public class UserController implements UsersApi {
     var userSessionsDTO = sessionListFacade
         .retrieveSortedSessionsForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
 
+    userSessionsDTO.getSessions().forEach(session -> {
+      var consultant = session.getConsultant();
+      if (nonNull(consultant) && nonNull(consultant.getUsername())) {
+        accountManager.findConsultantByUsername(consultant.getUsername()).ifPresent(consultantMap ->
+            consultant.setDisplayName(userDtoMapper.displayNameOf(consultantMap))
+        );
+      }
+    });
+
     return isNotEmpty(userSessionsDTO.getSessions())
         ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);

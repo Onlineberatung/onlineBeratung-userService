@@ -323,7 +323,7 @@ public class SessionService {
 
   private SessionConsultantForUserDTO convertToSessionConsultantForUserDTO(Consultant consultant) {
     return new SessionConsultantForUserDTO(consultant.getUsername(), consultant.isAbsent(),
-        consultant.getAbsenceMessage());
+        consultant.getAbsenceMessage(), null);
   }
 
   /**

@@ -30,4 +30,5 @@ public class SessionConsultantForUserDTO {
   @ApiModelProperty(example = "\"Bin nicht da\"")
   private String absenceMessage;
 
+  private String displayName;
 }

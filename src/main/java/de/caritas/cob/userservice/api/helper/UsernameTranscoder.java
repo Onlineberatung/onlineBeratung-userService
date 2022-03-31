@@ -51,4 +51,7 @@ public class UsernameTranscoder {
         .toUpperCase().replace(BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING, BASE32_PLACEHOLDER)));
   }
 
+  public String transformedOf(String s) {
+    return s.startsWith(ENCODING_PREFIX) ? base32DecodeUsername(s) : base32EncodeUsername(s);
+  }
 }
