@@ -324,7 +324,7 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing {@link UserDataResponseDTO}
    */
   @Override
-  public ResponseEntity<UserDataResponseDTO> getUserData(String rcToken, String rcToken2) {
+  public ResponseEntity<UserDataResponseDTO> getUserData() {
     UserDataResponseDTO partialUserData;
     if (authenticatedUser.isConsultant()) {
       var consultant = userAccountProvider.retrieveValidatedConsultant();
@@ -349,8 +349,7 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO, String rcToken,
-      String rcToken2) {
+  public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
     var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser).orElseThrow(() ->
         new BadRequestException("Invalid payload: at least one property must be set")
     );
