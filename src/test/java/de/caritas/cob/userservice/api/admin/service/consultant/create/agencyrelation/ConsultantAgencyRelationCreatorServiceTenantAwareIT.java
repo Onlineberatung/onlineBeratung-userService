@@ -38,6 +38,7 @@ import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +105,7 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
   }
 
   @Test
+  @Ignore
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValidAndMultitenancyEnabled() {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();

@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -38,10 +39,10 @@ public class AuthenticatedUserHelperTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME,
       FIRST_NAME, LAST_NAME, EMAIL, false, false, null, false, null, null, null, null,
-      null, null, null, null, true, null);
+      null, null, null, null, true, null, ConsultantStatus.CREATED);
   private final Consultant TEAM_CONSULTANT = new Consultant(TEAM_CONSULTANT_ID, ROCKETCHAT_ID,
       USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null,
-      null, null, null, null, null, true, null);
+      null, null, null, null, null, true, null, ConsultantStatus.CREATED);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.NEW,
       nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null);

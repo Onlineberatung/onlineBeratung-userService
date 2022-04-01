@@ -4,25 +4,20 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.facade.RocketChatFacade;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -41,9 +36,8 @@ public class ConsultantAgencyRelationCreatorService {
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull AgencyService agencyService;
   private final @NonNull IdentityClient identityClient;
-  private final @NonNull RocketChatFacade rocketChatFacade;
-  private final @NonNull SessionRepository sessionRepository;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull RocketChatAsyncHelper rocketChatAsyncHelper;
 
   /**
    * Creates a new {@link ConsultantAgency} based on the {@link ImportRecord} and agency ids.
@@ -85,7 +79,7 @@ public class ConsultantAgencyRelationCreatorService {
     }
 
     ensureConsultingTypeRoles(input, agency);
-    addConsultantToSessions(consultant, agency, logMethod);
+    rocketChatAsyncHelper.addConsultantToSessions(consultant, agency, logMethod, TenantContext.getCurrentTenant());
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
       consultant.setTeamConsultant(true);
@@ -145,27 +139,6 @@ public class ConsultantAgencyRelationCreatorService {
                     consultingTypeId, consultant.getId()));
           });
     }
-  }
-
-  private void addConsultantToSessions(Consultant consultant, AgencyDTO agency,
-      Consumer<String> logMethod) {
-    List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
-    RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, identityClient, logMethod,
-            consultingTypeManager)
-        .onSessions(relevantSessions)
-        .withConsultant(consultant)
-        .addToGroupsOrRollbackOnFailure();
-  }
-
-  private List<Session> collectRelevantSessionsToAddConsultant(AgencyDTO agency) {
-    List<Session> sessionsToAddConsultant = sessionRepository
-        .findByAgencyIdAndStatusAndConsultantIsNull(agency.getId(), SessionStatus.NEW);
-    if (isTrue(agency.getTeamAgency())) {
-      sessionsToAddConsultant.addAll(sessionRepository
-          .findByAgencyIdAndStatusAndTeamSessionIsTrue(agency.getId(), SessionStatus.IN_PROGRESS));
-    }
-    return sessionsToAddConsultant;
   }
 
   private boolean isTeamAgencyButNotTeamConsultant(AgencyDTO agency,

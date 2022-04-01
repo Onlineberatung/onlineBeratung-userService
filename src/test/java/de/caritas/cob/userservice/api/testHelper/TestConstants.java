@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAttachmentDTO;
@@ -318,14 +319,14 @@ public class TestConstants {
   public static final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME, FIRST_NAME, LAST_NAME, EMAIL,
           IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null,
-          null, null, null, null, null, null, true, null);
+          null, null, null, null, null, null, true, null, ConsultantStatus.CREATED);
   public static final Consultant CONSULTANT_2 = new Consultant(CONSULTANT_ID_2, ROCKETCHAT_ID,
       USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null,
-      null, null, null, null, null, null, true, null);
+      null, null, null, null, null, null, true, null, ConsultantStatus.CREATED);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
           "last name", EMAIL, false, false, null, false, null, null, null, null, null,
-          null, null, null, true, null);
+          null, null, null, true, null, ConsultantStatus.CREATED);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
@@ -422,11 +423,11 @@ public class TestConstants {
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false,
       null, null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null,
-      null, null, true, null);
+      null, null, true, null, ConsultantStatus.CREATED);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false,
       null, null, null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)),
-      null, null, null, null, true, null);
+      null, null, null, null, true, null, ConsultantStatus.CREATED);
   /**
    * UserAgency
    */

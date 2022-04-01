@@ -6,13 +6,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
-import de.caritas.cob.userservice.api.facade.RocketChatFacade;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Optional;
@@ -44,10 +42,7 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   private KeycloakService keycloakService;
 
   @Mock
-  private RocketChatFacade rocketChatFacade;
-
-  @Mock
-  private SessionRepository sessionRepository;
+  private RocketChatAsyncHelper rocketChatAsyncHelper;
 
   @Mock
   private ConsultingTypeManager consultingTypeManager;
