@@ -7,9 +7,9 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.ConsultantMobileToken;
 import de.caritas.cob.userservice.api.port.out.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -167,6 +167,16 @@ public class ConsultantService {
   private void verifyTokenDoesNotAlreadyExist(String mobileToken) {
     if (this.consultantMobileTokenRepository.findByMobileAppToken(mobileToken).isPresent()) {
       throw new ConflictException("Mobile Token already exists");
+    }
+  }
+
+  public void toggleWalkThrough(String userName) {
+    var result = consultantRepository
+        .findByUsernameAndDeleteDateIsNull(userName);
+    if (result.isPresent()) {
+      var consultant = result.get();
+      consultant.setWalkThroughEnabled(!consultant.isWalkThroughEnabled());
+      consultantRepository.save(consultant);
     }
   }
 

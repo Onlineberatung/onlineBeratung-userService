@@ -76,6 +76,7 @@ public class ConsultantDataProvider {
         .agencies(agencyDTOsOf(consultant))
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
+        .isWalkThroughEnabled(consultant.isWalkThroughEnabled())
         .hasAnonymousConversations(
             hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOsOf(consultant))
         )
