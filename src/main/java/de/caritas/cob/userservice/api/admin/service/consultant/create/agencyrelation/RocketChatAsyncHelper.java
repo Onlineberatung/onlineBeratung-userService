@@ -65,8 +65,8 @@ public class RocketChatAsyncHelper {
     TenantContext.clear();
   }
 
-  private void updateConsultantStatus(Consultant consultant, ConsultantStatus error) {
-    consultant.setStatus(error);
+  private void updateConsultantStatus(Consultant consultant, ConsultantStatus status) {
+    consultant.setStatus(status);
     consultantRepository.save(consultant);
   }
 
@@ -82,7 +82,7 @@ public class RocketChatAsyncHelper {
 
   private String getEmailText(Consultant consultant, Exception exception) {
     return "Error happened during rocket chat session assignments for consultant " + consultant
-        .getUsername() + "Error message: " + exception.getMessage();
+        .getUsername() + ". Error message: " + exception.getMessage();
   }
 
   private List<Session> collectRelevantSessionsToAddConsultant(AgencyDTO agency) {
