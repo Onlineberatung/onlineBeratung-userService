@@ -1947,6 +1947,8 @@ components:
         username:
           type: string
           example: beraterXYZ
+        displayName:
+          type: string
         isAbsent:
           type: boolean
           example: true

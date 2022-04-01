@@ -427,6 +427,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenAValidConsultant(true);
     givenKeycloakRespondsOtpByAppHasBeenSetup(consultant.getUsername());
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
@@ -531,6 +532,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenAValidConsultant(true);
     givenKeycloakRespondsOtpByEmailHasBeenSetup(consultant.getUsername());
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
@@ -635,6 +637,7 @@ public class UserControllerE2EIT {
     givenABearerToken();
     givenAValidConsultant(true);
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
+    givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();

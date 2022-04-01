@@ -285,7 +285,7 @@ public class UserControllerIT {
       .offline(false)
       .consultingType(CONSULTING_TYPE_ID_SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
-      new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
+      new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE, null);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
       .session(SESSION_DTO)
       .agency(AGENCY_DTO)
@@ -917,7 +917,6 @@ public class UserControllerIT {
     sessions.add(USER_SESSION_RESPONSE_DTO);
     UserSessionListResponseDTO response = new UserSessionListResponseDTO()
         .sessions(sessions);
-    var sessionsJson = objectMapper.writeValueAsString(response);
 
     when(authenticatedUser.getUserId())
         .thenReturn(USER_ID);
@@ -927,11 +926,20 @@ public class UserControllerIT {
     when(sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
+    var displayName = RandomStringUtils.randomAlphanumeric(16);
+    Map<String, Object> map = Map.of("displayName", displayName);
+    when(userDtoMapper.displayNameOf(eq(map))).thenReturn(displayName);
+    when(accountManager.findConsultantByUsername(anyString())).thenReturn(Optional.of(map));
+
+    response.getSessions().get(0).getConsultant().setDisplayName(displayName);
+    var sessionsJson = objectMapper.writeValueAsString(response);
+
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].consultant.displayName", is(displayName)))
         .andExpect(content().json(sessionsJson));
 
     verify(accountProvider, atLeastOnce())
@@ -956,28 +964,6 @@ public class UserControllerIT {
 
     verify(sessionListFacade, times(0)).retrieveSortedSessionsForAuthenticatedUser(Mockito.any(),
         Mockito.any());
-
-  }
-
-  @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnNoContent_WhenAuthorizedAndNoOpenSessionsAvailableAndSessionListIsNull()
-      throws Exception {
-    UserSessionListResponseDTO response = new UserSessionListResponseDTO()
-        .sessions(null);
-
-    when(authenticatedUser.getUserId())
-        .thenReturn(USER_ID);
-    when(accountProvider.retrieveValidatedUser())
-        .thenReturn(USER);
-
-    when(sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(anyString(), Mockito.any()))
-        .thenReturn(response);
-
-    mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
-            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
 
   }
 

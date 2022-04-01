@@ -84,7 +84,7 @@ public class RocketChatAdapterService implements MessageClient {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_INFO + chatUserId);
 
     try {
-      var response = rocketChatClient.getForEntity(url, chatUserId, UserInfoResponseDTO.class);
+      var response = rocketChatClient.getForEntity(url, UserInfoResponseDTO.class);
       return mapper.mapOfUserResponse(response);
     } catch (HttpClientErrorException exception) {
       log.error("User Info failed.", exception);

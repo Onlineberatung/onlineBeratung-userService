@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api;
 
+import static java.util.Objects.isNull;
+
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
@@ -10,6 +13,7 @@ import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,17 +31,34 @@ public class AccountManager implements AccountManaging {
 
   private final MessageClient messageClient;
 
+  private final UsernameTranscoder usernameTranscoder;
+
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
     var userMap = new HashMap<String, Object>();
-
     consultantRepository.findByIdAndDeleteDateIsNull(id).ifPresent(dbConsultant ->
-        messageClient.findUser(dbConsultant.getRocketChatId()).ifPresentOrElse(
-            chatUserMap -> userMap.putAll(userServiceMapper.mapOf(dbConsultant, chatUserMap)),
-            throwPersistenceConflict(id, dbConsultant.getRocketChatId())
-        ));
+        userMap.putAll(findByDbConsultant(dbConsultant))
+    );
 
     return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
+  }
+
+  @Override
+  public Optional<Map<String, Object>> findConsultantByUsername(String username) {
+    var dbConsultantRef = new AtomicReference<Consultant>();
+    var transformedUsername = usernameTranscoder.transformedOf(username);
+
+    consultantRepository.findByUsernameAndDeleteDateIsNull(username)
+        .ifPresentOrElse(dbConsultantRef::set, () ->
+            consultantRepository.findByUsernameAndDeleteDateIsNull(transformedUsername)
+                .ifPresent(dbConsultantRef::set)
+        );
+
+    var dbConsultant = dbConsultantRef.get();
+
+    return isNull(dbConsultant)
+        ? Optional.empty()
+        : Optional.of(findByDbConsultant(dbConsultant));
   }
 
   @Override
@@ -86,6 +107,17 @@ public class AccountManager implements AccountManaging {
     );
 
     return userServiceMapper.mapOf(savedConsultant, patchMap);
+  }
+
+  private Map<String, Object> findByDbConsultant(Consultant dbConsultant) {
+    var userMap = new HashMap<String, Object>();
+
+    messageClient.findUser(dbConsultant.getRocketChatId()).ifPresentOrElse(
+        chatUserMap -> userMap.putAll(userServiceMapper.mapOf(dbConsultant, chatUserMap)),
+        throwPersistenceConflict(dbConsultant.getId(), dbConsultant.getRocketChatId())
+    );
+
+    return userMap;
   }
 
   private Runnable throwPersistenceConflict(String dbUserId, String chatUserId) {

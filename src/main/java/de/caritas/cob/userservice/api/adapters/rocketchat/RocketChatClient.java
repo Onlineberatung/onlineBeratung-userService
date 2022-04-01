@@ -56,12 +56,6 @@ public class RocketChatClient {
     return restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
   }
 
-  public <T> ResponseEntity<T> getForEntity(String url, String userId, Class<T> responseType) {
-    var entity = new HttpEntity<>(httpHeaders(userId));
-
-    return restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
-  }
-
   private HttpHeaders httpHeaders() {
     var systemUser = rcCredentialHelper.getSystemUserSneaky();
 
