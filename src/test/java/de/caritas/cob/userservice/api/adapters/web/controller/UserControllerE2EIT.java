@@ -437,7 +437,6 @@ public class UserControllerE2EIT {
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -492,7 +491,6 @@ public class UserControllerE2EIT {
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -542,7 +540,6 @@ public class UserControllerE2EIT {
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -597,7 +594,6 @@ public class UserControllerE2EIT {
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -647,7 +643,6 @@ public class UserControllerE2EIT {
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -702,7 +697,6 @@ public class UserControllerE2EIT {
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -746,7 +740,6 @@ public class UserControllerE2EIT {
     mockMvc.perform(
             get("/users/data")
                 .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
