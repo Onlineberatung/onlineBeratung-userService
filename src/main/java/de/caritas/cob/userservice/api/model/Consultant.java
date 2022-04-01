@@ -150,8 +150,8 @@ public class Consultant implements TenantAware {
   @Enumerated(EnumType.STRING)
   private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
 
-  @Column(name = "walk_through_enabled", nullable = false, columnDefinition = "tinyint")
-  private boolean walkThroughEnabled;
+  @Column(name = "walk_through_enabled", columnDefinition = "tinyint")
+  private Boolean walkThroughEnabled;
 
   @JsonIgnore
   public String getFullName() {

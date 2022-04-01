@@ -175,7 +175,7 @@ public class ConsultantService {
         .findByUsernameAndDeleteDateIsNull(userName);
     if (result.isPresent()) {
       var consultant = result.get();
-      consultant.setWalkThroughEnabled(!consultant.isWalkThroughEnabled());
+      consultant.setWalkThroughEnabled(!consultant.getWalkThroughEnabled());
       consultantRepository.save(consultant);
     }
   }
