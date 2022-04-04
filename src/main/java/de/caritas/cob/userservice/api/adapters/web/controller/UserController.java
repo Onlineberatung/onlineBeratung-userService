@@ -342,7 +342,8 @@ public class UserController implements UsersApi {
         : null;
 
     var fullUserData = userDtoMapper.userDataOf(
-        partialUserData, otpInfoDTO, videoChatConfig.getE2eEncryptionEnabled()
+        partialUserData, otpInfoDTO, videoChatConfig.getE2eEncryptionEnabled(),
+        identityClientConfig.getDisplayNameAllowedForConsultants()
     );
 
     return new ResponseEntity<>(fullUserData, HttpStatus.OK);

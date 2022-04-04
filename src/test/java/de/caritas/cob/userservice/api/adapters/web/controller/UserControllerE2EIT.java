@@ -54,6 +54,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -176,6 +177,9 @@ public class UserControllerE2EIT {
   @Autowired
   private VideoChatConfig videoChatConfig;
 
+  @Autowired
+  private IdentityConfig identityConfig;
+
   @MockBean
   private AuthenticatedUser authenticatedUser;
 
@@ -272,6 +276,7 @@ public class UserControllerE2EIT {
     passwordDto = null;
     deleteUserAccountDto = null;
     userInfoResponse = null;
+    identityConfig.setDisplayNameAllowedForConsultants(false);
   }
 
   @Test
@@ -443,6 +448,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userId", is(consultant.getId())))
         .andExpect(jsonPath("userName", is(username)))
         .andExpect(jsonPath("displayName", is(displayName)))
+        .andExpect(jsonPath("isDisplayNameEditable", is(false)))
         .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
@@ -497,6 +503,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userId", is(user.getUserId())))
         .andExpect(jsonPath("userName", is(username)))
         .andExpect(jsonPath("displayName", is(nullValue())))
+        .andExpect(jsonPath("isDisplayNameEditable", is(false)))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email", is(nullValue())))
@@ -546,6 +553,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userId", is(consultant.getId())))
         .andExpect(jsonPath("userName", is(username)))
         .andExpect(jsonPath("displayName", is(displayName)))
+        .andExpect(jsonPath("isDisplayNameEditable", is(false)))
         .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
@@ -600,6 +608,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userId", is(user.getUserId())))
         .andExpect(jsonPath("userName", is(username)))
         .andExpect(jsonPath("displayName", is(nullValue())))
+        .andExpect(jsonPath("isDisplayNameEditable", is(false)))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email", is(nullValue())))
@@ -649,6 +658,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userId", is(consultant.getId())))
         .andExpect(jsonPath("userName", is(username)))
         .andExpect(jsonPath("displayName", is(displayName)))
+        .andExpect(jsonPath("isDisplayNameEditable", is(false)))
         .andExpect(jsonPath("firstName", is(consultant.getFirstName())))
         .andExpect(jsonPath("lastName", is(consultant.getLastName())))
         .andExpect(jsonPath("email", is(consultant.getEmail())))
@@ -703,6 +713,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("userId", is(user.getUserId())))
         .andExpect(jsonPath("userName", is(username)))
         .andExpect(jsonPath("displayName", is(nullValue())))
+        .andExpect(jsonPath("isDisplayNameEditable", is(false)))
         .andExpect(jsonPath("firstName", is(nullValue())))
         .andExpect(jsonPath("lastName", is(nullValue())))
         .andExpect(jsonPath("email", is(nullValue())))
@@ -729,13 +740,16 @@ public class UserControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getUserDataShouldContainIfEndToEndEncryptionIsEnabled() throws Exception {
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void getUserDataShouldContainEnabledFlags() throws Exception {
     givenABearerToken();
-    givenAValidUser(true);
+    givenAValidConsultant(true);
     givenConsultingTypeServiceResponse();
-    givenKeycloakRespondsOtpHasNotBeenSetup(user.getUsername());
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
     givenEnabledE2EEncryption();
+    givenDisplayNameAllowedForConsultants();
 
     mockMvc.perform(
             get("/users/data")
@@ -743,7 +757,8 @@ public class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("e2eEncryptionEnabled", is(true)));
+        .andExpect(jsonPath("e2eEncryptionEnabled", is(true)))
+        .andExpect(jsonPath("isDisplayNameEditable", is(true)));
   }
 
   @Test
@@ -2540,6 +2555,10 @@ public class UserControllerE2EIT {
 
   private void givenEnabledE2EEncryption() {
     videoChatConfig.setE2eEncryptionEnabled(true);
+  }
+
+  private void givenDisplayNameAllowedForConsultants() {
+    identityConfig.setDisplayNameAllowedForConsultants(true);
   }
 
   private void restoreSession() {

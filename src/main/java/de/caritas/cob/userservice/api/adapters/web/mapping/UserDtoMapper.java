@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.OtpType;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class UserDtoMapper {
 
   public UserDataResponseDTO userDataOf(UserDataResponseDTO userData, OtpInfoDTO otpInfoDTO,
-      boolean isE2eEncEnabled) {
+      boolean isE2eEncEnabled, boolean isDisplayNameAllowed) {
     var twoFactorAuthDTO = new TwoFactorAuthDTO();
 
     if (nonNull(otpInfoDTO)) {
@@ -40,6 +41,9 @@ public class UserDtoMapper {
     twoFactorAuthDTO.setIsToEncourage(userData.getEncourage2fa());
     userData.setTwoFactorAuth(twoFactorAuthDTO);
     userData.setE2eEncryptionEnabled(isE2eEncEnabled);
+    userData.setIsDisplayNameEditable(
+        isDisplayNameAllowed && userData.getUserRoles().contains(UserRole.CONSULTANT.getValue())
+    );
 
     return userData;
   }

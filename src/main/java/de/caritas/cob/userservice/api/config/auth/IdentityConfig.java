@@ -39,6 +39,9 @@ public class IdentityConfig implements IdentityClientConfig {
   @NotNull
   private Boolean otpAllowedForConsultants;
 
+  @NotNull
+  private Boolean displayNameAllowedForConsultants;
+
   public String getOpenIdConnectUrl(String path) {
     return getOpenIdConnectUrl(path, "");
   }
