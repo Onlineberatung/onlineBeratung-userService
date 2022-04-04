@@ -2260,7 +2260,7 @@ components:
           type: string
         username:
           type: string
-        name:
+        displayName:
           type: string
         utcOffset:
           type: string
