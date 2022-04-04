@@ -67,6 +67,7 @@ public class UserDataResponseDTO {
   private boolean hasArchive;
   private TwoFactorAuthDTO twoFactorAuth;
   private String displayName;
+  private Boolean isDisplayNameEditable;
 
   @JsonIgnore
   private Boolean encourage2fa;

@@ -25,5 +25,7 @@ public interface IdentityClientConfig {
 
   Boolean getOtpAllowedForConsultants();
 
+  Boolean getDisplayNameAllowedForConsultants();
+
   boolean isOtpAllowed(@NotNull Set<String> roles);
 }
