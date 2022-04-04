@@ -81,7 +81,7 @@ public class GetChatMembersFacade {
             .id(member.get_id())
             .status(member.getStatus())
             .username(new UsernameTranscoder().decodeUsername(member.getUsername()))
-            .name(member.getName())
+            .displayName(member.getName())
             .utcOffset(member.getUtcOffset()))
         .collect(Collectors.toList()));
   }
