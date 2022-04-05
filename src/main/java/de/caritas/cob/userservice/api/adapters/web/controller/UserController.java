@@ -1070,12 +1070,4 @@ public class UserController implements UsersApi {
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);
   }
-
-  @Override
-  public ResponseEntity<Void> toggleWalkThrough() {
-    var username = authenticatedUser.getUsername();
-    consultantService.toggleWalkThrough(username);
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
 }

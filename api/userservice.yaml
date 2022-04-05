@@ -836,23 +836,6 @@ paths:
           description: CONFLICT - invalid/unavailable username
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
-  /users/consultants/toggleWalkThrough:
-    put:
-      tags:
-        - user-controller
-      summary: 'Toggles the walk through property of a user'
-      operationId: toggleWalkThrough
-      responses:
-        200:
-          description: OK - successful operation
-        400:
-          description: BAD REQUEST - invalid/incomplete request or body object
-        403:
-          description: FORBIDDEN - no/invalid CSRF token
-        409:
-          description: CONFLICT - invalid/unavailable username
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /users/sessions/{sessionId}/consultant/{consultantId}:
     put:
       tags:
@@ -2094,7 +2077,7 @@ components:
         isWalkThroughEnabled:
           type: boolean
           example: true
-          description: "Is true if the walt through is enabled for the user"
+          description: "Is true if the walk through is enabled for the user"
 
     PatchUserDTO:
       type: object
@@ -2107,7 +2090,10 @@ components:
         displayName:
           type: string
           minLength: 1
-
+        walkThroughEnabled:
+          type: boolean
+          example: true
+          description: indicates should the walkthrough be enabled
     UpdateConsultantDTO:
       type: object
       required:

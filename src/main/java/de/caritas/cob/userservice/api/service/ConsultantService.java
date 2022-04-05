@@ -170,14 +170,4 @@ public class ConsultantService {
     }
   }
 
-  public void toggleWalkThrough(String userName) {
-    var result = consultantRepository
-        .findByUsernameAndDeleteDateIsNull(userName);
-    if (result.isPresent()) {
-      var consultant = result.get();
-      consultant.setWalkThroughEnabled(!consultant.getWalkThroughEnabled());
-      consultantRepository.save(consultant);
-    }
-  }
-
 }

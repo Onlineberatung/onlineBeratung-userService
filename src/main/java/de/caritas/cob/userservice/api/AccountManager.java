@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api;
 
-import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,6 +77,9 @@ public class AccountManager implements AccountManaging {
     }
     if (patchMap.containsKey("encourage2fa")) {
       consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
+    }
+    if (patchMap.containsKey("walkThroughEnabled")) {
+      consultant.setWalkThroughEnabled((Boolean) patchMap.get("walkThroughEnabled"));
     }
     var savedConsultant = consultantRepository.save(consultant);
 
