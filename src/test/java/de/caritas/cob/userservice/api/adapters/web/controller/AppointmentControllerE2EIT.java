@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static java.util.Objects.nonNull;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +22,10 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.AppointmentRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.UUID;
 import javax.servlet.http.Cookie;
@@ -64,6 +69,9 @@ public class AppointmentControllerE2EIT {
 
   @MockBean
   private AuthenticatedUser authenticatedUser;
+
+  @MockBean
+  private Clock clock;
 
   private Appointment appointment;
 
@@ -280,6 +288,32 @@ public class AppointmentControllerE2EIT {
         .andExpect(status().isBadRequest());
   }
 
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void getAppointmentsShouldReturnAppointmentsOfTodayAndFutureOrderedByDatetimeAscending()
+      throws Exception {
+    var clockToday = LocalDateTime.of(2022, 2, 15, 17, 12).toInstant(ZoneOffset.UTC);
+    when(clock.instant()).thenReturn(clockToday);
+    givenAValidConsultant(true);
+    var today = LocalDateTime.of(2022, 2, 15, 13, 37).toInstant(ZoneOffset.UTC);
+    var tomorrow = LocalDateTime.of(2022, 2, 16, 14, 44).toInstant(ZoneOffset.UTC);
+    var yesterday = LocalDateTime.of(2022, 2, 14, 7, 53).toInstant(ZoneOffset.UTC);
+    givenASavedAppointmentWithDatetime(yesterday);
+    givenASavedAppointmentWithDatetime(tomorrow);
+    givenASavedAppointmentWithDatetime(today);
+
+    mockMvc.perform(
+            get("/appointments")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("[0].datetime", is(today.toString())))
+        .andExpect(jsonPath("[1].datetime", is(tomorrow.toString())));
+  }
+
   private void givenAValidAppointmentDto() {
     givenAValidAppointmentDto(true, null);
   }
@@ -301,7 +335,18 @@ public class AppointmentControllerE2EIT {
     }
   }
 
+  private void givenASavedAppointmentWithDatetime(Instant datetime) {
+    createAppointment();
+    savedAppointment.setDatetime(datetime);
+    appointmentRepository.save(savedAppointment);
+  }
+
   private void givenASavedAppointment() {
+    createAppointment();
+    appointmentRepository.save(savedAppointment);
+  }
+
+  private void createAppointment() {
     savedAppointment = easyRandom.nextObject(
         de.caritas.cob.userservice.api.model.Appointment.class);
     savedAppointment.setConsultant(consultant);
@@ -310,7 +355,6 @@ public class AppointmentControllerE2EIT {
     if (desc.length() > 300) {
       savedAppointment.setDescription(desc.substring(0, 300));
     }
-    appointmentRepository.save(savedAppointment);
   }
 
   private void givenAnAppointmentMissingStatus() {

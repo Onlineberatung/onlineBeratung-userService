@@ -3,10 +3,14 @@ package de.caritas.cob.userservice.api;
 import de.caritas.cob.userservice.api.port.in.Organizing;
 import de.caritas.cob.userservice.api.port.out.AppointmentRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import java.time.Clock;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +23,8 @@ public class Organizer implements Organizing {
   private final ConsultantRepository consultantRepository;
 
   private final UserServiceMapper mapper;
+
+  private final Clock clock;
 
   @Override
   public Map<String, Object> createAppointment(Map<String, Object> appointmentMap) {
@@ -39,5 +45,15 @@ public class Organizer implements Organizing {
     );
 
     return appointmentMap.isEmpty() ? Optional.empty() : Optional.of(appointmentMap);
+  }
+
+  @Override
+  public List<Map<String, Object>> findAllAppointmentsForToday() {
+    var startOfDay = clock.instant().truncatedTo(ChronoUnit.DAYS);
+    var appointmentsOfToday = appointmentRepository.findAllOrderByDatetimeAfter(startOfDay);
+
+    return appointmentsOfToday.stream()
+        .map(mapper::mapOf)
+        .collect(Collectors.toList());
   }
 }

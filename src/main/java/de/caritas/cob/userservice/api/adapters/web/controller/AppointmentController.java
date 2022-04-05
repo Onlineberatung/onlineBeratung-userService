@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.Appointm
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -55,7 +56,12 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<List<Appointment>> getAppointments() {
-    return ResponseEntity.ok(List.of(new Appointment()));
+    var appointmentMapsOfToday = organizer.findAllAppointmentsForToday();
+    var appointmentsOfToday = appointmentMapsOfToday.stream()
+        .map(appointmentMap -> mapper.appointmentOf(appointmentMap,
+            authenticatedUser.isConsultant()))
+        .collect(Collectors.toList());
+    return ResponseEntity.ok(appointmentsOfToday);
   }
 
   @Override
