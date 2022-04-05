@@ -4,8 +4,8 @@ import static de.caritas.cob.userservice.api.model.Consultant.EMAIL_ANALYZER;
 import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.caritas.cob.userservice.api.repository.TenantAware;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -143,6 +143,9 @@ public class Consultant implements TenantAware {
   @Column(name = "tenant_id")
   @Field
   private Long tenantId;
+
+  @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL)
+  private Set<Appointment> appointments;
 
   @JsonIgnore
   public String getFullName() {

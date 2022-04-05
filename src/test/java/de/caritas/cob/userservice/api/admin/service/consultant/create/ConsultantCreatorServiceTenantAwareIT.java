@@ -57,6 +57,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
 
   private void createConsultant(String username) {
     Consultant consultant = new Consultant();
+    consultant.setAppointments(null);
     consultant.setTenantId(1L);
     consultant.setId(username);
     consultant.setRocketChatId(username);

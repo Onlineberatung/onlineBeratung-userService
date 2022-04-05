@@ -1,7 +1,10 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,7 +14,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
+import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.AppointmentRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import java.util.Set;
 import javax.servlet.http.Cookie;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -21,14 +31,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "spring.profiles.active=testing")
+@ActiveProfiles("testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class AppointmentControllerE2EIT {
 
@@ -43,11 +54,23 @@ public class AppointmentControllerE2EIT {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Autowired
+  private ConsultantRepository consultantRepository;
+
+  @Autowired
+  private AppointmentRepository appointmentRepository;
+
+  @MockBean
+  private AuthenticatedUser authenticatedUser;
+
   private Appointment appointment;
+
+  private Consultant consultant;
 
   @AfterEach
   public void reset() {
     appointment = null;
+    appointmentRepository.deleteAll();
   }
 
   @Test
@@ -110,7 +133,8 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void postAppointmentShouldReturnCreated() throws Exception {
-    givenAValidAppointment(false);
+    givenAValidAppointment(false, AppointmentStatus.CREATED);
+    givenAValidConsultant(true);
 
     mockMvc.perform(
             post("/appointments")
@@ -121,18 +145,78 @@ public class AppointmentControllerE2EIT {
                 .content(objectMapper.writeValueAsString(appointment))
         )
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("id", is(notNullValue())));
+        .andExpect(jsonPath("id", is(notNullValue())))
+        .andExpect(jsonPath("description", is(appointment.getDescription())))
+        .andExpect(jsonPath("datetime", is(appointment.getDatetime().toString())))
+        .andExpect(jsonPath("status", is(appointment.getStatus().getValue())));
+
+    assertEquals(1, appointmentRepository.count());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void postAppointmentShouldReturnBadRequestIfIdIsSet() throws Exception {
+    givenAValidAppointment(true, AppointmentStatus.CREATED);
+    givenAValidConsultant(true);
+
+    mockMvc.perform(
+            post("/appointments")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(appointment))
+        )
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void postAppointmentShouldReturnBadRequestIfStatusIsNull() throws Exception {
+    givenAnAppointmentMissingStatus();
+    givenAValidConsultant(true);
+
+    mockMvc.perform(
+            post("/appointments")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(appointment))
+        )
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void postAppointmentShouldReturnBadRequestIfDatetimeIsNull() throws Exception {
+    givenAnAppointmentMissingDatetime();
+    givenAValidConsultant(true);
+
+    mockMvc.perform(
+            post("/appointments")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(appointment))
+        )
+        .andExpect(status().isBadRequest());
   }
 
   private void givenAValidAppointment() {
-    givenAValidAppointment(true);
+    givenAValidAppointment(true, null);
   }
 
-  private void givenAValidAppointment(boolean includingId) {
+  private void givenAValidAppointment(boolean includingId, AppointmentStatus setStatus) {
     appointment = easyRandom.nextObject(Appointment.class);
 
     if (!includingId) {
       appointment.setId(null);
+    }
+
+    if (nonNull(setStatus)) {
+      appointment.setStatus(setStatus);
     }
 
     var desc = appointment.getDescription();
@@ -141,4 +225,29 @@ public class AppointmentControllerE2EIT {
     }
   }
 
+  private void givenAnAppointmentMissingStatus() {
+    givenAValidAppointment(false, null);
+    appointment.setStatus(null);
+  }
+
+  private void givenAnAppointmentMissingDatetime() {
+    givenAValidAppointment(false, null);
+    appointment.setDatetime(null);
+  }
+
+  private void givenAValidConsultant() {
+    givenAValidConsultant(false);
+  }
+
+  private void givenAValidConsultant(boolean isAuthUser) {
+    consultant = consultantRepository.findAll().iterator().next();
+    if (isAuthUser) {
+      when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+      when(authenticatedUser.isUser()).thenReturn(false);
+      when(authenticatedUser.isConsultant()).thenReturn(true);
+      when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
+      when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
+      when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
+    }
+  }
 }

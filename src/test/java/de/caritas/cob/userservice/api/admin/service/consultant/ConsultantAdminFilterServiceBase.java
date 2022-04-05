@@ -9,15 +9,21 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.Organizer;
 import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 public class ConsultantAdminFilterServiceBase {
 
   @Autowired
   private ConsultantAdminFilterService consultantAdminFilterService;
+
+  @MockBean
+  @SuppressWarnings("unused")
+  private Organizer organizer;
 
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven() {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
