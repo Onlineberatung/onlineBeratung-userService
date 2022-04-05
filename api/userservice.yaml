@@ -2093,7 +2093,7 @@ components:
         walkThroughEnabled:
           type: boolean
           example: true
-          description: indicates should the walkthrough be enabled
+          description: indicates should the walkt hrough be enabled
     UpdateConsultantDTO:
       type: object
       required:
