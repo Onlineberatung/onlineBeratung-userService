@@ -22,7 +22,9 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.AppointmentRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import java.util.Set;
+import java.util.UUID;
 import javax.servlet.http.Cookie;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +74,7 @@ public class AppointmentControllerE2EIT {
   @AfterEach
   public void reset() {
     appointment = null;
+    savedAppointment = null;
     appointmentRepository.deleteAll();
   }
 
@@ -87,7 +90,77 @@ public class AppointmentControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
         )
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id", is(notNullValue())))
+        .andExpect(jsonPath("description", is(savedAppointment.getDescription())))
+        .andExpect(jsonPath("datetime", is(savedAppointment.getDatetime().toString())))
+        .andExpect(jsonPath("status", is(savedAppointment.getStatus().toString().toLowerCase())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void getAppointmentShouldReturnOkAndOnlyStatusForAdviceSeeker() throws Exception {
+    givenAnAdviceSeeker();
+    givenAValidConsultant(false);
+    givenASavedAppointment();
+
+    mockMvc.perform(
+            get("/appointments/{id}", savedAppointment.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id", is(savedAppointment.getId().toString())))
+        .andExpect(jsonPath("status", is(savedAppointment.getStatus().toString().toLowerCase())))
+        .andExpect(jsonPath("description").isEmpty())
+        .andExpect(jsonPath("datetime").isEmpty());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
+  public void getAppointmentShouldReturnOkAndOnlyStatusForAnonymous() throws Exception {
+    givenAnAnonymousUser();
+    givenAValidConsultant(false);
+    givenASavedAppointment();
+
+    mockMvc.perform(
+            get("/appointments/{id}", savedAppointment.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id", is(savedAppointment.getId().toString())))
+        .andExpect(jsonPath("status", is(savedAppointment.getStatus().toString().toLowerCase())))
+        .andExpect(jsonPath("description").isEmpty())
+        .andExpect(jsonPath("datetime").isEmpty());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void getAppointmentShouldReturnClientErrorOnWrongIdFormat() throws Exception {
+    givenAValidConsultant(true);
+
+    mockMvc.perform(
+        get("/appointments/{id}", RandomStringUtils.randomAlphabetic(36))
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void getAppointmentShouldReturnNotFoundIfIdUnknown() throws Exception {
+    givenAValidConsultant(true);
+
+    mockMvc.perform(
+        get("/appointments/{id}", UUID.randomUUID())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isNotFound());
   }
 
   @Test
@@ -264,5 +337,23 @@ public class AppointmentControllerE2EIT {
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
       when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
     }
+  }
+
+  private void givenAnAnonymousUser() {
+    when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
+    when(authenticatedUser.isUser()).thenReturn(false);
+    when(authenticatedUser.isConsultant()).thenReturn(false);
+    when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
+    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
+  }
+
+  private void givenAnAdviceSeeker() {
+    when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
+    when(authenticatedUser.isUser()).thenReturn(true);
+    when(authenticatedUser.isConsultant()).thenReturn(false);
+    when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));
+    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
   }
 }

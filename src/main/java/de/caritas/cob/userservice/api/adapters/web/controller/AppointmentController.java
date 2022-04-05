@@ -38,7 +38,7 @@ public class AppointmentController implements AppointmentsApi {
         new NotFoundException("Appointment (%s) not found.", idString)
     );
 
-    var appointment = mapper.appointmentOf(appointmentMap);
+    var appointment = mapper.appointmentOf(appointmentMap, authenticatedUser.isConsultant());
 
     return ResponseEntity.ok(appointment);
   }
@@ -69,7 +69,7 @@ public class AppointmentController implements AppointmentsApi {
 
     var appointmentMap = mapper.mapOf(appointment, authenticatedUser);
     var savedMap = organizer.createAppointment(appointmentMap);
-    var savedAppointment = mapper.appointmentOf(savedMap);
+    var savedAppointment = mapper.appointmentOf(savedMap, true);
 
     return new ResponseEntity<>(savedAppointment, HttpStatus.CREATED);
   }

@@ -23,13 +23,16 @@ public class AppointmentDtoMapper {
     return appointmentMap;
   }
 
-  public Appointment appointmentOf(Map<String, Object> savedMap) {
+  public Appointment appointmentOf(Map<String, Object> savedMap, boolean fullDto) {
     var appointment = new Appointment();
-    appointment.setId(UUID.fromString((String) savedMap.get("id")));
-    appointment.setDescription((String) savedMap.get("description"));
     var status = (String) savedMap.get("status");
+    appointment.setId(UUID.fromString((String) savedMap.get("id")));
     appointment.setStatus(AppointmentStatus.fromValue(status));
-    appointment.setDatetime(Instant.parse((String) savedMap.get("datetime")));
+
+    if (fullDto) {
+      appointment.setDescription((String) savedMap.get("description"));
+      appointment.setDatetime(Instant.parse((String) savedMap.get("datetime")));
+    }
 
     return appointment;
   }

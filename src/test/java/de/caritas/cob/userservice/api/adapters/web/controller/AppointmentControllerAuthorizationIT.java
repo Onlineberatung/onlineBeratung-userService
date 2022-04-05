@@ -64,6 +64,27 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.START_CHAT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN
+  })
+  public void getAppointmentShouldReturnForbiddenWhenNoUserConsultantOrAnonymousAuthority()
+      throws Exception {
+    mvc.perform(
+        get("/appointments/{id}", UUID.randomUUID().toString())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
+  }
+
+  @Test
   public void putAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     givenAValidAppointment();
 
