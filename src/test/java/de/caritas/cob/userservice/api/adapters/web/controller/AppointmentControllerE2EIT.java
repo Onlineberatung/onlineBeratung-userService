@@ -65,6 +65,8 @@ public class AppointmentControllerE2EIT {
 
   private Appointment appointment;
 
+  private de.caritas.cob.userservice.api.model.Appointment savedAppointment;
+
   private Consultant consultant;
 
   @AfterEach
@@ -76,10 +78,11 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void getAppointmentShouldReturnOk() throws Exception {
-    givenAValidAppointment();
+    givenAValidConsultant(true);
+    givenASavedAppointment();
 
     mockMvc.perform(
-            get("/appointments/{id}", appointment.getId())
+            get("/appointments/{id}", savedAppointment.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
@@ -90,7 +93,7 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void putAppointmentShouldReturnOk() throws Exception {
-    givenAValidAppointment();
+    givenAValidAppointmentDto();
 
     mockMvc.perform(
             put("/appointments/{id}", appointment.getId())
@@ -106,7 +109,7 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void deleteAppointmentShouldReturnNoContent() throws Exception {
-    givenAValidAppointment();
+    givenAValidAppointmentDto();
 
     mockMvc.perform(
             delete("/appointments/{id}", appointment.getId())
@@ -133,7 +136,7 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void postAppointmentShouldReturnCreated() throws Exception {
-    givenAValidAppointment(false, AppointmentStatus.CREATED);
+    givenAValidAppointmentDto(false, AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
     mockMvc.perform(
@@ -156,7 +159,7 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void postAppointmentShouldReturnBadRequestIfIdIsSet() throws Exception {
-    givenAValidAppointment(true, AppointmentStatus.CREATED);
+    givenAValidAppointmentDto(true, AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
     mockMvc.perform(
@@ -204,11 +207,11 @@ public class AppointmentControllerE2EIT {
         .andExpect(status().isBadRequest());
   }
 
-  private void givenAValidAppointment() {
-    givenAValidAppointment(true, null);
+  private void givenAValidAppointmentDto() {
+    givenAValidAppointmentDto(true, null);
   }
 
-  private void givenAValidAppointment(boolean includingId, AppointmentStatus setStatus) {
+  private void givenAValidAppointmentDto(boolean includingId, AppointmentStatus setStatus) {
     appointment = easyRandom.nextObject(Appointment.class);
 
     if (!includingId) {
@@ -225,13 +228,25 @@ public class AppointmentControllerE2EIT {
     }
   }
 
+  private void givenASavedAppointment() {
+    savedAppointment = easyRandom.nextObject(
+        de.caritas.cob.userservice.api.model.Appointment.class);
+    savedAppointment.setConsultant(consultant);
+    savedAppointment.setId(null);
+    var desc = savedAppointment.getDescription();
+    if (desc.length() > 300) {
+      savedAppointment.setDescription(desc.substring(0, 300));
+    }
+    appointmentRepository.save(savedAppointment);
+  }
+
   private void givenAnAppointmentMissingStatus() {
-    givenAValidAppointment(false, null);
+    givenAValidAppointmentDto(false, null);
     appointment.setStatus(null);
   }
 
   private void givenAnAppointmentMissingDatetime() {
-    givenAValidAppointment(false, null);
+    givenAValidAppointmentDto(false, null);
     appointment.setDatetime(null);
   }
 

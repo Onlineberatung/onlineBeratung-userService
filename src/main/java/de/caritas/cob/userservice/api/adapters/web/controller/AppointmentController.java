@@ -6,6 +6,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
 import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
 import de.caritas.cob.userservice.api.adapters.web.mapping.AppointmentDtoMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.port.in.Organizing;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.AppointmentsApi;
@@ -32,7 +33,14 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
-    return ResponseEntity.ok(new Appointment());
+    var idString = id.toString();
+    var appointmentMap = organizer.findAppointment(idString).orElseThrow(() ->
+        new NotFoundException("Appointment (%s) not found.", idString)
+    );
+
+    var appointment = mapper.appointmentOf(appointmentMap);
+
+    return ResponseEntity.ok(appointment);
   }
 
   @Override
