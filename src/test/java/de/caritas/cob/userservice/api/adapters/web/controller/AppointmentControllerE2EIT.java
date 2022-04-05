@@ -204,6 +204,7 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void getAppointmentsShouldReturnOk() throws Exception {
+    when(clock.instant()).thenReturn(Instant.now());
     mockMvc.perform(
             get("/appointments")
                 .cookie(CSRF_COOKIE)
