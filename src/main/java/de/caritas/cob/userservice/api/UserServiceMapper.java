@@ -29,6 +29,7 @@ public class UserServiceMapper {
         put("lastName", consultant.getLastName());
         put("email", consultant.getEmail());
         put("encourage2fa", consultant.getEncourage2fa());
+        put("walkThroughEnabled", consultant.getWalkThroughEnabled());
       }
     };
   }

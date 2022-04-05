@@ -147,6 +147,7 @@ public class ConsultantCreatorService {
         .updateDate(consultantCreationInput.getUpdateDate())
         .tenantId(consultantCreationInput.getTenantId())
         .status(ConsultantStatus.IN_PROGRESS)
+        .walkThroughEnabled(true)
         .build();
   }
 

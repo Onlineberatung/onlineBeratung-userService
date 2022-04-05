@@ -2074,6 +2074,10 @@ components:
           type: boolean
           example: true
           description: "Is true if feature is enabled. Enables end-to-end encryption in video chat"
+        isWalkThroughEnabled:
+          type: boolean
+          example: true
+          description: "Is true if the walk through is enabled for the user"
 
     PatchUserDTO:
       type: object
@@ -2086,7 +2090,10 @@ components:
         displayName:
           type: string
           minLength: 1
-
+        walkThroughEnabled:
+          type: boolean
+          example: true
+          description: indicates should the walkt hrough be enabled
     UpdateConsultantDTO:
       type: object
       required:

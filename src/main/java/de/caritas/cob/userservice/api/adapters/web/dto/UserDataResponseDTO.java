@@ -71,4 +71,6 @@ public class UserDataResponseDTO {
   private Boolean encourage2fa;
 
   private Boolean e2eEncryptionEnabled;
+
+  private Boolean isWalkThroughEnabled;
 }
