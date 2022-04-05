@@ -1,6 +1,13 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
+import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AppointmentDtoMapper;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.port.in.Organizing;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.AppointmentsApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -16,6 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Api(tags = "appointment-controller")
 public class AppointmentController implements AppointmentsApi {
+
+  private final Organizing organizer;
+
+  private final AppointmentDtoMapper mapper;
+
+  private final AuthenticatedUser authenticatedUser;
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
@@ -39,8 +52,17 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Appointment> createAppointment(Appointment appointment) {
-    appointment.setId(UUID.randomUUID());
+    if (nonNull(appointment.getId())) {
+      throw new BadRequestException("Appointment ID must be null.");
+    }
+    if (!appointment.getStatus().equals(AppointmentStatus.CREATED)) {
+      throw new BadRequestException("The initial appointment status must be 'created.'");
+    }
 
-    return new ResponseEntity<>(appointment, HttpStatus.CREATED);
+    var appointmentMap = mapper.mapOf(appointment, authenticatedUser);
+    var savedMap = organizer.createAppointment(appointmentMap);
+    var savedAppointment = mapper.appointmentOf(savedMap);
+
+    return new ResponseEntity<>(savedAppointment, HttpStatus.CREATED);
   }
 }

@@ -1,12 +1,16 @@
 package de.caritas.cob.userservice.api;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.model.Appointment;
+import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +19,17 @@ import org.springframework.stereotype.Service;
 public class UserServiceMapper {
 
   private final UsernameTranscoder usernameTranscoder;
+
+  public Map<String, Object> mapOf(Appointment appointment) {
+    return new HashMap<>() {
+      {
+        put("id", appointment.getId().toString());
+        put("description", appointment.getDescription());
+        put("datetime", appointment.getDatetime().toString());
+        put("status", appointment.getStatus().toString().toLowerCase());
+      }
+    };
+  }
 
   public Map<String, Object> mapOf(User user) {
     return new HashMap<>() {
@@ -49,6 +64,10 @@ public class UserServiceMapper {
   @SuppressWarnings("unchecked")
   public List<String> bannedUsernamesOfMap(Map<String, Object> chatMetaInfoMap) {
     return (List<String>) chatMetaInfoMap.get("mutedUsers");
+  }
+
+  public String consultantIdOf(Map<String, Object> appointmentMap) {
+    return (String) appointmentMap.get("consultantId");
   }
 
   public Consultant consultantOf(Consultant consultant, Map<String, Object> patchMap) {
@@ -88,5 +107,21 @@ public class UserServiceMapper {
     }
 
     return adviceSeeker;
+  }
+
+  public Appointment appointmentOf(Map<String, Object> appointmentMap, Consultant consultant) {
+    var appointment = new Appointment();
+    if (appointmentMap.containsKey("id")) {
+      appointment.setId((UUID) appointmentMap.get("id"));
+    }
+    if (appointmentMap.containsKey("description")) {
+      appointment.setDescription((String) appointmentMap.get("description"));
+    }
+    appointment.setDatetime(Instant.parse((String) appointmentMap.get("datetime")));
+    var status = (String) appointmentMap.get("status");
+    appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
+    appointment.setConsultant(consultant);
+
+    return appointment;
   }
 }

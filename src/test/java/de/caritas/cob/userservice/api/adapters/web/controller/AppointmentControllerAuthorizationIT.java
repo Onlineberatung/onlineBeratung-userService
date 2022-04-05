@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import java.util.UUID;
 import javax.servlet.http.Cookie;
 import org.jeasy.random.EasyRandom;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -146,6 +148,28 @@ public class AppointmentControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE)
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.START_CHAT, AuthorityValue.USER_DEFAULT,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN
+  })
+  public void postAppointmentsShouldReturnForbiddenWhenNoConsultantDefaultAuthority()
+      throws Exception {
+    mvc.perform(
+        post("/appointments")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
   }
 
   private void givenAValidAppointment() {

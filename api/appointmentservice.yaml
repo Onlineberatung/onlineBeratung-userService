@@ -136,6 +136,9 @@ components:
   schemas:
     Appointment:
       type: object
+      required:
+        - status
+        - datetime
       properties:
         id:
           type: string
@@ -149,7 +152,10 @@ components:
           example: 2022-04-25T08:54:13Z
           description: ISO 8601 UTC
         status:
-          type: string
-          enum: [
-            created, started, paused
-          ]
+          $ref: '#/components/schemas/AppointmentStatus'
+
+    AppointmentStatus:
+      type: string
+      enum: [
+        created, started, paused
+      ]
