@@ -35,9 +35,8 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
-    var idString = id.toString();
-    var appointmentMap = organizer.findAppointment(idString).orElseThrow(() ->
-        new NotFoundException("Appointment (%s) not found.", idString)
+    var appointmentMap = organizer.findAppointment(id.toString()).orElseThrow(() ->
+        new NotFoundException("Appointment (%s) not found.", id.toString())
     );
 
     var appointment = mapper.appointmentOf(appointmentMap, authenticatedUser.isConsultant());
@@ -62,13 +61,10 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Void> deleteAppointment(UUID id) {
-    var idString = id.toString();
-
-    var deleted = organizer.deleteAppointment(idString);
-
-    if (!deleted) {
-      throw new NotFoundException("Appointment (%s) not found.", idString);
+    if (!organizer.deleteAppointment(id.toString())) {
+      throw new NotFoundException("Appointment (%s) not found.", id.toString());
     }
+
     return ResponseEntity.noContent().build();
   }
 
@@ -79,6 +75,7 @@ public class AppointmentController implements AppointmentsApi {
         .map(appointmentMap -> mapper.appointmentOf(appointmentMap,
             authenticatedUser.isConsultant()))
         .collect(Collectors.toList());
+
     return ResponseEntity.ok(appointmentsOfToday);
   }
 
