@@ -1713,6 +1713,8 @@ components:
         username:
           type: string
           example: "asker23"
+        displayName:
+          type: string
         rcUserId:
           type: string
           example: "ag89h3tjkerg94t"
