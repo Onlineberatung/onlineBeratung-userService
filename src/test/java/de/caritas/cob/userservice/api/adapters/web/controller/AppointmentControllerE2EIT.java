@@ -189,7 +189,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void deleteAppointmentShouldReturnNoContent() throws Exception {
+  public void deleteAppointmentShouldReturnNotFoundIfAppointmentDoesNotExist() throws Exception {
     givenAValidAppointmentDto();
 
     mockMvc.perform(
@@ -198,7 +198,24 @@ public class AppointmentControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
         )
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void deleteAppointmentShouldDeleteAppointmentAndReturnNoContent() throws Exception {
+    givenAValidConsultant(true);
+    givenASavedAppointment();
+
+    mockMvc.perform(
+            delete("/appointments/{id}", savedAppointment.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+        )
         .andExpect(status().isNoContent());
+
+    assertEquals(0, appointmentRepository.count());
   }
 
   @Test

@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,5 +56,15 @@ public class Organizer implements Organizing {
     return appointmentsOfToday.stream()
         .map(mapper::mapOf)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public boolean deleteAppointment(String id) {
+    try {
+      appointmentRepository.deleteById(UUID.fromString(id));
+      return true;
+    } catch (EmptyResultDataAccessException e) {
+      return false;
+    }
   }
 }

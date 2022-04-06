@@ -51,6 +51,13 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Void> deleteAppointment(UUID id) {
+    var idString = id.toString();
+
+    var deleted = organizer.deleteAppointment(idString);
+
+    if (!deleted) {
+      throw new NotFoundException("Appointment (%s) not found.", idString);
+    }
     return ResponseEntity.noContent().build();
   }
 
