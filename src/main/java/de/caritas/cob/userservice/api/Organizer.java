@@ -28,7 +28,7 @@ public class Organizer implements Organizing {
   private final Clock clock;
 
   @Override
-  public Map<String, Object> createAppointment(Map<String, Object> appointmentMap) {
+  public Map<String, Object> upsertAppointment(Map<String, Object> appointmentMap) {
     var consultantId = mapper.consultantIdOf(appointmentMap);
     var consultant = consultantRepository.findById(consultantId).orElseThrow();
     var appointment = mapper.appointmentOf(appointmentMap, consultant);

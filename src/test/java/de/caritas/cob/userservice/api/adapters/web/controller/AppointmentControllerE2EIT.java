@@ -173,9 +173,12 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void putAppointmentShouldReturnOk() throws Exception {
-    givenAValidAppointmentDto();
+  public void putAppointmentShouldReturnUpdateAppointmentAndReturnOk() throws Exception {
+    givenAValidConsultant(true);
+    givenASavedAppointment();
+    givenAValidAppointmentDto(savedAppointment.getId(), null);
 
+    assertEquals(1, appointmentRepository.count());
     mockMvc.perform(
             put("/appointments/{id}", appointment.getId())
                 .cookie(CSRF_COOKIE)
@@ -184,7 +187,55 @@ public class AppointmentControllerE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(appointment))
         )
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id", is(appointment.getId().toString())))
+        .andExpect(jsonPath("description", is(appointment.getDescription())))
+        .andExpect(jsonPath("datetime", is(appointment.getDatetime().toString())))
+        .andExpect(jsonPath("status", is(appointment.getStatus().toString().toLowerCase())));
+
+    assertEquals(1, appointmentRepository.count());
+    var updatedAppointment = appointmentRepository.findById(appointment.getId()).orElseThrow();
+    assertEquals(appointment.getId(), updatedAppointment.getId());
+    assertEquals(appointment.getStatus().getValue(),
+        updatedAppointment.getStatus().toString().toLowerCase());
+    assertEquals(appointment.getDatetime(), updatedAppointment.getDatetime());
+    assertEquals(appointment.getDescription(), updatedAppointment.getDescription());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void putAppointmentShouldReturnBadRequestIfIdsDiffer() throws Exception {
+    givenAValidConsultant(true);
+    givenASavedAppointment();
+    givenAValidAppointmentDto(savedAppointment.getId(), null);
+
+    mockMvc.perform(
+            put("/appointments/{id}", UUID.randomUUID())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(appointment))
+        )
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void putAppointmentShouldReturnNotFoundIfIdIsUnknown() throws Exception {
+    givenAValidConsultant(true);
+    var id = UUID.randomUUID();
+    givenAValidAppointmentDto(id, null);
+
+    mockMvc.perform(
+            put("/appointments/{id}", id)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(appointment))
+        )
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -235,7 +286,7 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void postAppointmentShouldReturnCreated() throws Exception {
-    givenAValidAppointmentDto(false, AppointmentStatus.CREATED);
+    givenAValidAppointmentDto(null, AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
     mockMvc.perform(
@@ -258,7 +309,7 @@ public class AppointmentControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void postAppointmentShouldReturnBadRequestIfIdIsSet() throws Exception {
-    givenAValidAppointmentDto(true, AppointmentStatus.CREATED);
+    givenAValidAppointmentDto(UUID.randomUUID(), AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
     mockMvc.perform(
@@ -316,9 +367,9 @@ public class AppointmentControllerE2EIT {
     var today = LocalDateTime.of(2022, 2, 15, 13, 37).toInstant(ZoneOffset.UTC);
     var tomorrow = LocalDateTime.of(2022, 2, 16, 14, 44).toInstant(ZoneOffset.UTC);
     var yesterday = LocalDateTime.of(2022, 2, 14, 7, 53).toInstant(ZoneOffset.UTC);
-    givenASavedAppointmentWithDatetime(yesterday);
-    givenASavedAppointmentWithDatetime(tomorrow);
-    givenASavedAppointmentWithDatetime(today);
+    givenASavedAppointment(yesterday);
+    givenASavedAppointment(tomorrow);
+    givenASavedAppointment(today);
 
     mockMvc.perform(
             get("/appointments")
@@ -333,15 +384,12 @@ public class AppointmentControllerE2EIT {
   }
 
   private void givenAValidAppointmentDto() {
-    givenAValidAppointmentDto(true, null);
+    givenAValidAppointmentDto(UUID.randomUUID(), null);
   }
 
-  private void givenAValidAppointmentDto(boolean includingId, AppointmentStatus setStatus) {
+  private void givenAValidAppointmentDto(UUID id, AppointmentStatus setStatus) {
     appointment = easyRandom.nextObject(Appointment.class);
-
-    if (!includingId) {
-      appointment.setId(null);
-    }
+    appointment.setId(id);
 
     if (nonNull(setStatus)) {
       appointment.setStatus(setStatus);
@@ -353,18 +401,11 @@ public class AppointmentControllerE2EIT {
     }
   }
 
-  private void givenASavedAppointmentWithDatetime(Instant datetime) {
-    createAppointment();
-    savedAppointment.setDatetime(datetime);
-    appointmentRepository.save(savedAppointment);
+  public void givenASavedAppointment() {
+    givenASavedAppointment(null);
   }
 
-  private void givenASavedAppointment() {
-    createAppointment();
-    appointmentRepository.save(savedAppointment);
-  }
-
-  private void createAppointment() {
+  public void givenASavedAppointment(Instant datetime) {
     savedAppointment = easyRandom.nextObject(
         de.caritas.cob.userservice.api.model.Appointment.class);
     savedAppointment.setConsultant(consultant);
@@ -373,20 +414,20 @@ public class AppointmentControllerE2EIT {
     if (desc.length() > 300) {
       savedAppointment.setDescription(desc.substring(0, 300));
     }
+    if (nonNull(datetime)) {
+      savedAppointment.setDatetime(datetime);
+    }
+    appointmentRepository.save(savedAppointment);
   }
 
   private void givenAnAppointmentMissingStatus() {
-    givenAValidAppointmentDto(false, null);
+    givenAValidAppointmentDto(null, null);
     appointment.setStatus(null);
   }
 
   private void givenAnAppointmentMissingDatetime() {
-    givenAValidAppointmentDto(false, null);
+    givenAValidAppointmentDto(null, null);
     appointment.setDatetime(null);
-  }
-
-  private void givenAValidConsultant() {
-    givenAValidConsultant(false);
   }
 
   private void givenAValidConsultant(boolean isAuthUser) {

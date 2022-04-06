@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface Organizing {
 
-  Map<String, Object> createAppointment(Map<String, Object> appointmentMap);
+  Map<String, Object> upsertAppointment(Map<String, Object> appointmentMap);
 
   Optional<Map<String, Object>> findAppointment(String id);
 

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
@@ -46,7 +47,17 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Appointment> updateAppointment(UUID id, Appointment appointment) {
-    return ResponseEntity.ok(new Appointment());
+    if (isNull(appointment.getId()) || !appointment.getId().equals(id)) {
+      throw new BadRequestException("Appointment ID from path and payload mismatch.");
+    }
+    var savedAppointmentMap = organizer.findAppointment(id.toString()).orElseThrow(() ->
+        new NotFoundException("Appointment (%s) not found.", id.toString())
+    );
+    var updatedAppointmentMap = mapper.mapOf(savedAppointmentMap, appointment);
+    var savedMap = organizer.upsertAppointment(updatedAppointmentMap);
+    var savedAppointment = mapper.appointmentOf(savedMap, true);
+
+    return ResponseEntity.ok(savedAppointment);
   }
 
   @Override
@@ -81,7 +92,7 @@ public class AppointmentController implements AppointmentsApi {
     }
 
     var appointmentMap = mapper.mapOf(appointment, authenticatedUser);
-    var savedMap = organizer.createAppointment(appointmentMap);
+    var savedMap = organizer.upsertAppointment(appointmentMap);
     var savedAppointment = mapper.appointmentOf(savedMap, true);
 
     return new ResponseEntity<>(savedAppointment, HttpStatus.CREATED);
