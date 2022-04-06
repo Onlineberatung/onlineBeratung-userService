@@ -1,17 +1,20 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
 import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
 import de.caritas.cob.userservice.api.adapters.web.mapping.AppointmentDtoMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.port.in.Organizing;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.AppointmentsApi;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,22 +35,48 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
-    return ResponseEntity.ok(new Appointment());
+    var appointmentMap = organizer.findAppointment(id.toString()).orElseThrow(() ->
+        new NotFoundException("Appointment (%s) not found.", id.toString())
+    );
+
+    var appointment = mapper.appointmentOf(appointmentMap, authenticatedUser.isConsultant());
+
+    return ResponseEntity.ok(appointment);
   }
 
   @Override
   public ResponseEntity<Appointment> updateAppointment(UUID id, Appointment appointment) {
-    return ResponseEntity.ok(new Appointment());
+    if (isNull(appointment.getId()) || !appointment.getId().equals(id)) {
+      throw new BadRequestException("Appointment ID from path and payload mismatch.");
+    }
+    var savedAppointmentMap = organizer.findAppointment(id.toString()).orElseThrow(() ->
+        new NotFoundException("Appointment (%s) not found.", id.toString())
+    );
+    var updatedAppointmentMap = mapper.mapOf(savedAppointmentMap, appointment);
+    var savedMap = organizer.upsertAppointment(updatedAppointmentMap);
+    var savedAppointment = mapper.appointmentOf(savedMap, true);
+
+    return ResponseEntity.ok(savedAppointment);
   }
 
   @Override
   public ResponseEntity<Void> deleteAppointment(UUID id) {
+    if (!organizer.deleteAppointment(id.toString())) {
+      throw new NotFoundException("Appointment (%s) not found.", id.toString());
+    }
+
     return ResponseEntity.noContent().build();
   }
 
   @Override
   public ResponseEntity<List<Appointment>> getAppointments() {
-    return ResponseEntity.ok(List.of(new Appointment()));
+    var futureAppointmentMaps = organizer.findAllFutureAppointments();
+    var futureAppointments = futureAppointmentMaps.stream()
+        .map(appointmentMap -> mapper.appointmentOf(appointmentMap,
+            authenticatedUser.isConsultant()))
+        .collect(Collectors.toList());
+
+    return ResponseEntity.ok(futureAppointments);
   }
 
   @Override
@@ -60,8 +89,8 @@ public class AppointmentController implements AppointmentsApi {
     }
 
     var appointmentMap = mapper.mapOf(appointment, authenticatedUser);
-    var savedMap = organizer.createAppointment(appointmentMap);
-    var savedAppointment = mapper.appointmentOf(savedMap);
+    var savedMap = organizer.upsertAppointment(appointmentMap);
+    var savedAppointment = mapper.appointmentOf(savedMap, true);
 
     return new ResponseEntity<>(savedAppointment, HttpStatus.CREATED);
   }

@@ -27,6 +27,7 @@ public class UserServiceMapper {
         put("description", appointment.getDescription());
         put("datetime", appointment.getDatetime().toString());
         put("status", appointment.getStatus().toString().toLowerCase());
+        put("consultantId", appointment.getConsultant().getId());
       }
     };
   }
@@ -112,7 +113,7 @@ public class UserServiceMapper {
   public Appointment appointmentOf(Map<String, Object> appointmentMap, Consultant consultant) {
     var appointment = new Appointment();
     if (appointmentMap.containsKey("id")) {
-      appointment.setId((UUID) appointmentMap.get("id"));
+      appointment.setId(UUID.fromString((String) appointmentMap.get("id")));
     }
     if (appointmentMap.containsKey("description")) {
       appointment.setDescription((String) appointmentMap.get("description"));
