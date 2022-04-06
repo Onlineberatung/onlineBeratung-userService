@@ -19,7 +19,7 @@ public class DeleteObsoleteAppointmentsScheduler {
   private final @NonNull AppointmentConfig appointmentConfig;
   private final @NonNull Clock clock;
 
-  @Scheduled(cron = "${appointments.scheduler.cron}")
+  @Scheduled(cron = "#{appointmentConfig.deleteJobCron}")
   public void deleteObsoleteAppointments() {
     if (!appointmentConfig.getDeleteJobEnabled()) {
       return;
