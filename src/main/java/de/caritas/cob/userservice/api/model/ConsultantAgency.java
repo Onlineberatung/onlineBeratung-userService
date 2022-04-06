@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.model;
 
-import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
