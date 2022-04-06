@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -88,7 +89,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/consultants/languages"
         )
         .permitAll()
-        .antMatchers("/users/data", "/appointments/{appointmentId:" + UUID_PATTERN + "}")
+        .antMatchers("/users/data")
+        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.GET, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/askers")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT)
@@ -145,6 +148,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/{sessionId:[0-9]+}",
             "/appointments"
         )
+        .hasAuthority(CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.PUT, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
+        .hasAuthority(CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.DELETE, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)

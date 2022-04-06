@@ -66,12 +66,18 @@ public class AppointmentControllerAuthorizationIT {
   @Test
   @WithMockUser(authorities = {
       AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
-      AuthorityValue.TECHNICAL_DEFAULT, AuthorityValue.START_CHAT,
-      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
-      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_ADMIN,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS
   })
   public void getAppointmentShouldReturnForbiddenWhenNoUserConsultantOrAnonymousAuthority()
       throws Exception {
@@ -112,6 +118,37 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ANONYMOUS_DEFAULT,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.USER_ADMIN,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS
+  })
+  public void putAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
+    givenAValidAppointment();
+
+    mvc.perform(
+        put("/appointments/{id}", appointment.getId())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(appointment))
+    ).andExpect(status().isForbidden());
+  }
+
+  @Test
   public void deleteAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     mvc.perform(
         delete("/appointments/{id}", UUID.randomUUID())
@@ -132,6 +169,33 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ANONYMOUS_DEFAULT,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.USER_ADMIN,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS
+  })
+  public void deleteAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
+    mvc.perform(
+        delete("/appointments/{id}", UUID.randomUUID())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
+  }
+
+  @Test
   public void getAppointmentsShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     mvc.perform(
         get("/appointments")
@@ -149,6 +213,33 @@ public class AppointmentControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE)
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ANONYMOUS_DEFAULT,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.USER_ADMIN,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS
+  })
+  public void getAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
+    mvc.perform(
+        get("/appointments")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isForbidden());
   }
 
   @Test
@@ -173,17 +264,23 @@ public class AppointmentControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {
+      AuthorityValue.ANONYMOUS_DEFAULT,
       AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
+      AuthorityValue.CREATE_NEW_CHAT,
       AuthorityValue.TECHNICAL_DEFAULT,
-      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-      AuthorityValue.START_CHAT, AuthorityValue.USER_DEFAULT,
-      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT,
-      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.USER_ADMIN,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS
   })
-  public void postAppointmentsShouldReturnForbiddenWhenNoConsultantDefaultAuthority()
-      throws Exception {
+  public void postAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
     mvc.perform(
         post("/appointments")
             .cookie(CSRF_COOKIE)
