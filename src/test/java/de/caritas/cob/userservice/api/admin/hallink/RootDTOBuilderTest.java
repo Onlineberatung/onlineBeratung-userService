@@ -7,12 +7,12 @@ import static org.hamcrest.Matchers.notNullValue;
 import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.admin.model.RootDTO;
 import de.caritas.cob.userservice.api.admin.model.RootLinks;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RootDTOBuilderTest {
+class RootDTOBuilderTest {
 
   @Test
-  public void buildRootDTO_Should_returnRootDTOWithSessionHalLinks() {
+  void buildRootDTO_Should_returnRootDTOWithSessionHalLinks() {
     RootDTO rootDTO = new RootDTOBuilder().buildRootDTO();
 
     assertThat(rootDTO, notNullValue());
@@ -24,7 +24,7 @@ public class RootDTOBuilderTest {
   }
 
   @Test
-  public void buildRootDTO_Should_returnRootDTOWithConsultantHalLinks() {
+  void buildRootDTO_Should_returnRootDTOWithConsultantHalLinks() {
     RootDTO rootDTO = new RootDTOBuilder().buildRootDTO();
 
     assertThat(rootDTO, notNullValue());
@@ -41,7 +41,7 @@ public class RootDTOBuilderTest {
   }
 
   @Test
-  public void buildRootDTO_Should_returnRootDTOWithSelfHalLink() {
+  void buildRootDTO_Should_returnRootDTOWithSelfHalLink() {
     RootDTO rootDTO = new RootDTOBuilder().buildRootDTO();
 
     assertThat(rootDTO, notNullValue());
@@ -52,7 +52,7 @@ public class RootDTOBuilderTest {
   }
 
   @Test
-  public void buildRootDTO_Should_returnRootDTOWithConsultantAgenciesHalLinks() {
+  void buildRootDTO_Should_returnRootDTOWithConsultantAgenciesHalLinks() {
     RootDTO rootDTO = new RootDTOBuilder().buildRootDTO();
 
     assertThat(rootDTO, notNullValue());
@@ -65,7 +65,7 @@ public class RootDTOBuilderTest {
   }
 
   @Test
-  public void buildRootDTO_Should_returnRootDTOWithDeleteAskerHalLink() {
+  void buildRootDTO_Should_returnRootDTOWithDeleteAskerHalLink() {
     RootDTO rootDTO = new RootDTOBuilder().buildRootDTO();
 
     assertThat(rootDTO, notNullValue());

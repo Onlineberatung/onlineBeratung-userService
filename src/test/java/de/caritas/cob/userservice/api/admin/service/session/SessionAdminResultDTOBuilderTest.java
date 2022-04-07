@@ -12,30 +12,30 @@ import de.caritas.cob.userservice.api.admin.model.SessionFilter;
 import de.caritas.cob.userservice.api.model.Session;
 import java.util.stream.Stream;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SessionAdminResultDTOBuilderTest {
+@ExtendWith(MockitoExtension.class)
+class SessionAdminResultDTOBuilderTest {
 
   private static final int MOCKED_SESSIONS_SIZE = 20;
 
   @Mock
   private Page<Session> resultPage;
 
-  @Before
-  public void setupResultPageMock() {
+  @BeforeEach
+  void setupResultPageMock() {
     EasyRandom easyRandom = new EasyRandom();
     Stream<Session> randomSessions = easyRandom.objects(Session.class, MOCKED_SESSIONS_SIZE);
     when(resultPage.get()).thenReturn(randomSessions);
   }
 
   @Test
-  public void build_Should_returnEmptySessionAdminResultDTOWithDefaultSelfLink_When_noParametersAreSet() {
+  void build_Should_returnEmptySessionAdminResultDTOWithDefaultSelfLink_When_noParametersAreSet() {
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance().build();
 
     assertThat(resultDTO, notNullValue());
@@ -50,7 +50,7 @@ public class SessionAdminResultDTOBuilderTest {
   }
 
   @Test
-  public void build_Should_returnSessionAdminResultDTOWithAllLinks_When_parametersAreSet() {
+  void build_Should_returnSessionAdminResultDTOWithAllLinks_When_parametersAreSet() {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
     when(this.resultPage.getTotalElements()).thenReturn(Long.valueOf(MOCKED_SESSIONS_SIZE));
 
@@ -73,7 +73,7 @@ public class SessionAdminResultDTOBuilderTest {
   }
 
   @Test
-  public void build_Should_returnSessionAdminResultDTOWithoutPreviousLink_When_parametersPageIsTheFirst() {
+  void build_Should_returnSessionAdminResultDTOWithoutPreviousLink_When_parametersPageIsTheFirst() {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
@@ -86,7 +86,7 @@ public class SessionAdminResultDTOBuilderTest {
   }
 
   @Test
-  public void build_Should_returnSessionAdminResultDTOWithoutNextLink_When_parametersPageIsTheLast() {
+  void build_Should_returnSessionAdminResultDTOWithoutNextLink_When_parametersPageIsTheLast() {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
