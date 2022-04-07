@@ -54,43 +54,6 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void getAppointmentShouldReturnUnauthorizedWhenNoKeycloakAuthorization() throws Exception {
-    mvc.perform(
-        get("/appointments/{id}", UUID.randomUUID())
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
-    ).andExpect(status().isUnauthorized());
-  }
-
-  @Test
-  @WithMockUser(authorities = {
-      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
-      AuthorityValue.CREATE_NEW_CHAT,
-      AuthorityValue.TECHNICAL_DEFAULT,
-      AuthorityValue.USE_FEEDBACK,
-      AuthorityValue.USER_ADMIN,
-      AuthorityValue.START_CHAT,
-      AuthorityValue.STOP_CHAT,
-      AuthorityValue.UPDATE_CHAT,
-      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
-      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
-      AuthorityValue.VIEW_ALL_PEER_SESSIONS
-  })
-  public void getAppointmentShouldReturnForbiddenWhenNoUserConsultantOrAnonymousAuthority()
-      throws Exception {
-    mvc.perform(
-        get("/appointments/{id}", UUID.randomUUID().toString())
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    ).andExpect(status().isForbidden());
-  }
-
-  @Test
   public void putAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     givenAValidAppointment();
 
