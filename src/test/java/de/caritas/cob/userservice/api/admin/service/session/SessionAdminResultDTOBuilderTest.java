@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.admin.model.SessionFilter;
 import de.caritas.cob.userservice.api.model.Session;
 import java.util.stream.Stream;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,8 +26,7 @@ class SessionAdminResultDTOBuilderTest {
   @Mock
   private Page<Session> resultPage;
 
-  @BeforeEach
-  void setupResultPageMock() {
+  void givenRandomSesisons() {
     EasyRandom easyRandom = new EasyRandom();
     Stream<Session> randomSessions = easyRandom.objects(Session.class, MOCKED_SESSIONS_SIZE);
     when(resultPage.get()).thenReturn(randomSessions);
@@ -51,6 +49,7 @@ class SessionAdminResultDTOBuilderTest {
 
   @Test
   void build_Should_returnSessionAdminResultDTOWithAllLinks_When_parametersAreSet() {
+    givenRandomSesisons();
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
     when(this.resultPage.getTotalElements()).thenReturn(Long.valueOf(MOCKED_SESSIONS_SIZE));
 
@@ -74,6 +73,7 @@ class SessionAdminResultDTOBuilderTest {
 
   @Test
   void build_Should_returnSessionAdminResultDTOWithoutPreviousLink_When_parametersPageIsTheFirst() {
+    givenRandomSesisons();
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
@@ -87,6 +87,7 @@ class SessionAdminResultDTOBuilderTest {
 
   @Test
   void build_Should_returnSessionAdminResultDTOWithoutNextLink_When_parametersPageIsTheLast() {
+    givenRandomSesisons();
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
     SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
