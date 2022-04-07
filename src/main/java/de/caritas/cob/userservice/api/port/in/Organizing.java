@@ -13,4 +13,6 @@ public interface Organizing {
   List<Map<String, Object>> findAllFutureAppointments();
 
   boolean deleteAppointment(String id);
+
+  void deleteObsoleteAppointments();
 }

@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.workflow.appointment.scheduler;
+package de.caritas.cob.userservice.api;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
@@ -23,10 +23,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-class DeleteObsoleteAppointmentsSchedulerIT {
+class OrganizerIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -40,7 +39,7 @@ class DeleteObsoleteAppointmentsSchedulerIT {
   private Clock clock;
 
   @Autowired
-  private DeleteObsoleteAppointmentsScheduler scheduler;
+  private Organizer organizer;
 
   @Test
   void deleteObsoleteAppointmentsShouldDeleteAppointmentsOlderThanLifespan() {
@@ -55,7 +54,7 @@ class DeleteObsoleteAppointmentsSchedulerIT {
     var yesterday = today.minus(1, ChronoUnit.DAYS);
     createAppointment(yesterday);
 
-    scheduler.deleteObsoleteAppointments();
+    organizer.deleteObsoleteAppointments();
 
     var notDeleted = StreamSupport.stream(appointmentRepository.findAll().spliterator(), false)
         .map(Appointment::getDatetime)
