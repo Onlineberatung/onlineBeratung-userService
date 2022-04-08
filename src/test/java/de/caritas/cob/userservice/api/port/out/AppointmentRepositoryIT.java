@@ -32,7 +32,7 @@ public class AppointmentRepositoryIT {
   private ConsultantRepository consultantRepository;
 
   @AfterEach
-  public void restore() {
+  public void reset() {
     underTest.deleteAll();
     consultant = null;
   }
@@ -40,7 +40,7 @@ public class AppointmentRepositoryIT {
   @Test
   public void saveShouldSaveAppointmentAndReturnId() {
     givenAValidConsultant();
-    givenAValidAppointment();
+    givenAValidAppointment(false);
 
     assertEquals(0, underTest.count());
     var savedAppointment = underTest.save(appointment);
@@ -48,17 +48,33 @@ public class AppointmentRepositoryIT {
     assertNotNull(savedAppointment.getId());
   }
 
+  @Test
+  public void deleteShouldKeepConsultant() {
+    givenAValidConsultant();
+    givenAValidAppointment(true);
+
+    assertEquals(1, underTest.count());
+    var countConsultants = consultantRepository.count();
+    underTest.delete(appointment);
+
+    assertEquals(countConsultants, consultantRepository.count());
+    assertEquals(0, underTest.count());
+  }
+
   private void givenAValidConsultant() {
     consultant = consultantRepository.findAll().iterator().next();
   }
 
-  private void givenAValidAppointment() {
+  private void givenAValidAppointment(boolean toSave) {
     appointment = easyRandom.nextObject(Appointment.class);
     appointment.setConsultant(consultant);
     appointment.setId(null);
     var desc = appointment.getDescription();
     if (desc.length() > 300) {
       appointment.setDescription(desc.substring(0, 300));
+    }
+    if (toSave) {
+      underTest.save(appointment);
     }
   }
 }
