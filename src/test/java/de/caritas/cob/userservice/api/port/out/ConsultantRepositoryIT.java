@@ -57,15 +57,15 @@ public class ConsultantRepositoryIT {
   public void deleteShouldDeleteConsultantAndAppointment() {
     givenACreatedConsultantWithAnAppointment();
 
-    var countConsultants = underTest.count();
     assertTrue(underTest.existsById(consultant.getId()));
     var appointment = consultant.getAppointments().iterator().next();
     assertTrue(appointmentRepository.existsById(appointment.getId()));
+    var countConsultants = underTest.count();
 
     underTest.delete(consultant);
 
-    assertFalse(underTest.existsById(consultant.getId()));
     assertEquals(countConsultants - 1, underTest.count());
+    assertFalse(underTest.existsById(consultant.getId()));
     assertFalse(appointmentRepository.existsById(appointment.getId()));
   }
 
@@ -182,8 +182,7 @@ public class ConsultantRepositoryIT {
   private void givenACreatedConsultantWithAnAppointment() {
     var dbConsultant = underTest.findAll().iterator().next();
     consultant = new Consultant();
-    String[] fieldsToIgnore = {"id"};
-    BeanUtils.copyProperties(dbConsultant, consultant, fieldsToIgnore);
+    BeanUtils.copyProperties(dbConsultant, consultant);
     consultant.setId(UUID.randomUUID().toString());
     consultant.setUsername(RandomStringUtils.randomAlphabetic(8));
     consultant.setRocketChatId(RandomStringUtils.randomAlphabetic(8));

@@ -53,12 +53,12 @@ public class AppointmentRepositoryIT {
     givenAValidConsultant();
     givenAValidAppointment(true);
 
-    var countConsultants = consultantRepository.count();
     assertEquals(1, underTest.count());
+    var countConsultants = consultantRepository.count();
     underTest.delete(appointment);
 
-    assertEquals(0, underTest.count());
     assertEquals(countConsultants, consultantRepository.count());
+    assertEquals(0, underTest.count());
   }
 
   private void givenAValidConsultant() {
