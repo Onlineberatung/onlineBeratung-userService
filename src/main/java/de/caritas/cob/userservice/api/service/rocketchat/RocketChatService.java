@@ -630,17 +630,10 @@ public class RocketChatService {
     try {
       var header = getStandardHttpHeaders(rocketChatCredentials);
       HttpEntity<Void> request = new HttpEntity<>(header);
-
-      log.error("userid: {}, token: {}",
-          rocketChatCredentials.getRocketChatUserId(),
-          rocketChatCredentials.getRocketChatToken()
-      );
-
       response =
           restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
-      log.error("short exception: {}", ex.toString());
       log.error("exception message: {}", ex.getMessage());
 
       throw new InternalServerErrorException(String.format(
