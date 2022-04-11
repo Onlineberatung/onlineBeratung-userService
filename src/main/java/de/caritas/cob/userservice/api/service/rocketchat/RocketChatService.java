@@ -634,10 +634,8 @@ public class RocketChatService {
           restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
-      log.error("exception message: {}", ex.getMessage());
-
       throw new InternalServerErrorException(String.format(
-          CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()),
+          CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()), ex,
           LogService::logRocketChatError);
     }
 
