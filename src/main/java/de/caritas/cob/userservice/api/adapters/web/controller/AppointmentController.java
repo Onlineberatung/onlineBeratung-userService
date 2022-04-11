@@ -15,15 +15,14 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 @Api(tags = "appointment-controller")
 public class AppointmentController implements AppointmentsApi {
 
@@ -31,7 +30,14 @@ public class AppointmentController implements AppointmentsApi {
 
   private final AppointmentDtoMapper mapper;
 
-  private final AuthenticatedUser authenticatedUser;
+  private final AuthenticatedUser currentUser;
+
+  public AppointmentController(Organizing organizer, AppointmentDtoMapper mapper,
+      @Qualifier("AuthenticatedOrAnonymousUser") AuthenticatedUser authenticatedUser) {
+    this.organizer = organizer;
+    this.mapper = mapper;
+    this.currentUser = authenticatedUser;
+  }
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
@@ -39,7 +45,7 @@ public class AppointmentController implements AppointmentsApi {
         new NotFoundException("Appointment (%s) not found.", id.toString())
     );
 
-    var appointment = mapper.appointmentOf(appointmentMap, authenticatedUser.isConsultant());
+    var appointment = mapper.appointmentOf(appointmentMap, currentUser.isConsultant());
 
     return ResponseEntity.ok(appointment);
   }
@@ -73,7 +79,7 @@ public class AppointmentController implements AppointmentsApi {
     var futureAppointmentMaps = organizer.findAllFutureAppointments();
     var futureAppointments = futureAppointmentMaps.stream()
         .map(appointmentMap -> mapper.appointmentOf(appointmentMap,
-            authenticatedUser.isConsultant()))
+            currentUser.isConsultant()))
         .collect(Collectors.toList());
 
     return ResponseEntity.ok(futureAppointments);
@@ -88,7 +94,7 @@ public class AppointmentController implements AppointmentsApi {
       throw new BadRequestException("The initial appointment status must be 'created.'");
     }
 
-    var appointmentMap = mapper.mapOf(appointment, authenticatedUser);
+    var appointmentMap = mapper.mapOf(appointment, currentUser);
     var savedMap = organizer.upsertAppointment(appointmentMap);
     var savedAppointment = mapper.appointmentOf(savedMap, true);
 

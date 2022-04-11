@@ -1,8 +1,11 @@
 package de.caritas.cob.userservice.api;
 
+import static java.util.Objects.isNull;
+
+import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
+import java.security.Principal;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -11,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,6 +22,7 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -81,13 +86,34 @@ public class UserServiceApplication {
    * @return {@link AuthenticatedUser}
    */
   @Bean
+  @Primary
   @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
   public AuthenticatedUser getAuthenticatedUser() {
+    var userPrincipal = getRequest().getUserPrincipal();
+    return createAuthenticatedUser(userPrincipal);
+  }
+
+  /**
+   * Returns the currently authenticated user or an anonymous representation.
+   *
+   * @return {@link AuthenticatedUser}
+   */
+  @Bean
+  @Qualifier("AuthenticatedOrAnonymousUser")
+  @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+  public AuthenticatedUser getAuthenticatedOrAnonymousUser() {
+    var userPrincipal = getRequest().getUserPrincipal();
+    if (isNull(userPrincipal)) {
+      return new AuthenticatedUser();
+    }
+    return createAuthenticatedUser(userPrincipal);
+  }
+
+  private AuthenticatedUser createAuthenticatedUser(Principal userPrincipal) {
+    var keycloakUser = (KeycloakAuthenticationToken) userPrincipal;
 
     // Get current KeycloakSecurityContext
-    KeycloakSecurityContext keycloakSecContext =
-        ((KeycloakAuthenticationToken) getRequest().getUserPrincipal()).getAccount()
-            .getKeycloakSecurityContext();
+    var keycloakSecContext = keycloakUser.getAccount().getKeycloakSecurityContext();
 
     AuthenticatedUser authenticatedUser = new AuthenticatedUser();
 

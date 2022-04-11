@@ -34,6 +34,7 @@ import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -68,6 +69,7 @@ public class AppointmentControllerE2EIT {
   private AppointmentRepository appointmentRepository;
 
   @MockBean
+  @Qualifier("AuthenticatedOrAnonymousUser")
   private AuthenticatedUser authenticatedUser;
 
   @MockBean
