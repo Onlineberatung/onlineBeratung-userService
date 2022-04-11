@@ -2,17 +2,23 @@ package de.caritas.cob.userservice.api.port.out;
 
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -24,11 +30,16 @@ import org.springframework.test.context.TestPropertySource;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class ConsultantRepositoryIT {
 
+  private static final EasyRandom easyRandom = new EasyRandom();
+
   private Consultant consultant;
   private Consultant originalConsultant;
 
   @Autowired
   private ConsultantRepository underTest;
+
+  @Autowired
+  private AppointmentRepository appointmentRepository;
 
   @BeforeEach
   public void backup() {
@@ -36,8 +47,26 @@ public class ConsultantRepositoryIT {
   }
 
   @AfterEach
-  public void restore() {
+  public void restoreAndReset() {
     underTest.save(originalConsultant);
+    consultant = null;
+    originalConsultant = null;
+  }
+
+  @Test
+  public void deleteShouldDeleteConsultantAndAppointment() {
+    givenACreatedConsultantWithAnAppointment();
+
+    assertTrue(underTest.existsById(consultant.getId()));
+    var appointment = consultant.getAppointments().iterator().next();
+    assertTrue(appointmentRepository.existsById(appointment.getId()));
+    var countConsultants = underTest.count();
+
+    underTest.delete(consultant);
+
+    assertEquals(countConsultants - 1, underTest.count());
+    assertFalse(underTest.existsById(consultant.getId()));
+    assertFalse(appointmentRepository.existsById(appointment.getId()));
   }
 
   @Test
@@ -148,6 +177,29 @@ public class ConsultantRepositoryIT {
     var languagesThen = consultantAfter.get().getLanguages();
     assertEquals(1, languagesThen.size());
     assertEquals(LanguageCode.de, languagesThen.iterator().next().getLanguageCode());
+  }
+
+  private void givenACreatedConsultantWithAnAppointment() {
+    var dbConsultant = underTest.findAll().iterator().next();
+    consultant = new Consultant();
+    BeanUtils.copyProperties(dbConsultant, consultant);
+    consultant.setId(UUID.randomUUID().toString());
+    consultant.setUsername(RandomStringUtils.randomAlphabetic(8));
+    consultant.setRocketChatId(RandomStringUtils.randomAlphabetic(8));
+    underTest.save(consultant);
+
+    var appointment = easyRandom.nextObject(Appointment.class);
+    appointment.setConsultant(consultant);
+    appointment.setId(null);
+    var desc = appointment.getDescription();
+    if (desc.length() > 300) {
+      appointment.setDescription(desc.substring(0, 300));
+    }
+
+    consultant.setAppointments(Set.of(appointment));
+    underTest.save(consultant);
+
+    consultant = underTest.findById(consultant.getId()).orElseThrow();
   }
 
   private void givenAnExistingConsultantSpeaking(LanguageCode... languageCodes) {
