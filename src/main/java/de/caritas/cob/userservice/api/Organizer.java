@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api;
 
+import de.caritas.cob.userservice.api.config.AppointmentConfig;
 import de.caritas.cob.userservice.api.port.in.Organizing;
 import de.caritas.cob.userservice.api.port.out.AppointmentRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
@@ -12,14 +13,19 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class Organizer implements Organizing {
 
   private final AppointmentRepository appointmentRepository;
+
+  private final AppointmentConfig appointmentConfig;
 
   private final ConsultantRepository consultantRepository;
 
@@ -66,5 +72,19 @@ public class Organizer implements Organizing {
     } catch (EmptyResultDataAccessException e) {
       return false;
     }
+  }
+
+  @Profile("!testing")
+  @Scheduled(cron = "#{appointmentConfig.deleteJobCron}")
+  @Transactional
+  @Override
+  public void deleteObsoleteAppointments() {
+    if (!appointmentConfig.getDeleteJobEnabled()) {
+      return;
+    }
+    var lifespanInHours = appointmentConfig.getLifespanInHours();
+    var olderThanLifespan = clock.instant().minus(lifespanInHours, ChronoUnit.HOURS);
+
+    appointmentRepository.deleteOlderThan(olderThanLifespan);
   }
 }
