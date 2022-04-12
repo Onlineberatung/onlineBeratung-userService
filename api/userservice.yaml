@@ -1733,6 +1733,8 @@ components:
         initiatorUserName:
           type: string
           example: "consultant23"
+        rcUserId:
+          type: string
         initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
@@ -1745,6 +1747,8 @@ components:
         - "FORWARD"
         - "VIDEOCALL"
         - "FINISHED_CONVERSATION"
+        - "USER_MUTED"
+        - "USER_UNMUTED"
 
     ConsultantSessionDTO:
       type: object
