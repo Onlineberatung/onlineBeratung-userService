@@ -16,11 +16,14 @@ paths:
     get:
       tags:
         - appointment-controller
-      summary: 'Gets an appointment [Auth: consultant, user, anonymous]'
+      summary: 'Gets an appointment [Auth: consultant, public]'
+      description:
+        If a consultant requests this, the response is the full appointment object,
+        else description and datetime are not included.
       operationId: getAppointment
       responses:
         200:
-          description: OK - Response for consultants contains the payload, for others only a status
+          description: OK - successful operation
           content:
             application/json:
               schema:
@@ -86,7 +89,7 @@ paths:
     get:
       tags:
         - appointment-controller
-      summary: 'Gets all future appointments [Auth: consultant]'
+      summary: 'Gets all today''s and future appointments [Auth: consultant]'
       operationId: getAppointments
       responses:
         200:
@@ -110,6 +113,8 @@ paths:
         - appointment-controller
       summary: 'Creates an appointment [Auth: consultant]'
       operationId: createAppointment
+      description:
+        Do not pass an ID inside the request''s payload, as it will be generated and returned.
       requestBody:
         content:
           'application/json':
