@@ -10,7 +10,7 @@ public interface Organizing {
 
   Optional<Map<String, Object>> findAppointment(String id);
 
-  List<Map<String, Object>> findAllFutureAppointments();
+  List<Map<String, Object>> findAllTodaysAndFutureAppointments();
 
   boolean deleteAppointment(String id);
 
