@@ -15,14 +15,15 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @Api(tags = "appointment-controller")
 public class AppointmentController implements AppointmentsApi {
 
@@ -31,13 +32,6 @@ public class AppointmentController implements AppointmentsApi {
   private final AppointmentDtoMapper mapper;
 
   private final AuthenticatedUser currentUser;
-
-  public AppointmentController(Organizing organizer, AppointmentDtoMapper mapper,
-      @Qualifier("AuthenticatedOrAnonymousUser") AuthenticatedUser authenticatedUser) {
-    this.organizer = organizer;
-    this.mapper = mapper;
-    this.currentUser = authenticatedUser;
-  }
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {

@@ -1,20 +1,7 @@
 package de.caritas.cob.userservice.api;
 
-import static java.util.Objects.isNull;
-
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
-import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import java.security.Principal;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.keycloak.representations.AccessToken;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,17 +9,9 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @EnableAsync
@@ -49,116 +28,8 @@ public class UserServiceApplication {
   @Value("${thread.executor.threadNamePrefix}")
   private String THREAD_NAME_PREFIX;
 
-  private final String claimNameUserId = "userId";
-  private final String claimNameUsername = "username";
-
   public static void main(String[] args) {
     SpringApplication.run(UserServiceApplication.class, args);
-  }
-
-  /**
-   * Returns the @KeycloakAuthenticationToken which represents the token for a Keycloak
-   * authentication.
-   *
-   * @return KeycloakAuthenticationToken
-   */
-  @Bean
-  @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  public KeycloakAuthenticationToken getAccessToken() {
-    return (KeycloakAuthenticationToken) getRequest().getUserPrincipal();
-  }
-
-  /**
-   * Returns the @KeycloakSecurityContext
-   *
-   * @return KeycloakSecurityContext
-   */
-  @Bean
-  @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  public KeycloakSecurityContext getKeycloakSecurityContext() {
-    return (KeycloakSecurityContext) ((KeycloakAuthenticationToken) getRequest().getUserPrincipal())
-        .getAccount().getKeycloakSecurityContext();
-  }
-
-  /**
-   * Returns the Keycloak user id of the authenticated user
-   *
-   * @return {@link AuthenticatedUser}
-   */
-  @Bean
-  @Primary
-  @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  public AuthenticatedUser getAuthenticatedUser() {
-    var userPrincipal = getRequest().getUserPrincipal();
-    return createAuthenticatedUser(userPrincipal);
-  }
-
-  /**
-   * Returns the currently authenticated user or an anonymous representation.
-   *
-   * @return {@link AuthenticatedUser}
-   */
-  @Bean
-  @Qualifier("AuthenticatedOrAnonymousUser")
-  @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  public AuthenticatedUser getAuthenticatedOrAnonymousUser() {
-    var userPrincipal = getRequest().getUserPrincipal();
-    if (isNull(userPrincipal)) {
-      return new AuthenticatedUser();
-    }
-    return createAuthenticatedUser(userPrincipal);
-  }
-
-  private AuthenticatedUser createAuthenticatedUser(Principal userPrincipal) {
-    var keycloakUser = (KeycloakAuthenticationToken) userPrincipal;
-
-    // Get current KeycloakSecurityContext
-    var keycloakSecContext = keycloakUser.getAccount().getKeycloakSecurityContext();
-
-    AuthenticatedUser authenticatedUser = new AuthenticatedUser();
-
-    // Set Keycloak token to authenticated user object
-    if (keycloakSecContext.getTokenString() != null) {
-      authenticatedUser.setAccessToken(keycloakSecContext.getTokenString());
-    } else {
-      throw new KeycloakException("No valid Keycloak access token string found.");
-    }
-
-    // Set userId and username to authenticated user object
-    Map<String, Object> claimMap = keycloakSecContext.getToken().getOtherClaims();
-    if (claimMap.containsKey(claimNameUserId)) {
-      authenticatedUser.setUserId(claimMap.get(claimNameUserId).toString());
-    } else {
-      throw new KeycloakException("Keycloak user attribute '" + claimNameUserId + "' not found.");
-    }
-
-    if (claimMap.containsKey(claimNameUsername)) {
-      authenticatedUser.setUsername(claimMap.get(claimNameUsername).toString());
-    }
-
-    // Set user roles
-    AccessToken.Access realmAccess = keycloakSecContext.getToken().getRealmAccess();
-    Set<String> roles = realmAccess.getRoles();
-    if (roles != null && roles.size() > 0) {
-      authenticatedUser.setRoles(roles);
-    } else {
-      throw new KeycloakException(
-          "Keycloak roles null or not set for user: " + authenticatedUser.getUserId() != null
-              ? authenticatedUser.getUserId()
-              : "unknown");
-    }
-
-    // Set granted authorities
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    authenticatedUser.setGrantedAuthorities(authentication.getAuthorities().stream()
-        .map(authority -> authority.toString()).collect(Collectors.toSet()));
-
-    return authenticatedUser;
-  }
-
-  private HttpServletRequest getRequest() {
-    return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-        .getRequest();
   }
 
   @Bean
