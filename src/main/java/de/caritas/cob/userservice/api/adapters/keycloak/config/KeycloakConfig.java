@@ -46,7 +46,7 @@ public class KeycloakConfig {
   @Bean
   @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
   public KeycloakSecurityContext keycloakSecurityContext(KeycloakAuthenticationToken token) {
-    return token.getAccount().getKeycloakSecurityContext();
+    return isNull(token) ? null : token.getAccount().getKeycloakSecurityContext();
   }
 
   @Bean
