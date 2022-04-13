@@ -46,17 +46,20 @@ public class KeycloakConfig {
   @Bean
   @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
   public KeycloakSecurityContext keycloakSecurityContext(KeycloakAuthenticationToken token) {
-    return isNullBean(token) ? null : token.getAccount().getKeycloakSecurityContext();
+    return token.getAccount().getKeycloakSecurityContext();
   }
 
   @Bean
   @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  public AuthenticatedUser authenticatedUser(KeycloakSecurityContext securityContext,
-      KeycloakAuthenticationToken authenticationToken) {
+  public AuthenticatedUser authenticatedUser(HttpServletRequest request) {
+    var userPrincipal = request.getUserPrincipal();
     var authenticatedUser = new AuthenticatedUser();
-    if (isNullBean(authenticationToken) || isNullBean(securityContext)) {
+    if (isNull(userPrincipal)) {
       return authenticatedUser;
     }
+
+    var authToken = (KeycloakAuthenticationToken) userPrincipal;
+    var securityContext = authToken.getAccount().getKeycloakSecurityContext();
 
     if (isNull(securityContext.getTokenString())) {
       throw new KeycloakException("No Keycloak access token string found.");
@@ -89,11 +92,6 @@ public class KeycloakConfig {
     authenticatedUser.setGrantedAuthorities(authorities);
 
     return authenticatedUser;
-  }
-
-  @SuppressWarnings("all") // .equals needed for NullBean
-  private boolean isNullBean(Object bean) {
-    return isNull(bean) || bean.equals(null);
   }
 
   @Bean
