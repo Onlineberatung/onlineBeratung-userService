@@ -19,7 +19,7 @@ public class TenantAdminService {
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantAdminControllerApi tenantAdminControllerApi;
 
-  @Cacheable(cacheNames = CacheManagerConfig.TENANT_CACHE, key = "#tenantId")
+  @Cacheable(cacheNames = CacheManagerConfig.TENANT_ADMIN_CACHE, key = "#tenantId")
   public TenantDTO getTenantById(Long tenantId) throws RestClientException {
     addDefaultHeaders(this.tenantAdminControllerApi.getApiClient());
     return this.tenantAdminControllerApi.getTenantById(tenantId);
