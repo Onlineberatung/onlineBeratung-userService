@@ -46,7 +46,7 @@ public class KeycloakConfig {
   @Bean
   @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
   public KeycloakSecurityContext keycloakSecurityContext(KeycloakAuthenticationToken token) {
-    return isNull(token) ? null : token.getAccount().getKeycloakSecurityContext();
+    return isNullBean(token) ? null : token.getAccount().getKeycloakSecurityContext();
   }
 
   @Bean
@@ -54,7 +54,7 @@ public class KeycloakConfig {
   public AuthenticatedUser authenticatedUser(KeycloakSecurityContext securityContext,
       KeycloakAuthenticationToken authenticationToken) {
     var authenticatedUser = new AuthenticatedUser();
-    if (isNull(authenticationToken)) {
+    if (isNullBean(authenticationToken) || isNullBean(securityContext)) {
       return authenticatedUser;
     }
 
@@ -89,6 +89,11 @@ public class KeycloakConfig {
     authenticatedUser.setGrantedAuthorities(authorities);
 
     return authenticatedUser;
+  }
+
+  @SuppressWarnings("all") // .equals needed for NullBean
+  private boolean isNullBean(Object bean) {
+    return isNull(bean) || bean.equals(null);
   }
 
   @Bean
