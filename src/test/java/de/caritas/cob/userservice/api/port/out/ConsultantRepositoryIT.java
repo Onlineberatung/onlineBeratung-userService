@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.model.Language;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -185,6 +186,7 @@ public class ConsultantRepositoryIT {
     BeanUtils.copyProperties(dbConsultant, consultant);
     consultant.setId(UUID.randomUUID().toString());
     consultant.setUsername(RandomStringUtils.randomAlphabetic(8));
+    consultant.setEmail(aValidEmail());
     consultant.setRocketChatId(RandomStringUtils.randomAlphabetic(8));
     underTest.save(consultant);
 
@@ -200,6 +202,15 @@ public class ConsultantRepositoryIT {
     underTest.save(consultant);
 
     consultant = underTest.findById(consultant.getId()).orElseThrow();
+  }
+
+  @NonNull
+  private String aValidEmail() {
+    return RandomStringUtils.randomAlphabetic(8)
+        + "@"
+        + RandomStringUtils.randomAlphabetic(8)
+        + "."
+        + (easyRandom.nextBoolean() ? "de" : "com");
   }
 
   private void givenAnExistingConsultantSpeaking(LanguageCode... languageCodes) {
