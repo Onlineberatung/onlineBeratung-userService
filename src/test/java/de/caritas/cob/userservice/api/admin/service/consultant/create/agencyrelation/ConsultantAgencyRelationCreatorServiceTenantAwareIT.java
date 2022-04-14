@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
+import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -38,7 +39,6 @@ import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +105,6 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
   }
 
   @Test
-  @Ignore
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValidAndMultitenancyEnabled() {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
@@ -132,12 +131,12 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    verify(rocketChatFacade, times(1))
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatFacade, times(1))
+            enquirySessionWithoutConsultant.getGroupId()));
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getFeedbackGroupId());
+            enquirySessionWithoutConsultant.getFeedbackGroupId()));
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
+import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -39,7 +40,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import org.jeasy.random.EasyRandom;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,11 +91,10 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   @MockBean
   private ConsultingTypeManager consultingTypeManager;
 
-  @MockBean
+  @Autowired
   private RocketChatAsyncHelper rocketChatAsyncHelper;
 
   @Test
-  @Ignore
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid() {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
@@ -122,12 +121,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    verify(rocketChatFacade, times(1))
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatFacade, times(1))
+            enquirySessionWithoutConsultant.getGroupId()));
+
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getFeedbackGroupId());
+            enquirySessionWithoutConsultant.getFeedbackGroupId()));
+
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -136,7 +137,6 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   }
 
   @Test
-  @Ignore
   public void createNewConsultantAgency_Should_addConsultantToTeamSessionRocketChatGroups_When_ParamsAreValid() {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
@@ -162,12 +162,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    verify(rocketChatFacade, times(1))
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatFacade, times(1))
+            enquirySessionWithoutConsultant.getGroupId()));
+
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getFeedbackGroupId());
+            enquirySessionWithoutConsultant.getFeedbackGroupId()));
+
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
