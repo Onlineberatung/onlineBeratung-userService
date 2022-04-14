@@ -13,6 +13,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -42,7 +43,16 @@ import org.springframework.lang.Nullable;
  * Represents a consultant
  */
 @Entity
-@Table(name = "consultant")
+@Table(
+    name = "consultant",
+    indexes = {
+        @Index(
+            columnList = "first_name, last_name, email",
+            name = "idx_first_name_last_name_email",
+            unique = true
+        ),
+    }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
