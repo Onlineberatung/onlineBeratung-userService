@@ -155,7 +155,7 @@ public class ConsultantAgencyAdminService {
   }
 
   private void markAsDeleted(ConsultantAgency consultantAgency) {
-    this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
+    this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
     consultantAgency.setDeleteDate(nowInUtc());
     this.consultantAgencyRepository.save(consultantAgency);
   }
