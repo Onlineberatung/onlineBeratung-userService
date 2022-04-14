@@ -1,6 +1,34 @@
 <configuration>
 
   <springProfile name="!testing">
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+      <destination>localhost:51413</destination>
+      <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+        <providers>
+          <mdc/>
+          <pattern>
+            <pattern>
+              {
+              "serviceName": "frontend",
+              "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
+              "request": {
+              "correlationId": "%mdc{CID:-test}",
+              "timestamp": "2022-04-14T13:33:42.501Z"
+              },
+              "log": {
+              "level": "%level",
+              "levelValue": "#asLong{%relative}",
+              "logger": "%logger",
+              "message": "%message",
+              "thread": "%thread",
+              "stack": "%replace(%replace(%rEx){'\n','\\\\n'}){'\t','\\\\t'}"
+              }
+              }
+            </pattern>
+          </pattern>
+        </providers>
+      </encoder>
+    </appender>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
       <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
         <providers>
@@ -8,20 +36,20 @@
           <pattern>
             <pattern>
               {
-                "serviceName": "users",
-                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
-                "request": {
-                  "correlationId": "%mdc{CID:-null}",
-                  "timestamp": "null"
-                },
-                "log": {
-                  "level": "%level",
-                  "levelValue": "#asLong{%relative}",
-                  "logger": "%logger",
-                  "message": "%message",
-                  "thread": "%thread",
-                  "stack": "%replace(%replace(%rEx){'\n','\\\\n'}){'\t','\\\\t'}"
-                }
+              "serviceName": "frontend",
+              "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
+              "request": {
+              "correlationId": "%mdc{CID:-test}",
+              "timestamp": "2022-04-14T13:33:42.501Z"
+              },
+              "log": {
+              "level": "%level",
+              "levelValue": "#asLong{%relative}",
+              "logger": "%logger",
+              "message": "%message",
+              "thread": "%thread",
+              "stack": "%replace(%replace(%rEx){'\n','\\\\n'}){'\t','\\\\t'}"
+              }
               }
             </pattern>
           </pattern>
@@ -30,6 +58,7 @@
     </appender>
     <root level="INFO">
       <appender-ref ref="STDOUT"/>
+      <appender-ref ref="logstash"/>
     </root>
   </springProfile>
 
