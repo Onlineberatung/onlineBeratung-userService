@@ -653,7 +653,9 @@ components:
         status:
           type: string
         agencies:
-          $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
+          type: array
+          items:
+            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
     ConsultantAdminResponseDTO:
       type: object

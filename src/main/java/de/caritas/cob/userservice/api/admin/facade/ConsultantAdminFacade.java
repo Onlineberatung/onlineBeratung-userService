@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.facade;
 import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
 import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.REQUESTED_SORT_FIELD_DOES_NOT_EXIST;
+import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
@@ -24,6 +25,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrela
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -63,8 +65,11 @@ public class ConsultantAdminFacade {
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
       ConsultantFilter consultantFilter, Sort sort) {
     validateSortInputField(sort);
-    return this.consultantAdminFilterService.findFilteredConsultants(page, perPage,
-        consultantFilter, sort);
+    var filteredConsultants = this.consultantAdminFilterService
+        .findFilteredConsultants(page, perPage, consultantFilter, sort);
+    retriveAndMergeAgenciesToConsultants(filteredConsultants);
+
+    return filteredConsultants;
   }
 
   private void validateSortInputField(Sort sort) {
@@ -73,6 +78,16 @@ public class ConsultantAdminFacade {
 
     if (containsNoValidField) {
       throw new CustomValidationHttpStatusException(REQUESTED_SORT_FIELD_DOES_NOT_EXIST);
+    }
+  }
+
+  private void retriveAndMergeAgenciesToConsultants(ConsultantSearchResultDTO filteredConsultants) {
+    if (nonNull(filteredConsultants)) {
+      var consultants = filteredConsultants.getEmbedded().stream()
+          .map(ConsultantAdminResponseDTO::getEmbedded)
+          .collect(Collectors.toSet());
+
+      consultantAgencyAdminService.appendAgenciesForConsultants(consultants);
     }
   }
 
