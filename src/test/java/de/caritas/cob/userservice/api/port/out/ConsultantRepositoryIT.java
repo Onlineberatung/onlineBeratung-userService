@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +32,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("testing")
-@AutoConfigureTestDatabase(replace = Replace.ANY)
+@AutoConfigureTestDatabase
 public class ConsultantRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -266,7 +265,8 @@ public class ConsultantRepositoryIT {
     );
   }
 
-  private void givenConsultantsMatchingFirstName(@PositiveOrZero int count, @NotNull String infix) {
+  private void givenConsultantsMatchingFirstName(@PositiveOrZero int count,
+      @NotBlank String infix) {
     while (count-- > 0) {
       var dbConsultant = underTest.findAll().iterator().next();
       var consultant = new Consultant();
@@ -283,7 +283,7 @@ public class ConsultantRepositoryIT {
     }
   }
 
-  private void givenConsultantsMatchingLastName(@PositiveOrZero int count, @NotNull String infix) {
+  private void givenConsultantsMatchingLastName(@PositiveOrZero int count, @NotBlank String infix) {
     while (count-- > 0) {
       var dbConsultant = underTest.findAll().iterator().next();
       var consultant = new Consultant();
@@ -300,7 +300,7 @@ public class ConsultantRepositoryIT {
     }
   }
 
-  private void givenConsultantsMatchingEmail(@PositiveOrZero int count, @NotNull String infix) {
+  private void givenConsultantsMatchingEmail(@PositiveOrZero int count, @NotBlank String infix) {
     while (count-- > 0) {
       var dbConsultant = underTest.findAll().iterator().next();
       var consultant = new Consultant();
@@ -317,7 +317,7 @@ public class ConsultantRepositoryIT {
     }
   }
 
-  private void givenConsultantsNotMatching(@PositiveOrZero int count, @NotNull String infix) {
+  private void givenConsultantsNotMatching(@PositiveOrZero int count, @NotBlank String infix) {
     while (count-- > 0) {
       var dbConsultant = underTest.findAll().iterator().next();
       var consultant = new Consultant();
