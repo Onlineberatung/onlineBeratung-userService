@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.Consultant;
 import lombok.NonNull;
@@ -83,13 +84,14 @@ public class ConsultantAdminService {
    * @param consultantId the consultant id
    */
   public void markConsultantForDeletion(String consultantId) {
-    Consultant consultant = this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
+    var consultant = this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
         .orElseThrow(() -> new NotFoundException(
             String.format("Consultant with id %s does not exist", consultantId)));
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
     consultant.setDeleteDate(nowInUtc());
+    consultant.setStatus(ConsultantStatus.IN_DELETION);
     this.consultantRepository.save(consultant);
   }
 }

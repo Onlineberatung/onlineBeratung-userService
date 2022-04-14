@@ -19,6 +19,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.update.Consultant
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import java.util.stream.Collectors;
@@ -147,6 +148,7 @@ public class ConsultantAdminServiceIT {
 
     var deletedConsultant = consultantRepository.findById(consultant.getId());
     assertThat(deletedConsultant.get().getDeleteDate(), notNullValue());
+    assertThat(deletedConsultant.get().getStatus(), is(ConsultantStatus.IN_DELETION));
     deletedConsultant.get().getConsultantAgencies().forEach(ca -> {
       assertThat(ca.getDeleteDate(), notNullValue());
     });
