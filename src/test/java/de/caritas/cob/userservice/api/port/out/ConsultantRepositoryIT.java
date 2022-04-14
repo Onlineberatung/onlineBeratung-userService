@@ -194,7 +194,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void findAllByInfixShouldFindConsultantWithMatchingInfixes() {
+  void findAllByInfixShouldFindConsultantWithMatchingInfixes() {
     var infix = RandomStringUtils.randomAlphanumeric(4);
     var firstNameMatching = easyRandom.nextInt(20) + 5;
     givenConsultantsMatchingFirstName(firstNameMatching, infix);
@@ -216,7 +216,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void findAllByInfixShouldReturnEmptyResultIfNoneMatching() {
+  void findAllByInfixShouldReturnEmptyResultIfNoneMatching() {
     var infix = RandomStringUtils.randomAlphanumeric(4);
     var notMatching = easyRandom.nextInt(20) + 5;
     givenConsultantsNotMatching(notMatching, infix);
@@ -228,7 +228,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void findAllByInfixShouldBeLimitedIfLimitGiven() {
+  void findAllByInfixShouldBeLimitedIfLimitGiven() {
     var infix = RandomStringUtils.randomAlphanumeric(16);
     var limit = easyRandom.nextInt(100);
     givenConsultantsMatchingEmail(limit + 1, infix);
@@ -244,7 +244,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void findAllByInfixShouldSearchCaseInsensitive() {
+  void findAllByInfixShouldSearchCaseInsensitive() {
     var infix = RandomStringUtils.randomAlphanumeric(4);
     var transformedInfix = easyRandom.nextBoolean() ? infix.toLowerCase() : infix.toUpperCase();
     var firstNameMatching = easyRandom.nextInt(20) + 5;
