@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.INITIAL;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static java.util.Objects.isNull;
@@ -32,7 +33,7 @@ public class ConsultantAgencyDeletionValidationService {
    *
    * @param consultantAgency the {@link ConsultantAgency} to be deleted
    */
-  public void validateForDeletion(ConsultantAgency consultantAgency) {
+  public void validateAndMarkForDeletion(ConsultantAgency consultantAgency) {
     if (isTheLastConsultantInAgency(consultantAgency)) {
       if (isAgencyStillActive(consultantAgency)) {
         throw new CustomValidationHttpStatusException(
@@ -43,6 +44,8 @@ public class ConsultantAgencyDeletionValidationService {
             CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES);
       }
     }
+    consultantAgency.setDeleteDate(nowInUtc());
+    consultantAgencyRepository.save(consultantAgency);
   }
 
   private boolean isTheLastConsultantInAgency(ConsultantAgency consultantAgency) {

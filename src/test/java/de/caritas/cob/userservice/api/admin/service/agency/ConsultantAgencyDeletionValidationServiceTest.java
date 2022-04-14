@@ -51,7 +51,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(false));
 
     try {
-      this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
+      this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
@@ -70,7 +70,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
         .thenReturn(singletonList(mock(Session.class)));
 
     try {
-      this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
+      this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
@@ -86,7 +86,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
         .thenReturn(singletonList(consultantAgency));
     when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
 
-    this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
+    this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
   }
 
   @Test
@@ -98,7 +98,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
 
     assertDoesNotThrow(
-        () -> this.agencyDeletionValidationService.validateForDeletion(consultantAgency));
+        () -> this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency));
   }
 
 }

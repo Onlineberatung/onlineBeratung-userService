@@ -36,7 +36,7 @@ public class ConsultantPreDeletionService {
     }
     if (nonNull(consultant.getConsultantAgencies())) {
       consultant.getConsultantAgencies()
-          .forEach(agencyDeletionValidationService::validateForDeletion);
+          .forEach(agencyDeletionValidationService::validateAndMarkForDeletion);
     }
     this.identityClient.deactivateUser(consultant.getId());
   }
