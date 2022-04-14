@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -72,6 +73,8 @@ public class ConsultantAgencyRelationCreatorService {
   private void createNewConsultantAgency(ConsultantAgencyCreationInput input,
       Consumer<String> logMethod) {
     var consultant = this.retrieveConsultant(input.getConsultantId());
+    consultant.setStatus(ConsultantStatus.IN_PROGRESS);
+    consultantRepository.save(consultant);
 
     var agency = retrieveAgency(input.getAgencyId());
     if (consultingTypeManager.isConsultantBoundedToAgency(agency.getConsultingType())) {
