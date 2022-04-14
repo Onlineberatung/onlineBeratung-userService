@@ -2,14 +2,14 @@
 
   <springProfile name="!testing">
     <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-      <destination>localhost:51413</destination>
+      <destination>logstash.develop:8080</destination>
       <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
         <providers>
           <mdc/>
           <pattern>
             <pattern>
               {
-              "serviceName": "frontend",
+              "serviceName": "users",
               "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
               "request": {
               "correlationId": "%mdc{CID:-test}",
@@ -36,7 +36,7 @@
           <pattern>
             <pattern>
               {
-              "serviceName": "frontend",
+              "serviceName": "users",
               "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
               "request": {
               "correlationId": "%mdc{CID:-test}",
@@ -59,6 +59,7 @@
     <root level="INFO">
       <appender-ref ref="STDOUT"/>
       <appender-ref ref="logstash"/>
+      <appender-ref ref="stash"/>
     </root>
   </springProfile>
 
