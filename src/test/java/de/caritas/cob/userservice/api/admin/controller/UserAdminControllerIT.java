@@ -154,7 +154,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
-        .findFilteredConsultants(eq(0), eq(1), any());
+        .findFilteredConsultants(eq(0), eq(1), any(), any());
   }
 
   @Test

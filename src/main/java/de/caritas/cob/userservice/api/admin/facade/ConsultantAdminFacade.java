@@ -2,12 +2,10 @@ package de.caritas.cob.userservice.api.admin.facade;
 
 import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
 import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.REQUESTED_SORT_FIELD_DOES_NOT_EXIST;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
-import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
-import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
@@ -16,10 +14,17 @@ import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.Sort;
+import de.caritas.cob.userservice.api.admin.model.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
+import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
+import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,9 +61,19 @@ public class ConsultantAdminFacade {
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
-      ConsultantFilter consultantFilter) {
+      ConsultantFilter consultantFilter, Sort sort) {
+    validateSortInputField(sort);
     return this.consultantAdminFilterService.findFilteredConsultants(page, perPage,
-        consultantFilter);
+        consultantFilter, sort);
+  }
+
+  private void validateSortInputField(Sort sort) {
+    var containsNoValidField = Stream.of(FieldEnum.values())
+        .noneMatch(field -> field.equals(sort.getField()));
+
+    if (containsNoValidField) {
+      throw new CustomValidationHttpStatusException(REQUESTED_SORT_FIELD_DOES_NOT_EXIST);
+    }
   }
 
   /**

@@ -77,12 +77,24 @@ public class ConsultantAdminFilterServiceIT extends ConsultantAdminFilterService
 
   @Test
   public void findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast() {
-    super.findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast();
+    super
+        .findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast();
   }
 
   @Test
   public void findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst() {
-    super.findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst();
+    super
+        .findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst();
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_orderResultByFirstNameDESC_When_sortParameterIsGiven() {
+    super.findFilteredConsultants_Should_orderResultByFirstNameDESC_When_sortParameterIsGiven();
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_orderResultByEmailASC_When_sortParameterIsGiven() {
+    super.findFilteredConsultants_Should_orderResultByEmailASC_When_sortParameterIsGiven();
   }
 
 }

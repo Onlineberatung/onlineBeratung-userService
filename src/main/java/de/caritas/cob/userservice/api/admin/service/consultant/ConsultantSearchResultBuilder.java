@@ -3,16 +3,15 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
 import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.admin.model.HalLink;
 import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.admin.model.PaginationLinks;
+import de.caritas.cob.userservice.api.admin.model.Sort;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hibernate.search.jpa.FullTextQuery;
@@ -25,6 +24,7 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
 
   private final FullTextQuery fullTextQuery;
   private ConsultantFilter consultantFilter;
+  private Sort sort;
   private Integer page;
   private Integer perPage;
 
@@ -50,6 +50,11 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
    */
   public ConsultantSearchResultBuilder withFilter(ConsultantFilter consultantFilter) {
     this.consultantFilter = consultantFilter;
+    return this;
+  }
+
+  public ConsultantSearchResultBuilder withSort(Sort sort) {
+    this.sort = sort;
     return this;
   }
 
@@ -83,12 +88,12 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
    */
   public ConsultantSearchResultDTO buildConsultantSearchResult() {
     Stream<Consultant> resultStream = fullTextQuery.getResultStream();
-    List<ConsultantAdminResponseDTO> resultList = resultStream
+    var resultList = resultStream
         .map(ConsultantResponseDTOBuilder::getInstance)
         .map(ConsultantResponseDTOBuilder::buildResponseDTO)
         .collect(Collectors.toList());
 
-    PaginationLinks paginationLinks = new PaginationLinks()
+    var paginationLinks = new PaginationLinks()
         .self(buildSelfLink())
         .next(buildNextLink())
         .previous(buildPreviousLink());
@@ -105,7 +110,8 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
 
   private HalLink buildHalLinkForParams(Integer page, Integer perPage) {
     return buildHalLink(
-        methodOn(UseradminApi.class).getConsultants(page, perPage, this.consultantFilter),
+        methodOn(UseradminApi.class)
+            .getConsultants(page, perPage, this.consultantFilter, this.sort),
         MethodEnum.GET);
   }
 
