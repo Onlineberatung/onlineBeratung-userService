@@ -2,7 +2,7 @@
 
   <springProfile name="!testing">
     <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-      <destination>localhost:51413</destination>
+      <destination>logstash.develop:8080</destination>
       <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
         <providers>
           <mdc/>
