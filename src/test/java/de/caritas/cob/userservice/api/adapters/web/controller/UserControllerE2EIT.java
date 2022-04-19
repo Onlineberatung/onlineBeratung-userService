@@ -343,7 +343,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void searchConsultantsShouldRespondWithBadRequestIfQueryIsNotGiven() throws Exception {
+  void searchConsultantsShouldRespondWithBadRequestIfQueryIsNotGiven() throws Exception {
     mockMvc.perform(
         get("/users/consultants/search")
             .cookie(CSRF_COOKIE)
@@ -354,7 +354,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void searchConsultantsShouldRespondWithBadRequestIfPageTooSmall() throws Exception {
+  void searchConsultantsShouldRespondWithBadRequestIfPageTooSmall() throws Exception {
     int pageNumber = -easyRandom.nextInt(3);
 
     mockMvc.perform(
@@ -369,7 +369,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void searchConsultantsShouldRespondWithBadRequestIfPerPageTooSmall() throws Exception {
+  void searchConsultantsShouldRespondWithBadRequestIfPerPageTooSmall() throws Exception {
     int perPage = -easyRandom.nextInt(3);
 
     mockMvc.perform(
@@ -384,7 +384,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void searchConsultantsShouldRespondWithBadRequestIfFieldIsNotInEnum() throws Exception {
+  void searchConsultantsShouldRespondWithBadRequestIfFieldIsNotInEnum() throws Exception {
     mockMvc.perform(
         get("/users/consultants/search")
             .cookie(CSRF_COOKIE)
@@ -397,7 +397,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void searchConsultantsShouldRespondWithBadRequestIfOrderIsNotInEnum() throws Exception {
+  void searchConsultantsShouldRespondWithBadRequestIfOrderIsNotInEnum() throws Exception {
     mockMvc.perform(
         get("/users/consultants/search")
             .cookie(CSRF_COOKIE)
@@ -410,7 +410,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void searchConsultantsShouldRespondOkIfQueryIsGiven() throws Exception {
+  void searchConsultantsShouldRespondOkIfQueryIsGiven() throws Exception {
     mockMvc.perform(
         get("/users/consultants/search")
             .cookie(CSRF_COOKIE)
@@ -422,7 +422,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void searchConsultantsShouldRespondOkIfAllIsGiven() throws Exception {
+  void searchConsultantsShouldRespondOkIfAllIsGiven() throws Exception {
     mockMvc.perform(
         get("/users/consultants/search")
             .cookie(CSRF_COOKIE)
