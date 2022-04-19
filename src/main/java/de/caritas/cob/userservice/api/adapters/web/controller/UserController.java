@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
@@ -91,6 +92,7 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.InternalServerErrorException;
@@ -631,6 +633,13 @@ public class UserController implements UsersApi {
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
+  @Override
+  public ResponseEntity<ConsultantSearchResultDTO> searchConsultants(
+      String query, Integer page, Integer perPage, String field, String order) {
+
+    return ResponseEntity.ok(new ConsultantSearchResultDTO());
+  }
+
   /**
    * Assigns a session (the provided session id) to the provided consultant id.
    *
@@ -1060,12 +1069,12 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing all agencies of consultant
    */
   @Override
-  public ResponseEntity<ConsultantResponseDTO> getConsultantPublicData(String consultantId) {
-    var consultant = consultantService.getConsultant(consultantId)
+  public ResponseEntity<ConsultantResponseDTO> getConsultantPublicData(UUID consultantId) {
+    var consultant = consultantService.getConsultant(consultantId.toString())
         .orElseThrow(() ->
             new NotFoundException(String.format("Consultant with id %s not found", consultantId))
         );
-    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId);
+    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId.toString());
     var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);
