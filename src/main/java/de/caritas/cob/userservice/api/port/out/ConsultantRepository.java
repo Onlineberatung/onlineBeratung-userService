@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.port.out;
 
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +26,8 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
 
   @Query(
       value =
-          "FROM Consultant c "
+          "SELECT c.id as id, c.firstName as firstName, c.lastName as lastName, c.email as email "
+              + "FROM Consultant c "
               + "WHERE c.deleteDate IS NULL"
               + "  AND ("
               + "   UPPER(c.firstName) LIKE CONCAT('%', UPPER(?1), '%')"
@@ -33,7 +35,7 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
               + "   OR UPPER(c.email) LIKE CONCAT('%', UPPER(?1), '%')"
               + "  )"
   )
-  List<Consultant> findAllByInfix(String infix, Pageable pageable);
+  List<ConsultantBase> findAllByInfix(String infix, Pageable pageable);
 
   long countByDeleteDateIsNull();
 
