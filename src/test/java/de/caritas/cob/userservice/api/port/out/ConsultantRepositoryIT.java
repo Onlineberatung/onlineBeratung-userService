@@ -28,6 +28,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -240,6 +241,46 @@ public class ConsultantRepositoryIT {
     foundConsultants.forEach(consultant ->
         assertTrue(matchingIds.contains(consultant.getId()))
     );
+  }
+
+  @Test
+  void findAllByInfixShouldBeSortedByLastNameDescIfSortGiven() {
+    var infix = RandomStringUtils.randomAlphanumeric(16);
+    var limit = easyRandom.nextInt(100) + 1;
+    givenConsultantsMatchingEmail(limit, infix);
+
+    var sort = Sort.by("lastName").descending();
+    var pageRequest = PageRequest.of(0, limit, sort);
+    var foundConsultants = underTest.findAllByInfix(infix, pageRequest);
+
+    assertEquals(limit, foundConsultants.size());
+    assertEquals(limit, matchingIds.size());
+    var previousLastName = foundConsultants.get(0).getLastName();
+    for (var foundConsultant : foundConsultants) {
+      assertTrue(matchingIds.contains(foundConsultant.getId()));
+      assertTrue(previousLastName.compareTo(foundConsultant.getLastName()) >= 0);
+      previousLastName = foundConsultant.getLastName();
+    }
+  }
+
+  @Test
+  void findAllByInfixShouldBeSortedByFirstNameAscIfSortGiven() {
+    var infix = RandomStringUtils.randomAlphanumeric(16);
+    var limit = easyRandom.nextInt(100);
+    givenConsultantsMatchingEmail(limit, infix);
+
+    var sort = Sort.by("firstName").ascending();
+    var pageRequest = PageRequest.of(0, limit, sort);
+    var foundConsultants = underTest.findAllByInfix(infix, pageRequest);
+
+    assertEquals(limit, foundConsultants.size());
+    assertEquals(limit, matchingIds.size());
+    var previousFirstName = foundConsultants.get(0).getFirstName();
+    for (var foundConsultant : foundConsultants) {
+      assertTrue(matchingIds.contains(foundConsultant.getId()));
+      assertTrue(previousFirstName.compareTo(foundConsultant.getFirstName()) <= 0);
+      previousFirstName = foundConsultant.getFirstName();
+    }
   }
 
   @Test
