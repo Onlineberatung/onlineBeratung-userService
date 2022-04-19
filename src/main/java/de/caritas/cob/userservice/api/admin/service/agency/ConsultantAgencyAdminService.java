@@ -82,7 +82,7 @@ public class ConsultantAgencyAdminService {
         .collect(Collectors.toSet());
 
     var consultantAgencies = consultantAgencyRepository
-        .findByConsultantIdInAndDeleteDateIsNull(consultantIds);
+        .findByConsultantIdIn(consultantIds);
 
     var agencyIds = consultantAgencies.stream()
         .map(ConsultantAgency::getAgencyId)

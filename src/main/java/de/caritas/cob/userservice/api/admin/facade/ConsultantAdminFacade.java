@@ -25,6 +25,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrela
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
@@ -74,12 +75,22 @@ public class ConsultantAdminFacade {
 
   private void validateSortInputField(Sort sort) {
     var containsNoValidField = Stream.of(FieldEnum.values())
-        .noneMatch(field -> field.equals(sort.getField()));
+        .noneMatch(providedSortFieldIgnoringCase(sort));
 
     if (containsNoValidField) {
       throw new CustomValidationHttpStatusException(REQUESTED_SORT_FIELD_DOES_NOT_EXIST);
     }
   }
+
+  private Predicate<FieldEnum> providedSortFieldIgnoringCase(Sort sort) {
+    return field -> {
+      if (nonNull(sort.getField())) {
+        return field.getValue().equalsIgnoreCase(sort.getField().getValue());
+      }
+      return false;
+    };
+  }
+
 
   private void retriveAndMergeAgenciesToConsultants(ConsultantSearchResultDTO filteredConsultants) {
     if (nonNull(filteredConsultants)) {
