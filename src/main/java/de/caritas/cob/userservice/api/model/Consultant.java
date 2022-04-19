@@ -47,8 +47,8 @@ import org.springframework.lang.Nullable;
     name = "consultant",
     indexes = {
         @Index(
-            columnList = "first_name, last_name, email",
-            name = "idx_first_name_last_name_email",
+            columnList = "first_name, last_name, email, delete_date",
+            name = "idx_first_name_last_name_email_delete_date",
             unique = true
         ),
     }
@@ -211,5 +211,16 @@ public class Consultant implements TenantAware {
   public String toString() {
     return "Consultant [id=" + id + ", rocketChatId=" + rocketChatId + ", username=" + username
         + "]";
+  }
+
+  public interface ConsultantBase {
+
+    String getId();
+
+    String getFirstName();
+
+    String getLastName();
+
+    String getEmail();
   }
 }
