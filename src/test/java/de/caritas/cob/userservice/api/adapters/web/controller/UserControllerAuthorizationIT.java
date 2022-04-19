@@ -103,25 +103,19 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
-@TestPropertySource(properties = "spring.profiles.active=testing")
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = Replace.ANY)
+@ActiveProfiles("testing")
 public class UserControllerAuthorizationIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -966,6 +960,55 @@ public class UserControllerAuthorizationIT {
     ).andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAgencyService);
+  }
+
+  @Test
+  public void searchConsultantsShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
+    mvc.perform(
+        get("/users/consultants/search")
+            .accept("application/hal+json")
+            .param("query", "e")
+    ).andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void searchConsultantsShouldReturnUnauthorizedWhenNoKeycloakAuthorization()
+      throws Exception {
+    mvc.perform(
+        get("/users/consultants/search")
+            .accept("application/hal+json")
+            .param("query", "e")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+    ).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ANONYMOUS_DEFAULT,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
+      AuthorityValue.CONSULTANT_DEFAULT,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS
+  })
+  public void searchConsultantsShouldReturnForbiddenWhenNoUserAdminAuthority() throws Exception {
+    mvc.perform(
+        get("/users/consultants/search")
+            .accept("application/hal+json")
+            .param("query", "e")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+    ).andExpect(status().isForbidden());
   }
 
   /**

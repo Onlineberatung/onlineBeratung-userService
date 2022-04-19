@@ -108,7 +108,6 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -120,7 +119,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -129,8 +128,8 @@ import org.springframework.web.util.UriTemplateHandler;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "spring.profiles.active=testing")
-@AutoConfigureTestDatabase(replace = Replace.ANY)
+@ActiveProfiles("testing")
+@AutoConfigureTestDatabase
 public class UserControllerE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -340,6 +339,101 @@ public class UserControllerE2EIT {
     assertEquals(LanguageCode.de, savedSession.get().getLanguageCode());
 
     restoreSession();
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void searchConsultantsShouldRespondWithBadRequestIfQueryIsNotGiven() throws Exception {
+    mockMvc.perform(
+        get("/users/consultants/search")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept("application/hal+json")
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void searchConsultantsShouldRespondWithBadRequestIfPageTooSmall() throws Exception {
+    int pageNumber = -easyRandom.nextInt(3);
+
+    mockMvc.perform(
+        get("/users/consultants/search")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept("application/hal+json")
+            .param("query", RandomStringUtils.randomAlphabetic(1))
+            .param("page", String.valueOf(pageNumber))
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void searchConsultantsShouldRespondWithBadRequestIfPerPageTooSmall() throws Exception {
+    int perPage = -easyRandom.nextInt(3);
+
+    mockMvc.perform(
+        get("/users/consultants/search")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept("application/hal+json")
+            .param("query", RandomStringUtils.randomAlphabetic(1))
+            .param("perPage", String.valueOf(perPage))
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void searchConsultantsShouldRespondWithBadRequestIfFieldIsNotInEnum() throws Exception {
+    mockMvc.perform(
+        get("/users/consultants/search")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept("application/hal+json")
+            .param("query", RandomStringUtils.randomAlphabetic(1))
+            .param("field", RandomStringUtils.randomAlphabetic(16))
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void searchConsultantsShouldRespondWithBadRequestIfOrderIsNotInEnum() throws Exception {
+    mockMvc.perform(
+        get("/users/consultants/search")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept("application/hal+json")
+            .param("query", RandomStringUtils.randomAlphabetic(1))
+            .param("order", RandomStringUtils.randomAlphabetic(16))
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void searchConsultantsShouldRespondOkIfQueryIsGiven() throws Exception {
+    mockMvc.perform(
+        get("/users/consultants/search")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept("application/hal+json")
+            .param("query", RandomStringUtils.randomAlphabetic(1))
+    ).andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void searchConsultantsShouldRespondOkIfAllIsGiven() throws Exception {
+    mockMvc.perform(
+        get("/users/consultants/search")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept("application/hal+json")
+            .param("query", RandomStringUtils.randomAlphabetic(1))
+            .param("page", "1")
+            .param("perPage", "10")
+            .param("field", "lastName")
+            .param("order", "ASC")
+    ).andExpect(status().isOk());
   }
 
   @Test
