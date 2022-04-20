@@ -58,7 +58,6 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
 
   private void encode(T event, OutputStream outputStream) {
     if (this.encoder instanceof StreamingEncoder) {
-      logToStandardOutput("Encoding message stream");
       try {
         ((StreamingEncoder) this.encoder).encode(event, outputStream);
       } catch (Exception e) {
