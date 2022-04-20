@@ -23,18 +23,33 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
   @Override
   protected void append(ILoggingEvent event) {
 
-    this.logstashHost = System.getenv("LOGSTASH_HOST");
-    if (logstashHost == null) {
-      logToStandardOutput("logstash env variable not found, skipping logging");
+    if (!isLogstashEnvVariableSet()) {
       return;
     }
 
     String json = serializeToJson((T) event);
-    try (CloseableHttpClient client = HttpClients.createDefault()) {
+    try (CloseableHttpClient client = getHttpClient()) {
       client.execute(prepareHttpPutRequest(json));
     } catch (IOException e) {
-      handleException(e);
+      handleIOException(e);
     }
+  }
+
+  CloseableHttpClient getHttpClient() {
+    return HttpClients.createDefault();
+  }
+
+  private boolean isLogstashEnvVariableSet() {
+    this.logstashHost = getLogstashHost();
+    if (logstashHost == null) {
+      logToStandardError("Logstash env variable (LOGSTASH_HOST) not set, skipping logging to logstash");
+      return false;
+    }
+    return true;
+  }
+
+  protected String getLogstashHost() {
+    return System.getenv("LOGSTASH_HOST");
   }
 
   private HttpPut prepareHttpPutRequest(String json) throws UnsupportedEncodingException {
@@ -45,8 +60,8 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
     return httpPut;
   }
 
-  private void handleException(IOException e) {
-    logToStandardOutput("IO Exception during http call to logstash endpoint");
+  private void handleIOException(IOException e) {
+    logToStandardError("IO Exception during http call to logstash endpoint");
     e.printStackTrace();
   }
 
@@ -61,14 +76,16 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
       try {
         ((StreamingEncoder) this.encoder).encode(event, outputStream);
       } catch (Exception e) {
-        logToStandardOutput("Encoder exception occurred. Logs may not be delivered to logstash");
+        logToStandardError("Encoder exception occurred. Logs may not be delivered to logstash");
         e.printStackTrace();
       }
+    } else {
+      logToStandardError("Encoder is not an instance of streaming encoder. ");
     }
   }
 
-  private void logToStandardOutput(String msg) {
-    System.out.println(msg);
+  private void logToStandardError(String msg) {
+    System.err.println(msg);
   }
 
   public void setEncoder(Encoder<T> encoder) {
