@@ -11,8 +11,8 @@
               "serviceName": "users",
               "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
               "request": {
-              "correlationId": "%mdc{CID:-test}",
-              "timestamp": "2022-04-14T13:33:42.501Z"
+              "correlationId": "%mdc{CID:-null}",
+              "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}"
               },
               "log": {
               "level": "%level",
@@ -38,8 +38,8 @@
               "serviceName": "users",
               "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
               "request": {
-              "correlationId": "%mdc{CID:-test}",
-              "timestamp": "2022-04-14T13:33:42.501Z"
+              "correlationId": "%mdc{CID:-null}",
+              "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}"
               },
               "log": {
               "level": "%level",
