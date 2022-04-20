@@ -13,9 +13,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -46,7 +45,16 @@ import org.springframework.lang.Nullable;
  * Represents a consultant
  */
 @Entity
-@Table(name = "consultant")
+@Table(
+    name = "consultant",
+    indexes = {
+        @Index(
+            columnList = "first_name, last_name, email, delete_date",
+            name = "idx_first_name_last_name_email_delete_date",
+            unique = true
+        ),
+    }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -78,7 +86,7 @@ public class Consultant implements TenantAware {
   @Column(name = "username", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
-  @Field()
+  @Field
   @SortableField
   private String username;
 
@@ -152,6 +160,9 @@ public class Consultant implements TenantAware {
   @Field
   private Long tenantId;
 
+  @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL)
+  private Set<Appointment> appointments;
+
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
@@ -214,5 +225,16 @@ public class Consultant implements TenantAware {
   public String toString() {
     return "Consultant [id=" + id + ", rocketChatId=" + rocketChatId + ", username=" + username
         + "]";
+  }
+
+  public interface ConsultantBase {
+
+    String getId();
+
+    String getFirstName();
+
+    String getLastName();
+
+    String getEmail();
   }
 }

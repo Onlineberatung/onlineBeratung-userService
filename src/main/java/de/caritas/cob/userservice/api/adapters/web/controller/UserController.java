@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
@@ -30,7 +31,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -92,6 +92,7 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.InternalServerErrorException;
@@ -291,6 +292,15 @@ public class UserController implements UsersApi {
     var userSessionsDTO = sessionListFacade
         .retrieveSortedSessionsForAuthenticatedUser(user.getUserId(), rocketChatCredentials);
 
+    userSessionsDTO.getSessions().forEach(session -> {
+      var consultant = session.getConsultant();
+      if (nonNull(consultant) && nonNull(consultant.getUsername())) {
+        accountManager.findConsultantByUsername(consultant.getUsername()).ifPresent(consultantMap ->
+            consultant.setDisplayName(userDtoMapper.displayNameOf(consultantMap))
+        );
+      }
+    });
+
     return isNotEmpty(userSessionsDTO.getSessions())
         ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -317,27 +327,28 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<UserDataResponseDTO> getUserData() {
-    var userDataResponseDTO = authenticatedUser.isConsultant()
-        ? consultantDataProvider.retrieveData(userAccountProvider.retrieveValidatedConsultant())
-        : askerDataProvider.retrieveData(userAccountProvider.retrieveValidatedUser());
-
-    var isOtpEnabled = authenticatedUser.isUser() && identityClientConfig.getOtpAllowedForUsers()
-        || authenticatedUser.isConsultant() && identityClientConfig.getOtpAllowedForConsultants();
-
-    TwoFactorAuthDTO twoFactorAuthDTO;
-    var encourage2fa = userDataResponseDTO.getEncourage2fa();
-    if (isOtpEnabled) {
-      var username = authenticatedUser.getUsername();
-      var otpInfoDTO = identityManager.getOtpCredential(username);
-      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(otpInfoDTO, encourage2fa);
+    UserDataResponseDTO partialUserData;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      partialUserData = consultantDataProvider.retrieveData(consultant);
+      accountManager.findConsultant(authenticatedUser.getUserId()).ifPresent(consultantMap ->
+          partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap))
+      );
     } else {
-      twoFactorAuthDTO = userDtoMapper.twoFactorAuthDtoOf(encourage2fa);
+      var user = userAccountProvider.retrieveValidatedUser();
+      partialUserData = askerDataProvider.retrieveData(user);
     }
-    userDataResponseDTO.setTwoFactorAuth(twoFactorAuthDTO);
 
-    userDataResponseDTO.setE2eEncryptionEnabled(videoChatConfig.getE2eEncryptionEnabled());
+    var otpInfoDTO = identityClientConfig.isOtpAllowed(authenticatedUser.getRoles())
+        ? identityManager.getOtpCredential(authenticatedUser.getUsername())
+        : null;
 
-    return new ResponseEntity<>(userDataResponseDTO, HttpStatus.OK);
+    var fullUserData = userDtoMapper.userDataOf(
+        partialUserData, otpInfoDTO, videoChatConfig.getE2eEncryptionEnabled(),
+        identityClientConfig.getDisplayNameAllowedForConsultants()
+    );
+
+    return new ResponseEntity<>(fullUserData, HttpStatus.OK);
   }
 
   @Override
@@ -509,7 +520,8 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewMessageNotification(newMessageNotificationDTO.getRcGroupId(),
-        authenticatedUser.getRoles(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
+        authenticatedUser.getRoles(), authenticatedUser.getUserId(),
+        TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -527,7 +539,8 @@ public class UserController implements UsersApi {
       @RequestBody NewMessageNotificationDTO newMessageNotificationDTO) {
 
     emailNotificationFacade.sendNewFeedbackMessageNotification(
-        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId(), TenantContext.getCurrentTenantData());
+        newMessageNotificationDTO.getRcGroupId(), authenticatedUser.getUserId(),
+        TenantContext.getCurrentTenantData());
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -618,6 +631,13 @@ public class UserController implements UsersApi {
     return isNotEmpty(consultants)
         ? new ResponseEntity<>(consultants, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<ConsultantSearchResultDTO> searchConsultants(
+      String query, Integer page, Integer perPage, String field, String order) {
+
+    return ResponseEntity.ok(new ConsultantSearchResultDTO());
   }
 
   /**
@@ -1030,12 +1050,6 @@ public class UserController implements UsersApi {
     return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
   }
 
-  @Override
-  public ResponseEntity<Void> activateTwoFactorAuthByAppDeprecated(
-      OneTimePasswordDTO oneTimePasswordDTO) {
-    return activateTwoFactorAuthByApp(oneTimePasswordDTO);
-  }
-
   /**
    * Deactivates 2FA by mobile app for the calling user.
    *
@@ -1048,11 +1062,6 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
-  @Override
-  public ResponseEntity<Void> deactivateTwoFactorAuthByAppDeprecated() {
-    return deactivateTwoFactorAuthByApp();
-  }
-
   /**
    * Returns all agencies of given consultant.
    *
@@ -1060,12 +1069,12 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} containing all agencies of consultant
    */
   @Override
-  public ResponseEntity<ConsultantResponseDTO> getConsultantPublicData(String consultantId) {
-    var consultant = consultantService.getConsultant(consultantId)
+  public ResponseEntity<ConsultantResponseDTO> getConsultantPublicData(UUID consultantId) {
+    var consultant = consultantService.getConsultant(consultantId.toString())
         .orElseThrow(() ->
             new NotFoundException(String.format("Consultant with id %s not found", consultantId))
         );
-    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId);
+    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId.toString());
     var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);

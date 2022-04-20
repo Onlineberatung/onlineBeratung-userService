@@ -5,22 +5,33 @@ import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANON
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAttachmentDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.Helper;
+import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
+import de.caritas.cob.userservice.api.model.ChatAgency;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.OtpInfoDTO;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.login.DataDTO;
@@ -31,16 +42,6 @@ import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessa
 import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
-import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
-import de.caritas.cob.userservice.api.model.ChatAgency;
-import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
@@ -62,7 +63,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.keycloak.common.util.RandomString;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -319,14 +319,14 @@ public class TestConstants {
   public static final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME, FIRST_NAME, LAST_NAME, EMAIL,
           IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null,
-          null, null, null, null, null, null, true, null, ConsultantStatus.CREATED, false);
+          null, null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   public static final Consultant CONSULTANT_2 = new Consultant(CONSULTANT_ID_2, ROCKETCHAT_ID,
       USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null,
-      null, null, null, null, null, null, true, null, ConsultantStatus.CREATED, false);
+      null, null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
           "last name", EMAIL, false, false, null, false, null, null, null, null, null,
-          null, null, null, true, null, ConsultantStatus.CREATED, false);
+          null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
@@ -372,21 +372,24 @@ public class TestConstants {
   public static final UserDTO USER_DTO_WITHOUT_MANDATORY_STATE = new UserDTO(null, null, null, null,
       null, null, Integer.toString(CONSULTING_TYPE_ID_SUCHT));
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO =
-      new RocketChatUserDTO(RC_USER_ID, USERNAME, null);
+      new RocketChatUserDTO(RC_USER_ID, USERNAME, null, null);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, SUCCESS, NULL, NULL);
   public static final RocketChatUserDTO ROCKET_CHAT_USER_DTO_2 =
-      new RocketChatUserDTO(RC_USER_ID_2, USERNAME, null);
+      new RocketChatUserDTO(RC_USER_ID_2, USERNAME, null, null);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_2 =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO_2, SUCCESS, NULL, NULL);
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_FAILED =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, FAILED, ERROR, ERROR);
   public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
-      new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE);
-  public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123", null);
-  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456",
+      new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE, null);
+  public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123", null,
       null);
-  public static final RocketChatUserDTO USER_DTO_3 = new RocketChatUserDTO("adg", "789", null);
+  public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456",
+      null,
+      null);
+  public static final RocketChatUserDTO USER_DTO_3 = new RocketChatUserDTO("adg", "789", null,
+      null);
 
   /*
    * /* Messages
@@ -416,18 +419,16 @@ public class TestConstants {
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null)};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
       new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null);
-  public static final ConsultantAgency CONSULTANT_AGENCY_3 =
-      new ConsultantAgency(3L, CONSULTANT, AGENCY_ID_3, nowInUtc(), nowInUtc(), nowInUtc(), null);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false,
       null, null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null,
-      null, null, true, null, ConsultantStatus.CREATED, false);
+      null, null, true, null, null, ConsultantStatus.CREATED, false);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false,
       null, null, null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)),
-      null, null, null, null, true, null, ConsultantStatus.CREATED, false);
+      null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   /**
    * UserAgency
    */
@@ -1217,10 +1218,4 @@ public class TestConstants {
 
   public static final OtpInfoDTO OTP_INFO_DTO = new OtpInfoDTO().otpSecret("secret")
       .otpSecretQrCode("QrCode").otpSetup(false);
-  public static final OtpSetupDTO VALID_OTP_SETUP_DTO = new OtpSetupDTO().initialCode("111111")
-      .secret(new RandomString(32).nextString());
-  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_CODE = new OtpSetupDTO().initialCode(
-      "1").secret(new RandomString(32).nextString());
-  public static final OtpSetupDTO INVALID_OTP_SETUP_DTO_WRONG_SECRET = new OtpSetupDTO().initialCode(
-      "111111").secret("secret");
 }

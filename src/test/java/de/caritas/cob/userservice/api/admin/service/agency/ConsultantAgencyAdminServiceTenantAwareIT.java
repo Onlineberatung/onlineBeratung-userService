@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.util.Sets;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.api.Organizer;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
@@ -73,6 +74,9 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
 
   @MockBean
   private AgencyAdminService agencyAdminService;
+
+  @Autowired
+  private Organizer organizer;
 
   @MockBean
   private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
@@ -248,6 +252,7 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
 
   private Consultant givenAValidConsultant(String id, boolean isTeamConsultant) {
     Consultant consultant = new Consultant();
+    consultant.setAppointments(null);
     consultant.setTenantId(1L);
     consultant.setId(id);
     consultant.setConsultantAgencies(Sets.newHashSet());

@@ -431,6 +431,31 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>appointment-service</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/api/appointmentservice.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>${adapters.web.generated.path}.controller</apiPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<interfaceOnly>true</interfaceOnly>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<output>target/generated-sources</output>
+							<typeMappings>
+								<typeMapping>OffsetDateTime=Instant</typeMapping>
+							</typeMappings>
+							<importMappings>
+								<importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping>
+							</importMappings>
+						</configuration>
+					</execution>
+					<execution>
 						<id>user-admin-service</id>
 						<goals>
 							<goal>generate</goal>
