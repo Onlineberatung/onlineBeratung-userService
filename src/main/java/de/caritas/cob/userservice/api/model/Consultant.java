@@ -5,7 +5,6 @@ import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -13,6 +12,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Lob;

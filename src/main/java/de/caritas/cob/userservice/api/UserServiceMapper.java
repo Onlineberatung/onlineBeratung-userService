@@ -85,6 +85,9 @@ public class UserServiceMapper {
     if (patchMap.containsKey("encourage2fa")) {
       consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
     }
+    if (patchMap.containsKey("walkThroughEnabled")) {
+      consultant.setWalkThroughEnabled((Boolean) patchMap.get("walkThroughEnabled"));
+    }
 
     return consultant;
   }

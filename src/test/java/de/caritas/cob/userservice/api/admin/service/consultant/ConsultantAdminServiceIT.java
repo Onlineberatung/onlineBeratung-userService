@@ -161,6 +161,7 @@ public class ConsultantAdminServiceIT {
         .excludeField(FieldPredicates.named("languages"))
         .excludeField(FieldPredicates.named("consultantMobileTokens"))
         .excludeField(FieldPredicates.named("deleteDate"))
+        .excludeField(FieldPredicates.named("appointments"))
         .excludeField(FieldPredicates.named("sessions"));
     var consultant = new EasyRandom(parameters).nextObject(Consultant.class);
     consultantRepository.save(consultant);
