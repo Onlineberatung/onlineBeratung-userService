@@ -108,6 +108,7 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     consultant.setLastName(easyRandom.nextObject(String.class));
     consultant.setEmail(easyRandom.nextObject(String.class));
     consultant.setEncourage2fa(true);
+    consultant.setWalkThroughEnabled(true);
     consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
     return consultant;
