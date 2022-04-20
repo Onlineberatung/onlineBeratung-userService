@@ -2,13 +2,12 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
-  <changeSet author="aalicic" id="consultantWalkThrough">
+  <changeSet author="aalicic" id="consultantStatus">
     <rollback>
-      <sqlFile
-        path="db/changelog/changeset/0023_consultant_walk_through/consultant-walk-through-rollback.sql"
+      <sqlFile path="db/changelog/changeset/0023_consultant_status/consultant-status-rollback.sql"
         stripComments="true"/>
     </rollback>
-    <sqlFile path="db/changelog/changeset/0023_consultant_walk_through/consultant-walk-through.sql"
+    <sqlFile path="db/changelog/changeset/0023_consultant_status/consultant-status.sql"
       stripComments="true"/>
   </changeSet>
 </databaseChangeLog>

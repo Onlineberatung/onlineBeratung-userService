@@ -164,11 +164,11 @@ public class Consultant implements TenantAware {
   @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL)
   private Set<Appointment> appointments;
 
-  @Column(name = "status")
+  @Column(name = "status", length = 11)
   @Enumerated(EnumType.STRING)
   private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
 
-  @Column(name = "walk_through_enabled", columnDefinition = "tinyint")
+  @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)
   private Boolean walkThroughEnabled;
 
   @JsonIgnore
