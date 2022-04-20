@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.SessionData;
@@ -63,7 +64,7 @@ public class SessionDataProviderTest {
   private final User USER = new User(USER_ID, null, USERNAME, EMAIL, false);
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
       "first name", "last name", "consultant@cob.de", false, false, null, false, null,
-      null, null, null, null, null, null, null, true, null, null);
+      null, null, null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Session INITIALIZED_SESSION_SUCHT = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 0L, null, SessionStatus.INITIAL, null, null,
       null, null, false, false, false, nowInUtc(), null, null);

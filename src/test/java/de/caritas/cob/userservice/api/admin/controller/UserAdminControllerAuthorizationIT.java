@@ -212,7 +212,7 @@ public class UserAdminControllerAuthorizationIT {
             .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(consultantAdminFacade, times(1)).findFilteredConsultants(any(), anyInt(), any());
+    verify(consultantAdminFacade, times(1)).findFilteredConsultants(any(), anyInt(), any(), any());
   }
 
   @Test

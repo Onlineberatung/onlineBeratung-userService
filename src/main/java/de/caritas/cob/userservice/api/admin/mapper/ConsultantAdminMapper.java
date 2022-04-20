@@ -31,7 +31,8 @@ public class ConsultantAdminMapper {
         .absenceMessage(this.consultant.getAbsenceMessage())
         .createDate(String.valueOf(this.consultant.getCreateDate()))
         .updateDate(String.valueOf(this.consultant.getUpdateDate()))
-        .deleteDate(String.valueOf(this.consultant.getDeleteDate()));
+        .deleteDate(String.valueOf(this.consultant.getDeleteDate()))
+        .status(String.valueOf(this.consultant.getStatus()));
   }
 
 }

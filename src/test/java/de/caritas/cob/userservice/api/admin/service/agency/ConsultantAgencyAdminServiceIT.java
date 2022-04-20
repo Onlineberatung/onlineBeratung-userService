@@ -15,17 +15,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
+import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -185,6 +186,22 @@ public class ConsultantAgencyAdminServiceIT {
       assertThat(consultant.getLinks().getSelf(), notNullValue());
       assertThat(consultant.getLinks().getUpdate(), notNullValue());
     });
+  }
+
+  @Test
+  public void appendAgenciesForConsultants_Should_enrichConsultants_When_consultantHasAgencies() {
+    var persistedConsultant = consultantRepository.findAll().iterator().next();
+    var consultantDTO = de.caritas.cob.userservice.api.admin.service.consultant.ConsultantResponseDTOBuilder
+        .getInstance(persistedConsultant)
+        .buildResponseDTO().getEmbedded();
+    var agencyOfConsultant = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
+    agencyOfConsultant.setId(1731L);
+    when(agencyAdminService.retrieveAllAgencies()).thenReturn(List.of(agencyOfConsultant));
+
+    this.consultantAgencyAdminService.appendAgenciesForConsultants(Set.of(consultantDTO));
+
+    assertThat(consultantDTO.getAgencies(), hasSize(1));
+    assertThat(consultantDTO.getAgencies().get(0).getName(), is(agencyOfConsultant.getName()));
   }
 
 }

@@ -51,6 +51,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -100,24 +101,24 @@ public class EmailNotificationFacadeTest {
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, "XXX", USERNAME_CONSULTANT_ENCODED, "consultant", "consultant",
           "consultant@domain.de", false, false, null, false, null, 1L, null, null, null,
-          null, null, null, true, null, null);
+          null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Consultant CONSULTANT_WITHOUT_MAIL = new Consultant(CONSULTANT_ID, "XXX",
       "consultant", "consultant", "consultant", "", false, false, null, false, null, 1L,
-      null, null, null, null, null, null, true, null, null);
+      null, null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Consultant CONSULTANT2 =
       new Consultant(CONSULTANT_ID_2, "XXX", "consultant2", "consultant2", "consultant2",
           "consultant2@domain.de", false, false, null, false, null, 1L, null, null, null,
-          null, null, null, true, null, null);
+          null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Consultant CONSULTANT3 =
       new Consultant(CONSULTANT_ID_3, "XXX", "consultant3", "consultant3", "consultant3",
           "consultant3@domain.de", false, false, null, false, null, 1L, null, null, null,
-          null, null, null, true, null, null);
+          null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Consultant CONSULTANT_NO_EMAIL = new Consultant(CONSULTANT_ID, "XXX", "consultant",
       "consultant", "consultant", "", false, false, null, false, null, 1L, null, null,
-      null, null, null, null, true, null, null);
+      null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Consultant ABSENT_CONSULTANT = new Consultant("XXX", "XXX", "consultant",
       "consultant", "consultant", "consultant@domain.de", true, false, null, false, null,
-      1L, null, null, null, null, null, null, true, null, null);
+      1L, null, null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =

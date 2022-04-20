@@ -57,7 +57,8 @@ public class UserDtoMapper {
   }
 
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
-    if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName())) {
+    if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName()) && isNull(
+        patchUserDTO.getWalkThroughEnabled())) {
       return Optional.empty();
     }
 
@@ -68,6 +69,9 @@ public class UserDtoMapper {
     }
     if (nonNull(patchUserDTO.getDisplayName())) {
       map.put("displayName", patchUserDTO.getDisplayName());
+    }
+    if (nonNull(patchUserDTO.getWalkThroughEnabled())) {
+      map.put("walkThroughEnabled", patchUserDTO.getWalkThroughEnabled());
     }
 
     return Optional.of(map);

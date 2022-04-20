@@ -12,6 +12,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Lob;
@@ -35,6 +37,7 @@ import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
+import org.hibernate.search.annotations.SortableField;
 import org.hibernate.search.annotations.TokenFilterDef;
 import org.hibernate.search.annotations.TokenizerDef;
 import org.springframework.lang.Nullable;
@@ -85,17 +88,21 @@ public class Consultant implements TenantAware {
   @Size(max = 255)
   @NonNull
   @Field
+  @SortableField
   private String username;
 
   @Column(name = "first_name", nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
+  @SortableField
   private String firstName;
 
   @Column(name = "last_name", nullable = false)
   @Size(max = 255)
   @NonNull
   @Field
+  @SortableField
   private String lastName;
 
   @Column(name = "email", nullable = false)
@@ -103,6 +110,7 @@ public class Consultant implements TenantAware {
   @NonNull
   @Field
   @Analyzer(definition = EMAIL_ANALYZER)
+  @SortableField
   private String email;
 
   @Column(name = "is_absent", nullable = false, columnDefinition = "tinyint")
@@ -155,6 +163,13 @@ public class Consultant implements TenantAware {
 
   @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL)
   private Set<Appointment> appointments;
+
+  @Column(name = "status", length = 11)
+  @Enumerated(EnumType.STRING)
+  private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
+
+  @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)
+  private Boolean walkThroughEnabled;
 
   @JsonIgnore
   public String getFullName() {

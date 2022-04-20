@@ -51,6 +51,7 @@ public class UserServiceMapper {
         put("lastName", consultant.getLastName());
         put("email", consultant.getEmail());
         put("encourage2fa", consultant.getEncourage2fa());
+        put("walkThroughEnabled", consultant.getWalkThroughEnabled());
       }
     };
 
@@ -83,6 +84,9 @@ public class UserServiceMapper {
     }
     if (patchMap.containsKey("encourage2fa")) {
       consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
+    }
+    if (patchMap.containsKey("walkThroughEnabled")) {
+      consultant.setWalkThroughEnabled((Boolean) patchMap.get("walkThroughEnabled"));
     }
 
     return consultant;
