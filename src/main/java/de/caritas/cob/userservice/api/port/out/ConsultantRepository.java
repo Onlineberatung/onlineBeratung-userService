@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -35,7 +36,7 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
               + "   OR UPPER(c.email) LIKE CONCAT('%', UPPER(?1), '%')"
               + "  )"
   )
-  List<ConsultantBase> findAllByInfix(String infix, Pageable pageable);
+  Page<ConsultantBase> findAllByInfix(String infix, Pageable pageable);
 
   long countByDeleteDateIsNull();
 

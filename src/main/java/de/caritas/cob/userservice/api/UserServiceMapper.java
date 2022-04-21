@@ -4,19 +4,26 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceMapper {
+
+  private static final String EMAIL = "email";
+  private static final String FIRST_NAME = "firstName";
+  private static final String LAST_NAME = "lastName";
 
   private final UsernameTranscoder usernameTranscoder;
 
@@ -37,7 +44,7 @@ public class UserServiceMapper {
       {
         put("id", user.getUserId());
         put("username", user.getUsername());
-        put("email", user.getEmail());
+        put(EMAIL, user.getEmail());
         put("encourage2fa", user.getEncourage2fa());
       }
     };
@@ -47,9 +54,9 @@ public class UserServiceMapper {
     var map = new HashMap<String, Object>() {
       {
         put("id", consultant.getId());
-        put("firstName", consultant.getFirstName());
-        put("lastName", consultant.getLastName());
-        put("email", consultant.getEmail());
+        put(FIRST_NAME, consultant.getFirstName());
+        put(LAST_NAME, consultant.getLastName());
+        put(EMAIL, consultant.getEmail());
         put("encourage2fa", consultant.getEncourage2fa());
         put("walkThroughEnabled", consultant.getWalkThroughEnabled());
       }
@@ -63,6 +70,27 @@ public class UserServiceMapper {
     return map;
   }
 
+  public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage) {
+    var consultants = new ArrayList<Map<String, String>>();
+    consultantPage.forEach(consultant -> consultants.add(mapOf(consultant)));
+
+    return Map.of(
+        "totalElements", (int) consultantPage.getTotalElements(),
+        "isFirstPage", consultantPage.isFirst(),
+        "isLastPage", consultantPage.isLast(),
+        "consultants", consultants
+    );
+  }
+
+  public Map<String, String> mapOf(ConsultantBase consultant) {
+    return Map.of(
+        "id", consultant.getId(),
+        EMAIL, consultant.getEmail(),
+        FIRST_NAME, consultant.getFirstName(),
+        LAST_NAME, consultant.getLastName()
+    );
+  }
+
   @SuppressWarnings("unchecked")
   public List<String> bannedUsernamesOfMap(Map<String, Object> chatMetaInfoMap) {
     return (List<String>) chatMetaInfoMap.get("mutedUsers");
@@ -73,14 +101,14 @@ public class UserServiceMapper {
   }
 
   public Consultant consultantOf(Consultant consultant, Map<String, Object> patchMap) {
-    if (patchMap.containsKey("email")) {
-      consultant.setEmail((String) patchMap.get("email"));
+    if (patchMap.containsKey(EMAIL)) {
+      consultant.setEmail((String) patchMap.get(EMAIL));
     }
-    if (patchMap.containsKey("firstName")) {
-      consultant.setFirstName((String) patchMap.get("firstName"));
+    if (patchMap.containsKey(FIRST_NAME)) {
+      consultant.setFirstName((String) patchMap.get(FIRST_NAME));
     }
-    if (patchMap.containsKey("lastName")) {
-      consultant.setLastName((String) patchMap.get("lastName"));
+    if (patchMap.containsKey(LAST_NAME)) {
+      consultant.setLastName((String) patchMap.get(LAST_NAME));
     }
     if (patchMap.containsKey("encourage2fa")) {
       consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
@@ -104,8 +132,8 @@ public class UserServiceMapper {
   }
 
   public User adviceSeekerOf(User adviceSeeker, Map<String, Object> patchMap) {
-    if (patchMap.containsKey("email")) {
-      adviceSeeker.setEmail((String) patchMap.get("email"));
+    if (patchMap.containsKey(EMAIL)) {
+      adviceSeeker.setEmail((String) patchMap.get(EMAIL));
     }
     if (patchMap.containsKey("encourage2fa")) {
       adviceSeeker.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
