@@ -24,6 +24,7 @@
 	<include file="db/changelog/changeset/0019_tenant_id/0019_changeSet.xml"/>
 	<include file="db/changelog/changeset/0020_add_appointments/0020_changeSet.xml"/>
 	<include file="db/changelog/changeset/0021_index_for_consultant_search/0021_changeSet.xml"/>
-	<include file="db/changelog/changeset/0022_consultant_status/0022_changeSet.xml"/>
-	<include file="db/changelog/changeset/0023_consultant_walk_through/0023_changeSet.xml"/>
+	<include file="db/changelog/changeset/0022_delete_date_for_consultant_search/0022_changeSet.xml"/>
+	<include file="db/changelog/changeset/0023_consultant_status/0023_changeSet.xml"/>
+	<include file="db/changelog/changeset/0024_consultant_walk_through/0024_changeSet.xml"/>
 </databaseChangeLog>
