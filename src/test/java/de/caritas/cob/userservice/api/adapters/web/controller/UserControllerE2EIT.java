@@ -67,6 +67,7 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
@@ -449,6 +450,9 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
         .andExpect(jsonPath("_embedded[9]._embedded.lastname", containsString(infix)))
+        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[9]._embedded.status", is("CREATED")))
         .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
         .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
@@ -512,7 +516,12 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
+        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[1]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[2]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[3]._embedded.status", is("CREATED")))
         .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
         .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
         .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
@@ -2274,6 +2283,7 @@ public class UserControllerE2EIT {
       consultant.setFirstName(aStringWithoutInfix(infix));
       consultant.setLastName(aStringWithInfix(infix));
       consultant.setEmail(aValidEmailWithoutInfix(infix));
+      consultant.setStatus(ConsultantStatus.CREATED);
 
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());

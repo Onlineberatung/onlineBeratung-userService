@@ -133,6 +133,8 @@ public class ConsultantDtoMapper {
     consultant.setEmail(consultantMap.get("email"));
     consultant.setFirstname(consultantMap.get("firstName"));
     consultant.setLastname(consultantMap.get("lastName"));
+    consultant.setUsername(consultantMap.get("username"));
+    consultant.setStatus(consultantMap.get("status"));
 
     return consultant;
   }

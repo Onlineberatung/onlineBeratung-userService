@@ -1,10 +1,13 @@
 package de.caritas.cob.userservice.api;
 
+import static java.util.Objects.isNull;
+
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,6 +27,8 @@ public class UserServiceMapper {
   private static final String EMAIL = "email";
   private static final String FIRST_NAME = "firstName";
   private static final String LAST_NAME = "lastName";
+  private static final String USERNAME = "username";
+  private static final String STATUS = "status";
 
   private final UsernameTranscoder usernameTranscoder;
 
@@ -33,7 +38,7 @@ public class UserServiceMapper {
         put("id", appointment.getId().toString());
         put("description", appointment.getDescription());
         put("datetime", appointment.getDatetime().toString());
-        put("status", appointment.getStatus().toString().toLowerCase());
+        put(STATUS, appointment.getStatus().toString().toLowerCase());
         put("consultantId", appointment.getConsultant().getId());
       }
     };
@@ -43,7 +48,7 @@ public class UserServiceMapper {
     return new HashMap<>() {
       {
         put("id", user.getUserId());
-        put("username", user.getUsername());
+        put(USERNAME, user.getUsername());
         put(EMAIL, user.getEmail());
         put("encourage2fa", user.getEncourage2fa());
       }
@@ -70,9 +75,16 @@ public class UserServiceMapper {
     return map;
   }
 
-  public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage) {
+  public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage,
+      Iterable<Consultant> fullConsultants) {
+
     var consultants = new ArrayList<Map<String, String>>();
-    consultantPage.forEach(consultant -> consultants.add(mapOf(consultant)));
+    var fullConsultantIterator = fullConsultants.iterator();
+    consultantPage.forEach(consultantBase -> {
+      var fullConsultant = fullConsultantIterator.next();
+      var consultantMap = mapOf(consultantBase, fullConsultant);
+      consultants.add(consultantMap);
+    });
 
     return Map.of(
         "totalElements", (int) consultantPage.getTotalElements(),
@@ -82,12 +94,18 @@ public class UserServiceMapper {
     );
   }
 
-  public Map<String, String> mapOf(ConsultantBase consultant) {
+  public Map<String, String> mapOf(ConsultantBase consultantBase, Consultant fullConsultant) {
+    var status = isNull(fullConsultant.getStatus())
+        ? ConsultantStatus.ERROR.toString()
+        : fullConsultant.getStatus().toString();
+
     return Map.of(
-        "id", consultant.getId(),
-        EMAIL, consultant.getEmail(),
-        FIRST_NAME, consultant.getFirstName(),
-        LAST_NAME, consultant.getLastName()
+        "id", consultantBase.getId(),
+        EMAIL, consultantBase.getEmail(),
+        FIRST_NAME, consultantBase.getFirstName(),
+        LAST_NAME, consultantBase.getLastName(),
+        STATUS, status,
+        USERNAME, fullConsultant.getUsername()
     );
   }
 
@@ -151,7 +169,7 @@ public class UserServiceMapper {
       appointment.setDescription((String) appointmentMap.get("description"));
     }
     appointment.setDatetime(Instant.parse((String) appointmentMap.get("datetime")));
-    var status = (String) appointmentMap.get("status");
+    var status = (String) appointmentMap.get(STATUS);
     appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
     appointment.setConsultant(consultant);
 

@@ -11,10 +11,12 @@ import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -308,6 +310,26 @@ public class ConsultantRepositoryIT {
     consultantPage.forEach(consultant ->
         assertTrue(matchingIds.contains(consultant.getId()))
     );
+  }
+
+  @Test
+  void findAllByIdShouldKeepOrder() {
+    var consultants = underTest.findAllByDeleteDateNotNull();
+    consultants.sort(Comparator.comparing(Consultant::getLastName));
+    var consultantIds = consultants.stream()
+        .map(Consultant::getId)
+        .collect(Collectors.toList());
+
+    var againConsultantIterator = underTest.findAllById(consultantIds).iterator();
+    consultants.forEach(c -> assertEquals(c.getId(), againConsultantIterator.next().getId()));
+
+    consultants.sort(Comparator.comparing(Consultant::getFirstName));
+    consultantIds = consultants.stream()
+        .map(Consultant::getId)
+        .collect(Collectors.toList());
+
+    var lastConsultantIterator = underTest.findAllById(consultantIds).iterator();
+    consultants.forEach(c -> assertEquals(c.getId(), lastConsultantIterator.next().getId()));
   }
 
   private void givenConsultantsMatchingFirstName(@PositiveOrZero int count,
