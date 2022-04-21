@@ -39,26 +39,24 @@ public class UserServiceMapper {
   private final UsernameTranscoder usernameTranscoder;
 
   public Map<String, Object> mapOf(Appointment appointment) {
-    return new HashMap<>() {
-      {
-        put("id", appointment.getId().toString());
-        put("description", appointment.getDescription());
-        put("datetime", appointment.getDatetime().toString());
-        put(STATUS, appointment.getStatus().toString().toLowerCase());
-        put("consultantId", appointment.getConsultant().getId());
-      }
-    };
+    var map = new HashMap<String, Object>();
+    map.put("id", appointment.getId().toString());
+    map.put("description", appointment.getDescription());
+    map.put("datetime", appointment.getDatetime().toString());
+    map.put(STATUS, appointment.getStatus().toString().toLowerCase());
+    map.put("consultantId", appointment.getConsultant().getId());
+
+    return map;
   }
 
   public Map<String, Object> mapOf(User user) {
-    return new HashMap<>() {
-      {
-        put("id", user.getUserId());
-        put(USERNAME, user.getUsername());
-        put(EMAIL, user.getEmail());
-        put("encourage2fa", user.getEncourage2fa());
-      }
-    };
+    var map = new HashMap<String, Object>();
+    map.put("id", user.getUserId());
+    map.put(USERNAME, user.getUsername());
+    map.put(EMAIL, user.getEmail());
+    map.put("encourage2fa", user.getEncourage2fa());
+
+    return map;
   }
 
   public Map<String, Object> mapOf(Consultant consultant, Map<String, Object> additionalMap) {
