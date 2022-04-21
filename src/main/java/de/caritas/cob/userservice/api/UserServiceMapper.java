@@ -4,14 +4,17 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -61,6 +64,27 @@ public class UserServiceMapper {
     }
 
     return map;
+  }
+
+  public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage) {
+    var consultants = new ArrayList<Map<String, String>>();
+    consultantPage.forEach(consultant -> consultants.add(mapOf(consultant)));
+
+    return Map.of(
+        "totalElements", Long.valueOf(consultantPage.getTotalElements()).intValue(),
+        "isFirstPage", consultantPage.isFirst(),
+        "isLastPage", consultantPage.isLast(),
+        "consultants", consultants
+    );
+  }
+
+  public Map<String, String> mapOf(ConsultantBase consultant) {
+    return Map.of(
+        "id", consultant.getId(),
+        "email", consultant.getEmail(),
+        "firstName", consultant.getFirstName(),
+        "lastName", consultant.getLastName()
+    );
   }
 
   @SuppressWarnings("unchecked")

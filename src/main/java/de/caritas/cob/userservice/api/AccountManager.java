@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -59,6 +61,16 @@ public class AccountManager implements AccountManaging {
     return isNull(dbConsultant)
         ? Optional.empty()
         : Optional.of(findByDbConsultant(dbConsultant));
+  }
+
+  public Map<String, Object> findConsultantsByInfix(
+      String infix, int pageNumber, int pageSize, String fieldName, boolean isAscending) {
+
+    var direction = isAscending ? Direction.ASC : Direction.DESC;
+    var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
+    var consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
+
+    return userServiceMapper.mapOf(consultantPage);
   }
 
   @Override
