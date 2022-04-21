@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +37,8 @@ public class AccountManager implements AccountManaging {
   private final MessageClient messageClient;
 
   private final UsernameTranscoder usernameTranscoder;
+
+  private final AgencyService agencyService;
 
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
@@ -71,12 +74,16 @@ public class AccountManager implements AccountManaging {
     var direction = isAscending ? Direction.ASC : Direction.DESC;
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
     var consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
+
     var consultantIds = consultantPage.stream()
         .map(ConsultantBase::getId)
         .collect(Collectors.toList());
-    var fullConsultants = consultantRepository.findAllById(consultantIds);
+    var fullConsultants = consultantRepository.findAllByIdIn(consultantIds);
 
-    return userServiceMapper.mapOf(consultantPage, fullConsultants);
+    var agencyIds = userServiceMapper.agencyIdsOf(fullConsultants);
+    var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
+
+    return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies);
   }
 
   @Override

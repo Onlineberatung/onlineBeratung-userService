@@ -1,12 +1,15 @@
 package de.caritas.cob.userservice.api;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
@@ -15,7 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -76,13 +82,19 @@ public class UserServiceMapper {
   }
 
   public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage,
-      Iterable<Consultant> fullConsultants) {
+      List<Consultant> fullConsultants, List<AgencyDTO> agencyDTOS) {
 
-    var consultants = new ArrayList<Map<String, String>>();
-    var fullConsultantIterator = fullConsultants.iterator();
+    var agencyLookupMap = agencyDTOS.stream()
+        .collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
+
+    var fullConsultantLookupMap = fullConsultants.stream()
+        .collect(Collectors.toMap(Consultant::getId, Function.identity()));
+
+    var consultants = new ArrayList<Map<String, Object>>();
     consultantPage.forEach(consultantBase -> {
-      var fullConsultant = fullConsultantIterator.next();
-      var consultantMap = mapOf(consultantBase, fullConsultant);
+      var fullConsultant = fullConsultantLookupMap.get(consultantBase.getId());
+      var agencies = mapOf(fullConsultant.getConsultantAgencies(), agencyLookupMap);
+      var consultantMap = mapOf(consultantBase, fullConsultant, agencies);
       consultants.add(consultantMap);
     });
 
@@ -94,7 +106,27 @@ public class UserServiceMapper {
     );
   }
 
-  public Map<String, String> mapOf(ConsultantBase consultantBase, Consultant fullConsultant) {
+  private List<Map<String, Object>> mapOf(
+      Set<ConsultantAgency> consultantAgencies, Map<Long, AgencyDTO> lookupMap) {
+
+    var agencies = new ArrayList<Map<String, Object>>();
+    if (nonNull(consultantAgencies)) {
+      consultantAgencies.forEach(consultantAgency -> {
+        var agencyId = consultantAgency.getAgencyId();
+        var agencyDTO = lookupMap.get(agencyId);
+        Map<String, Object> agencyMap = new HashMap<>();
+        agencyMap.put("id", agencyId);
+        agencyMap.put("name", agencyDTO.getName());
+        agencyMap.put("postcode", agencyDTO.getPostcode());
+        agencies.add(agencyMap);
+      });
+    }
+
+    return agencies;
+  }
+
+  public Map<String, Object> mapOf(ConsultantBase consultantBase, Consultant fullConsultant,
+      List<Map<String, Object>> agencies) {
     var status = isNull(fullConsultant.getStatus())
         ? ConsultantStatus.ERROR.toString()
         : fullConsultant.getStatus().toString();
@@ -105,7 +137,8 @@ public class UserServiceMapper {
         FIRST_NAME, consultantBase.getFirstName(),
         LAST_NAME, consultantBase.getLastName(),
         STATUS, status,
-        USERNAME, fullConsultant.getUsername()
+        USERNAME, fullConsultant.getUsername(),
+        "agencies", agencies
     );
   }
 
@@ -174,5 +207,14 @@ public class UserServiceMapper {
     appointment.setConsultant(consultant);
 
     return appointment;
+  }
+
+  public List<Long> agencyIdsOf(List<Consultant> consultants) {
+    return consultants.stream()
+        .map(Consultant::getConsultantAgencies)
+        .flatMap(Set::stream)
+        .map(ConsultantAgency::getAgencyId)
+        .distinct()
+        .collect(Collectors.toList());
   }
 }
