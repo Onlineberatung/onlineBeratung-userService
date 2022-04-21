@@ -62,16 +62,13 @@ public class UserServiceMapper {
   }
 
   public Map<String, Object> mapOf(Consultant consultant, Map<String, Object> additionalMap) {
-    var map = new HashMap<String, Object>() {
-      {
-        put("id", consultant.getId());
-        put(FIRST_NAME, consultant.getFirstName());
-        put(LAST_NAME, consultant.getLastName());
-        put(EMAIL, consultant.getEmail());
-        put(ENCOURAGE_2FA, consultant.getEncourage2fa());
-        put("walkThroughEnabled", consultant.getWalkThroughEnabled());
-      }
-    };
+    var map = new HashMap<String, Object>();
+    map.put("id", consultant.getId());
+    map.put(FIRST_NAME, consultant.getFirstName());
+    map.put(LAST_NAME, consultant.getLastName());
+    map.put(EMAIL, consultant.getEmail());
+    map.put(ENCOURAGE_2FA, consultant.getEncourage2fa());
+    map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
 
     if (additionalMap.containsKey("displayName")) {
       var displayName = (String) additionalMap.get("displayName");
