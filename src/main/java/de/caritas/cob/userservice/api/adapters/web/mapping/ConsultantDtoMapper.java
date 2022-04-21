@@ -116,10 +116,10 @@ public class ConsultantDtoMapper {
     result.setEmbedded(consultants);
 
     var pagination = new PaginationLinks().self(pageLinkOf(query, page, perPage, field, order));
-    if (!(Boolean) resultMap.get("isFirstPage")) {
+    if (!(boolean) resultMap.get("isFirstPage")) {
       pagination.previous(pageLinkOf(query, page - 1, perPage, field, order));
     }
-    if (!(Boolean) resultMap.get("isLastPage")) {
+    if (!(boolean) resultMap.get("isLastPage")) {
       pagination.next(pageLinkOf(query, page + 1, perPage, field, order));
     }
     result.setLinks(pagination);
