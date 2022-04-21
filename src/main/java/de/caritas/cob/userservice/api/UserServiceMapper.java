@@ -71,7 +71,7 @@ public class UserServiceMapper {
     consultantPage.forEach(consultant -> consultants.add(mapOf(consultant)));
 
     return Map.of(
-        "totalElements", Long.valueOf(consultantPage.getTotalElements()).intValue(),
+        "totalElements", (int) consultantPage.getTotalElements(),
         "isFirstPage", consultantPage.isFirst(),
         "isLastPage", consultantPage.isLast(),
         "consultants", consultants
