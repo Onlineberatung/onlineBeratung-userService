@@ -870,9 +870,9 @@ paths:
           description: field to sort by
           schema:
             type: string
-            enum: [ firstName, lastName, email ]
-            default: firstName
-            pattern: '^(firstName|lastName|email)$'
+            enum: [ FIRSTNAME, LASTNAME, EMAIL ]
+            default: FIRSTNAME
+            pattern: '^(FIRSTNAME|LASTNAME|EMAIL)$'
         - name: order
           in: query
           description: sort order

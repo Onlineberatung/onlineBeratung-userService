@@ -531,7 +531,7 @@ public class UserControllerE2EIT {
                 .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
                 .param("page", "3")
                 .param("perPage", "11")
-                .param("field", "lastName")
+                .param("field", "LASTNAME")
                 .param("order", "DESC")
         ).andExpect(status().isOk())
         .andExpect(jsonPath("total", is(numMatching)))

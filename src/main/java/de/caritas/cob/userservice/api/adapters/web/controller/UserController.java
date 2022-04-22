@@ -640,9 +640,10 @@ public class UserController implements UsersApi {
       String query, Integer page, Integer perPage, String field, String order) {
     var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
     var isAscending = order.equalsIgnoreCase("asc");
+    var mappedField = consultantDtoMapper.mappedFieldOf(field);
 
     var resultMap = accountManager.findConsultantsByInfix(
-        decodedInfix, page - 1, perPage, field, isAscending
+        decodedInfix, page - 1, perPage, mappedField, isAscending
     );
     var result = consultantDtoMapper.consultantSearchResultOf(
         resultMap, query, page, perPage, field, order

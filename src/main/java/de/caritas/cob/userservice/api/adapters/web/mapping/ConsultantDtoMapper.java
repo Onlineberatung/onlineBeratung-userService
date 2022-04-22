@@ -207,4 +207,18 @@ public class ConsultantDtoMapper {
         .method(method)
         .templated(link.isTemplated());
   }
+
+  public String mappedFieldOf(String field) {
+    switch (field) {
+      case "FIRSTNAME":
+        return "firstName";
+      case "LASTNAME":
+        return "lastName";
+      case "EMAIL":
+        return "email";
+      default:
+    }
+
+    throw new IllegalArgumentException("Mapping of field '" + field + "' not supported.");
+  }
 }
