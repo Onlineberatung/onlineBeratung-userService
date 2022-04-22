@@ -5,6 +5,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.adapters.web.controller.UserController;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
@@ -103,7 +104,7 @@ public class ConsultantDtoMapper {
       String query, int page, int perPage, String field, String order) {
     var consultants = new ArrayList<ConsultantAdminResponseDTO>();
 
-    var consultantMaps = (List<Map<String, String>>) resultMap.get("consultants");
+    var consultantMaps = (List<Map<String, Object>>) resultMap.get("consultants");
     consultantMaps.forEach(consultantMap -> {
       var response = new ConsultantAdminResponseDTO();
       response.setEmbedded(consultantDtoOf(consultantMap));
@@ -127,18 +128,32 @@ public class ConsultantDtoMapper {
     return result;
   }
 
-  public ConsultantDTO consultantDtoOf(Map<String, String> consultantMap) {
+  @SuppressWarnings("unchecked")
+  public ConsultantDTO consultantDtoOf(Map<String, Object> consultantMap) {
     var consultant = new ConsultantDTO();
-    consultant.setId(consultantMap.get("id"));
-    consultant.setEmail(consultantMap.get("email"));
-    consultant.setFirstname(consultantMap.get("firstName"));
-    consultant.setLastname(consultantMap.get("lastName"));
+    consultant.setId((String) consultantMap.get("id"));
+    consultant.setEmail((String) consultantMap.get("email"));
+    consultant.setFirstname((String) consultantMap.get("firstName"));
+    consultant.setLastname((String) consultantMap.get("lastName"));
+    consultant.setUsername((String) consultantMap.get("username"));
+    consultant.setStatus((String) consultantMap.get("status"));
+
+    var agencies = new ArrayList<AgencyAdminResponseDTO>();
+    var agencyMaps = (ArrayList<Map<String, Object>>) consultantMap.get("agencies");
+    agencyMaps.forEach(agencyMap -> {
+      var agency = new AgencyAdminResponseDTO();
+      agency.setId((Long) agencyMap.get("id"));
+      agency.setName((String) agencyMap.get("name"));
+      agency.setPostcode((String) agencyMap.get("postcode"));
+      agencies.add(agency);
+    });
+    consultant.setAgencies(agencies);
 
     return consultant;
   }
 
-  public ConsultantLinks consultantLinksOf(Map<String, String> consultantMap) {
-    var id = consultantMap.get("id");
+  public ConsultantLinks consultantLinksOf(Map<String, Object> consultantMap) {
+    var id = (String) consultantMap.get("id");
 
     return new ConsultantLinks()
         .self(consultantLinkOf(id, MethodEnum.GET))

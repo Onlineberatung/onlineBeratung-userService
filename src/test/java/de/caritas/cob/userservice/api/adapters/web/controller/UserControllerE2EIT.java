@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.endsWith;
@@ -47,6 +48,7 @@ import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginRespons
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.UpdateUser;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
@@ -67,6 +69,8 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
@@ -83,6 +87,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
@@ -97,6 +102,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
@@ -122,6 +128,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -196,6 +203,9 @@ public class UserControllerE2EIT {
   @MockBean
   private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
+  @SpyBean
+  private AgencyService agencyService;
+
   @MockBean
   @Qualifier("restTemplate")
   private RestTemplate restTemplate;
@@ -237,6 +247,8 @@ public class UserControllerE2EIT {
 
   private List<String> consultantIdsToDelete = new ArrayList<>();
 
+  private List<ConsultantAgency> consultantAgencies = new ArrayList<>();
+
   private OneTimePasswordDTO oneTimePasswordDTO;
 
   private EmailDTO emailDTO;
@@ -276,8 +288,10 @@ public class UserControllerE2EIT {
       consultantRepository.save(consultantToReset);
     });
     consultantsToReset = new HashSet<>();
+    consultantAgencyRepository.deleteAll(consultantAgencies);
     consultantIdsToDelete.forEach(id -> consultantRepository.deleteById(id));
     consultantIdsToDelete = new ArrayList<>();
+    consultantAgencies = new ArrayList<>();
     oneTimePasswordDTO = null;
     emailDTO = null;
     tan = null;
@@ -432,6 +446,7 @@ public class UserControllerE2EIT {
     givenAnInfix();
     var numMatching = easyRandom.nextInt(20) + 11;
     givenConsultantsMatching(numMatching, infix);
+    givenAgencyServiceReturningAgencies();
 
     var pageUrlPrefix = "http://localhost/users/consultants/search?";
     var consultantUrlPrefix = "http://localhost/useradmin/consultants/";
@@ -449,7 +464,18 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
         .andExpect(jsonPath("_embedded[9]._embedded.lastname", containsString(infix)))
+        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[9]._embedded.status", is("CREATED")))
         .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
         .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
         .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
@@ -493,6 +519,7 @@ public class UserControllerE2EIT {
     givenAnInfix();
     var numMatching = 26;
     givenConsultantsMatching(numMatching, infix);
+    givenAgencyServiceReturningAgencies();
 
     var pageUrlPrefix = "http://localhost/users/consultants/search?";
     var consultantUrlPrefix = "http://localhost/useradmin/consultants/";
@@ -512,7 +539,29 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
+        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies", hasSize(1)))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[1]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[1]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[1]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[2]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[2]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[2]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[3]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[3]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[3]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[1]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[2]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[3]._embedded.status", is("CREATED")))
         .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
         .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
         .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
@@ -542,11 +591,20 @@ public class UserControllerE2EIT {
     var searchResult = objectMapper.readValue(response.getContentAsString(),
         ConsultantSearchResultDTO.class);
     var foundConsultants = searchResult.getEmbedded();
+
     var previousLastName = foundConsultants.get(0).getEmbedded().getLastname();
     for (var foundConsultant : foundConsultants) {
       var currentLastname = foundConsultant.getEmbedded().getLastname();
       assertTrue(previousLastName.compareTo(currentLastname) >= 0);
       previousLastName = currentLastname;
+    }
+
+    var agencyIdConsultantMap = consultantAgencies.stream()
+        .collect(Collectors.toMap(ConsultantAgency::getAgencyId, ConsultantAgency::getConsultant));
+    for (var foundConsultant : foundConsultants) {
+      var embedded = foundConsultant.getEmbedded();
+      var foundAgencyId = embedded.getAgencies().get(0).getId();
+      assertEquals(agencyIdConsultantMap.get(foundAgencyId).getId(), embedded.getId());
     }
   }
 
@@ -2274,9 +2332,19 @@ public class UserControllerE2EIT {
       consultant.setFirstName(aStringWithoutInfix(infix));
       consultant.setLastName(aStringWithInfix(infix));
       consultant.setEmail(aValidEmailWithoutInfix(infix));
+      consultant.setStatus(ConsultantStatus.CREATED);
 
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());
+
+      var consultantAgency = ConsultantAgency.builder()
+          .consultant(consultant)
+          .agencyId(aPositiveLong())
+          .build();
+      consultantAgencyRepository.save(consultantAgency);
+      consultantAgencies.add(consultantAgency);
+      consultant.setConsultantAgencies(Set.of(consultantAgency));
+      consultantRepository.save(consultant);
     }
   }
 
@@ -2405,6 +2473,20 @@ public class UserControllerE2EIT {
     when(keycloakRestTemplate.exchange(
         endsWith(urlSuffix), eq(HttpMethod.PUT), any(HttpEntity.class), eq(OtpInfoDTO.class)
     )).thenThrow(invalidParameter);
+  }
+
+  private void givenAgencyServiceReturningAgencies() {
+    var agencies = new ArrayList<AgencyDTO>();
+    consultantAgencies.forEach(consultantAgency -> {
+      var agency = new AgencyDTO();
+      agency.setId(consultantAgency.getAgencyId());
+      agency.setName(RandomStringUtils.randomAlphabetic(16));
+      agency.setPostcode(RandomStringUtils.randomNumeric(5));
+      agencies.add(agency);
+    });
+
+    when(agencyService.getAgenciesWithoutCaching(anyList()))
+        .thenReturn(agencies);
   }
 
   private void givenAKeycloakSetupOtpAnotherOtpConfigActiveErrorResponse() {

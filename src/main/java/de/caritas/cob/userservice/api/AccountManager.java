@@ -5,15 +5,18 @@ import static java.util.Objects.isNull;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +37,8 @@ public class AccountManager implements AccountManaging {
   private final MessageClient messageClient;
 
   private final UsernameTranscoder usernameTranscoder;
+
+  private final AgencyService agencyService;
 
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
@@ -70,7 +75,15 @@ public class AccountManager implements AccountManaging {
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
     var consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
 
-    return userServiceMapper.mapOf(consultantPage);
+    var consultantIds = consultantPage.stream()
+        .map(ConsultantBase::getId)
+        .collect(Collectors.toList());
+    var fullConsultants = consultantRepository.findAllByIdIn(consultantIds);
+
+    var agencyIds = userServiceMapper.agencyIdsOf(fullConsultants);
+    var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
+
+    return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies);
   }
 
   @Override
