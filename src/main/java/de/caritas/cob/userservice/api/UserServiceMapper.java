@@ -28,24 +28,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("java:S1192") // String literals should not be duplicated
 public class UserServiceMapper {
-
-  private static final String EMAIL = "email";
-  private static final String FIRST_NAME = "firstName";
-  private static final String LAST_NAME = "lastName";
-  private static final String USERNAME = "username";
-  private static final String STATUS = "status";
-  private static final String DESCRIPTION = "description";
-  private static final String ENCOURAGE_2FA = "encourage2fa";
 
   private final UsernameTranscoder usernameTranscoder;
 
   public Map<String, Object> mapOf(Appointment appointment) {
     var map = new HashMap<String, Object>();
     map.put("id", appointment.getId().toString());
-    map.put(DESCRIPTION, appointment.getDescription());
+    map.put("description", appointment.getDescription());
     map.put("datetime", appointment.getDatetime().toString());
-    map.put(STATUS, appointment.getStatus().toString().toLowerCase());
+    map.put("status", appointment.getStatus().toString().toLowerCase());
     map.put("consultantId", appointment.getConsultant().getId());
 
     return map;
@@ -54,9 +47,9 @@ public class UserServiceMapper {
   public Map<String, Object> mapOf(User user) {
     var map = new HashMap<String, Object>();
     map.put("id", user.getUserId());
-    map.put(USERNAME, user.getUsername());
-    map.put(EMAIL, user.getEmail());
-    map.put(ENCOURAGE_2FA, user.getEncourage2fa());
+    map.put("username", user.getUsername());
+    map.put("email", user.getEmail());
+    map.put("encourage2fa", user.getEncourage2fa());
 
     return map;
   }
@@ -64,10 +57,10 @@ public class UserServiceMapper {
   public Map<String, Object> mapOf(Consultant consultant, Map<String, Object> additionalMap) {
     var map = new HashMap<String, Object>();
     map.put("id", consultant.getId());
-    map.put(FIRST_NAME, consultant.getFirstName());
-    map.put(LAST_NAME, consultant.getLastName());
-    map.put(EMAIL, consultant.getEmail());
-    map.put(ENCOURAGE_2FA, consultant.getEncourage2fa());
+    map.put("firstName", consultant.getFirstName());
+    map.put("lastName", consultant.getLastName());
+    map.put("email", consultant.getEmail());
+    map.put("encourage2fa", consultant.getEncourage2fa());
     map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
 
     if (additionalMap.containsKey("displayName")) {
@@ -130,11 +123,11 @@ public class UserServiceMapper {
 
     return Map.of(
         "id", consultantBase.getId(),
-        EMAIL, consultantBase.getEmail(),
-        FIRST_NAME, consultantBase.getFirstName(),
-        LAST_NAME, consultantBase.getLastName(),
-        STATUS, status,
-        USERNAME, fullConsultant.getUsername(),
+        "email", consultantBase.getEmail(),
+        "firstName", consultantBase.getFirstName(),
+        "lastName", consultantBase.getLastName(),
+        "status", status,
+        "username", fullConsultant.getUsername(),
         "agencies", agencies
     );
   }
@@ -149,17 +142,17 @@ public class UserServiceMapper {
   }
 
   public Consultant consultantOf(Consultant consultant, Map<String, Object> patchMap) {
-    if (patchMap.containsKey(EMAIL)) {
-      consultant.setEmail((String) patchMap.get(EMAIL));
+    if (patchMap.containsKey("email")) {
+      consultant.setEmail((String) patchMap.get("email"));
     }
-    if (patchMap.containsKey(FIRST_NAME)) {
-      consultant.setFirstName((String) patchMap.get(FIRST_NAME));
+    if (patchMap.containsKey("firstName")) {
+      consultant.setFirstName((String) patchMap.get("firstName"));
     }
-    if (patchMap.containsKey(LAST_NAME)) {
-      consultant.setLastName((String) patchMap.get(LAST_NAME));
+    if (patchMap.containsKey("lastName")) {
+      consultant.setLastName((String) patchMap.get("lastName"));
     }
-    if (patchMap.containsKey(ENCOURAGE_2FA)) {
-      consultant.setEncourage2fa((Boolean) patchMap.get(ENCOURAGE_2FA));
+    if (patchMap.containsKey("encourage2fa")) {
+      consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
     }
     if (patchMap.containsKey("walkThroughEnabled")) {
       consultant.setWalkThroughEnabled((Boolean) patchMap.get("walkThroughEnabled"));
@@ -180,11 +173,11 @@ public class UserServiceMapper {
   }
 
   public User adviceSeekerOf(User adviceSeeker, Map<String, Object> patchMap) {
-    if (patchMap.containsKey(EMAIL)) {
-      adviceSeeker.setEmail((String) patchMap.get(EMAIL));
+    if (patchMap.containsKey("email")) {
+      adviceSeeker.setEmail((String) patchMap.get("email"));
     }
-    if (patchMap.containsKey(ENCOURAGE_2FA)) {
-      adviceSeeker.setEncourage2fa((Boolean) patchMap.get(ENCOURAGE_2FA));
+    if (patchMap.containsKey("encourage2fa")) {
+      adviceSeeker.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
     }
 
     return adviceSeeker;
@@ -195,11 +188,11 @@ public class UserServiceMapper {
     if (appointmentMap.containsKey("id")) {
       appointment.setId(UUID.fromString((String) appointmentMap.get("id")));
     }
-    if (appointmentMap.containsKey(DESCRIPTION)) {
-      appointment.setDescription((String) appointmentMap.get(DESCRIPTION));
+    if (appointmentMap.containsKey("description")) {
+      appointment.setDescription((String) appointmentMap.get("description"));
     }
     appointment.setDatetime(Instant.parse((String) appointmentMap.get("datetime")));
-    var status = (String) appointmentMap.get(STATUS);
+    var status = (String) appointmentMap.get("status");
     appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
     appointment.setConsultant(consultant);
 
