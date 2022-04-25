@@ -609,6 +609,79 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  void searchConsultantsShouldRespondOkAndPayloadIfStarQueryIsGiven() throws Exception {
+    givenAnInfix();
+    givenConsultantsMatching(easyRandom.nextInt(20) + 11, infix);
+    givenAgencyServiceReturningDummyAgencies();
+    var numAll = (int) consultantRepository.countByDeleteDateIsNull();
+
+    var pageUrlPrefix = "http://localhost/users/consultants/search?";
+    var consultantUrlPrefix = "http://localhost/useradmin/consultants/";
+    var response = mockMvc.perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", "*")
+                .param("perPage", String.valueOf(numAll) + 1)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(numAll)))
+        .andExpect(jsonPath("_embedded", hasSize(numAll)))
+        .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.lastname", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.lastname", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.status", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.status", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
+        .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
+        .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
+        .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
+        .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
+        .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
+        .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
+        .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
+        .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
+        .andExpect(jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
+        .andExpect(jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
+        .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
+        .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
+        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
+        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
+        .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
+        .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
+        .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
+        .andExpect(jsonPath("_links.self.href", containsString("query=*")))
+        .andExpect(jsonPath("_links.self.method", is("GET")))
+        .andExpect(jsonPath("_links.self.templated", is(false)))
+        .andExpect(jsonPath("_links.next", is(nullValue())))
+        .andExpect(jsonPath("_links.previous", is(nullValue())))
+        .andReturn().getResponse();
+
+    var searchResult = objectMapper.readValue(response.getContentAsString(),
+        ConsultantSearchResultDTO.class);
+    var foundConsultants = searchResult.getEmbedded();
+    var previousFirstName = foundConsultants.get(0).getEmbedded().getFirstname();
+    for (var foundConsultant : foundConsultants) {
+      var currentFirstname = foundConsultant.getEmbedded().getFirstname();
+      assertTrue(previousFirstName.compareTo(currentFirstname) <= 0);
+      previousFirstName = currentFirstname;
+    }
+  }
+
+  @Test
   @WithMockUser
   public void getLanguagesShouldRespondWithBadRequestIfAgencyIdIsNotGiven() throws Exception {
     mockMvc.perform(
@@ -2487,6 +2560,23 @@ public class UserControllerE2EIT {
 
     when(agencyService.getAgenciesWithoutCaching(anyList()))
         .thenReturn(agencies);
+  }
+
+  private void givenAgencyServiceReturningDummyAgencies() {
+    var agencies = new ArrayList<AgencyDTO>();
+
+    when(agencyService.getAgenciesWithoutCaching(anyList()))
+        .thenAnswer(i -> {
+          List<Long> agencyIds = i.getArgument(0);
+          agencyIds.forEach(agencyId -> {
+            var agency = new AgencyDTO();
+            agency.setId(agencyId);
+            agency.setName(RandomStringUtils.randomAlphabetic(16));
+            agency.setPostcode(RandomStringUtils.randomNumeric(5));
+            agencies.add(agency);
+          });
+          return agencies;
+        });
   }
 
   private void givenAKeycloakSetupOtpAnotherOtpConfigActiveErrorResponse() {

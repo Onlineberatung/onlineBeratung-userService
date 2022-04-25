@@ -310,6 +310,26 @@ public class ConsultantRepositoryIT {
     );
   }
 
+  @Test
+  void findAllByInfixShouldSearchAllOnStarQuery() {
+    var infix = RandomStringUtils.randomAlphanumeric(4);
+    var transformedInfix = easyRandom.nextBoolean() ? infix.toLowerCase() : infix.toUpperCase();
+    final var before = (int) underTest.countByDeleteDateIsNull();
+    var firstNameMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsMatchingFirstName(firstNameMatching, transformedInfix);
+    var lastNameMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsMatchingLastName(lastNameMatching, transformedInfix);
+    var emailMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsMatchingEmail(emailMatching, transformedInfix);
+    var notMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsNotMatching(notMatching, transformedInfix);
+
+    var consultantPage = underTest.findAllByInfix("*", Pageable.unpaged());
+
+    int allMatching = firstNameMatching + lastNameMatching + emailMatching + notMatching + before;
+    assertEquals(allMatching, consultantPage.getTotalElements());
+  }
+
   private void givenConsultantsMatchingFirstName(@PositiveOrZero int count,
       @NotBlank String infix) {
     while (count-- > 0) {
