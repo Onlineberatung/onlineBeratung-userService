@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -75,20 +76,22 @@ public class EmailNotificationFacade {
    * @param session the regarding session
    */
   @Async
-  public void sendNewEnquiryEmailNotification(Session session,
-      TenantData tenantData) {
-    try {
-      log.info("Preparing to send NEW_ENQUIRY_EMAIL_NOTIFICATION email for session: ",
-          session.getId());
-      TenantContext.setCurrentTenantData(tenantData);
-      newEnquiryEmailSupplier.setCurrentSession(session);
-      sendMailTasksToMailService(newEnquiryEmailSupplier);
-      TenantContext.clear();
-    } catch (Exception ex) {
-      log.error(
-          "EmailNotificationFacade error: Failed to send new enquiry notification for session {}.",
-          session.getId(), ex
-      );
+  public void sendNewEnquiryEmailNotification(Session session, TenantData tenantData) {
+    var sessionAlreadyAssignedToConsultant = nonNull(session.getConsultant());
+    if (!sessionAlreadyAssignedToConsultant) {
+      try {
+        log.info("Preparing to send NEW_ENQUIRY_EMAIL_NOTIFICATION email for session: {}",
+            session.getId());
+        TenantContext.setCurrentTenantData(tenantData);
+        newEnquiryEmailSupplier.setCurrentSession(session);
+        sendMailTasksToMailService(newEnquiryEmailSupplier);
+        TenantContext.clear();
+      } catch (Exception ex) {
+        log.error(
+            "EmailNotificationFacade error: Failed to send new enquiry notification for session {}.",
+            session.getId(), ex
+        );
+      }
     }
   }
 
@@ -98,7 +101,7 @@ public class EmailNotificationFacade {
     if (isNotEmpty(generatedMails)) {
       MailsDTO mailsDTO = new MailsDTO()
           .mails(generatedMails);
-      log.info("Sending email notifications with mailDTOs ", mailsDTO);
+      log.info("Sending email notifications with mailDTOs {}", mailsDTO);
       mailService.sendEmailNotification(mailsDTO);
     }
   }
@@ -184,7 +187,7 @@ public class EmailNotificationFacade {
   public void sendAssignEnquiryEmailNotification(Consultant receiverConsultant, String senderUserId,
       String askerUserName, TenantData tenantData) {
     TenantContext.setCurrentTenantData(tenantData);
-    log.info("Preparing to send ASSIGN_ENQUIRY_NOTIFICATION email to consultant: ",
+    log.info("Preparing to send ASSIGN_ENQUIRY_NOTIFICATION email to consultant: {}",
         receiverConsultant != null ? receiverConsultant.getId() : "No consultant selected");
     assignEnquiryEmailSupplier.setReceiverConsultant(receiverConsultant);
     assignEnquiryEmailSupplier.setSenderUserId(senderUserId);
