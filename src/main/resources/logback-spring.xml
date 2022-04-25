@@ -57,7 +57,7 @@
     </appender>
     <root level="INFO">
       <appender-ref ref="STDOUT"/>
-      <appender-ref ref="logstashcustom"/>
+<!--      <appender-ref ref="logstashcustom"/>-->
     </root>
   </springProfile>
 
