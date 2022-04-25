@@ -5,7 +5,7 @@
       <file>log/userservice.log</file>
       <append>true</append>
       <encoder>
-        <pattern>"%d{yyyy.MMM.dd HH:mm:ss.SSS} [ProgramName] %level - %msg%n"</pattern>
+        <pattern>%d{yyyy.MMM.dd HH:mm:ss.SSS} %level - %msg%n</pattern>
       </encoder>
     </appender>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
