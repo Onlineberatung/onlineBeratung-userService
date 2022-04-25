@@ -12,4 +12,6 @@ public interface MessageClient {
   boolean unmuteUserInChat(String chatUserId, String chatId);
 
   boolean updateUser(String chatUserId, String displayName);
+
+  Optional<Map<String, Object>> findUser(String chatUserId);
 }

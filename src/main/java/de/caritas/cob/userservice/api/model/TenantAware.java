@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.repository;
+package de.caritas.cob.userservice.api.model;
 
 /**
  * Marker interface for entities that need to support tenant feature.

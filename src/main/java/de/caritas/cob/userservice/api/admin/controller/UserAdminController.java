@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.controller;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
+import de.caritas.cob.userservice.api.admin.model.Sort;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
@@ -169,9 +170,9 @@ public class UserAdminController implements UseradminApi {
    */
   @Override
   public ResponseEntity<ConsultantSearchResultDTO> getConsultants(@NotNull @Valid Integer page,
-      @NotNull @Valid Integer perPage, @Valid ConsultantFilter consultantFilter) {
-    ConsultantSearchResultDTO resultDTO =
-        this.consultantAdminFacade.findFilteredConsultants(page, perPage, consultantFilter);
+      @NotNull @Valid Integer perPage, @Valid ConsultantFilter consultantFilter, @Valid Sort sort) {
+    var resultDTO =
+        this.consultantAdminFacade.findFilteredConsultants(page, perPage, consultantFilter, sort);
     return ResponseEntity.ok(resultDTO);
   }
 

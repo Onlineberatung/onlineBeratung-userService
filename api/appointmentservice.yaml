@@ -1,0 +1,166 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+paths:
+  /appointments/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: appointment id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - appointment-controller
+      summary: 'Gets an appointment [Auth: consultant, public]'
+      description:
+        If a consultant requests this, the response is the full appointment object,
+        else description and datetime are not included.
+      operationId: getAppointment
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        404:
+          description: NOT FOUND - an appointment with given ID does not exist
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    put:
+      tags:
+        - appointment-controller
+      summary: 'Updates an appointment [Auth: consultant]'
+      operationId: updateAppointment
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Appointment'
+        required: true
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        404:
+          description: NOT FOUND - an appointment with given ID does not exist
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    delete:
+      tags:
+        - appointment-controller
+      summary: 'Deletes an appointment [Auth: consultant]'
+      operationId: DeleteAppointment
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        404:
+          description: NOT FOUND - an appointment with given ID does not exist
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
+  /appointments:
+    get:
+      tags:
+        - appointment-controller
+      summary: 'Gets all today''s and future appointments [Auth: consultant]'
+      operationId: getAppointments
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Appointment'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    post:
+      tags:
+        - appointment-controller
+      summary: 'Creates an appointment [Auth: consultant]'
+      operationId: createAppointment
+      description:
+        Do not pass an ID inside the request''s payload, as it will be generated and returned.
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Appointment'
+        required: true
+      responses:
+        201:
+          description: CREATED - successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
+components:
+  schemas:
+    Appointment:
+      type: object
+      required:
+        - status
+        - datetime
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 300
+        datetime:
+          type: string
+          format: date-time
+          example: 2022-04-25T08:54:13Z
+          description: ISO 8601 UTC
+        status:
+          $ref: '#/components/schemas/AppointmentStatus'
+
+    AppointmentStatus:
+      type: string
+      enum: [
+        created, started, paused
+      ]

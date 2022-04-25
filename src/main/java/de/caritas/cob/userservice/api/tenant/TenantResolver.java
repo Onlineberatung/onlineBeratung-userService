@@ -3,9 +3,9 @@ package de.caritas.cob.userservice.api.tenant;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
 import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +69,8 @@ public class TenantResolver {
 
     Optional<Long> tenantFromHeader = tenantHeaderSupplier.getTenantFromHeader();
     if (tenantFromHeader.isPresent()) {
+      var currentSubdomain = tenantService.getRestrictedTenantData(tenantFromHeader.get()).getSubdomain();
+      TenantContext.setCurrentSubdomain(currentSubdomain);
       return tenantFromHeader;
     }
 
@@ -82,7 +84,7 @@ public class TenantResolver {
   }
 
   private Long getTenantIdBySubdomain(String currentSubdomain) {
-    return tenantService.getRestrictedTenantDataBySubdomain(currentSubdomain).getId();
+    return tenantService.getRestrictedTenantData(currentSubdomain).getId();
   }
 
   private Optional<Long> getUserTenantIdAttribute(Map<String, Object> claimMap) {

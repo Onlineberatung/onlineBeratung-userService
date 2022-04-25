@@ -244,6 +244,7 @@ public class CreateEnquiryMessageFacadeTest {
     this.rocketChatCredentials = RocketChatCredentials.builder().build();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(Mockito.mock(
         HttpServletRequest.class)));
+    resetRequestAttributes();
   }
 
   @Test
@@ -290,6 +291,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any(), any());
     assertEquals(SESSION_ID, response.getSessionId());
     assertEquals(RC_GROUP_ID, response.getRcGroupId());
+    resetRequestAttributes();
   }
 
   @Test(expected = ConflictException.class)
@@ -301,6 +303,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
         RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test(expected = CreateEnquiryMessageException.class)
@@ -311,6 +314,7 @@ public class CreateEnquiryMessageFacadeTest {
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.empty());
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
         RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test(expected = CreateEnquiryMessageException.class)
@@ -324,6 +328,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
         RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -335,6 +340,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
         RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -360,6 +366,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -386,6 +393,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -406,6 +414,7 @@ public class CreateEnquiryMessageFacadeTest {
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
     verify(rocketChatService, atLeast(1)).rollbackGroup(RC_GROUP_ID, rocketChatCredentials);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -437,6 +446,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    resetRequestAttributes();
   }
 
   @Test
@@ -465,6 +475,7 @@ public class CreateEnquiryMessageFacadeTest {
     }
 
     verify(rocketChatService, times(1)).rollbackGroup(RC_GROUP_ID, RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test
@@ -493,6 +504,7 @@ public class CreateEnquiryMessageFacadeTest {
     }
 
     verify(rocketChatService, times(1)).rollbackGroup(RC_GROUP_ID, RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test(expected = CreateEnquiryMessageException.class)
@@ -502,6 +514,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
         RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test
@@ -543,6 +556,7 @@ public class CreateEnquiryMessageFacadeTest {
     assertNotNull(spySession.getEnquiryMessageDate());
     verify(spySession, times(1)).setStatus(SessionStatus.NEW);
     verify(sessionService, times(1)).saveSession(spySession);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -574,6 +588,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -605,6 +620,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    resetRequestAttributes();
 
   }
 
@@ -638,6 +654,7 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(groupResponseDTO));
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    resetRequestAttributes();
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -671,6 +688,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     createEnquiryMessageFacade
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    resetRequestAttributes();
   }
 
   @Test
@@ -692,6 +710,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     verify(rocketChatService, atMost(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
+    resetRequestAttributes();
 
   }
 
@@ -722,6 +741,7 @@ public class CreateEnquiryMessageFacadeTest {
 
     verify(rocketChatService, atMost(1))
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
+    resetRequestAttributes();
 
   }
 
@@ -748,6 +768,7 @@ public class CreateEnquiryMessageFacadeTest {
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, atMost(1))
         .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+    resetRequestAttributes();
 
   }
 
@@ -784,6 +805,7 @@ public class CreateEnquiryMessageFacadeTest {
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, atMost(1))
         .rollbackGroup(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId(), RC_CREDENTIALS);
+    resetRequestAttributes();
   }
 
   @Test
@@ -819,6 +841,7 @@ public class CreateEnquiryMessageFacadeTest {
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
         .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
+    resetRequestAttributes();
   }
 
   @Test
@@ -852,6 +875,7 @@ public class CreateEnquiryMessageFacadeTest {
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
         .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
+    resetRequestAttributes();
   }
 
   @Test
@@ -893,6 +917,7 @@ public class CreateEnquiryMessageFacadeTest {
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
         .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
+    resetRequestAttributes();
   }
 
   @Test
@@ -933,6 +958,7 @@ public class CreateEnquiryMessageFacadeTest {
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
         .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
+    resetRequestAttributes();
   }
 
   @Test
@@ -965,6 +991,7 @@ public class CreateEnquiryMessageFacadeTest {
         .rollbackGroup(GROUP_RESPONSE_DTO.getGroup().getId(), RC_CREDENTIALS);
     verify(rocketChatService, times(1))
         .deleteGroupAsSystemUser(FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
+    resetRequestAttributes();
   }
 
   @Test
@@ -1006,6 +1033,7 @@ public class CreateEnquiryMessageFacadeTest {
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(messageServiceProvider, times(1))
         .postFurtherStepsOrSaveSessionDataMessageIfConfigured(anyString(), any(), any());
+    resetRequestAttributes();
   }
 
   @Test
@@ -1042,6 +1070,12 @@ public class CreateEnquiryMessageFacadeTest {
         .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
 
     verify(session).setStatus(SessionStatus.IN_PROGRESS);
+    resetRequestAttributes();
+  }
+
+
+  private void resetRequestAttributes() {
+    RequestContextHolder.setRequestAttributes(null);
   }
 
 }

@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.tenant.TenantResolver.TECHNICAL_TENANT_ID;
 
-import de.caritas.cob.userservice.api.repository.TenantAware;
+import de.caritas.cob.userservice.api.model.TenantAware;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;

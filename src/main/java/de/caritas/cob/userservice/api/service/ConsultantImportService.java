@@ -45,6 +45,8 @@ public class ConsultantImportService {
   private String importFilename;
   @Value("${consultant.import.protocol.filename}")
   private String protocolFilename;
+  @Value("${multitenancy.enabled}")
+  private Boolean multiTenancyEnabled;
 
   private final @NonNull IdentityClient identityClient;
   private final @NonNull ConsultantService consultantService;
@@ -288,7 +290,11 @@ public class ConsultantImportService {
     }
     importRecord.setAbsenceMessage(absenceMessage);
     importRecord.setAgenciesAndRoleSets(record.get(8));
-    importRecord.setTenantId((record.get(9).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(9)));
+
+    if (isTrue(multiTenancyEnabled)) {
+      importRecord.setTenantId(
+          (record.get(9).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(9)));
+    }
     return importRecord;
   }
 

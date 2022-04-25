@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.model;
 
-import de.caritas.cob.userservice.api.repository.TenantAware;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -25,7 +24,6 @@ import lombok.ToString.Exclude;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.hibernate.search.annotations.Field;
 
 /**
  * Represents a user

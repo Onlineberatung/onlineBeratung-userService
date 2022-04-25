@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.PeekingIterator;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.After;
 import org.junit.Test;
@@ -183,11 +184,12 @@ public class ArchivedSessionConversationListProviderTestIT {
     consultant.setUsername("consultant");
     consultant.setFirstName("firstname");
     consultant.setLastName("lastname");
-    consultant.setEmail("firstname@lastname.de");
+    consultant.setEmail(RandomStringUtils.randomAlphabetic(8) + "@lastname.de");
     consultant.setTeamConsultant(false);
     consultant.setLanguageFormal(false);
     consultant.setAbsent(false);
     consultant.setEncourage2fa(true);
+    consultant.setWalkThroughEnabled(true);
     return consultant;
   }
 

@@ -630,13 +630,12 @@ public class RocketChatService {
     try {
       var header = getStandardHttpHeaders(rocketChatCredentials);
       HttpEntity<Void> request = new HttpEntity<>(header);
-
       response =
           restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
       throw new InternalServerErrorException(String.format(
-          CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()),
+          CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()), ex,
           LogService::logRocketChatError);
     }
 

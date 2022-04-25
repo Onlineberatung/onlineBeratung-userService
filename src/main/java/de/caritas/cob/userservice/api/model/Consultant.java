@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.api.model.Consultant.EMAIL_ANALYZER;
 import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.caritas.cob.userservice.api.repository.TenantAware;
 import com.neovisionaries.i18n.LanguageCode;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -13,7 +12,10 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -35,6 +37,7 @@ import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
+import org.hibernate.search.annotations.SortableField;
 import org.hibernate.search.annotations.TokenFilterDef;
 import org.hibernate.search.annotations.TokenizerDef;
 import org.springframework.lang.Nullable;
@@ -43,7 +46,16 @@ import org.springframework.lang.Nullable;
  * Represents a consultant
  */
 @Entity
-@Table(name = "consultant")
+@Table(
+    name = "consultant",
+    indexes = {
+        @Index(
+            columnList = "first_name, last_name, email, delete_date",
+            name = "idx_first_name_last_name_email_delete_date",
+            unique = true
+        ),
+    }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -76,17 +88,21 @@ public class Consultant implements TenantAware {
   @Size(max = 255)
   @NonNull
   @Field
+  @SortableField
   private String username;
 
   @Column(name = "first_name", nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
+  @SortableField
   private String firstName;
 
   @Column(name = "last_name", nullable = false)
   @Size(max = 255)
   @NonNull
   @Field
+  @SortableField
   private String lastName;
 
   @Column(name = "email", nullable = false)
@@ -94,6 +110,7 @@ public class Consultant implements TenantAware {
   @NonNull
   @Field
   @Analyzer(definition = EMAIL_ANALYZER)
+  @SortableField
   private String email;
 
   @Column(name = "is_absent", nullable = false, columnDefinition = "tinyint")
@@ -143,6 +160,16 @@ public class Consultant implements TenantAware {
   @Column(name = "tenant_id")
   @Field
   private Long tenantId;
+
+  @OneToMany(mappedBy = "consultant", cascade = CascadeType.ALL)
+  private Set<Appointment> appointments;
+
+  @Column(name = "status", length = 11)
+  @Enumerated(EnumType.STRING)
+  private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
+
+  @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)
+  private Boolean walkThroughEnabled;
 
   @JsonIgnore
   public String getFullName() {
@@ -199,5 +226,16 @@ public class Consultant implements TenantAware {
   public String toString() {
     return "Consultant [id=" + id + ", rocketChatId=" + rocketChatId + ", username=" + username
         + "]";
+  }
+
+  public interface ConsultantBase {
+
+    String getId();
+
+    String getFirstName();
+
+    String getLastName();
+
+    String getEmail();
   }
 }

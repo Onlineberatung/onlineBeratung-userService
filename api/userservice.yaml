@@ -821,6 +821,7 @@ paths:
           required: true
           schema:
             type: string
+            format: UUID
       responses:
         200:
           description: successful operation
@@ -836,6 +837,66 @@ paths:
           description: CONFLICT - invalid/unavailable username
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /users/consultants/search:
+    get:
+      tags:
+        - user-controller
+      summary: 'Get consultants matching the given query [Auth: user-admin]'
+      operationId: searchConsultants
+      parameters:
+        - name: query
+          in: query
+          description: URL-encoded infix to search for in first name, last name, or email.
+            A non-encoded star symbol searches for all.
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: page
+          in: query
+          description: Page number (first page = 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: perPage
+          in: query
+          description: Number of items returned per page
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: field
+          in: query
+          description: field to sort by
+          schema:
+            type: string
+            enum: [ FIRSTNAME, LASTNAME, EMAIL ]
+            default: FIRSTNAME
+            pattern: '^(FIRSTNAME|LASTNAME|EMAIL)$'
+        - name: order
+          in: query
+          description: sort order
+          schema:
+            type: string
+            enum: [ ASC, DESC ]
+            default: ASC
+            pattern: '^(ASC|DESC)$'
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: 'useradminservice.yaml#/components/schemas/ConsultantSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/{sessionId}/consultant/{consultantId}:
     put:
       tags:
@@ -1713,6 +1774,8 @@ components:
         username:
           type: string
           example: "asker23"
+        displayName:
+          type: string
         rcUserId:
           type: string
           example: "ag89h3tjkerg94t"
@@ -1731,6 +1794,8 @@ components:
         initiatorUserName:
           type: string
           example: "consultant23"
+        rcUserId:
+          type: string
         initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
@@ -1743,6 +1808,8 @@ components:
         - "FORWARD"
         - "VIDEOCALL"
         - "FINISHED_CONVERSATION"
+        - "USER_MUTED"
+        - "USER_UNMUTED"
 
     ConsultantSessionDTO:
       type: object
@@ -1921,6 +1988,8 @@ components:
         username:
           type: string
           example: beraterXYZ
+        displayName:
+          type: string
         isAbsent:
           type: boolean
           example: true
@@ -1970,6 +2039,9 @@ components:
         userName:
           type: string
           example: max.muster
+        displayName:
+          type: string
+          example: Max M.
         firstName:
           type: string
           example: Max
@@ -2028,6 +2100,10 @@ components:
           type: boolean
           example: true
           description: "Is true if feature is enabled. Enables end-to-end encryption in video chat"
+        isWalkThroughEnabled:
+          type: boolean
+          example: true
+          description: "Is true if the walk through is enabled for the user"
 
     PatchUserDTO:
       type: object
@@ -2040,7 +2116,10 @@ components:
         displayName:
           type: string
           minLength: 1
-
+        walkThroughEnabled:
+          type: boolean
+          example: true
+          description: indicates should the walkt hrough be enabled
     UpdateConsultantDTO:
       type: object
       required:
@@ -2255,7 +2334,7 @@ components:
           type: string
         username:
           type: string
-        name:
+        displayName:
           type: string
         utcOffset:
           type: string

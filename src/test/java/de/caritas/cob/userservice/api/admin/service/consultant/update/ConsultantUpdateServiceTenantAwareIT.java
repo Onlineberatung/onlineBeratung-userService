@@ -99,6 +99,7 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
 
   private Consultant givenAValidConsultant(String id, boolean isTeamConsultant) {
     Consultant consultant = new Consultant();
+    consultant.setAppointments(null);
     consultant.setTenantId(1L);
     consultant.setId(id);
     consultant.setConsultantAgencies(Sets.newHashSet());
@@ -107,6 +108,7 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     consultant.setLastName(easyRandom.nextObject(String.class));
     consultant.setEmail(easyRandom.nextObject(String.class));
     consultant.setEncourage2fa(true);
+    consultant.setWalkThroughEnabled(true);
     consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
     return consultant;

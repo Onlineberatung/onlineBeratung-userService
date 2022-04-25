@@ -41,7 +41,7 @@ public class TenantTemplateSupplierTest {
     RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
 
     //when
-    when(tenantService.getRestrictedTenantDataBySubdomain(tenantData.getSubdomain()))
+    when(tenantService.getRestrictedTenantData(tenantData.getSubdomain()))
         .thenReturn(mockedTenantData);
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 

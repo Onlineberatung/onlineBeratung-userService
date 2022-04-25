@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
+import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -16,23 +17,23 @@ import static org.mockito.Mockito.when;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.model.UserAgency;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.LinkedHashMap;
@@ -90,6 +91,9 @@ public class ConsultantAgencyRelationCreatorServiceIT {
   @MockBean
   private ConsultingTypeManager consultingTypeManager;
 
+  @Autowired
+  private RocketChatAsyncHelper rocketChatAsyncHelper;
+
   @Test
   public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValid() {
 
@@ -117,12 +121,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    verify(rocketChatFacade, times(1))
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatFacade, times(1))
+            enquirySessionWithoutConsultant.getGroupId()));
+
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getFeedbackGroupId());
+            enquirySessionWithoutConsultant.getFeedbackGroupId()));
+
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -156,12 +162,14 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
-    verify(rocketChatFacade, times(1))
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getGroupId());
-    verify(rocketChatFacade, times(1))
+            enquirySessionWithoutConsultant.getGroupId()));
+
+    verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getFeedbackGroupId());
+            enquirySessionWithoutConsultant.getFeedbackGroupId()));
+
     List<ConsultantAgency> result = this.consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
@@ -232,6 +240,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     consultant.setRocketChatId("RocketChatId");
     consultant.setDeleteDate(null);
     consultant.setLanguages(null);
+    consultant.setAppointments(null);
     return this.consultantRepository.save(consultant);
   }
 

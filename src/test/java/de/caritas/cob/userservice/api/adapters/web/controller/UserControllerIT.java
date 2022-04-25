@@ -77,7 +77,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_ME
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ROLE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
@@ -99,7 +98,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.MASTER_KEY
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE_DATE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.NAME;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.OTP_INFO_DTO;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
@@ -109,8 +107,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -151,7 +147,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserD
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
@@ -195,6 +190,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -223,11 +219,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
@@ -257,19 +253,18 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 public class UserControllerIT {
 
+  private static final Cookie RC_TOKEN_COOKIE = new Cookie(
+      "rc_token", RandomStringUtils.randomAlphanumeric(43)
+  );
+
   private final String VALID_ENQUIRY_MESSAGE_BODY = "{\"message\": \"" + MESSAGE + "\"}";
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
-          null, null, null, true, null);
+          null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
-  private final Set<String> ROLES_WITH_CONSULTANT =
-      new HashSet<>(Arrays.asList("dummyRoleA", UserRole.CONSULTANT.getValue(), "dummyRoleB"));
-  private final String VALID_USER_ROLE_RESULT = "{\"userRoles\": [\"" + "dummyRoleA" + "\",\""
-      + UserRole.USER.getValue() + "\",\"" + "dummyRoleB" + "\"],\"grantedAuthorities\": [\""
-      + AuthorityValue.USER_DEFAULT + "\"], \"inTeamAgency\":false}";
   private final SessionDTO SESSION_DTO = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
@@ -291,25 +286,11 @@ public class UserControllerIT {
       .offline(false)
       .consultingType(CONSULTING_TYPE_ID_SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
-      new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE);
+      new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE, null);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
       .session(SESSION_DTO)
       .agency(AGENCY_DTO)
       .consultant(SESSION_CONSULTANT_DTO);
-  private final List<AgencyDTO> AGENCY_LIST = new ArrayList<>();
-  private final LinkedHashMap<String, Object> SESSION_DATA = new LinkedHashMap<>() {
-    {
-      put("age", "1");
-      put("state", "4");
-    }
-  };
-  private final UserDataResponseDTO CONSULTANT_USER_DATA_RESPONSE_DTO = UserDataResponseDTO
-      .builder().userId(USER_ID).userName("Beraterbiene").firstName("Max").lastName("Mustermann")
-      .email("mail@muster.mann").isAbsent(true).isFormalLanguage(false).absenceMessage("Bin weg")
-      .isInTeamAgency(true).agencies(AGENCY_LIST).hasAnonymousConversations(false).build();
-  private final UserDataResponseDTO USER_USER_DATA_RESPONSE_DTO = UserDataResponseDTO.builder()
-      .userId(USER_ID).userName(NAME).isAbsent(false).isFormalLanguage(false).isInTeamAgency(false)
-      .consultingTypes(SESSION_DATA).hasAnonymousConversations(false).build();
   private final String PATH_PUT_SESSIONS_MONITORING = "/users/sessions/monitoring/" + SESSION_ID;
   private final String PATH_GET_MONITORING = "/users/sessions/" + SESSION_ID + "/monitoring";
   protected static final String PATH_GET_PUBLIC_CONSULTANT_DATA = "/users/consultants/65c1095e-b977-493a-a34f-064b729d1d6c";
@@ -448,8 +429,10 @@ public class UserControllerIT {
   @MockBean
   private ConsultantService consultantService;
   @MockBean
+  @SuppressWarnings("unused")
   private ConsultantDataProvider consultantDataProvider;
   @MockBean
+  @SuppressWarnings("unused")
   private AskerDataProvider askerDataProvider;
   @MockBean
   @SuppressWarnings("unused")
@@ -935,7 +918,6 @@ public class UserControllerIT {
     sessions.add(USER_SESSION_RESPONSE_DTO);
     UserSessionListResponseDTO response = new UserSessionListResponseDTO()
         .sessions(sessions);
-    var sessionsJson = objectMapper.writeValueAsString(response);
 
     when(authenticatedUser.getUserId())
         .thenReturn(USER_ID);
@@ -945,11 +927,20 @@ public class UserControllerIT {
     when(sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(anyString(), Mockito.any()))
         .thenReturn(response);
 
+    var displayName = RandomStringUtils.randomAlphanumeric(16);
+    Map<String, Object> map = Map.of("displayName", displayName);
+    when(userDtoMapper.displayNameOf(eq(map))).thenReturn(displayName);
+    when(accountManager.findConsultantByUsername(anyString())).thenReturn(Optional.of(map));
+
+    response.getSessions().get(0).getConsultant().setDisplayName(displayName);
+    var sessionsJson = objectMapper.writeValueAsString(response);
+
     mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].consultant.displayName", is(displayName)))
         .andExpect(content().json(sessionsJson));
 
     verify(accountProvider, atLeastOnce())
@@ -974,28 +965,6 @@ public class UserControllerIT {
 
     verify(sessionListFacade, times(0)).retrieveSortedSessionsForAuthenticatedUser(Mockito.any(),
         Mockito.any());
-
-  }
-
-  @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnNoContent_WhenAuthorizedAndNoOpenSessionsAvailableAndSessionListIsNull()
-      throws Exception {
-    UserSessionListResponseDTO response = new UserSessionListResponseDTO()
-        .sessions(null);
-
-    when(authenticatedUser.getUserId())
-        .thenReturn(USER_ID);
-    when(accountProvider.retrieveValidatedUser())
-        .thenReturn(USER);
-
-    when(sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(anyString(), Mockito.any()))
-        .thenReturn(response);
-
-    mvc.perform(get(PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER)
-            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
 
   }
 
@@ -1228,26 +1197,6 @@ public class UserControllerIT {
    */
 
   @Test
-  public void getUserData_ForUser_Should_ReturnOkAndValidContent() throws Exception {
-
-    when(authenticatedUser.isUser()).thenReturn(true);
-
-    UserDataResponseDTO responseDto = USER_USER_DATA_RESPONSE_DTO;
-    responseDto.setUserRoles(ROLES_WITH_USER);
-    responseDto.setGrantedAuthorities(
-        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.USER)));
-
-    when(askerDataProvider.retrieveData(any())).thenReturn(responseDto);
-    when(identityClient.getOtpCredential(null)).thenReturn(OTP_INFO_DTO);
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().json(VALID_USER_ROLE_RESULT));
-  }
-
-  @Test
   public void getUserData_ForUser_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
       throws Exception {
 
@@ -1262,37 +1211,9 @@ public class UserControllerIT {
 
     mvc.perform(get(PATH_USER_DATA)
             .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-  }
-
-  @Test
-  public void getUserData_ForConsultant_Should_ReturnOkAndValidContent() throws Exception {
-
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-
-    UserDataResponseDTO responseDto = CONSULTANT_USER_DATA_RESPONSE_DTO;
-    responseDto.setUserRoles(ROLES_WITH_CONSULTANT);
-    responseDto.setLanguages(Set.of("de", "en"));
-    responseDto.setGrantedAuthorities(
-        new HashSet<>(Authority.getAuthoritiesByUserRole(UserRole.CONSULTANT)));
-
-    when(consultantDataProvider.retrieveData(any())).thenReturn(responseDto);
-    when(identityClient.getOtpCredential(null)).thenReturn(OTP_INFO_DTO);
-
-    mvc.perform(
-            get(PATH_USER_DATA)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-        )
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.languages", containsInAnyOrder("de", "en")))
-        .andExpect(jsonPath("$.userRoles", hasSize(3)))
-        .andExpect(
-            jsonPath("$.userRoles",
-                containsInAnyOrder("dummyRoleA", "dummyRoleB", CONSULTANT_ROLE)
-            )
-        );
   }
 
   /**

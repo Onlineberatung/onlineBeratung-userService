@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getAuthorizedHttpHeaders;
 import static de.caritas.cob.userservice.api.helper.RequestHelper.getFormHttpHeaders;
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -54,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
@@ -417,7 +419,7 @@ public class KeycloakService implements IdentityClient {
   }
 
   private void updateTenantId(UserDTO userDTO, UserRepresentation kcUser) {
-    if (multiTenancyEnabled) {
+    if (TRUE.equals(multiTenancyEnabled)) {
       Map<String, List<String>> attributes = new HashMap<>();
       var list = new ArrayList<String>();
       if (userDTO.getTenantId() != null) {
@@ -564,8 +566,14 @@ public class KeycloakService implements IdentityClient {
   }
 
   private boolean hasEmailAddressChanged(UserResource userResource, String email) {
-    return !userResource.toRepresentation().getEmail().equals(email);
+    UserRepresentation userRepresentation = userResource.toRepresentation();
+    if (userRepresentation != null && userRepresentation.getEmail() != null) {
+      return !userRepresentation.getEmail().equals(email);
+    } else {
+      return !StringUtils.isEmpty(email);
+    }
   }
+
 
   /**
    * Updates the email address of user with given id in keycloak.

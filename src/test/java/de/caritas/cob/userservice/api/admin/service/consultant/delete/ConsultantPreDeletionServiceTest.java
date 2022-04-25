@@ -8,7 +8,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -65,7 +64,7 @@ public class ConsultantPreDeletionServiceTest {
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
     verify(this.validationService, times(consultant.getConsultantAgencies().size()))
-        .validateForDeletion(any());
+        .validateAndMarkForDeletion(any());
   }
 
   @Test
@@ -75,7 +74,7 @@ public class ConsultantPreDeletionServiceTest {
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
-    verify(this.keycloakService, times(1)).deactivateUser(eq(consultant.getId()));
+    verify(this.keycloakService, times(1)).deactivateUser(consultant.getId());
   }
 
 }

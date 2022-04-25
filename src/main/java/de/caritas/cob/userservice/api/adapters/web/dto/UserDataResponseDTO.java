@@ -66,9 +66,13 @@ public class UserDataResponseDTO {
   private boolean hasAnonymousConversations;
   private boolean hasArchive;
   private TwoFactorAuthDTO twoFactorAuth;
+  private String displayName;
+  private Boolean isDisplayNameEditable;
 
   @JsonIgnore
   private Boolean encourage2fa;
 
   private Boolean e2eEncryptionEnabled;
+
+  private Boolean isWalkThroughEnabled;
 }

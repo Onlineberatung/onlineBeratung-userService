@@ -14,9 +14,9 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USE_FEEDBACK;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 
-import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
-import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.HttpTenantFilter;
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
+import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -90,13 +91,15 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers("/users/data")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.GET, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
+        .permitAll()
         .antMatchers("/users/sessions/askers")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT)
         .antMatchers("/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
             "/users/chat/{chatId:[0-9]+}/join", "/users/chat/{chatId:[0-9]+}/members",
             "/users/chat/{chatId:[0-9]+}/leave", "/users/twoFactorAuth", "/users/2fa/**",
-            "/users/mobile/app/token"
+            "/users/mobile/app/token", "/users/consultants/toggleWalkThrough"
         )
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
@@ -137,13 +140,18 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/{chatUserId:[0-9A-Za-z]+}/chat/{chatId:[0-9]+}/ban"
         )
         .hasAuthority(UPDATE_CHAT)
-        .antMatchers("/useradmin", "/useradmin/**")
+        .antMatchers("/useradmin", "/useradmin/**", "/users/consultants/search")
         .hasAuthority(USER_ADMIN)
         .antMatchers(
             "/users/consultants/sessions/{sessionId:[0-9]+}",
             "/users/sessions/{sessionId:[0-9]+}/archive",
-            "/users/sessions/{sessionId:[0-9]+}"
+            "/users/sessions/{sessionId:[0-9]+}",
+            "/appointments"
         )
+        .hasAuthority(CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.PUT, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
+        .hasAuthority(CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.DELETE, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)

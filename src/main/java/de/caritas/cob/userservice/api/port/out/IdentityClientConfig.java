@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.port.out;
 
+import java.util.Set;
+import javax.validation.constraints.NotNull;
+
 public interface IdentityClientConfig {
 
   String getErrorMessageDuplicatedEmail();
@@ -21,4 +24,8 @@ public interface IdentityClientConfig {
   Boolean getOtpAllowedForUsers();
 
   Boolean getOtpAllowedForConsultants();
+
+  Boolean getDisplayNameAllowedForConsultants();
+
+  boolean isOtpAllowed(@NotNull Set<String> roles);
 }

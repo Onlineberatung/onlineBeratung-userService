@@ -42,8 +42,8 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
    * @return the generated {@link ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO buildResponseDTO() {
-    ConsultantDTO consultantDTO = new ConsultantAdminMapper(this.consultant).mapData();
-    ConsultantLinks consultantLinks = new ConsultantLinks()
+    var consultantDTO = new ConsultantAdminMapper(this.consultant).mapData();
+    var consultantLinks = new ConsultantLinks()
         .self(buildSelfLink())
         .update(buildUpdateLink())
         .delete(buildDeleteLink())

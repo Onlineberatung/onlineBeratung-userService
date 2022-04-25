@@ -57,6 +57,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
 
   private void createConsultant(String username) {
     Consultant consultant = new Consultant();
+    consultant.setAppointments(null);
     consultant.setTenantId(1L);
     consultant.setId(username);
     consultant.setRocketChatId(username);
@@ -65,6 +66,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
     consultant.setLastName(username);
     consultant.setEmail(username + "@email.com");
     consultant.setEncourage2fa(true);
+    consultant.setWalkThroughEnabled(true);
     consultantRepository.save(consultant);
   }
 
@@ -86,7 +88,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
     dummyTenant.setLicensing(licensing);
     ReflectionTestUtils
         .setField(consultantCreatorService, "tenantAdminService", tenantAdminService);
-    when(tenantAdminService.getTenantById()).thenReturn(dummyTenant);
+    when(tenantAdminService.getTenantById(TenantContext.getCurrentTenant())).thenReturn(dummyTenant);
   }
 
 }
