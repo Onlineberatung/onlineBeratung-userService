@@ -1,6 +1,13 @@
 <configuration>
 
   <springProfile name="!testing">
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+      <file>log/userservice.log</file>
+      <append>true</append>
+      <encoder>
+        <pattern>"%d{yyyy.MMM.dd HH:mm:ss.SSS} [ProgramName] %level - %msg%n"</pattern>
+      </encoder>
+    </appender>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
       <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
         <providers>
@@ -8,9 +15,9 @@
           <pattern>
             <pattern>
               {
-                "serviceName": "users",
-                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
-                "request": {
+              "serviceName": "users",
+              "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}",
+              "request": {
                   "correlationId": "%mdc{CID:-null}",
                   "timestamp": "null"
                 },
