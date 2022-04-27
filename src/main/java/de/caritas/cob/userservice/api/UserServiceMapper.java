@@ -124,15 +124,19 @@ public class UserServiceMapper {
         ? ConsultantStatus.ERROR.toString()
         : fullConsultant.getStatus().toString();
 
-    return Map.of(
-        "id", consultantBase.getId(),
-        "email", consultantBase.getEmail(),
-        "firstName", consultantBase.getFirstName(),
-        "lastName", consultantBase.getLastName(),
-        "status", status,
-        "username", fullConsultant.getUsername(),
-        "agencies", agencies
-    );
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", consultantBase.getId());
+    map.put("email", consultantBase.getEmail());
+    map.put("firstName", consultantBase.getFirstName());
+    map.put("lastName", consultantBase.getLastName());
+    map.put("status", status);
+    map.put("username", fullConsultant.getUsername());
+    map.put("absenceMessage", fullConsultant.getAbsenceMessage());
+    map.put("isAbsent", fullConsultant.isAbsent());
+    map.put("isLanguageFormal", fullConsultant.isLanguageFormal());
+    map.put("agencies", agencies);
+
+    return map;
   }
 
   @SuppressWarnings("unchecked")
