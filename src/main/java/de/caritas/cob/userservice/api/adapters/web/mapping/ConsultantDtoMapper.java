@@ -145,6 +145,7 @@ public class ConsultantDtoMapper {
       agency.setId((Long) agencyMap.get("id"));
       agency.setName((String) agencyMap.get("name"));
       agency.setPostcode((String) agencyMap.get("postcode"));
+      agency.setCity((String) agencyMap.get("city"));
       agencies.add(agency);
     });
     consultant.setAgencies(agencies);

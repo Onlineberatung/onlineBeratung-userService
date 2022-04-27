@@ -474,10 +474,12 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
         .andExpect(
             jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].city", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
         .andExpect(
             jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].city", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
         .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
         .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
@@ -2602,6 +2604,7 @@ public class UserControllerE2EIT {
       agency.setId(consultantAgency.getAgencyId());
       agency.setName(RandomStringUtils.randomAlphabetic(16));
       agency.setPostcode(RandomStringUtils.randomNumeric(5));
+      agency.setCity(RandomStringUtils.randomNumeric(8));
       agencies.add(agency);
     });
 
