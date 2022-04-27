@@ -103,12 +103,14 @@ public class UserServiceMapper {
     if (nonNull(consultantAgencies)) {
       consultantAgencies.forEach(consultantAgency -> {
         var agencyId = consultantAgency.getAgencyId();
-        var agencyDTO = lookupMap.get(agencyId);
-        Map<String, Object> agencyMap = new HashMap<>();
-        agencyMap.put("id", agencyId);
-        agencyMap.put("name", agencyDTO.getName());
-        agencyMap.put("postcode", agencyDTO.getPostcode());
-        agencies.add(agencyMap);
+        if (lookupMap.containsKey(agencyId)) {
+          var agencyDTO = lookupMap.get(agencyId);
+          Map<String, Object> agencyMap = new HashMap<>();
+          agencyMap.put("id", agencyId);
+          agencyMap.put("name", agencyDTO.getName());
+          agencyMap.put("postcode", agencyDTO.getPostcode());
+          agencies.add(agencyMap);
+        }
       });
     }
 
@@ -203,6 +205,7 @@ public class UserServiceMapper {
     return consultants.stream()
         .map(Consultant::getConsultantAgencies)
         .flatMap(Set::stream)
+        .filter(consultantAgency -> isNull(consultantAgency.getDeleteDate()))
         .map(ConsultantAgency::getAgencyId)
         .distinct()
         .collect(Collectors.toList());
