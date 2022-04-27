@@ -469,6 +469,9 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
         .andExpect(jsonPath("_embedded[9]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[0]._embedded.absenceMessage", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.absent", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.formalLanguage", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
@@ -2451,6 +2454,9 @@ public class UserControllerE2EIT {
       consultant.setLastName(aStringWithInfix(infix));
       consultant.setEmail(aValidEmailWithoutInfix(infix));
       consultant.setStatus(ConsultantStatus.CREATED);
+      consultant.setAbsenceMessage(RandomStringUtils.randomAlphabetic(8));
+      consultant.setAbsent(easyRandom.nextBoolean());
+      consultant.setLanguageFormal(easyRandom.nextBoolean());
 
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());
