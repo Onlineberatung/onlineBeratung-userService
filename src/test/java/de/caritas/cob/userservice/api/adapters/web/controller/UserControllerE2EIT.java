@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -95,6 +96,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Basi
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -678,6 +680,42 @@ public class UserControllerE2EIT {
       var currentFirstname = foundConsultant.getEmbedded().getFirstname();
       assertTrue(previousFirstName.compareTo(currentFirstname) <= 0);
       previousFirstName = currentFirstname;
+    }
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  void searchConsultantsShouldContainOnlyAgenciesNotMarkedForDeletion() throws Exception {
+    givenAnInfix();
+    var numMatching = easyRandom.nextInt(20) + 1;
+    givenConsultantsMatching(numMatching, infix, true);
+    givenAgencyServiceReturningDummyAgencies();
+
+    var response = mockMvc.perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
+        ).andExpect(status().isOk())
+        .andReturn().getResponse().getContentAsString();
+
+    var searchResult = objectMapper.readValue(response, ConsultantSearchResultDTO.class);
+    var consultantAgenciesMarkedForDeletion = consultantAgencies.stream()
+        .filter(consultantAgency -> nonNull(consultantAgency.getDeleteDate()))
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toSet());
+    var consultantAgenciesNotMarkedForDeletion = consultantAgencies.stream()
+        .filter(consultantAgency -> isNull(consultantAgency.getDeleteDate()))
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toSet());
+
+    for (var foundConsultant : searchResult.getEmbedded()) {
+      foundConsultant.getEmbedded().getAgencies().forEach(agency -> {
+        var agencyId = agency.getId();
+        assertFalse(consultantAgenciesMarkedForDeletion.contains(agencyId));
+        assertTrue(consultantAgenciesNotMarkedForDeletion.contains(agencyId));
+      });
     }
   }
 
@@ -2395,6 +2433,11 @@ public class UserControllerE2EIT {
   }
 
   private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix) {
+    givenConsultantsMatching(count, infix, false);
+  }
+
+  private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix,
+      boolean includingAgenciesMarkedForDeletion) {
     while (count-- > 0) {
       var dbConsultant = consultantRepository.findAll().iterator().next();
       var consultant = new Consultant();
@@ -2414,6 +2457,10 @@ public class UserControllerE2EIT {
           .consultant(consultant)
           .agencyId(aPositiveLong())
           .build();
+      if (includingAgenciesMarkedForDeletion) {
+        var deleteDate = easyRandom.nextBoolean() ? null : LocalDateTime.now();
+        consultantAgency.setDeleteDate(deleteDate);
+      }
       consultantAgencyRepository.save(consultantAgency);
       consultantAgencies.add(consultantAgency);
       consultant.setConsultantAgencies(Set.of(consultantAgency));
