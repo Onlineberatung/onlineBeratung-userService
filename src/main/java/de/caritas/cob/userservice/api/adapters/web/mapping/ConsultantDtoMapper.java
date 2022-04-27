@@ -137,6 +137,9 @@ public class ConsultantDtoMapper {
     consultant.setLastname((String) consultantMap.get("lastName"));
     consultant.setUsername((String) consultantMap.get("username"));
     consultant.setStatus((String) consultantMap.get("status"));
+    consultant.setAbsenceMessage((String) consultantMap.get("absenceMessage"));
+    consultant.setAbsent((Boolean) consultantMap.get("isAbsent"));
+    consultant.setFormalLanguage((Boolean) consultantMap.get("isLanguageFormal"));
 
     var agencies = new ArrayList<AgencyAdminResponseDTO>();
     var agencyMaps = (ArrayList<Map<String, Object>>) consultantMap.get("agencies");
@@ -145,6 +148,7 @@ public class ConsultantDtoMapper {
       agency.setId((Long) agencyMap.get("id"));
       agency.setName((String) agencyMap.get("name"));
       agency.setPostcode((String) agencyMap.get("postcode"));
+      agency.setCity((String) agencyMap.get("city"));
       agencies.add(agency);
     });
     consultant.setAgencies(agencies);

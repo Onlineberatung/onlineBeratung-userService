@@ -469,15 +469,20 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
         .andExpect(jsonPath("_embedded[9]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[0]._embedded.absenceMessage", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.absent", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.formalLanguage", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
         .andExpect(
             jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].city", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
         .andExpect(
             jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].city", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
         .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
         .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
@@ -2449,6 +2454,9 @@ public class UserControllerE2EIT {
       consultant.setLastName(aStringWithInfix(infix));
       consultant.setEmail(aValidEmailWithoutInfix(infix));
       consultant.setStatus(ConsultantStatus.CREATED);
+      consultant.setAbsenceMessage(RandomStringUtils.randomAlphabetic(8));
+      consultant.setAbsent(easyRandom.nextBoolean());
+      consultant.setLanguageFormal(easyRandom.nextBoolean());
 
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());
@@ -2602,6 +2610,7 @@ public class UserControllerE2EIT {
       agency.setId(consultantAgency.getAgencyId());
       agency.setName(RandomStringUtils.randomAlphabetic(16));
       agency.setPostcode(RandomStringUtils.randomNumeric(5));
+      agency.setCity(RandomStringUtils.randomNumeric(8));
       agencies.add(agency);
     });
 
