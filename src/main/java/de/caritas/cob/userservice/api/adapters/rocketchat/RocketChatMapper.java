@@ -5,12 +5,12 @@ import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.Message;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MuteUnmuteUser;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.UpdateUser;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.User;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.Message;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.MuteUnmuteUser;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.User;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

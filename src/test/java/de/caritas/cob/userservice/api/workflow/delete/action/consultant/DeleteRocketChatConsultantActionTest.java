@@ -19,7 +19,7 @@ import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWo
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;

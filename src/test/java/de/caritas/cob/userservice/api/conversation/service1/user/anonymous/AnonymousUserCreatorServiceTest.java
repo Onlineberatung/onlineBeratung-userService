@@ -25,8 +25,8 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
