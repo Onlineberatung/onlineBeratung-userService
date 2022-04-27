@@ -54,17 +54,20 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientResponseException;
@@ -129,6 +132,26 @@ public class RocketChatService {
   private String rocketChatApiCleanRoomHistory;
   @Value("${rocket.chat.api.group.set.readOnly}")
   private String rocketChatApiGroupSetReadOnly;
+
+  private boolean rotatingTokensInitialized = false;
+
+  @PostConstruct
+  @Scheduled(cron = "${rocket.credentialscheduler.cron}")
+  @Profile("!testing")
+  public void updateCredentials() {
+    if (rotatingTokensInitialized) {
+      log.debug("rotating tokens");
+    } else {
+      log.debug("initialize tokens");
+      rotatingTokensInitialized = true;
+    }
+
+    try {
+      rcCredentialHelper.updateCredentials();
+    } catch (RocketChatLoginException e) {
+      log.warn("Unauthorized: {}", e.getMessage());
+    }
+  }
 
   /**
    * Creation of a private Rocket.Chat group.
