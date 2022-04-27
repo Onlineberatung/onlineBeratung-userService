@@ -109,6 +109,7 @@ public class UserServiceMapper {
           agencyMap.put("id", agencyId);
           agencyMap.put("name", agencyDTO.getName());
           agencyMap.put("postcode", agencyDTO.getPostcode());
+          agencyMap.put("city", agencyDTO.getCity());
           agencies.add(agencyMap);
         }
       });
