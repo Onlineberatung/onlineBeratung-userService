@@ -264,7 +264,7 @@ public class UserAdminControllerIT {
     verify(consultantAdminFacade, times(agencies.size()))
         .createNewConsultantAgency(eq(consultantId), any(CreateConsultantAgencyDTO.class));
     verify(consultantAdminFacade)
-        .markConsultantAgenciesForDeletion(eq(consultantId));
+        .markConsultantAgenciesForDeletion(consultantId);
   }
 
   @Test
