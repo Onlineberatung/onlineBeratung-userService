@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.helper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -53,8 +54,8 @@ class LogstashAppenderTest {
     logstashAppender.append(loggingEvent);
     logstashAppender.append(loggingEvent);
     // then
-    verify(streamingEncoder, Mockito.timeout(100).times(3)).encode(eq(loggingEvent), any(OutputStream.class));
-    verify(closeableHttpClientMock, Mockito.timeout(100).times(2)).execute(any(HttpPut.class));
+    verify(streamingEncoder, timeout(500).times(3)).encode(eq(loggingEvent), any(OutputStream.class));
+    verify(closeableHttpClientMock, timeout(500).times(2)).execute(any(HttpPut.class));
   }
 
   @Test
