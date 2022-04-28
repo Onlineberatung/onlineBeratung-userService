@@ -110,6 +110,10 @@ public class UserServiceMapper {
           agencyMap.put("name", agencyDTO.getName());
           agencyMap.put("postcode", agencyDTO.getPostcode());
           agencyMap.put("city", agencyDTO.getCity());
+          agencyMap.put("description", agencyDTO.getDescription());
+          agencyMap.put("isTeamAgency", agencyDTO.getTeamAgency());
+          agencyMap.put("isOffline", agencyDTO.getOffline());
+          agencyMap.put("consultingType", agencyDTO.getConsultingType());
           agencies.add(agencyMap);
         }
       });
@@ -134,6 +138,13 @@ public class UserServiceMapper {
     map.put("absenceMessage", fullConsultant.getAbsenceMessage());
     map.put("isAbsent", fullConsultant.isAbsent());
     map.put("isLanguageFormal", fullConsultant.isLanguageFormal());
+    map.put("isTeamConsultant", fullConsultant.isTeamConsultant());
+    map.put("createdAt",
+        nonNull(fullConsultant.getCreateDate()) ? fullConsultant.getCreateDate().toString() : null);
+    map.put("updatedAt",
+        nonNull(fullConsultant.getUpdateDate()) ? fullConsultant.getUpdateDate().toString() : null);
+    map.put("deletedAt",
+        nonNull(fullConsultant.getDeleteDate()) ? fullConsultant.getDeleteDate().toString() : null);
     map.put("agencies", agencies);
 
     return map;
