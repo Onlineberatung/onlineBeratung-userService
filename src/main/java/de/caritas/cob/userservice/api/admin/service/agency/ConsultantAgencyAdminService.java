@@ -205,6 +205,12 @@ public class ConsultantAgencyAdminService {
         .forEach(this::markAsDeleted);
   }
 
+  public void markConsultantAgenciesForDeletion(String consultantId) {
+    consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultantId).forEach(
+        this::markAsDeleted
+    );
+  }
+
   private void markAsDeleted(ConsultantAgency consultantAgency) {
     this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
     consultantAgency.setDeleteDate(nowInUtc());
