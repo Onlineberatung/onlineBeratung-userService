@@ -43,6 +43,19 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
     }
   }
 
+  private boolean isLogstashEnvVariableSet() {
+    this.logstashHost = getLogstashHost();
+    if (logstashHost == null) {
+      logToStandardError("Logstash env variable (LOGSTASH_HOST) not set, skipping logging to logstash");
+      return false;
+    }
+    return true;
+  }
+
+  private void serializeEventAndAddToBuffer(T event) {
+    bufferedJsonLogRequests.add(serializeToJson(event));
+  }
+
   private boolean isBufferSizeExceeded() {
     return bufferedJsonLogRequests.size() % logBufferSize == 0;
   }
@@ -51,10 +64,6 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
     ArrayList<String> bufferCopy = new ArrayList<>(bufferedJsonLogRequests);
     supplyAsync(() -> sendPackageToLogstash(bufferCopy));
     bufferedJsonLogRequests.clear();
-  }
-
-  private void serializeEventAndAddToBuffer(T event) {
-    bufferedJsonLogRequests.add(serializeToJson(event));
   }
 
   private String sendPackageToLogstash(Collection<String> logsSerializedToJson) {
@@ -77,13 +86,9 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
     return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
   }
 
-  private boolean isLogstashEnvVariableSet() {
-    this.logstashHost = getLogstashHost();
-    if (logstashHost == null) {
-      logToStandardError("Logstash env variable (LOGSTASH_HOST) not set, skipping logging to logstash");
-      return false;
-    }
-    return true;
+  private void handleIOException(IOException e) {
+    logToStandardError("IO Exception during http call to logstash endpoint");
+    e.printStackTrace();
   }
 
   protected String getLogstashHost() {
@@ -96,11 +101,6 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
     httpPut.setEntity(entity);
     httpPut.setHeader("Content-type", "application/json");
     return httpPut;
-  }
-
-  private void handleIOException(IOException e) {
-    logToStandardError("IO Exception during http call to logstash endpoint");
-    e.printStackTrace();
   }
 
   private String serializeToJson(T event) {
