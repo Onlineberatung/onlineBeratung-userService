@@ -1,42 +1,80 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.spi.DeferredProcessingAware;
+import com.google.common.collect.Lists;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collection;
+import lombok.SneakyThrows;
 import net.logstash.logback.encoder.StreamingEncoder;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 public class LogstashAppender<T extends DeferredProcessingAware> extends
     AppenderBase<ILoggingEvent> {
 
+  private int connectionTimeoutMillis = 300; // default value
+  private int logBufferSize = 20; // default value
   private String logstashHost;
   private Encoder<T> encoder;
+  private ArrayList<String> bufferedJsonLogRequests = Lists.newArrayListWithCapacity(100);
 
+  @SneakyThrows
   @Override
   protected void append(ILoggingEvent event) {
-
     if (!isLogstashEnvVariableSet()) {
       return;
     }
 
-    String json = serializeToJson((T) event);
+    serializeEventAndAddToBuffer((T) event);
+    if (isBufferSizeExceeded()) {
+      sendRequestsAsynchronously();
+    }
+  }
+
+  private boolean isBufferSizeExceeded() {
+    return bufferedJsonLogRequests.size() % logBufferSize == 0;
+  }
+
+  private void sendRequestsAsynchronously() {
+    ArrayList<String> bufferCopy = new ArrayList<>(bufferedJsonLogRequests);
+    supplyAsync(() -> sendPackageToLogstash(bufferCopy));
+    bufferedJsonLogRequests.clear();
+  }
+
+  private void serializeEventAndAddToBuffer(T event) {
+    bufferedJsonLogRequests.add(serializeToJson(event));
+  }
+
+  private String sendPackageToLogstash(Collection<String> logsSerializedToJson) {
     try (CloseableHttpClient client = getHttpClient()) {
-      client.execute(prepareHttpPutRequest(json));
+      for (String log : logsSerializedToJson) {
+        client.execute(prepareHttpPutRequest(log));
+      }
+      return "success";
     } catch (IOException e) {
       handleIOException(e);
+      return "error";
     }
   }
 
   CloseableHttpClient getHttpClient() {
-    return HttpClients.createDefault();
+    RequestConfig config = RequestConfig.custom()
+        .setConnectTimeout(connectionTimeoutMillis)
+        .setConnectionRequestTimeout(connectionTimeoutMillis)
+        .setSocketTimeout(connectionTimeoutMillis).build();
+    return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
   }
 
   private boolean isLogstashEnvVariableSet() {
@@ -90,5 +128,13 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
 
   public void setEncoder(Encoder<T> encoder) {
     this.encoder = encoder;
+  }
+
+  public void setLogBufferSize(int logBufferSize) {
+    this.logBufferSize = logBufferSize;
+  }
+
+  public void setConnectionTimeoutMillis(int connectionTimeoutMillis) {
+    this.connectionTimeoutMillis = connectionTimeoutMillis;
   }
 }
