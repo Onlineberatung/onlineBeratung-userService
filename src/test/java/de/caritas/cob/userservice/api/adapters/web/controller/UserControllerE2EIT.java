@@ -444,34 +444,6 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  void searchConsultantsShouldContainConsultantsMarkedAsDeleted() throws Exception {
-    givenAnInfix();
-    givenConsultantsMatching(1, infix, false, true);
-    givenAgencyServiceReturningDummyAgencies();
-    var consultantsMarkedAsDeleted = consultantRepository.findAllByDeleteDateNotNull();
-    assertEquals(1, consultantsMarkedAsDeleted.size());
-    var onlyConsultant = consultantsMarkedAsDeleted.get(0);
-
-    mockMvc.perform(
-            get("/users/consultants/search")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept("application/hal+json")
-                .param("query", infix)
-                .param("perPage", "1")
-        )
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("total", is(1)))
-        .andExpect(jsonPath("_embedded", hasSize(1)))
-        .andExpect(jsonPath("_embedded[0]._embedded.id", is(onlyConsultant.getId())))
-        .andExpect(
-            jsonPath("_embedded[0]._embedded.status", is(onlyConsultant.getStatus().toString())))
-        .andExpect(jsonPath("_embedded[0]._embedded.deleteDate", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.email", is(onlyConsultant.getEmail())));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondOkAndPayloadIfQueryIsGiven() throws Exception {
     givenAnInfix();
     var numMatching = easyRandom.nextInt(20) + 11;
@@ -737,7 +709,40 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  void searchConsultantsShouldContainOnlyAgenciesNotMarkedForDeletion() throws Exception {
+  void searchConsultantsShouldContainAgenciesMarkedForDeletionIfConsultantDeleted()
+      throws Exception {
+    givenAnInfix();
+    givenConsultantsMatching(1, infix, true, true);
+    givenAgencyServiceReturningDummyAgencies();
+    var consultantsMarkedAsDeleted = consultantRepository.findAllByDeleteDateNotNull();
+    assertEquals(1, consultantsMarkedAsDeleted.size());
+    var onlyConsultant = consultantsMarkedAsDeleted.get(0);
+
+    mockMvc.perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", infix)
+                .param("perPage", "1")
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(1)))
+        .andExpect(jsonPath("_embedded", hasSize(1)))
+        .andExpect(jsonPath("_embedded[0]._embedded.id", is(onlyConsultant.getId())))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.status", is(onlyConsultant.getStatus().toString())))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies", hasSize(1)))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.deleteDate", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.email", is(onlyConsultant.getEmail())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  void searchConsultantsShouldContainOnlyAgenciesNotMarkedForDeletionIfConsultantNotDeleted()
+      throws Exception {
     givenAnInfix();
     var numMatching = easyRandom.nextInt(20) + 1;
     givenConsultantsMatching(numMatching, infix, true, false);
@@ -750,6 +755,7 @@ public class UserControllerE2EIT {
                 .accept("application/hal+json")
                 .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
         ).andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(numMatching)))
         .andReturn().getResponse().getContentAsString();
 
     var searchResult = objectMapper.readValue(response, ConsultantSearchResultDTO.class);
