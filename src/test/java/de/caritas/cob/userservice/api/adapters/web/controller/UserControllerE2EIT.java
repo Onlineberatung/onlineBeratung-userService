@@ -444,6 +444,34 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  void searchConsultantsShouldContainConsultantsMarkedAsDeleted() throws Exception {
+    givenAnInfix();
+    givenConsultantsMatching(1, infix, false, true);
+    givenAgencyServiceReturningDummyAgencies();
+    var consultantsMarkedAsDeleted = consultantRepository.findAllByDeleteDateNotNull();
+    assertEquals(1, consultantsMarkedAsDeleted.size());
+    var onlyConsultant = consultantsMarkedAsDeleted.get(0);
+
+    mockMvc.perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", infix)
+                .param("perPage", "1")
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(1)))
+        .andExpect(jsonPath("_embedded", hasSize(1)))
+        .andExpect(jsonPath("_embedded[0]._embedded.id", is(onlyConsultant.getId())))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.status", is(onlyConsultant.getStatus().toString())))
+        .andExpect(jsonPath("_embedded[0]._embedded.deleteDate", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.email", is(onlyConsultant.getEmail())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondOkAndPayloadIfQueryIsGiven() throws Exception {
     givenAnInfix();
     var numMatching = easyRandom.nextInt(20) + 11;
@@ -712,7 +740,7 @@ public class UserControllerE2EIT {
   void searchConsultantsShouldContainOnlyAgenciesNotMarkedForDeletion() throws Exception {
     givenAnInfix();
     var numMatching = easyRandom.nextInt(20) + 1;
-    givenConsultantsMatching(numMatching, infix, true);
+    givenConsultantsMatching(numMatching, infix, true, false);
     givenAgencyServiceReturningDummyAgencies();
 
     var response = mockMvc.perform(
@@ -2457,11 +2485,11 @@ public class UserControllerE2EIT {
   }
 
   private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix) {
-    givenConsultantsMatching(count, infix, false);
+    givenConsultantsMatching(count, infix, false, false);
   }
 
   private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix,
-      boolean includingAgenciesMarkedForDeletion) {
+      boolean includingAgenciesMarkedAsDeleted, boolean markedAsDeleted) {
     while (count-- > 0) {
       var dbConsultant = consultantRepository.findAll().iterator().next();
       var consultant = new Consultant();
@@ -2472,7 +2500,12 @@ public class UserControllerE2EIT {
       consultant.setFirstName(aStringWithoutInfix(infix));
       consultant.setLastName(aStringWithInfix(infix));
       consultant.setEmail(aValidEmailWithoutInfix(infix));
-      consultant.setStatus(ConsultantStatus.CREATED);
+      if (markedAsDeleted) {
+        consultant.setStatus(ConsultantStatus.IN_DELETION);
+        consultant.setDeleteDate(LocalDateTime.now());
+      } else {
+        consultant.setStatus(ConsultantStatus.CREATED);
+      }
       consultant.setAbsenceMessage(RandomStringUtils.randomAlphabetic(8));
       consultant.setAbsent(easyRandom.nextBoolean());
       consultant.setLanguageFormal(easyRandom.nextBoolean());
@@ -2485,7 +2518,7 @@ public class UserControllerE2EIT {
           .consultant(consultant)
           .agencyId(aPositiveLong())
           .build();
-      if (includingAgenciesMarkedForDeletion) {
+      if (includingAgenciesMarkedAsDeleted) {
         var deleteDate = easyRandom.nextBoolean() ? null : LocalDateTime.now();
         consultantAgency.setDeleteDate(deleteDate);
       }
