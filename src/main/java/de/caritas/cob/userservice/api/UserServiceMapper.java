@@ -109,7 +109,7 @@ public class UserServiceMapper {
     if (consultantAgencyLookupMap.containsKey(consultant.getId())) {
       consultantAgencyLookupMap.get(consultant.getId()).forEach(coAgency -> {
         var agencyId = coAgency.getAgencyId();
-        if (agencyLookupMap.containsKey(agencyId) && isDeletionIsConsistent(consultant, coAgency)) {
+        if (agencyLookupMap.containsKey(agencyId) && isDeletionConsistent(consultant, coAgency)) {
           var agencyDTO = agencyLookupMap.get(agencyId);
           Map<String, Object> agencyMap = new HashMap<>();
           agencyMap.put("id", agencyId);
@@ -156,7 +156,7 @@ public class UserServiceMapper {
     return map;
   }
 
-  private boolean isDeletionIsConsistent(Consultant consultant, ConsultantAgency consultantAgency) {
+  private boolean isDeletionConsistent(Consultant consultant, ConsultantAgency consultantAgency) {
     return !(isNull(consultant.getDeleteDate()) && nonNull(consultantAgency.getDeleteDate()));
   }
 
