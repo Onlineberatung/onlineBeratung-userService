@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -72,7 +71,8 @@ public class UserServiceMapper {
   }
 
   public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage,
-      List<Consultant> fullConsultants, List<AgencyDTO> agencyDTOS) {
+      List<Consultant> fullConsultants, List<AgencyDTO> agencyDTOS,
+      List<ConsultantAgency> consultantAgencies) {
 
     var agencyLookupMap = agencyDTOS.stream()
         .collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
@@ -80,10 +80,15 @@ public class UserServiceMapper {
     var fullConsultantLookupMap = fullConsultants.stream()
         .collect(Collectors.toMap(Consultant::getId, Function.identity()));
 
+    var consultantAgencyLookupMap = consultantAgencies.stream()
+        .collect(Collectors.groupingBy(consultantAgency ->
+            consultantAgency.getConsultant().getId())
+        );
+
     var consultants = new ArrayList<Map<String, Object>>();
     consultantPage.forEach(consultantBase -> {
       var fullConsultant = fullConsultantLookupMap.get(consultantBase.getId());
-      var agencies = mapOf(fullConsultant.getConsultantAgencies(), agencyLookupMap);
+      var agencies = mapOf(fullConsultant, agencyLookupMap, consultantAgencyLookupMap);
       var consultantMap = mapOf(consultantBase, fullConsultant, agencies);
       consultants.add(consultantMap);
     });
@@ -96,15 +101,16 @@ public class UserServiceMapper {
     );
   }
 
-  private List<Map<String, Object>> mapOf(
-      Set<ConsultantAgency> consultantAgencies, Map<Long, AgencyDTO> lookupMap) {
-
+  private List<Map<String, Object>> mapOf(Consultant consultant,
+      Map<Long, AgencyDTO> agencyLookupMap,
+      Map<String, List<ConsultantAgency>> consultantAgencyLookupMap) {
     var agencies = new ArrayList<Map<String, Object>>();
-    if (nonNull(consultantAgencies)) {
-      consultantAgencies.forEach(consultantAgency -> {
-        var agencyId = consultantAgency.getAgencyId();
-        if (lookupMap.containsKey(agencyId)) {
-          var agencyDTO = lookupMap.get(agencyId);
+
+    if (consultantAgencyLookupMap.containsKey(consultant.getId())) {
+      consultantAgencyLookupMap.get(consultant.getId()).forEach(coAgency -> {
+        var agencyId = coAgency.getAgencyId();
+        if (agencyLookupMap.containsKey(agencyId) && isDeletionConsistent(consultant, coAgency)) {
+          var agencyDTO = agencyLookupMap.get(agencyId);
           Map<String, Object> agencyMap = new HashMap<>();
           agencyMap.put("id", agencyId);
           agencyMap.put("name", agencyDTO.getName());
@@ -148,6 +154,10 @@ public class UserServiceMapper {
     map.put("agencies", agencies);
 
     return map;
+  }
+
+  private boolean isDeletionConsistent(Consultant consultant, ConsultantAgency consultantAgency) {
+    return !(isNull(consultant.getDeleteDate()) && nonNull(consultantAgency.getDeleteDate()));
   }
 
   @SuppressWarnings("unchecked")
@@ -217,11 +227,8 @@ public class UserServiceMapper {
     return appointment;
   }
 
-  public List<Long> agencyIdsOf(List<Consultant> consultants) {
-    return consultants.stream()
-        .map(Consultant::getConsultantAgencies)
-        .flatMap(Set::stream)
-        .filter(consultantAgency -> isNull(consultantAgency.getDeleteDate()))
+  public List<Long> agencyIdsOf(List<ConsultantAgency> consultantAgencies) {
+    return consultantAgencies.stream()
         .map(ConsultantAgency::getAgencyId)
         .distinct()
         .collect(Collectors.toList());
