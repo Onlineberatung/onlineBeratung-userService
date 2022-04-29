@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
@@ -72,7 +72,7 @@ public class UserServiceMapper {
 
   public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage,
       List<Consultant> fullConsultants, List<AgencyDTO> agencyDTOS,
-      List<ConsultantAgency> consultantAgencies) {
+      List<ConsultantAgencyBase> consultantAgencies) {
 
     var agencyLookupMap = agencyDTOS.stream()
         .collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
@@ -81,9 +81,7 @@ public class UserServiceMapper {
         .collect(Collectors.toMap(Consultant::getId, Function.identity()));
 
     var consultantAgencyLookupMap = consultantAgencies.stream()
-        .collect(Collectors.groupingBy(consultantAgency ->
-            consultantAgency.getConsultant().getId())
-        );
+        .collect(Collectors.groupingBy(ConsultantAgencyBase::getConsultantId));
 
     var consultants = new ArrayList<Map<String, Object>>();
     consultantPage.forEach(consultantBase -> {
@@ -103,7 +101,7 @@ public class UserServiceMapper {
 
   private List<Map<String, Object>> mapOf(Consultant consultant,
       Map<Long, AgencyDTO> agencyLookupMap,
-      Map<String, List<ConsultantAgency>> consultantAgencyLookupMap) {
+      Map<String, List<ConsultantAgencyBase>> consultantAgencyLookupMap) {
     var agencies = new ArrayList<Map<String, Object>>();
 
     if (consultantAgencyLookupMap.containsKey(consultant.getId())) {
@@ -156,7 +154,8 @@ public class UserServiceMapper {
     return map;
   }
 
-  private boolean isDeletionConsistent(Consultant consultant, ConsultantAgency consultantAgency) {
+  private boolean isDeletionConsistent(Consultant consultant,
+      ConsultantAgencyBase consultantAgency) {
     return !(isNull(consultant.getDeleteDate()) && nonNull(consultantAgency.getDeleteDate()));
   }
 
@@ -227,9 +226,9 @@ public class UserServiceMapper {
     return appointment;
   }
 
-  public List<Long> agencyIdsOf(List<ConsultantAgency> consultantAgencies) {
+  public List<Long> agencyIdsOf(List<ConsultantAgencyBase> consultantAgencies) {
     return consultantAgencies.stream()
-        .map(ConsultantAgency::getAgencyId)
+        .map(ConsultantAgencyBase::getAgencyId)
         .distinct()
         .collect(Collectors.toList());
   }

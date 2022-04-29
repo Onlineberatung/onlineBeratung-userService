@@ -16,7 +16,6 @@ import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -84,9 +83,7 @@ public class AccountManager implements AccountManaging {
         .collect(Collectors.toList());
     var fullConsultants = consultantRepository.findAllByIdIn(consultantIds);
 
-    var consultingAgencies = consultantAgencyRepository.findByConsultantIdIn(
-        Set.copyOf(consultantIds)
-    );
+    var consultingAgencies = consultantAgencyRepository.findByConsultantIdIn(consultantIds);
     var agencyIds = userServiceMapper.agencyIdsOf(consultingAgencies);
     var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
 
