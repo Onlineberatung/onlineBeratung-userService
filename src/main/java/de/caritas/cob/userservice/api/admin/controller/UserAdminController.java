@@ -107,6 +107,17 @@ public class UserAdminController implements UseradminApi {
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
+  @Override
+  public ResponseEntity<Void> setConsultantAgencies(String consultantId,
+      List<CreateConsultantAgencyDTO> agencyList) {
+    consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId);
+    agencyList.forEach(agency ->
+        consultantAdminFacade.createNewConsultantAgency(consultantId, agency)
+    );
+
+    return ResponseEntity.ok().build();
+  }
+
   /**
    * Entry point to delete a consultant agency relation.
    *
@@ -193,7 +204,7 @@ public class UserAdminController implements UseradminApi {
    * given id.
    *
    * @param consultantId Consultant Id (required)
-   * @return {@link de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO}s
+   * @return {@link ConsultantAgencyResponseDTO}s
    */
   @Override
   public ResponseEntity<ConsultantAgencyResponseDTO> getConsultantAgencies(
