@@ -84,4 +84,15 @@ public class ConsultantAgency implements TenantAware {
   public int hashCode() {
     return Objects.hash(id);
   }
+
+  public interface ConsultantAgencyBase {
+
+    Long getId();
+
+    Long getAgencyId();
+
+    String getConsultantId();
+
+    LocalDateTime getDeleteDate();
+  }
 }
