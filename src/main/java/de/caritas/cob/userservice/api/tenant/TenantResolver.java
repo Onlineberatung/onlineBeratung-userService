@@ -105,13 +105,11 @@ public class TenantResolver {
   private boolean isTechnicalUserRole(HttpServletRequest request) {
     AccessToken token = ((KeycloakAuthenticationToken) request.getUserPrincipal()).getAccount()
         .getKeycloakSecurityContext().getToken();
-    var accountResourceAccess = token.getResourceAccess("account");
-    return hasRoles(accountResourceAccess) && accountResourceAccess.getRoles()
-        .contains("technical");
+    return hasRoles(token) && token.getRealmAccess().getRoles().contains("technical");
   }
 
-  private boolean hasRoles(Access accountResourceAccess) {
-    return accountResourceAccess != null && accountResourceAccess.getRoles() != null;
+  private boolean hasRoles(AccessToken accessToken) {
+    return accessToken.getRealmAccess() != null && accessToken.getRealmAccess().getRoles() != null;
   }
 
   private boolean userIsAuthenticated(HttpServletRequest request) {
