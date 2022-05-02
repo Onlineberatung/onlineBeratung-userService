@@ -101,34 +101,38 @@ public class UserServiceMapper {
   }
 
   private List<Map<String, Object>> mapOf(Consultant consultant,
-      Map<Long, AgencyDTO> agencyLookupMap,
-      Map<String, List<ConsultantAgencyBase>> consultantAgencyLookupMap) {
+      Map<Long, AgencyDTO> agencyLookupMap, Map<String, List<ConsultantAgencyBase>> caLookupMap) {
     var agencies = new ArrayList<Map<String, Object>>();
     var agencyIdsAdded = new HashSet<Long>();
 
-    if (consultantAgencyLookupMap.containsKey(consultant.getId())) {
-      consultantAgencyLookupMap.get(consultant.getId()).forEach(coAgency -> {
+    if (caLookupMap.containsKey(consultant.getId())) {
+      caLookupMap.get(consultant.getId()).forEach(coAgency -> {
         var agencyId = coAgency.getAgencyId();
         if (agencyLookupMap.containsKey(agencyId)
             && isDeletionConsistent(consultant, coAgency)
             && isAgencyUnique(agencyIdsAdded, agencyId)) {
           var agencyDTO = agencyLookupMap.get(agencyId);
-          Map<String, Object> agencyMap = new HashMap<>();
-          agencyMap.put("id", agencyId);
-          agencyMap.put("name", agencyDTO.getName());
-          agencyMap.put("postcode", agencyDTO.getPostcode());
-          agencyMap.put("city", agencyDTO.getCity());
-          agencyMap.put("description", agencyDTO.getDescription());
-          agencyMap.put("isTeamAgency", agencyDTO.getTeamAgency());
-          agencyMap.put("isOffline", agencyDTO.getOffline());
-          agencyMap.put("consultingType", agencyDTO.getConsultingType());
-          agencies.add(agencyMap);
+          agencies.add(mapOf(agencyDTO));
           agencyIdsAdded.add(agencyId);
         }
       });
     }
 
     return agencies;
+  }
+
+  private Map<String, Object> mapOf(AgencyDTO agencyDTO) {
+    Map<String, Object> agencyMap = new HashMap<>();
+    agencyMap.put("id", agencyDTO.getId());
+    agencyMap.put("name", agencyDTO.getName());
+    agencyMap.put("postcode", agencyDTO.getPostcode());
+    agencyMap.put("city", agencyDTO.getCity());
+    agencyMap.put("description", agencyDTO.getDescription());
+    agencyMap.put("isTeamAgency", agencyDTO.getTeamAgency());
+    agencyMap.put("isOffline", agencyDTO.getOffline());
+    agencyMap.put("consultingType", agencyDTO.getConsultingType());
+
+    return agencyMap;
   }
 
   public Map<String, Object> mapOf(ConsultantBase consultantBase, Consultant fullConsultant,
