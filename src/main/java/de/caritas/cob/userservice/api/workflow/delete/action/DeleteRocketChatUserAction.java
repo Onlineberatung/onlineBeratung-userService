@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourceType;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
 import java.util.List;
 import lombok.NonNull;

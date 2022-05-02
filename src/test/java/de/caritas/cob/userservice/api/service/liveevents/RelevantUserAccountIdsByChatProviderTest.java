@@ -9,11 +9,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Optional;
