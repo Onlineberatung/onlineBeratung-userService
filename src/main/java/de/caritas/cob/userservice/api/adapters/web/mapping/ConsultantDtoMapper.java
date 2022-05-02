@@ -140,6 +140,10 @@ public class ConsultantDtoMapper {
     consultant.setAbsenceMessage((String) consultantMap.get("absenceMessage"));
     consultant.setAbsent((Boolean) consultantMap.get("isAbsent"));
     consultant.setFormalLanguage((Boolean) consultantMap.get("isLanguageFormal"));
+    consultant.setTeamConsultant((Boolean) consultantMap.get("isTeamConsultant"));
+    consultant.setCreateDate((String) consultantMap.get("createdAt"));
+    consultant.setUpdateDate((String) consultantMap.get("updatedAt"));
+    consultant.setDeleteDate((String) consultantMap.get("deletedAt"));
 
     var agencies = new ArrayList<AgencyAdminResponseDTO>();
     var agencyMaps = (ArrayList<Map<String, Object>>) consultantMap.get("agencies");
@@ -149,6 +153,10 @@ public class ConsultantDtoMapper {
       agency.setName((String) agencyMap.get("name"));
       agency.setPostcode((String) agencyMap.get("postcode"));
       agency.setCity((String) agencyMap.get("city"));
+      agency.setDescription((String) agencyMap.get("description"));
+      agency.setTeamAgency((Boolean) agencyMap.get("isTeamAgency"));
+      agency.setOffline((Boolean) agencyMap.get("isOffline"));
+      agency.setConsultingType((Integer) agencyMap.get("consultingType"));
       agencies.add(agency);
     });
     consultant.setAgencies(agencies);

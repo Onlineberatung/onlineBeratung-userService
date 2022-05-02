@@ -149,6 +149,10 @@ public class ConsultantAdminFacade {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
   }
 
+  public void markConsultantAgenciesForDeletion(String consultantId) {
+    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId);
+  }
+
   /**
    * Marks the {@link Consultant} as deleted.
    *

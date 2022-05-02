@@ -9,16 +9,16 @@ import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -72,7 +72,8 @@ public class UserServiceMapper {
   }
 
   public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage,
-      List<Consultant> fullConsultants, List<AgencyDTO> agencyDTOS) {
+      List<Consultant> fullConsultants, List<AgencyDTO> agencyDTOS,
+      List<ConsultantAgencyBase> consultantAgencies) {
 
     var agencyLookupMap = agencyDTOS.stream()
         .collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
@@ -80,10 +81,13 @@ public class UserServiceMapper {
     var fullConsultantLookupMap = fullConsultants.stream()
         .collect(Collectors.toMap(Consultant::getId, Function.identity()));
 
+    var consultantAgencyLookupMap = consultantAgencies.stream()
+        .collect(Collectors.groupingBy(ConsultantAgencyBase::getConsultantId));
+
     var consultants = new ArrayList<Map<String, Object>>();
     consultantPage.forEach(consultantBase -> {
       var fullConsultant = fullConsultantLookupMap.get(consultantBase.getId());
-      var agencies = mapOf(fullConsultant.getConsultantAgencies(), agencyLookupMap);
+      var agencies = mapOf(fullConsultant, agencyLookupMap, consultantAgencyLookupMap);
       var consultantMap = mapOf(consultantBase, fullConsultant, agencies);
       consultants.add(consultantMap);
     });
@@ -96,26 +100,39 @@ public class UserServiceMapper {
     );
   }
 
-  private List<Map<String, Object>> mapOf(
-      Set<ConsultantAgency> consultantAgencies, Map<Long, AgencyDTO> lookupMap) {
-
+  private List<Map<String, Object>> mapOf(Consultant consultant,
+      Map<Long, AgencyDTO> agencyLookupMap, Map<String, List<ConsultantAgencyBase>> caLookupMap) {
     var agencies = new ArrayList<Map<String, Object>>();
-    if (nonNull(consultantAgencies)) {
-      consultantAgencies.forEach(consultantAgency -> {
-        var agencyId = consultantAgency.getAgencyId();
-        if (lookupMap.containsKey(agencyId)) {
-          var agencyDTO = lookupMap.get(agencyId);
-          Map<String, Object> agencyMap = new HashMap<>();
-          agencyMap.put("id", agencyId);
-          agencyMap.put("name", agencyDTO.getName());
-          agencyMap.put("postcode", agencyDTO.getPostcode());
-          agencyMap.put("city", agencyDTO.getCity());
-          agencies.add(agencyMap);
+    var agencyIdsAdded = new HashSet<Long>();
+
+    if (caLookupMap.containsKey(consultant.getId())) {
+      caLookupMap.get(consultant.getId()).forEach(coAgency -> {
+        var agencyId = coAgency.getAgencyId();
+        if (agencyLookupMap.containsKey(agencyId)
+            && isDeletionConsistent(consultant, coAgency)
+            && isAgencyUnique(agencyIdsAdded, agencyId)) {
+          var agencyDTO = agencyLookupMap.get(agencyId);
+          agencies.add(mapOf(agencyDTO));
+          agencyIdsAdded.add(agencyId);
         }
       });
     }
 
     return agencies;
+  }
+
+  private Map<String, Object> mapOf(AgencyDTO agencyDTO) {
+    Map<String, Object> agencyMap = new HashMap<>();
+    agencyMap.put("id", agencyDTO.getId());
+    agencyMap.put("name", agencyDTO.getName());
+    agencyMap.put("postcode", agencyDTO.getPostcode());
+    agencyMap.put("city", agencyDTO.getCity());
+    agencyMap.put("description", agencyDTO.getDescription());
+    agencyMap.put("isTeamAgency", agencyDTO.getTeamAgency());
+    agencyMap.put("isOffline", agencyDTO.getOffline());
+    agencyMap.put("consultingType", agencyDTO.getConsultingType());
+
+    return agencyMap;
   }
 
   public Map<String, Object> mapOf(ConsultantBase consultantBase, Consultant fullConsultant,
@@ -134,9 +151,25 @@ public class UserServiceMapper {
     map.put("absenceMessage", fullConsultant.getAbsenceMessage());
     map.put("isAbsent", fullConsultant.isAbsent());
     map.put("isLanguageFormal", fullConsultant.isLanguageFormal());
+    map.put("isTeamConsultant", fullConsultant.isTeamConsultant());
+    map.put("createdAt",
+        nonNull(fullConsultant.getCreateDate()) ? fullConsultant.getCreateDate().toString() : null);
+    map.put("updatedAt",
+        nonNull(fullConsultant.getUpdateDate()) ? fullConsultant.getUpdateDate().toString() : null);
+    map.put("deletedAt",
+        nonNull(fullConsultant.getDeleteDate()) ? fullConsultant.getDeleteDate().toString() : null);
     map.put("agencies", agencies);
 
     return map;
+  }
+
+  private boolean isAgencyUnique(HashSet<Long> agencyIdsAdded, Long agencyId) {
+    return !agencyIdsAdded.contains(agencyId);
+  }
+
+  private boolean isDeletionConsistent(Consultant consultant,
+      ConsultantAgencyBase consultantAgency) {
+    return !(isNull(consultant.getDeleteDate()) && nonNull(consultantAgency.getDeleteDate()));
   }
 
   @SuppressWarnings("unchecked")
@@ -206,12 +239,9 @@ public class UserServiceMapper {
     return appointment;
   }
 
-  public List<Long> agencyIdsOf(List<Consultant> consultants) {
-    return consultants.stream()
-        .map(Consultant::getConsultantAgencies)
-        .flatMap(Set::stream)
-        .filter(consultantAgency -> isNull(consultantAgency.getDeleteDate()))
-        .map(ConsultantAgency::getAgencyId)
+  public List<Long> agencyIdsOf(List<ConsultantAgencyBase> consultantAgencies) {
+    return consultantAgencies.stream()
+        .map(ConsultantAgencyBase::getAgencyId)
         .distinct()
         .collect(Collectors.toList());
   }

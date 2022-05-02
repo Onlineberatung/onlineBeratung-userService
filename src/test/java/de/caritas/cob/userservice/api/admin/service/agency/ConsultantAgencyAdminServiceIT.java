@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
@@ -9,6 +10,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -18,7 +20,6 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
@@ -27,6 +28,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,9 +54,6 @@ public class ConsultantAgencyAdminServiceIT {
 
   @Autowired
   private ConsultantAgencyRepository consultantAgencyRepository;
-
-  @MockBean
-  private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   @MockBean
   private AgencyService agencyService;
@@ -168,8 +167,30 @@ public class ConsultantAgencyAdminServiceIT {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
 
     ConsultantAgency deletedConsultantAgency =
-        this.consultantAgencyRepository.findById(validRelation.getId()).get();
+        this.consultantAgencyRepository.findById(validRelation.getId()).orElseThrow();
     assertThat(deletedConsultantAgency.getDeleteDate(), notNullValue());
+  }
+
+  @Test
+  public void markConsultantAgenciesForDeletionShouldMark() {
+    var consultant = consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe")
+        .orElseThrow();
+    var consultantAgencies = consultant.getConsultantAgencies();
+    assertTrue(consultantAgencies.size() > 0);
+    consultantAgencies.forEach(consultantAgency ->
+        assertTrue(isNull(consultantAgency.getDeleteDate()))
+    );
+
+    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultant.getId());
+
+    var consultantAgencyIds = consultantAgencies.stream()
+        .map(ConsultantAgency::getId)
+        .collect(Collectors.toList());
+    consultantAgencyRepository.findAllById(consultantAgencyIds).forEach(consultantAgency -> {
+      assertThat(consultantAgency.getDeleteDate(), notNullValue());
+      consultantAgency.setDeleteDate(null);
+      consultantAgencyRepository.save(consultantAgency);
+    });
   }
 
   @Test
