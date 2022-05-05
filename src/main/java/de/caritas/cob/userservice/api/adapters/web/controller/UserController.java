@@ -91,6 +91,7 @@ import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkf
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi;
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.validation.Valid;
@@ -356,6 +357,7 @@ public class UserController implements UsersApi {
     var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser).orElseThrow(() ->
         new BadRequestException("Invalid payload: at least one property must be set")
     );
+
     accountManager.patchUser(patchMap).orElseThrow();
 
     return ResponseEntity.noContent().build();
@@ -1039,6 +1041,12 @@ public class UserController implements UsersApi {
     }
     if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
       throw new ConflictException("2FA is disabled for consultant role");
+    }
+    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig.getOtpAllowedForSingleTenantAdmins()) {
+      throw new ConflictException("2FA is disabled for single tenant admin role");
+    }
+    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig.getOtpAllowedForTenantSuperAdmins()) {
+      throw new ConflictException("2FA is disabled for tenant admin role");
     }
 
     var isValid = identityManager.setUpOneTimePassword(

@@ -7,6 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -40,7 +41,16 @@ public class IdentityConfig implements IdentityClientConfig {
   private Boolean otpAllowedForConsultants;
 
   @NotNull
+  private Boolean otpAllowedForSingleTenantAdmins;
+
+  @NotNull
+  private Boolean otpAllowedForTenantSuperAdmins;
+
+  @NotNull
   private Boolean displayNameAllowedForConsultants;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   public String getOpenIdConnectUrl(String path) {
     return getOpenIdConnectUrl(path, "");
@@ -74,6 +84,25 @@ public class IdentityConfig implements IdentityClientConfig {
   @Override
   public boolean isOtpAllowed(@NotNull Set<String> roles) {
     return roles.contains(UserRole.USER.getValue()) && otpAllowedForUsers
-        || roles.contains(UserRole.CONSULTANT.getValue()) && otpAllowedForConsultants;
+        || roles.contains(UserRole.CONSULTANT.getValue()) && otpAllowedForConsultants
+        || isMultitenancyEnabledAndOtpAllowed(roles);
+  }
+
+  private boolean isMultitenancyEnabledAndOtpAllowed(Set<String> roles) {
+    return multiTenancyEnabled && isAnyTenantAdminAndOtpIsAllowed(roles);
+  }
+
+  private boolean isAnyTenantAdminAndOtpIsAllowed(Set<String> roles) {
+    return isSingleTenantAdminAndOtpIsAllowed(roles) || isTenantSuperAdminAndOtpIsAllowed(roles);
+  }
+
+  private boolean isTenantSuperAdminAndOtpIsAllowed(Set<String> roles) {
+    return roles.contains(UserRole.TENANT_ADMIN.getValue())
+        && otpAllowedForTenantSuperAdmins;
+  }
+
+  private boolean isSingleTenantAdminAndOtpIsAllowed(Set<String> roles) {
+    return roles.contains(UserRole.SINGLE_TENANT_ADMIN.getValue())
+        && otpAllowedForSingleTenantAdmins;
   }
 }

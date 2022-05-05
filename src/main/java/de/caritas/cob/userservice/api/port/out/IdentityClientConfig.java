@@ -25,6 +25,10 @@ public interface IdentityClientConfig {
 
   Boolean getOtpAllowedForConsultants();
 
+  Boolean getOtpAllowedForSingleTenantAdmins();
+
+  Boolean getOtpAllowedForTenantSuperAdmins();
+
   Boolean getDisplayNameAllowedForConsultants();
 
   boolean isOtpAllowed(@NotNull Set<String> roles);
